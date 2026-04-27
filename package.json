@@ -1,0 +1,24 @@
+{
+  "name": "drift",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "dev": "pnpm --filter @drift/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @drift/web test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
+  }
+}

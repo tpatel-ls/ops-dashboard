@@ -1,0 +1,1 @@
+-- Seeds run only against a local Supabase. Empty for now.

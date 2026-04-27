@@ -1,0 +1,11 @@
+{
+  "name": "Plank",
+  "short_name": "Plank",
+  "description": "Local-first tasks, calendar, and whiteboard.",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#0d0d12",
+  "theme_color": "#0d0d12",
+  "orientation": "any",
+  "icons": []
+}
