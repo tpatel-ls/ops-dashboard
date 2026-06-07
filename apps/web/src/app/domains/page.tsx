@@ -1,11 +1,14 @@
 import { ViewShell } from '@/components/view-shell';
+import { DomainsView } from '@/components/domains-view';
 
 export default function DomainsPage() {
   return (
-    <ViewShell eyebrow="More" title="Domains" subtitle="The top-level areas of your life everything rolls up to.">
-      <div className="surface flex h-64 items-center justify-center text-sm text-muted-foreground">
-        Domains — being built.
-      </div>
+    <ViewShell
+      eyebrow="More"
+      title="Domains"
+      subtitle="Top-level areas of your life. Everything rolls up here."
+    >
+      <DomainsView />
     </ViewShell>
   );
 }

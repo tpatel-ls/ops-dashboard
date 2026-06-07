@@ -1,14 +1,14 @@
 import { ViewShell } from '@/components/view-shell';
-import { ProjectsManager } from '@/components/projects-manager';
+import { ProjectsBoard } from '@/components/projects-board';
 
 export default function ProjectsPage() {
   return (
     <ViewShell
-      eyebrow="Workspace"
+      eyebrow="Build"
       title="Projects"
-      subtitle="Color groups that wire into Kanban grouping and task rows."
+      subtitle="Projects, areas, and retainers — click any card to open the detail panel."
     >
-      <ProjectsManager />
+      <ProjectsBoard />
     </ViewShell>
   );
 }

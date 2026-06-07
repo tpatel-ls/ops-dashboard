@@ -4,7 +4,7 @@ import { Command } from 'cmdk';
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import {
   Calendar,
   Hash,
@@ -12,12 +12,14 @@ import {
   KanbanSquare,
   LayoutGrid,
   Pencil,
+  Plus,
   Settings as SettingsIcon,
   Sun,
   Target,
 } from 'lucide-react';
 import { getDb } from '@drift/core';
 import { useAppStore } from '@/lib/app-store';
+import { runCapture } from '@/lib/capture-client';
 
 const NAV = [
   { id: 'nav-today', label: 'Today', href: '/today', icon: Sun, hint: 'g t' },
@@ -38,6 +40,7 @@ export function CommandPalette() {
   const openEdit = useAppStore((s) => s.openEdit);
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [capturing, startCapture] = useTransition();
 
   const tasks = useLiveQuery(async () => {
     const db = getDb();
@@ -60,6 +63,16 @@ export function CommandPalette() {
 
   const results = query && fuse ? fuse.search(query).slice(0, 8).map((r) => r.item) : [];
 
+  function handleCapture() {
+    const text = query.trim();
+    if (!text) return;
+    startCapture(async () => {
+      await runCapture(text, 'text');
+      close();
+      setQuery('');
+    });
+  }
+
   if (!open) return null;
 
   return (
@@ -78,7 +91,7 @@ export function CommandPalette() {
             <Command.Input
               value={query}
               onValueChange={setQuery}
-              placeholder="Find tasks, jump to a view..."
+              placeholder="Find tasks, jump to a view, or type to capture..."
               className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
               autoFocus
             />
@@ -88,10 +101,40 @@ export function CommandPalette() {
             <Command.Empty className="px-3 py-6 text-center text-xs text-muted-foreground">
               No matches.
             </Command.Empty>
+
+            {/* Prominent capture action — always visible when there is text */}
+            {query.trim() ? (
+              <Command.Group
+                heading="Capture"
+                className="text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
+              >
+                <Command.Item
+                  value="capture-now"
+                  keywords={[query]}
+                  onSelect={handleCapture}
+                  disabled={capturing}
+                  className="group flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm text-foreground data-[selected=true]:bg-primary-soft data-[selected=true]:text-foreground"
+                >
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    <Plus className="size-3" aria-hidden />
+                  </span>
+                  <span className="flex-1 truncate">
+                    {capturing ? 'Capturing…' : (
+                      <>
+                        <span className="text-muted-foreground">Capture </span>
+                        <span className="font-medium">&ldquo;{query}&rdquo;</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="font-mono text-[10px] text-subtle-foreground">Enter</span>
+                </Command.Item>
+              </Command.Group>
+            ) : null}
+
             {results.length > 0 ? (
               <Command.Group
                 heading="Tasks"
-                className="text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
+                className="mt-2 text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
               >
                 {results.map((t) => (
                   <Command.Item
@@ -114,6 +157,7 @@ export function CommandPalette() {
                 ))}
               </Command.Group>
             ) : null}
+
             <Command.Group
               heading="Jump"
               className="mt-2 text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
