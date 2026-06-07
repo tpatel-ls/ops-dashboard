@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { getDb } from '@drift/core';
 import type { Task, Priority } from '@drift/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
+import { todayISO } from '@/lib/routines';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@drift/ui';
 
@@ -33,7 +34,7 @@ function sortKey(t: Task): string {
 
 export function OpenTasks() {
   const [collapsed, setCollapsed] = useState(false);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const { tasks, projects, domains } = useLiveQuery(async () => {
     const db = getDb();

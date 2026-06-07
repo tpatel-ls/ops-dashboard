@@ -28,8 +28,19 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
   Fixed an inherited zustand-selector infinite loop in app-shell (`closeAll`).
 - [x] **Security hardening** on API routes (review-flagged): same-origin/secret
   guard, input caps, priority clamp, dropped user-supplied push `url`, no error reflection.
-- [ ] PWA installability (manifest PNG icons) — deferred to host-time pass.
-- [ ] P1 (capture flow + Today + Tasks + Domains/Projects), P2 (Routines + heatmap + journal).
+- [x] **P1 + P2 features** built (8 parallel agents) + integrated + browser-verified:
+  capture+Inbox, Today (top-three/open/routines/slipping/resurfacing/notifications),
+  Tasks (filter→edit drawer), Routines (streaks/groups), Habits (heatmap + stats),
+  Domains, Projects/Areas/Retainers (milestones/checklists/worklogs/slipping), Content
+  pipeline, Library journal + AI journal-upload. Commits `a912540`, `32cac33`.
+- [x] Browser-verified all 9 new routes: **0 console errors each**; full seed renders
+  (NL-parsed task dates, priority, domain/project chips, 12-day streak, heatmap, 1.5h logged).
+- [x] Fixed: `order` not indexed (broke all task creation) → Dexie v3; mic-button hydration.
+- [ ] Code review pass + `next build` gate (in progress).
+- [ ] Deferred: edit-drawer extra fields (domain/content links, reminders UI); PWA PNG
+  icons; People CRM + Note/Quote/Book entities (P4); Google Calendar, server push cron,
+  chat-with-data, Wear OS capture (P5). AI-key-gated paths (triage, journal vision) need
+  ANTHROPIC_API_KEY to verify live (fallbacks work without).
 
 ## Security posture
 API routes (`/api/triage`, `/api/push`) use `lib/server/guard.ts`: same-origin

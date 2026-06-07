@@ -121,7 +121,7 @@ export default function HabitsPage() {
         {/* Stat cards */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard
-            label="Best streak"
+            label="Current streak"
             value={stats?.bestStreak ?? 0}
             icon={Flame}
             tone="text-primary"

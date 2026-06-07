@@ -42,10 +42,12 @@ export async function cancelReminder(reminderId: string): Promise<void> {
 export async function checkAndFireDueReminders(now: Date = new Date()): Promise<number> {
   if (notificationPermission() !== 'granted') return 0;
   const db = getDb();
+  // `delivered` is a boolean and cannot be an IndexedDB key; query by the
+  // indexed `triggerAt` and filter undelivered in memory.
   const due = await db.reminders
-    .where('delivered')
-    .equals(0 as unknown as never)
-    .filter((r) => !r.delivered && new Date(r.triggerAt) <= now)
+    .where('triggerAt')
+    .belowOrEqual(now.toISOString())
+    .filter((r) => !r.delivered)
     .toArray();
   let fired = 0;
   for (const r of due) {
