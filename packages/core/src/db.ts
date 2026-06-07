@@ -61,6 +61,12 @@ export class DriftDB extends Dexie {
       notifications: 'id, kind, readAt, createdAt, updatedAt, deletedAt',
       checklistTemplates: 'id, name, kind, updatedAt, deletedAt',
     });
+    // v3 — index `order` on tasks (addTask + recurrence use orderBy('order');
+    // Dexie throws on orderBy over an unindexed key).
+    this.version(3).stores({
+      tasks:
+        'id, status, priority, scheduledFor, dueAt, projectId, parentId, domainId, contentId, order, updatedAt, deletedAt, *tags',
+    });
   }
 }
 
