@@ -1,5 +1,21 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Project, Reminder, Settings, SyncOp, Task, Whiteboard } from './types';
+import type {
+  AppNotification,
+  Capture,
+  ChecklistTemplate,
+  Content,
+  Domain,
+  JournalEntry,
+  Project,
+  Reminder,
+  Routine,
+  RoutineCheck,
+  Settings,
+  SyncOp,
+  Task,
+  Whiteboard,
+  WorkLog,
+} from './types';
 
 export class DriftDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
@@ -8,6 +24,15 @@ export class DriftDB extends Dexie {
   reminders!: EntityTable<Reminder, 'id'>;
   settings!: EntityTable<Settings, 'id'>;
   syncOps!: EntityTable<SyncOp, 'id'>;
+  domains!: EntityTable<Domain, 'id'>;
+  routines!: EntityTable<Routine, 'id'>;
+  routineChecks!: EntityTable<RoutineCheck, 'id'>;
+  captures!: EntityTable<Capture, 'id'>;
+  journalEntries!: EntityTable<JournalEntry, 'id'>;
+  workLogs!: EntityTable<WorkLog, 'id'>;
+  content!: EntityTable<Content, 'id'>;
+  notifications!: EntityTable<AppNotification, 'id'>;
+  checklistTemplates!: EntityTable<ChecklistTemplate, 'id'>;
 
   constructor(name = 'drift') {
     super(name);
@@ -19,6 +44,22 @@ export class DriftDB extends Dexie {
       reminders: 'id, taskId, triggerAt, delivered',
       settings: 'id',
       syncOps: 'id, table, recordId, createdAt',
+    });
+    // v2 — Ops Dashboard entities. Boolean fields (starred, done, notify) are
+    // intentionally NOT indexed: IndexedDB keys can't be booleans.
+    this.version(2).stores({
+      tasks:
+        'id, status, priority, scheduledFor, dueAt, projectId, parentId, domainId, contentId, updatedAt, deletedAt, *tags',
+      projects: 'id, name, kind, status, domainId, archivedAt, lastWorkedAt, updatedAt, deletedAt',
+      domains: 'id, name, order, archivedAt, updatedAt, deletedAt',
+      routines: 'id, timeOfDay, kind, domainId, order, archivedAt, updatedAt, deletedAt',
+      routineChecks: 'id, routineId, date, updatedAt, deletedAt, [routineId+date]',
+      captures: 'id, status, source, createdAt, updatedAt, deletedAt',
+      journalEntries: 'id, date, updatedAt, deletedAt, *tags',
+      workLogs: 'id, projectId, at, updatedAt, deletedAt',
+      content: 'id, type, status, domainId, order, updatedAt, deletedAt',
+      notifications: 'id, kind, readAt, createdAt, updatedAt, deletedAt',
+      checklistTemplates: 'id, name, kind, updatedAt, deletedAt',
     });
   }
 }
@@ -42,4 +83,7 @@ export const DEFAULT_SETTINGS: Omit<Settings, 'updatedAt'> = {
   pomodoroFocusMinutes: 25,
   pomodoroBreakMinutes: 5,
   dailyReviewAt: '17:30',
+  aiEnabled: true,
+  captureAutoReminder: true,
+  slippingDays: 5,
 };

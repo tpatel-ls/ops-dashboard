@@ -1,8 +1,15 @@
 'use client';
 
 import { getDb, getDeviceId, newId } from '@drift/core';
-import type { Project } from '@drift/core';
+import type { Project, ProjectKind } from '@drift/core';
 import { enqueueOp } from './sync-queue';
+
+export interface CreateProjectOptions {
+  color?: string;
+  kind?: ProjectKind;
+  domainId?: string;
+  description?: string;
+}
 
 const DEFAULT_COLORS = [
   'oklch(0.7 0.16 150)',
@@ -13,14 +20,23 @@ const DEFAULT_COLORS = [
   'oklch(0.68 0.18 350)',
 ];
 
-export async function createProject(name: string, color?: string): Promise<Project> {
+export async function createProject(
+  name: string,
+  opts: CreateProjectOptions = {},
+): Promise<Project> {
   const db = getDb();
   const count = await db.projects.count();
   const now = new Date().toISOString();
   const project: Project = {
     id: newId(),
     name,
-    color: color ?? DEFAULT_COLORS[count % DEFAULT_COLORS.length] ?? DEFAULT_COLORS[0]!,
+    color: opts.color ?? DEFAULT_COLORS[count % DEFAULT_COLORS.length] ?? DEFAULT_COLORS[0]!,
+    kind: opts.kind ?? 'project',
+    status: 'active',
+    ...(opts.domainId ? { domainId: opts.domainId } : {}),
+    ...(opts.description ? { description: opts.description } : {}),
+    milestones: [],
+    checklists: [],
     createdAt: now,
     updatedAt: now,
     version: 1,

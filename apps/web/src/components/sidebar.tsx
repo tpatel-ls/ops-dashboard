@@ -2,18 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLiveQuery } from 'dexie-react-hooks';
 import {
+  BookOpen,
   Calendar,
-  ClipboardList,
+  Clapperboard,
+  Flame,
+  FolderKanban,
+  Globe,
   Hash,
   Inbox,
   KanbanSquare,
   LayoutGrid,
+  ListTodo,
   Pencil,
+  Repeat,
   Settings as SettingsIcon,
-  Sparkles,
   Sun,
+  Users,
 } from 'lucide-react';
+import { getDb } from '@drift/core';
 import { cn } from '@drift/ui';
 
 interface NavItem {
@@ -21,51 +29,58 @@ interface NavItem {
   label: string;
   icon: typeof Sun;
   shortcut?: string;
-  badge?: string;
 }
 
 const PLAN: NavItem[] = [
   { href: '/today', label: 'Today', icon: Sun, shortcut: 'g t' },
-  { href: '/week', label: 'Week', icon: LayoutGrid, shortcut: 'g w' },
-  { href: '/month', label: 'Month', icon: Calendar, shortcut: 'g m' },
-  { href: '/calendar', label: 'Calendar', icon: Calendar, shortcut: 'g c' },
   { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g n' },
+  { href: '/tasks', label: 'Tasks', icon: ListTodo },
+  { href: '/calendar', label: 'Calendar', icon: Calendar, shortcut: 'g c' },
+  { href: '/week', label: 'Week', icon: LayoutGrid, shortcut: 'g w' },
 ];
 
-const WORK: NavItem[] = [
+const BUILD: NavItem[] = [
+  { href: '/routines', label: 'Routines', icon: Repeat },
+  { href: '/habits', label: 'Habits', icon: Flame },
+  { href: '/projects', label: 'Projects', icon: FolderKanban },
+  { href: '/content', label: 'Content', icon: Clapperboard },
   { href: '/kanban', label: 'Kanban', icon: KanbanSquare, shortcut: 'g k' },
+];
+
+const LIBRARY: NavItem[] = [
+  { href: '/library', label: 'Library', icon: BookOpen },
+  { href: '/people', label: 'People', icon: Users },
   { href: '/whiteboards', label: 'Whiteboards', icon: Pencil, shortcut: 'g b' },
 ];
 
 const META: NavItem[] = [
-  { href: '/projects', label: 'Projects', icon: ClipboardList },
+  { href: '/domains', label: 'Domains', icon: Globe },
   { href: '/tags', label: 'Tags', icon: Hash },
-  { href: '/settings', label: 'Settings', icon: SettingsIcon },
-];
-
-const SAMPLE_PROJECTS = [
-  { id: 'home', name: 'Home', color: 'oklch(0.7 0.16 150)' },
-  { id: 'work', name: 'Work', color: 'oklch(0.72 0.16 60)' },
-  { id: 'reading', name: 'Reading', color: 'oklch(0.65 0.18 280)' },
+  { href: '/settings', label: 'Settings', icon: SettingsIcon, shortcut: 'g s' },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const inboxCount = useLiveQuery(
+    () => getDb().captures.where('status').equals('pending').count(),
+    [],
+    0,
+  );
 
   return (
     <aside
       aria-label="Primary"
-      className="hairline relative hidden w-[252px] shrink-0 flex-col border-r bg-bg-rail/70 backdrop-blur md:flex"
+      className="hairline scrollbar-thin relative hidden w-[252px] shrink-0 flex-col overflow-y-auto border-r bg-bg-rail/70 backdrop-blur md:flex"
     >
       <div className="flex items-center gap-2.5 px-4 pt-5 pb-3">
         <div
           aria-hidden
           className="flex size-8 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
         >
-          <Sparkles className="size-4" />
+          <LayoutGrid className="size-4" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-[15px] font-semibold tracking-tight">Drift</span>
+          <span className="text-[15px] font-semibold tracking-tight">Ops Dashboard</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
             v0.1 / local
           </span>
@@ -79,31 +94,24 @@ export function Sidebar() {
 
       <Section label="Plan">
         {PLAN.map((item) => (
-          <NavLink key={item.href} item={item} active={pathname === item.href} />
+          <NavLink
+            key={item.href}
+            item={item}
+            active={pathname === item.href}
+            badge={item.href === '/inbox' && inboxCount ? inboxCount : undefined}
+          />
         ))}
       </Section>
 
-      <Section label="Work">
-        {WORK.map((item) => (
+      <Section label="Build">
+        {BUILD.map((item) => (
           <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
         ))}
       </Section>
 
-      <Section label="Projects" trailing="3">
-        {SAMPLE_PROJECTS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            className="group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-          >
-            <span
-              aria-hidden
-              className="size-2.5 rounded-[3px] ring-1 ring-inset ring-black/5"
-              style={{ background: p.color }}
-            />
-            <span className="truncate">{p.name}</span>
-            <span className="ml-auto font-mono text-[10px] text-subtle-foreground">0</span>
-          </button>
+      <Section label="Library">
+        {LIBRARY.map((item) => (
+          <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
         ))}
       </Section>
 
@@ -149,7 +157,7 @@ function Section({
   );
 }
 
-function NavLink({ item, active }: { item: NavItem; active: boolean }) {
+function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badge?: number }) {
   const Icon = item.icon;
   return (
     <Link
@@ -170,7 +178,11 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       ) : null}
       <Icon className={cn('size-4', active && 'text-primary')} aria-hidden />
       <span className="truncate">{item.label}</span>
-      {item.shortcut ? (
+      {badge ? (
+        <span className="ml-auto inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-[10px] font-medium text-primary-foreground">
+          {badge}
+        </span>
+      ) : item.shortcut ? (
         <span className="ml-auto font-mono text-[10px] text-subtle-foreground opacity-0 transition-opacity group-hover:opacity-100">
           {item.shortcut}
         </span>

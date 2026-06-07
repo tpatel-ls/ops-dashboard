@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
+import { ensureSeed } from '@/lib/seed';
 import { CommandPalette } from './command-palette';
 import { HelpOverlay } from './help-overlay';
 import { TaskEditDrawer } from './task-edit-drawer';
@@ -30,9 +31,13 @@ export function AppShell() {
 
   useEffect(() => {
     router.prefetch('/today');
-    router.prefetch('/week');
+    router.prefetch('/tasks');
     router.prefetch('/inbox');
   }, [router]);
+
+  useEffect(() => {
+    void ensureSeed();
+  }, []);
 
   useHotkeys([
     { combo: 'mod+k', handler: togglePalette },
