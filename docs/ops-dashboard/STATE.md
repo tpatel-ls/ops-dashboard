@@ -21,9 +21,20 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
 ## Status
 - [x] Brainstorm + 4 decisions + design-research workflow (`wf_b1308e73-3e2`).
 - [x] Recover Drift from git history; install deps; write spec.
-- [ ] Baseline verify (typecheck/test).
-- [ ] **P0** core extension + shell rebrand + capture API + supabase 0002 + env + PWA icons.
-- [ ] P1, P2, ...
+- [x] Baseline verify (typecheck + tests green).
+- [x] **P0** core extension, lib layer, shell rebrand + mobile nav, capture/triage +
+  Pushover API, supabase 0002, env example, seed. Committed `dee9109`.
+- [x] **Browser-verified** in Playwright: app boots, renders, **0 console errors**.
+  Fixed an inherited zustand-selector infinite loop in app-shell (`closeAll`).
+- [x] **Security hardening** on API routes (review-flagged): same-origin/secret
+  guard, input caps, priority clamp, dropped user-supplied push `url`, no error reflection.
+- [ ] PWA installability (manifest PNG icons) — deferred to host-time pass.
+- [ ] P1 (capture flow + Today + Tasks + Domains/Projects), P2 (Routines + heatmap + journal).
+
+## Security posture
+API routes (`/api/triage`, `/api/push`) use `lib/server/guard.ts`: same-origin
+browser calls allowed; server-to-server needs `OPS_API_SECRET`; at host-time also
+behind Supabase auth middleware. Inputs capped; push `url` not user-controllable.
 
 ## How to resume
 1. Read this + `spec.md`. 2. `git log --oneline feat/ops-dashboard`.
@@ -39,12 +50,13 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
 `SUPABASE_SECRET_KEY`.
 
 ## Next steps (live — keep current)
-1. Verify baseline green.
-2. Extend `@drift/core`: `types.ts` (add Domain, Routine, RoutineCheck, Capture,
-   JournalEntry, WorkLog, Content, AppNotification, ChecklistTemplate; extend
-   Task/Project/Settings), `db.ts` → `version(2)`, `sync.ts` table union, exports.
-3. Add `apps/web/src/lib/<entity>.ts` helpers mirroring `tasks.ts` (put + enqueueOp + version bump).
-4. Build features P0 → P1 → P2.
+1. Shared capture flow: `lib/capture-client.ts` (runCapture → /api/triage → route to
+   record, chrono fallback) wired into quick-add + command palette + Inbox.
+2. Feature pages (parallelizable, disjoint files): Today, Tasks, Routines,
+   Habits (react-activity-calendar heatmap + `lib/activity.ts`), Domains+Projects,
+   Content, Journal-in-Library.
+3. Deferred to a later pass: People CRM + Notes/Quotes/Books types (P4); PWA icons;
+   Google Calendar, server push cron, chat-with-data, Wear OS capture (P5).
 
 ## Notes / decisions log
 - Keep `@drift/*` package scope + Dexie name `drift` (no churn; no user data yet).
