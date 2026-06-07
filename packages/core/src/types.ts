@@ -245,6 +245,70 @@ export interface ChecklistTemplate extends SyncMeta {
   items: string[];
 }
 
+// ---- People (personal CRM) ----
+export interface PersonFact {
+  id: ID;
+  label: string;
+  value: string;
+}
+export interface Interaction {
+  id: ID;
+  date: string;
+  note: string;
+}
+export interface Person extends SyncMeta {
+  name: string;
+  relationship?: string;
+  avatarUrl?: string;
+  facts: PersonFact[];
+  interactions: Interaction[];
+  domainId?: ID;
+  tags: string[];
+}
+
+// ---- Library: notes, quotes, books ----
+export interface Note extends SyncMeta {
+  title?: string;
+  body: string;
+  source?: string;
+  tags: string[];
+  flaggedForReview?: boolean;
+  imageUrl?: string;
+  bookId?: ID;
+}
+
+export interface Thought {
+  id: ID;
+  text: string;
+  at: string;
+}
+export type QuoteSourceType = 'book' | 'article' | 'podcast' | 'conversation' | 'other';
+export interface Quote extends SyncMeta {
+  text: string;
+  author?: string;
+  source?: string;
+  sourceType?: QuoteSourceType;
+  bookId?: ID;
+  thoughts: Thought[];
+  tags: string[];
+  favorite?: boolean;
+}
+
+export type BookStatus = 'want' | 'reading' | 'finished' | 'abandoned';
+export interface Book extends SyncMeta {
+  title: string;
+  author?: string;
+  coverUrl?: string;
+  status: BookStatus;
+  format?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  rating?: number;
+  isbn?: string;
+  summary?: string;
+  tags: string[];
+}
+
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type DefaultView =
   | 'today'
@@ -299,7 +363,11 @@ export type SyncTable =
   | 'workLogs'
   | 'content'
   | 'notifications'
-  | 'checklistTemplates';
+  | 'checklistTemplates'
+  | 'people'
+  | 'notes'
+  | 'quotes'
+  | 'books';
 
 export interface SyncOp {
   id: ID;

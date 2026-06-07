@@ -1,11 +1,15 @@
 import type {
   AppNotification,
+  Book,
   Capture,
   ChecklistTemplate,
   Content,
   Domain,
   JournalEntry,
+  Note,
+  Person,
   Project,
+  Quote,
   Routine,
   RoutineCheck,
   Task,
@@ -32,7 +36,11 @@ export type Syncable =
   | WorkLog
   | Content
   | AppNotification
-  | ChecklistTemplate;
+  | ChecklistTemplate
+  | Person
+  | Note
+  | Quote
+  | Book;
 
 export function pickWinner<T extends Syncable>(local: T | undefined, remote: T): T {
   if (!local) return remote;
