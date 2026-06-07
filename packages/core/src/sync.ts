@@ -1,4 +1,17 @@
-import type { Project, Task, Whiteboard } from './types';
+import type {
+  AppNotification,
+  Capture,
+  ChecklistTemplate,
+  Content,
+  Domain,
+  JournalEntry,
+  Project,
+  Routine,
+  RoutineCheck,
+  Task,
+  Whiteboard,
+  WorkLog,
+} from './types';
 
 export interface SyncEnvelope {
   tasks: Task[];
@@ -7,7 +20,19 @@ export interface SyncEnvelope {
   cursor: string;
 }
 
-export type Syncable = Task | Project | Whiteboard;
+export type Syncable =
+  | Task
+  | Project
+  | Whiteboard
+  | Domain
+  | Routine
+  | RoutineCheck
+  | Capture
+  | JournalEntry
+  | WorkLog
+  | Content
+  | AppNotification
+  | ChecklistTemplate;
 
 export function pickWinner<T extends Syncable>(local: T | undefined, remote: T): T {
   if (!local) return remote;
