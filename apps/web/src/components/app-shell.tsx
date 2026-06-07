@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
 import { ensureSeed } from '@/lib/seed';
@@ -20,14 +20,15 @@ export function AppShell() {
   const toggleHelp = useAppStore((s) => s.toggleHelp);
   const openQuickAdd = useAppStore((s) => s.openQuickAdd);
   const openFocus = useAppStore((s) => s.openFocus);
-  const closeAll = useAppStore((s) => () => {
+  const closeAll = useCallback(() => {
+    const s = useAppStore.getState();
     s.closePalette();
     s.closeHelp();
     s.closeEdit();
     s.closeQuickAdd();
     s.closeFocus();
     s.closeReview();
-  });
+  }, []);
 
   useEffect(() => {
     router.prefetch('/today');
