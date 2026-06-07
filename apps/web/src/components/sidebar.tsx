@@ -15,6 +15,7 @@ import {
   KanbanSquare,
   LayoutGrid,
   ListTodo,
+  MessageCircle,
   Pencil,
   Repeat,
   Settings as SettingsIcon,
@@ -54,6 +55,7 @@ const LIBRARY: NavItem[] = [
 ];
 
 const META: NavItem[] = [
+  { href: '/ask', label: 'Ask', icon: MessageCircle },
   { href: '/domains', label: 'Domains', icon: Globe },
   { href: '/tags', label: 'Tags', icon: Hash },
   { href: '/settings', label: 'Settings', icon: SettingsIcon, shortcut: 'g s' },

@@ -1,12 +1,16 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type {
   AppNotification,
+  Book,
   Capture,
   ChecklistTemplate,
   Content,
   Domain,
   JournalEntry,
+  Note,
+  Person,
   Project,
+  Quote,
   Reminder,
   Routine,
   RoutineCheck,
@@ -33,6 +37,10 @@ export class DriftDB extends Dexie {
   content!: EntityTable<Content, 'id'>;
   notifications!: EntityTable<AppNotification, 'id'>;
   checklistTemplates!: EntityTable<ChecklistTemplate, 'id'>;
+  people!: EntityTable<Person, 'id'>;
+  notes!: EntityTable<Note, 'id'>;
+  quotes!: EntityTable<Quote, 'id'>;
+  books!: EntityTable<Book, 'id'>;
 
   constructor(name = 'drift') {
     super(name);
@@ -66,6 +74,13 @@ export class DriftDB extends Dexie {
     this.version(3).stores({
       tasks:
         'id, status, priority, scheduledFor, dueAt, projectId, parentId, domainId, contentId, order, updatedAt, deletedAt, *tags',
+    });
+    // v4 — People CRM + Library (notes, quotes, books).
+    this.version(4).stores({
+      people: 'id, name, domainId, updatedAt, deletedAt, *tags',
+      notes: 'id, bookId, updatedAt, deletedAt, *tags',
+      quotes: 'id, bookId, author, updatedAt, deletedAt, *tags',
+      books: 'id, status, author, updatedAt, deletedAt, *tags',
     });
   }
 }
