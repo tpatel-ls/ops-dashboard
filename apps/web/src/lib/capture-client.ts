@@ -46,13 +46,17 @@ export async function runCapture(
 
     if (json.ok && json.result) {
       const result = json.result as TriageResult;
-      kind = (result.kind as CaptureKind) || 'task';
+      // What the AI classified it as (preserved on the capture) vs. what record
+      // we actually created (route type).
+      const aiKind: CaptureKind = (result.kind as CaptureKind) || 'task';
+      let routeType: CaptureKind = 'task';
 
       // (c) Route to the right record type
-      if (kind === 'journal') {
+      if (aiKind === 'journal') {
         const body = result.notes ? `${result.title}\n${result.notes}` : result.title;
         const entry = await createJournalEntry({ body, source: 'upload' });
         id = entry.id;
+        routeType = 'journal';
       } else {
         // Find matching domain by case-insensitive name match
         let domainId: string | undefined;
@@ -74,17 +78,19 @@ export async function runCapture(
           ...(domainId ? { domainId } : {}),
         });
         id = task.id;
-        kind = 'task';
+        routeType = 'task';
       }
 
-      // (d) Record the route on the capture
-      await setCaptureRoute(cap.id, { type: kind, id }, kind, result.title);
+      kind = routeType;
+
+      // (d) Record the route on the capture (preserve the AI classification)
+      await setCaptureRoute(cap.id, { type: routeType, id }, aiKind, result.title);
 
       // (e) Push notification
       await pushNotification({
         title: `Captured: ${result.title}`,
         kind: 'capture',
-        refType: kind,
+        refType: routeType,
         refId: id,
       });
 
