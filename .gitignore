@@ -12,3 +12,7 @@ coverage
 .vercel
 playwright-report
 test-results
+.playwright-mcp
+# local dev screenshots / scratch
+/ops-*.png
+/*-smoke.png
