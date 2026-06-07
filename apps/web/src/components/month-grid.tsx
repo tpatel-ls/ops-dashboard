@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { addMonths, format, isSameMonth } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, monthGrid } from '@drift/core';
-import type { Priority } from '@drift/core';
+import type { Priority, Project } from '@drift/core';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@drift/ui';
 
@@ -29,6 +29,10 @@ export function MonthGrid() {
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
     return all.filter((t) => !t.deletedAt && t.scheduledFor);
+  });
+  const projectsMap = useLiveQuery(async () => {
+    const all = await getDb().projects.toArray();
+    return new Map<string, Project>(all.filter((p) => !p.deletedAt).map((p) => [p.id, p]));
   });
 
   const today = isoDay(new Date());
@@ -146,25 +150,40 @@ export function MonthGrid() {
             </div>
           ) : (
             <ul className="flex flex-col gap-1.5">
-              {selectedTasks.map((t) => (
-                <li key={t.id}>
-                  <button
-                    type="button"
-                    onClick={() => openEdit(t.id)}
-                    className="surface-flat flex w-full items-center gap-2 px-2.5 py-2 text-left text-sm hover:border-border-strong"
-                  >
-                    <span
-                      aria-hidden
-                      className="size-1.5 rounded-full"
-                      style={{
-                        background:
-                          t.priority > 0 ? PRIORITY_COLOR[t.priority] : 'var(--color-primary)',
-                      }}
-                    />
-                    <span className="truncate">{t.title}</span>
-                  </button>
-                </li>
-              ))}
+              {selectedTasks.map((t) => {
+                const project = t.projectId ? projectsMap?.get(t.projectId) : undefined;
+                return (
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => openEdit(t.id)}
+                      className="surface-flat flex w-full flex-col gap-1 px-2.5 py-2 text-left text-sm hover:border-border-strong"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          aria-hidden
+                          className="size-1.5 shrink-0 rounded-full"
+                          style={{
+                            background:
+                              t.priority > 0 ? PRIORITY_COLOR[t.priority] : 'var(--color-primary)',
+                          }}
+                        />
+                        <span className="truncate">{t.title}</span>
+                      </div>
+                      {project ? (
+                        <div className="ml-3.5 flex items-center gap-1 text-[10px] text-subtle-foreground">
+                          <span
+                            aria-hidden
+                            className="size-1.5 rounded-full"
+                            style={{ background: project.color }}
+                          />
+                          <span className="truncate">{project.name}</span>
+                        </div>
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

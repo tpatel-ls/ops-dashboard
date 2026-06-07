@@ -2,17 +2,23 @@
 
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Bell, CalendarClock, Hash, Plus, Trash2, X } from 'lucide-react';
+import { Bell, CalendarClock, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { getDb, newId } from '@drift/core';
 import type { ChecklistItem, Priority, Task } from '@drift/core';
 import { useAppStore } from '@/lib/app-store';
 import { setChecklist, softDeleteTask, updateTask } from '@/lib/tasks';
-import { scheduleReminder } from '@/lib/notifications';
+import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { cn } from '@drift/ui';
 
 const STATUSES: Task['status'][] = ['backlog', 'todo', 'doing', 'blocked', 'done'];
 const PRIORITY_LABEL: Record<Priority, string> = { 0: 'None', 1: 'Low', 2: 'Med', 3: 'Urgent' };
+const RECURRENCE_OPTIONS = [
+  { value: 'none', label: 'No repeat' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+] as const;
 
 export function TaskEditDrawer() {
   const id = useAppStore((s) => s.editTaskId);
@@ -45,25 +51,56 @@ export function TaskEditDrawer() {
 }
 
 function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
-  const projects = useLiveQuery(async () => getDb().projects.toArray());
+  const projects = useLiveQuery(async () =>
+    getDb().projects.filter((p) => !p.deletedAt && !p.archivedAt).toArray()
+  );
+  const domains = useLiveQuery(async () =>
+    getDb().domains.filter((d) => !d.deletedAt && !d.archivedAt).toArray()
+  );
+  const contentItems = useLiveQuery(async () =>
+    getDb().content.filter((c) => !c.deletedAt).toArray()
+  );
+
   const [draftTitle, setDraftTitle] = useState(task.title);
   const [draftNotes, setDraftNotes] = useState(task.notes ?? '');
   const [tagDraft, setTagDraft] = useState('');
   const [reminderDraft, setReminderDraft] = useState('');
   const [checklistDraft, setChecklistDraft] = useState('');
 
+  const currentRecurrence = task.recurrence?.freq ?? 'none';
+
   return (
     <>
       {(
         <div className="space-y-6 p-5">
+          {/* Title + notes */}
           <div>
-            <input
-              value={draftTitle}
-              onChange={(e) => setDraftTitle(e.target.value)}
-              onBlur={() => draftTitle !== task.title && updateTask(task.id, { title: draftTitle })}
-              className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
-              placeholder="Untitled"
-            />
+            <div className="flex items-start gap-2">
+              <input
+                value={draftTitle}
+                onChange={(e) => setDraftTitle(e.target.value)}
+                onBlur={() => draftTitle !== task.title && updateTask(task.id, { title: draftTitle })}
+                className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
+                placeholder="Untitled"
+              />
+              {/* Star toggle */}
+              <button
+                type="button"
+                onClick={() => updateTask(task.id, { starred: !task.starred })}
+                aria-label={task.starred ? 'Unstar task' : 'Star task'}
+                className={cn(
+                  'mt-1 shrink-0 rounded-md p-1 transition-colors',
+                  task.starred
+                    ? 'text-warning hover:text-warning/70'
+                    : 'text-subtle-foreground hover:text-foreground',
+                )}
+              >
+                <Star
+                  className="size-4"
+                  fill={task.starred ? 'currentColor' : 'none'}
+                />
+              </button>
+            </div>
             <textarea
               value={draftNotes}
               onChange={(e) => setDraftNotes(e.target.value)}
@@ -74,230 +111,295 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
             />
           </div>
 
-            <Section title="Status">
-              <div className="flex flex-wrap gap-1.5">
-                {STATUSES.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => updateTask(task.id, { status: s })}
-                    className={cn(
-                      'rounded-md border px-2.5 py-1 text-xs capitalize',
-                      task.status === s
-                        ? 'border-primary bg-primary/10 text-foreground'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </Section>
+          <Section title="Status">
+            <div className="flex flex-wrap gap-1.5">
+              {STATUSES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => updateTask(task.id, { status: s })}
+                  className={cn(
+                    'rounded-md border px-2.5 py-1 text-xs capitalize',
+                    task.status === s
+                      ? 'border-primary bg-primary/10 text-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </Section>
 
-            <Section title="Priority">
-              <div className="flex gap-1.5">
-                {([0, 1, 2, 3] as Priority[]).map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => updateTask(task.id, { priority: p })}
-                    className={cn(
-                      'rounded-md border px-3 py-1 text-xs',
-                      task.priority === p
-                        ? 'border-primary bg-primary/10 text-foreground'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {PRIORITY_LABEL[p]}
-                  </button>
-                ))}
-              </div>
-            </Section>
+          <Section title="Priority">
+            <div className="flex gap-1.5">
+              {([0, 1, 2, 3] as Priority[]).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => updateTask(task.id, { priority: p })}
+                  className={cn(
+                    'rounded-md border px-3 py-1 text-xs',
+                    task.priority === p
+                      ? 'border-primary bg-primary/10 text-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {PRIORITY_LABEL[p]}
+                </button>
+              ))}
+            </div>
+          </Section>
 
-            <Section title="Schedule" icon={<CalendarClock className="size-3.5" />}>
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Date">
-                  <input
-                    type="date"
-                    value={task.scheduledFor ?? ''}
-                    onChange={(e) =>
-                      updateTask(task.id, {
-                        scheduledFor: e.target.value || undefined,
-                      })
-                    }
-                    className="input"
-                  />
-                </Field>
-                <Field label="Estimate (m)">
-                  <input
-                    type="number"
-                    min={0}
-                    value={task.estimateMinutes ?? ''}
-                    onChange={(e) =>
-                      updateTask(task.id, {
-                        estimateMinutes: e.target.value ? Number(e.target.value) : undefined,
-                      })
-                    }
-                    className="input"
-                  />
-                </Field>
-                <Field label="Start">
-                  <input
-                    type="time"
-                    value={task.startAt ? format(new Date(task.startAt), 'HH:mm') : ''}
-                    onChange={(e) => {
-                      const day = task.scheduledFor ?? new Date().toISOString().slice(0, 10);
-                      const iso = e.target.value
-                        ? new Date(`${day}T${e.target.value}:00`).toISOString()
-                        : undefined;
-                      updateTask(task.id, { startAt: iso });
-                    }}
-                    className="input"
-                  />
-                </Field>
-                <Field label="End">
-                  <input
-                    type="time"
-                    value={task.endAt ? format(new Date(task.endAt), 'HH:mm') : ''}
-                    onChange={(e) => {
-                      const day = task.scheduledFor ?? new Date().toISOString().slice(0, 10);
-                      const iso = e.target.value
-                        ? new Date(`${day}T${e.target.value}:00`).toISOString()
-                        : undefined;
-                      updateTask(task.id, { endAt: iso });
-                    }}
-                    className="input"
-                  />
-                </Field>
-              </div>
-            </Section>
-
-            <Section title="Project">
-              <select
-                value={task.projectId ?? ''}
-                onChange={(e) =>
-                  updateTask(task.id, { projectId: e.target.value || undefined })
-                }
-                className="input w-full"
-              >
-                <option value="">No project</option>
-                {projects?.filter((p) => !p.archivedAt).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </Section>
-
-            <Section title="Tags" icon={<Hash className="size-3.5" />}>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {task.tags.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() =>
-                      updateTask(task.id, { tags: task.tags.filter((x) => x !== t) })
-                    }
-                    className="group inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-accent-foreground"
-                  >
-                    #{t}
-                    <X className="size-2.5 opacity-0 group-hover:opacity-100" aria-hidden />
-                  </button>
-                ))}
+          <Section title="Schedule" icon={<CalendarClock className="size-3.5" />}>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Date">
                 <input
-                  value={tagDraft}
-                  onChange={(e) => setTagDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && tagDraft.trim()) {
-                      e.preventDefault();
-                      const t = tagDraft.trim().replace(/^#/, '').toLowerCase();
-                      if (!task.tags.includes(t)) {
-                        updateTask(task.id, { tags: [...task.tags, t] });
-                      }
-                      setTagDraft('');
-                    }
-                  }}
-                  placeholder="add tag"
-                  className="bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
+                  type="date"
+                  value={task.scheduledFor ?? ''}
+                  onChange={(e) =>
+                    updateTask(task.id, {
+                      scheduledFor: e.target.value || undefined,
+                    })
+                  }
+                  className="input"
                 />
-              </div>
-            </Section>
+              </Field>
+              <Field label="Estimate (m)">
+                <input
+                  type="number"
+                  min={0}
+                  value={task.estimateMinutes ?? ''}
+                  onChange={(e) =>
+                    updateTask(task.id, {
+                      estimateMinutes: e.target.value ? Number(e.target.value) : undefined,
+                    })
+                  }
+                  className="input"
+                />
+              </Field>
+              <Field label="Start">
+                <input
+                  type="time"
+                  value={task.startAt ? format(new Date(task.startAt), 'HH:mm') : ''}
+                  onChange={(e) => {
+                    const day = task.scheduledFor ?? new Date().toISOString().slice(0, 10);
+                    const iso = e.target.value
+                      ? new Date(`${day}T${e.target.value}:00`).toISOString()
+                      : undefined;
+                    updateTask(task.id, { startAt: iso });
+                  }}
+                  className="input"
+                />
+              </Field>
+              <Field label="End">
+                <input
+                  type="time"
+                  value={task.endAt ? format(new Date(task.endAt), 'HH:mm') : ''}
+                  onChange={(e) => {
+                    const day = task.scheduledFor ?? new Date().toISOString().slice(0, 10);
+                    const iso = e.target.value
+                      ? new Date(`${day}T${e.target.value}:00`).toISOString()
+                      : undefined;
+                    updateTask(task.id, { endAt: iso });
+                  }}
+                  className="input"
+                />
+              </Field>
+            </div>
+          </Section>
 
-            <Section title="Reminders" icon={<Bell className="size-3.5" />}>
-              <div className="flex flex-col gap-1.5">
-                {task.reminders.map((r) => (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between rounded-md border border-hairline bg-input px-2.5 py-1.5 text-xs"
-                  >
-                    <span className="font-mono">{format(new Date(r.triggerAt), 'EEE d MMM HH:mm')}</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateTask(task.id, {
-                          reminders: task.reminders.filter((x) => x.id !== r.id),
-                        })
-                      }
-                      className="text-subtle-foreground hover:text-destructive"
-                      aria-label="Remove reminder"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
-                ))}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="datetime-local"
-                    value={reminderDraft}
-                    onChange={(e) => setReminderDraft(e.target.value)}
-                    className="input flex-1"
-                  />
+          {/* Recurrence */}
+          <Section title="Repeat" icon={<RefreshCw className="size-3.5" />}>
+            <select
+              value={currentRecurrence}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === 'none') {
+                  updateTask(task.id, { recurrence: undefined });
+                } else {
+                  updateTask(task.id, {
+                    recurrence: {
+                      freq: val as 'daily' | 'weekly' | 'monthly' | 'yearly',
+                      interval: 1,
+                    },
+                  });
+                }
+              }}
+              className="input w-full"
+            >
+              {RECURRENCE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </Section>
+
+          {/* Domain */}
+          <Section title="Domain">
+            <select
+              value={task.domainId ?? ''}
+              onChange={(e) =>
+                updateTask(task.id, { domainId: e.target.value || undefined })
+              }
+              className="input w-full"
+            >
+              <option value="">No domain</option>
+              {domains?.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </Section>
+
+          {/* Project */}
+          <Section title="Project">
+            <select
+              value={task.projectId ?? ''}
+              onChange={(e) =>
+                updateTask(task.id, { projectId: e.target.value || undefined })
+              }
+              className="input w-full"
+            >
+              <option value="">No project</option>
+              {projects?.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </Section>
+
+          {/* Content link */}
+          <Section title="Content" icon={<Link2 className="size-3.5" />}>
+            <select
+              value={task.contentId ?? ''}
+              onChange={(e) =>
+                updateTask(task.id, { contentId: e.target.value || undefined })
+              }
+              className="input w-full"
+            >
+              <option value="">No content link</option>
+              {contentItems?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </select>
+          </Section>
+
+          <Section title="Tags" icon={<Hash className="size-3.5" />}>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {task.tags.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() =>
+                    updateTask(task.id, { tags: task.tags.filter((x) => x !== t) })
+                  }
+                  className="group inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-accent-foreground"
+                >
+                  #{t}
+                  <X className="size-2.5 opacity-0 group-hover:opacity-100" aria-hidden />
+                </button>
+              ))}
+              <input
+                value={tagDraft}
+                onChange={(e) => setTagDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && tagDraft.trim()) {
+                    e.preventDefault();
+                    const t = tagDraft.trim().replace(/^#/, '').toLowerCase();
+                    if (!task.tags.includes(t)) {
+                      updateTask(task.id, { tags: [...task.tags, t] });
+                    }
+                    setTagDraft('');
+                  }
+                }}
+                placeholder="add tag"
+                className="bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
+              />
+            </div>
+          </Section>
+
+          <Section title="Reminders" icon={<Bell className="size-3.5" />}>
+            <div className="flex flex-col gap-1.5">
+              {task.reminders.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex items-center justify-between rounded-md border border-hairline bg-input px-2.5 py-1.5 text-xs"
+                >
+                  <span className="font-mono">{format(new Date(r.triggerAt), 'EEE d MMM HH:mm')}</span>
                   <button
                     type="button"
                     onClick={async () => {
-                      if (!reminderDraft) return;
-                      const iso = new Date(reminderDraft).toISOString();
-                      const reminder = await scheduleReminder(task.id, iso);
-                      await updateTask(task.id, {
-                        reminders: [...task.reminders, reminder],
+                      await cancelReminder(r.id);
+                      updateTask(task.id, {
+                        reminders: task.reminders.filter((x) => x.id !== r.id),
                       });
-                      setReminderDraft('');
                     }}
-                    className="kbd"
-                    aria-label="Add reminder"
+                    className="text-subtle-foreground hover:text-destructive"
+                    aria-label="Cancel reminder"
                   >
-                    <Plus className="size-3" />
+                    <X className="size-3" />
                   </button>
                 </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  type="datetime-local"
+                  value={reminderDraft}
+                  onChange={(e) => setReminderDraft(e.target.value)}
+                  className="input flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!reminderDraft) return;
+                    const iso = new Date(reminderDraft).toISOString();
+                    const reminder = await scheduleReminder(task.id, iso);
+                    await updateTask(task.id, {
+                      reminders: [...task.reminders, reminder],
+                    });
+                    setReminderDraft('');
+                  }}
+                  className="kbd"
+                  aria-label="Add reminder"
+                >
+                  <Plus className="size-3" />
+                </button>
               </div>
-            </Section>
+            </div>
+          </Section>
 
-            <Section title="Checklist">
-              <div className="flex flex-col gap-1.5">
-                {task.checklist.map((item) => (
-                  <ChecklistRow key={item.id} task={task} item={item} />
-                ))}
-                <div className="flex items-center gap-2">
-                  <input
-                    value={checklistDraft}
-                    onChange={(e) => setChecklistDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && checklistDraft.trim()) {
-                        e.preventDefault();
-                        const next: ChecklistItem[] = [
-                          ...task.checklist,
-                          { id: newId(), text: checklistDraft.trim(), done: false },
-                        ];
-                        setChecklist(task.id, next);
-                        setChecklistDraft('');
-                      }
-                    }}
-                    placeholder="New step"
-                    className="input flex-1"
-                  />
-                </div>
+          <Section title="Checklist">
+            <div className="flex flex-col gap-1.5">
+              {task.checklist.map((item) => (
+                <ChecklistRow key={item.id} task={task} item={item} />
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  value={checklistDraft}
+                  onChange={(e) => setChecklistDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && checklistDraft.trim()) {
+                      e.preventDefault();
+                      const next: ChecklistItem[] = [
+                        ...task.checklist,
+                        { id: newId(), text: checklistDraft.trim(), done: false },
+                      ];
+                      setChecklist(task.id, next);
+                      setChecklistDraft('');
+                    }
+                  }}
+                  placeholder="New step"
+                  className="input flex-1"
+                />
               </div>
-            </Section>
+            </div>
+          </Section>
 
           <button
             type="button"

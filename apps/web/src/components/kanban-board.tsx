@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { getDb } from '@drift/core';
-import type { Task } from '@drift/core';
+import type { Project, Task } from '@drift/core';
 import { addTask, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@drift/ui';
@@ -28,18 +28,18 @@ interface Column {
 }
 
 const STATUS_COLUMNS: Column[] = [
-  { id: 'backlog', label: 'Backlog', color: 'oklch(0.65 0.05 280)' },
-  { id: 'todo', label: 'Todo', color: 'oklch(0.7 0.07 230)' },
-  { id: 'doing', label: 'Doing', color: 'oklch(0.72 0.16 60)' },
-  { id: 'blocked', label: 'Blocked', color: 'oklch(0.65 0.21 28)' },
-  { id: 'done', label: 'Done', color: 'oklch(0.65 0.16 150)' },
+  { id: 'backlog', label: 'Backlog', color: 'var(--color-subtle-foreground)' },
+  { id: 'todo', label: 'Todo', color: 'var(--color-priority-low)' },
+  { id: 'doing', label: 'Doing', color: 'var(--color-warning)' },
+  { id: 'blocked', label: 'Blocked', color: 'var(--color-destructive)' },
+  { id: 'done', label: 'Done', color: 'var(--color-success)' },
 ];
 
 const PRIORITY_COLUMNS: Column[] = [
-  { id: '3', label: 'Urgent', color: 'oklch(0.55 0.24 18)' },
-  { id: '2', label: 'High', color: 'oklch(0.7 0.18 30)' },
-  { id: '1', label: 'Low', color: 'oklch(0.7 0.07 230)' },
-  { id: '0', label: 'None', color: 'oklch(0.55 0.04 280)' },
+  { id: '3', label: 'Urgent', color: 'var(--color-priority-urgent)' },
+  { id: '2', label: 'High', color: 'var(--color-priority-high)' },
+  { id: '1', label: 'Low', color: 'var(--color-priority-low)' },
+  { id: '0', label: 'None', color: 'var(--color-subtle-foreground)' },
 ];
 
 export function KanbanBoard() {
@@ -49,6 +49,11 @@ export function KanbanBoard() {
     return all.filter((t) => !t.deletedAt && t.status !== 'archived');
   });
   const projects = useLiveQuery(async () => getDb().projects.toArray());
+
+  const projectsMap = useMemo(
+    () => new Map((projects ?? []).map((p) => [p.id, p])),
+    [projects],
+  );
 
   const columns = useMemo<Column[]>(() => {
     if (grouping === 'status') return STATUS_COLUMNS;
@@ -123,7 +128,15 @@ export function KanbanBoard() {
         <div className="scrollbar-thin flex flex-1 gap-3 overflow-x-auto pb-2">
           {columns.map((col) => {
             const bucket = (tasks ?? []).filter((t) => bucketOf(t) === col.id);
-            return <KanbanColumn key={col.id} column={col} tasks={bucket} grouping={grouping} />;
+            return (
+              <KanbanColumn
+                key={col.id}
+                column={col}
+                tasks={bucket}
+                grouping={grouping}
+                projectsMap={projectsMap}
+              />
+            );
           })}
         </div>
       </DndContext>
@@ -135,10 +148,12 @@ function KanbanColumn({
   column,
   tasks,
   grouping,
+  projectsMap,
 }: {
   column: Column;
   tasks: Task[];
   grouping: Grouping;
+  projectsMap: Map<string, Project>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const [adding, setAdding] = useState('');
@@ -157,7 +172,7 @@ function KanbanColumn({
       </div>
       <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
         {tasks.map((t) => (
-          <KanbanCard key={t.id} task={t} />
+          <KanbanCard key={t.id} task={t} grouping={grouping} projectsMap={projectsMap} />
         ))}
       </div>
       {grouping === 'status' ? (
@@ -184,7 +199,15 @@ function KanbanColumn({
   );
 }
 
-function KanbanCard({ task }: { task: Task }) {
+function KanbanCard({
+  task,
+  grouping,
+  projectsMap,
+}: {
+  task: Task;
+  grouping: Grouping;
+  projectsMap: Map<string, Project>;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   });
@@ -192,6 +215,10 @@ function KanbanCard({ task }: { task: Task }) {
   const style: React.CSSProperties | undefined = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
     : undefined;
+
+  const project =
+    grouping !== 'project' && task.projectId ? projectsMap.get(task.projectId) : undefined;
+
   return (
     <div
       ref={setNodeRef}
@@ -203,14 +230,26 @@ function KanbanCard({ task }: { task: Task }) {
         openEdit(task.id);
       }}
       className={cn(
-        'surface-flat cursor-grab touch-none px-2.5 py-2 text-[13px] transition-colors',
+        'surface-flat cursor-grab touch-none select-none px-2.5 py-2 text-[13px] transition-colors',
         'hover:border-border-strong',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
       <div className="truncate">{task.title}</div>
-      <div className="mt-1 flex items-center gap-1.5 text-[10px] text-subtle-foreground">
+      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-subtle-foreground">
         {task.priority > 0 ? <span className="font-mono">!{task.priority}</span> : null}
+        {project ? (
+          <span
+            className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-accent-foreground"
+          >
+            <span
+              aria-hidden
+              className="size-1.5 rounded-full"
+              style={{ background: project.color }}
+            />
+            <span className="max-w-[80px] truncate">{project.name}</span>
+          </span>
+        ) : null}
         {task.tags.slice(0, 2).map((tag) => (
           <span key={tag} className="rounded bg-accent px-1.5 py-0.5">
             #{tag}
