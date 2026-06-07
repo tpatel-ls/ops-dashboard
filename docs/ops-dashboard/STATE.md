@@ -36,7 +36,11 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
 - [x] Browser-verified all 9 new routes: **0 console errors each**; full seed renders
   (NL-parsed task dates, priority, domain/project chips, 12-day streak, heatmap, 1.5h logged).
 - [x] Fixed: `order` not indexed (broke all task creation) → Dexie v3; mic-button hydration.
-- [ ] Code review pass + `next build` gate (in progress).
+- [x] Adversarial code review (3 reviewers) → fixed timezone-local dates (streaks/
+  heatmap/journal), reminder boolean-index query, capture aiKind preservation,
+  overdue local date, streak label. Re-verified Habits (streak 12, journal counted,
+  0 errors). Commit `0a4458c`.
+- [x] Production build: 24 routes compile, TS + lint clean.
 - [ ] Deferred: edit-drawer extra fields (domain/content links, reminders UI); PWA PNG
   icons; People CRM + Note/Quote/Book entities (P4); Google Calendar, server push cron,
   chat-with-data, Wear OS capture (P5). AI-key-gated paths (triage, journal vision) need
