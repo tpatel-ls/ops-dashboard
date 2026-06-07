@@ -14,7 +14,7 @@ import {
 import { addDays, format, startOfWeek } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@drift/core';
-import type { Priority, Task } from '@drift/core';
+import type { Priority, Project, Task } from '@drift/core';
 import { rescheduleTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@drift/ui';
@@ -35,6 +35,10 @@ export function WeekBoard() {
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
     return all.filter((t) => !t.deletedAt && t.status !== 'archived');
+  });
+  const projectsMap = useLiveQuery(async () => {
+    const all = await getDb().projects.toArray();
+    return new Map(all.filter((p) => !p.deletedAt).map((p) => [p.id, p]));
   });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -90,6 +94,7 @@ export function WeekBoard() {
                 isoDate={dayIso}
                 isToday={dayIso === today}
                 tasks={dayTasks}
+                projectsMap={projectsMap ?? new Map()}
               />
             );
           })}
@@ -104,11 +109,13 @@ function DayColumn({
   isoDate,
   isToday,
   tasks,
+  projectsMap,
 }: {
   day: Date;
   isoDate: string;
   isToday: boolean;
   tasks: Task[];
+  projectsMap: Map<string, Project>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: isoDate });
   return (
@@ -137,14 +144,20 @@ function DayColumn({
       </div>
       <div className="flex flex-col gap-1">
         {tasks.map((t) => (
-          <DraggableCard key={t.id} task={t} />
+          <DraggableCard key={t.id} task={t} projectsMap={projectsMap} />
         ))}
       </div>
     </div>
   );
 }
 
-function DraggableCard({ task }: { task: Task }) {
+function DraggableCard({
+  task,
+  projectsMap,
+}: {
+  task: Task;
+  projectsMap: Map<string, Project>;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   });
@@ -152,6 +165,8 @@ function DraggableCard({ task }: { task: Task }) {
   const style: React.CSSProperties | undefined = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
     : undefined;
+
+  const project = task.projectId ? projectsMap.get(task.projectId) : undefined;
 
   return (
     <div
@@ -175,11 +190,25 @@ function DraggableCard({ task }: { task: Task }) {
         style={{ background: PRIORITY_COLOR[task.priority], opacity: task.priority ? 1 : 0 }}
       />
       <div className="ml-2 truncate">{task.title}</div>
-      {task.startAt ? (
-        <div className="ml-2 mt-0.5 font-mono text-[10px] text-subtle-foreground">
-          {format(new Date(task.startAt), 'HH:mm')}
-        </div>
-      ) : null}
+      <div className="ml-2 mt-0.5 flex items-center gap-1.5">
+        {task.startAt ? (
+          <span className="font-mono text-[10px] text-subtle-foreground">
+            {format(new Date(task.startAt), 'HH:mm')}
+          </span>
+        ) : null}
+        {project ? (
+          <span
+            className="inline-flex items-center gap-1 rounded bg-accent px-1 py-px text-[10px] text-accent-foreground"
+          >
+            <span
+              aria-hidden
+              className="size-1.5 rounded-full"
+              style={{ background: project.color }}
+            />
+            <span className="max-w-[72px] truncate">{project.name}</span>
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }

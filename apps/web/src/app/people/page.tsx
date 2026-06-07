@@ -1,11 +1,14 @@
 import { ViewShell } from '@/components/view-shell';
+import { PeopleView } from '@/components/people-view';
 
 export default function PeoplePage() {
   return (
-    <ViewShell eyebrow="Library" title="People" subtitle="A personal CRM — facts and interactions worth remembering.">
-      <div className="surface flex h-64 items-center justify-center text-sm text-muted-foreground">
-        People — being built.
-      </div>
+    <ViewShell
+      eyebrow="Library"
+      title="People"
+      subtitle="Remember what matters — facts, interactions, and context about the people in your life."
+    >
+      <PeopleView />
     </ViewShell>
   );
 }

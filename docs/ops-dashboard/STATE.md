@@ -41,10 +41,17 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
   overdue local date, streak label. Re-verified Habits (streak 12, journal counted,
   0 errors). Commit `0a4458c`.
 - [x] Production build: 24 routes compile, TS + lint clean.
-- [ ] Deferred: edit-drawer extra fields (domain/content links, reminders UI); PWA PNG
-  icons; People CRM + Note/Quote/Book entities (P4); Google Calendar, server push cron,
-  chat-with-data, Wear OS capture (P5). AI-key-gated paths (triage, journal vision) need
-  ANTHROPIC_API_KEY to verify live (fallbacks work without).
+- [x] **P4/P5 local features** (8 more agents + integration): People CRM (facts/
+  interactions), Library tabs (Notes/Quotes/Books beside Journal), enriched task
+  edit-drawer (domain/project/content/star/reminders/recurrence), chat-with-data
+  (`/ask` + `/api/chat`), Wear OS capture webhook (`/api/capture`, secret-gated),
+  **PWA install icons** + typed manifest, polished Calendar/Week/Month/Kanban.
+  Browser-verified; production build (28 routes) clean. Commits `c…` (P4 core) + this batch.
+- [ ] **Needs your accounts/keys (not buildable by me alone):** hosting (Supabase +
+  Vercel for true multi-device sync across S24 Ultra/Tab/Watch); live AI
+  (`ANTHROPIC_API_KEY` for triage/journal/chat, `GROQ_API_KEY` voice, Pushover push) —
+  code is in place with fallbacks, just unconfigured; Google Calendar; the physical
+  Wear OS shortcut that hits `/api/capture`.
 
 ## Security posture
 API routes (`/api/triage`, `/api/push`) use `lib/server/guard.ts`: same-origin
