@@ -33,10 +33,13 @@ export function QuickAdd() {
   const [value, setValue] = useState('');
   const [pending, startTransition] = useTransition();
   const [listening, setListening] = useState(false);
+  // Gate the mic button on mount so SSR and first client render match (the
+  // SpeechRecognition feature-detect is client-only -> avoids hydration mismatch).
+  const [mounted, setMounted] = useState(false);
   const recogRef = useRef<SpeechRecognitionLike | null>(null);
 
-  // Clean up recognition on unmount
   useEffect(() => {
+    setMounted(true);
     return () => {
       recogRef.current?.abort();
     };
@@ -99,7 +102,7 @@ export function QuickAdd() {
         autoComplete="off"
         spellCheck={false}
       />
-      {SpeechRecognitionAPI ? (
+      {mounted && SpeechRecognitionAPI ? (
         <button
           type="button"
           onClick={toggleMic}
