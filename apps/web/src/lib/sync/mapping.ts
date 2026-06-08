@@ -44,7 +44,7 @@ const snakeToCamel = (k: string): string => k.replace(/_([a-z0-9])/g, (_, c: str
  * app reads back verbatim. Recursing would corrupt them. Drops `undefined`
  * (JSON would anyway) and injects the owning user_id.
  */
-export function toRow(rec: Record<string, unknown>, userId: string): Record<string, unknown> {
+export function toRow(rec: object, userId: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(rec)) {
     if (v === undefined) continue;
