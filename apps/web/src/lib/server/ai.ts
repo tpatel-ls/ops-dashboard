@@ -19,6 +19,8 @@ let _client: Anthropic | null | undefined;
 export function getAnthropic(): Anthropic | null {
   if (_client !== undefined) return _client;
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  _client = apiKey ? new Anthropic({ apiKey }) : null;
+  // Optional gateway/proxy (e.g. a self-hosted Anthropic-compatible endpoint).
+  const baseURL = process.env.ANTHROPIC_BASE_URL;
+  _client = apiKey ? new Anthropic({ apiKey, ...(baseURL ? { baseURL } : {}) }) : null;
   return _client;
 }
