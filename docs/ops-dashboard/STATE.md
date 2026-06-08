@@ -8,6 +8,10 @@
 ## Session 2 — multi-device realtime sync (built, needs your accounts to go live)
 All code committed on `feat/ops-dashboard`; `pnpm typecheck` + `pnpm build` green,
 9 core tests pass, browser smoke = 0 console errors (`/today`, `/login`, `/settings`).
+A 6-dimension adversarial review (each finding independently refuted/confirmed)
+raised 7, confirmed 6, all fixed: per-table pull cursors (was a global cursor that
+could silently drop rows), start/stop generation token (was a re-entrancy leak),
+capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect.
 - **P1 Auth:** `@supabase/ssr` (2026 publishable/secret keys, `getClaims`) — factories
   in `utils/supabase/{client,server,middleware,admin}.ts`, root `middleware.ts`
   (gates pages, never redirects `/api`, no-op when unconfigured), `/login`
