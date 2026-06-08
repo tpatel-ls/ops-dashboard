@@ -5,7 +5,27 @@
 > Go-live runbook: [`./deploy.md`](./deploy.md) · Watch: [`./watch-capture.md`](./watch-capture.md).
 > Last updated: 2026-06-08 (session 2 — realtime sync + auth + PWA, code-complete).
 
-## Session 2 — multi-device realtime sync (built, needs your accounts to go live)
+## Session 2 — multi-device realtime sync: **DEPLOYED & LIVE** ✅
+- **Production:** https://taskify-three-delta.vercel.app (Vercel project `taskify`,
+  Root Directory `apps/web`). Login: `tanaypatel192@gmail.com`.
+- **Supabase:** project `jnaycounllaafvorakss` (Taskify), migrations 0001→0004
+  applied, single user created, realtime publication + version-guard live.
+- **Verified in production:** login gate works; Settings→Sync shows **Live**; the
+  watch webhook `POST /api/capture` ("buy milk tomorrow 5pm", secret-gated) parsed
+  + persisted + appeared in the browser **live via realtime** (correct local day
+  2026-06-09), and the soft-delete tombstone propagated back. `/api/health`
+  returns `{ok:true,db:"up"}`. Env vars set in Vercel (prod/preview/dev).
+- **Server secret note:** the new `sb_secret_` key was rejected by this project's
+  GoTrue admin + Data API (401), so `SUPABASE_SECRET_KEY` uses the legacy
+  `service_role` key (works everywhere; valid until end-2026).
+- **Known follow-ups (non-blocking):** (1) `/today` logs React hydration error
+  #418 in prod — it's statically prerendered but renders live dates; make the
+  date-dependent today views client-only or `export const dynamic='force-dynamic'`.
+  (2) Set `ANTHROPIC_API_KEY` in Vercel for smart triage/journal/chat (currently
+  local NL-parser fallback). (3) In Supabase Auth, turn OFF "Allow new signups"
+  (hardening; admin-created user already exists). (4) `middleware.ts` works but
+  Next 16 deprecates the name in favour of `proxy.ts`.
+
 All code committed on `feat/ops-dashboard`; `pnpm typecheck` + `pnpm build` green,
 9 core tests pass, browser smoke = 0 console errors (`/today`, `/login`, `/settings`).
 A 6-dimension adversarial review (each finding independently refuted/confirmed)
