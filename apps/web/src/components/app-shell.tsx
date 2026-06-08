@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
-import { ensureSeed } from '@/lib/seed';
+import { wipeLocalData } from '@/lib/reset';
 import { CommandPalette } from './command-palette';
 import { HelpOverlay } from './help-overlay';
 import { TaskEditDrawer } from './task-edit-drawer';
@@ -36,8 +36,13 @@ export function AppShell() {
     router.prefetch('/inbox');
   }, [router]);
 
+  // One-time clear of the bundled demo data, so the dashboard starts fresh.
+  // Guarded so it never wipes real data the user adds later.
   useEffect(() => {
-    void ensureSeed();
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem('ops:demo-cleared') === '1') return;
+    localStorage.setItem('ops:demo-cleared', '1');
+    void wipeLocalData();
   }, []);
 
   useHotkeys([
