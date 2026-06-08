@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import Script from 'next/script';
-import { Sidebar } from '@/components/sidebar';
-import { MobileNav } from '@/components/mobile-nav';
-import { TopBar } from '@/components/top-bar';
 import { ThemeProvider } from '@/components/theme-provider';
-import { AppShell } from '@/components/app-shell';
 import './globals.css';
 
 const inter = Inter({
@@ -44,19 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <Script src="/theme-boot.js" strategy="beforeInteractive" />
-        <ThemeProvider>
-          <div className="relative flex h-[100dvh] w-screen overflow-hidden">
-            <Sidebar />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <TopBar />
-              <main className="scrollbar-thin min-h-0 flex-1 overflow-auto pb-20 md:pb-0">
-                {children}
-              </main>
-            </div>
-          </div>
-          <MobileNav />
-          <AppShell />
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

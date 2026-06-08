@@ -1,25 +1,14 @@
 'use client';
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, isSupabaseConfigured } from '@/utils/supabase/client';
 
-let _client: SupabaseClient | null = null;
-
+/**
+ * Back-compat shim. The browser client now lives in utils/supabase/client.ts
+ * (cookie-based @supabase/ssr session, shared with the server + middleware).
+ */
 export function getSupabase(): SupabaseClient | null {
-  if (typeof window === 'undefined') return null;
-  if (_client) return _client;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anon) return null;
-  _client = createClient(url, anon, {
-    auth: {
-      persistSession: true,
-      storageKey: 'drift.supabase.session',
-      autoRefreshToken: true,
-    },
-  });
-  return _client;
+  return createClient();
 }
 
-export function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-}
+export { isSupabaseConfigured };
