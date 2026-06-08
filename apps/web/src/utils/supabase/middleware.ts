@@ -9,7 +9,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * runs fully on-device. API routes are never redirected — they self-guard
  * (same-origin / OPS_API_SECRET bearer) and must return JSON, not an HTML redirect.
  */
-const PUBLIC_PATHS = ['/login', '/auth'];
+const PUBLIC_PATHS = ['/login', '/auth', '/~offline'];
 
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

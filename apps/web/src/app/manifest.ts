@@ -9,7 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/today',
     scope: '/',
     display: 'standalone',
-    orientation: 'portrait',
+    // 'any' so the Tab S10 Ultra can run the landscape two-pane layout.
+    orientation: 'any',
     background_color: '#15151b',
     theme_color: '#15151b',
     categories: ['productivity', 'lifestyle'],

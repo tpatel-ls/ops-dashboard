@@ -28,11 +28,14 @@ export function TaskEditDrawer() {
   if (!id) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex" onClick={close}>
-      <div className="flex-1 bg-black/40 backdrop-blur-sm" />
+    <div className="fixed inset-0 z-40 flex lg:pointer-events-none" onClick={close}>
+      {/* On phone: a dimming modal backdrop. On tablet (lg+): a transparent,
+          click-through spacer so the list stays visible + interactive beside the
+          docked detail pane (master–detail). */}
+      <div className="flex-1 bg-black/40 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none" />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="surface scrollbar-thin relative h-full w-full max-w-md overflow-y-auto rounded-none border-y-0 border-r-0"
+        className="surface scrollbar-thin pointer-events-auto relative h-full w-full max-w-md overflow-y-auto rounded-none border-y-0 border-r-0 lg:border-l lg:shadow-2xl"
       >
         <header className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-hairline bg-card px-5 py-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
