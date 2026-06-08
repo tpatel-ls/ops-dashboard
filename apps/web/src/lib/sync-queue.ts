@@ -24,6 +24,9 @@ export async function enqueueOp(args: EnqueueArgs): Promise<void> {
     attempts: 0,
   };
   await db.syncOps.put(row);
+  // Nudge the sync engine to drain promptly (debounced there). Decoupled via a
+  // window event to avoid an import cycle with the engine.
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('drift:sync-kick'));
 }
 
 export async function pendingOpCount(): Promise<number> {

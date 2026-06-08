@@ -3,8 +3,9 @@
 import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb } from '@drift/core';
-import { startSync, stopSync } from '@/lib/sync-worker-client';
+import { startSync, stopSync } from '@/lib/sync/engine';
 
+/** Starts/stops the realtime sync engine in response to the local sync toggle. */
 export function SyncBoot() {
   const enabled = useLiveQuery(async () => {
     const s = await getDb().settings.get('singleton');
@@ -12,9 +13,11 @@ export function SyncBoot() {
   });
 
   useEffect(() => {
-    if (enabled) startSync();
-    else stopSync();
-    return () => stopSync();
+    if (enabled) void startSync();
+    else void stopSync();
+    return () => {
+      void stopSync();
+    };
   }, [enabled]);
 
   return null;

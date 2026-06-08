@@ -19,6 +19,7 @@ import {
   type DriftExport,
 } from '@/lib/export';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
+import { SyncStatus } from '@/components/sync-status';
 
 const VIEW_OPTIONS: Settings['defaultView'][] = [
   'today',
@@ -34,8 +35,7 @@ export function SettingsForm() {
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [perm, setPerm] = useState<PermissionState>('default');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authStatus, setAuthStatus] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -64,15 +64,17 @@ export function SettingsForm() {
     await getDb().settings.put(next);
   }
 
-  async function sendMagicLink() {
+  useEffect(() => {
+    let cancelled = false;
     const supabase = getSupabase();
-    if (!supabase) {
-      setAuthStatus('Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and ANON_KEY.');
-      return;
-    }
-    const { error } = await supabase.auth.signInWithOtp({ email: authEmail });
-    setAuthStatus(error ? `Error: ${error.message}` : 'Check your email for the magic link.');
-  }
+    if (!supabase) return;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setUserEmail(data.user?.email ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!settings) {
     return <div className="h-40 animate-pulse rounded-xl border bg-card/40" aria-hidden />;
@@ -230,11 +232,11 @@ export function SettingsForm() {
 
       <Section
         title="Sync"
-        description="Optional Supabase sync. Disabled by default."
+        description="Realtime multi-device sync via Supabase. Disabled by default."
       >
         <Toggle
           label="Enable sync on this device"
-          description="When enabled, Drift prompts for a Supabase magic link."
+          description="Pushes local changes up and streams others' changes down, live."
           checked={settings.syncEnabled}
           onChange={(v) => patch({ syncEnabled: v })}
         />
@@ -243,29 +245,35 @@ export function SettingsForm() {
             {!isSupabaseConfigured() ? (
               <div className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
                 Supabase env vars are not set. Add NEXT_PUBLIC_SUPABASE_URL and
-                NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.
+                NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env.local.
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  className="input flex-1"
-                />
-                <button
-                  type="button"
-                  onClick={sendMagicLink}
-                  className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-                >
-                  Send magic link
-                </button>
-              </div>
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <SyncStatus />
+                  {userEmail ? (
+                    <span className="text-xs text-muted-foreground">{userEmail}</span>
+                  ) : null}
+                </div>
+                {userEmail ? (
+                  <form action="/auth/signout" method="post">
+                    <button
+                      type="submit"
+                      className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
+                    >
+                      Sign out
+                    </button>
+                  </form>
+                ) : (
+                  <a
+                    href="/login"
+                    className="inline-flex w-fit rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                  >
+                    Sign in to sync
+                  </a>
+                )}
+              </>
             )}
-            {authStatus ? (
-              <div className="text-xs text-muted-foreground">{authStatus}</div>
-            ) : null}
           </div>
         ) : null}
       </Section>
