@@ -75,7 +75,13 @@ function meta(deviceId: string) {
   return { id: newId(), createdAt: now, updatedAt: now, version: 1, deviceId };
 }
 
-/** Shift parsed time fields from server-UTC into the caller's local time. */
+/**
+ * Shift parsed time INSTANTS (dueAt/startAt/endAt) from the server-UTC frame into
+ * the caller's local time. `scheduledFor` is deliberately left untouched: it is a
+ * date-only LOCAL calendar day that the parser already set from the user's
+ * wall-clock text. Re-deriving it from the shifted UTC instant would land it on
+ * the wrong day whenever the local time straddles UTC midnight.
+ */
 function applyTzOffset(task: Task, tzOffsetMinutes: number | undefined): Task {
   if (typeof tzOffsetMinutes !== 'number' || !Number.isFinite(tzOffsetMinutes)) return task;
   const shift = (iso?: string) =>
@@ -88,7 +94,6 @@ function applyTzOffset(task: Task, tzOffsetMinutes: number | undefined): Task {
     ...(dueAt ? { dueAt } : {}),
     ...(startAt ? { startAt } : {}),
     ...(endAt ? { endAt } : {}),
-    ...(dueAt ? { scheduledFor: dueAt.slice(0, 10) } : {}),
   };
 }
 

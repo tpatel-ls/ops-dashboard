@@ -14,16 +14,22 @@ import {
   type DexieTableName,
 } from './mapping';
 
-const CURSOR_KEY = 'drift.sync.cursor';
+const CURSORS_KEY = 'drift.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
 const EPOCH = '1970-01-01T00:00:00Z';
 const MAX_ATTEMPTS = 12;
 const DRAIN_BATCH = 100;
 const BACKFILL_CHUNK = 200;
 const SAFETY_INTERVAL_MS = 20_000;
 const KICK_DEBOUNCE_MS = 300;
+// Re-query a small window behind each table's cursor so a row written by a
+// slightly clock-behind device isn't permanently skipped. mergeInbound is
+// idempotent, so the overlap is harmless.
+const PULL_OVERLAP_MS = 120_000;
 
-let started = false;
-let starting: Promise<void> | null = null;
+// `generation` is bumped on every start/stop so an in-flight startSync that is
+// superseded (user toggled off, signed out, restarted) bails before installing
+// its realtime channel / listeners / timers.
+let generation = 0;
 let channel: RealtimeChannel | null = null;
 let safetyTimer: number | null = null;
 let kickTimer: number | null = null;
@@ -109,26 +115,57 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
 
 // ---- Pull (Supabase -> local) ---------------------------------------------
 
+function readCursors(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(CURSORS_KEY) ?? '{}') as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+function writeCursors(cursors: Record<string, string>): void {
+  if (typeof window !== 'undefined') window.localStorage.setItem(CURSORS_KEY, JSON.stringify(cursors));
+}
+
+/**
+ * Catch-up pull. Each table keeps its OWN cursor and only advances it on a
+ * successful fetch of that table — a transient error on one table never moves
+ * another table's cursor past unread rows.
+ */
 async function pull(supabase: SupabaseClient): Promise<void> {
-  const cursor = (typeof window !== 'undefined' && window.localStorage.getItem(CURSOR_KEY)) || EPOCH;
-  let maxSeen = cursor;
+  const cursors = readCursors();
+  let changed = false;
 
   for (const table of DEXIE_TABLES) {
     const dbTable = SYNC_TABLES[table];
+    const cursor = cursors[dbTable] ?? EPOCH;
+    const since =
+      cursor === EPOCH
+        ? EPOCH
+        : new Date(Date.parse(cursor) - PULL_OVERLAP_MS).toISOString();
+
     const { data, error } = await supabase
       .from(dbTable)
       .select('*')
-      .gte('updated_at', cursor)
+      .gte('updated_at', since)
       .order('updated_at', { ascending: true })
       .limit(1000);
-    if (error || !data) continue;
+    if (error || !data) continue; // leave THIS table's cursor untouched → retried next cycle
+
+    let maxSeen = cursor;
     for (const row of data as Array<Record<string, unknown>>) {
       await mergeInbound(table, row);
       const ts = row.updated_at;
       if (typeof ts === 'string' && ts > maxSeen) maxSeen = ts;
     }
+    if (maxSeen !== cursor) {
+      cursors[dbTable] = maxSeen;
+      changed = true;
+    }
   }
-  if (typeof window !== 'undefined') window.localStorage.setItem(CURSOR_KEY, maxSeen);
+
+  if (changed) writeCursors(cursors);
 }
 
 // ---- Backfill (one-time full push of pre-existing local data) --------------
@@ -158,6 +195,7 @@ async function backfillIfNeeded(supabase: SupabaseClient, userId: string): Promi
 // ---- Realtime --------------------------------------------------------------
 
 function subscribeRealtime(supabase: SupabaseClient): void {
+  if (channel) return; // never double-subscribe
   channel = supabase.channel('drift-sync');
   for (const table of DEXIE_TABLES) {
     channel.on(
@@ -179,6 +217,16 @@ function subscribeRealtime(supabase: SupabaseClient): void {
 
 // ---- Lifecycle -------------------------------------------------------------
 
+function ensureAuthListener(supabase: SupabaseClient): void {
+  if (authSub) return;
+  const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+    if (event === 'TOKEN_REFRESHED' && s) supabase.realtime.setAuth(s.access_token);
+    if (event === 'SIGNED_IN') void restartSync();
+    if (event === 'SIGNED_OUT') void stopSync();
+  });
+  authSub = sub.subscription;
+}
+
 function scheduleKick(): void {
   if (kickTimer !== null) return;
   kickTimer = window.setTimeout(() => {
@@ -189,10 +237,12 @@ function scheduleKick(): void {
 
 /** One push+pull pass using a fresh authenticated client. */
 async function cycle(): Promise<void> {
+  const myGen = generation;
   const supabase = createClient();
   if (!supabase) return;
   const { data } = await supabase.auth.getSession();
   const session = data.session;
+  if (myGen !== generation) return; // superseded by a stop/restart mid-cycle
   if (!session) {
     setSyncStatus({ state: 'signed-out' });
     return;
@@ -200,8 +250,10 @@ async function cycle(): Promise<void> {
   try {
     await drainOutbox(supabase, session.user.id);
     await pull(supabase);
+    if (myGen !== generation) return;
     setSyncStatus({ state: 'live', error: null, lastSyncedAt: new Date().toISOString() });
   } catch {
+    if (myGen !== generation) return;
     setSyncStatus({ state: navigator.onLine ? 'error' : 'offline' });
   }
 }
@@ -213,74 +265,8 @@ function onOnline(): void {
   void cycle();
 }
 
-export async function startSync(): Promise<void> {
-  if (typeof window === 'undefined') return;
-  if (started) return;
-  if (starting) return starting;
-
-  starting = (async () => {
-    const supabase = createClient();
-    if (!supabase) {
-      setSyncStatus({ state: 'unconfigured' });
-      return;
-    }
-    const { data } = await supabase.auth.getSession();
-    const session = data.session;
-    if (!session) {
-      setSyncStatus({ state: 'signed-out' });
-      // React to a later login without requiring a manual re-enable.
-      if (!authSub) {
-        const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') void restartSync();
-          if (event === 'SIGNED_OUT') void stopSync();
-        });
-        authSub = sub.subscription;
-      }
-      return;
-    }
-
-    setSyncStatus({ state: 'connecting', error: null });
-    const userId = session.user.id;
-
-    // Realtime authorization uses the current access token.
-    supabase.realtime.setAuth(session.access_token);
-
-    try {
-      await backfillIfNeeded(supabase, userId);
-      await pull(supabase);
-      setSyncStatus({ lastSyncedAt: new Date().toISOString() });
-    } catch {
-      setSyncStatus({ state: navigator.onLine ? 'error' : 'offline' });
-    }
-
-    // Realtime's SUBSCRIBED callback drives the 'live' state from here.
-    subscribeRealtime(supabase);
-    void drainOutbox(supabase, userId).catch(() => {});
-    await updatePending();
-
-    if (!authSub) {
-      const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
-        if (event === 'TOKEN_REFRESHED' && s) supabase.realtime.setAuth(s.access_token);
-        if (event === 'SIGNED_OUT') void stopSync();
-      });
-      authSub = sub.subscription;
-    }
-
-    window.addEventListener('drift:sync-kick', onKickEvent);
-    window.addEventListener('online', onOnline);
-    safetyTimer = window.setInterval(() => void cycle(), SAFETY_INTERVAL_MS);
-
-    started = true;
-  })();
-
-  try {
-    await starting;
-  } finally {
-    starting = null;
-  }
-}
-
-export async function stopSync(): Promise<void> {
+/** Tear down every installed resource. Idempotent. */
+async function teardown(): Promise<void> {
   if (typeof window !== 'undefined') {
     window.removeEventListener('drift:sync-kick', onKickEvent);
     window.removeEventListener('online', onOnline);
@@ -294,9 +280,8 @@ export async function stopSync(): Promise<void> {
     kickTimer = null;
   }
   if (channel) {
-    const supabase = createClient();
     try {
-      await supabase?.removeChannel(channel);
+      await createClient()?.removeChannel(channel);
     } catch {
       /* ignore */
     }
@@ -306,7 +291,62 @@ export async function stopSync(): Promise<void> {
     authSub.unsubscribe();
     authSub = null;
   }
-  started = false;
+}
+
+export async function startSync(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  // Each call gets a fresh generation; a stop/restart bumps it and makes this
+  // run bail before installing anything.
+  const myGen = ++generation;
+  await teardown();
+  if (myGen !== generation) return;
+
+  const supabase = createClient();
+  if (!supabase) {
+    setSyncStatus({ state: 'unconfigured' });
+    return;
+  }
+
+  const { data } = await supabase.auth.getSession();
+  if (myGen !== generation) return;
+  const session = data.session;
+  if (!session) {
+    setSyncStatus({ state: 'signed-out' });
+    ensureAuthListener(supabase); // restart when the user signs in later
+    return;
+  }
+
+  setSyncStatus({ state: 'connecting', error: null });
+  const userId = session.user.id;
+  supabase.realtime.setAuth(session.access_token); // realtime authorization
+
+  try {
+    await backfillIfNeeded(supabase, userId);
+    if (myGen !== generation) return;
+    await pull(supabase);
+    if (myGen !== generation) return;
+    setSyncStatus({ lastSyncedAt: new Date().toISOString() });
+  } catch {
+    if (myGen !== generation) return;
+    setSyncStatus({ state: navigator.onLine ? 'error' : 'offline' });
+  }
+
+  if (myGen !== generation) return; // a stop landed during startup — do not go live
+
+  // Realtime's SUBSCRIBED callback drives the 'live' state from here.
+  subscribeRealtime(supabase);
+  void drainOutbox(supabase, userId).catch(() => {});
+  await updatePending();
+  ensureAuthListener(supabase);
+
+  window.addEventListener('drift:sync-kick', onKickEvent);
+  window.addEventListener('online', onOnline);
+  safetyTimer = window.setInterval(() => void cycle(), SAFETY_INTERVAL_MS);
+}
+
+export async function stopSync(): Promise<void> {
+  generation++; // invalidate any in-flight startSync
+  await teardown();
   setSyncStatus({ state: 'off' });
 }
 
