@@ -11,7 +11,13 @@ import { createClient } from '@/utils/supabase/server';
 export async function login(formData: FormData): Promise<void> {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
-  const next = String(formData.get('next') ?? '/today') || '/today';
+  // Only allow same-origin absolute paths. Reject protocol-relative (`//evil`)
+  // and backslash (`/\evil`) forms, which browsers resolve off-site (open redirect).
+  const rawNext = String(formData.get('next') ?? '/today');
+  const next =
+    rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.startsWith('/\\')
+      ? rawNext
+      : '/today';
 
   const supabase = await createClient();
   if (!supabase) {
@@ -25,5 +31,5 @@ export async function login(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/', 'layout');
-  redirect(next.startsWith('/') ? next : '/today');
+  redirect(next);
 }

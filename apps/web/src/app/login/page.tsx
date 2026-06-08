@@ -12,8 +12,12 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error, next } = await searchParams;
+  const { error, next: rawNext } = await searchParams;
   const message = error ? (ERRORS[error] ?? 'Sign-in failed.') : null;
+  const next =
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.startsWith('/\\')
+      ? rawNext
+      : '/today';
 
   return (
     <div className="flex min-h-[100dvh] w-full items-center justify-center p-6">
@@ -25,7 +29,7 @@ export default async function LoginPage({
         </div>
 
         <form action={login} className="grid gap-3">
-          <input type="hidden" name="next" value={next ?? '/today'} />
+          <input type="hidden" name="next" value={next} />
           <label className="grid gap-1 text-xs text-muted-foreground">
             <span>Email</span>
             <input
