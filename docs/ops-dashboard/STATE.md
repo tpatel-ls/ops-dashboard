@@ -21,8 +21,15 @@
 - **Known follow-ups (non-blocking):** (1) `/today` logs React hydration error
   #418 in prod — it's statically prerendered but renders live dates; make the
   date-dependent today views client-only or `export const dynamic='force-dynamic'`.
-  (2) Set `ANTHROPIC_API_KEY` in Vercel for smart triage/journal/chat (currently
-  local NL-parser fallback). (3) In Supabase Auth, turn OFF "Allow new signups"
+  (2) **AI is LIVE** via a self-hosted Anthropic-compatible gateway: env
+  `ANTHROPIC_BASE_URL=https://jamess-mac-mini.tail7e0fa0.ts.net` (Tailscale Funnel
+  → publicly reachable by Vercel), `ANTHROPIC_API_KEY` set, and
+  `OPS_TRIAGE_MODEL=claude-haiku-4-5-20251001` (the short alias isn't recognized by
+  the proxy; vision=claude-sonnet-4-6, chat=claude-opus-4-8 work as-is). `ai.ts`
+  now honors `ANTHROPIC_BASE_URL`. Caveat: depends on the Mac mini being on +
+  Funnel running; if it's down, capture falls back to the local date parser.
+  No Whisper/audio model on the proxy, so voice still uses the browser Web Speech
+  API (fine on phone/tablet). (3) In Supabase Auth, turn OFF "Allow new signups"
   (hardening; admin-created user already exists). (4) `middleware.ts` works but
   Next 16 deprecates the name in favour of `proxy.ts`.
 
