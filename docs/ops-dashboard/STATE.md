@@ -28,8 +28,13 @@
   the proxy; vision=claude-sonnet-4-6, chat=claude-opus-4-8 work as-is). `ai.ts`
   now honors `ANTHROPIC_BASE_URL`. Caveat: depends on the Mac mini being on +
   Funnel running; if it's down, capture falls back to the local date parser.
-  No Whisper/audio model on the proxy, so voice still uses the browser Web Speech
-  API (fine on phone/tablet). (3) In Supabase Auth, turn OFF "Allow new signups"
+  (2b) **Voice transcription is LIVE** via a self-hosted GPU Whisper server on the
+  user's GB10 (DGX Spark), exposed over Tailscale Funnel:
+  `TRANSCRIBE_BASE_URL=https://whisper.tail7e0fa0.ts.net/v1`, key-auth, model
+  `whisper-1` (large-v3-turbo). `/api/transcribe` proxies audio there; the quick-add
+  mic records audio → Whisper when enabled+online, else on-device Web Speech.
+  Verified prod: Vercel→GB10 returns accurate text in ~1.7s. Setup brief:
+  `gb10-whisper-setup.md`. (3) In Supabase Auth, turn OFF "Allow new signups"
   (hardening; admin-created user already exists). (4) `middleware.ts` works but
   Next 16 deprecates the name in favour of `proxy.ts`.
 
