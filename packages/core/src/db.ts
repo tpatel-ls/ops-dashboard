@@ -21,7 +21,7 @@ import type {
   WorkLog,
 } from './types';
 
-export class DriftDB extends Dexie {
+export class OpsDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
   projects!: EntityTable<Project, 'id'>;
   whiteboards!: EntityTable<Whiteboard, 'id'>;
@@ -42,7 +42,7 @@ export class DriftDB extends Dexie {
   quotes!: EntityTable<Quote, 'id'>;
   books!: EntityTable<Book, 'id'>;
 
-  constructor(name = 'drift') {
+  constructor(name = 'ops-dashboard') {
     super(name);
     this.version(1).stores({
       tasks:
@@ -85,10 +85,10 @@ export class DriftDB extends Dexie {
   }
 }
 
-let _db: DriftDB | null = null;
+let _db: OpsDB | null = null;
 
-export function getDb(): DriftDB {
-  if (!_db) _db = new DriftDB();
+export function getDb(): OpsDB {
+  if (!_db) _db = new OpsDB();
   return _db;
 }
 

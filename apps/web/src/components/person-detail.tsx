@@ -11,15 +11,15 @@ import {
   X,
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
-import type { Domain, Interaction, Person, PersonFact } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Domain, Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import {
   deletePerson,
   makeFact,
   makeInteraction,
   updatePerson,
 } from '@/lib/people';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 // ─── Facts section ────────────────────────────────────────────────────────────
 

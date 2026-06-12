@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb } from '@drift/core';
-import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export interface CreateRoutineInput {

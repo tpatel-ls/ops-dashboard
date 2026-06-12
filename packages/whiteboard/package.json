@@ -1,5 +1,5 @@
 {
-  "name": "@drift/whiteboard",
+  "name": "@ops-dashboard/whiteboard",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "tldraw": "^3.7.0"
   },
   "devDependencies": {
-    "@drift/tsconfig": "workspace:*",
+    "@ops-dashboard/tsconfig": "workspace:*",
     "@types/react": "^19",
     "react": "19.2.4",
     "tldraw": "^3.7.0",

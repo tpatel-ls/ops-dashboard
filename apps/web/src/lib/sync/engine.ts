@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb } from '@drift/core';
-import type { Syncable } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Syncable } from '@ops-dashboard/core';
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { setSyncStatus } from './status';
@@ -14,7 +14,7 @@ import {
   type DexieTableName,
 } from './mapping';
 
-const CURSORS_KEY = 'drift.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
+const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
 const EPOCH = '1970-01-01T00:00:00Z';
 const MAX_ATTEMPTS = 12;
 const DRAIN_BATCH = 100;
@@ -177,7 +177,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 async function backfillIfNeeded(supabase: SupabaseClient, userId: string): Promise<void> {
-  const key = `drift.sync.backfilled.${userId}`;
+  const key = `ops.sync.backfilled.${userId}`;
   if (typeof window !== 'undefined' && window.localStorage.getItem(key) === '1') return;
 
   for (const table of DEXIE_TABLES) {
@@ -196,7 +196,7 @@ async function backfillIfNeeded(supabase: SupabaseClient, userId: string): Promi
 
 function subscribeRealtime(supabase: SupabaseClient): void {
   if (channel) return; // never double-subscribe
-  channel = supabase.channel('drift-sync');
+  channel = supabase.channel('ops-sync');
   for (const table of DEXIE_TABLES) {
     channel.on(
       'postgres_changes',
@@ -268,7 +268,7 @@ function onOnline(): void {
 /** Tear down every installed resource. Idempotent. */
 async function teardown(): Promise<void> {
   if (typeof window !== 'undefined') {
-    window.removeEventListener('drift:sync-kick', onKickEvent);
+    window.removeEventListener('ops:sync-kick', onKickEvent);
     window.removeEventListener('online', onOnline);
   }
   if (safetyTimer !== null) {
@@ -339,7 +339,7 @@ export async function startSync(): Promise<void> {
   await updatePending();
   ensureAuthListener(supabase);
 
-  window.addEventListener('drift:sync-kick', onKickEvent);
+  window.addEventListener('ops:sync-kick', onKickEvent);
   window.addEventListener('online', onOnline);
   safetyTimer = window.setInterval(() => void cycle(), SAFETY_INTERVAL_MS);
 }

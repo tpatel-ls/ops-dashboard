@@ -3,10 +3,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { format, parseISO } from 'date-fns';
 import { BookOpen, Trash2, Upload } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { JournalEntry } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { JournalEntry } from '@ops-dashboard/core';
 import { deleteJournalEntry } from '@/lib/journal';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const MOOD_GLYPH: Record<string, { symbol: string; label: string; color: string }> = {
   great: { symbol: '✦', label: 'Great', color: 'text-success' },

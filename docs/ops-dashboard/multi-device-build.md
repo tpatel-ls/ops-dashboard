@@ -26,7 +26,7 @@ the app anywhere.
 
 - Repo: `/Users/tanaypatel/Desktop/taskify`. Branch: `feat/ops-dashboard`.
 - It's a **local-first PWA "Ops Dashboard"** — Next.js 16 App Router, React 19,
-  Tailwind v4, Dexie (IndexedDB), pnpm monorepo (`@drift/core`, `@drift/ui`, app at
+  Tailwind v4, Dexie (IndexedDB), pnpm monorepo (`@ops-dashboard/core`, `@ops-dashboard/ui`, app at
   `apps/web`). Run: `pnpm install` then `pnpm dev` (→ http://localhost:3000).
 - **Read these before doing anything:** `docs/ops-dashboard/spec.md` (full design,
   data model, conventions, and the verified 2026 Supabase↔Next research) and
@@ -216,7 +216,7 @@ Provide a copy-pasteable `curl` so I can verify the endpoint before wiring the w
 ## Guardrails / conventions
 
 - Read `spec.md` + `STATE.md` first; match the warm-amber design tokens + utility
-  classes; keep `@drift/*` scope; colocate small files.
+  classes; keep `@ops-dashboard/*` scope; colocate small files.
 - Use the **2026 Supabase SSR patterns** exactly (getAll/setAll, getClaims,
   publishable/secret keys) — they're documented in `spec.md`; do not copy older
   tutorials. RLS `((select auth.uid()) = user_id)` on every table. Never put the

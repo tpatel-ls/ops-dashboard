@@ -1,6 +1,6 @@
 'use client';
 
-import type { Content, ContentType } from '@drift/core';
+import type { Content, ContentType } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export function createContent(input: {

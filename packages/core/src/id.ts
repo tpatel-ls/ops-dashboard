@@ -4,7 +4,7 @@ export function newId(): string {
   return ulid();
 }
 
-const DEVICE_KEY = 'drift.deviceId';
+const DEVICE_KEY = 'ops.deviceId';
 
 export function getDeviceId(): string {
   if (typeof window === 'undefined') return 'server';

@@ -1,5 +1,5 @@
-import { getDb } from '@drift/core';
-import type { RoutineCheck } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { RoutineCheck } from '@ops-dashboard/core';
 
 export interface ActivityDay {
   date: string; // YYYY-MM-DD

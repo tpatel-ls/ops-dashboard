@@ -12,10 +12,10 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { createJournalEntry } from '@/lib/journal';
 import { toggleRoutineCheck, todayISO } from '@/lib/routines';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 type Mode = 'idle' | 'text' | 'photo';
 type Stage = 'input' | 'processing' | 'confirm' | 'done' | 'manual-fallback';

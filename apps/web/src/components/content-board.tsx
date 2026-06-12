@@ -15,10 +15,10 @@ import {
   LayoutGrid,
   List,
 } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Content, ContentType, ContentStatus, Domain } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Content, ContentType, ContentStatus, Domain } from '@ops-dashboard/core';
 import { createContent, updateContent, deleteContent } from '@/lib/content';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 // ── constants ────────────────────────────────────────────────────────────────
 

@@ -1,10 +1,10 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
-import type { Project, Task, Whiteboard } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 
-export interface DriftExport {
+export interface OpsExport {
   version: 1;
   exportedAt: string;
   tasks: Task[];
@@ -12,7 +12,7 @@ export interface DriftExport {
   whiteboards: Whiteboard[];
 }
 
-export async function exportAll(): Promise<DriftExport> {
+export async function exportAll(): Promise<OpsExport> {
   const db = getDb();
   const [tasks, projects, whiteboards] = await Promise.all([
     db.tasks.toArray(),
@@ -28,7 +28,7 @@ export async function exportAll(): Promise<DriftExport> {
   };
 }
 
-export async function importAll(payload: DriftExport): Promise<void> {
+export async function importAll(payload: OpsExport): Promise<void> {
   if (payload.version !== 1) throw new Error('Unsupported export version');
   const db = getDb();
   await db.transaction('rw', db.tasks, db.projects, db.whiteboards, async () => {

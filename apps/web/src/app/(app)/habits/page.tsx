@@ -2,12 +2,12 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, CheckCircle2, Flame, Sparkles } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { loadActivity } from '@/lib/activity';
 import { computeStreak, todayISO, addDaysISO } from '@/lib/routines';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 // ─── Stat card ───────────────────────────────────────────────────────────────
 

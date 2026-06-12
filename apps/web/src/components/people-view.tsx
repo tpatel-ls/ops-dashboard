@@ -10,11 +10,11 @@ import {
   X,
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
-import type { Domain, Person } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Domain, Person } from '@ops-dashboard/core';
 import { createPerson } from '@/lib/people';
 import { PersonDetail } from '@/components/person-detail';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 // ─── Create person form ───────────────────────────────────────────────────────
 

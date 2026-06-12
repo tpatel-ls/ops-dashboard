@@ -1,5 +1,5 @@
 {
-  "extends": "@drift/tsconfig/library.json",
+  "extends": "@ops-dashboard/tsconfig/library.json",
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -3,7 +3,7 @@ import withSerwistInit from '@serwist/next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@drift/core', '@drift/ui', '@drift/whiteboard'],
+  transpilePackages: ['@ops-dashboard/core', '@ops-dashboard/ui', '@ops-dashboard/whiteboard'],
 };
 
 const withSerwist = withSerwistInit({

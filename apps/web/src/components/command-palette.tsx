@@ -17,7 +17,7 @@ import {
   Sun,
   Target,
 } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { runCapture } from '@/lib/capture-client';
 

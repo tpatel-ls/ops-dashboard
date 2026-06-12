@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { createWhiteboard, softDeleteWhiteboard } from '@/lib/whiteboards';
 
 export function WhiteboardList() {

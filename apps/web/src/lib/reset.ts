@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb } from '@drift/core';
-import type { SyncTable } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { SyncTable } from '@ops-dashboard/core';
 
 const TABLES: SyncTable[] = [
   'tasks',

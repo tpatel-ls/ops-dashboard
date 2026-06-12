@@ -8,7 +8,7 @@ Settings, which prompts a Supabase magic link login.
 Every syncable row carries:
 
 - `version` (monotonic integer, bumped on every local write)
-- `deviceId` (ULID per browser profile, see `@drift/core/id`)
+- `deviceId` (ULID per browser profile, see `@ops-dashboard/core/id`)
 - `updatedAt` (ISO 8601 with timezone)
 - `deletedAt` (soft delete, hard delete after 30 days)
 

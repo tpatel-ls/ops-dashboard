@@ -3,7 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 
 export function ResurfacingEntry() {
   const entry = useLiveQuery(async () => {

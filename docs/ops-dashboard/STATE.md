@@ -7,7 +7,7 @@
 
 ## Session 2 — multi-device realtime sync: **DEPLOYED & LIVE** ✅
 - **Production:** https://taskify-three-delta.vercel.app (Vercel project `taskify`,
-  Root Directory `apps/web`). Login: `tanaypatel192@gmail.com`.
+  Root Directory `apps/web`). Login: `your-email@example.com`.
 - **Supabase:** project `jnaycounllaafvorakss` (Taskify), migrations 0001→0004
   applied, single user created, realtime publication + version-guard live.
 - **Verified in production:** login gate works; Settings→Sync shows **Live**; the
@@ -22,7 +22,7 @@
   #418 in prod — it's statically prerendered but renders live dates; make the
   date-dependent today views client-only or `export const dynamic='force-dynamic'`.
   (2) **AI is LIVE** via a self-hosted Anthropic-compatible gateway: env
-  `ANTHROPIC_BASE_URL=https://jamess-mac-mini.tail7e0fa0.ts.net` (Tailscale Funnel
+  `ANTHROPIC_BASE_URL=https://<your-proxy-host>.<tailnet>.ts.net` (Tailscale Funnel
   → publicly reachable by Vercel), `ANTHROPIC_API_KEY` set, and
   `OPS_TRIAGE_MODEL=claude-haiku-4-5-20251001` (the short alias isn't recognized by
   the proxy; vision=claude-sonnet-4-6, chat=claude-opus-4-8 work as-is). `ai.ts`
@@ -30,7 +30,7 @@
   Funnel running; if it's down, capture falls back to the local date parser.
   (2b) **Voice transcription is LIVE** via a self-hosted GPU Whisper server on the
   user's GB10 (DGX Spark), exposed over Tailscale Funnel:
-  `TRANSCRIBE_BASE_URL=https://whisper.tail7e0fa0.ts.net/v1`, key-auth, model
+  `TRANSCRIBE_BASE_URL=https://<your-whisper-host>.<tailnet>.ts.net/v1`, key-auth, model
   `whisper-1` (large-v3-turbo). `/api/transcribe` proxies audio there; the quick-add
   mic records audio → Whisper when enabled+online, else on-device Web Speech.
   Verified prod: Vercel→GB10 returns accurate text in ~1.7s. Setup brief:
@@ -71,7 +71,7 @@ capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect
 
 ## Snapshot
 - **Product:** Ops Dashboard — local-first personal life-OS PWA, built on the
-  recovered **Drift** monorepo (Next.js 16, React 19, Tailwind v4, Dexie, Supabase
+  recovered **Ops Dashboard** monorepo (Next.js 16, React 19, Tailwind v4, Dexie, Supabase
   sync, PWA, cmdk).
 - **Branch:** `feat/ops-dashboard`. **PM:** pnpm 10 (corepack). **Node:** 25.
 - **Deps installed:** yes. **Baseline (typecheck/test):** verifying.
@@ -86,7 +86,7 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
 
 ## Status
 - [x] Brainstorm + 4 decisions + design-research workflow (`wf_b1308e73-3e2`).
-- [x] Recover Drift from git history; install deps; write spec.
+- [x] Recover Ops Dashboard from git history; install deps; write spec.
 - [x] Baseline verify (typecheck + tests green).
 - [x] **P0** core extension, lib layer, shell rebrand + mobile nav, capture/triage +
   Pushover API, supabase 0002, env example, seed. Committed `dee9109`.
@@ -150,7 +150,7 @@ behind Supabase auth middleware. Inputs capped; push `url` not user-controllable
    changed rows in one catch-up.
 
 ## Notes / decisions log
-- Keep `@drift/*` package scope + Dexie name `drift` (no churn; no user data yet).
+- Keep `@ops-dashboard/*` package scope + Dexie name `ops-dashboard` (no churn; no user data yet).
   "Ops Dashboard" is display-name only.
 - Activity heatmap = **derived** (no stored table). `react-activity-calendar` v3.
 - Voice = MediaRecorder→Groq Whisper; AI = Claude Sonnet 4.6; both have local fallbacks.

@@ -4,10 +4,10 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { addDays, format, parseISO, startOfWeek } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@drift/core';
-import type { Task } from '@drift/core';
+import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
+import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const HOUR_HEIGHT = 48;
 const START_HOUR = 6;

@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb, newId } from '@drift/core';
-import type { SyncOp } from '@drift/core';
+import { getDb, newId } from '@ops-dashboard/core';
+import type { SyncOp } from '@ops-dashboard/core';
 
 interface EnqueueArgs {
   table: SyncOp['table'];
@@ -26,7 +26,7 @@ export async function enqueueOp(args: EnqueueArgs): Promise<void> {
   await db.syncOps.put(row);
   // Nudge the sync engine to drain promptly (debounced there). Decoupled via a
   // window event to avoid an import cycle with the engine.
-  if (typeof window !== 'undefined') window.dispatchEvent(new Event('drift:sync-kick'));
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('ops:sync-kick'));
 }
 
 export async function pendingOpCount(): Promise<number> {

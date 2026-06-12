@@ -29,13 +29,13 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.4)
-      '@drift/core':
+      '@ops-dashboard/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@drift/ui':
+      '@ops-dashboard/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@drift/whiteboard':
+      '@ops-dashboard/whiteboard':
         specifier: workspace:*
         version: link:../../packages/whiteboard
       '@supabase/ssr':
@@ -96,7 +96,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.12(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
-      '@drift/tsconfig':
+      '@ops-dashboard/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
       '@playwright/test':
@@ -172,7 +172,7 @@ importers:
         specifier: ^2.3.0
         version: 2.4.0
     devDependencies:
-      '@drift/tsconfig':
+      '@ops-dashboard/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       fake-indexeddb:
@@ -196,7 +196,7 @@ importers:
         specifier: ^2.5.5
         version: 2.6.1
     devDependencies:
-      '@drift/tsconfig':
+      '@ops-dashboard/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       typescript:
@@ -209,7 +209,7 @@ importers:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
     devDependencies:
-      '@drift/tsconfig':
+      '@ops-dashboard/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       '@types/react':

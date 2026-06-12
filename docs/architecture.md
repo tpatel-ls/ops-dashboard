@@ -1,20 +1,20 @@
 # Architecture
 
-Drift is a pnpm monorepo. The web app is a Next.js 16 App Router project that
+Ops Dashboard is a pnpm monorepo. The web app is a Next.js 16 App Router project that
 talks to IndexedDB through Dexie. Optional Supabase sync runs in a Web Worker
 (landing in M6) and is opt-in per device.
 
 ## Packages
 
-- `@drift/core` owns the data shapes, the Dexie schema, the ULID and device
+- `@ops-dashboard/core` owns the data shapes, the Dexie schema, the ULID and device
   id helpers, and the natural language quick-add parser. Pure TypeScript so
   it can run in tests, in the browser, and inside the Web Worker.
-- `@drift/ui` keeps the `cn` helper and the design tokens that any
+- `@ops-dashboard/ui` keeps the `cn` helper and the design tokens that any
   framework-agnostic UI ships with. Heavier shadcn primitives land here as
   they are needed.
-- `@drift/whiteboard` owns the pen pointer helpers, palm rejection, and the
+- `@ops-dashboard/whiteboard` owns the pen pointer helpers, palm rejection, and the
   tldraw wrapper. The wrapper itself is added in M4.
-- `@drift/tsconfig` is the shared TS config base that every package extends.
+- `@ops-dashboard/tsconfig` is the shared TS config base that every package extends.
 
 ## App layers
 
@@ -22,7 +22,7 @@ talks to IndexedDB through Dexie. Optional Supabase sync runs in a Web Worker
 apps/web
   src/app                 routes per view (today, week, month, kanban, etc.)
   src/components          presentation layer
-  src/lib                 thin data layer that wraps @drift/core for the UI
+  src/lib                 thin data layer that wraps @ops-dashboard/core for the UI
 ```
 
 Mutations flow `UI -> lib -> Dexie`. When sync is enabled, the lib layer also

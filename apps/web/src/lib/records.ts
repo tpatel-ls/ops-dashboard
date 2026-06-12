@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb, getDeviceId, newId } from '@drift/core';
-import type { SyncMeta, SyncTable } from '@drift/core';
+import { getDb, getDeviceId, newId } from '@ops-dashboard/core';
+import type { SyncMeta, SyncTable } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 /**

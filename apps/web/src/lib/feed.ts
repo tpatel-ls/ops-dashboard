@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb } from '@drift/core';
-import type { AppNotification, NotificationKind } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { AppNotification, NotificationKind } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 /** Append an item to the in-app notification feed (Today / Inbox bell). */

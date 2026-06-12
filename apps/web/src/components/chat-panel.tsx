@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, KeyRound } from 'lucide-react';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 export interface ChatMessage {
   id: string;

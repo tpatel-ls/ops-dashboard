@@ -9,7 +9,7 @@ M7 polish has settled.
 cd apps/web
 pnpm add -D @capacitor/cli
 pnpm add @capacitor/core @capacitor/android @capacitor/local-notifications @capacitor/filesystem @capacitor/preferences
-pnpm exec cap init drift com.drift.app --web-dir out
+pnpm exec cap init ops-dashboard com.opsdashboard.app --web-dir out
 pnpm exec cap add android
 ```
 
@@ -19,7 +19,7 @@ up rather than overwriting.
 ## Build the wrapper
 
 ```
-NEXT_OUTPUT=export pnpm --filter @drift/web build
+NEXT_OUTPUT=export pnpm --filter @ops-dashboard/web build
 pnpm exec cap copy android
 pnpm exec cap open android
 ```

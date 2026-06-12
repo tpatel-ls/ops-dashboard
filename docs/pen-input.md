@@ -22,7 +22,7 @@ canvas.addEventListener('pointerdown', (e) => {
 ## Palm rejection
 
 Whenever a pen pointer is active, ignore touch pointers for the next 200 ms.
-`@drift/whiteboard` exports `shouldRejectAsPalm` for this. The window resets
+`@ops-dashboard/whiteboard` exports `shouldRejectAsPalm` for this. The window resets
 on every pen sample so a resting palm stays rejected.
 
 ## Side button as eraser

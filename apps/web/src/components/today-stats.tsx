@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Flame, ListTodo, Target } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 
 export function TodayStats() {
   const stats = useLiveQuery(async () => {

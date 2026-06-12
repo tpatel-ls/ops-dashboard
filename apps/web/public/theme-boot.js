@@ -1,6 +1,6 @@
 (function () {
   try {
-    var k = 'drift.theme';
+    var k = 'ops.theme';
     var s = localStorage.getItem(k);
     var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
     var r = s === 'light' || s === 'dark' ? s : d ? 'dark' : 'light';

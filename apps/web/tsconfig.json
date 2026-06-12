@@ -1,5 +1,5 @@
 {
-  "extends": "@drift/tsconfig/nextjs.json",
+  "extends": "@ops-dashboard/tsconfig/nextjs.json",
   "compilerOptions": {
     "exactOptionalPropertyTypes": false,
     "plugins": [{ "name": "next" }],

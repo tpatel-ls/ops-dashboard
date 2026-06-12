@@ -22,8 +22,8 @@ import {
   Sun,
   Users,
 } from 'lucide-react';
-import { getDb } from '@drift/core';
-import { cn } from '@drift/ui';
+import { getDb } from '@ops-dashboard/core';
+import { cn } from '@ops-dashboard/ui';
 
 interface NavItem {
   href: string;

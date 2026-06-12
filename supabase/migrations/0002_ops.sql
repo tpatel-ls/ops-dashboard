@@ -1,4 +1,4 @@
--- Ops Dashboard schema (v2). Mirrors the new @drift/core entities.
+-- Ops Dashboard schema (v2). Mirrors the new @ops-dashboard/core entities.
 -- Applied at host time (`supabase db push`); not required for local Dexie dev.
 -- RLS uses (select auth.uid()) = user_id per current Supabase perf guidance.
 

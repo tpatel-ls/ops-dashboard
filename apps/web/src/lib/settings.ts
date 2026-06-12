@@ -1,7 +1,7 @@
 'use client';
 
-import { DEFAULT_SETTINGS, getDb } from '@drift/core';
-import type { Settings } from '@drift/core';
+import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
+import type { Settings } from '@ops-dashboard/core';
 
 /** Read settings, seeding the singleton on first access. */
 export async function getSettings(): Promise<Settings> {

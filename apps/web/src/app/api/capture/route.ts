@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
-import { newId, parseQuickAdd, quickAddToTask } from '@drift/core';
-import type { Capture, CaptureKind, JournalEntry, Task, AppNotification } from '@drift/core';
+import { newId, parseQuickAdd, quickAddToTask } from '@ops-dashboard/core';
+import type { Capture, CaptureKind, JournalEntry, Task, AppNotification } from '@ops-dashboard/core';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { createClient } from '@/utils/supabase/server';

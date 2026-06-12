@@ -19,7 +19,7 @@ interface ThemeContextValue {
   setTheme: (t: Theme) => void;
 }
 
-const STORAGE_KEY = 'drift.theme';
+const STORAGE_KEY = 'ops.theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): Theme {

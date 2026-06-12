@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getDb } from '@drift/core';
-import type { Task, Project, Routine, RoutineCheck, Domain, JournalEntry } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Task, Project, Routine, RoutineCheck, Domain, JournalEntry } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ChatPanel } from '@/components/chat-panel';
 import type { ChatMessage } from '@/components/chat-panel';

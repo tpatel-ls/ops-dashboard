@@ -3,7 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Archive, Plus } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { archiveProject, createProject, renameProject } from '@/lib/projects';
 
 export function ProjectsManager() {

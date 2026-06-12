@@ -3,10 +3,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Archive, Boxes, Check, ChevronRight, ListTodo, Pencil, Plus, X } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Domain } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Domain } from '@ops-dashboard/core';
 import { archiveDomain, createDomain, updateDomain } from '@/lib/domains';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const PRESET_COLORS = [
   { label: 'Amber', value: 'oklch(0.65 0.18 38)' },

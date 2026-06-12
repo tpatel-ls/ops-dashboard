@@ -7,8 +7,8 @@ import {
   parseQuickAdd,
   projectNextTask,
   quickAddToTask,
-} from '@drift/core';
-import type { ChecklistItem, Task } from '@drift/core';
+} from '@ops-dashboard/core';
+import type { ChecklistItem, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 export async function addTask(input: string, overrides: Partial<Task> = {}): Promise<Task> {

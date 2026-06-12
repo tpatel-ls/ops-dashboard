@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.drift.app',
-  appName: 'Drift',
+  appId: 'com.opsdashboard.app',
+  appName: 'Ops Dashboard',
   webDir: 'out',
   bundledWebRuntime: false,
   android: {

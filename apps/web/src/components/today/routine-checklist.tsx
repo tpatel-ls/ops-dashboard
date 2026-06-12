@@ -2,10 +2,10 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Flame } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { TimeOfDay } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { TimeOfDay } from '@ops-dashboard/core';
 import { computeStreak, todayISO, toggleRoutineCheck } from '@/lib/routines';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const TIME_ORDER: TimeOfDay[] = ['morning', 'afternoon', 'evening', 'anytime'];
 const TIME_LABEL: Record<TimeOfDay, string> = {

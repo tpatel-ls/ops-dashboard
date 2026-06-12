@@ -1,6 +1,6 @@
 'use client';
 
-import type { Domain } from '@drift/core';
+import type { Domain } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export function createDomain(input: {

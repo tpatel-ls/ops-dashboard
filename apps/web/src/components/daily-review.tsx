@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { addDays, format } from 'date-fns';
 import { CheckCircle2, ListChecks, MoonStar } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, isoDay } from '@drift/core';
-import type { Task } from '@drift/core';
+import { DEFAULT_SETTINGS, getDb, isoDay } from '@ops-dashboard/core';
+import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { updateTask } from '@/lib/tasks';
 
-const STORAGE_KEY = 'drift.lastReview';
+const STORAGE_KEY = 'ops.lastReview';
 
 export function DailyReviewTrigger() {
   const open = useAppStore((s) => s.reviewOpen);

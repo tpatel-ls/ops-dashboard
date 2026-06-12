@@ -3,11 +3,11 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
-import type { Task, Priority } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Task, Priority } from '@ops-dashboard/core';
 import { setTaskStatus } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 interface TaskListProps {
   filter?: 'today' | 'inbox' | 'all';

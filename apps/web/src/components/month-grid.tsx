@@ -4,10 +4,10 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { addMonths, format, isSameMonth } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, isoDay, monthGrid } from '@drift/core';
-import type { Priority, Project } from '@drift/core';
+import { DEFAULT_SETTINGS, getDb, isoDay, monthGrid } from '@ops-dashboard/core';
+import type { Priority, Project } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const PRIORITY_COLOR: Record<Priority, string> = {
   0: 'transparent',
