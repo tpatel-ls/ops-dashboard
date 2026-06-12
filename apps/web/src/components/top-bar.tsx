@@ -1,6 +1,7 @@
 'use client';
 
-import { Bell, Search, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, Search, Settings, Sparkles } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { QuickAdd } from './quick-add';
 
@@ -34,6 +35,13 @@ export function TopBar() {
         >
           <Bell className="size-4" aria-hidden />
         </button>
+        <Link
+          href="/settings"
+          aria-label="Settings"
+          className="hairline inline-flex size-9 items-center justify-center rounded-[10px] border bg-card text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Settings className="size-4" aria-hidden />
+        </Link>
         <ThemeToggle />
       </div>
     </header>
