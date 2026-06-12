@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb, newId } from '@drift/core';
-import type { Reminder, Task } from '@drift/core';
+import { getDb, newId } from '@ops-dashboard/core';
+import type { Reminder, Task } from '@ops-dashboard/core';
 
 export type PermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
 
@@ -57,7 +57,7 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
       const reg = await navigator.serviceWorker.getRegistration('/');
       const opts: NotificationOptions = {
         body: task.notes ?? 'Reminder',
-        tag: `drift-${r.id}`,
+        tag: `ops-${r.id}`,
         data: { taskId: task.id, reminderId: r.id },
       };
       if (reg) await reg.showNotification(task.title, opts);

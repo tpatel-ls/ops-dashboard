@@ -2,7 +2,7 @@
 
 > Personal life operating-system PWA. Inspired by Jared Hill's Claude-Code-built
 > "Ops Dashboard" (source transcript: `~/Downloads/Jerad Ops Dashboard Project.txt`).
-> Owner: Tanay (tanaypatel192@gmail.com). Created 2026-06-07.
+> Owner: Tanay (your-email@example.com). Created 2026-06-07.
 
 This spec is the build anchor. If context resets, read this + `STATE.md` to resume.
 
@@ -37,7 +37,7 @@ data" layer. Friction of capture is the enemy; the system must get out of the wa
 | 4 | Watch capture | Design the capture **API** now; phone/tablet/desktop capture in v1; Wear OS path later |
 
 ### Auto-decided defaults (changeable)
-- **Foundation:** Build on the recovered **Drift** monorepo (Next.js 16 App Router,
+- **Foundation:** Build on the recovered **Ops Dashboard** monorepo (Next.js 16 App Router,
   React 19, Tailwind v4, Dexie local-first, Supabase sync, PWA, cmdk palette). This
   matches the recommended stack and runs with zero external accounts.
 - **AI:** Anthropic Claude. `claude-sonnet-4-6` for triage/journal; `claude-opus-4-8`
@@ -48,19 +48,19 @@ data" layer. Friction of capture is the enemy; the system must get out of the wa
 - **Heatmap:** `react-activity-calendar@^3` fed by a pure aggregation over derived
   activity (no redundant table). `Activity = {date, count, level}`, dense gap-filled.
 - **Product name:** "Ops Dashboard" (display only). Internal package scope stays
-  `@drift/*` to avoid import churn. Dexie DB name stays `drift` (no user data yet).
+  `@ops-dashboard/*` to avoid import churn. Dexie DB name stays `ops-dashboard` (no user data yet).
 
 ---
 
 ## 3. Architecture (inherited + extended)
 
 pnpm monorepo:
-- `@drift/core` — data shapes, Dexie schema, ULID/device-id, NL parser, recurrence,
+- `@ops-dashboard/core` — data shapes, Dexie schema, ULID/device-id, NL parser, recurrence,
   sync helpers. Pure TS (runs in tests/browser/worker). **We extend this heavily.**
-- `@drift/ui` — `cn` + design tokens.
-- `@drift/whiteboard` — tldraw wrapper (kept, low priority).
+- `@ops-dashboard/ui` — `cn` + design tokens.
+- `@ops-dashboard/whiteboard` — tldraw wrapper (kept, low priority).
 - `apps/web` — Next.js app. `src/app` routes, `src/components` UI, `src/lib` thin
-  data layer wrapping `@drift/core`.
+  data layer wrapping `@ops-dashboard/core`.
 
 **Data flow:** `UI → src/lib → Dexie`. Each mutation also `enqueueOp()` to the
 `syncOps` outbox; when sync is enabled a Web Worker drains it to Supabase.
@@ -129,8 +129,8 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 ## 5. Feature breakdown by phase
 
 ### P0 — Foundation
-- Recover Drift (done), install, baseline runs.
-- Extend `@drift/core` types + Dexie v2 + sync union + lib helpers for every new
+- Recover Ops Dashboard (done), install, baseline runs.
+- Extend `@ops-dashboard/core` types + Dexie v2 + sync union + lib helpers for every new
   entity (domains, routines, captures, journal, worklogs, content, notifications).
 - Rebrand shell to "Ops Dashboard"; restructure sidebar into Jared's sections
   (Today, Capture/Inbox, Tasks, Routines, Projects, Content, People, Library,
@@ -187,7 +187,7 @@ SUPABASE_SECRET_KEY=
 ## 7. Key conventions to follow
 - New entity → add type, add to Dexie `version(2)`, add `src/lib/<entity>.ts` with
   `add/update/softDelete` that also `enqueueOp`, bump `version`, set `updatedAt`.
-- Use `getDb()`, `newId()` (ULID), `getDeviceId()`, `enqueueOp()` from `@drift/core`.
+- Use `getDb()`, `newId()` (ULID), `getDeviceId()`, `enqueueOp()` from `@ops-dashboard/core`.
 - UI state (modals/drawers) in `useAppStore` (zustand). Live queries via
   `dexie-react-hooks` `useLiveQuery`.
 - Style with existing tokens/utilities only; never hardcode colors. Match the

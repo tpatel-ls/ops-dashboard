@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getDb } from '@drift/core';
-import type { Task, Priority } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Task, Priority } from '@ops-dashboard/core';
 import { format, parseISO, isToday, isPast } from 'date-fns';
 import { Check, Star, ChevronDown, Circle } from 'lucide-react';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 

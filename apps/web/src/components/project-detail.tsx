@@ -15,7 +15,7 @@ import {
   Timer,
   X,
 } from 'lucide-react';
-import { getDb, newId } from '@drift/core';
+import { getDb, newId } from '@ops-dashboard/core';
 import type {
   ChecklistItem,
   Domain,
@@ -25,12 +25,12 @@ import type {
   ProjectKind,
   ProjectStatus,
   Task,
-} from '@drift/core';
+} from '@ops-dashboard/core';
 import { patchRecord } from '@/lib/records';
 import { logWork } from '@/lib/worklogs';
 import { setTaskStatus } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 // ─── Status + kind labels ────────────────────────────────────────────────────
 

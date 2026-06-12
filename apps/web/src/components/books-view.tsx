@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, ChevronDown, ChevronUp, Plus, Star, Trash2 } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Book, BookStatus, Quote } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Book, BookStatus, Quote } from '@ops-dashboard/core';
 import { createBook, updateBook, deleteBook } from '@/lib/books';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 

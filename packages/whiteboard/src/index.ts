@@ -35,4 +35,4 @@ export function samplePen(e: PointerEvent): PenPointerSample {
   };
 }
 
-export { DriftCanvas, type DriftCanvasProps } from './canvas';
+export { OpsCanvas, type DriftCanvasProps } from './canvas';

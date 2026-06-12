@@ -2,10 +2,10 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Star } from 'lucide-react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const PRIORITY_COLOR: Record<number, string> = {
   0: 'transparent',

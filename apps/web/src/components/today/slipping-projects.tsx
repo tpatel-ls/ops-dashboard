@@ -3,7 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 
 const SLIP_DAYS = 5;
 

@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb } from '@drift/core';
-import type { Task } from '@drift/core';
+import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
+import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 type Phase = 'focus' | 'break';
 

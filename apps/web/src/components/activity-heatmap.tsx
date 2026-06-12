@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ActivityCalendar } from 'react-activity-calendar';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 import type { ActivityDay } from '@/lib/activity';
 
 interface ActivityHeatmapProps {

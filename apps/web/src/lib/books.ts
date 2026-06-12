@@ -1,6 +1,6 @@
 'use client';
 
-import type { Book, BookStatus } from '@drift/core';
+import type { Book, BookStatus } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export function createBook(input: {

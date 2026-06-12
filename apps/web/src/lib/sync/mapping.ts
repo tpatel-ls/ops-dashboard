@@ -1,4 +1,4 @@
-import type { SyncTable, Syncable } from '@drift/core';
+import type { SyncTable, Syncable } from '@ops-dashboard/core';
 
 /**
  * Central column/table mapping between the camelCase TS/Dexie world and the

@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { format, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
-import { cn } from '@drift/ui';
+import { getDb } from '@ops-dashboard/core';
+import { cn } from '@ops-dashboard/ui';
 
 const HOUR_HEIGHT = 44;
 const START_HOUR = 7;

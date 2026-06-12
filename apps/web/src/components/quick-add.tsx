@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { Loader2, Mic, MicOff } from 'lucide-react';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 import { runCapture } from '@/lib/capture-client';
 import { pickAudioMime, transcribeBlob, whisperEnabled } from '@/lib/transcribe';
 

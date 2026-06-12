@@ -2,7 +2,7 @@
 
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { useTheme, type Theme } from './theme-provider';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const OPTIONS: { value: Theme; icon: typeof Sun; label: string }[] = [
   { value: 'light', icon: Sun, label: 'Light' },

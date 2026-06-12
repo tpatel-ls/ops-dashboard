@@ -1,6 +1,6 @@
 'use client';
 
-import type { Capture, CaptureKind, CaptureRoute, CaptureSource } from '@drift/core';
+import type { Capture, CaptureKind, CaptureRoute, CaptureSource } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export function createCapture(raw: string, source: CaptureSource = 'text'): Promise<Capture> {

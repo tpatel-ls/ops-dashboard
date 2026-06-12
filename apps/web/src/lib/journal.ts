@@ -1,6 +1,6 @@
 'use client';
 
-import type { JournalEntry } from '@drift/core';
+import type { JournalEntry } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { todayISO } from './routines';
 

@@ -1,5 +1,5 @@
 {
-  "name": "@drift/web",
+  "name": "@ops-dashboard/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -17,9 +17,9 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@drift/core": "workspace:*",
-    "@drift/ui": "workspace:*",
-    "@drift/whiteboard": "workspace:*",
+    "@ops-dashboard/core": "workspace:*",
+    "@ops-dashboard/ui": "workspace:*",
+    "@ops-dashboard/whiteboard": "workspace:*",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.108.0",
     "class-variance-authority": "^0.7.1",
@@ -41,7 +41,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@drift/tsconfig": "workspace:*",
+    "@ops-dashboard/tsconfig": "workspace:*",
     "@playwright/test": "^1.49.1",
     "@serwist/next": "^9.5.11",
     "@tailwindcss/postcss": "^4",

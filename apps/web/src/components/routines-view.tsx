@@ -10,8 +10,8 @@ import {
   Flame,
   Trash2,
 } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Domain, Routine, RoutineCheck } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Domain, Routine, RoutineCheck } from '@ops-dashboard/core';
 import {
   archiveRoutine,
   computeStreak,
@@ -19,7 +19,7 @@ import {
   todayISO,
   toggleRoutineCheck,
 } from '@/lib/routines';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 import { RoutineForm } from '@/components/routine-form';
 
 /* ─── helpers ─────────────────────────────────────────────────── */

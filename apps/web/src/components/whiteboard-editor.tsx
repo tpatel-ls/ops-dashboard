@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { saveWhiteboard } from '@/lib/whiteboards';
 
-const DriftCanvas = dynamic(
-  () => import('@drift/whiteboard').then((m) => m.DriftCanvas),
+const OpsCanvas = dynamic(
+  () => import('@ops-dashboard/whiteboard').then((m) => m.OpsCanvas),
   {
     ssr: false,
     loading: () => (
@@ -38,7 +38,7 @@ export function WhiteboardEditor({ id }: { id: string }) {
 
   return (
     <div className="surface relative h-[calc(100vh-180px)] overflow-hidden">
-      <DriftCanvas
+      <OpsCanvas
         initialDocument={board.document}
         onSnapshot={(doc) => {
           void saveWhiteboard(id, doc);

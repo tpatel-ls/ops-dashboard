@@ -1,12 +1,12 @@
 'use client';
 
-import { getDb } from '@drift/core';
-import type { CaptureKind } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { CaptureKind } from '@ops-dashboard/core';
 import { createCapture, setCaptureRoute } from '@/lib/captures';
 import { addTask } from '@/lib/tasks';
 import { createJournalEntry } from '@/lib/journal';
 import { pushNotification } from '@/lib/feed';
-import type { CaptureSource } from '@drift/core';
+import type { CaptureSource } from '@ops-dashboard/core';
 
 interface TriageResult {
   kind: string;

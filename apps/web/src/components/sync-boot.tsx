@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { startSync, stopSync } from '@/lib/sync/engine';
 
 /** Starts/stops the realtime sync engine in response to the local sync toggle. */

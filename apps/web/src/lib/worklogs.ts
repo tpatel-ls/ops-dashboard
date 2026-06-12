@@ -1,6 +1,6 @@
 'use client';
 
-import type { Project, WorkLog } from '@drift/core';
+import type { Project, WorkLog } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 /** Log time against a project and stamp the project's lastWorkedAt (drives slipping). */

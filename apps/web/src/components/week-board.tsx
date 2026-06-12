@@ -13,11 +13,11 @@ import {
 } from '@dnd-kit/core';
 import { addDays, format, startOfWeek } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@drift/core';
-import type { Priority, Project, Task } from '@drift/core';
+import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
+import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const PRIORITY_COLOR: Record<Priority, string> = {
   0: 'transparent',

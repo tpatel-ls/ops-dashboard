@@ -1,5 +1,5 @@
 {
-  "name": "@drift/core",
+  "name": "@ops-dashboard/core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -26,7 +26,7 @@
     "ulid": "^2.3.0"
   },
   "devDependencies": {
-    "@drift/tsconfig": "workspace:*",
+    "@ops-dashboard/tsconfig": "workspace:*",
     "fake-indexeddb": "^6.0.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

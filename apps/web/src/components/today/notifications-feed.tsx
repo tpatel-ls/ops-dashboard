@@ -3,9 +3,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { markAllNotificationsRead, markNotificationRead } from '@/lib/feed';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const KIND_LABEL: Record<string, string> = {
   capture: 'capture',

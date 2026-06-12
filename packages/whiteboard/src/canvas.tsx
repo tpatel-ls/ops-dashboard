@@ -12,7 +12,7 @@ export interface DriftCanvasProps {
 
 const PALM_REJECT_WINDOW_MS = 200;
 
-export function DriftCanvas({ initialDocument, onSnapshot, className }: DriftCanvasProps) {
+export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPenAt = useRef(0);
   const saveTimer = useRef<number | null>(null);

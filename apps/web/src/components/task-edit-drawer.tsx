@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, CalendarClock, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { getDb, newId } from '@drift/core';
-import type { ChecklistItem, Priority, Task } from '@drift/core';
+import { getDb, newId } from '@ops-dashboard/core';
+import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { setChecklist, softDeleteTask, updateTask } from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 const STATUSES: Task['status'][] = ['backlog', 'todo', 'doing', 'blocked', 'done'];
 const PRIORITY_LABEL: Record<Priority, string> = { 0: 'None', 1: 'Low', 2: 'Med', 3: 'Urgent' };

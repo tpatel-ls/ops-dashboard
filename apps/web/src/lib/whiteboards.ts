@@ -1,7 +1,7 @@
 'use client';
 
-import { getDb, getDeviceId, newId } from '@drift/core';
-import type { Whiteboard } from '@drift/core';
+import { getDb, getDeviceId, newId } from '@ops-dashboard/core';
+import type { Whiteboard } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 export async function createWhiteboard(name: string): Promise<Whiteboard> {

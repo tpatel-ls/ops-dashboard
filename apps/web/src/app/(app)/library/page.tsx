@@ -8,7 +8,7 @@ import { JournalUpload } from '@/components/journal-upload';
 import { NotesView } from '@/components/notes-view';
 import { QuotesView } from '@/components/quotes-view';
 import { BooksView } from '@/components/books-view';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 /* ─── Tab definition ───────────────────────────────────────────── */
 

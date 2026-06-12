@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTheme } from './theme-provider';
-import { DEFAULT_SETTINGS, getDb } from '@drift/core';
-import type { Settings } from '@drift/core';
-import { cn } from '@drift/ui';
+import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
+import type { Settings } from '@ops-dashboard/core';
+import { cn } from '@ops-dashboard/ui';
 import {
   notificationPermission,
   requestNotifications,
@@ -16,7 +16,7 @@ import {
   exportAll,
   importAll,
   tasksToMarkdown,
-  type DriftExport,
+  type OpsExport,
 } from '@/lib/export';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
@@ -144,7 +144,7 @@ export function SettingsForm() {
         </div>
       </Section>
 
-      <Section title="Default view" description="Where Drift opens.">
+      <Section title="Default view" description="Where Ops Dashboard opens.">
         <select
           value={settings.defaultView}
           onChange={(e) => patch({ defaultView: e.target.value as Settings['defaultView'] })}
@@ -284,7 +284,7 @@ export function SettingsForm() {
             type="button"
             onClick={async () => {
               const data = await exportAll();
-              downloadJson(data, `drift-${new Date().toISOString().slice(0, 10)}.json`);
+              downloadJson(data, `ops-dashboard-${new Date().toISOString().slice(0, 10)}.json`);
             }}
             className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
           >
@@ -294,8 +294,8 @@ export function SettingsForm() {
             type="button"
             onClick={async () => {
               const data = await exportAll();
-              const md = tasksToMarkdown(data.tasks, 'Drift tasks');
-              downloadText(md, `drift-${new Date().toISOString().slice(0, 10)}.md`);
+              const md = tasksToMarkdown(data.tasks, 'Ops Dashboard tasks');
+              downloadText(md, `ops-dashboard-${new Date().toISOString().slice(0, 10)}.md`);
             }}
             className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
           >
@@ -318,7 +318,7 @@ export function SettingsForm() {
               if (!file) return;
               try {
                 const text = await file.text();
-                const parsed = JSON.parse(text) as DriftExport;
+                const parsed = JSON.parse(text) as OpsExport;
                 await importAll(parsed);
                 e.target.value = '';
               } catch (err) {

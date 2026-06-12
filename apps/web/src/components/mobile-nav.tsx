@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Flame, ListTodo, Plus, Repeat, Sun } from 'lucide-react';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 
 const LEFT = [

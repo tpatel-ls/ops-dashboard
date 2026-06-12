@@ -1,4 +1,4 @@
--- Drift initial schema. Mirrors @drift/core types.
+-- Ops Dashboard initial schema. Mirrors @ops-dashboard/core types.
 -- Lands in M6 alongside the sync worker.
 
 create extension if not exists pgcrypto;

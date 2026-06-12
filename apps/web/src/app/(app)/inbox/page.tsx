@@ -3,11 +3,11 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { Archive, BookOpen, FileText, Inbox, StickyNote, Trash2, X } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Capture, CaptureKind } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Capture, CaptureKind } from '@ops-dashboard/core';
 import { dismissCapture, deleteCapture } from '@/lib/captures';
 import { ViewShell } from '@/components/view-shell';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */

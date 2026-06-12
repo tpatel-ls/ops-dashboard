@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo } from 'react';
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 
 export function TagsIndex() {

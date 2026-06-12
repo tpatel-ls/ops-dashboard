@@ -14,12 +14,12 @@ import {
   X,
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
-import { getDb } from '@drift/core';
-import type { Domain, Project, ProjectKind, ProjectStatus } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Domain, Project, ProjectKind, ProjectStatus } from '@ops-dashboard/core';
 import { createProject } from '@/lib/projects';
 import { patchRecord } from '@/lib/records';
 import { ProjectDetail } from '@/components/project-detail';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

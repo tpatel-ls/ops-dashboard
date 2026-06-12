@@ -211,13 +211,13 @@ body {
   border-color: var(--hairline);
 }
 
-@keyframes drift-pulse {
+@keyframes ops-pulse {
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
 
 .live-dot {
-  animation: drift-pulse 2.4s ease-in-out infinite;
+  animation: ops-pulse 2.4s ease-in-out infinite;
 }
 
 ::selection {

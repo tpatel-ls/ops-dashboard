@@ -1,4 +1,4 @@
-# Drift
+# Ops Dashboard
 
 Local-first task and whiteboard app. Web first, Android wrapper later.
 

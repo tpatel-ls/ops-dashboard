@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
 import { createDomain } from './domains';
 import { createProject } from './projects';
 import { addDaysISO, createRoutine, toggleRoutineCheck, todayISO } from './routines';

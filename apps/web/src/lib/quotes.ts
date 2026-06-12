@@ -1,7 +1,7 @@
 'use client';
 
-import { newId } from '@drift/core';
-import type { Quote, QuoteSourceType, Thought } from '@drift/core';
+import { newId } from '@ops-dashboard/core';
+import type { Quote, QuoteSourceType, Thought } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export function createQuote(input: {

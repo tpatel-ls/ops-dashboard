@@ -12,11 +12,11 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Project, Task } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Project, Task } from '@ops-dashboard/core';
 import { addTask, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 type Grouping = 'status' | 'project' | 'priority' | 'tag';
 

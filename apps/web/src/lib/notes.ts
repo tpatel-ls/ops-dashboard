@@ -1,6 +1,6 @@
 'use client';
 
-import type { Note } from '@drift/core';
+import type { Note } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 export function createNote(input: {

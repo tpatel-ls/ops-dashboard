@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Flag, Plus, Trash2, X } from 'lucide-react';
-import { getDb } from '@drift/core';
-import type { Note } from '@drift/core';
+import { getDb } from '@ops-dashboard/core';
+import type { Note } from '@ops-dashboard/core';
 import { createNote, updateNote, deleteNote } from '@/lib/notes';
-import { cn } from '@drift/ui';
+import { cn } from '@ops-dashboard/ui';
 
 /* ─── Create Form ──────────────────────────────────────────────── */
 
