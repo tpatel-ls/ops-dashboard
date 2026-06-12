@@ -1,0 +1,25 @@
+node_modules
+.next
+out
+dist
+.turbo
+coverage
+.DS_Store
+*.log
+.env
+.env.local
+.env*.local
+.vercel
+playwright-report
+test-results
+.playwright-mcp
+# local dev screenshots / scratch
+/ops-*.png
+/*-smoke.png
+# Serwist-generated service worker (built from src/app/sw.ts)
+apps/web/public/sw.js
+apps/web/public/sw.js.map
+apps/web/public/swe-worker-*.js
+
+# Supabase CLI local cache
+supabase/.temp/
