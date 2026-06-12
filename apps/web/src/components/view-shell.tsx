@@ -40,8 +40,8 @@ export function ViewShell({
           {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
         </div>
       </header>
-      <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="min-h-0">{children}</div>
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="min-h-0 min-w-0">{children}</div>
         {rail ? <aside className="hidden min-h-0 lg:block">{rail}</aside> : null}
       </div>
     </div>

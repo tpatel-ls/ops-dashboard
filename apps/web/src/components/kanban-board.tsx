@@ -103,7 +103,7 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="flex h-full min-w-0 flex-col gap-3">
       <div className="flex items-center gap-1.5">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
           Group by

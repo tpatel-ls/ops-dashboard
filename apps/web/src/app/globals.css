@@ -123,6 +123,9 @@
 
 html,
 body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
   background: var(--bg-base);
   color: var(--foreground);
   font-family: var(--font-sans);
