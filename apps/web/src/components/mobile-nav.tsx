@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flame, ListTodo, Plus, Repeat, Sun } from 'lucide-react';
+import { Flame, LayoutDashboard, Plus, Repeat, Sun } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 
 const LEFT = [
+  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
   { href: '/today', label: 'Today', icon: Sun },
-  { href: '/tasks', label: 'Tasks', icon: ListTodo },
 ];
 const RIGHT = [
   { href: '/routines', label: 'Routines', icon: Repeat },

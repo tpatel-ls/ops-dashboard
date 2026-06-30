@@ -31,6 +31,7 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
+    router.prefetch('/dashboard');
     router.prefetch('/today');
     router.prefetch('/tasks');
     router.prefetch('/inbox');
@@ -49,6 +50,7 @@ export function AppShell() {
     { combo: 'mod+k', handler: togglePalette },
     { combo: '?', handler: toggleHelp },
     { combo: 'g then i', handler: openQuickAdd },
+    { combo: 'g then d', handler: () => router.push('/dashboard') },
     { combo: 'g then t', handler: () => router.push('/today') },
     { combo: 'g then w', handler: () => router.push('/week') },
     { combo: 'g then m', handler: () => router.push('/month') },
