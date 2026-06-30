@@ -13,6 +13,7 @@ import {
   Hash,
   Inbox,
   KanbanSquare,
+  LayoutDashboard,
   LayoutGrid,
   ListTodo,
   MessageCircle,
@@ -33,6 +34,7 @@ interface NavItem {
 }
 
 const PLAN: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, shortcut: 'g d' },
   { href: '/today', label: 'Today', icon: Sun, shortcut: 'g t' },
   { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g n' },
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
