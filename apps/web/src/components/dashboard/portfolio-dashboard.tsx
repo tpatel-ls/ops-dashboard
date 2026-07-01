@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { differenceInDays, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
-import type { Domain, Project, Task, TaskStatus } from '@ops-dashboard/core';
+import type { Domain, Project, ProjectStatus, Task, TaskStatus } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { ViewShell } from '@/components/view-shell';
 import { ProjectDetail } from '@/components/project-detail';
@@ -71,6 +71,13 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'progress', label: 'Progress' },
   { key: 'open', label: 'Open' },
   { key: 'name', label: 'Name' },
+];
+
+const STATUS_FILTERS: { key: 'all' | ProjectStatus; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'active', label: 'Active' },
+  { key: 'paused', label: 'Paused' },
+  { key: 'done', label: 'Done' },
 ];
 
 interface ProjectStats {
@@ -385,6 +392,7 @@ export function PortfolioDashboard() {
   const [selected, setSelected] = useState<Project | null>(null);
   const [importing, startImport] = useTransition();
   const [sortKey, setSortKey] = useState<SortKey>('default');
+  const [statusFilter, setStatusFilter] = useState<'all' | ProjectStatus>('all');
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -452,7 +460,8 @@ export function PortfolioDashboard() {
   });
 
   const visibleStats = useMemo(() => {
-    const list = data?.stats ?? [];
+    let list = data?.stats ?? [];
+    if (statusFilter !== 'all') list = list.filter((s) => s.project.status === statusFilter);
     if (sortKey === 'default') return list;
     const sorted = [...list];
     sorted.sort((a, b) => {
@@ -461,7 +470,7 @@ export function PortfolioDashboard() {
       return a.project.name.localeCompare(b.project.name);
     });
     return sorted;
-  }, [data, sortKey]);
+  }, [data, sortKey, statusFilter]);
 
   // Keep the open detail drawer in sync with edits made inside it.
   const liveSelected = useLiveQuery(
@@ -529,10 +538,8 @@ export function PortfolioDashboard() {
 
           {/* Toolbar */}
           {data && data.stats.length > 0 ? (
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-                Projects
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Segmented options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
               <Segmented options={SORTS} value={sortKey} onChange={setSortKey} />
             </div>
           ) : null}
@@ -567,6 +574,10 @@ export function PortfolioDashboard() {
                 <FolderPlus className="size-4" aria-hidden />
                 {importing ? 'Loading…' : 'Load my projects'}
               </button>
+            </div>
+          ) : visibleStats.length === 0 ? (
+            <div className="surface flex h-40 flex-col items-center justify-center gap-1 text-center">
+              <p className="text-sm text-muted-foreground">No projects match this filter.</p>
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
