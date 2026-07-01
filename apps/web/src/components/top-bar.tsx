@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Bell, Search, Settings, Sparkles } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { QuickAdd } from './quick-add';
+import { OrgSwitcher } from './org-switcher';
 
 export function TopBar() {
   return (
@@ -19,6 +20,7 @@ export function TopBar() {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-1.5">
+        <OrgSwitcher />
         <button
           type="button"
           aria-label="Search"
