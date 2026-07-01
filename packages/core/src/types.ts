@@ -50,6 +50,8 @@ export interface Task {
   actualMinutes?: number;
   tags: string[];
   projectId?: ID;
+  /** Organization lane, denormalized from the project. Absent = Personal. */
+  orgId?: ID;
   /** Top-level life area. */
   domainId?: ID;
   /** Optional link to a content pipeline item. */
@@ -93,6 +95,8 @@ export interface Project {
   /** project = time-bound deliverable, area = ongoing space, retainer = monthly recurring. */
   kind: ProjectKind;
   status: ProjectStatus;
+  /** Organization lane the project belongs to. Absent = Personal. */
+  orgId?: ID;
   domainId?: ID;
   description?: string;
   startDate?: string;
@@ -121,6 +125,17 @@ export interface Whiteboard {
   version: number;
   deviceId: string;
   deletedAt?: string;
+}
+
+/**
+ * An organization lane for work (the user works for multiple orgs).
+ * Projects/tasks reference it via orgId; records without one are Personal.
+ */
+export interface Organization extends SyncMeta {
+  name: string;
+  color: string;
+  order: number;
+  archivedAt?: string;
 }
 
 /** Top-level life area; everything (projects, tasks, routines) rolls up to a domain. */
@@ -353,6 +368,7 @@ export interface Settings {
 export type SyncTable =
   | 'tasks'
   | 'projects'
+  | 'organizations'
   | 'whiteboards'
   | 'reminders'
   | 'domains'

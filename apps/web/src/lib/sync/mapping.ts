@@ -11,6 +11,7 @@ import type { SyncTable, Syncable } from '@ops-dashboard/core';
 export const SYNC_TABLES = {
   tasks: 'tasks',
   projects: 'projects',
+  organizations: 'organizations',
   whiteboards: 'whiteboards',
   domains: 'domains',
   routines: 'routines',
