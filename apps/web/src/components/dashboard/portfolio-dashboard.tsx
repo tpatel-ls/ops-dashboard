@@ -386,6 +386,53 @@ function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p:
   );
 }
 
+// ─── Needs attention ──────────────────────────────────────────────────────────────
+
+function NeedsAttention({ stats, onPick }: { stats: ProjectStats[]; onPick: (p: Project) => void }) {
+  const flagged = stats
+    .filter((s) => s.project.status === 'active' && (s.isSlipping || s.urgent > 0))
+    .sort((a, b) => b.urgent - a.urgent || b.open - a.open)
+    .slice(0, 4);
+  if (flagged.length === 0) return null;
+  return (
+    <div className="surface flex flex-col gap-3 p-4">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="size-3.5 text-warning" aria-hidden />
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          Needs attention
+        </span>
+      </div>
+      <ul className="flex flex-col gap-1">
+        {flagged.map((s) => (
+          <li key={s.project.id}>
+            <button
+              type="button"
+              onClick={() => onPick(s.project)}
+              className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            >
+              <span
+                className="size-2 shrink-0 rounded-full"
+                style={{ background: s.project.color }}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">
+                {s.project.name}
+              </span>
+              {s.urgent > 0 ? (
+                <span className="shrink-0 font-mono text-[10px] text-destructive">
+                  {s.urgent} urgent
+                </span>
+              ) : (
+                <span className="shrink-0 font-mono text-[10px] text-warning">slipping</span>
+              )}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────────
 
 export function PortfolioDashboard() {
@@ -525,7 +572,14 @@ export function PortfolioDashboard() {
           ) : null
         }
         actions={importButton}
-        rail={data ? <NextActionsRail stats={data.stats} onPick={setSelected} /> : null}
+        rail={
+          data ? (
+            <div className="flex flex-col gap-4">
+              <NextActionsRail stats={data.stats} onPick={setSelected} />
+              <NeedsAttention stats={data.stats} onPick={setSelected} />
+            </div>
+          ) : null
+        }
       >
         <div className="flex flex-col gap-5">
           {/* Stat tiles */}
