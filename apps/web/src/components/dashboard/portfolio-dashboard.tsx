@@ -12,6 +12,7 @@ import {
   FolderKanban,
   FolderPlus,
   ListTodo,
+  Plus,
   Sparkles,
 } from 'lucide-react';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -28,6 +29,7 @@ import { cn } from '@ops-dashboard/ui';
 import { ViewShell } from '@/components/view-shell';
 import { ProjectDetail } from '@/components/project-detail';
 import { useOrgStore } from '@/lib/org-store';
+import { addTaskToProject } from '@/lib/tasks';
 import {
   PORTFOLIO_PROJECT_NAMES,
   importPortfolioProjects,
@@ -250,15 +252,52 @@ function Segmented<T extends string>({
 
 // ─── Project tile ─────────────────────────────────────────────────────────────────
 
+function TileAddTask({ project }: { project: Project }) {
+  const [text, setText] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const v = text.trim();
+    if (!v || saving) return;
+    setSaving(true);
+    try {
+      // NL parsing applies; the task inherits the project's domain + org lane.
+      await addTaskToProject(v, project);
+      setText('');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form
+      onSubmit={submit}
+      className="hairline flex items-center gap-1.5 rounded-md border bg-bg-sunken px-2 py-1.5 transition-colors focus-within:border-primary/50"
+    >
+      <Plus className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Add a task..."
+        disabled={saving}
+        aria-label={`Add a task to ${project.name}`}
+        className="w-full bg-transparent text-xs text-foreground outline-none placeholder:text-subtle-foreground"
+      />
+    </form>
+  );
+}
+
 function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => void }) {
   const { project, domain, org, total, done, pct, counts, open, urgent, next, hours, isSlipping } =
     stats;
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="surface group flex w-full flex-col gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-    >
+    <div className="surface group flex w-full flex-col gap-3 p-4 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)]">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex w-full flex-col gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+      >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -359,7 +398,10 @@ function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => v
           </span>
         ) : null}
       </div>
-    </button>
+      </button>
+
+      <TileAddTask project={project} />
+    </div>
   );
 }
 

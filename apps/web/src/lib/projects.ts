@@ -8,6 +8,7 @@ export interface CreateProjectOptions {
   color?: string;
   kind?: ProjectKind;
   domainId?: string;
+  orgId?: string;
   description?: string;
 }
 
@@ -34,6 +35,7 @@ export async function createProject(
     kind: opts.kind ?? 'project',
     status: 'active',
     ...(opts.domainId ? { domainId: opts.domainId } : {}),
+    ...(opts.orgId ? { orgId: opts.orgId } : {}),
     ...(opts.description ? { description: opts.description } : {}),
     milestones: [],
     checklists: [],

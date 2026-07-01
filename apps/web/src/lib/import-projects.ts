@@ -1,8 +1,10 @@
 'use client';
 
-import { getDb } from '@ops-dashboard/core';
+import { DEFAULT_ORG_COLOR, DEFAULT_ORG_NAME, getDb } from '@ops-dashboard/core';
 import type { Priority, TaskStatus } from '@ops-dashboard/core';
 import { createDomain } from './domains';
+import { createOrganization } from './organizations';
+import { SEED_ORG_ID } from './org-setup';
 import { createProject } from './projects';
 import { addTask } from './tasks';
 
@@ -260,6 +262,18 @@ export async function importPortfolioProjects(): Promise<ImportResult> {
 
   const result: ImportResult = { projectsCreated: 0, tasksCreated: 0, skipped: [] };
 
+  // LSG work lands in the seeded org lane. Deterministic id so a second
+  // device racing this seed converges on the same record (see org-setup).
+  const orgs = (await db.organizations.toArray()).filter((o) => !o.deletedAt);
+  const seedOrg =
+    orgs.find((o) => o.name.trim().toLowerCase() === DEFAULT_ORG_NAME.toLowerCase()) ??
+    (await createOrganization({
+      id: SEED_ORG_ID,
+      name: DEFAULT_ORG_NAME,
+      color: DEFAULT_ORG_COLOR,
+      order: 1,
+    }));
+
   for (const def of PORTFOLIO_PROJECTS) {
     if (takenNames.has(def.name.trim().toLowerCase())) {
       result.skipped.push(def.name);
@@ -271,6 +285,7 @@ export async function importPortfolioProjects(): Promise<ImportResult> {
       color: def.color,
       kind: 'project',
       domainId,
+      ...(def.domain === 'LSG' ? { orgId: seedOrg.id } : {}),
       description: def.description,
     });
     takenNames.add(def.name.trim().toLowerCase());
@@ -282,6 +297,7 @@ export async function importPortfolioProjects(): Promise<ImportResult> {
         priority: t.priority,
         projectId: project.id,
         domainId,
+        ...(project.orgId ? { orgId: project.orgId } : {}),
         tags: t.tags ?? [],
         ...(t.notes ? { notes: t.notes } : {}),
       });
