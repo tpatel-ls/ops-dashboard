@@ -77,17 +77,25 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
   if (draining) return;
   draining = true;
   try {
+    // A table that fails once this drain is skipped for the rest of the drain
+    // (preserves per-table op ordering) WITHOUT blocking other tables. This
+    // keeps e.g. a table whose prod migration is not applied yet from wedging
+    // the whole outbox; its ops just retry next cycle.
+    const failedTables = new Set<string>();
     let more = true;
     while (more) {
       const ops = await db().syncOps.orderBy('createdAt').limit(DRAIN_BATCH).toArray();
       if (!ops.length) break;
       more = ops.length === DRAIN_BATCH;
+      let progressed = false;
 
       for (const op of ops) {
         if (!isSyncedTable(op.table)) {
           await db().syncOps.delete(op.id);
+          progressed = true;
           continue;
         }
+        if (failedTables.has(op.table)) continue;
         const dbTable = SYNC_TABLES[op.table];
         const row = toRow(op.payload as Record<string, unknown>, userId);
         // Both 'put' and 'delete' upsert the record; a delete is a tombstone
@@ -101,11 +109,17 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
           } else {
             await db().syncOps.update(op.id, { attempts, lastError: error.message });
           }
-          // Back off — likely offline or transient; retry on the next cycle.
-          throw error;
+          // Back off on this table only; others keep draining this cycle.
+          failedTables.add(op.table);
+          continue;
         }
         await db().syncOps.delete(op.id);
+        progressed = true;
       }
+
+      // Head of the queue is entirely failed/skipped ops: stop so we do not
+      // hot-loop re-reading the same batch; the next cycle retries them.
+      if (!progressed) break;
     }
   } finally {
     draining = false;

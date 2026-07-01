@@ -7,6 +7,7 @@ import type {
   Domain,
   JournalEntry,
   Note,
+  Organization,
   Person,
   Project,
   Quote,
@@ -27,6 +28,7 @@ export interface SyncEnvelope {
 export type Syncable =
   | Task
   | Project
+  | Organization
   | Whiteboard
   | Domain
   | Routine

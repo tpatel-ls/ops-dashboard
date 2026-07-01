@@ -8,6 +8,7 @@ import type {
   Domain,
   JournalEntry,
   Note,
+  Organization,
   Person,
   Project,
   Quote,
@@ -24,6 +25,7 @@ import type {
 export class OpsDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
   projects!: EntityTable<Project, 'id'>;
+  organizations!: EntityTable<Organization, 'id'>;
   whiteboards!: EntityTable<Whiteboard, 'id'>;
   reminders!: EntityTable<Reminder, 'id'>;
   settings!: EntityTable<Settings, 'id'>;
@@ -81,6 +83,14 @@ export class OpsDB extends Dexie {
       notes: 'id, bookId, updatedAt, deletedAt, *tags',
       quotes: 'id, bookId, author, updatedAt, deletedAt, *tags',
       books: 'id, status, author, updatedAt, deletedAt, *tags',
+    });
+    // v5 — Organizations (work lanes) + orgId on tasks/projects.
+    this.version(5).stores({
+      organizations: 'id, name, order, archivedAt, updatedAt, deletedAt',
+      tasks:
+        'id, status, priority, scheduledFor, dueAt, projectId, parentId, domainId, contentId, orgId, order, updatedAt, deletedAt, *tags',
+      projects:
+        'id, name, kind, status, domainId, orgId, archivedAt, lastWorkedAt, updatedAt, deletedAt',
     });
   }
 }
