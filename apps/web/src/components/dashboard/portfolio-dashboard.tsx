@@ -8,6 +8,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Flame,
   FolderKanban,
   FolderPlus,
   ListTodo,
@@ -71,6 +72,7 @@ interface ProjectStats {
   pct: number;
   counts: Record<TaskStatus, number>;
   open: number;
+  urgent: number;
   next?: Task;
   hours: number;
   isSlipping: boolean;
@@ -175,7 +177,7 @@ function PriorityDot({ priority }: { priority: number }) {
 // ─── Project tile ─────────────────────────────────────────────────────────────────
 
 function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => void }) {
-  const { project, domain, total, done, pct, counts, open, next, hours, isSlipping } = stats;
+  const { project, domain, total, done, pct, counts, open, urgent, next, hours, isSlipping } = stats;
   return (
     <button
       type="button"
@@ -253,6 +255,12 @@ function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => v
       {/* Footer */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-subtle-foreground">
         <span>{open} open</span>
+        {urgent > 0 ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] text-destructive">
+            <Flame className="size-3" aria-hidden />
+            {urgent} urgent
+          </span>
+        ) : null}
         {hours > 0 ? (
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3" aria-hidden />
@@ -356,6 +364,7 @@ export function PortfolioDashboard() {
         pct,
         counts,
         open: openTasks.length,
+        urgent: openTasks.filter((t) => t.priority >= 3).length,
         next: openTasks[0],
         hours: (hoursByProject.get(project.id) ?? 0) / 60,
         isSlipping,
