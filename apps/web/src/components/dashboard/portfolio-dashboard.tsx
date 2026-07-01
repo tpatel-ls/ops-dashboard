@@ -139,6 +139,22 @@ function StatusBar({ counts, total }: { counts: Record<TaskStatus, number>; tota
   );
 }
 
+function StatusLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1">
+      {SEGMENTS.map((s) => (
+        <span
+          key={s.key}
+          className="inline-flex items-center gap-1.5 text-[11px] text-subtle-foreground"
+        >
+          <span className="size-2 rounded-full" style={{ background: s.color }} aria-hidden />
+          {s.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function StatTile({
   label,
   value,
@@ -494,6 +510,8 @@ export function PortfolioDashboard() {
               ))}
             </div>
           )}
+
+          {data && data.stats.length > 0 ? <StatusLegend /> : null}
         </div>
       </ViewShell>
 
