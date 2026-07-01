@@ -600,7 +600,7 @@ export function PortfolioDashboard() {
 
           {/* Project grid */}
           {data === undefined ? (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
@@ -634,7 +634,7 @@ export function PortfolioDashboard() {
               <p className="text-sm text-muted-foreground">No projects match this filter.</p>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {visibleStats.map((s) => (
                 <ProjectTile key={s.project.id} stats={s} onClick={() => setSelected(s.project)} />
               ))}
