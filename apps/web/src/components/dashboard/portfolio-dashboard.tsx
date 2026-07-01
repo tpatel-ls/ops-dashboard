@@ -373,6 +373,7 @@ export function PortfolioDashboard() {
       openTasks: stats.reduce((n, s) => n + s.open, 0),
       inProgress: stats.reduce((n, s) => n + s.counts.doing, 0),
       done: stats.reduce((n, s) => n + s.counts.done, 0),
+      totalTasks: stats.reduce((n, s) => n + s.total, 0),
     };
 
     return { stats, totals, missing, domains };
@@ -392,6 +393,10 @@ export function PortfolioDashboard() {
   }
 
   const missing = data?.missing ?? [];
+  const overallPct =
+    data && data.totals.totalTasks > 0
+      ? Math.round((data.totals.done / data.totals.totalTasks) * 100)
+      : 0;
   const importButton =
     missing.length > 0 ? (
       <button
@@ -411,6 +416,21 @@ export function PortfolioDashboard() {
         eyebrow="Overview"
         title="Dashboard"
         subtitle="Everything you are tracking, in one place."
+        meta={
+          data && data.totals.totalTasks > 0 ? (
+            <div className="hidden items-center gap-2 sm:flex">
+              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-bg-sunken">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${overallPct}%` }}
+                />
+              </div>
+              <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                {overallPct}% done
+              </span>
+            </div>
+          ) : null
+        }
         actions={importButton}
         rail={data ? <NextActionsRail stats={data.stats} onPick={setSelected} /> : null}
       >
