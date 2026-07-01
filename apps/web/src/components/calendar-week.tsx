@@ -5,8 +5,9 @@ import { useState } from 'react';
 import { addDays, format, parseISO, startOfWeek } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
-import type { Task } from '@ops-dashboard/core';
+import type { Project, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 
 const HOUR_HEIGHT = 48;
@@ -23,6 +24,13 @@ export function CalendarWeek() {
     const all = await getDb().tasks.toArray();
     return all.filter((t) => !t.deletedAt && t.startAt);
   });
+  const projectsMap = useLiveQuery(async () => {
+    const all = await getDb().projects.toArray();
+    return new Map<string, Project>(all.filter((p) => !p.deletedAt).map((p) => [p.id, p]));
+  });
+
+  const lanes = useOrgLanes(projectsMap);
+  const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
 
   const openEdit = useAppStore((s) => s.openEdit);
   const today = isoDay(new Date());
@@ -57,6 +65,11 @@ export function CalendarWeek() {
         <span className="ml-2 font-mono text-[11px] text-subtle-foreground">
           Week of {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d')}
         </span>
+        {lanes.showLegend ? (
+          <div className="ml-auto">
+            <OrgLaneLegend lanes={lanes.lanes} hidden={lanes.hidden} onToggle={lanes.toggle} />
+          </div>
+        ) : null}
       </div>
       <div className="surface flex flex-1 overflow-hidden">
         <div className="scrollbar-thin flex flex-1 overflow-auto">
@@ -83,7 +96,14 @@ export function CalendarWeek() {
               );
             })}
             {hours.map((h) => (
-              <Hour key={h} hour={h} days={days} tasks={tasks ?? []} onOpen={openEdit} />
+              <Hour
+                key={h}
+                hour={h}
+                days={days}
+                tasks={visibleTasks}
+                laneColor={(t) => lanes.colorOf(lanes.laneOf(t))}
+                onOpen={openEdit}
+              />
             ))}
           </div>
         </div>
@@ -96,11 +116,13 @@ function Hour({
   hour,
   days,
   tasks,
+  laneColor,
   onOpen,
 }: {
   hour: number;
   days: Date[];
   tasks: Task[];
+  laneColor: (t: Task) => string;
   onOpen: (id: string) => void;
 }) {
   return (
@@ -128,13 +150,19 @@ function Hour({
                 : 30;
               const top = (start.getMinutes() / 60) * HOUR_HEIGHT;
               const height = (minutes / 60) * HOUR_HEIGHT - 2;
+              const color = laneColor(t);
               return (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => onOpen(t.id)}
-                  className="absolute right-0.5 left-0.5 truncate rounded-md border border-primary/30 bg-primary/15 px-1.5 py-1 text-left text-[11px] text-foreground transition-colors hover:border-primary/60"
-                  style={{ top, height }}
+                  className="absolute right-0.5 left-0.5 truncate rounded-md border px-1.5 py-1 text-left text-[11px] text-foreground transition-all hover:brightness-110"
+                  style={{
+                    top,
+                    height,
+                    background: `color-mix(in oklch, ${color} 16%, transparent)`,
+                    borderColor: `color-mix(in oklch, ${color} 40%, transparent)`,
+                  }}
                 >
                   <div className="truncate font-medium">{t.title}</div>
                   <div className="font-mono text-[10px] text-muted-foreground">

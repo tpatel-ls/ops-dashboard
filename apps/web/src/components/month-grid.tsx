@@ -5,16 +5,10 @@ import { useState } from 'react';
 import { addMonths, format, isSameMonth } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, monthGrid } from '@ops-dashboard/core';
-import type { Priority, Project } from '@ops-dashboard/core';
+import type { Project } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
-
-const PRIORITY_COLOR: Record<Priority, string> = {
-  0: 'transparent',
-  1: 'var(--color-priority-low)',
-  2: 'var(--color-priority-med)',
-  3: 'var(--color-priority-urgent)',
-};
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -35,10 +29,13 @@ export function MonthGrid() {
     return new Map<string, Project>(all.filter((p) => !p.deletedAt).map((p) => [p.id, p]));
   });
 
+  const lanes = useOrgLanes(projectsMap);
+  const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
+
   const today = isoDay(new Date());
   const [selected, setSelected] = useState<string | null>(null);
   const selectedDay = selected ?? today;
-  const selectedTasks = (tasks ?? []).filter((t) => t.scheduledFor === selectedDay);
+  const selectedTasks = visibleTasks.filter((t) => t.scheduledFor === selectedDay);
   const openEdit = useAppStore((s) => s.openEdit);
 
   return (
@@ -71,6 +68,11 @@ export function MonthGrid() {
           <span className="ml-2 text-sm font-semibold tracking-tight">
             {format(anchor, 'MMMM yyyy')}
           </span>
+          {lanes.showLegend ? (
+            <div className="ml-auto">
+              <OrgLaneLegend lanes={lanes.lanes} hidden={lanes.hidden} onToggle={lanes.toggle} />
+            </div>
+          ) : null}
         </div>
         <div className="grid grid-cols-7 gap-px rounded-xl border border-border bg-border">
           {labels.map((d) => (
@@ -83,7 +85,7 @@ export function MonthGrid() {
           ))}
           {days.map((day) => {
             const iso = isoDay(day);
-            const dayTasks = (tasks ?? []).filter((t) => t.scheduledFor === iso);
+            const dayTasks = visibleTasks.filter((t) => t.scheduledFor === iso);
             const inMonth = isSameMonth(day, anchor);
             const isToday = iso === today;
             const isSelected = iso === selectedDay;
@@ -115,10 +117,7 @@ export function MonthGrid() {
                       <span
                         aria-hidden
                         className="size-1.5 rounded-full"
-                        style={{
-                          background:
-                            t.priority > 0 ? PRIORITY_COLOR[t.priority] : 'var(--color-primary)',
-                        }}
+                        style={{ background: lanes.colorOf(lanes.laneOf(t)) }}
                       />
                       <span className="truncate">{t.title}</span>
                     </span>
@@ -163,10 +162,7 @@ export function MonthGrid() {
                         <span
                           aria-hidden
                           className="size-1.5 shrink-0 rounded-full"
-                          style={{
-                            background:
-                              t.priority > 0 ? PRIORITY_COLOR[t.priority] : 'var(--color-primary)',
-                          }}
+                          style={{ background: lanes.colorOf(lanes.laneOf(t)) }}
                         />
                         <span className="truncate">{t.title}</span>
                       </div>
