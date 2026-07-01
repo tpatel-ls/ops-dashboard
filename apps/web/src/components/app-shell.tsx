@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
+import { ensureOrgSetup } from '@/lib/org-setup';
 import { wipeLocalData } from '@/lib/reset';
 import { CommandPalette } from './command-palette';
 import { HelpOverlay } from './help-overlay';
@@ -44,6 +45,12 @@ export function AppShell() {
     if (localStorage.getItem('ops:demo-cleared') === '1') return;
     localStorage.setItem('ops:demo-cleared', '1');
     void wipeLocalData();
+  }, []);
+
+  // One-time org lane setup: seed the default org and move the known LSG
+  // projects into it. Idempotent; no-op on devices with nothing to migrate.
+  useEffect(() => {
+    void ensureOrgSetup();
   }, []);
 
   useHotkeys([

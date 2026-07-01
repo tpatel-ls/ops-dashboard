@@ -28,7 +28,8 @@ import type {
 } from '@ops-dashboard/core';
 import { patchRecord } from '@/lib/records';
 import { logWork } from '@/lib/worklogs';
-import { setTaskStatus } from '@/lib/tasks';
+import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
+import { useActiveOrgs } from '@/components/org-switcher';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
 
@@ -410,6 +411,23 @@ function ChecklistGroup({
 
 function LinkedTasksSection({ project }: { project: Project }) {
   const openEdit = useAppStore((s) => s.openEdit);
+  const [adding, setAdding] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function submitAdd(e: React.FormEvent) {
+    e.preventDefault();
+    const text = adding.trim();
+    if (!text || saving) return;
+    setSaving(true);
+    try {
+      // NL parsing applies (dates, #tags, !!); the task inherits the
+      // project's domain + org lane. Input stays put for rapid entry.
+      await addTaskToProject(text, project);
+      setAdding('');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const tasks = useLiveQuery(
     async () => {
@@ -438,6 +456,20 @@ function LinkedTasksSection({ project }: { project: Project }) {
           {tasks.filter((t) => t.status !== 'done').length} open
         </span>
       </div>
+      <form
+        onSubmit={submitAdd}
+        className="hairline flex items-center gap-1.5 rounded-md border bg-bg-sunken px-2 py-1.5 focus-within:border-primary/50"
+      >
+        <Plus className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+        <input
+          value={adding}
+          onChange={(e) => setAdding(e.target.value)}
+          placeholder="Add a task... (try: call Bryan tomorrow 2pm !!)"
+          disabled={saving}
+          className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-subtle-foreground"
+        />
+        <span className="kbd hidden sm:inline">Enter</span>
+      </form>
       {tasks.length === 0 ? (
         <p className="text-xs text-subtle-foreground">No tasks linked to this project.</p>
       ) : (
@@ -559,8 +591,23 @@ function LogWorkSection({ project }: { project: Project }) {
 // ─── Meta / editable fields ───────────────────────────────────────────────────
 
 function MetaSection({ project, domains }: { project: Project; domains: Domain[] }) {
+  const orgs = useActiveOrgs();
+
   async function set<K extends keyof Project>(key: K, value: Project[K]) {
     await patchRecord<Project>('projects', project.id, { [key]: value } as Partial<Project>);
+  }
+
+  async function setOrg(orgId: string) {
+    // Clears travel as SQL null: the sync mapper drops absent keys, so an
+    // undefined would leave the previous lane on other devices.
+    const value = (orgId || null) as unknown as Project['orgId'];
+    await patchRecord<Project>('projects', project.id, { orgId: value });
+    // orgId is denormalized onto tasks; cascade so lists/calendar move too.
+    const tasks = await getDb().tasks.where('projectId').equals(project.id).toArray();
+    for (const t of tasks) {
+      if (t.deletedAt) continue;
+      await updateTask(t.id, { orgId: value as Task['orgId'] });
+    }
   }
 
   return (
@@ -589,6 +636,20 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
           >
             {Object.entries(KIND_LABELS).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
+            ))}
+          </select>
+        </div>
+        {/* Organization */}
+        <div className="flex items-center gap-2">
+          <span className="w-20 text-xs text-muted-foreground">Org</span>
+          <select
+            value={project.orgId ?? ''}
+            onChange={(e) => void setOrg(e.target.value)}
+            className="input flex-1"
+          >
+            <option value="">Personal</option>
+            {(orgs ?? []).map((o) => (
+              <option key={o.id} value={o.id}>{o.name}</option>
             ))}
           </select>
         </div>

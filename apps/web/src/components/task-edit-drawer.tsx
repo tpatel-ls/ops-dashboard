@@ -261,9 +261,17 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           <Section title="Project">
             <select
               value={task.projectId ?? ''}
-              onChange={(e) =>
-                updateTask(task.id, { projectId: e.target.value || undefined })
-              }
+              onChange={(e) => {
+                const pid = e.target.value;
+                const proj = pid ? projects?.find((p) => p.id === pid) : undefined;
+                // The task's org lane follows its project. Clears travel as
+                // SQL null so they propagate to other devices (the sync
+                // mapper drops absent keys).
+                void updateTask(task.id, {
+                  projectId: (pid || null) as unknown as string | undefined,
+                  orgId: (proj?.orgId ?? null) as unknown as string | undefined,
+                });
+              }}
               className="input w-full"
             >
               <option value="">No project</option>
