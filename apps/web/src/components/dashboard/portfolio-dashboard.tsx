@@ -78,7 +78,7 @@ interface ProjectStats {
 
 // ─── Small pieces ─────────────────────────────────────────────────────────────────
 
-function ProgressRing({ pct, color, size = 46, stroke = 5 }: { pct: number; color: string; size?: number; stroke?: number }) {
+function ProgressRing({ pct, color, size = 52, stroke = 5 }: { pct: number; color: string; size?: number; stroke?: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
@@ -107,8 +107,9 @@ function ProgressRing({ pct, color, size = 46, stroke = 5 }: { pct: number; colo
           style={{ stroke: color }}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-mono text-[11px] font-medium text-foreground tabular-nums">
+      <span className="absolute inset-0 flex items-center justify-center font-mono text-[10px] font-medium text-foreground tabular-nums">
         {clamped}
+        <span className="ml-px text-subtle-foreground">%</span>
       </span>
     </div>
   );
