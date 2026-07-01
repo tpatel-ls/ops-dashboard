@@ -1,7 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import {
   Activity,
   AlertTriangle,
@@ -63,6 +63,15 @@ function emptyCounts(): Record<TaskStatus, number> {
 }
 
 // ─── Derived per-project shape ────────────────────────────────────────────────────
+
+type SortKey = 'default' | 'progress' | 'open' | 'name';
+
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: 'default', label: 'Default' },
+  { key: 'progress', label: 'Progress' },
+  { key: 'open', label: 'Open' },
+  { key: 'name', label: 'Name' },
+];
 
 interface ProjectStats {
   project: Project;
@@ -188,6 +197,39 @@ function PriorityDot({ priority }: { priority: number }) {
   const tone =
     priority >= 3 ? 'var(--destructive)' : priority === 2 ? 'var(--warning)' : priority === 1 ? 'var(--primary)' : 'var(--subtle-foreground)';
   return <span className="size-1.5 shrink-0 rounded-full" style={{ background: tone }} aria-hidden />;
+}
+
+// ─── Segmented control ────────────────────────────────────────────────────────────
+
+function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { key: T; label: string }[];
+  value: T;
+  onChange: (key: T) => void;
+}) {
+  return (
+    <div className="hairline inline-flex items-center gap-0.5 rounded-[10px] border bg-card p-0.5">
+      {options.map((o) => (
+        <button
+          key={o.key}
+          type="button"
+          onClick={() => onChange(o.key)}
+          aria-pressed={value === o.key}
+          className={cn(
+            'rounded-[7px] px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+            value === o.key
+              ? 'bg-accent text-foreground'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 // ─── Project tile ─────────────────────────────────────────────────────────────────
@@ -342,6 +384,7 @@ function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p:
 export function PortfolioDashboard() {
   const [selected, setSelected] = useState<Project | null>(null);
   const [importing, startImport] = useTransition();
+  const [sortKey, setSortKey] = useState<SortKey>('default');
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -408,6 +451,18 @@ export function PortfolioDashboard() {
     return { stats, totals, missing, domains };
   });
 
+  const visibleStats = useMemo(() => {
+    const list = data?.stats ?? [];
+    if (sortKey === 'default') return list;
+    const sorted = [...list];
+    sorted.sort((a, b) => {
+      if (sortKey === 'progress') return b.pct - a.pct;
+      if (sortKey === 'open') return b.open - a.open;
+      return a.project.name.localeCompare(b.project.name);
+    });
+    return sorted;
+  }, [data, sortKey]);
+
   // Keep the open detail drawer in sync with edits made inside it.
   const liveSelected = useLiveQuery(
     async () => (selected ? ((await getDb().projects.get(selected.id)) ?? null) : null),
@@ -472,6 +527,16 @@ export function PortfolioDashboard() {
             <StatTile label="Done" value={data?.totals.done ?? 0} icon={CheckCircle2} color="var(--success)" />
           </div>
 
+          {/* Toolbar */}
+          {data && data.stats.length > 0 ? (
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+                Projects
+              </span>
+              <Segmented options={SORTS} value={sortKey} onChange={setSortKey} />
+            </div>
+          ) : null}
+
           {/* Project grid */}
           {data === undefined ? (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -505,7 +570,7 @@ export function PortfolioDashboard() {
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {data.stats.map((s) => (
+              {visibleStats.map((s) => (
                 <ProjectTile key={s.project.id} stats={s} onClick={() => setSelected(s.project)} />
               ))}
             </div>
