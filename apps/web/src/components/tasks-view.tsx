@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Task, Priority } from '@ops-dashboard/core';
 import { format, parseISO, isToday, isPast } from 'date-fns';
 import { Check, Star, ChevronDown, Circle } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
+import { taskLane } from '@/lib/org-lanes';
+import { useOrgStore } from '@/lib/org-store';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -317,6 +319,7 @@ export function TasksView() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [projectFilter, setProjectFilter] = useState<string | null>(null);
   const [domainFilter, setDomainFilter] = useState<string | null>(null);
+  const ctx = useOrgStore((s) => s.ctx);
 
   // Load all data
   const data = useLiveQuery(async () => {
@@ -343,6 +346,10 @@ export function TasksView() {
     const { allTasks, projectMap, domainMap } = data;
 
     let tasks = allTasks.filter((t) => !t.deletedAt && t.status !== 'archived');
+
+    // Org context (top-bar switcher). Lane falls back through the project for
+    // records created before orgId denormalization.
+    tasks = tasks.filter((t) => matchesOrgContext(taskLane(t, projectMap), ctx));
 
     // Status filter
     if (statusFilter === 'open') {
@@ -396,7 +403,7 @@ export function TasksView() {
             ? domainMap.get(projectMap.get(t.projectId)!.domainId!)
             : undefined,
     }));
-  }, [data, statusFilter, projectFilter, domainFilter]);
+  }, [data, statusFilter, projectFilter, domainFilter, ctx]);
 
   const count = filteredTasks?.length ?? 0;
 
@@ -451,6 +458,7 @@ export function TasksView() {
             label="Project"
             value={projectFilter}
             options={data.activeProjects
+              .filter((p) => matchesOrgContext(p.orgId, ctx))
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((p) => ({ id: p.id, name: p.name, color: p.color }))}
             onChange={setProjectFilter}

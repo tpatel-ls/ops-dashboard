@@ -14,8 +14,9 @@ import {
   X,
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Domain, Project, ProjectKind, ProjectStatus } from '@ops-dashboard/core';
+import { useOrgStore } from '@/lib/org-store';
 import { createProject } from '@/lib/projects';
 import { patchRecord } from '@/lib/records';
 import { ProjectDetail } from '@/components/project-detail';
@@ -307,11 +308,16 @@ function KindGroup({
 export function ProjectsBoard() {
   const [creating, setCreating] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const ctx = useOrgStore((s) => s.ctx);
 
   const data = useLiveQuery(async () => {
     const db = getDb();
     const [projects, domains, tasks, workLogs] = await Promise.all([
-      db.projects.toArray().then((all) => all.filter((p) => !p.deletedAt && !p.archivedAt)),
+      db.projects
+        .toArray()
+        .then((all) =>
+          all.filter((p) => !p.deletedAt && !p.archivedAt && matchesOrgContext(p.orgId, ctx)),
+        ),
       db.domains.toArray().then((all) => all.filter((d) => !d.deletedAt)),
       db.tasks.toArray().then((all) => all.filter((t) => !t.deletedAt && t.status !== 'archived' && t.status !== 'done')),
       db.workLogs.toArray().then((all) => all.filter((w) => !w.deletedAt)),
@@ -330,7 +336,7 @@ export function ProjectsBoard() {
     }));
 
     return { cardData, domains };
-  });
+  }, [ctx]);
 
   // When a project is updated (e.g. via ProjectDetail), refresh the selected project
   const liveSelectedProject = useLiveQuery(

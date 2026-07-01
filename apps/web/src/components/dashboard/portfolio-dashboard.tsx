@@ -15,11 +15,19 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { differenceInDays, parseISO } from 'date-fns';
-import { getDb } from '@ops-dashboard/core';
-import type { Domain, Project, ProjectStatus, Task, TaskStatus } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext } from '@ops-dashboard/core';
+import type {
+  Domain,
+  Organization,
+  Project,
+  ProjectStatus,
+  Task,
+  TaskStatus,
+} from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { ViewShell } from '@/components/view-shell';
 import { ProjectDetail } from '@/components/project-detail';
+import { useOrgStore } from '@/lib/org-store';
 import {
   PORTFOLIO_PROJECT_NAMES,
   importPortfolioProjects,
@@ -83,6 +91,7 @@ const STATUS_FILTERS: { key: 'all' | ProjectStatus; label: string }[] = [
 interface ProjectStats {
   project: Project;
   domain?: Domain;
+  org?: Organization;
   total: number;
   done: number;
   pct: number;
@@ -242,7 +251,8 @@ function Segmented<T extends string>({
 // ─── Project tile ─────────────────────────────────────────────────────────────────
 
 function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => void }) {
-  const { project, domain, total, done, pct, counts, open, urgent, next, hours, isSlipping } = stats;
+  const { project, domain, org, total, done, pct, counts, open, urgent, next, hours, isSlipping } =
+    stats;
   return (
     <button
       type="button"
@@ -268,10 +278,20 @@ function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => v
               {STATUS_LABELS[project.status]}
             </span>
           </div>
-          {domain ? (
-            <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
-              <span className="size-1.5 rounded-full" style={{ background: domain.color }} aria-hidden />
-              <span className="font-mono text-[10px] text-subtle-foreground">{domain.name}</span>
+          {org || domain ? (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              {org ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
+                  <span className="size-1.5 rounded-full" style={{ background: org.color }} aria-hidden />
+                  <span className="font-mono text-[10px] text-subtle-foreground">{org.name}</span>
+                </span>
+              ) : null}
+              {domain ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
+                  <span className="size-1.5 rounded-full" style={{ background: domain.color }} aria-hidden />
+                  <span className="font-mono text-[10px] text-subtle-foreground">{domain.name}</span>
+                </span>
+              ) : null}
             </div>
           ) : null}
           {project.description ? (
@@ -440,17 +460,24 @@ export function PortfolioDashboard() {
   const [importing, startImport] = useTransition();
   const [sortKey, setSortKey] = useState<SortKey>('default');
   const [statusFilter, setStatusFilter] = useState<'all' | ProjectStatus>('all');
+  const ctx = useOrgStore((s) => s.ctx);
 
   const data = useLiveQuery(async () => {
     const db = getDb();
-    const [projects, domains, tasks, workLogs] = await Promise.all([
+    const [allProjects, domains, organizations, tasks, workLogs] = await Promise.all([
       db.projects.toArray().then((all) => all.filter((p) => !p.deletedAt && !p.archivedAt)),
       db.domains.toArray().then((all) => all.filter((d) => !d.deletedAt)),
+      db.organizations.toArray().then((all) => all.filter((o) => !o.deletedAt)),
       db.tasks.toArray().then((all) => all.filter((t) => !t.deletedAt && t.status !== 'archived')),
       db.workLogs.toArray().then((all) => all.filter((w) => !w.deletedAt)),
     ]);
 
+    // The active org lens scopes what the dashboard shows; the importer CTA
+    // check runs on ALL projects so a lane switch never re-offers the seed.
+    const projects = allProjects.filter((p) => matchesOrgContext(p.orgId, ctx));
+
     const domainMap = new Map(domains.map((d) => [d.id, d]));
+    const orgMap = new Map(organizations.map((o) => [o.id, o]));
     const hoursByProject = new Map<string, number>();
     for (const w of workLogs) {
       hoursByProject.set(w.projectId, (hoursByProject.get(w.projectId) ?? 0) + w.minutes);
@@ -473,6 +500,7 @@ export function PortfolioDashboard() {
       return {
         project,
         domain: project.domainId ? domainMap.get(project.domainId) : undefined,
+        org: project.orgId ? orgMap.get(project.orgId) : undefined,
         total,
         done,
         pct,
@@ -492,7 +520,7 @@ export function PortfolioDashboard() {
         a.project.name.localeCompare(b.project.name),
     );
 
-    const presentNames = new Set(projects.map((p) => p.name.trim().toLowerCase()));
+    const presentNames = new Set(allProjects.map((p) => p.name.trim().toLowerCase()));
     const missing = PORTFOLIO_PROJECT_NAMES.filter((n) => !presentNames.has(n.trim().toLowerCase()));
 
     const totals = {
@@ -504,7 +532,7 @@ export function PortfolioDashboard() {
     };
 
     return { stats, totals, missing, domains };
-  });
+  }, [ctx]);
 
   const visibleStats = useMemo(() => {
     let list = data?.stats ?? [];

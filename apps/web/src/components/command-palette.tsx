@@ -18,9 +18,12 @@ import {
   Sun,
   Target,
 } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
+import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { useOrgStore } from '@/lib/org-store';
 import { runCapture } from '@/lib/capture-client';
+import { useActiveOrgs } from './org-switcher';
 
 const NAV = [
   { id: 'nav-dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, hint: 'g d' },
@@ -40,9 +43,18 @@ export function CommandPalette() {
   const open = useAppStore((s) => s.paletteOpen);
   const close = useAppStore((s) => s.closePalette);
   const openEdit = useAppStore((s) => s.openEdit);
+  const ctx = useOrgStore((s) => s.ctx);
+  const setCtx = useOrgStore((s) => s.setCtx);
+  const orgs = useActiveOrgs();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [capturing, startCapture] = useTransition();
+
+  const lanes: { ctx: OrgContext; label: string; color: string }[] = [
+    { ctx: 'all', label: 'All', color: 'var(--primary)' },
+    ...(orgs ?? []).map((o) => ({ ctx: o.id as OrgContext, label: o.name, color: o.color })),
+    { ctx: 'personal', label: 'Personal', color: PERSONAL_COLOR },
+  ];
 
   const tasks = useLiveQuery(async () => {
     const db = getDb();
@@ -159,6 +171,36 @@ export function CommandPalette() {
                 ))}
               </Command.Group>
             ) : null}
+
+            <Command.Group
+              heading="Context"
+              className="mt-2 text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
+            >
+              {lanes.map((lane) => (
+                <Command.Item
+                  key={`ctx-${lane.ctx}`}
+                  value={`ctx-${lane.ctx}`}
+                  keywords={['switch', 'context', lane.label]}
+                  onSelect={() => {
+                    setCtx(lane.ctx);
+                    close();
+                  }}
+                  className="group flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
+                >
+                  <span
+                    className="size-2.5 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
+                    style={{ background: lane.color }}
+                    aria-hidden
+                  />
+                  <span>Switch to {lane.label}</span>
+                  {ctx === lane.ctx ? (
+                    <span className="ml-auto font-mono text-[10px] text-subtle-foreground">
+                      current
+                    </span>
+                  ) : null}
+                </Command.Item>
+              ))}
+            </Command.Group>
 
             <Command.Group
               heading="Jump"

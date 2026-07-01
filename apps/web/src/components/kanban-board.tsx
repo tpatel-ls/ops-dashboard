@@ -12,10 +12,12 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Project, Task } from '@ops-dashboard/core';
 import { addTask, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
+import { taskLane } from '@/lib/org-lanes';
+import { useOrgStore } from '@/lib/org-store';
 import { cn } from '@ops-dashboard/ui';
 
 type Grouping = 'status' | 'project' | 'priority' | 'tag';
@@ -55,6 +57,14 @@ export function KanbanBoard() {
     [projects],
   );
 
+  const ctx = useOrgStore((s) => s.ctx);
+  const scopedTasks = useMemo(
+    () => (tasks ?? []).filter((t) => matchesOrgContext(taskLane(t, projectsMap), ctx)),
+    [tasks, projectsMap, ctx],
+  );
+  // Tasks added inline under an org lens land in that lane.
+  const addOverrides: Partial<Task> = ctx !== 'all' && ctx !== 'personal' ? { orgId: ctx } : {};
+
   const columns = useMemo<Column[]>(() => {
     if (grouping === 'status') return STATUS_COLUMNS;
     if (grouping === 'priority') return PRIORITY_COLUMNS;
@@ -62,17 +72,18 @@ export function KanbanBoard() {
       const cols: Column[] = [{ id: '__none', label: 'No project', color: 'oklch(0.55 0.04 280)' }];
       for (const p of projects ?? []) {
         if (p.archivedAt) continue;
+        if (!matchesOrgContext(p.orgId, ctx)) continue;
         cols.push({ id: p.id, label: p.name, color: p.color });
       }
       return cols;
     }
     const tagSet = new Set<string>();
-    for (const t of tasks ?? []) for (const tag of t.tags) tagSet.add(tag);
+    for (const t of scopedTasks) for (const tag of t.tags) tagSet.add(tag);
     const list = Array.from(tagSet).sort();
     return list.length
       ? list.map((tag) => ({ id: tag, label: `#${tag}`, color: 'oklch(0.65 0.18 280)' }))
       : [{ id: '__notag', label: 'No tag', color: 'oklch(0.55 0.04 280)' }];
-  }, [grouping, projects, tasks]);
+  }, [grouping, projects, scopedTasks, ctx]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -95,7 +106,13 @@ export function KanbanBoard() {
       const p = Number(target);
       if (p >= 0 && p <= 3) updateTask(id, { priority: p as Task['priority'] });
     } else if (grouping === 'project') {
-      updateTask(id, { projectId: target === '__none' ? undefined : target });
+      const proj = target === '__none' ? undefined : projectsMap.get(target);
+      // Clears travel as SQL null: the sync mapper drops absent keys, so an
+      // undefined here would leave the previous value on other devices.
+      updateTask(id, {
+        projectId: (target === '__none' ? null : target) as unknown as Task['projectId'],
+        orgId: (proj?.orgId ?? null) as unknown as Task['orgId'],
+      });
     } else {
       const newTags = target === '__notag' ? task.tags : Array.from(new Set([target, ...task.tags]));
       updateTask(id, { tags: newTags });
@@ -127,7 +144,7 @@ export function KanbanBoard() {
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <div className="scrollbar-thin flex flex-1 gap-3 overflow-x-auto pb-2">
           {columns.map((col) => {
-            const bucket = (tasks ?? []).filter((t) => bucketOf(t) === col.id);
+            const bucket = scopedTasks.filter((t) => bucketOf(t) === col.id);
             return (
               <KanbanColumn
                 key={col.id}
@@ -135,6 +152,7 @@ export function KanbanBoard() {
                 tasks={bucket}
                 grouping={grouping}
                 projectsMap={projectsMap}
+                addOverrides={addOverrides}
               />
             );
           })}
@@ -149,11 +167,13 @@ function KanbanColumn({
   tasks,
   grouping,
   projectsMap,
+  addOverrides,
 }: {
   column: Column;
   tasks: Task[];
   grouping: Grouping;
   projectsMap: Map<string, Project>;
+  addOverrides: Partial<Task>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const [adding, setAdding] = useState('');
@@ -181,7 +201,7 @@ function KanbanColumn({
             e.preventDefault();
             const text = adding.trim();
             if (!text) return;
-            await addTask(text, { status: column.id as Task['status'] });
+            await addTask(text, { status: column.id as Task['status'], ...addOverrides });
             setAdding('');
           }}
           className="mt-2 flex items-center gap-1.5 rounded-md border bg-input px-2 py-1.5"
