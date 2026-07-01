@@ -198,7 +198,7 @@ function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => v
     <button
       type="button"
       onClick={onClick}
-      className="surface group flex w-full flex-col gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)]"
+      className="surface group flex w-full flex-col gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
@@ -315,7 +315,7 @@ function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p:
               <button
                 type="button"
                 onClick={() => onPick(s.project)}
-                className="group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent"
+                className="group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               >
                 <span
                   className="mt-1 size-2 shrink-0 rounded-full"
