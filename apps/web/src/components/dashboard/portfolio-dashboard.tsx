@@ -140,17 +140,20 @@ function StatTile({
   label,
   value,
   icon: Icon,
-  accent,
+  color,
 }: {
   label: string;
   value: number;
   icon: typeof FolderKanban;
-  accent: string;
+  color: string;
 }) {
   return (
     <div className="surface flex items-center gap-3 px-4 py-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-bg-sunken">
-        <Icon className={cn('size-4', accent)} aria-hidden />
+      <div
+        className="flex size-9 shrink-0 items-center justify-center rounded-[10px]"
+        style={{ background: `color-mix(in oklch, ${color} 15%, transparent)` }}
+      >
+        <Icon className="size-4" style={{ color }} aria-hidden />
       </div>
       <div className="min-w-0">
         <div className="text-[22px] font-semibold leading-none tabular-nums">{value}</div>
@@ -437,10 +440,10 @@ export function PortfolioDashboard() {
         <div className="flex flex-col gap-5">
           {/* Stat tiles */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatTile label="Active" value={data?.totals.activeProjects ?? 0} icon={FolderKanban} accent="text-primary" />
-            <StatTile label="Open tasks" value={data?.totals.openTasks ?? 0} icon={ListTodo} accent="text-foreground" />
-            <StatTile label="In progress" value={data?.totals.inProgress ?? 0} icon={Activity} accent="text-warning" />
-            <StatTile label="Done" value={data?.totals.done ?? 0} icon={CheckCircle2} accent="text-success" />
+            <StatTile label="Active" value={data?.totals.activeProjects ?? 0} icon={FolderKanban} color="var(--primary)" />
+            <StatTile label="Open tasks" value={data?.totals.openTasks ?? 0} icon={ListTodo} color="var(--foreground)" />
+            <StatTile label="In progress" value={data?.totals.inProgress ?? 0} icon={Activity} color="var(--warning)" />
+            <StatTile label="Done" value={data?.totals.done ?? 0} icon={CheckCircle2} color="var(--success)" />
           </div>
 
           {/* Project grid */}
