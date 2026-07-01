@@ -20,6 +20,7 @@ import {
 } from '@/lib/export';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
+import { OrganizationsManager } from '@/components/organizations-manager';
 
 const VIEW_OPTIONS: Settings['defaultView'][] = [
   'today',
@@ -156,6 +157,13 @@ export function SettingsForm() {
             </option>
           ))}
         </select>
+      </Section>
+
+      <Section
+        title="Organizations"
+        description="The orgs you work for. The top-bar switcher scopes Dashboard, Projects, Tasks, Kanban, and Calendar to one lane; everything without an org is Personal."
+      >
+        <OrganizationsManager />
       </Section>
 
       <Section title="Pen and stylus" description="First class S-Pen.">

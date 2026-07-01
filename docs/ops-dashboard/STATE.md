@@ -3,7 +3,36 @@
 > **Read this FIRST to resume.** Full design: [`./spec.md`](./spec.md).
 > Multi-device build brief: [`./multi-device-build.md`](./multi-device-build.md).
 > Go-live runbook: [`./deploy.md`](./deploy.md) · Watch: [`./watch-capture.md`](./watch-capture.md).
-> Last updated: 2026-06-08 (session 2 — realtime sync + auth + PWA, code-complete).
+> Last updated: 2026-07-01 (session 3 — org lanes + portfolio dashboard).
+
+## Session 3 — org context + portfolio dashboard: code-complete, one prod step pending
+- **Portfolio dashboard** at `/dashboard` (now the landing route): per-project
+  progress rings, status bars, next actions, filters/sort, needs-attention
+  rail, plus a "Load my projects" idempotent importer (Blue Text, Power
+  Dialer, Mini Monet, Email Triage).
+- **Organizations (work lanes):** new synced `organizations` table + `orgId`
+  on projects/tasks (Dexie v5, migration `0005_organizations.sql`). Top-bar
+  switcher (All / org / Personal, per-device via localStorage) scopes
+  Dashboard, Projects, Tasks, Kanban, Calendar. Week + Month calendars color
+  tasks by lane with legend chips that toggle lanes under All. Settings ->
+  Organizations manages lanes. Boot setup seeds "LS Global Group"
+  (deterministic id `org-ls-global-group` so devices cannot duplicate it) and
+  migrates Blue Text / Power Dialer into it.
+- **Fast task-to-project:** quick-add project picker (picked -> `addTask`
+  direct, skips triage), inline add inputs on project detail + dashboard
+  tiles, kanban project-drop and task-drawer project changes carry `orgId`.
+  Field clears travel as SQL null (the mapper drops absent keys, so
+  undefined never propagates a clear) - systemic fix still open for other
+  fields (projectId clear pre-dates this).
+- **Outbox hardening:** drainOutbox now isolates failures per table (was
+  head-of-line blocking), so an unapplied prod migration cannot wedge sync
+  for other tables.
+- **PENDING (one manual step): apply `supabase/migrations/0005_organizations.sql`
+  to prod project `jnaycounllaafvorakss`** - the CLI on this machine is authed
+  to the LSG Supabase account, not the personal one hosting Taskify. Paste the
+  file into the Supabase SQL editor (or `supabase link --project-ref
+  jnaycounllaafvorakss && supabase db push`). Until then, org rows retry
+  harmlessly; everything else syncs.
 
 ## Session 2 — multi-device realtime sync: **DEPLOYED & LIVE** ✅
 - **Production:** https://taskify-three-delta.vercel.app (Vercel project `taskify`,
