@@ -23,6 +23,7 @@ import {
   Settings as SettingsIcon,
   Sun,
   Users,
+  Utensils,
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -42,6 +43,7 @@ const PLAN: NavItem[] = [
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
   { href: '/calendar', label: 'Calendar', icon: Calendar, shortcut: 'g c' },
   { href: '/week', label: 'Week', icon: LayoutGrid, shortcut: 'g w' },
+  { href: '/food', label: 'Food', icon: Utensils },
 ];
 
 const BUILD: NavItem[] = [
