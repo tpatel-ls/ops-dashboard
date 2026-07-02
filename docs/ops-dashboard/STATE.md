@@ -3,7 +3,66 @@
 > **Read this FIRST to resume.** Full design: [`./spec.md`](./spec.md).
 > Multi-device build brief: [`./multi-device-build.md`](./multi-device-build.md).
 > Go-live runbook: [`./deploy.md`](./deploy.md) · Watch: [`./watch-capture.md`](./watch-capture.md).
-> Last updated: 2026-07-01 (session 3 — org lanes + portfolio dashboard).
+> Last updated: 2026-07-01 (session 4 - universal capture: notepad, braindump brain, food logs).
+
+## Session 4 - universal capture: one brain, many mouths (2026-07-01)
+- **The brain:** `/api/braindump` parses ANY capture (a line or a whole ramble)
+  into N routed items (forced `route_items` tool call on `MODELS.triage`;
+  context = active project/routine names + client-local date; caps 8000 chars /
+  100 names). Client router `lib/route-items.ts` files each item through the
+  sync-aware lib helpers (task / project task via `addTaskToProject` /
+  food log / routine check / journal / note / quote), creates one Capture per
+  item for the Inbox trail, and returns a per-item undo closure (soft delete or
+  un-check + dismiss the capture). AI unreachable -> one task per line, flagged
+  `aiOffline`. `runCapture` (top bar, palette) is now a thin wrapper (max 3
+  notifications per dump). Rides-along fixes: notes/quotes/journal/person now
+  become real records (was: everything collapsed to Task); person -> note,
+  event -> dated task.
+- **FoodLog entity** (AI-estimated calories + macros): types + Dexie v6
+  (`foodLogs: 'id, date, mealType, updatedAt, deletedAt'`) + `Syncable` union +
+  `SYNC_TABLES.foodLogs = 'food_logs'` + migration `0006_food_logs.sql`
+  (RLS/version-guard/realtime, mirrors 0005). `lib/food-logs.ts` CRUD;
+  `computeFoodTotals` + `matchByName` live in core with vitest coverage.
+  `wipeLocalData` now clears `organizations` (latent org-rollout bug) and
+  `foodLogs`.
+- **/notepad** (sidebar PLAN, `g p`, palette entry): big auto-growing textarea
+  + mic; the transcript APPENDS instead of auto-submitting. Process
+  (Ctrl+Enter) -> session feed rows with kind icon, destination chip (project /
+  "Food - N kcal" / "checked: routine" / Journal / Note / Quote) and one-tap
+  Undo (row goes struck-through); amber notice row on AI-offline dumps. Voice
+  logic extracted to `lib/use-voice-input.ts` (Whisper-preferred, Web Speech
+  fallback, 60s cap, hydration-safe `available`); `quick-add.tsx` consumes the
+  hook - one implementation, zero top-bar behavior change.
+- **/food** (sidebar PLAN after Week, palette entry; intentionally NOT
+  org-scoped): selected-day stat tiles (kcal/protein/carbs/fat), meals grouped
+  breakfast/lunch/dinner/snacks with per-item breakdown + total-kcal chip +
+  soft delete + meal-type select, 7-day kcal bar trend (plain divs; click a bar
+  to jump to that day), prev/next/Today nav mirroring the month grid. Quick log
+  line pipes through the brain with a `"(food log) "` prefix bias; mic appends;
+  AI-offline falls back to a task with an amber notice.
+- **Mobile quick-add dialog:** now routes through `processBrainDump` (was raw
+  `addTask` - no AI), flashes "N items filed" before closing, mic via the
+  shared hook, "Open Notepad" link at the bottom.
+- **Verified:** typecheck all packages; 22 core vitest tests; eslint clean on
+  every touched file; production webpack build (36 routes incl. `/notepad`,
+  `/food`, `/api/braindump`); live Playwright E2E on dev (AI key not set
+  locally, so the fallback path is what's exercisable): notepad 3-line dump ->
+  amber notice + 3 tasks with NL dates parsed ("tomorrow 2pm", "this weekend"
+  -> Sat 4 Jul), undo soft-deletes the task + dismisses the capture, Inbox
+  shows all captures "via notepad", /food renders + quick-log fallback notice,
+  390x844 quick-add dialog has mic + Notepad link, **0 console errors** across
+  the whole session.
+- **PENDING external steps:** (1) apply migrations **0005 + 0006** to prod
+  (runbook `apply-0005.md`; one `db push` applies both) - until then food_logs
+  rows retry harmlessly (per-table outbox isolation). (2) AI-path E2E in PROD
+  after deploy (the Anthropic gateway env lives there): dump "call Bryan
+  tomorrow about the RAG prompt, had 2 eggs and toast for breakfast, did my
+  morning workout" -> expect a Blue Text task, a ~300-400 kcal food log, and
+  the workout routine checked.
+- **Follow-ups (explicitly out of scope this round):** watch webhook
+  `/api/capture` still uses the old single-item triage prompt - upgrade it to
+  the braindump brain later. Nutrition DB lookups (AI estimates only) and
+  inline macro editing (delete + re-log is v1) also deferred.
 
 ## Session 3 — org context + portfolio dashboard: code-complete, one prod step pending
 - **Portfolio dashboard** at `/dashboard` (now the landing route): per-project
