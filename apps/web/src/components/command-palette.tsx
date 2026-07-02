@@ -18,6 +18,7 @@ import {
   Settings as SettingsIcon,
   Sun,
   Target,
+  Utensils,
 } from 'lucide-react';
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
@@ -36,6 +37,7 @@ const NAV = [
   { id: 'nav-kanban', label: 'Kanban', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
   { id: 'nav-whiteboards', label: 'Whiteboards', href: '/whiteboards', icon: Pencil, hint: 'g b' },
   { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g n' },
+  { id: 'nav-food', label: 'Food', href: '/food', icon: Utensils },
   { id: 'nav-tags', label: 'Tags', href: '/tags', icon: Hash },
   { id: 'nav-projects', label: 'Projects', href: '/projects', icon: Target },
   { id: 'nav-settings', label: 'Settings', href: '/settings', icon: SettingsIcon, hint: 'g s' },
