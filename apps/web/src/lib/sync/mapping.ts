@@ -26,6 +26,7 @@ export const SYNC_TABLES = {
   notes: 'notes',
   quotes: 'quotes',
   books: 'books',
+  foodLogs: 'food_logs',
 } as const satisfies Partial<Record<SyncTable, string>>;
 
 export type DexieTableName = keyof typeof SYNC_TABLES;

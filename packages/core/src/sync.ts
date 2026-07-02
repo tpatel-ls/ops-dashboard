@@ -5,6 +5,7 @@ import type {
   ChecklistTemplate,
   Content,
   Domain,
+  FoodLog,
   JournalEntry,
   Note,
   Organization,
@@ -42,7 +43,8 @@ export type Syncable =
   | Person
   | Note
   | Quote
-  | Book;
+  | Book
+  | FoodLog;
 
 export function pickWinner<T extends Syncable>(local: T | undefined, remote: T): T {
   if (!local) return remote;

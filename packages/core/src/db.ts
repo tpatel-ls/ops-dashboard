@@ -6,6 +6,7 @@ import type {
   ChecklistTemplate,
   Content,
   Domain,
+  FoodLog,
   JournalEntry,
   Note,
   Organization,
@@ -43,6 +44,7 @@ export class OpsDB extends Dexie {
   notes!: EntityTable<Note, 'id'>;
   quotes!: EntityTable<Quote, 'id'>;
   books!: EntityTable<Book, 'id'>;
+  foodLogs!: EntityTable<FoodLog, 'id'>;
 
   constructor(name = 'ops-dashboard') {
     super(name);
@@ -91,6 +93,10 @@ export class OpsDB extends Dexie {
         'id, status, priority, scheduledFor, dueAt, projectId, parentId, domainId, contentId, orgId, order, updatedAt, deletedAt, *tags',
       projects:
         'id, name, kind, status, domainId, orgId, archivedAt, lastWorkedAt, updatedAt, deletedAt',
+    });
+    // v6 — Food logs (AI-estimated meals from universal capture).
+    this.version(6).stores({
+      foodLogs: 'id, date, mealType, updatedAt, deletedAt',
     });
   }
 }
