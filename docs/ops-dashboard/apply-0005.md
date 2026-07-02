@@ -1,11 +1,32 @@
-# Apply migrations 0005 + 0006 (organizations, food logs) - run on the Mac
+# Ship to prod: deploy + migrations 0005/0006 - run on the Mac
 
-Two pending schema steps, both from 2026-07-01 sessions: push
-`supabase/migrations/0005_organizations.sql` (org lanes) and
+Three pending steps, all from 2026-07-01 sessions. The Windows machine cannot
+do any of them: its Supabase CLI is authed to the LSG account and its Vercel
+CLI (`tpatel-2911`) has no `taskify` project. The Mac (session-2 go-live
+account) can do all three.
+
+## Step 0 - deploy latest main (prod is BEHIND)
+
+Pushes to `main` do not auto-deploy. Verified 2026-07-01: the last
+GitHub-recorded Vercel deployment is from 2026-06-12, and `/api/braindump`
+404s in prod - so prod is missing BOTH the org-lanes session and the
+universal-capture session. From this repo on the Mac:
+
+```sh
+git pull
+vercel deploy --prod   # repo root; the project's Root Directory is apps/web
+```
+
+Optional but recommended so this never recurs: Vercel dashboard -> taskify ->
+Settings -> Git -> connect `tpatel-ls/ops-dashboard`, production branch
+`main` (Root Directory stays `apps/web`). After that, pushes to main deploy
+automatically.
+
+## Steps 1-2 - apply migrations 0005 + 0006
+
+Push `supabase/migrations/0005_organizations.sql` (org lanes) and
 `supabase/migrations/0006_food_logs.sql` (universal-capture food logs) to the
-production project `jnaycounllaafvorakss` (Taskify). The Windows machine's CLI
-is authed to the LSG Supabase account, which cannot see this project; the Mac
-can.
+production project `jnaycounllaafvorakss` (Taskify).
 
 Both files are idempotent and additive only (new tables, two nullable columns,
 triggers + realtime). Safe to run twice.

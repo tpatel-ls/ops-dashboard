@@ -52,13 +52,29 @@
   shows all captures "via notepad", /food renders + quick-log fallback notice,
   390x844 quick-add dialog has mic + Notepad link, **0 console errors** across
   the whole session.
-- **PENDING external steps:** (1) apply migrations **0005 + 0006** to prod
-  (runbook `apply-0005.md`; one `db push` applies both) - until then food_logs
-  rows retry harmlessly (per-table outbox isolation). (2) AI-path E2E in PROD
-  after deploy (the Anthropic gateway env lives there): dump "call Bryan
-  tomorrow about the RAG prompt, had 2 eggs and toast for breakfast, did my
-  morning workout" -> expect a Blue Text task, a ~300-400 kcal food log, and
-  the workout routine checked.
+- **PENDING external steps (run from the account that owns the prod project;
+  runbook `apply-0005.md` covers all three):**
+  (0) **DEPLOY - prod is STALE.** Discovered while shipping this session:
+  pushes to `main` do NOT auto-deploy. The last GitHub-recorded Vercel
+  deployment is from **2026-06-12** (`b0f93d9`), so prod is running
+  pre-org-lanes code - sessions 3 AND 4 are not live (`/api/braindump` 404s
+  in prod; commit `6e1166b` has no Vercel status). The `taskify` project is
+  not visible from the Windows machine: CLI user `tpatel-2911` has no such
+  project and the LS Global Group team does not either - it lives on the
+  account used for the session-2 go-live (the Mac). Fix from there:
+  `git pull && vercel deploy --prod` from the repo root (project Root
+  Directory is `apps/web`), and optionally connect the GitHub repo in the
+  project's Git settings (production branch `main`) so pushes deploy
+  automatically from now on. Note: a stray empty `taskify` project briefly
+  created under `tpatel-2911s-projects` during this diagnosis was deleted
+  again; the real prod project and domain were never touched.
+  (1) Apply migrations **0005 + 0006** to prod (one `db push` applies both) -
+  until then food_logs/organizations rows retry harmlessly (per-table outbox
+  isolation).
+  (2) AI-path E2E in PROD after deploy (the Anthropic gateway env lives
+  there): dump "call Bryan tomorrow about the RAG prompt, had 2 eggs and
+  toast for breakfast, did my morning workout" -> expect a Blue Text task, a
+  ~300-400 kcal food log, and the workout routine checked.
 - **Follow-ups (explicitly out of scope this round):** watch webhook
   `/api/capture` still uses the old single-item triage prompt - upgrade it to
   the braindump brain later. Nutrition DB lookups (AI estimates only) and
