@@ -36,6 +36,7 @@ export function AppShell() {
     router.prefetch('/today');
     router.prefetch('/tasks');
     router.prefetch('/inbox');
+    router.prefetch('/notepad');
   }, [router]);
 
   // One-time clear of the bundled demo data, so the dashboard starts fresh.
@@ -65,6 +66,7 @@ export function AppShell() {
     { combo: 'g then k', handler: () => router.push('/kanban') },
     { combo: 'g then b', handler: () => router.push('/whiteboards') },
     { combo: 'g then n', handler: () => router.push('/inbox') },
+    { combo: 'g then p', handler: () => router.push('/notepad') },
     { combo: 'g then s', handler: () => router.push('/settings') },
     { combo: 'f', handler: openFocus },
     { combo: 'escape', handler: closeAll },
