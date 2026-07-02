@@ -12,6 +12,7 @@ import {
   KanbanSquare,
   LayoutDashboard,
   LayoutGrid,
+  NotebookPen,
   Pencil,
   Plus,
   Settings as SettingsIcon,
@@ -28,6 +29,7 @@ import { useActiveOrgs } from './org-switcher';
 const NAV = [
   { id: 'nav-dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, hint: 'g d' },
   { id: 'nav-today', label: 'Today', href: '/today', icon: Sun, hint: 'g t' },
+  { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g p' },
   { id: 'nav-week', label: 'Week', href: '/week', icon: LayoutGrid, hint: 'g w' },
   { id: 'nav-month', label: 'Month', href: '/month', icon: Calendar, hint: 'g m' },
   { id: 'nav-calendar', label: 'Calendar', href: '/calendar', icon: Calendar, hint: 'g c' },

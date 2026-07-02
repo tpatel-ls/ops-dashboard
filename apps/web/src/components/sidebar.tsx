@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   ListTodo,
   MessageCircle,
+  NotebookPen,
   Pencil,
   Repeat,
   Settings as SettingsIcon,
@@ -36,6 +37,7 @@ interface NavItem {
 const PLAN: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, shortcut: 'g d' },
   { href: '/today', label: 'Today', icon: Sun, shortcut: 'g t' },
+  { href: '/notepad', label: 'Notepad', icon: NotebookPen, shortcut: 'g p' },
   { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g n' },
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
   { href: '/calendar', label: 'Calendar', icon: Calendar, shortcut: 'g c' },
