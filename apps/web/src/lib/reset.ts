@@ -6,6 +6,7 @@ import type { SyncTable } from '@ops-dashboard/core';
 const TABLES: SyncTable[] = [
   'tasks',
   'projects',
+  'organizations',
   'whiteboards',
   'reminders',
   'domains',
@@ -21,6 +22,7 @@ const TABLES: SyncTable[] = [
   'notes',
   'quotes',
   'books',
+  'foodLogs',
 ];
 
 /** Clear every record from local storage (keeps Settings). Used by the one-time

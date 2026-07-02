@@ -2,7 +2,17 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { Archive, BookOpen, FileText, Inbox, StickyNote, Trash2, X } from 'lucide-react';
+import {
+  Archive,
+  BookOpen,
+  FileText,
+  Inbox,
+  Repeat,
+  StickyNote,
+  Trash2,
+  Utensils,
+  X,
+} from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Capture, CaptureKind } from '@ops-dashboard/core';
 import { dismissCapture, deleteCapture } from '@/lib/captures';
@@ -21,6 +31,8 @@ const KIND_LABEL: Record<CaptureKind, string> = {
   person: 'Person',
   quote: 'Quote',
   routine: 'Routine',
+  food: 'Food',
+  habit: 'Habit',
 };
 
 const KIND_ICON: Record<CaptureKind, React.ElementType> = {
@@ -31,6 +43,8 @@ const KIND_ICON: Record<CaptureKind, React.ElementType> = {
   person: Archive,
   quote: Archive,
   routine: Archive,
+  food: Utensils,
+  habit: Repeat,
 };
 
 const STATUS_LABEL = {

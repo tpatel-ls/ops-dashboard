@@ -177,12 +177,21 @@ export interface RoutineCheck extends SyncMeta {
   date: string;
   done: boolean;
   completedAt?: string;
-  source?: 'manual' | 'journal';
+  source?: 'manual' | 'journal' | 'capture';
 }
 
-export type CaptureSource = 'text' | 'voice' | 'watch' | 'journal';
+export type CaptureSource = 'text' | 'voice' | 'watch' | 'journal' | 'notepad';
 export type CaptureStatus = 'pending' | 'triaged' | 'dismissed';
-export type CaptureKind = 'task' | 'note' | 'journal' | 'event' | 'person' | 'quote' | 'routine';
+export type CaptureKind =
+  | 'task'
+  | 'note'
+  | 'journal'
+  | 'event'
+  | 'person'
+  | 'quote'
+  | 'routine'
+  | 'food'
+  | 'habit';
 
 export interface CaptureRoute {
   type: CaptureKind;
@@ -324,6 +333,36 @@ export interface Book extends SyncMeta {
   tags: string[];
 }
 
+// ---- Food logging ----
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+
+export interface FoodItem {
+  name: string;
+  /** e.g. "2 eggs", "1 cup". */
+  quantity?: string;
+  /** kcal, AI-estimated. */
+  calories: number;
+  /** Grams. */
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+}
+
+/** One logged meal/snack, AI-estimated from what the user said they ate. */
+export interface FoodLog extends SyncMeta {
+  /** Local YYYY-MM-DD. */
+  date: string;
+  mealType: MealType;
+  /** What the user actually said/typed. */
+  description: string;
+  items: FoodItem[];
+  totalCalories: number;
+  totalProtein?: number;
+  totalCarbs?: number;
+  totalFat?: number;
+  source?: CaptureSource;
+}
+
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type DefaultView =
   | 'today'
@@ -383,7 +422,8 @@ export type SyncTable =
   | 'people'
   | 'notes'
   | 'quotes'
-  | 'books';
+  | 'books'
+  | 'foodLogs';
 
 export interface SyncOp {
   id: ID;

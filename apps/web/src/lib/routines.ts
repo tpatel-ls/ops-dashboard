@@ -74,7 +74,7 @@ export async function toggleRoutineCheck(
   routineId: string,
   date: string,
   done: boolean,
-  source: 'manual' | 'journal' = 'manual',
+  source: 'manual' | 'journal' | 'capture' = 'manual',
 ): Promise<void> {
   const db = getDb();
   const existing = await db.routineChecks.where('[routineId+date]').equals([routineId, date]).first();
