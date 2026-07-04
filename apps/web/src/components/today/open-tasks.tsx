@@ -99,7 +99,7 @@ export function OpenTasks() {
               </span>
               <h3 className="text-base font-semibold tracking-tight">A clean slate.</h3>
               <p className="text-sm text-muted-foreground">
-                All caught up! Use the quick-add bar to capture what's next.
+                All caught up! Use the quick-add bar to capture what&apos;s next.
               </p>
             </div>
           ) : (

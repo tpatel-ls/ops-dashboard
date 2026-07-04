@@ -18,6 +18,7 @@ import {
   ListTodo,
   MessageCircle,
   NotebookPen,
+  MonitorSmartphone,
   Pencil,
   Repeat,
   Settings as SettingsIcon,
@@ -37,7 +38,7 @@ interface NavItem {
 
 const PLAN: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, shortcut: 'g d' },
-  { href: '/today', label: 'Today', icon: Sun, shortcut: 'g t' },
+  { href: '/today', label: 'Briefing', icon: Sun, shortcut: 'g t' },
   { href: '/notepad', label: 'Notepad', icon: NotebookPen, shortcut: 'g p' },
   { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g n' },
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
@@ -62,6 +63,7 @@ const LIBRARY: NavItem[] = [
 
 const META: NavItem[] = [
   { href: '/ask', label: 'Ask', icon: MessageCircle },
+  { href: '/devices', label: 'Devices', icon: MonitorSmartphone, shortcut: 'g x' },
   { href: '/domains', label: 'Domains', icon: Globe },
   { href: '/tags', label: 'Tags', icon: Hash },
   { href: '/settings', label: 'Settings', icon: SettingsIcon, shortcut: 'g s' },

@@ -67,6 +67,7 @@ export function AppShell() {
     { combo: 'g then b', handler: () => router.push('/whiteboards') },
     { combo: 'g then n', handler: () => router.push('/inbox') },
     { combo: 'g then p', handler: () => router.push('/notepad') },
+    { combo: 'g then x', handler: () => router.push('/devices') },
     { combo: 'g then s', handler: () => router.push('/settings') },
     { combo: 'f', handler: openFocus },
     { combo: 'escape', handler: closeAll },

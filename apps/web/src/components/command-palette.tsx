@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   LayoutGrid,
   NotebookPen,
+  MonitorSmartphone,
   Pencil,
   Plus,
   Settings as SettingsIcon,
@@ -29,7 +30,7 @@ import { useActiveOrgs } from './org-switcher';
 
 const NAV = [
   { id: 'nav-dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, hint: 'g d' },
-  { id: 'nav-today', label: 'Today', href: '/today', icon: Sun, hint: 'g t' },
+  { id: 'nav-today', label: 'Briefing', href: '/today', icon: Sun, hint: 'g t' },
   { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g p' },
   { id: 'nav-week', label: 'Week', href: '/week', icon: LayoutGrid, hint: 'g w' },
   { id: 'nav-month', label: 'Month', href: '/month', icon: Calendar, hint: 'g m' },
@@ -40,6 +41,7 @@ const NAV = [
   { id: 'nav-food', label: 'Food', href: '/food', icon: Utensils },
   { id: 'nav-tags', label: 'Tags', href: '/tags', icon: Hash },
   { id: 'nav-projects', label: 'Projects', href: '/projects', icon: Target },
+  { id: 'nav-devices', label: 'Devices', href: '/devices', icon: MonitorSmartphone, hint: 'g x' },
   { id: 'nav-settings', label: 'Settings', href: '/settings', icon: SettingsIcon, hint: 'g s' },
 ];
 

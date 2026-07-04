@@ -16,13 +16,16 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
   {
     heading: 'Navigate',
     rows: [
-      ['g t', 'Today'],
+      ['g d', 'Dashboard'],
+      ['g t', 'Briefing'],
+      ['g p', 'Notepad'],
       ['g w', 'Week'],
       ['g m', 'Month'],
       ['g c', 'Calendar'],
       ['g k', 'Kanban'],
       ['g b', 'Whiteboards'],
       ['g n', 'Inbox'],
+      ['g x', 'Devices'],
       ['g s', 'Settings'],
     ],
   },
