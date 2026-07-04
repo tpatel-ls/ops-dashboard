@@ -34,12 +34,17 @@ export function TodayStats() {
   ];
 
   return (
-    <div className="flex items-center divide-x divide-border">
+    <div className="grid grid-cols-3 gap-2">
       {items.map((it) => {
         const Icon = it.icon;
         return (
-          <div key={it.label} className="flex items-center gap-2 px-3 first:pl-0 last:pr-0">
-            <Icon className={`size-3.5 ${it.tone}`} aria-hidden />
+          <div
+            key={it.label}
+            className="flex min-w-[86px] items-center gap-2 rounded-[12px] border bg-card/70 px-2.5 py-2 shadow-sm backdrop-blur"
+          >
+            <span className="flex size-7 items-center justify-center rounded-[9px] bg-bg-sunken">
+              <Icon className={`size-3.5 ${it.tone}`} aria-hidden />
+            </span>
             <div className="flex items-baseline gap-1.5">
               <span className="font-mono text-sm font-semibold tabular-nums">{it.value}</span>
               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
