@@ -133,6 +133,23 @@ export function DevicesHub() {
             <ReadinessPill label="Sync" state={readiness.sync} />
           </div>
         </div>
+        <div className="relative mt-5 grid grid-cols-5 gap-2">
+          {DEVICE_SETUPS.map((device, index) => {
+            const Icon = ICONS[device.id];
+            return (
+              <div
+                key={device.id}
+                className="rounded-[14px] border bg-card/62 px-2 py-2 text-center backdrop-blur"
+                style={{ transform: `translateY(${index % 2 === 0 ? 0 : 6}px)` }}
+              >
+                <Icon className="mx-auto size-4 text-primary" aria-hidden />
+                <div className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+                  {device.id === 'galaxy-watch' ? 'Watch' : device.id === 'tab-s10-ultra' ? 'Tablet' : device.id === 's24-ultra' ? 'Phone' : device.name}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -219,7 +236,8 @@ function ReadinessPill({ label, state }: { label: string; state: ReadinessState 
 function DeviceCard({ device }: { device: DeviceSetup }) {
   const Icon = ICONS[device.id];
   return (
-    <article className="group rounded-[18px] border bg-card p-4 shadow-sm transition-colors hover:border-border-strong">
+    <article className="group relative overflow-hidden rounded-[18px] border bg-card p-4 shadow-sm transition-colors hover:border-border-strong">
+      <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-warning to-success opacity-70" aria-hidden />
       <div className="mb-4 flex items-start gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-bg-sunken text-primary transition-transform group-hover:-translate-y-0.5">
           <Icon className="size-5" aria-hidden />
