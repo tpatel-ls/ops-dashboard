@@ -1,17 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { Bell, Search, Settings, Sparkles } from 'lucide-react';
+import { Bell, Radio, Search, Settings, Sparkles } from 'lucide-react';
+import { useAppStore } from '@/lib/app-store';
 import { ThemeToggle } from './theme-toggle';
 import { QuickAdd } from './quick-add';
 import { OrgSwitcher } from './org-switcher';
+import { SyncStatus } from './sync-status';
 
 export function TopBar() {
+  const togglePalette = useAppStore((s) => s.togglePalette);
+
   return (
-    <header className="hairline relative flex h-16 shrink-0 items-center gap-3 border-b bg-bg-base/70 px-4 backdrop-blur-md md:px-6">
+    <header className="hairline relative flex h-16 shrink-0 items-center gap-3 border-b bg-bg-base/80 px-4 backdrop-blur-xl md:px-6">
       <div className="flex flex-1 items-center gap-2">
-        <div className="surface-flat flex h-10 max-w-2xl flex-1 items-center gap-2 px-3 shadow-sm">
-          <Sparkles className="size-4 text-primary" aria-hidden />
+        <div className="command-surface flex h-11 max-w-2xl flex-1 items-center gap-2 rounded-[14px] px-3">
+          <span className="hidden items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary md:inline-flex">
+            <Radio className="size-3" aria-hidden />
+            Capture
+          </span>
+          <Sparkles className="size-4 text-primary md:hidden" aria-hidden />
           <QuickAdd />
           <div className="hidden items-center gap-1 md:flex">
             <span className="kbd">Enter</span>
@@ -20,11 +28,15 @@ export function TopBar() {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-1.5">
+        <div className="hidden xl:block">
+          <SyncStatus showPending={false} />
+        </div>
         <OrgSwitcher />
         <button
           type="button"
+          onClick={togglePalette}
           aria-label="Search"
-          className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Search className="size-3.5" aria-hidden />
           <span className="hidden md:inline">Search</span>
