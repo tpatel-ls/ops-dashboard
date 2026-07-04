@@ -65,7 +65,7 @@ export function OpenTasks() {
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
-        className="mb-2.5 flex w-full items-center gap-2 text-left"
+        className="mb-2.5 flex w-full items-center gap-2 rounded-[12px] px-1 py-1 text-left transition-colors hover:bg-accent/55"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
           Open Tasks
@@ -93,12 +93,12 @@ export function OpenTasks() {
               ))}
             </ul>
           ) : tasks.length === 0 ? (
-            <div className="surface flex min-h-[80px] flex-col items-center justify-center gap-1.5 p-6 text-center">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+            <div className="os-panel flex min-h-[118px] flex-col items-center justify-center gap-2 rounded-[18px] p-6 text-center">
+              <span className="relative font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
                 open tasks
               </span>
               <h3 className="text-base font-semibold tracking-tight">A clean slate.</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="max-w-sm text-sm leading-6 text-muted-foreground">
                 All caught up! Use the quick-add bar to capture what&apos;s next.
               </p>
             </div>
