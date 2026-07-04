@@ -51,8 +51,8 @@ export function HelpOverlay() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="surface w-full max-w-2xl overflow-hidden">
-        <header className="flex items-center justify-between border-b border-hairline px-5 py-4">
+      <div className="command-surface w-full max-w-3xl overflow-hidden rounded-[22px]">
+        <header className="relative flex items-center justify-between border-b border-hairline px-5 py-4">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
               Reference
@@ -68,9 +68,9 @@ export function HelpOverlay() {
             Esc
           </button>
         </header>
-        <div className="grid gap-6 p-5 sm:grid-cols-3">
+        <div className="grid gap-4 p-5 sm:grid-cols-3">
           {SECTIONS.map((s) => (
-            <div key={s.heading}>
+            <div key={s.heading} className="rounded-[16px] border bg-bg-sunken/45 p-3">
               <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
                 {s.heading}
               </div>
