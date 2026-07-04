@@ -16,6 +16,7 @@ import {
   MonitorSmartphone,
   Pencil,
   Plus,
+  Search,
   Settings as SettingsIcon,
   Sun,
   Target,
@@ -102,20 +103,25 @@ export function CommandPalette() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="surface w-full max-w-xl overflow-hidden">
+      <div className="command-surface w-full max-w-2xl overflow-hidden rounded-[22px]">
         <Command label="Command palette" shouldFilter={false} className="flex flex-col">
-          <div className="flex items-center gap-2 border-b border-hairline px-4 py-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
-              Search
-            </span>
-            <Command.Input
-              value={query}
-              onValueChange={setQuery}
-              placeholder="Find tasks, jump to a view, or type to capture..."
-              className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
-              autoFocus
-            />
-            <span className="kbd">Esc</span>
+          <div className="border-b border-hairline px-4 py-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+                Command center
+              </span>
+              <span className="kbd">Esc</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-[14px] border bg-bg-sunken px-3 py-2">
+              <Search className="size-4 text-primary" aria-hidden />
+              <Command.Input
+                value={query}
+                onValueChange={setQuery}
+                placeholder="Find tasks, switch context, or capture a thought..."
+                className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
+                autoFocus
+              />
+            </div>
           </div>
           <Command.List className="scrollbar-thin max-h-[60vh] overflow-y-auto p-2">
             <Command.Empty className="px-3 py-6 text-center text-xs text-muted-foreground">
