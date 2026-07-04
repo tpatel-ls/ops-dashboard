@@ -167,6 +167,42 @@ body {
     0 0;
 }
 
+.os-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--card) 96%, var(--primary) 4%),
+      var(--card)
+    );
+  box-shadow:
+    0 1px 0 color-mix(in oklch, white 38%, transparent) inset,
+    0 18px 48px -40px color-mix(in oklch, var(--foreground) 55%, transparent);
+}
+
+.os-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--primary) 18%, transparent), transparent 28%),
+    radial-gradient(circle at 92% 0%, color-mix(in oklch, var(--success) 14%, transparent), transparent 34%);
+  opacity: 0.9;
+}
+
+.command-surface {
+  border: 1px solid color-mix(in oklch, var(--primary) 22%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--card) 94%, var(--primary) 6%), var(--card)),
+    var(--card);
+  box-shadow:
+    0 24px 70px -42px color-mix(in oklch, var(--primary) 70%, transparent),
+    0 1px 0 color-mix(in oklch, white 35%, transparent) inset;
+}
+
 .surface {
   background: var(--card);
   border: 1px solid var(--border);
