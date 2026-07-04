@@ -43,7 +43,7 @@ export function BriefingIntelligence() {
   }
 
   return (
-    <section className="overflow-hidden rounded-[18px] border border-border bg-card shadow-sm">
+    <section className="overflow-hidden rounded-[20px] border border-border bg-card shadow-sm">
       <div className="relative isolate overflow-hidden border-b border-hairline px-4 py-4 md:px-5">
         <div
           aria-hidden
@@ -64,6 +64,17 @@ export function BriefingIntelligence() {
             <SignalPill label="Routing" value={briefing.summary.routingIssues} tone="warn" />
             <SignalPill label="Stale" value={briefing.summary.staleDomains} tone="danger" />
           </div>
+        </div>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-bg-sunken">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-success via-warning to-destructive"
+            style={{
+              width: `${Math.min(
+                100,
+                16 + briefing.summary.openToday * 8 + briefing.summary.routingIssues * 18 + briefing.summary.staleDomains * 18,
+              )}%`,
+            }}
+          />
         </div>
       </div>
 
@@ -107,7 +118,7 @@ function SignalPill({
   return (
     <div
       className={cn(
-        'min-w-[58px] rounded-[10px] border bg-card/70 px-2 py-1.5 backdrop-blur',
+        'min-w-[58px] rounded-[10px] border bg-card/72 px-2 py-1.5 shadow-sm backdrop-blur',
         tone === 'warn' && value > 0 && 'border-warning/40 bg-warning/10',
         tone === 'danger' && value > 0 && 'border-destructive/40 bg-destructive/10',
       )}
@@ -137,7 +148,7 @@ function BriefingPanel({
 }) {
   const hasChildren = children.length > 0;
   return (
-    <div className="bg-card p-4">
+    <div className="bg-card p-4 transition-colors hover:bg-bg-raised">
       <div className="mb-3 flex items-start gap-3">
         <div className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-bg-sunken text-primary">
           <Icon className="size-4" aria-hidden />
