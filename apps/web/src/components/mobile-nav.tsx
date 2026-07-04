@@ -8,7 +8,7 @@ import { useAppStore } from '@/lib/app-store';
 
 const LEFT = [
   { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-  { href: '/today', label: 'Today', icon: Sun },
+  { href: '/today', label: 'Brief', icon: Sun },
 ];
 const RIGHT = [
   { href: '/routines', label: 'Routines', icon: Repeat },

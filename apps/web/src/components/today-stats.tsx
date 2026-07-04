@@ -28,7 +28,7 @@ export function TodayStats() {
   });
 
   const items = [
-    { label: 'Today', value: stats?.total ?? 0, icon: ListTodo, tone: 'text-foreground' },
+    { label: 'Brief', value: stats?.total ?? 0, icon: ListTodo, tone: 'text-foreground' },
     { label: 'Done', value: stats?.done ?? 0, icon: Target, tone: 'text-success' },
     { label: 'Overdue', value: stats?.overdue ?? 0, icon: Flame, tone: 'text-priority-urgent' },
   ];
