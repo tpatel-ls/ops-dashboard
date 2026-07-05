@@ -52,6 +52,8 @@ export function RoutineChecklist() {
       grouped,
       checksByRoutine,
       todayDone,
+      totalRoutines: activeRoutines.length,
+      doneToday: activeRoutines.filter((r) => todayDone[r.id] === true).length,
     };
   });
 
@@ -61,16 +63,32 @@ export function RoutineChecklist() {
     );
   }
 
-  const { grouped, checksByRoutine, todayDone } = data;
+  const { grouped, checksByRoutine, todayDone, totalRoutines, doneToday } = data;
   const hasAny = TIME_ORDER.some((tod) => (grouped[tod]?.length ?? 0) > 0);
+  const completion = totalRoutines > 0 ? Math.round((doneToday / totalRoutines) * 100) : 0;
 
   return (
     <section className="surface flex flex-col">
-      <div className="hairline flex items-center border-b px-4 py-3">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-          Routines
-        </span>
-        <span className="ml-1.5 font-mono text-[10px] text-muted-foreground">{today}</span>
+      <div className="hairline border-b px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            Routines
+          </span>
+          <span className="font-mono text-[10px] text-muted-foreground">{today}</span>
+          {hasAny ? (
+            <span className="ml-auto font-mono text-[10px] tabular-nums text-muted-foreground">
+              {doneToday}/{totalRoutines} done
+            </span>
+          ) : null}
+        </div>
+        {hasAny ? (
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-bg-sunken">
+            <div
+              className="h-full rounded-full bg-success transition-all"
+              style={{ width: `${completion}%` }}
+            />
+          </div>
+        ) : null}
       </div>
 
       {!hasAny ? (
@@ -89,10 +107,16 @@ export function RoutineChecklist() {
             {TIME_ORDER.map((tod) => {
               const routines = grouped[tod];
               if (!routines || routines.length === 0) return null;
+              const groupDone = routines.filter((routine) => todayDone[routine.id] === true).length;
               return (
                 <div key={tod}>
-                  <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
-                    {TIME_LABEL[tod]}
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+                      {TIME_LABEL[tod]}
+                    </span>
+                    <span className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+                      {groupDone}/{routines.length}
+                    </span>
                   </div>
                   <ul className="flex flex-col gap-1">
                     {routines.map((routine) => {
