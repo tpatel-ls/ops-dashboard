@@ -12,15 +12,18 @@ export function TopBar() {
   const togglePalette = useAppStore((s) => s.togglePalette);
 
   return (
-    <header className="hairline relative flex h-16 shrink-0 items-center gap-3 border-b bg-bg-base/80 px-4 backdrop-blur-xl md:px-6">
+    <header className="hairline relative flex h-16 shrink-0 items-center gap-3 border-b bg-bg-base/82 px-4 backdrop-blur-xl md:px-6">
       <div className="flex flex-1 items-center gap-2">
-        <div className="command-surface flex h-11 max-w-2xl flex-1 items-center gap-2 rounded-[14px] px-3">
+        <div className="command-surface flex h-11 max-w-3xl flex-1 items-center gap-2 rounded-[14px] px-3">
           <span className="hidden items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary md:inline-flex">
             <Radio className="size-3" aria-hidden />
-            Capture
+            Universal capture
           </span>
           <Sparkles className="size-4 text-primary md:hidden" aria-hidden />
           <QuickAdd />
+          <span className="hidden rounded-full border bg-card/65 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground lg:inline-flex">
+            AI route
+          </span>
           <div className="hidden items-center gap-1 md:flex">
             <span className="kbd">Enter</span>
             <span className="font-mono text-[10px] text-subtle-foreground">save</span>
