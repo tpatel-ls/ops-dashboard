@@ -5,6 +5,7 @@ import { Check, Flame } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { TimeOfDay } from '@ops-dashboard/core';
 import { computeStreak, todayISO, toggleRoutineCheck } from '@/lib/routines';
+import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { cn } from '@ops-dashboard/ui';
 
 const TIME_ORDER: TimeOfDay[] = ['morning', 'afternoon', 'evening', 'anytime'];
@@ -127,9 +128,11 @@ export function RoutineChecklist() {
                         <li key={routine.id} className="flex items-center gap-3">
                           <button
                             type="button"
-                            onClick={() =>
-                              toggleRoutineCheck(routine.id, today, !checkedToday)
-                            }
+                            onClick={() => {
+                              if (checkedToday) hapticTap();
+                              else hapticSuccess();
+                              void toggleRoutineCheck(routine.id, today, !checkedToday);
+                            }}
                             className={cn(
                               'inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
                               checkedToday
