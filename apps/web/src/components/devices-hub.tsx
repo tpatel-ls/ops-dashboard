@@ -20,6 +20,7 @@ import {
   type InstallReadiness,
   type ReadinessState,
 } from '@/lib/device-setup';
+import { supportsAppBadge } from '@/lib/app-badge';
 
 const ICONS: Record<DeviceSetup['id'], typeof Smartphone> = {
   's24-ultra': Smartphone,
@@ -43,6 +44,13 @@ export function DevicesHub() {
     notifications: 'unavailable',
     sync: 'offline',
   });
+  const [capabilities, setCapabilities] = useState({
+    installed: false,
+    serviceWorker: false,
+    appBadge: false,
+    share: false,
+    haptics: false,
+  });
   const [endpoint, setEndpoint] = useState('https://APP.vercel.app/api/capture');
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -58,6 +66,13 @@ export function DevicesHub() {
       const notification = 'Notification' in window;
       const serviceWorker = 'serviceWorker' in navigator;
       const mediaRecorder = 'MediaRecorder' in window && Boolean(navigator.mediaDevices);
+      const capabilityFacts = {
+        installed: standalone,
+        serviceWorker,
+        appBadge: supportsAppBadge(),
+        share: 'share' in navigator,
+        haptics: 'vibrate' in navigator,
+      };
 
       setReadiness(
         getInstallReadiness({
@@ -69,6 +84,7 @@ export function DevicesHub() {
           online: navigator.onLine,
         }),
       );
+      setCapabilities(capabilityFacts);
       setEndpoint(`${window.location.origin}/api/capture`);
     }
 
@@ -188,6 +204,20 @@ export function DevicesHub() {
             />
           </section>
 
+          <section className="rounded-[18px] border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex items-center gap-2">
+              <MonitorSmartphone className="size-4 text-primary" aria-hidden />
+              <h3 className="text-sm font-semibold tracking-tight">Browser capabilities</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <CapabilityPill label="Installed" ready={capabilities.installed} />
+              <CapabilityPill label="Service worker" ready={capabilities.serviceWorker} />
+              <CapabilityPill label="App badge" ready={capabilities.appBadge} />
+              <CapabilityPill label="Share" ready={capabilities.share} />
+              <CapabilityPill label="Haptics" ready={capabilities.haptics} />
+            </div>
+          </section>
+
           <section className="rounded-[18px] border bg-bg-sunken p-4">
             <div className="mb-2 flex items-center gap-2">
               <WifiOff className="size-4 text-warning" aria-hidden />
@@ -200,6 +230,25 @@ export function DevicesHub() {
             </p>
           </section>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function CapabilityPill({ label, ready }: { label: string; ready: boolean }) {
+  return (
+    <div
+      className={cn(
+        'rounded-[12px] border px-3 py-2',
+        ready ? 'border-success/35 bg-success/10' : 'bg-bg-sunken',
+      )}
+    >
+      <div className="flex items-center gap-1.5 text-xs font-medium">
+        <span className={cn('size-1.5 rounded-full', ready ? 'bg-success' : 'bg-muted-foreground')} />
+        {label}
+      </div>
+      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground">
+        {ready ? 'ready' : 'not exposed'}
       </div>
     </div>
   );

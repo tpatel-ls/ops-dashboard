@@ -64,7 +64,14 @@ function destinationLabel(r: RoutedResult): string {
 export function Notepad() {
   const searchParams = useSearchParams();
   const { draft, setDraft, saveDraft } = useLocalDraft('ops:notepad-draft');
-  const [value, setValue] = useState('');
+  const sharedValue = [
+    searchParams.get('title'),
+    searchParams.get('text'),
+    searchParams.get('url'),
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const [value, setValue] = useState(() => sharedValue || draft);
   const [feed, setFeed] = useState<FeedEntry[]>([]);
   const [pending, startTransition] = useTransition();
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -75,25 +82,9 @@ export function Notepad() {
   });
 
   useEffect(() => {
-    setValue((current) => (current.trim() ? current : draft));
-  }, [draft]);
-
-  useEffect(() => {
     const id = window.setTimeout(() => saveDraft(value), 450);
     return () => window.clearTimeout(id);
   }, [saveDraft, value]);
-
-  useEffect(() => {
-    const shared = [
-      searchParams.get('title'),
-      searchParams.get('text'),
-      searchParams.get('url'),
-    ]
-      .filter(Boolean)
-      .join('\n');
-    if (!shared.trim()) return;
-    setValue((current) => (current.trim() ? current : shared));
-  }, [searchParams]);
 
   // Auto-grow the textarea with its content (capped so it never eats the page).
   useEffect(() => {
