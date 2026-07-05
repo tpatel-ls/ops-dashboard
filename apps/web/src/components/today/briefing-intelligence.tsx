@@ -42,6 +42,16 @@ export function BriefingIntelligence() {
     );
   }
 
+  const pressure = Math.min(
+    100,
+    briefing.summary.openToday * 6 +
+      briefing.summary.routingIssues * 18 +
+      briefing.summary.staleDomains * 16,
+  );
+  const readiness = Math.max(0, 100 - pressure);
+  const readinessLabel =
+    readiness >= 80 ? 'clear' : readiness >= 55 ? 'loaded' : readiness >= 30 ? 'hot' : 'critical';
+
   return (
     <section className="overflow-hidden rounded-[20px] border border-border bg-card shadow-sm">
       <div className="relative isolate overflow-hidden border-b border-hairline px-4 py-4 md:px-5">
@@ -58,6 +68,17 @@ export function BriefingIntelligence() {
               Operating signal
             </div>
             <h2 className="text-lg font-semibold tracking-tight">Briefing intelligence</h2>
+            <div className="mt-2 flex max-w-md items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-sunken">
+                <div
+                  className="h-full rounded-full bg-success transition-all"
+                  style={{ width: `${readiness}%` }}
+                />
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                {readiness}% {readinessLabel}
+              </span>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <SignalPill label="Open" value={briefing.summary.openToday} tone="default" />
