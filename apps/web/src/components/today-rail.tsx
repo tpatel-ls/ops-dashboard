@@ -27,18 +27,36 @@ export function TodayRail() {
   const hours = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
   const minutesIntoDay = (d: Date) => (d.getHours() - START_HOUR) * 60 + d.getMinutes();
   const nowOffset = (minutesIntoDay(now) / 60) * HOUR_HEIGHT;
+  const nextBlock = blocks
+    ?.filter((task) => task.startAt && parseISO(task.startAt) >= now)
+    .sort((a, b) => a.startAt!.localeCompare(b.startAt!))[0];
 
   return (
     <div className="surface flex h-full flex-col overflow-hidden">
-      <div className="hairline flex items-center justify-between border-b px-4 py-3">
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle-foreground">
-            Hour rail
+      <div className="hairline border-b px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle-foreground">
+              Hour rail
+            </div>
+            <div className="mt-0.5 text-sm font-medium">{format(now, 'EEEE')}</div>
           </div>
-          <div className="mt-0.5 text-sm font-medium">{format(now, 'EEEE')}</div>
+          <div className="text-right">
+            <div className="font-mono text-xs tabular-nums text-muted-foreground">
+              {format(now, 'HH:mm')}
+            </div>
+            <div className="mt-0.5 font-mono text-[10px] text-subtle-foreground">
+              {blocks ? `${blocks.length} block${blocks.length === 1 ? '' : 's'}` : 'loading'}
+            </div>
+          </div>
         </div>
-        <div className="font-mono text-xs tabular-nums text-muted-foreground">
-          {format(now, 'HH:mm')}
+        <div className="mt-3 rounded-[12px] border bg-bg-sunken px-3 py-2">
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
+            Next block
+          </div>
+          <div className="mt-0.5 truncate text-xs text-muted-foreground">
+            {nextBlock ? `${format(parseISO(nextBlock.startAt!), 'HH:mm')} · ${nextBlock.title}` : 'No upcoming time block'}
+          </div>
         </div>
       </div>
       <div className="scrollbar-thin relative flex-1 overflow-y-auto">
@@ -78,6 +96,11 @@ export function TodayRail() {
               </div>
             );
           })}
+          {blocks && blocks.length === 0 ? (
+            <div className="absolute left-14 right-2 top-16 rounded-[14px] border border-dashed bg-card/80 px-3 py-4 text-center text-xs leading-5 text-muted-foreground">
+              Schedule a task with a start time to make the rail operational.
+            </div>
+          ) : null}
           {nowOffset >= 0 && nowOffset <= hours.length * HOUR_HEIGHT ? (
             <div
               className="absolute right-0 left-12 z-10 flex items-center"
