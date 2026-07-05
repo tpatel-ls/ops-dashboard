@@ -1,13 +1,14 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { BookOpen, CheckCircle2, Flame, ShieldCheck, Sparkles, Target } from 'lucide-react';
+import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { loadActivity } from '@/lib/activity';
 import { computeStreak, todayISO } from '@/lib/routines';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
+import { shareOrCopy } from '@/lib/share';
 import { cn } from '@ops-dashboard/ui';
 
 // ─── Stat card ───────────────────────────────────────────────────────────────
@@ -147,6 +148,15 @@ export default function HabitsPage() {
   };
   const identityScore = computeIdentityScore(identityInput);
   const sectionScores = computeIdentitySections(identityInput);
+  const band = identityBand(identityScore);
+
+  async function shareIdentityScore() {
+    await shareOrCopy({
+      title: 'Identity Calendar',
+      text: `Identity score: ${identityScore}/100 (${band}). ${weeklyActiveDays}/7 active days this week, ${bestStreak}-day best streak.`,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+    });
+  }
 
   return (
     <ViewShell
@@ -174,7 +184,7 @@ export default function HabitsPage() {
                   <span className="pb-2 font-mono text-sm text-subtle-foreground">/100</span>
                 </div>
                 <div className="mt-2 inline-flex rounded-full border bg-card/65 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary backdrop-blur">
-                  {identityBand(identityScore)}
+                  {band}
                 </div>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                   Built from streak, weekly consistency, completed tasks, reflection, and the
@@ -195,6 +205,14 @@ export default function HabitsPage() {
                   </div>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => void shareIdentityScore()}
+                className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card/75 px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                <Share2 className="size-3.5 text-primary" aria-hidden />
+                Share score
+              </button>
             </div>
           </section>
 
