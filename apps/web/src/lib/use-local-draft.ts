@@ -3,17 +3,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePageVisibility } from './use-page-visibility';
 
+function readDraft(key: string): string {
+  if (typeof window === 'undefined') return '';
+  try {
+    return window.localStorage.getItem(key) ?? '';
+  } catch {
+    return '';
+  }
+}
+
 export function useLocalDraft(key: string) {
   const visibility = usePageVisibility();
-  const [draft, setDraft] = useState('');
-
-  useEffect(() => {
-    try {
-      setDraft(window.localStorage.getItem(key) ?? '');
-    } catch {
-      setDraft('');
-    }
-  }, [key]);
+  const [draft, setDraft] = useState(() => readDraft(key));
 
   const saveDraft = useCallback(
     (value: string) => {

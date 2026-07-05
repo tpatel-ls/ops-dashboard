@@ -1,18 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Download, X } from 'lucide-react';
 import { useInstallPrompt } from '@/lib/use-install-prompt';
 
 const DISMISS_KEY = 'ops:install-prompt-dismissed';
 
+function getDismissedState(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return window.localStorage.getItem(DISMISS_KEY) === '1';
+  } catch {
+    return true;
+  }
+}
+
 export function InstallPrompt() {
   const { canPrompt, prompt } = useInstallPrompt();
-  const [dismissed, setDismissed] = useState(true);
-
-  useEffect(() => {
-    setDismissed(window.localStorage.getItem(DISMISS_KEY) === '1');
-  }, []);
+  const [dismissed, setDismissed] = useState(getDismissedState);
 
   if (!canPrompt || dismissed) return null;
 

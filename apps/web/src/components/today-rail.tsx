@@ -21,7 +21,9 @@ export function TodayRail() {
   }, []);
 
   useEffect(() => {
-    if (visibility === 'visible') setNow(new Date());
+    if (visibility !== 'visible') return;
+    const id = window.setTimeout(() => setNow(new Date()), 0);
+    return () => window.clearTimeout(id);
   }, [visibility]);
 
   const blocks = useLiveQuery(async () => {
