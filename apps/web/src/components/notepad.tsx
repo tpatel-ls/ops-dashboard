@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import {
   BookOpen,
@@ -60,6 +61,7 @@ function destinationLabel(r: RoutedResult): string {
 }
 
 export function Notepad() {
+  const searchParams = useSearchParams();
   const [value, setValue] = useState('');
   const [feed, setFeed] = useState<FeedEntry[]>([]);
   const [pending, startTransition] = useTransition();
@@ -69,6 +71,18 @@ export function Notepad() {
     // Append instead of auto-submitting: the user may keep talking/typing.
     onTranscript: (text) => setValue((v) => (v.trim() ? `${v.replace(/\s+$/, '')}\n${text}` : text)),
   });
+
+  useEffect(() => {
+    const shared = [
+      searchParams.get('title'),
+      searchParams.get('text'),
+      searchParams.get('url'),
+    ]
+      .filter(Boolean)
+      .join('\n');
+    if (!shared.trim()) return;
+    setValue((current) => (current.trim() ? current : shared));
+  }, [searchParams]);
 
   // Auto-grow the textarea with its content (capped so it never eats the page).
   useEffect(() => {
