@@ -7,6 +7,7 @@ import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { loadActivity } from '@/lib/activity';
 import { computeStreak, todayISO } from '@/lib/routines';
+import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
 import { cn } from '@ops-dashboard/ui';
 
 // ─── Stat card ───────────────────────────────────────────────────────────────
@@ -45,10 +46,6 @@ function StatCard({ label, value, icon: Icon, tone = 'text-primary', sub }: Stat
       </div>
     </div>
   );
-}
-
-function clampScore(value: number) {
-  return Math.max(0, Math.min(100, value));
 }
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
@@ -140,15 +137,16 @@ export default function HabitsPage() {
   const completedCount = stats?.completedCount ?? 0;
   const journalCount = stats?.journalCount ?? 0;
   const totalPoints = stats?.totalPoints ?? 0;
-  const identityScore = clampScore(
-    Math.round(bestStreak * 3.5 + weeklyActiveDays * 7 + Math.min(totalPoints, 160) * 0.22),
-  );
-  const sectionScores = [
-    { label: 'Consistency', value: clampScore(Math.round((bestStreak / 31) * 100)) },
-    { label: 'Execution', value: clampScore(Math.round((completedCount / 14) * 100)) },
-    { label: 'Reflection', value: clampScore(Math.round((journalCount / 7) * 100)) },
-    { label: 'Year signal', value: clampScore(Math.round((activeDays / 365) * 100)) },
-  ];
+  const identityInput = {
+    bestStreak,
+    weeklyActiveDays,
+    activeDays,
+    completedCount,
+    journalCount,
+    totalPoints,
+  };
+  const identityScore = computeIdentityScore(identityInput);
+  const sectionScores = computeIdentitySections(identityInput);
 
   return (
     <ViewShell
@@ -174,6 +172,9 @@ export default function HabitsPage() {
                     {identityScore}
                   </span>
                   <span className="pb-2 font-mono text-sm text-subtle-foreground">/100</span>
+                </div>
+                <div className="mt-2 inline-flex rounded-full border bg-card/65 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary backdrop-blur">
+                  {identityBand(identityScore)}
                 </div>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                   Built from streak, weekly consistency, completed tasks, reflection, and the
@@ -207,7 +208,11 @@ export default function HabitsPage() {
             </div>
             <div className="flex flex-col gap-3">
               {sectionScores.map((score) => (
-                <ScoreBar key={score.label} label={score.label} value={score.value} />
+                <ScoreBar
+                  key={score.label}
+                  label={`${score.label} · ${score.target}`}
+                  value={score.value}
+                />
               ))}
             </div>
           </section>
