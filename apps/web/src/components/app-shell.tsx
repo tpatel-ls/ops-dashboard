@@ -15,6 +15,7 @@ import { DailyReviewTrigger } from './daily-review';
 import { ReminderTicker } from './reminder-ticker';
 import { SyncBoot } from './sync-boot';
 import { AppBadgeSync } from './app-badge-sync';
+import { InstallPrompt } from './install-prompt';
 
 export function AppShell() {
   const router = useRouter();
@@ -85,6 +86,7 @@ export function AppShell() {
       <ReminderTicker />
       <SyncBoot />
       <AppBadgeSync />
+      <InstallPrompt />
     </>
   );
 }
