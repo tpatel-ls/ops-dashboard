@@ -24,6 +24,7 @@ import type { CaptureKind } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { processBrainDump } from '@/lib/route-items';
 import type { RoutedResult } from '@/lib/route-items';
+import { useLocalDraft } from '@/lib/use-local-draft';
 import { useVoiceInput } from '@/lib/use-voice-input';
 import { ViewShell } from '@/components/view-shell';
 
@@ -62,6 +63,7 @@ function destinationLabel(r: RoutedResult): string {
 
 export function Notepad() {
   const searchParams = useSearchParams();
+  const { draft, setDraft, saveDraft } = useLocalDraft('ops:notepad-draft');
   const [value, setValue] = useState('');
   const [feed, setFeed] = useState<FeedEntry[]>([]);
   const [pending, startTransition] = useTransition();
@@ -71,6 +73,15 @@ export function Notepad() {
     // Append instead of auto-submitting: the user may keep talking/typing.
     onTranscript: (text) => setValue((v) => (v.trim() ? `${v.replace(/\s+$/, '')}\n${text}` : text)),
   });
+
+  useEffect(() => {
+    setValue((current) => (current.trim() ? current : draft));
+  }, [draft]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => saveDraft(value), 450);
+    return () => window.clearTimeout(id);
+  }, [saveDraft, value]);
 
   useEffect(() => {
     const shared = [
@@ -113,6 +124,8 @@ export function Notepad() {
       }
       setFeed((prev) => [...entries, ...prev]);
       setValue('');
+      setDraft('');
+      saveDraft('');
     });
   }
 
