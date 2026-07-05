@@ -118,7 +118,30 @@ export function Notepad() {
       subtitle="Dump everything on your mind. AI splits it into items and files each one."
     >
       <div className="flex flex-col gap-5">
-        <div className="surface-flat flex flex-col gap-2 rounded-[14px] p-3">
+        <div className="command-surface flex flex-col gap-2 rounded-[16px] p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-[9px] bg-primary/10 text-primary">
+                <NotebookPen className="size-4" aria-hidden />
+              </span>
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+                  Life input
+                </div>
+                <div className="text-sm font-semibold tracking-tight">Write once. File everywhere.</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {['tasks', 'meals', 'journal', 'routines'].map((label) => (
+                <span
+                  key={label}
+                  className="rounded-full border bg-card/65 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-subtle-foreground"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
           <textarea
             ref={taRef}
             value={value}
