@@ -27,14 +27,19 @@ export function MobileNav() {
       {LEFT.map((it) => (
         <Tab key={it.href} {...it} active={pathname.startsWith(it.href)} />
       ))}
-      <button
-        type="button"
-        onClick={openQuickAdd}
-        aria-label="Capture"
-        className="relative -top-4 mx-1 flex size-14 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary text-primary-foreground shadow-[0_14px_34px_-14px_color-mix(in_oklch,var(--primary)_82%,transparent)] transition-transform active:scale-95"
-      >
-        <Plus className="size-5" />
-      </button>
+      <div className="relative -top-4 mx-1 flex shrink-0 flex-col items-center">
+        <button
+          type="button"
+          onClick={openQuickAdd}
+          aria-label="Capture"
+          className="flex size-14 items-center justify-center rounded-full border border-primary/25 bg-primary text-primary-foreground shadow-[0_14px_34px_-14px_color-mix(in_oklch,var(--primary)_82%,transparent)] transition-transform active:scale-95"
+        >
+          <Plus className="size-5" />
+        </button>
+        <span className="mt-1 rounded-full border bg-card px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-primary shadow-sm">
+          Capture
+        </span>
+      </div>
       {RIGHT.map((it) => (
         <Tab key={it.href} {...it} active={pathname.startsWith(it.href)} />
       ))}
@@ -63,10 +68,13 @@ function Tab({
       )}
     >
       {active ? (
-        <span className="absolute inset-x-3 top-1 bottom-1 rounded-[14px] bg-accent" aria-hidden />
+        <span className="absolute inset-x-3 top-1 bottom-1 rounded-[14px] bg-accent shadow-[inset_0_1px_0_0_color-mix(in_oklch,var(--foreground)_7%,transparent)]" aria-hidden />
       ) : null}
       <Icon className={cn('relative size-5', active && 'text-primary')} aria-hidden />
       <span className="relative">{label}</span>
+      {active ? (
+        <span className="relative mt-0.5 size-1 rounded-full bg-primary" aria-hidden />
+      ) : null}
     </Link>
   );
 }
