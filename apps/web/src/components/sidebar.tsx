@@ -82,7 +82,7 @@ export function Sidebar() {
       aria-label="Primary"
       className="hairline scrollbar-thin relative hidden w-[252px] shrink-0 flex-col overflow-y-auto border-r bg-bg-rail/70 backdrop-blur md:flex"
     >
-      <div className="flex items-center gap-2.5 px-4 pt-5 pb-3">
+      <div className="mx-2 mt-3 flex items-center gap-2.5 rounded-[16px] border bg-card/60 px-3 py-3 shadow-sm">
         <div
           aria-hidden
           className="flex size-8 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
@@ -90,9 +90,9 @@ export function Sidebar() {
           <LayoutGrid className="size-4" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-[15px] font-semibold tracking-tight">Ops Dashboard</span>
+          <span className="text-[15px] font-semibold tracking-tight">Identity OS</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-            v0.1 / local
+            daily command
           </span>
         </div>
         <span
@@ -113,7 +113,7 @@ export function Sidebar() {
         ))}
       </Section>
 
-      <Section label="Build">
+      <Section label="Build" trailing="identity">
         {BUILD.map((item) => (
           <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
         ))}
@@ -133,10 +133,16 @@ export function Sidebar() {
         ))}
       </Section>
 
-      <div className="hairline border-t px-4 py-3">
-        <div className="flex items-center gap-2 text-[11px] text-subtle-foreground">
-          <span className="font-mono">⌘ K</span>
-          <span>command palette</span>
+      <div className="hairline border-t p-3">
+        <div className="rounded-[14px] border bg-card/60 p-3">
+          <div className="flex items-center gap-2 text-[11px] text-subtle-foreground">
+            <span className="font-mono">⌘ K</span>
+            <span>command palette</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-success live-dot" aria-hidden />
+            <span>Local-first system online</span>
+          </div>
         </div>
       </div>
     </aside>
@@ -174,9 +180,9 @@ function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badg
       href={item.href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors',
+        'group relative flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-sm transition-colors',
         active
-          ? 'bg-accent text-foreground'
+          ? 'bg-accent text-foreground shadow-[inset_0_1px_0_0_color-mix(in_oklch,var(--foreground)_7%,transparent)]'
           : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
       )}
     >
