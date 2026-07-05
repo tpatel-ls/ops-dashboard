@@ -34,9 +34,14 @@ export function TopThree() {
     <section>
       <div className="mb-2.5 flex items-center gap-2">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-          Top Three
+          Daily mission
         </span>
         <Star className="size-3 text-primary" fill="currentColor" aria-hidden />
+        {tasks !== undefined ? (
+          <span className="ml-auto rounded-full border bg-card px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+            {tasks.length}/3 slots
+          </span>
+        ) : null}
       </div>
 
       {tasks === undefined ? (
@@ -50,7 +55,7 @@ export function TopThree() {
         </div>
       ) : (
         <ul className="flex flex-col gap-1.5">
-          {tasks.map((task) => {
+          {tasks.map((task, index) => {
             const priorityColor = PRIORITY_COLOR[task.priority] ?? 'transparent';
             return (
               <li
@@ -73,6 +78,10 @@ export function TopThree() {
                     opacity: task.priority === 0 ? 0 : 1,
                   }}
                 />
+
+                <span className="hidden size-6 shrink-0 items-center justify-center rounded-full bg-bg-sunken font-mono text-[10px] text-subtle-foreground sm:inline-flex">
+                  {index + 1}
+                </span>
 
                 {/* check-off button */}
                 <button
