@@ -5,6 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { format, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
+import { usePageVisibility } from '@/lib/use-page-visibility';
 
 const HOUR_HEIGHT = 44;
 const START_HOUR = 7;
@@ -12,11 +13,16 @@ const END_HOUR = 22;
 
 export function TodayRail() {
   const [now, setNow] = useState(() => new Date());
+  const visibility = usePageVisibility();
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (visibility === 'visible') setNow(new Date());
+  }, [visibility]);
 
   const blocks = useLiveQuery(async () => {
     const today = new Date().toISOString().slice(0, 10);
