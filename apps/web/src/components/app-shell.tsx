@@ -14,6 +14,7 @@ import { FocusMode } from './focus-mode';
 import { DailyReviewTrigger } from './daily-review';
 import { ReminderTicker } from './reminder-ticker';
 import { SyncBoot } from './sync-boot';
+import { AppBadgeSync } from './app-badge-sync';
 
 export function AppShell() {
   const router = useRouter();
@@ -83,6 +84,7 @@ export function AppShell() {
       <DailyReviewTrigger />
       <ReminderTicker />
       <SyncBoot />
+      <AppBadgeSync />
     </>
   );
 }
