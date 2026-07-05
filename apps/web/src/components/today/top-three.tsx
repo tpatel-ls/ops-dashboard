@@ -5,6 +5,7 @@ import { Check, Star } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
+import { hapticSuccess } from '@/lib/haptics';
 import { cn } from '@ops-dashboard/ui';
 
 const PRIORITY_COLOR: Record<number, string> = {
@@ -86,7 +87,10 @@ export function TopThree() {
                 {/* check-off button */}
                 <button
                   type="button"
-                  onClick={() => setTaskStatus(task.id, 'done')}
+                  onClick={() => {
+                    hapticSuccess();
+                    void setTaskStatus(task.id, 'done');
+                  }}
                   className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10"
                   aria-label="Mark done"
                 >
