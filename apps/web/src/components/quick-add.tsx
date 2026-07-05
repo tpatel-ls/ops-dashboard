@@ -81,6 +81,9 @@ export function QuickAdd() {
         autoComplete="off"
         spellCheck={false}
       />
+      <span className="hidden shrink-0 rounded-full border bg-card/70 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground xl:inline-flex">
+        {project ? 'Project mode' : pending ? 'Filing' : 'Triage mode'}
+      </span>
       <div ref={pickerRef} className="relative flex shrink-0 items-center">
         <button
           type="button"
@@ -121,7 +124,15 @@ export function QuickAdd() {
           )}
         </button>
         {pickerOpen ? (
-          <div className="surface absolute right-0 top-full z-50 mt-3 w-64 overflow-hidden">
+          <div className="surface absolute right-0 top-full z-50 mt-3 w-72 overflow-hidden">
+            <div className="hairline flex items-center justify-between border-b px-3 py-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
+                File capture into
+              </span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-primary">
+                {project ? 'locked' : 'auto'}
+              </span>
+            </div>
             <input
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
