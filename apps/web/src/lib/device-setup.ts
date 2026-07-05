@@ -54,6 +54,18 @@ export const APP_SHORTCUTS: AppShortcut[] = [
     url: '/tasks',
   },
   {
+    name: 'Identity Calendar',
+    shortName: 'Identity',
+    description: 'Open the habit score and activity ledger.',
+    url: '/habits',
+  },
+  {
+    name: 'Log Food',
+    shortName: 'Food',
+    description: 'Open meal capture and macro tracking.',
+    url: '/food',
+  },
+  {
     name: 'Inbox',
     shortName: 'Inbox',
     description: 'Clear captures that need review or routing.',
