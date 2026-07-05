@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ActivityCalendar } from 'react-activity-calendar';
+import { CalendarDays } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import type { ActivityDay } from '@/lib/activity';
 
@@ -50,6 +51,9 @@ const DARK_RAMP: [string, string, string, string, string] = [
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const [dark, setDark] = useState(true);
+  const total = data.reduce((sum, day) => sum + day.count, 0);
+  const activeDays = data.filter((day) => day.count > 0).length;
+  const peak = Math.max(0, ...data.map((day) => day.count));
 
   useEffect(() => {
     const html = document.documentElement;
@@ -76,29 +80,58 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   return (
     <div
       className={cn(
-        'surface overflow-x-auto p-5 scrollbar-thin',
+        'surface overflow-hidden p-0',
       )}
     >
-      <ActivityCalendar
-        data={data}
-        maxLevel={4}
-        weekStart={1}
-        colorScheme={dark ? 'dark' : 'light'}
-        theme={{
-          light: LIGHT_RAMP,
-          dark: DARK_RAMP,
-        }}
-        showWeekdayLabels
-        fontSize={11}
-        labels={{
-          totalCount: '{{count}} activity points in the last year',
-        }}
-        style={{
-          color: dark
-            ? 'oklch(0.96 0.005 80)'
-            : 'oklch(0.48 0.015 280)',
-        }}
-      />
+      <div className="hairline flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
+            <CalendarDays className="size-4" aria-hidden />
+          </span>
+          <div>
+            <h2 className="text-sm font-semibold tracking-tight">Year identity ledger</h2>
+            <p className="text-xs text-muted-foreground">Every completed action leaves a mark.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <MiniMetric label="points" value={total} />
+          <MiniMetric label="days" value={activeDays} />
+          <MiniMetric label="peak" value={peak} />
+        </div>
+      </div>
+      <div className="scrollbar-thin overflow-x-auto p-5">
+        <ActivityCalendar
+          data={data}
+          maxLevel={4}
+          weekStart={1}
+          colorScheme={dark ? 'dark' : 'light'}
+          theme={{
+            light: LIGHT_RAMP,
+            dark: DARK_RAMP,
+          }}
+          showWeekdayLabels
+          fontSize={11}
+          labels={{
+            totalCount: '{{count}} activity points in the last year',
+          }}
+          style={{
+            color: dark
+              ? 'oklch(0.96 0.005 80)'
+              : 'oklch(0.48 0.015 280)',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function MiniMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="min-w-[54px] rounded-[10px] border bg-bg-sunken px-2 py-1.5">
+      <div className="font-mono text-sm font-semibold tabular-nums">{value}</div>
+      <div className="font-mono text-[9px] uppercase tracking-[0.12em] text-subtle-foreground">
+        {label}
+      </div>
     </div>
   );
 }
