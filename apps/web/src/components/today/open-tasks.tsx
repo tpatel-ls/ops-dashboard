@@ -59,6 +59,20 @@ export function OpenTasks() {
   }) ?? { tasks: undefined, projects: {}, domains: {} };
 
   const openEdit = useAppStore((s) => s.openEdit);
+  const summary =
+    tasks === undefined
+      ? null
+      : {
+          overdue: tasks.filter(
+            (task) =>
+              (task.scheduledFor && task.scheduledFor < today) ||
+              (task.dueAt && task.dueAt.slice(0, 10) < today),
+          ).length,
+          today: tasks.filter(
+            (task) => task.scheduledFor === today || task.dueAt?.slice(0, 10) === today,
+          ).length,
+          high: tasks.filter((task) => task.priority >= 2).length,
+        };
 
   return (
     <section>
@@ -103,8 +117,16 @@ export function OpenTasks() {
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col gap-1.5">
-              {tasks.map((task) => {
+            <>
+              {summary ? (
+                <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                  <SummaryChip label="overdue" value={summary.overdue} tone="danger" />
+                  <SummaryChip label="today" value={summary.today} tone="primary" />
+                  <SummaryChip label="high" value={summary.high} tone="warn" />
+                </div>
+              ) : null}
+              <ul className="flex flex-col gap-1.5">
+                {tasks.map((task) => {
                 const priorityColor = PRIORITY_COLOR[task.priority];
                 const project = task.projectId ? projects[task.projectId] : null;
                 const domain = task.domainId
@@ -205,11 +227,36 @@ export function OpenTasks() {
                     </button>
                   </li>
                 );
-              })}
-            </ul>
+                })}
+              </ul>
+            </>
           )}
         </>
       )}
     </section>
+  );
+}
+
+function SummaryChip({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: 'danger' | 'primary' | 'warn';
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border bg-card px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground',
+        value > 0 && tone === 'danger' && 'border-destructive/35 bg-destructive/10 text-destructive',
+        value > 0 && tone === 'primary' && 'border-primary/35 bg-primary/10 text-primary',
+        value > 0 && tone === 'warn' && 'border-warning/40 bg-warning/10 text-warning',
+      )}
+    >
+      <span className="tabular-nums">{value}</span>
+      {label}
+    </span>
   );
 }
