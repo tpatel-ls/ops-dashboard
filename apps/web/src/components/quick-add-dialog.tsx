@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Loader2, Mic, MicOff, NotebookPen, Sparkles } from 'lucide-react';
+import { Loader2, Mic, MicOff, NotebookPen, Sparkles, X } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -52,7 +52,23 @@ export function QuickAddDialog() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="surface w-full max-w-xl overflow-hidden">
+      <div className="surface w-full max-w-2xl overflow-hidden">
+        <div className="hairline flex items-center justify-between gap-3 border-b px-4 py-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+              Command capture
+            </div>
+            <div className="text-sm font-semibold tracking-tight">Route anything into the system</div>
+          </div>
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close capture"
+            className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
         <form onSubmit={submit} className="flex items-center gap-3 px-4 py-3">
           {pending ? (
             <Loader2 className="size-4 animate-spin text-primary" aria-hidden />
@@ -68,7 +84,7 @@ export function QuickAddDialog() {
               onChange={(e) => setValue(e.target.value)}
               disabled={pending || listening || transcribing}
               placeholder="Capture anything: a task, a meal, a thought..."
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+              className="flex-1 bg-transparent text-base outline-none placeholder:text-subtle-foreground"
             />
           )}
           {available && !summary ? (
@@ -97,7 +113,17 @@ export function QuickAddDialog() {
           ) : null}
           <span className="kbd">Enter</span>
         </form>
-        <div className="hairline flex items-center justify-between border-t px-4 py-2">
+        <div className="hairline flex flex-wrap items-center justify-between gap-2 border-t px-4 py-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {['task', 'meal', 'thought'].map((label) => (
+              <span
+                key={label}
+                className="rounded-full border bg-bg-sunken px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-subtle-foreground"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
           <span className="text-[11px] text-subtle-foreground">
             Multiple thoughts? Brain-dump in the Notepad.
           </span>
