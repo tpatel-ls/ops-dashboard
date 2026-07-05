@@ -8,6 +8,7 @@ import type { Project } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { runCapture } from '@/lib/capture-client';
 import { addTaskToProject } from '@/lib/tasks';
+import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { useVoiceInput } from '@/lib/use-voice-input';
 
 export function QuickAdd() {
@@ -39,9 +40,11 @@ export function QuickAdd() {
   }, [pickerOpen]);
 
   function captureText(text: string, source: 'text' | 'voice') {
+    hapticTap();
     startTransition(async () => {
       if (project) await addTaskToProject(text, project);
       else await runCapture(text, source);
+      hapticSuccess();
       setValue('');
     });
   }
