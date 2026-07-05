@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Bell, Radio, Search, Settings, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/lib/app-store';
+import { useNetworkStatus } from '@/lib/use-network-status';
 import { ThemeToggle } from './theme-toggle';
 import { QuickAdd } from './quick-add';
 import { OrgSwitcher } from './org-switcher';
@@ -10,6 +11,7 @@ import { SyncStatus } from './sync-status';
 
 export function TopBar() {
   const togglePalette = useAppStore((s) => s.togglePalette);
+  const online = useNetworkStatus();
 
   return (
     <header className="hairline relative flex h-16 shrink-0 items-center gap-3 border-b bg-bg-base/82 px-4 backdrop-blur-xl md:px-6">
@@ -31,6 +33,13 @@ export function TopBar() {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-1.5">
+        <span className="hidden items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs text-muted-foreground lg:inline-flex">
+          <span
+            className={online ? 'live-dot size-1.5 rounded-full bg-success' : 'size-1.5 rounded-full bg-warning'}
+            aria-hidden
+          />
+          {online ? 'Online' : 'Offline'}
+        </span>
         <div className="hidden xl:block">
           <SyncStatus showPending={false} />
         </div>
