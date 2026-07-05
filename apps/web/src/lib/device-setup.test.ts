@@ -25,6 +25,8 @@ describe('device setup model', () => {
       '/today',
       '/today?capture=1',
       '/tasks',
+      '/habits',
+      '/food',
       '/inbox',
       '/ask',
     ]);
