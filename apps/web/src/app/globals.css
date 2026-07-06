@@ -121,6 +121,16 @@
   border-color: var(--border);
 }
 
+main,
+main * {
+  min-width: 0;
+}
+
+main {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 *:focus-visible {
   outline: 2px solid color-mix(in oklch, var(--ring) 72%, transparent);
   outline-offset: 2px;
@@ -209,6 +219,8 @@ body {
 }
 
 .surface {
+  min-width: 0;
+  max-width: 100%;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
@@ -219,6 +231,8 @@ body {
 }
 
 .surface-flat {
+  min-width: 0;
+  max-width: 100%;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);

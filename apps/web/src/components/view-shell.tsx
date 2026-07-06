@@ -25,13 +25,13 @@ export function ViewShell({
   return (
     <div
       className={cn(
-        'mx-auto flex h-full w-full flex-col gap-5 p-4 md:p-7',
+        'mx-auto flex h-full w-full min-w-0 flex-col gap-5 overflow-x-clip p-4 md:p-7',
         fullWidth ? 'max-w-none' : 'max-w-[1360px]',
       )}
     >
-      <header className="os-panel rounded-[22px] px-4 py-4 md:px-5 md:py-5">
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
+      <header className="os-panel min-w-0 rounded-[22px] px-4 py-4 md:px-5 md:py-5">
+        <div className="relative flex min-w-0 flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {eyebrow ? (
                 <div className="inline-flex rounded-full border bg-card/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground backdrop-blur">
@@ -50,7 +50,7 @@ export function ViewShell({
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 pt-0.5">
+          <div className="flex min-w-0 flex-wrap items-center justify-start gap-2 pt-0.5 md:justify-end">
             {meta ? <div className="flex items-center gap-2">{meta}</div> : null}
             {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
           </div>

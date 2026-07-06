@@ -39,9 +39,9 @@ export function MonthGrid() {
   const openEdit = useAppStore((s) => s.openEdit);
 
   return (
-    <div className="grid h-full gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
+    <div className="grid h-full min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <button
             type="button"
             aria-label="Previous month"
@@ -65,20 +65,20 @@ export function MonthGrid() {
           >
             <ChevronRight className="size-3" />
           </button>
-          <span className="ml-2 text-sm font-semibold tracking-tight">
+          <span className="ml-1 text-sm font-semibold tracking-tight md:ml-2">
             {format(anchor, 'MMMM yyyy')}
           </span>
           {lanes.showLegend ? (
-            <div className="ml-auto">
+            <div className="min-w-0 md:ml-auto">
               <OrgLaneLegend lanes={lanes.lanes} hidden={lanes.hidden} onToggle={lanes.toggle} />
             </div>
           ) : null}
         </div>
-        <div className="grid grid-cols-7 gap-px rounded-xl border border-border bg-border">
+        <div className="grid min-w-0 grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
           {labels.map((d) => (
             <div
               key={d}
-              className="bg-bg-rail px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
+              className="bg-bg-rail px-1 py-1.5 text-center font-mono text-[9px] uppercase tracking-[0.08em] text-subtle-foreground sm:px-2 sm:text-[10px] sm:tracking-[0.18em]"
             >
               {d}
             </div>
@@ -95,7 +95,7 @@ export function MonthGrid() {
                 type="button"
                 onClick={() => setSelected(iso)}
                 className={cn(
-                  'flex min-h-[88px] flex-col gap-1 bg-card p-2 text-left transition-colors',
+                  'flex min-h-[54px] min-w-0 flex-col gap-1 bg-card p-1.5 text-left transition-colors sm:min-h-[88px] sm:p-2',
                   !inMonth && 'bg-bg-sunken text-muted-foreground/60',
                   isSelected && 'ring-2 ring-inset ring-primary/60',
                 )}
@@ -108,11 +108,26 @@ export function MonthGrid() {
                 >
                   {format(day, 'd')}
                 </span>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <div className="flex flex-wrap gap-0.5 sm:hidden">
+                    {dayTasks.slice(0, 4).map((t) => (
+                      <span
+                        key={t.id}
+                        aria-hidden
+                        className="size-1.5 rounded-full"
+                        style={{ background: lanes.colorOf(lanes.laneOf(t)) }}
+                      />
+                    ))}
+                    {dayTasks.length > 4 ? (
+                      <span className="font-mono text-[9px] text-subtle-foreground">
+                        +{dayTasks.length - 4}
+                      </span>
+                    ) : null}
+                  </div>
                   {dayTasks.slice(0, 3).map((t) => (
                     <span
                       key={t.id}
-                      className="flex items-center gap-1 truncate text-[11px]"
+                      className="hidden min-w-0 items-center gap-1 truncate text-[11px] sm:flex"
                     >
                       <span
                         aria-hidden
@@ -123,7 +138,7 @@ export function MonthGrid() {
                     </span>
                   ))}
                   {dayTasks.length > 3 ? (
-                    <span className="font-mono text-[10px] text-subtle-foreground">
+                    <span className="hidden font-mono text-[10px] text-subtle-foreground sm:inline">
                       +{dayTasks.length - 3}
                     </span>
                   ) : null}
@@ -133,7 +148,7 @@ export function MonthGrid() {
           })}
         </div>
       </div>
-      <aside className="surface flex h-full min-h-[400px] flex-col overflow-hidden">
+      <aside className="surface flex h-full min-h-[280px] min-w-0 flex-col overflow-hidden lg:min-h-[400px]">
         <header className="border-b border-hairline px-4 py-3">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
             Day detail
