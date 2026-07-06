@@ -14,6 +14,7 @@ export default async function LoginPage({
 }) {
   const { error, next: rawNext } = await searchParams;
   const message = error ? (ERRORS[error] ?? 'Sign-in failed.') : null;
+  const localDevLogin = process.env.NODE_ENV !== 'production';
   const next =
     rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.startsWith('/\\')
       ? rawNext
@@ -71,6 +72,20 @@ export default async function LoginPage({
           This is a single-user dashboard. Accounts are created in the Supabase
           dashboard — there is no public signup.
         </p>
+
+        {localDevLogin ? (
+          <div className="mt-4 border-t pt-4">
+            <a
+              href={`/auth/dev-login?next=${encodeURIComponent(next)}`}
+              className="flex w-full items-center justify-center rounded-md border bg-bg-sunken px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Continue locally
+            </a>
+            <p className="mt-2 text-[11px] leading-relaxed text-subtle-foreground">
+              Development only. This bypass never works on production hosts.
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

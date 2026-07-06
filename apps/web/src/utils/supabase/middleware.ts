@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { DEV_AUTH_COOKIE, DEV_AUTH_VALUE, isDevAuthAvailable } from '@/lib/dev-auth';
 
 /**
  * Refreshes the Supabase session cookie on every matched request and gates page
@@ -12,6 +13,22 @@ import { NextResponse, type NextRequest } from 'next/server';
 const PUBLIC_PATHS = ['/login', '/auth', '/~offline'];
 
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
+  const { pathname, hostname } = request.nextUrl;
+  const isApi = pathname.startsWith('/api');
+  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const hasDevAuth =
+    isDevAuthAvailable(hostname) && request.cookies.get(DEV_AUTH_COOKIE)?.value === DEV_AUTH_VALUE;
+
+  if (hasDevAuth) {
+    if (pathname === '/login') {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/dashboard';
+      redirectUrl.search = '';
+      return NextResponse.redirect(redirectUrl);
+    }
+    return NextResponse.next({ request });
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -41,10 +58,6 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   // keys when available). Do not insert logic between createServerClient and this.
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims ?? null;
-
-  const { pathname } = request.nextUrl;
-  const isApi = pathname.startsWith('/api');
-  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   // Redirect only real page navigations; APIs self-guard and return JSON.
   if (!claims && !isApi && !isPublic) {
