@@ -15,9 +15,9 @@ export function TopBar() {
   const online = useNetworkStatus();
 
   return (
-    <header className="hairline relative flex h-16 shrink-0 items-center gap-3 border-b bg-bg-base/82 px-4 backdrop-blur-xl md:px-6">
-      <div className="flex flex-1 items-center gap-2">
-        <div className="command-surface flex h-11 max-w-3xl flex-1 items-center gap-2 rounded-[14px] px-3">
+    <header className="hairline relative flex h-16 shrink-0 items-center gap-2 overflow-hidden border-b bg-bg-base/82 px-3 backdrop-blur-xl md:gap-3 md:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="command-surface flex h-11 min-w-0 max-w-3xl flex-1 items-center gap-2 rounded-[14px] px-2.5 md:px-3">
           <span className="hidden items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary md:inline-flex">
             <Radio className="size-3" aria-hidden />
             Universal capture
@@ -33,7 +33,7 @@ export function TopBar() {
           </div>
         </div>
       </div>
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5">
         <span className="hidden items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs text-muted-foreground lg:inline-flex">
           <span
             className={cn(
@@ -49,32 +49,36 @@ export function TopBar() {
         <div className="hidden xl:block">
           <SyncStatus showPending={false} />
         </div>
-        <OrgSwitcher />
+        <div className="hidden sm:block">
+          <OrgSwitcher />
+        </div>
         <button
           type="button"
           onClick={togglePalette}
           aria-label="Search"
-          className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="hairline inline-flex size-9 items-center justify-center rounded-[10px] border bg-card text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:h-9 md:w-auto md:gap-2 md:px-3"
         >
           <Search className="size-3.5" aria-hidden />
           <span className="hidden md:inline">Search</span>
-          <span className="kbd ml-1">⌘ K</span>
+          <span className="kbd ml-1 hidden md:inline-flex">⌘ K</span>
         </button>
         <button
           type="button"
           aria-label="Notifications"
-          className="hairline inline-flex size-9 items-center justify-center rounded-[10px] border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          className="hairline hidden size-9 items-center justify-center rounded-[10px] border bg-card text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
         >
           <Bell className="size-4" aria-hidden />
         </button>
         <Link
           href="/settings"
           aria-label="Settings"
-          className="hairline inline-flex size-9 items-center justify-center rounded-[10px] border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          className="hairline hidden size-9 items-center justify-center rounded-[10px] border bg-card text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
         >
           <Settings className="size-4" aria-hidden />
         </Link>
-        <ThemeToggle />
+        <div className="hidden md:block">
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

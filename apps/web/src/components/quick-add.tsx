@@ -69,7 +69,7 @@ export function QuickAdd() {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-1 items-center gap-2">
+    <form onSubmit={submit} className="flex min-w-0 flex-1 items-center gap-1.5 md:gap-2">
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -78,7 +78,7 @@ export function QuickAdd() {
             ? `Add a task to ${project.name}...`
             : 'Capture anything. Try: ship spec tomorrow 3pm #work !!'
         }
-        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
+        className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
         aria-label="Quick add task"
         disabled={pending || listening || transcribing}
         autoComplete="off"

@@ -223,15 +223,15 @@ export function PowerDialerCommandCenter() {
         </button>
       }
     >
-      <div className="grid gap-5">
-        <section className="surface relative overflow-hidden p-5 md:p-6">
+      <div className="grid min-w-0 gap-5">
+        <section className="surface relative min-w-0 overflow-hidden p-4 md:p-6">
           <div
             aria-hidden
             className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,color-mix(in_oklch,var(--success)_26%,transparent),transparent_34%),radial-gradient(circle_at_88%_8%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_38%)]"
           />
-          <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="relative grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
             <div className="flex min-w-0 flex-col gap-5">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full border bg-card/75 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
                   <Radar className="size-3.5 text-primary" aria-hidden />
                   LSG launch command
@@ -242,7 +242,7 @@ export function PowerDialerCommandCenter() {
                 </span>
               </div>
               <div>
-                <h2 className="max-w-4xl text-3xl font-semibold tracking-tight md:text-5xl">
+                <h2 className="max-w-4xl text-3xl font-semibold tracking-tight break-words md:text-5xl">
                   Build the dialer that makes reps talk, not click.
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
@@ -251,7 +251,7 @@ export function PowerDialerCommandCenter() {
                   writes everything back, and gives managers a live operating view.
                 </p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 <HeroMetric label="Launch tasks" value={summary.total} icon={ClipboardList} />
                 <HeroMetric label="Open" value={summary.open} icon={Activity} />
                 <HeroMetric label="In progress" value={summary.doing} icon={Workflow} />
@@ -259,7 +259,7 @@ export function PowerDialerCommandCenter() {
               </div>
             </div>
 
-            <div className="rounded-[18px] border bg-card/75 p-4 backdrop-blur">
+            <div className="min-w-0 rounded-[18px] border bg-card/75 p-4 backdrop-blur">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-semibold tracking-tight">Launch progress</h3>
@@ -293,8 +293,8 @@ export function PowerDialerCommandCenter() {
           </div>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.6fr)]">
-          <div className="surface p-5">
+        <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.6fr)]">
+          <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold tracking-tight">Capability map</h2>
@@ -310,14 +310,14 @@ export function PowerDialerCommandCenter() {
                 <ArrowRight className="size-3" aria-hidden />
               </Link>
             </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
               {CAPABILITIES.map((capability) => {
                 const Icon = capability.icon;
                 const progress = capabilityProgress(data?.launchTasks ?? [], capability.terms);
                 return (
                   <article
                     key={capability.title}
-                    className="rounded-[14px] border bg-bg-sunken/60 p-3"
+                    className="min-w-0 rounded-[14px] border bg-bg-sunken/60 p-3"
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <span className="flex size-9 items-center justify-center rounded-[12px] border bg-card text-primary">
@@ -343,7 +343,7 @@ export function PowerDialerCommandCenter() {
             </div>
           </div>
 
-          <div className="surface p-5">
+          <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-tight">Upcoming calendar</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -374,19 +374,19 @@ export function PowerDialerCommandCenter() {
           </div>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-3">
-          <div className="surface p-5 xl:col-span-2">
+        <section className="grid min-w-0 gap-4 xl:grid-cols-3">
+          <div className="surface min-w-0 p-4 md:p-5 xl:col-span-2">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-tight">Integration rails</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Current research path for customer phone systems, blue messaging, and CRM.
               </p>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid min-w-0 gap-3 md:grid-cols-2">
               {VENDOR_RAILS.map((rail) => {
                 const Icon = rail.icon;
                 return (
-                  <article key={rail.name} className="rounded-[14px] border bg-bg-sunken/60 p-4">
+                  <article key={rail.name} className="min-w-0 rounded-[14px] border bg-bg-sunken/60 p-4">
                     <div className="flex items-start gap-3">
                       <span className="flex size-10 shrink-0 items-center justify-center rounded-[13px] border bg-card text-primary">
                         <Icon className="size-4" aria-hidden />
@@ -405,7 +405,7 @@ export function PowerDialerCommandCenter() {
             </div>
           </div>
 
-          <div className="surface p-5">
+          <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-tight">Sequence</h2>
               <p className="mt-1 text-sm text-muted-foreground">The operating loop we are building.</p>
@@ -423,8 +423,8 @@ export function PowerDialerCommandCenter() {
           </div>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="surface p-5">
+        <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4 flex items-center gap-2">
               <ShieldCheck className="size-4 text-primary" aria-hidden />
               <h2 className="text-base font-semibold tracking-tight">Guardrails</h2>
@@ -444,7 +444,7 @@ export function PowerDialerCommandCenter() {
             </div>
           </div>
 
-          <div className="surface p-5">
+          <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold tracking-tight">Pilot dashboard targets</h2>
@@ -454,7 +454,7 @@ export function PowerDialerCommandCenter() {
               </div>
               <Upload className="size-4 text-primary" aria-hidden />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <TargetMetric label="Reach rate" value="18%" detail="answered leads" />
               <TargetMetric label="Talk time" value="2.4h" detail="per rep day" />
               <TargetMetric label="Speed" value="4x" detail="calls per rep" />
@@ -479,7 +479,7 @@ function HeroMetric({
   tone?: 'primary' | 'danger';
 }) {
   return (
-    <div className="rounded-[14px] border bg-card/75 p-3 backdrop-blur">
+    <div className="min-w-0 rounded-[14px] border bg-card/75 p-3 backdrop-blur">
       <div className="mb-3 flex items-center justify-between">
         <Icon
           className={cn('size-4', tone === 'danger' ? 'text-destructive' : 'text-primary')}
@@ -496,7 +496,7 @@ function HeroMetric({
 
 function MiniMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[12px] border bg-bg-sunken/70 p-2">
+    <div className="min-w-0 rounded-[12px] border bg-bg-sunken/70 p-2">
       <div className="font-mono text-xl font-semibold tabular-nums">{value}</div>
       <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
         {label}
@@ -507,7 +507,7 @@ function MiniMetric({ label, value }: { label: string; value: number }) {
 
 function TargetMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="rounded-[14px] border bg-bg-sunken/60 p-4">
+    <div className="min-w-0 rounded-[14px] border bg-bg-sunken/60 p-4">
       <div className="font-mono text-2xl font-semibold tabular-nums">{value}</div>
       <div className="mt-2 text-sm font-semibold tracking-tight">{label}</div>
       <div className="mt-1 text-xs text-muted-foreground">{detail}</div>

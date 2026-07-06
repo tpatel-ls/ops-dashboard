@@ -121,14 +121,14 @@ export function DevicesHub() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <section className="relative overflow-hidden rounded-[22px] border border-border bg-card p-5 shadow-sm md:p-6">
+    <div className="flex min-w-0 flex-col gap-5">
+      <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-border bg-card p-4 shadow-sm md:p-6">
         <div
           aria-hidden
           className="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,color-mix(in_oklch,var(--primary)_28%,transparent),transparent_34%),radial-gradient(circle_at_88%_10%,color-mix(in_oklch,var(--success)_18%,transparent),transparent_36%)]"
         />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
+        <div className="relative flex min-w-0 flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0 max-w-2xl">
             <div className="mb-2 inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
               <Radio className="size-3.5 text-primary" aria-hidden />
               One system, every device
@@ -142,14 +142,14 @@ export function DevicesHub() {
               same triage pipeline.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
             <ReadinessPill label="Install" state={readiness.install} />
             <ReadinessPill label="Voice" state={readiness.voice} />
             <ReadinessPill label="Push" state={readiness.notifications} />
             <ReadinessPill label="Sync" state={readiness.sync} />
           </div>
         </div>
-        <div className="relative mt-5 grid grid-cols-5 gap-2">
+        <div className="relative mt-5 grid min-w-0 grid-cols-5 gap-2">
           {DEVICE_SETUPS.map((device, index) => {
             const Icon = ICONS[device.id];
             return (
@@ -169,13 +169,13 @@ export function DevicesHub() {
       </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-2">
           {DEVICE_SETUPS.map((device) => (
             <DeviceCard key={device.id} device={device} />
           ))}
         </div>
 
-        <aside className="flex flex-col gap-4">
+        <aside className="flex min-w-0 flex-col gap-4">
           <section className="rounded-[18px] border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <Watch className="size-4 text-primary" aria-hidden />
@@ -258,7 +258,7 @@ function ReadinessPill({ label, state }: { label: string; state: ReadinessState 
   return (
     <div
       className={cn(
-        'rounded-[14px] border bg-card/75 px-3 py-2 backdrop-blur',
+        'min-w-0 rounded-[14px] border bg-card/75 px-3 py-2 backdrop-blur',
         (state === 'ready' || state === 'installed') && 'border-success/35 bg-success/10',
         state === 'offline' && 'border-warning/40 bg-warning/10',
         state === 'unavailable' && 'border-border',
@@ -267,7 +267,7 @@ function ReadinessPill({ label, state }: { label: string; state: ReadinessState 
       <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold">
+      <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-sm font-semibold">
         <span
           className={cn(
             'size-1.5 rounded-full bg-muted-foreground',
@@ -285,7 +285,7 @@ function ReadinessPill({ label, state }: { label: string; state: ReadinessState 
 function DeviceCard({ device }: { device: DeviceSetup }) {
   const Icon = ICONS[device.id];
   return (
-    <article className="group relative overflow-hidden rounded-[18px] border bg-card p-4 shadow-sm transition-colors hover:border-border-strong">
+    <article className="group relative min-w-0 overflow-hidden rounded-[18px] border bg-card p-4 shadow-sm transition-colors hover:border-border-strong">
       <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-warning to-success opacity-70" aria-hidden />
       <div className="mb-4 flex items-start gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-bg-sunken text-primary transition-transform group-hover:-translate-y-0.5">
@@ -296,7 +296,7 @@ function DeviceCard({ device }: { device: DeviceSetup }) {
           <p className="text-xs text-muted-foreground">{device.role}</p>
         </div>
       </div>
-      <p className="mb-4 rounded-[14px] border bg-bg-sunken/60 px-3 py-2 text-sm leading-5 text-foreground">
+      <p className="mb-4 rounded-[14px] border bg-bg-sunken/60 px-3 py-2 text-sm leading-5 text-foreground break-words">
         {device.primaryAction}
       </p>
       <div className="space-y-4">
@@ -315,7 +315,7 @@ function DeviceCard({ device }: { device: DeviceSetup }) {
             ))}
           </ol>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-2 sm:grid-cols-2">
           <TagList title="Best at" items={device.strengths} tone="success" />
           <TagList title="Watch for" items={device.limitations} tone="warning" />
         </div>
@@ -334,18 +334,18 @@ function TagList({
   tone: 'success' | 'warning';
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
         {title}
       </div>
       <ul className="space-y-1">
         {items.map((item) => (
-          <li key={item} className="flex gap-1.5 text-xs leading-5 text-muted-foreground">
+          <li key={item} className="flex min-w-0 gap-1.5 text-xs leading-5 text-muted-foreground">
             <CheckCircle2
               className={cn('mt-0.5 size-3.5 shrink-0', tone === 'success' ? 'text-success' : 'text-warning')}
               aria-hidden
             />
-            <span>{item}</span>
+            <span className="min-w-0 break-words">{item}</span>
           </li>
         ))}
       </ul>
@@ -366,7 +366,7 @@ function CopyBlock({
   onCopy: () => void;
 }) {
   return (
-    <div className="mb-3 last:mb-0">
+    <div className="mb-3 min-w-0 last:mb-0">
       <div className="mb-1 flex items-center justify-between gap-2">
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
           {label}
@@ -380,7 +380,7 @@ function CopyBlock({
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="scrollbar-thin max-h-36 overflow-auto rounded-[12px] border bg-bg-sunken p-3 text-[11px] leading-5 text-muted-foreground">
+      <pre className="scrollbar-thin max-h-36 max-w-full whitespace-pre-wrap break-all rounded-[12px] border bg-bg-sunken p-3 text-[11px] leading-5 text-muted-foreground sm:overflow-auto sm:break-normal">
         <code>{value}</code>
       </pre>
     </div>

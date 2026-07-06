@@ -121,7 +121,7 @@ export function KanbanBoard() {
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
           Group by
         </span>
@@ -142,7 +142,7 @@ export function KanbanBoard() {
         ))}
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="scrollbar-thin flex flex-1 gap-3 overflow-x-auto pb-2">
+        <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 pb-2 md:flex md:overflow-x-auto">
           {columns.map((col) => {
             const bucket = scopedTasks.filter((t) => bucketOf(t) === col.id);
             return (
@@ -181,13 +181,13 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'surface-flat scrollbar-thin flex h-full min-h-[320px] w-[280px] shrink-0 flex-col overflow-hidden p-2 transition-colors',
+        'surface-flat scrollbar-thin flex min-h-[260px] w-full min-w-0 flex-col overflow-hidden p-2 transition-colors md:h-full md:min-h-[320px] md:w-[280px] md:shrink-0',
         isOver && 'border-primary/50 bg-primary/5',
       )}
     >
-      <div className="mb-2 flex items-center gap-2 px-1.5">
+      <div className="mb-2 flex min-w-0 items-center gap-2 px-1.5">
         <span aria-hidden className="size-2 rounded-full" style={{ background: column.color }} />
-        <span className="text-sm font-semibold tracking-tight">{column.label}</span>
+        <span className="min-w-0 truncate text-sm font-semibold tracking-tight">{column.label}</span>
         <span className="ml-auto font-mono text-[10px] text-subtle-foreground">{tasks.length}</span>
       </div>
       <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
@@ -204,14 +204,14 @@ function KanbanColumn({
             await addTask(text, { status: column.id as Task['status'], ...addOverrides });
             setAdding('');
           }}
-          className="mt-2 flex items-center gap-1.5 rounded-md border bg-input px-2 py-1.5"
+          className="mt-2 flex min-w-0 items-center gap-1.5 rounded-md border bg-input px-2 py-1.5"
         >
           <Plus className="size-3 text-muted-foreground" aria-hidden />
           <input
             value={adding}
             onChange={(e) => setAdding(e.target.value)}
             placeholder="New task"
-            className="flex-1 bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
+            className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
           />
         </form>
       ) : null}
@@ -250,24 +250,24 @@ function KanbanCard({
         openEdit(task.id);
       }}
       className={cn(
-        'surface-flat cursor-grab touch-none select-none px-2.5 py-2 text-[13px] transition-colors',
+        'surface-flat min-w-0 cursor-grab touch-none select-none px-2.5 py-2 text-[13px] transition-colors',
         'hover:border-border-strong',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
-      <div className="truncate">{task.title}</div>
-      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-subtle-foreground">
+      <div className="min-w-0 truncate">{task.title}</div>
+      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[10px] text-subtle-foreground">
         {task.priority > 0 ? <span className="font-mono">!{task.priority}</span> : null}
         {project ? (
           <span
-            className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-accent-foreground"
+            className="inline-flex min-w-0 items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-accent-foreground"
           >
             <span
               aria-hidden
               className="size-1.5 rounded-full"
               style={{ background: project.color }}
             />
-            <span className="max-w-[80px] truncate">{project.name}</span>
+            <span className="min-w-0 max-w-[80px] truncate">{project.name}</span>
           </span>
         ) : null}
         {task.tags.slice(0, 2).map((tag) => (

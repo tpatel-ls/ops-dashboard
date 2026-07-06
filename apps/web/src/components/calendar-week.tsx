@@ -37,8 +37,8 @@ export function CalendarWeek() {
   const hours = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="flex items-center gap-2">
+    <div className="flex h-full min-w-0 flex-col gap-3">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <button
           type="button"
           aria-label="Previous week"
@@ -62,16 +62,27 @@ export function CalendarWeek() {
         >
           <ChevronRight className="size-3" />
         </button>
-        <span className="ml-2 font-mono text-[11px] text-subtle-foreground">
+        <span className="ml-1 font-mono text-[11px] text-subtle-foreground md:ml-2">
           Week of {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d')}
         </span>
         {lanes.showLegend ? (
-          <div className="ml-auto">
+          <div className="min-w-0 md:ml-auto">
             <OrgLaneLegend lanes={lanes.lanes} hidden={lanes.hidden} onToggle={lanes.toggle} />
           </div>
         ) : null}
       </div>
-      <div className="surface flex flex-1 overflow-hidden">
+      <div className="flex flex-col gap-2 md:hidden">
+        {days.map((day) => (
+          <MobileDayAgenda
+            key={isoDay(day)}
+            day={day}
+            tasks={visibleTasks}
+            laneColor={(t) => lanes.colorOf(lanes.laneOf(t))}
+            onOpen={openEdit}
+          />
+        ))}
+      </div>
+      <div className="surface hidden flex-1 overflow-hidden md:flex">
         <div className="scrollbar-thin flex flex-1 overflow-auto">
           <div
             className="grid w-full"
@@ -109,6 +120,69 @@ export function CalendarWeek() {
         </div>
       </div>
     </div>
+  );
+}
+
+function MobileDayAgenda({
+  day,
+  tasks,
+  laneColor,
+  onOpen,
+}: {
+  day: Date;
+  tasks: Task[];
+  laneColor: (t: Task) => string;
+  onOpen: (id: string) => void;
+}) {
+  const dayIso = isoDay(day);
+  const blocks = tasks
+    .filter((task) => isoDay(parseISO(task.startAt!)) === dayIso)
+    .sort((a, b) => parseISO(a.startAt!).getTime() - parseISO(b.startAt!).getTime());
+  return (
+    <section className="surface-flat min-w-0 p-3">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            {format(day, 'EEE')}
+          </div>
+          <div className="text-lg font-semibold leading-none tracking-tight">
+            {format(day, 'MMM d')}
+          </div>
+        </div>
+        <span className="font-mono text-[10px] text-subtle-foreground">{blocks.length}</span>
+      </div>
+      {blocks.length === 0 ? (
+        <p className="rounded-[12px] border border-dashed bg-bg-sunken/60 px-3 py-3 text-xs text-muted-foreground">
+          No time blocks.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {blocks.map((task) => {
+            const start = parseISO(task.startAt!);
+            const color = laneColor(task);
+            return (
+              <button
+                key={task.id}
+                type="button"
+                onClick={() => onOpen(task.id)}
+                className="flex min-w-0 items-center gap-2 rounded-[12px] border bg-bg-sunken/60 px-3 py-2 text-left"
+                style={{ borderColor: `color-mix(in oklch, ${color} 34%, var(--border))` }}
+              >
+                <span
+                  aria-hidden
+                  className="size-2 shrink-0 rounded-full"
+                  style={{ background: color }}
+                />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{task.title}</span>
+                <span className="shrink-0 font-mono text-[10px] text-subtle-foreground">
+                  {format(start, 'h:mm a')}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
 
