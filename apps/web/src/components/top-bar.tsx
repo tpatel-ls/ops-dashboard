@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Bell, Radio, Search, Settings, Sparkles } from 'lucide-react';
+import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { useNetworkStatus } from '@/lib/use-network-status';
 import { ThemeToggle } from './theme-toggle';
@@ -35,10 +36,15 @@ export function TopBar() {
       <div className="ml-auto flex items-center gap-1.5">
         <span className="hidden items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs text-muted-foreground lg:inline-flex">
           <span
-            className={online ? 'live-dot size-1.5 rounded-full bg-success' : 'size-1.5 rounded-full bg-warning'}
+            className={cn(
+              'size-1.5 rounded-full',
+              online === null && 'bg-muted-foreground',
+              online === true && 'live-dot bg-success',
+              online === false && 'bg-warning',
+            )}
             aria-hidden
           />
-          {online ? 'Online' : 'Offline'}
+          {online === null ? 'Network' : online ? 'Online' : 'Offline'}
         </span>
         <div className="hidden xl:block">
           <SyncStatus showPending={false} />
