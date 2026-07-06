@@ -7,7 +7,7 @@ import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 
 const LEFT = [
-  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Command', icon: LayoutDashboard },
   { href: '/today', label: 'Brief', icon: Sun },
 ];
 const RIGHT = [
