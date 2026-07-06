@@ -22,6 +22,7 @@ describe('device setup model', () => {
 
   it('defines manifest shortcuts for the daily operating loop', () => {
     expect(APP_SHORTCUTS.map((shortcut) => shortcut.url)).toEqual([
+      '/dashboard',
       '/today',
       '/today?capture=1',
       '/tasks',

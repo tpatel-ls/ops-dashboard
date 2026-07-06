@@ -36,6 +36,12 @@ export interface InstallReadiness {
 
 export const APP_SHORTCUTS: AppShortcut[] = [
   {
+    name: 'Life Command',
+    shortName: 'Command',
+    description: 'Open the all-in-one management cockpit.',
+    url: '/dashboard',
+  },
+  {
     name: 'Open Briefing',
     shortName: 'Briefing',
     description: 'Start the day from the operating cockpit.',

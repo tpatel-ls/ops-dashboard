@@ -37,7 +37,7 @@ interface NavItem {
 }
 
 const PLAN: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, shortcut: 'g d' },
+  { href: '/dashboard', label: 'Life Command', icon: LayoutDashboard, shortcut: 'g d' },
   { href: '/today', label: 'Briefing', icon: Sun, shortcut: 'g t' },
   { href: '/notepad', label: 'Notepad', icon: NotebookPen, shortcut: 'g p' },
   { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g n' },

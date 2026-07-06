@@ -19,7 +19,7 @@ export default function manifest(): ShareTargetManifest {
     short_name: 'Ops',
     description: 'Your personal operating system — capture, tasks, routines, projects, and journal.',
     id: '/',
-    start_url: '/today',
+    start_url: '/dashboard',
     scope: '/',
     display: 'standalone',
     // 'any' so the Tab S10 Ultra can run the landscape two-pane layout.

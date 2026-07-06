@@ -30,7 +30,7 @@ import { runCapture } from '@/lib/capture-client';
 import { useActiveOrgs } from './org-switcher';
 
 const NAV = [
-  { id: 'nav-dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, hint: 'g d' },
+  { id: 'nav-dashboard', label: 'Life Command', href: '/dashboard', icon: LayoutDashboard, hint: 'g d' },
   { id: 'nav-today', label: 'Briefing', href: '/today', icon: Sun, hint: 'g t' },
   { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g p' },
   { id: 'nav-week', label: 'Week', href: '/week', icon: LayoutGrid, hint: 'g w' },
