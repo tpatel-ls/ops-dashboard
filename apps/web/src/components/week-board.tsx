@@ -17,6 +17,7 @@ import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
+import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 
 const PRIORITY_COLOR: Record<Priority, string> = {
@@ -40,6 +41,8 @@ export function WeekBoard() {
     const all = await getDb().projects.toArray();
     return new Map(all.filter((p) => !p.deletedAt).map((p) => [p.id, p]));
   });
+  const lanes = useOrgLanes(projectsMap);
+  const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -81,12 +84,17 @@ export function WeekBoard() {
         <span className="ml-2 font-mono text-[11px] text-subtle-foreground">
           Week of {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d, yyyy')}
         </span>
+        {lanes.showLegend ? (
+          <div className="ml-auto">
+            <OrgLaneLegend lanes={lanes.lanes} hidden={lanes.hidden} onToggle={lanes.toggle} />
+          </div>
+        ) : null}
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <div className="grid h-full min-h-[420px] min-w-0 flex-1 grid-cols-1 gap-2 overflow-hidden sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {days.map((day) => {
             const dayIso = isoDay(day);
-            const dayTasks = (tasks ?? []).filter((t) => t.scheduledFor === dayIso);
+            const dayTasks = visibleTasks.filter((t) => t.scheduledFor === dayIso);
             return (
               <DayColumn
                 key={dayIso}
@@ -95,6 +103,7 @@ export function WeekBoard() {
                 isToday={dayIso === today}
                 tasks={dayTasks}
                 projectsMap={projectsMap ?? new Map()}
+                laneColor={(task) => lanes.colorOf(lanes.laneOf(task))}
               />
             );
           })}
@@ -110,12 +119,14 @@ function DayColumn({
   isToday,
   tasks,
   projectsMap,
+  laneColor,
 }: {
   day: Date;
   isoDate: string;
   isToday: boolean;
   tasks: Task[];
   projectsMap: Map<string, Project>;
+  laneColor: (task: Task) => string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: isoDate });
   return (
@@ -144,7 +155,7 @@ function DayColumn({
       </div>
       <div className="flex flex-col gap-1">
         {tasks.map((t) => (
-          <DraggableCard key={t.id} task={t} projectsMap={projectsMap} />
+          <DraggableCard key={t.id} task={t} projectsMap={projectsMap} laneColor={laneColor(t)} />
         ))}
       </div>
     </div>
@@ -154,17 +165,19 @@ function DayColumn({
 function DraggableCard({
   task,
   projectsMap,
+  laneColor,
 }: {
   task: Task;
   projectsMap: Map<string, Project>;
+  laneColor: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   });
   const openEdit = useAppStore((s) => s.openEdit);
-  const style: React.CSSProperties | undefined = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
-    : undefined;
+  const style: React.CSSProperties = {
+    ...(transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 } : {}),
+  };
 
   const project = task.projectId ? projectsMap.get(task.projectId) : undefined;
 
@@ -189,7 +202,14 @@ function DraggableCard({
         className="absolute inset-y-1 left-0 w-[3px] rounded-r-full"
         style={{ background: PRIORITY_COLOR[task.priority], opacity: task.priority ? 1 : 0 }}
       />
-      <div className="ml-2 truncate">{task.title}</div>
+      <div className="ml-2 flex min-w-0 items-center gap-1.5">
+        <span
+          aria-hidden
+          className="size-1.5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
+          style={{ background: laneColor }}
+        />
+        <span className="min-w-0 truncate">{task.title}</span>
+      </div>
       <div className="ml-2 mt-0.5 flex min-w-0 items-center gap-1.5">
         {task.startAt ? (
           <span className="font-mono text-[10px] text-subtle-foreground">
