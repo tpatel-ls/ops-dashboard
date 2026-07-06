@@ -12,6 +12,7 @@ import {
   FolderKanban,
   Inbox,
   NotebookPen,
+  PhoneCall,
   Plus,
   Radar,
   ShieldCheck,
@@ -20,6 +21,7 @@ import {
   Utensils,
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
+import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { ViewShell } from '@/components/view-shell';
 import { useAppStore } from '@/lib/app-store';
@@ -53,6 +55,7 @@ const QUICK_LAUNCH = [
   { label: 'Capture', href: '/today?capture=1', icon: Plus, detail: 'task, note, meal, thought' },
   { label: 'Briefing', href: '/today', icon: Radar, detail: 'today and attention' },
   { label: 'Calendar', href: '/calendar', icon: CalendarDays, detail: 'time and schedule' },
+  { label: 'Power Dialer', href: '/power-dialer', icon: PhoneCall, detail: 'LSG launch control' },
   { label: 'Devices', href: '/devices', icon: Smartphone, detail: 'phone, tablet, watch' },
   { label: 'Ask', href: '/ask', icon: Brain, detail: 'chat with context' },
 ];
@@ -64,8 +67,38 @@ function scoreLabel(score: number): string {
   return 'needs command';
 }
 
+function taskSortTime(task: Task): number {
+  const raw = task.startAt ?? task.dueAt ?? task.scheduledFor;
+  return raw ? new Date(raw).getTime() : Number.MAX_SAFE_INTEGER;
+}
+
 export function LifeCommandCenter() {
   const openQuickAdd = useAppStore((state) => state.openQuickAdd);
+  const launch = useLiveQuery(async () => {
+    const db = getDb();
+    const [projects, tasks] = await Promise.all([
+      db.projects.toArray().then((all) => all.filter((p) => !p.deletedAt && !p.archivedAt)),
+      db.tasks.toArray().then((all) => all.filter((t) => !t.deletedAt && t.status !== 'archived')),
+    ]);
+    const launchProjects = projects.filter((project) =>
+      ['blue text', 'power dialer'].includes(project.name.trim().toLowerCase()),
+    );
+    const projectIds = new Set(launchProjects.map((project) => project.id));
+    const launchTasks = tasks.filter((task) => task.projectId && projectIds.has(task.projectId));
+    if (launchProjects.length === 0 && launchTasks.length === 0) return null;
+    const open = launchTasks.filter((task) => task.status !== 'done');
+    const urgent = open.filter((task) => task.priority >= 3).length;
+    const scheduled = open
+      .filter((task) => task.scheduledFor || task.startAt || task.dueAt)
+      .sort((a, b) => taskSortTime(a) - taskSortTime(b));
+    return {
+      projects: launchProjects.length,
+      open: open.length,
+      urgent,
+      doing: launchTasks.filter((task) => task.status === 'doing').length,
+      next: scheduled[0],
+    };
+  });
   const summary = useLiveQuery(async () => {
     const db = getDb();
     const [
@@ -157,6 +190,8 @@ export function LifeCommandCenter() {
               <AttentionPanel items={summary.attention} />
             </div>
           </section>
+
+          {launch ? <LsgLaunchStrip launch={launch} /> : null}
 
           <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {summary.modules.map((module) => (
@@ -265,6 +300,69 @@ function HeroMetric({
         {suffix ? <span className="ml-1 text-xs text-muted-foreground">{suffix}</span> : null}
       </div>
       <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function LsgLaunchStrip({
+  launch,
+}: {
+  launch: {
+    projects: number;
+    open: number;
+    urgent: number;
+    doing: number;
+    next?: Task;
+  };
+}) {
+  return (
+    <section className="surface relative overflow-hidden p-4 md:p-5">
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[linear-gradient(90deg,color-mix(in_oklch,var(--success)_14%,transparent),transparent_34%),radial-gradient(circle_at_92%_10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_32%)]"
+      />
+      <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-[14px] border bg-card/80 text-primary backdrop-blur">
+            <PhoneCall className="size-5" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+              LSG launch
+            </div>
+            <h2 className="truncate text-lg font-semibold tracking-tight">
+              Power Dialer and Blue Text are now live workstreams.
+            </h2>
+            <p className="mt-1 truncate text-sm text-muted-foreground">
+              {launch.next ? `Next scheduled: ${launch.next.title}` : 'Sync the launch plan to schedule the next moves.'}
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-2 lg:w-[420px]">
+          <MiniLaunchStat label="Projects" value={launch.projects} />
+          <MiniLaunchStat label="Open" value={launch.open} />
+          <MiniLaunchStat label="Doing" value={launch.doing} />
+          <MiniLaunchStat label="Urgent" value={launch.urgent} />
+        </div>
+        <Link
+          href="/power-dialer"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-[12px] bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          Open dialer
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function MiniLaunchStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-[12px] border bg-card/75 px-2 py-2 text-center backdrop-blur">
+      <div className="font-mono text-lg font-semibold tabular-nums">{value}</div>
+      <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-subtle-foreground">
         {label}
       </div>
     </div>
