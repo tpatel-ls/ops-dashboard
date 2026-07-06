@@ -30,7 +30,7 @@ export async function ensureSeed(): Promise<void> {
     description: 'Rebuild the marketing site and ship by month end.',
   });
   await createProject('Home', { kind: 'area', domainId: home.id });
-  await createProject('Monthly SEO — Acme', { kind: 'retainer', domainId: work.id });
+  await createProject('Monthly SEO - Acme', { kind: 'retainer', domainId: work.id });
   await logWork(site.id, 90, 'Wireframes', new Date(Date.now() - 2 * 86400000).toISOString());
 
   await createRoutine({ name: 'Morning workout', timeOfDay: 'morning', domainId: health.id });

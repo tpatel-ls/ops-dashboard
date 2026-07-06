@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Browser Supabase client (2026 @supabase/ssr pattern). Uses the publishable
- * key — safe to ship to the browser; RLS protects the data. The session lives in
+ * key - safe to ship to the browser; RLS protects the data. The session lives in
  * cookies so it is shared with the server client + middleware.
  *
  * Returns null when Supabase isn't configured, so the app stays fully local-first.

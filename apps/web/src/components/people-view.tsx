@@ -213,7 +213,7 @@ export function PeopleView() {
         {/* Toolbar */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            {data ? `${data.peopleWithDomains.length} ${data.peopleWithDomains.length === 1 ? 'person' : 'people'}` : '—'}
+            {data ? `${data.peopleWithDomains.length} ${data.peopleWithDomains.length === 1 ? 'person' : 'people'}` : '-'}
           </span>
           <button
             type="button"
@@ -264,7 +264,7 @@ export function PeopleView() {
               </div>
               <h3 className="mt-1 text-xl font-semibold tracking-tight">A clean slate.</h3>
               <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Add the people who matter — store facts and log interactions so nothing slips through the cracks.
+                Add the people who matter - store facts and log interactions so nothing slips through the cracks.
               </p>
             </div>
             <button

@@ -29,7 +29,7 @@ export async function createClient(): Promise<SupabaseClient | null> {
             cookieStore.set(name, value, options),
           );
         } catch {
-          // Called from a Server Component — safe to ignore; middleware refreshes
+          // Called from a Server Component - safe to ignore; middleware refreshes
           // the session cookie on the next request.
         }
       },

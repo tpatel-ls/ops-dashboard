@@ -479,7 +479,7 @@ export function TasksView() {
 
         {/* Count */}
         <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.18em] text-subtle-foreground">
-          {filteredTasks === null ? '—' : `${count} task${count !== 1 ? 's' : ''}`}
+          {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
         </div>
       </div>
 

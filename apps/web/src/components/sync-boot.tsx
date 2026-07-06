@@ -11,7 +11,7 @@ import { startSync, stopSync } from '@/lib/sync/engine';
  * Drives the realtime sync engine.
  *
  * 1. Auto-enables sync once you're signed in. This is a single-user personal
- *    dashboard — being signed in means you want your data on this device — so we
+ *    dashboard - being signed in means you want your data on this device - so we
  *    flip the local `syncEnabled` toggle on automatically instead of making you
  *    find it in Settings on every device. (The toggle still works as an off
  *    switch; it just defaults on while authenticated.)

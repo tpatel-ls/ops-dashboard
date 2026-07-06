@@ -661,7 +661,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
             onChange={(e) => set('domainId', e.target.value || undefined)}
             className="input flex-1"
           >
-            <option value="">— none —</option>
+            <option value="">- none -</option>
             {domains.map((d) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}

@@ -57,7 +57,7 @@ export class OpsDB extends Dexie {
       settings: 'id',
       syncOps: 'id, table, recordId, createdAt',
     });
-    // v2 — Ops Dashboard entities. Boolean fields (starred, done, notify) are
+    // v2 - Ops Dashboard entities. Boolean fields (starred, done, notify) are
     // intentionally NOT indexed: IndexedDB keys can't be booleans.
     this.version(2).stores({
       tasks:
@@ -73,20 +73,20 @@ export class OpsDB extends Dexie {
       notifications: 'id, kind, readAt, createdAt, updatedAt, deletedAt',
       checklistTemplates: 'id, name, kind, updatedAt, deletedAt',
     });
-    // v3 — index `order` on tasks (addTask + recurrence use orderBy('order');
+    // v3 - index `order` on tasks (addTask + recurrence use orderBy('order');
     // Dexie throws on orderBy over an unindexed key).
     this.version(3).stores({
       tasks:
         'id, status, priority, scheduledFor, dueAt, projectId, parentId, domainId, contentId, order, updatedAt, deletedAt, *tags',
     });
-    // v4 — People CRM + Library (notes, quotes, books).
+    // v4 - People CRM + Library (notes, quotes, books).
     this.version(4).stores({
       people: 'id, name, domainId, updatedAt, deletedAt, *tags',
       notes: 'id, bookId, updatedAt, deletedAt, *tags',
       quotes: 'id, bookId, author, updatedAt, deletedAt, *tags',
       books: 'id, status, author, updatedAt, deletedAt, *tags',
     });
-    // v5 — Organizations (work lanes) + orgId on tasks/projects.
+    // v5 - Organizations (work lanes) + orgId on tasks/projects.
     this.version(5).stores({
       organizations: 'id, name, order, archivedAt, updatedAt, deletedAt',
       tasks:
@@ -94,7 +94,7 @@ export class OpsDB extends Dexie {
       projects:
         'id, name, kind, status, domainId, orgId, archivedAt, lastWorkedAt, updatedAt, deletedAt',
     });
-    // v6 — Food logs (AI-estimated meals from universal capture).
+    // v6 - Food logs (AI-estimated meals from universal capture).
     this.version(6).stores({
       foodLogs: 'id, date, mealType, updatedAt, deletedAt',
     });

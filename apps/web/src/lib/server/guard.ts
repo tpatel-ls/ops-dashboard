@@ -5,7 +5,7 @@ import { timingSafeEqual } from 'node:crypto';
  * app. Layered:
  *   1. Server-to-server: a matching OPS_API_SECRET bearer (e.g. the future Wear
  *      OS capture webhook).
- *   2. Same-origin browser requests from the app's own UI — a cross-site page
+ *   2. Same-origin browser requests from the app's own UI - a cross-site page
  *      cannot set Sec-Fetch-Site, so this blocks third-party browser abuse while
  *      allowing the app's own fetches.
  *   3. Local dev convenience (no secret configured, not production).

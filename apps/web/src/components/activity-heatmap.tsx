@@ -34,19 +34,19 @@ interface ActivityHeatmapProps {
   plain-string color requirement.
 */
 const LIGHT_RAMP: [string, string, string, string, string] = [
-  '#F2EDE4', // level 0 – faint paper
-  '#EDD8C0', // level 1 – soft peach
-  '#D4A96A', // level 2 – light amber
-  '#B87A2F', // level 3 – amber
-  '#8C4E0A', // level 4 – deep amber
+  '#F2EDE4', // level 0 - faint paper
+  '#EDD8C0', // level 1 - soft peach
+  '#D4A96A', // level 2 - light amber
+  '#B87A2F', // level 3 - amber
+  '#8C4E0A', // level 4 - deep amber
 ];
 
 const DARK_RAMP: [string, string, string, string, string] = [
-  '#27252F', // level 0 – deep bg
-  '#3D2E19', // level 1 – muted amber shadow
-  '#6B4118', // level 2 – warm mid
-  '#A3601A', // level 3 – amber
-  '#C9882E', // level 4 – bright amber
+  '#27252F', // level 0 - deep bg
+  '#3D2E19', // level 1 - muted amber shadow
+  '#6B4118', // level 2 - warm mid
+  '#A3601A', // level 3 - amber
+  '#C9882E', // level 4 - bright amber
 ];
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
@@ -71,7 +71,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
           'surface flex items-center justify-center p-8 text-sm text-muted-foreground',
         )}
       >
-        No activity data yet — start completing tasks, routines, and journal
+        No activity data yet - start completing tasks, routines, and journal
         entries.
       </div>
     );

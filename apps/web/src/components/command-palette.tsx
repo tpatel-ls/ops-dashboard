@@ -128,7 +128,7 @@ export function CommandPalette() {
               No matches.
             </Command.Empty>
 
-            {/* Prominent capture action — always visible when there is text */}
+            {/* Prominent capture action - always visible when there is text */}
             {query.trim() ? (
               <Command.Group
                 heading="Capture"

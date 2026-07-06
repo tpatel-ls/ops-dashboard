@@ -28,7 +28,7 @@ export async function GET(req: Request): Promise<Response> {
 
   const admin = createAdminClient();
   if (!admin) {
-    // No backend configured yet — the app is healthy in local-first mode.
+    // No backend configured yet - the app is healthy in local-first mode.
     return NextResponse.json({ ok: true, db: 'unconfigured' });
   }
 

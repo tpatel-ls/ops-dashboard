@@ -1,8 +1,8 @@
-# Ops Dashboard — Multi-Device + Realtime Sync Build
+# Ops Dashboard - Multi-Device + Realtime Sync Build
 
 **Paste this entire file as the prompt in a fresh Claude Code session.** It is a
 complete, standalone execution brief. Work autonomously and end-to-end; don't
-re-ask decisions that are already locked below. `ultracode` — use Workflow
+re-ask decisions that are already locked below. `ultracode` - use Workflow
 orchestration for parallelizable work. Keep `pnpm typecheck` / `pnpm build` green
 and commit at each phase. Checkpoint progress to `docs/ops-dashboard/STATE.md`.
 
@@ -10,8 +10,8 @@ and commit at each phase. Checkpoint progress to `docs/ops-dashboard/STATE.md`.
 
 ## Mission
 
-Make any capture — a task, note, or journal entry logged on **any** device,
-including a tap on the **Galaxy Watch 7 Ultra** — appear on **every** device's
+Make any capture - a task, note, or journal entry logged on **any** device,
+including a tap on the **Galaxy Watch 7 Ultra** - appear on **every** device's
 dashboard, **live**. Free stack: **Supabase free cloud** (Postgres + Auth +
 Realtime) + **Vercel free** hosting. Target devices: **Samsung Galaxy S24 Ultra**
 (phone), **Galaxy Tab S10 Ultra** (tablet), **Galaxy Watch 7 Ultra** (Wear OS).
@@ -25,7 +25,7 @@ the app anywhere.
 ## Read first (existing project context)
 
 - Repo: `/Users/tanaypatel/Desktop/taskify`. Branch: `feat/ops-dashboard`.
-- It's a **local-first PWA "Ops Dashboard"** — Next.js 16 App Router, React 19,
+- It's a **local-first PWA "Ops Dashboard"** - Next.js 16 App Router, React 19,
   Tailwind v4, Dexie (IndexedDB), pnpm monorepo (`@ops-dashboard/core`, `@ops-dashboard/ui`, app at
   `apps/web`). Run: `pnpm install` then `pnpm dev` (→ http://localhost:3000).
 - **Read these before doing anything:** `docs/ops-dashboard/spec.md` (full design,
@@ -34,7 +34,7 @@ the app anywhere.
   existing design tokens and `src/lib` data-layer patterns exactly.
 
 ### Current state (do NOT rebuild these)
-- P0–P5 **local features are built + browser-verified**: capture + AI triage,
+- P0-P5 **local features are built + browser-verified**: capture + AI triage,
   Today, Tasks, Routines + streaks, Habits heatmap, Projects/Areas/Retainers,
   Content, People CRM, Library (Journal/Notes/Quotes/Books), Domains, chat (`/ask`),
   enriched task edit-drawer, PWA icons + `app/manifest.ts`. Demo seed is removed
@@ -59,9 +59,9 @@ the app anywhere.
 
 ## Locked architecture decisions (do not re-litigate)
 
-1. **Backend:** Supabase **free cloud** — Postgres + Auth + **Realtime**.
+1. **Backend:** Supabase **free cloud** - Postgres + Auth + **Realtime**.
 2. **Hosting:** **Vercel free** (public HTTPS, reachable by all devices anywhere).
-   *(Tailscale is an optional private-only alternative — skip unless I ask.)*
+   *(Tailscale is an optional private-only alternative - skip unless I ask.)*
 3. **Sync:** bidirectional, **single-user**, **Supabase Realtime** for instant
    cross-device updates. Offline-first: Dexie stays the local cache/source of truth
    offline; the outbox drains when online; inbound merges via `pickWinner`. Soft
@@ -81,7 +81,7 @@ the app anywhere.
 
 ---
 
-## What I (the user) will provide — ask me for these when you reach the step
+## What I (the user) will provide - ask me for these when you reach the step
 
 - **Supabase:** I'll create a free project; I'll paste the **Project URL**,
   **publishable key** (`sb_publishable_…`), and **secret key** (`sb_secret_…`).
@@ -94,7 +94,7 @@ the app anywhere.
   or **HTTP Shortcuts** if needed.
 
 Collect these with `AskUserQuestion` or a clear inline request; don't block other
-work waiting on them — build the code first, wire keys when I provide them.
+work waiting on them - build the code first, wire keys when I provide them.
 
 ---
 
@@ -104,7 +104,7 @@ work waiting on them — build the code first, wire keys when I provide them.
 > phase, verify (`pnpm typecheck`, and `pnpm build` before declaring done; Playwright
 > for UI). Update `STATE.md`.
 
-### Phase 1 — Supabase project, schema, single-user auth
+### Phase 1 - Supabase project, schema, single-user auth
 - Have me create the free Supabase project; capture URL + keys into
   `apps/web/.env.local` (gitignored) and later Vercel env.
 - Install/init CLI as devDep (`npx supabase`); `supabase link`; **`supabase db
@@ -118,11 +118,11 @@ work waiting on them — build the code first, wire keys when I provide them.
 - **Acceptance:** can log in as the one user; unauthenticated requests redirect; RLS
   blocks cross-user rows.
 
-### Phase 2 — Bidirectional realtime sync engine
+### Phase 2 - Bidirectional realtime sync engine
 - **Column mapping:** write a camelCase(TS)↔snake_case(DB) mapper per table (the DB
   uses snake_case; the app uses camelCase). Centralize it.
 - **Push (outbound):** wire the existing outbox/worker to upsert local `SyncOp`s to
-  Supabase with `user_id = auth.uid()`, version-aware (don't clobber newer remote —
+  Supabase with `user_id = auth.uid()`, version-aware (don't clobber newer remote -
   use `pickWinner` semantics). Drain on reconnect.
 - **Pull (inbound):** on boot, fetch rows changed since a stored cursor
   (`updated_at`), merge into Dexie via `pickWinner`, advance cursor.
@@ -134,31 +134,31 @@ work waiting on them — build the code first, wire keys when I provide them.
 - **Acceptance:** create a task on device A → it appears on device B within ~2s
   without reload; edit/delete propagate; works after going offline→online.
 
-### Phase 3 — Capture persistence + the watch flow
+### Phase 3 - Capture persistence + the watch flow
 - `/api/capture`: after triage, **persist** the resulting task/journal row to
   Supabase under the user (so realtime propagates it everywhere). Keep it
   secret-gated (`OPS_API_SECRET`) for the watch; also accept an authenticated
   in-app session. Return the created record.
 - In-app `runCapture`: ensure it flows through the sync layer (Dexie + outbox →
   Supabase), so phone/tablet/desktop captures also propagate.
-- **Watch shortcut** (deliver the recipe to me — see the dedicated section below).
+- **Watch shortcut** (deliver the recipe to me - see the dedicated section below).
 - Pushover: send on reminders + a daily summary; it bridges phone→watch.
 - **Acceptance:** a `POST /api/capture` with the secret + `{raw:"..."}` creates a
   task that shows up live on all signed-in devices.
 
-### Phase 4 — PWA on the three devices (Serwist + responsive)
+### Phase 4 - PWA on the three devices (Serwist + responsive)
 - Replace `public/sw.js` with **Serwist** (`@serwist/next`, `app/sw.ts`): precache
   app shell, offline fallback route, keep the notification handlers. Verify install
   only via `next build && next start` or the Vercel build (SW doesn't run in dev).
 - Confirm `app/manifest.ts` + the existing 192/512/maskable icons satisfy Android
   "Add to Home Screen".
 - Responsive: phone = bottom nav + single column; **Tab S10 Ultra** (≈1480 CSS px
-  landscape) = persistent sidebar + two-pane master–detail. Use `dvh` +
+  landscape) = persistent sidebar + two-pane master-detail. Use `dvh` +
   `env(safe-area-inset-*)`, `viewport-fit=cover` (S24 Ultra punch-hole/gesture bar).
 - **Acceptance:** installs to home screen on S24 Ultra and Tab S10 Ultra over the
   Vercel HTTPS URL; works offline (cached shell + Dexie); mic works (HTTPS).
 
-### Phase 5 — Deploy to Vercel + keep-alive
+### Phase 5 - Deploy to Vercel + keep-alive
 - `vercel link` + deploy. Set env vars in Vercel (Supabase URL/publishable/secret,
   `ANTHROPIC_API_KEY`, `GROQ_API_KEY`, `PUSHOVER_*`, `OPS_API_SECRET`). Add the
   Vercel domain to Supabase Auth → URL Configuration (Site URL + Redirect URLs).
@@ -166,7 +166,7 @@ work waiting on them — build the code first, wire keys when I provide them.
   (`vercel.json`) hitting it daily → free project never pauses.
 - **Acceptance:** the production URL loads on all devices, signed in, syncing live.
 
-### Phase 6 — AI live + full end-to-end verification
+### Phase 6 - AI live + full end-to-end verification
 - With `ANTHROPIC_API_KEY` set, verify triage, journal **photo** OCR (`/api/journal/
   extract`), and chat (`/ask`) actually run.
 - Run the full acceptance test (watch → all devices), `pnpm typecheck`, `pnpm build`,
@@ -218,12 +218,12 @@ Provide a copy-pasteable `curl` so I can verify the endpoint before wiring the w
 - Read `spec.md` + `STATE.md` first; match the warm-amber design tokens + utility
   classes; keep `@ops-dashboard/*` scope; colocate small files.
 - Use the **2026 Supabase SSR patterns** exactly (getAll/setAll, getClaims,
-  publishable/secret keys) — they're documented in `spec.md`; do not copy older
+  publishable/secret keys) - they're documented in `spec.md`; do not copy older
   tutorials. RLS `((select auth.uid()) = user_id)` on every table. Never put the
   secret key in a `NEXT_PUBLIC_` var.
 - All server routes keep degrading gracefully without keys; never reflect raw error
   messages; keep the `requestAllowed` guard on `/api/*`.
-- Single user — keep auth minimal; disable public signups.
+- Single user - keep auth minimal; disable public signups.
 - Commit per phase with clear messages; run an adversarial code-review workflow
   before declaring done (watch for: Dexie `.orderBy/.where` on unindexed keys,
   boolean-indexed queries, UTC-vs-local date bucketing, unawaited promises).

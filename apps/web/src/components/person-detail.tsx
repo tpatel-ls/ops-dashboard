@@ -342,7 +342,7 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
               onChange={(e) => setDomain(e.target.value)}
               className="input flex-1"
             >
-              <option value="">— none —</option>
+              <option value="">- none -</option>
               {domains.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
