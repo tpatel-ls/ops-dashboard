@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
-import Script from 'next/script';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
@@ -39,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <Script src="/theme-boot.js" strategy="beforeInteractive" />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
