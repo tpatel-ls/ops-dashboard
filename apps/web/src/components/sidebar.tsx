@@ -20,6 +20,7 @@ import {
   NotebookPen,
   MonitorSmartphone,
   Pencil,
+  PhoneCall,
   Repeat,
   Settings as SettingsIcon,
   Sun,
@@ -51,6 +52,7 @@ const BUILD: NavItem[] = [
   { href: '/routines', label: 'Routines', icon: Repeat },
   { href: '/habits', label: 'Habits', icon: Flame },
   { href: '/projects', label: 'Projects', icon: FolderKanban },
+  { href: '/power-dialer', label: 'Power Dialer', icon: PhoneCall, shortcut: 'g l' },
   { href: '/content', label: 'Content', icon: Clapperboard },
   { href: '/kanban', label: 'Kanban', icon: KanbanSquare, shortcut: 'g k' },
 ];

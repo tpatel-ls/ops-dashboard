@@ -5,6 +5,7 @@ import { useCallback, useEffect } from 'react';
 import { useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
 import { ensureOrgSetup } from '@/lib/org-setup';
+import { ensureLsgWorkSetup } from '@/lib/lsg-work-setup';
 import { wipeLocalData } from '@/lib/reset';
 import { CommandPalette } from './command-palette';
 import { HelpOverlay } from './help-overlay';
@@ -39,6 +40,7 @@ export function AppShell() {
     router.prefetch('/tasks');
     router.prefetch('/inbox');
     router.prefetch('/notepad');
+    router.prefetch('/power-dialer');
   }, [router]);
 
   // One-time clear of the bundled demo data, so the dashboard starts fresh.
@@ -53,7 +55,7 @@ export function AppShell() {
   // One-time org lane setup: seed the default org and move the known LSG
   // projects into it. Idempotent; no-op on devices with nothing to migrate.
   useEffect(() => {
-    void ensureOrgSetup();
+    void ensureOrgSetup().then(() => ensureLsgWorkSetup());
   }, []);
 
   useHotkeys([
@@ -66,6 +68,7 @@ export function AppShell() {
     { combo: 'g then m', handler: () => router.push('/month') },
     { combo: 'g then c', handler: () => router.push('/calendar') },
     { combo: 'g then k', handler: () => router.push('/kanban') },
+    { combo: 'g then l', handler: () => router.push('/power-dialer') },
     { combo: 'g then b', handler: () => router.push('/whiteboards') },
     { combo: 'g then n', handler: () => router.push('/inbox') },
     { combo: 'g then p', handler: () => router.push('/notepad') },

@@ -15,6 +15,7 @@ import {
   NotebookPen,
   MonitorSmartphone,
   Pencil,
+  PhoneCall,
   Plus,
   Search,
   Settings as SettingsIcon,
@@ -42,6 +43,7 @@ const NAV = [
   { id: 'nav-food', label: 'Food', href: '/food', icon: Utensils },
   { id: 'nav-tags', label: 'Tags', href: '/tags', icon: Hash },
   { id: 'nav-projects', label: 'Projects', href: '/projects', icon: Target },
+  { id: 'nav-power-dialer', label: 'Power Dialer', href: '/power-dialer', icon: PhoneCall, hint: 'g l' },
   { id: 'nav-devices', label: 'Devices', href: '/devices', icon: MonitorSmartphone, hint: 'g x' },
   { id: 'nav-settings', label: 'Settings', href: '/settings', icon: SettingsIcon, hint: 'g s' },
 ];
