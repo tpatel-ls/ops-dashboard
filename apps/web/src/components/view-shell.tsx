@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { cn } from '@ops-dashboard/ui';
 
 interface ViewShellProps {
   eyebrow?: string;
@@ -8,6 +9,7 @@ interface ViewShellProps {
   actions?: ReactNode;
   children: ReactNode;
   rail?: ReactNode;
+  fullWidth?: boolean;
 }
 
 export function ViewShell({
@@ -18,9 +20,15 @@ export function ViewShell({
   actions,
   children,
   rail,
+  fullWidth = false,
 }: ViewShellProps) {
   return (
-    <div className="mx-auto flex h-full w-full max-w-[1360px] flex-col gap-5 p-4 md:p-7">
+    <div
+      className={cn(
+        'mx-auto flex h-full w-full flex-col gap-5 p-4 md:p-7',
+        fullWidth ? 'max-w-none' : 'max-w-[1360px]',
+      )}
+    >
       <header className="os-panel rounded-[22px] px-4 py-4 md:px-5 md:py-5">
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
@@ -48,7 +56,12 @@ export function ViewShell({
           </div>
         </div>
       </header>
-      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div
+        className={cn(
+          'grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-5',
+          rail && 'lg:grid-cols-[minmax(0,1fr)_300px]',
+        )}
+      >
         <div className="min-h-0 min-w-0">{children}</div>
         {rail ? <aside className="hidden min-h-0 lg:block">{rail}</aside> : null}
       </div>
