@@ -53,8 +53,8 @@ export function WeekBoard() {
   const today = isoDay(new Date());
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="flex items-center gap-2">
+    <div className="flex h-full min-w-0 flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           aria-label="Previous week"
@@ -83,7 +83,7 @@ export function WeekBoard() {
         </span>
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="grid h-full min-h-[420px] flex-1 grid-cols-1 gap-2 overflow-x-auto sm:grid-cols-7">
+        <div className="grid h-full min-h-[420px] min-w-0 flex-1 grid-cols-1 gap-2 overflow-hidden sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {days.map((day) => {
             const dayIso = isoDay(day);
             const dayTasks = (tasks ?? []).filter((t) => t.scheduledFor === dayIso);
@@ -122,7 +122,7 @@ function DayColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'surface-flat scrollbar-thin flex h-full min-h-[200px] min-w-[180px] flex-col overflow-y-auto p-2 transition-colors',
+        'surface-flat scrollbar-thin flex h-full min-h-[200px] min-w-0 flex-col overflow-y-auto p-2 transition-colors',
         isOver && 'border-primary/50 bg-primary/5',
       )}
     >
@@ -179,7 +179,7 @@ function DraggableCard({
         openEdit(task.id);
       }}
       className={cn(
-        'surface-flat relative cursor-grab touch-none select-none px-2 py-1.5 text-[12px]',
+        'surface-flat relative min-w-0 cursor-grab touch-none select-none px-2 py-1.5 text-[12px]',
         'hover:border-border-strong',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
@@ -190,7 +190,7 @@ function DraggableCard({
         style={{ background: PRIORITY_COLOR[task.priority], opacity: task.priority ? 1 : 0 }}
       />
       <div className="ml-2 truncate">{task.title}</div>
-      <div className="ml-2 mt-0.5 flex items-center gap-1.5">
+      <div className="ml-2 mt-0.5 flex min-w-0 items-center gap-1.5">
         {task.startAt ? (
           <span className="font-mono text-[10px] text-subtle-foreground">
             {format(new Date(task.startAt), 'HH:mm')}
@@ -198,14 +198,14 @@ function DraggableCard({
         ) : null}
         {project ? (
           <span
-            className="inline-flex items-center gap-1 rounded bg-accent px-1 py-px text-[10px] text-accent-foreground"
+            className="inline-flex min-w-0 items-center gap-1 rounded bg-accent px-1 py-px text-[10px] text-accent-foreground"
           >
             <span
               aria-hidden
               className="size-1.5 rounded-full"
               style={{ background: project.color }}
             />
-            <span className="max-w-[72px] truncate">{project.name}</span>
+            <span className="min-w-0 max-w-[72px] truncate">{project.name}</span>
           </span>
         ) : null}
       </div>

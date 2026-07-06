@@ -3,7 +3,12 @@ import { WeekBoard } from '@/components/week-board';
 
 export default function WeekPage() {
   return (
-    <ViewShell eyebrow="Plan" title="Week" subtitle="Drag cards between days to reschedule.">
+    <ViewShell
+      eyebrow="Plan"
+      title="Week"
+      subtitle="Drag cards between days to reschedule."
+      fullWidth
+    >
       <WeekBoard />
     </ViewShell>
   );
