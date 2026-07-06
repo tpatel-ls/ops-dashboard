@@ -69,7 +69,7 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
       />
       <input
         className="input"
-        placeholder="Tags — comma separated (optional)"
+        placeholder="Tags - comma separated (optional)"
         value={tagsRaw}
         onChange={(e) => setTagsRaw(e.target.value)}
       />
@@ -220,7 +220,7 @@ export function NotesView() {
           )}
         >
           <Plus className="size-4" />
-          Capture a note — idea, excerpt, or reference
+          Capture a note - idea, excerpt, or reference
         </button>
       )}
 

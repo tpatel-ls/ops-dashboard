@@ -23,7 +23,7 @@ create policy projects_owner on projects for all to authenticated
 create policy whiteboards_owner on whiteboards for all to authenticated
   using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
--- 2) Version-guard trigger. SECURITY INVOKER (default) — does not bypass RLS.
+-- 2) Version-guard trigger. SECURITY INVOKER (default) - does not bypass RLS.
 --    On UPDATE, if the incoming row is older than what's stored, keep the stored
 --    row (RETURN OLD = no-op, so realtime does not echo a losing write).
 create or replace function sync_guard() returns trigger

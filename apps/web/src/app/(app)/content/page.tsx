@@ -6,7 +6,7 @@ export default function ContentPage() {
     <ViewShell
       eyebrow="Build"
       title="Content"
-      subtitle="Move videos, articles, podcasts, and newsletters through your pipeline — idea to published."
+      subtitle="Move videos, articles, podcasts, and newsletters through your pipeline - idea to published."
     >
       <ContentBoard />
     </ViewShell>

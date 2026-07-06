@@ -1,9 +1,9 @@
-# GB10 Whisper Server — self-hosted, key-auth, reachable everywhere
+# GB10 Whisper Server - self-hosted, key-auth, reachable everywhere
 
 **Paste this entire file as the prompt in a fresh Claude Code session running ON
 the GB10.** It is a complete, standalone execution brief. Work autonomously and
 end-to-end; verify each step before moving on. You have the actual box in front of
-you — adapt commands to what this machine really is (arm64 + CUDA), don't assume.
+you - adapt commands to what this machine really is (arm64 + CUDA), don't assume.
 
 ---
 
@@ -11,17 +11,17 @@ you — adapt commands to what this machine really is (arm64 + CUDA), don't assu
 
 Stand up a **self-hosted Whisper speech-to-text server** on this GB10 that is:
 
-1. **OpenAI-compatible** — exposes `POST /v1/audio/transcriptions` (multipart
+1. **OpenAI-compatible** - exposes `POST /v1/audio/transcriptions` (multipart
    `file` + `model`) so any app that allows a custom OpenAI base URL works
    (dictation apps, the user's "Ops Dashboard" PWA, scripts).
-2. **GPU-accelerated** — runs Whisper **large-v3** (or **large-v3-turbo**) on the
+2. **GPU-accelerated** - runs Whisper **large-v3** (or **large-v3-turbo**) on the
    GB10 GPU. Free, open weights.
-3. **Key-protected** — requires `Authorization: Bearer <API_KEY>`. Generate a
+3. **Key-protected** - requires `Authorization: Bearer <API_KEY>`. Generate a
    strong key; unauthenticated requests get 401.
-4. **Reachable from anywhere** — exposed publicly over HTTPS via **Tailscale
+4. **Reachable from anywhere** - exposed publicly over HTTPS via **Tailscale
    Funnel** (the user already uses Tailscale + Funnel on another node), so phones,
    tablets, a Vercel app, and laptops can all reach it with the key.
-5. **Always-on** — survives reboots (Docker `restart: unless-stopped` + Funnel
+5. **Always-on** - survives reboots (Docker `restart: unless-stopped` + Funnel
    persisted; optional systemd unit).
 
 **Acceptance:** from a machine that is NOT on the tailnet,
@@ -33,9 +33,9 @@ transcript JSON, and the same call WITHOUT the key returns 401.
 
 ## Target hardware (verify, don't assume)
 
-- **GB10 = NVIDIA Grace‑Blackwell (DGX Spark‑class)** — **arm64 (aarch64) + CUDA**,
+- **GB10 = NVIDIA Grace‑Blackwell (DGX Spark‑class)** - **arm64 (aarch64) + CUDA**,
   large unified memory, DGX OS / Ubuntu 24.04. NVIDIA Container Toolkit is
-  typically preinstalled. **This is NOT x86** — many prebuilt CUDA Docker images
+  typically preinstalled. **This is NOT x86** - many prebuilt CUDA Docker images
   are x86-only, so verify image arch or build/run a path that supports arm64+CUDA.
 
 Run first and record results:
@@ -57,7 +57,7 @@ continuing. If Tailscale isn't logged in, have the user run `sudo tailscale up`.
 - OpenAI-compatible `/v1/audio/transcriptions`. Default model id the clients send:
   **`whisper-1`** (map it to large-v3-turbo internally).
 - Auth = static bearer key (one shared key is fine; single user). Put the key in
-  front via a tiny reverse proxy or the server's own auth — never bake it into a
+  front via a tiny reverse proxy or the server's own auth - never bake it into a
   public image layer.
 - Public exposure = **Tailscale Funnel** (handles HTTPS + a real cert). Do NOT
   open raw ports to the internet.
@@ -69,7 +69,7 @@ continuing. If Tailscale isn't logged in, have the user run `sudo tailscale up`.
 
 Try in this order; each is fine. The wrapper (key proxy + Funnel) is identical.
 
-### Engine — choose ONE
+### Engine - choose ONE
 - **A. `speaches`** (faster-whisper / CTranslate2), OpenAI-compatible out of the
   box. Simplest IF an arm64+CUDA image/build runs here:
   ```bash
@@ -95,7 +95,7 @@ Try in this order; each is fine. The wrapper (key proxy + Funnel) is identical.
   whisper.cpp's `/inference`. Only do this if A and B both fail.
 
 **Confirm GPU use:** during a transcription, `nvidia-smi` must show the process and
-GPU memory in use. If it's on CPU, fix it (wrong image/build) — CPU large-v3 is too
+GPU memory in use. If it's on CPU, fix it (wrong image/build) - CPU large-v3 is too
 slow for "all the time" dictation.
 
 ### Auth + public URL (common to all engines)
@@ -127,11 +127,11 @@ tailscale funnel status      # note the https://<node>.<tailnet>.ts.net URL
 
 ## Execution plan (verify at each step)
 
-1. **Env check** — run the hardware/Tailscale commands above; fix GPU-in-Docker and
+1. **Env check** - run the hardware/Tailscale commands above; fix GPU-in-Docker and
    Tailscale login before proceeding.
-2. **Engine up** — start engine A/B/C; pull/warm **large-v3-turbo** (or large-v3);
+2. **Engine up** - start engine A/B/C; pull/warm **large-v3-turbo** (or large-v3);
    confirm it listens on `127.0.0.1:8000` and uses the **GPU**.
-3. **Local transcription test** — make a real clip and transcribe it locally
+3. **Local transcription test** - make a real clip and transcribe it locally
    (bypassing auth, hitting :8000):
    ```bash
    # generate speech without internet: espeak-ng or a bundled sample
@@ -140,23 +140,23 @@ tailscale funnel status      # note the https://<node>.<tailnet>.ts.net URL
    curl -s -F file=@sample.wav -F model=whisper-1 http://127.0.0.1:8000/v1/audio/transcriptions
    ```
    Expect text ≈ "buy milk tomorrow at five pm". Note the latency.
-4. **Auth + Funnel** — start Caddy (or LiteLLM) with the generated key; enable
+4. **Auth + Funnel** - start Caddy (or LiteLLM) with the generated key; enable
    Funnel; capture the public URL.
-5. **Public acceptance test** — from off the tailnet (ask the user to run it from
+5. **Public acceptance test** - from off the tailnet (ask the user to run it from
    their phone on cellular, or use a non-tailnet shell):
    ```bash
    curl -F file=@sample.wav -F model=whisper-1 \
      -H "Authorization: Bearer <KEY>" https://<node>.<tailnet>.ts.net/v1/audio/transcriptions   # 200 + transcript
    curl -o /dev/null -w "%{http_code}\n" -X POST https://<node>.<tailnet>.ts.net/v1/audio/transcriptions   # 401
    ```
-6. **Make permanent** — Docker `restart: unless-stopped` (done above) keeps the
+6. **Make permanent** - Docker `restart: unless-stopped` (done above) keeps the
    engine + auth alive; `tailscale funnel --bg` persists across reboots. Optionally
    write a `docker-compose.yml` + a `systemd` unit so it auto-starts. Confirm by
    `sudo reboot` and re-running the public test (optional but recommended).
 
 ---
 
-## Output — print this block at the end (the user pastes it back to me)
+## Output - print this block at the end (the user pastes it back to me)
 
 ```
 WHISPER_BASE_URL = https://<node>.<tailnet>.ts.net      # ends WITHOUT /v1
@@ -177,7 +177,7 @@ returns 401.
 This server is a standard OpenAI transcription endpoint, so it drops into any app
 that lets you set a **custom OpenAI base URL + API key + model**:
 
-- **macOS / Windows dictation apps** that support custom OpenAI endpoints — e.g.
+- **macOS / Windows dictation apps** that support custom OpenAI endpoints - e.g.
   **superwhisper**, **MacWhisper**, **VoiceInk**, **Whispering** (open source).
   Set: Base URL `https://<node>.<tailnet>.ts.net/v1`, API key `<KEY>`, model
   `whisper-1`. (Wispr Flow itself is cloud-only and may not accept custom
@@ -193,7 +193,7 @@ that lets you set a **custom OpenAI base URL + API key + model**:
 
 ## Security & guardrails
 
-- The Funnel URL is **public** — the bearer key is the only thing protecting it.
+- The Funnel URL is **public** - the bearer key is the only thing protecting it.
   Use a long random key (done), keep `KEY.txt` `chmod 600`, rotate if leaked.
 - Consider a basic rate limit (Caddy `rate_limit`, or LiteLLM limits) so a leaked
   key can't be abused to pin your GPU.

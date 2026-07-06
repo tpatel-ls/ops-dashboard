@@ -98,7 +98,7 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
         </select>
         <input
           className="input"
-          placeholder="Tags — comma separated (optional)"
+          placeholder="Tags - comma separated (optional)"
           value={tagsRaw}
           onChange={(e) => setTagsRaw(e.target.value)}
         />
@@ -215,7 +215,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
       <div className="flex flex-wrap items-center gap-2">
         {(quote.author || quote.source) && (
           <span className="font-mono text-[11px] text-muted-foreground">
-            {quote.author ? `— ${quote.author}` : ''}
+            {quote.author ? `- ${quote.author}` : ''}
             {quote.author && quote.source ? ', ' : ''}
             {quote.source && (
               <span className="italic">{quote.source}</span>
@@ -380,7 +380,7 @@ export function QuotesView() {
           )}
         >
           <Plus className="size-4" />
-          Save a quote — from books, articles, podcasts, or conversations
+          Save a quote - from books, articles, podcasts, or conversations
         </button>
       )}
 

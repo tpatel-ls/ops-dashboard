@@ -203,7 +203,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-primary" />
-            <span className="text-sm font-medium">AI extracted — review before saving</span>
+            <span className="text-sm font-medium">AI extracted - review before saving</span>
           </div>
           <button
             type="button"
@@ -436,7 +436,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Paste or type your journal entry here — raw notes, voice transcript, anything…"
+          placeholder="Paste or type your journal entry here - raw notes, voice transcript, anything…"
           rows={7}
           className="input resize-none"
           autoFocus

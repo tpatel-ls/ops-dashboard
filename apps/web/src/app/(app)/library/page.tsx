@@ -43,7 +43,7 @@ export default function LibraryPage() {
     <ViewShell
       eyebrow="Library"
       title="Library"
-      subtitle="Journal, notes, quotes, and books — all in one place."
+      subtitle="Journal, notes, quotes, and books - all in one place."
       actions={
         tab === 'journal' ? (
           <button
@@ -128,7 +128,7 @@ export default function LibraryPage() {
                 )}
               >
                 <PenLine className="size-4" />
-                Add a journal entry — paste text or upload a photo
+                Add a journal entry - paste text or upload a photo
               </button>
             )}
           </>

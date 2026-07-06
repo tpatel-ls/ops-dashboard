@@ -23,7 +23,7 @@ curl -sS -X POST "https://APP.vercel.app/api/capture" \
 ```
 
 Expected: `{"ok":true,"result":{...},"record":{...},"kind":"task"}`. Open the app on
-your phone/tablet — the task "buy milk" appears live, dated tomorrow 5pm.
+your phone/tablet - the task "buy milk" appears live, dated tomorrow 5pm.
 
 - `tzOffsetMinutes` is the JS `new Date().getTimezoneOffset()` value (e.g. `300`
   for US Eastern). It makes "5pm" land at 5pm **local**. Omit it and times are
@@ -33,7 +33,7 @@ your phone/tablet — the task "buy milk" appears live, dated tomorrow 5pm.
 
 ---
 
-## Option 1 — Google Assistant routine (simplest, no apps)
+## Option 1 - Google Assistant routine (simplest, no apps)
 
 Best when you just want "Hey Google, log …" and don't need exact field control.
 
@@ -42,7 +42,7 @@ Best when you just want "Hey Google, log …" and don't need exact field control
 3. **Action:** Assistant routines can't POST raw JSON directly, so add a
    **"Try adding your own" → app action** only if you have Tasker installed
    (Assistant can launch a Tasker task). If you don't want Tasker, Assistant alone
-   can't reach the webhook — use Option 2.
+   can't reach the webhook - use Option 2.
 4. With Tasker present: Assistant action → run Tasker task `OpsCapture` (below),
    passing the spoken text.
 
@@ -51,7 +51,7 @@ fall back to Option 2, which is the reliable path.
 
 ---
 
-## Option 2 — Tasker + a Wear OS tile (reliable, recommended)
+## Option 2 - Tasker + a Wear OS tile (reliable, recommended)
 
 This gives you a **one-tap watch tile → speak → task created**.
 

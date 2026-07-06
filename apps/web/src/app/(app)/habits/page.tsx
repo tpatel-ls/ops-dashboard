@@ -92,7 +92,7 @@ export default function HabitsPage() {
       if (streak > bestStreak) bestStreak = streak;
     }
 
-    // Journal entries this week (Mon–today)
+    // Journal entries this week (Mon-today)
     const weekStart = (() => {
       const d = new Date();
       const day = d.getDay(); // 0=Sun
@@ -284,7 +284,7 @@ export default function HabitsPage() {
               </span>
               <p className="text-sm font-medium text-foreground">A clean slate.</p>
               <p className="max-w-xs text-xs text-muted-foreground">
-                Complete tasks, check off routines, or write a journal entry — every action
+                Complete tasks, check off routines, or write a journal entry - every action
                 lights up the grid.
               </p>
             </div>

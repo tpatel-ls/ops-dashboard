@@ -164,7 +164,7 @@ function BookHighlights({ bookId, quotes }: { bookId: string; quotes: Quote[] })
             <li key={q.id} className="rounded-md bg-bg-sunken px-3 py-2">
               <p className="text-[13px] italic leading-snug text-foreground">&ldquo;{q.text}&rdquo;</p>
               {q.author && (
-                <p className="mt-1 font-mono text-[10px] text-subtle-foreground">— {q.author}</p>
+                <p className="mt-1 font-mono text-[10px] text-subtle-foreground">- {q.author}</p>
               )}
             </li>
           ))}

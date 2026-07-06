@@ -70,7 +70,7 @@ export default async function LoginPage({
 
         <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
           This is a single-user dashboard. Accounts are created in the Supabase
-          dashboard — there is no public signup.
+          dashboard - there is no public signup.
         </p>
 
         {localDevLogin ? (

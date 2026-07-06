@@ -17,7 +17,7 @@ export default function manifest(): ShareTargetManifest {
   return {
     name: 'Ops Dashboard',
     short_name: 'Ops',
-    description: 'Your personal operating system — capture, tasks, routines, projects, and journal.',
+    description: 'Your personal operating system - capture, tasks, routines, projects, and journal.',
     id: '/',
     start_url: '/dashboard',
     scope: '/',

@@ -1,4 +1,4 @@
-# Ops Dashboard — State & Handoff
+# Ops Dashboard - State & Handoff
 
 > **Read this FIRST to resume.** Full design: [`./spec.md`](./spec.md).
 > Multi-device build brief: [`./multi-device-build.md`](./multi-device-build.md).
@@ -80,7 +80,7 @@
   the braindump brain later. Nutrition DB lookups (AI estimates only) and
   inline macro editing (delete + re-log is v1) also deferred.
 
-## Session 3 — org context + portfolio dashboard: code-complete, one prod step pending
+## Session 3 - org context + portfolio dashboard: code-complete, one prod step pending
 - **Portfolio dashboard** at `/dashboard` (now the landing route): per-project
   progress rings, status bars, next actions, filters/sort, needs-attention
   rail, plus a "Load my projects" idempotent importer (Blue Text, Power
@@ -109,7 +109,7 @@
   jnaycounllaafvorakss && supabase db push`). Until then, org rows retry
   harmlessly; everything else syncs.
 
-## Session 2 — multi-device realtime sync: **DEPLOYED & LIVE** ✅
+## Session 2 - multi-device realtime sync: **DEPLOYED & LIVE** ✅
 - **Production:** https://taskify-three-delta.vercel.app (Vercel project `taskify`,
   Root Directory `apps/web`). Login: `your-email@example.com`.
 - **Supabase:** project `jnaycounllaafvorakss` (Taskify), migrations 0001→0004
@@ -123,7 +123,7 @@
   GoTrue admin + Data API (401), so `SUPABASE_SECRET_KEY` uses the legacy
   `service_role` key (works everywhere; valid until end-2026).
 - **Known follow-ups (non-blocking):** (1) `/today` logs React hydration error
-  #418 in prod — it's statically prerendered but renders live dates; make the
+  #418 in prod - it's statically prerendered but renders live dates; make the
   date-dependent today views client-only or `export const dynamic='force-dynamic'`.
   (2) **AI is LIVE** via a self-hosted Anthropic-compatible gateway: env
   `ANTHROPIC_BASE_URL=https://<your-proxy-host>.<tailnet>.ts.net` (Tailscale Funnel
@@ -148,7 +148,7 @@ A 6-dimension adversarial review (each finding independently refuted/confirmed)
 raised 7, confirmed 6, all fixed: per-table pull cursors (was a global cursor that
 could silently drop rows), start/stop generation token (was a re-entrancy leak),
 capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect.
-- **P1 Auth:** `@supabase/ssr` (2026 publishable/secret keys, `getClaims`) — factories
+- **P1 Auth:** `@supabase/ssr` (2026 publishable/secret keys, `getClaims`) - factories
   in `utils/supabase/{client,server,middleware,admin}.ts`, root `middleware.ts`
   (gates pages, never redirects `/api`, no-op when unconfigured), `/login`
   (signInWithPassword) + `/auth/signout`. Routes moved under `(app)` group so login
@@ -165,7 +165,7 @@ capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect
   client in-app) → realtime fans it out. `/api/health` keep-alive. Watch recipe doc.
 - **P4 PWA:** Serwist (`@serwist/next`, `app/sw.ts`) precache + `/~offline` +
   preserved notification handlers; built via `next build --webpack` (Serwist off in
-  dev). Tablet master–detail (drawer docks beside the list at `lg+`); manifest
+  dev). Tablet master-detail (drawer docks beside the list at `lg+`); manifest
   `orientation: any`.
 - **P5 Deploy:** `apps/web/vercel.json` daily cron → `/api/health`; runbook in `deploy.md`.
 
@@ -174,7 +174,7 @@ capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect
 `ANTHROPIC_API_KEY`, and an `OPS_API_SECRET`. See `deploy.md`.
 
 ## Snapshot
-- **Product:** Ops Dashboard — local-first personal life-OS PWA, built on the
+- **Product:** Ops Dashboard - local-first personal life-OS PWA, built on the
   recovered **Ops Dashboard** monorepo (Next.js 16, React 19, Tailwind v4, Dexie, Supabase
   sync, PWA, cmdk).
 - **Branch:** `feat/ops-dashboard`. **PM:** pnpm 10 (corepack). **Node:** 25.
@@ -219,7 +219,7 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
   Browser-verified; production build (28 routes) clean. Commits `c…` (P4 core) + this batch.
 - [ ] **Needs your accounts/keys (not buildable by me alone):** hosting (Supabase +
   Vercel for true multi-device sync across S24 Ultra/Tab/Watch); live AI
-  (`ANTHROPIC_API_KEY` for triage/journal/chat, `GROQ_API_KEY` voice, Pushover push) —
+  (`ANTHROPIC_API_KEY` for triage/journal/chat, `GROQ_API_KEY` voice, Pushover push) -
   code is in place with fallbacks, just unconfigured; Google Calendar; the physical
   Wear OS shortcut that hits `/api/capture`.
 
@@ -242,8 +242,8 @@ behind Supabase auth middleware. Inputs capped; push `url` not user-controllable
 `OPS_API_SECRET` (watch + cron), `CRON_SECRET`, `ANTHROPIC_API_KEY`, `GROQ_API_KEY`,
 `PUSHOVER_TOKEN`, `PUSHOVER_USER`. See `apps/web/.env.local.example`.
 
-## Next steps (live — keep current)
-1. **Go live (needs your accounts):** follow `deploy.md` — create Supabase project,
+## Next steps (live - keep current)
+1. **Go live (needs your accounts):** follow `deploy.md` - create Supabase project,
    `supabase db push` (0001→0004), create the single user (signups off), set env,
    `vercel link`/deploy, Auth URL config, set the cron `CRON_SECRET`.
 2. **Verify multi-device:** sign in on S24 Ultra + Tab S10 Ultra, install PWA,

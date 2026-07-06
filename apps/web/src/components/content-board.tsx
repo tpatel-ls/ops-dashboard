@@ -537,7 +537,7 @@ function EmptyState() {
       </div>
       <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
       <p className="max-w-xs text-sm text-muted-foreground">
-        Add your first content idea above — articles, videos, podcasts, and newsletters all in one pipeline.
+        Add your first content idea above - articles, videos, podcasts, and newsletters all in one pipeline.
       </p>
     </div>
   );
@@ -590,7 +590,7 @@ export function ContentBoard() {
         <EmptyState />
       ) : (
         <>
-          {/* kanban columns — lg+ only */}
+          {/* kanban columns - lg+ only */}
           <div className="hidden overflow-x-auto pb-4 lg:block scrollbar-thin">
             <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
               {STATUSES.map((s) => (
@@ -607,7 +607,7 @@ export function ContentBoard() {
             </div>
           </div>
 
-          {/* grouped list — phone */}
+          {/* grouped list - phone */}
           <div className="flex flex-col gap-5 lg:hidden">
             {STATUSES.map((s, i) => (
               <ListGroup

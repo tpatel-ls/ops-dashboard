@@ -238,7 +238,7 @@ export default function AskPage() {
     <ViewShell
       eyebrow="More"
       title="Ask"
-      subtitle="Chat with everything in your dashboard — tasks, projects, routines, journal, and more."
+      subtitle="Chat with everything in your dashboard - tasks, projects, routines, journal, and more."
     >
       <ChatPanel
         messages={messages}

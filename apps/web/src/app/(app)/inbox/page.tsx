@@ -172,7 +172,7 @@ export default function InboxPage() {
     <ViewShell
       eyebrow="Plan"
       title="Inbox"
-      subtitle="Everything you captured — review, route, and clear."
+      subtitle="Everything you captured - review, route, and clear."
       meta={meta}
     >
       {captures === undefined ? (

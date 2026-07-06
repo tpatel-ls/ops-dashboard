@@ -4,7 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * Admin Supabase client — uses the SECRET key (`sb_secret_…`), which bypasses
+ * Admin Supabase client - uses the SECRET key (`sb_secret_…`), which bypasses
  * RLS. Server-only; never import from a client component. Used by the Wear OS
  * capture webhook (authenticated by OPS_API_SECRET, not a user session) to write
  * rows under the single user, and by /api/health for the keep-alive ping.

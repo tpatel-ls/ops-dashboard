@@ -1,4 +1,4 @@
-# Ops Dashboard — Design Spec
+# Ops Dashboard - Design Spec
 
 > Personal life operating-system PWA. Inspired by Jared Hill's Claude-Code-built
 > "Ops Dashboard" (source transcript: `~/Downloads/Jerad Ops Dashboard Project.txt`).
@@ -15,9 +15,9 @@ tasks, routines/habits, projects, content, people, library, and a "chat with you
 data" layer. Friction of capture is the enemy; the system must get out of the way.
 
 ### Target devices (all Samsung / Android / Wear OS)
-- **Galaxy S24 Ultra** (phone) — primary capture surface; PWA installed to home screen.
-- **Galaxy Tab S10 Ultra** (tablet) — two-pane layouts at ≥lg.
-- **Galaxy Watch 7 Ultra** (Wear OS) — capture via API later; notifications via
+- **Galaxy S24 Ultra** (phone) - primary capture surface; PWA installed to home screen.
+- **Galaxy Tab S10 Ultra** (tablet) - two-pane layouts at ≥lg.
+- **Galaxy Watch 7 Ultra** (Wear OS) - capture via API later; notifications via
   Pushover phone→watch bridging (no native watch app needed).
 
 ### Tanay's three deltas vs Jared's build
@@ -55,11 +55,11 @@ data" layer. Friction of capture is the enemy; the system must get out of the wa
 ## 3. Architecture (inherited + extended)
 
 pnpm monorepo:
-- `@ops-dashboard/core` — data shapes, Dexie schema, ULID/device-id, NL parser, recurrence,
+- `@ops-dashboard/core` - data shapes, Dexie schema, ULID/device-id, NL parser, recurrence,
   sync helpers. Pure TS (runs in tests/browser/worker). **We extend this heavily.**
-- `@ops-dashboard/ui` — `cn` + design tokens.
-- `@ops-dashboard/whiteboard` — tldraw wrapper (kept, low priority).
-- `apps/web` — Next.js app. `src/app` routes, `src/components` UI, `src/lib` thin
+- `@ops-dashboard/ui` - `cn` + design tokens.
+- `@ops-dashboard/whiteboard` - tldraw wrapper (kept, low priority).
+- `apps/web` - Next.js app. `src/app` routes, `src/components` UI, `src/lib` thin
   data layer wrapping `@ops-dashboard/core`.
 
 **Data flow:** `UI → src/lib → Dexie`. Each mutation also `enqueueOp()` to the
@@ -76,7 +76,7 @@ from env and **degrade gracefully** when keys are missing.
 accent"), `.dark` class via next-themes. Utilities: `.surface`, `.surface-flat`,
 `.input`, `.kbd`, `.hairline`, `.dot-grid`, `.live-dot`, `.scrollbar-thin`.
 Responsive on **width** (not UA): phone `<lg` single column + bottom nav/drawer;
-tablet `≥lg/xl` persistent sidebar + master–detail. Use `dvh` + `env(safe-area-*)`.
+tablet `≥lg/xl` persistent sidebar + master-detail. Use `dvh` + `env(safe-area-*)`.
 
 ---
 
@@ -85,31 +85,31 @@ tablet `≥lg/xl` persistent sidebar + master–detail. Use `dvh` + `env(safe-ar
 Base fields on every entity: `id, createdAt, updatedAt, version, deviceId, deletedAt`.
 
 **Existing (extend):**
-- `Task` — add `domainId?`, `contentId?`, `starred?` (Today top-3). Keep status,
+- `Task` - add `domainId?`, `contentId?`, `starred?` (Today top-3). Keep status,
   priority, scheduling, tags, projectId, parentId, recurrence, reminders, checklist.
-- `Project` — add `domainId?`, `kind: 'project'|'area'|'retainer'`,
+- `Project` - add `domainId?`, `kind: 'project'|'area'|'retainer'`,
   `status: 'active'|'paused'|'done'|'archived'`, `description?`, `startDate?`,
   `dueDate?`, `lastWorkedAt?` (slipping), `milestones: Milestone[]`,
-  `checklists: NamedChecklist[]`, `retainerResetDay?` (1–28, monthly reload).
-- `Settings` — add `pushoverConfigured`, `aiEnabled`, capture defaults, timezone.
+  `checklists: NamedChecklist[]`, `retainerResetDay?` (1-28, monthly reload).
+- `Settings` - add `pushoverConfigured`, `aiEnabled`, capture defaults, timezone.
 
 **New:**
-- `Domain` — `name, color, icon?, description?, order`. Top of the hierarchy.
-- `Milestone` (embedded) — `id, title, done, dueDate?`.
-- `NamedChecklist` (embedded) — `id, name, items: ChecklistItem[]`.
-- `ChecklistTemplate` — `name, kind, items: string[]` (reusable, e.g. new-website).
-- `WorkLog` — `projectId, minutes, note?, at`. Time tracking + feeds heatmap.
-- `Capture` — `raw, source: 'text'|'voice'|'watch'|'journal', status:
+- `Domain` - `name, color, icon?, description?, order`. Top of the hierarchy.
+- `Milestone` (embedded) - `id, title, done, dueDate?`.
+- `NamedChecklist` (embedded) - `id, name, items: ChecklistItem[]`.
+- `ChecklistTemplate` - `name, kind, items: string[]` (reusable, e.g. new-website).
+- `WorkLog` - `projectId, minutes, note?, at`. Time tracking + feeds heatmap.
+- `Capture` - `raw, source: 'text'|'voice'|'watch'|'journal', status:
   'pending'|'triaged'|'dismissed', routedTo?: {type,id}, aiSummary?`. Raw inbox item.
-- `Routine` (habit) — `name, description?, timeOfDay:
+- `Routine` (habit) - `name, description?, timeOfDay:
   'morning'|'afternoon'|'evening'|'anytime', specificTime?, notify, domainId?,
   kind: 'ongoing'|'fixed', durationDays?, startDate, endDate?, order, archivedAt?`.
-- `RoutineCheck` — `routineId, date (YYYY-MM-DD), done, completedAt?`. Streaks + heatmap.
-- `JournalEntry` — `date, body, mediaUrls[], mood?, tags[], source?`. Needed for upload.
-- `AppNotification` — `title, body?, kind, refId?, readAt?`. In-app feed.
-- `Content` (model now, UI P3) — `title, type, status, channel?, domainId?, url?,
+- `RoutineCheck` - `routineId, date (YYYY-MM-DD), done, completedAt?`. Streaks + heatmap.
+- `JournalEntry` - `date, body, mediaUrls[], mood?, tags[], source?`. Needed for upload.
+- `AppNotification` - `title, body?, kind, refId?, readAt?`. In-app feed.
+- `Content` (model now, UI P3) - `title, type, status, channel?, domainId?, url?,
   outline?, publishDate?, order`.
-- `Person` / `Note` / `Quote` / `Book` / `InventoryItem` (model later, P4–P5).
+- `Person` / `Note` / `Quote` / `Book` / `InventoryItem` (model later, P4-P5).
 
 **Activity aggregation (heatmap):** pure function reads completed tasks
 (`completedAt`), routine checks (`done`), work logs (`at`), journal entries
@@ -128,7 +128,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 
 ## 5. Feature breakdown by phase
 
-### P0 — Foundation
+### P0 - Foundation
 - Recover Ops Dashboard (done), install, baseline runs.
 - Extend `@ops-dashboard/core` types + Dexie v2 + sync union + lib helpers for every new
   entity (domains, routines, captures, journal, worklogs, content, notifications).
@@ -140,7 +140,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 - Supabase `0002_ops.sql`. `.env.local.example`. Fix PWA manifest icons + Serwist
   (or keep manual SW for now; manifest icons are the must-fix for installability).
 
-### P1 — Capture + Today + Tasks
+### P1 - Capture + Today + Tasks
 - **Capture:** quick-add upgraded to capture-and-triage; voice button
   (MediaRecorder→/api/transcribe, Web Speech fallback); Cmd/Ctrl+K palette capture;
   capture → AI triage → routed record + notification; **Inbox** = recent captures
@@ -154,7 +154,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 - **Domains + Projects/Areas/Retainers** manager: milestones, checklists +
   templates, work-log/time tracking, retainer monthly auto-reload.
 
-### P2 — Habits + Heatmap + Journal (Tanay's emphasis)
+### P2 - Habits + Heatmap + Journal (Tanay's emphasis)
 - **Routines/Habits:** CRUD, check-off, streaks, ongoing vs fixed (e.g. 30-day),
   archived/completed streaks, per-day bar/summary.
 - **GitHub-style heatmap** across all activity types, with per-type weighting and a
@@ -164,7 +164,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
   habits were done → marks `RoutineCheck`s for the day (with user confirm).
 - **Pushover** reminders + daily summary (client ticker now; server cron at host-time).
 
-### P3–P5 (outline)
+### P3-P5 (outline)
 - P3 Content pipeline (kanban) + retainer polish.
 - P4 Library (notes/quotes/journal/books+Kindle highlights) + People CRM + Inventory.
 - P5 Google Calendar, server push cron, global search (fuse.js exists), chat-with-data,

@@ -326,7 +326,7 @@ export function RoutinesView() {
           </div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
           <p className="max-w-sm text-sm text-muted-foreground">
-            Build daily habits — morning stretches, evening reviews, or a 30-day challenge. Track
+            Build daily habits - morning stretches, evening reviews, or a 30-day challenge. Track
             your streaks and stay consistent.
           </p>
         </div>

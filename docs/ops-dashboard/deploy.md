@@ -1,4 +1,4 @@
-# Ops Dashboard — go-live runbook (Supabase + Vercel, free)
+# Ops Dashboard - go-live runbook (Supabase + Vercel, free)
 
 Everything here is the **account/key** work that can't be done from code alone.
 The app, auth, realtime sync, capture webhook, PWA, and cron are already built and
@@ -15,7 +15,7 @@ build-green on `feat/ops-dashboard`. Follow these in order.
    - **Publishable** key (`sb_publishable_…`) → `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - **Secret** key (`sb_secret_…`) → `SUPABASE_SECRET_KEY` (server-only; never `NEXT_PUBLIC_`)
 
-## 2. Apply the schema (CLI — I can run these once you log in)
+## 2. Apply the schema (CLI - I can run these once you log in)
 
 ```bash
 # from repo root
@@ -26,7 +26,7 @@ npx supabase gen types typescript --linked > apps/web/src/lib/database.types.ts
 ```
 
 `db push` applies: base tables (0001), Ops entities (0002), Library (0003), and
-**0004_sync** — which adds the version-guard trigger and puts all 16 tables in the
+**0004_sync** - which adds the version-guard trigger and puts all 16 tables in the
 `supabase_realtime` publication. Realtime works immediately after.
 
 ## 3. Create your single user (no public signup)
@@ -64,7 +64,7 @@ vercel --prod                    # or via the dashboard
 ```
 
 - **Root Directory = `apps/web`** (monorepo). `apps/web/vercel.json` defines the
-  daily keep-alive cron (`/api/health` at 09:00 UTC) — Hobby allows one daily cron,
+  daily keep-alive cron (`/api/health` at 09:00 UTC) - Hobby allows one daily cron,
   on production only.
 - Set every env var from step 4 in **Vercel → Project → Settings → Environment
   Variables** (Production). Add `CRON_SECRET` (any random string) so the cron call

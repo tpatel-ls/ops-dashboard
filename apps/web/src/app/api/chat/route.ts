@@ -6,9 +6,9 @@ export const runtime = 'nodejs';
 
 const MAX_CONTEXT = 60_000;
 
-const CHAT_SYSTEM = `You are the personal assistant inside the user's Ops Dashboard — a local-first life management app. The user is asking a question about their own data: tasks, projects, routines, journal entries, domains, notes, quotes, books, and people.
+const CHAT_SYSTEM = `You are the personal assistant inside the user's Ops Dashboard - a local-first life management app. The user is asking a question about their own data: tasks, projects, routines, journal entries, domains, notes, quotes, books, and people.
 
-Answer using ONLY the information provided in the CONTEXT block below. Be concise and direct. If the context does not contain enough information to answer, say so honestly. Do not invent data. Format your response in plain text — no markdown headers, keep lists minimal.`;
+Answer using ONLY the information provided in the CONTEXT block below. Be concise and direct. If the context does not contain enough information to answer, say so honestly. Do not invent data. Format your response in plain text - no markdown headers, keep lists minimal.`;
 
 export async function POST(req: Request): Promise<Response> {
   if (!requestAllowed(req)) {

@@ -112,7 +112,7 @@ function CreateProjectForm({ domains, onCreated, onCancel }: CreateProjectFormPr
           onChange={(e) => setDomainId(e.target.value)}
           className="input"
         >
-          <option value="">— no domain —</option>
+          <option value="">- no domain -</option>
           {domains.map((d) => (
             <option key={d.id} value={d.id}>{d.name}</option>
           ))}

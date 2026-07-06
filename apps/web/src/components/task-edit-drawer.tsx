@@ -31,7 +31,7 @@ export function TaskEditDrawer() {
     <div className="fixed inset-0 z-40 flex lg:pointer-events-none" onClick={close}>
       {/* On phone: a dimming modal backdrop. On tablet (lg+): a transparent,
           click-through spacer so the list stays visible + interactive beside the
-          docked detail pane (master–detail). */}
+          docked detail pane (master-detail). */}
       <div className="flex-1 bg-black/40 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none" />
       <div
         onClick={(e) => e.stopPropagation()}

@@ -52,7 +52,7 @@ async function getLocalRow(table: DexieTableName, id: string): Promise<Syncable 
 }
 
 async function putLocalRow(table: DexieTableName, rec: Syncable): Promise<void> {
-  // Direct Dexie write — NOT through the mutation helpers — so inbound merges
+  // Direct Dexie write - NOT through the mutation helpers - so inbound merges
   // never re-enqueue an outbound op (which would loop).
   await db().table(table).put(rec);
 }
@@ -144,7 +144,7 @@ function writeCursors(cursors: Record<string, string>): void {
 
 /**
  * Catch-up pull. Each table keeps its OWN cursor and only advances it on a
- * successful fetch of that table — a transient error on one table never moves
+ * successful fetch of that table - a transient error on one table never moves
  * another table's cursor past unread rows.
  */
 async function pull(supabase: SupabaseClient): Promise<void> {
@@ -345,7 +345,7 @@ export async function startSync(): Promise<void> {
     setSyncStatus({ state: navigator.onLine ? 'error' : 'offline' });
   }
 
-  if (myGen !== generation) return; // a stop landed during startup — do not go live
+  if (myGen !== generation) return; // a stop landed during startup - do not go live
 
   // Realtime's SUBSCRIBED callback drives the 'live' state from here.
   subscribeRealtime(supabase);

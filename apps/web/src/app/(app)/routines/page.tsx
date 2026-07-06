@@ -6,7 +6,7 @@ export default function RoutinesPage() {
     <ViewShell
       eyebrow="Build"
       title="Routines"
-      subtitle="Track daily habits and streaks — morning, afternoon, evening, or anytime."
+      subtitle="Track daily habits and streaks - morning, afternoon, evening, or anytime."
     >
       <RoutinesView />
     </ViewShell>

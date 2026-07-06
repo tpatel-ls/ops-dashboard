@@ -8,7 +8,7 @@ const META: Record<SyncState, { label: string; color: string }> = {
   'signed-out': { label: 'Signed out', color: 'var(--color-warning)' },
   connecting: { label: 'Connecting…', color: 'var(--color-warning)' },
   live: { label: 'Live', color: 'var(--color-success)' },
-  offline: { label: 'Offline — will sync', color: 'var(--color-warning)' },
+  offline: { label: 'Offline - will sync', color: 'var(--color-warning)' },
   error: { label: 'Error', color: 'var(--color-destructive)' },
 };
 

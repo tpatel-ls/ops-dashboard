@@ -7,7 +7,7 @@ import { DEV_AUTH_COOKIE, DEV_AUTH_VALUE, isDevAuthAvailable } from '@/lib/dev-a
  * navigations behind auth (2026 pattern: getClaims, never getSession server-side).
  *
  * Local-first safety: when Supabase isn't configured, this is a no-op so the app
- * runs fully on-device. API routes are never redirected — they self-guard
+ * runs fully on-device. API routes are never redirected - they self-guard
  * (same-origin / OPS_API_SECRET bearer) and must return JSON, not an HTML redirect.
  */
 const PUBLIC_PATHS = ['/login', '/auth', '/~offline'];

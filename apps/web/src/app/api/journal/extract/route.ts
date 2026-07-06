@@ -14,7 +14,7 @@ The user has provided a journal entry (text and/or a photo of a handwritten page
 Call extract_journal exactly once. Extract:
 - summary: a single concise sentence capturing the essence of the entry.
 - body: the cleaned, readable journal text (fix OCR artifacts, remove noise, preserve the user's voice).
-- mood: one of "great" | "good" | "neutral" | "low" | "rough" — infer from tone.
+- mood: one of "great" | "good" | "neutral" | "low" | "rough" - infer from tone.
 - tags: up to 6 lowercase topic tags relevant to the content.
 - habitsDone: from the provided routineNames list, return only those habits/routines that the entry clearly indicates were completed today. Match case-insensitively. Return exact names as provided.`;
 
