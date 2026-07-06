@@ -1,5 +1,5 @@
-import { PortfolioDashboard } from '@/components/dashboard/portfolio-dashboard';
+import { LifeCommandCenter } from '@/components/dashboard/life-command-center';
 
 export default function DashboardPage() {
-  return <PortfolioDashboard />;
+  return <LifeCommandCenter />;
 }
