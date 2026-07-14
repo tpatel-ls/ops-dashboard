@@ -135,19 +135,19 @@ git commit -m "feat: add universal logger launch state"
 - Consumes: Task 1 destination helpers and Task 2 launch state.
 - Produces: Task, Project, and Progress form modes with inline organization creation and sync feedback.
 
-- [ ] **Step 1: Write a failing project creation test for due date and org**
+- [x] **Step 1: Write a failing project creation test for due date and org**
 
 ```ts
 const project = await createProject('Launch', { orgId: 'org-a', dueDate: '2026-08-01' });
 expect(project).toMatchObject({ orgId: 'org-a', dueDate: '2026-08-01' });
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/projects.test.ts`
 Expected: FAIL because `CreateProjectOptions` does not accept `dueDate`.
 
-- [ ] **Step 3: Extend `CreateProjectOptions` minimally**
+- [x] **Step 3: Extend `CreateProjectOptions` minimally**
 
 ```ts
 export interface CreateProjectOptions {
@@ -162,31 +162,31 @@ export interface CreateProjectOptions {
 
 Copy `dueDate` into the new record only when provided, then verify the focused test passes.
 
-- [ ] **Step 4: Build the dialog shell and destination rail**
+- [x] **Step 4: Build the dialog shell and destination rail**
 
 Use `role="dialog"`, `aria-modal="true"`, a fixed backdrop, phone bottom-sheet geometry, tablet and desktop centered geometry, mode buttons, destination buttons with text and color, and an inline Add organization form. Read the active organization context and last destination, then call `resolveWorkDestination`.
 
-- [ ] **Step 5: Implement Task mode**
+- [x] **Step 5: Implement Task mode**
 
 On save call `addTaskToProject` when a filtered project is selected. Otherwise call `addTask(title, { orgId, scheduledFor, priority })`. Schedule options are Inbox, Today, Tomorrow, and a date input. Keep local errors visible and preserve form values.
 
-- [ ] **Step 6: Implement Project mode**
+- [x] **Step 6: Implement Project mode**
 
 Call `createProject(name, { orgId, kind, dueDate, description })`. The primary action includes the destination name.
 
-- [ ] **Step 7: Implement Progress mode**
+- [x] **Step 7: Implement Progress mode**
 
 Require a filtered project, expose 15, 30, and 60 minute shortcuts, validate positive integer minutes, and call `logWork(project.id, minutes, note)`.
 
-- [ ] **Step 8: Add save feedback and dialog behavior**
+- [x] **Step 8: Add save feedback and dialog behavior**
 
 After local save, read `useSyncStatus` and show the Task 1 message before closing. Escape closes, backdrop click closes, focus starts in the first required field, and controls meet the 44px phone target.
 
-- [ ] **Step 9: Replace the old dialog in the app shell**
+- [x] **Step 9: Replace the old dialog in the app shell**
 
 Render `WorkLoggerDialog`, route `g then i` to task mode, and make the global close action close the work logger.
 
-- [ ] **Step 10: Verify tests, typecheck, and commit**
+- [x] **Step 10: Verify tests, typecheck, and commit**
 
 Run:
 

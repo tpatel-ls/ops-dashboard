@@ -10,7 +10,7 @@ import { wipeLocalData } from '@/lib/reset';
 import { CommandPalette } from './command-palette';
 import { HelpOverlay } from './help-overlay';
 import { TaskEditDrawer } from './task-edit-drawer';
-import { QuickAddDialog } from './quick-add-dialog';
+import { WorkLoggerDialog } from './work-logger-dialog';
 import { FocusMode } from './focus-mode';
 import { DailyReviewTrigger } from './daily-review';
 import { ReminderTicker } from './reminder-ticker';
@@ -30,6 +30,7 @@ export function AppShell() {
     s.closeHelp();
     s.closeEdit();
     s.closeQuickAdd();
+    s.closeWorkLogger();
     s.closeFocus();
     s.closeReview();
   }, []);
@@ -83,7 +84,7 @@ export function AppShell() {
       <CommandPalette />
       <HelpOverlay />
       <TaskEditDrawer />
-      <QuickAddDialog />
+      <WorkLoggerDialog />
       <FocusMode />
       <DailyReviewTrigger />
       <ReminderTicker />
