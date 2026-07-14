@@ -22,7 +22,7 @@ export function AppShell() {
   const router = useRouter();
   const togglePalette = useAppStore((s) => s.togglePalette);
   const toggleHelp = useAppStore((s) => s.toggleHelp);
-  const openQuickAdd = useAppStore((s) => s.openQuickAdd);
+  const openWorkLogger = useAppStore((s) => s.openWorkLogger);
   const openFocus = useAppStore((s) => s.openFocus);
   const closeAll = useCallback(() => {
     const s = useAppStore.getState();
@@ -62,7 +62,7 @@ export function AppShell() {
   useHotkeys([
     { combo: 'mod+k', handler: togglePalette },
     { combo: '?', handler: toggleHelp },
-    { combo: 'g then i', handler: openQuickAdd },
+    { combo: 'g then i', handler: () => openWorkLogger('task') },
     { combo: 'g then d', handler: () => router.push('/dashboard') },
     { combo: 'g then t', handler: () => router.push('/today') },
     { combo: 'g then w', handler: () => router.push('/week') },

@@ -17,7 +17,7 @@ const RIGHT = [
 
 export function MobileNav() {
   const pathname = usePathname();
-  const openQuickAdd = useAppStore((s) => s.openQuickAdd);
+  const openWorkLogger = useAppStore((s) => s.openWorkLogger);
 
   return (
     <nav
@@ -30,7 +30,7 @@ export function MobileNav() {
       <div className="relative -top-4 mx-1 flex shrink-0 flex-col items-center">
         <button
           type="button"
-          onClick={openQuickAdd}
+          onClick={() => openWorkLogger('task')}
           aria-label="Capture"
           className="flex size-14 items-center justify-center rounded-full border border-primary/25 bg-primary text-primary-foreground shadow-[0_14px_34px_-14px_color-mix(in_oklch,var(--primary)_82%,transparent)] transition-transform active:scale-95"
         >

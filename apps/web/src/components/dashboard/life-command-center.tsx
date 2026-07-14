@@ -73,7 +73,7 @@ function taskSortTime(task: Task): number {
 }
 
 export function LifeCommandCenter() {
-  const openQuickAdd = useAppStore((state) => state.openQuickAdd);
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   const launch = useLiveQuery(async () => {
     const db = getDb();
     const [projects, tasks] = await Promise.all([
@@ -141,7 +141,7 @@ export function LifeCommandCenter() {
       actions={
         <button
           type="button"
-          onClick={openQuickAdd}
+          onClick={() => openWorkLogger('task')}
           className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
           <Plus className="size-3.5 text-primary" aria-hidden />

@@ -49,7 +49,7 @@ export function TopBar() {
         <div className="hidden xl:block">
           <SyncStatus showPending={false} />
         </div>
-        <div className="hidden sm:block">
+        <div>
           <OrgSwitcher />
         </div>
         <button

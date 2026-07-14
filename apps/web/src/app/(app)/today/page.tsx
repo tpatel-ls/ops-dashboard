@@ -18,11 +18,13 @@ import { useAppStore } from '@/lib/app-store';
 export default function TodayPage() {
   const now = new Date();
   const openFocus = useAppStore((s) => s.openFocus);
-  const openQuickAdd = useAppStore((s) => s.openQuickAdd);
+  const openWorkLogger = useAppStore((s) => s.openWorkLogger);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('capture') === '1') openQuickAdd();
-  }, [openQuickAdd]);
+    if (new URLSearchParams(window.location.search).get('capture') === '1') {
+      openWorkLogger('task');
+    }
+  }, [openWorkLogger]);
 
   return (
     <ViewShell
