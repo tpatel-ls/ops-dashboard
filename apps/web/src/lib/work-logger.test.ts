@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Project } from '@ops-dashboard/core';
 import {
   destinationOrgId,
+  destinationForProject,
   projectsForDestination,
   resolveWorkDestination,
   syncSaveMessage,
@@ -40,6 +41,11 @@ describe('resolveWorkDestination', () => {
 });
 
 describe('destination helpers', () => {
+  it('derives the destination from a preselected project', () => {
+    expect(destinationForProject(project('org-project', 'org-a'))).toBe('org-a');
+    expect(destinationForProject(project('personal-project'))).toBe('personal');
+  });
+
   it('maps Personal to an absent orgId', () => {
     expect(destinationOrgId('personal')).toBeUndefined();
     expect(destinationOrgId('org-a')).toBe('org-a');
@@ -60,6 +66,7 @@ describe('destination helpers', () => {
 describe('syncSaveMessage', () => {
   it('distinguishes synced, queued, and signed-out saves', () => {
     expect(syncSaveMessage('live', 0)).toBe('Saved and synced');
+    expect(syncSaveMessage('live', 1)).toBe('Saved - syncing now');
     expect(syncSaveMessage('offline', 1)).toBe('Saved offline - sync queued');
     expect(syncSaveMessage('signed-out', 0)).toBe('Saved on this device - sign in to sync');
   });

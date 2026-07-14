@@ -22,7 +22,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="hairline fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t bg-bg-rail/90 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_42px_-34px_rgba(0,0,0,0.75)] backdrop-blur-xl md:hidden"
+      className="hairline relative z-40 flex shrink-0 items-stretch justify-around border-t bg-bg-rail/90 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_42px_-34px_rgba(0,0,0,0.75)] backdrop-blur-xl md:hidden"
     >
       {LEFT.map((it) => (
         <Tab key={it.href} {...it} active={pathname.startsWith(it.href)} />

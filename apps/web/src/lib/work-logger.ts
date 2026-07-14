@@ -18,6 +18,10 @@ export function destinationOrgId(destination: WorkDestination): string | undefin
   return destination === 'personal' ? undefined : destination;
 }
 
+export function destinationForProject(project: Pick<Project, 'orgId'>): WorkDestination {
+  return project.orgId ?? 'personal';
+}
+
 export function projectsForDestination(
   projects: Project[],
   destination: WorkDestination,
@@ -33,6 +37,7 @@ export function projectsForDestination(
 
 export function syncSaveMessage(state: SyncState, pending: number): string {
   if (state === 'live' && pending === 0) return 'Saved and synced';
+  if (state === 'live' || state === 'connecting') return 'Saved - syncing now';
   if (state === 'signed-out' || state === 'unconfigured' || state === 'off') {
     return 'Saved on this device - sign in to sync';
   }

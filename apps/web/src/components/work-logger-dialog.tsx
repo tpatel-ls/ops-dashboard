@@ -16,6 +16,7 @@ import { createOrganization, nextOrgColor } from '@/lib/organizations';
 import { logWork } from '@/lib/worklogs';
 import {
   destinationOrgId,
+  destinationForProject,
   projectsForDestination,
   resolveWorkDestination,
   syncSaveMessage,
@@ -88,11 +89,16 @@ export function WorkLoggerDialog() {
     );
   }
 
-  const initialDestination = resolveWorkDestination(
-    ctx,
-    readLastDestination(),
-    data.organizations.map((org) => org.id),
-  );
+  const launchProject = launchProjectId
+    ? data.projects.find((project) => project.id === launchProjectId)
+    : undefined;
+  const initialDestination = launchProject
+    ? destinationForProject(launchProject)
+    : resolveWorkDestination(
+        ctx,
+        readLastDestination(),
+        data.organizations.map((org) => org.id),
+      );
 
   return (
     <WorkLoggerPanel
@@ -123,6 +129,7 @@ function WorkLoggerPanel({
   onClose: () => void;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
   const [mode, setMode] = useState<WorkLoggerMode>(launchMode);
   const [destination, setDestination] = useState<WorkDestination>(initialDestination);
   const [projectId, setProjectId] = useState(launchProjectId ?? '');
@@ -182,7 +189,12 @@ function WorkLoggerPanel({
     }
 
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
   }, [onClose]);
 
   function chooseDestination(next: WorkDestination) {
@@ -269,9 +281,9 @@ function WorkLoggerPanel({
         await logWork(selectedProject.id, minutes, progressNote.trim() || undefined);
       }
 
-      const message = syncSaveMessage(syncState, syncPending);
+      const message = syncSaveMessage(syncState, syncPending + 1);
       setSavedMessage(message);
-      window.setTimeout(onClose, 950);
+      closeTimerRef.current = window.setTimeout(onClose, 950);
     } catch {
       setError(`Could not save this ${mode}. Your entry is still here.`);
     } finally {
