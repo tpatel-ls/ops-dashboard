@@ -212,23 +212,23 @@ git commit -m "feat: add organization-first work logger"
 - Consumes: `useActiveOrgs`, `resolveWorkDestination`, and `openWorkLogger`.
 - Produces: organization-aware inline creation, organization labels in All, and progress launch actions.
 
-- [ ] **Step 1: Add a browser assertion that reproduces the disappearing-project bug**
+- [x] **Step 1: Add a browser assertion that reproduces the disappearing-project bug**
 
 In `apps/web/scripts/verify-work-logger.mjs`, seed an organization in IndexedDB, set its context, create a project through the UI, and assert the project stays visible with that organization's label. Run it and verify it fails before the form change.
 
-- [ ] **Step 2: Add organization selection to the existing project form**
+- [x] **Step 2: Add organization selection to the existing project form**
 
 Load active organizations, initialize the destination from the active context, render Personal plus organization choices, and pass `orgId: destinationOrgId(destination)` to `createProject`.
 
-- [ ] **Step 3: Label cards in All context**
+- [x] **Step 3: Label cards in All context**
 
 Load organizations alongside projects and attach the matching organization to `ProjectCardData`. Show organization name and color only when `ctx === 'all'`.
 
-- [ ] **Step 4: Add progress actions without nested buttons**
+- [x] **Step 4: Add progress actions without nested buttons**
 
 Restructure the card into an article with a primary open button and a separate icon-plus-text `Log progress` button. Launch `openWorkLogger('progress', project.id)`.
 
-- [ ] **Step 5: Verify the focused browser assertion and commit**
+- [x] **Step 5: Verify the focused browser assertion and commit**
 
 Run: `pnpm --filter @ops-dashboard/web exec node scripts/verify-work-logger.mjs --scenario project-org`
 Expected: PASS.
