@@ -19,19 +19,21 @@ async function verifyProjectOrganization(page) {
   await openApp(page, '/projects');
   await page.getByRole('button', { name: 'New' }).click();
 
-  const organization = page.getByLabel('Organization');
-  if (!(await organization.isVisible().catch(() => false))) {
+  const createProjectForm = page.getByRole('form', { name: 'Create project' });
+  const organization = createProjectForm.getByLabel('Organization');
+  if (!(await organization.waitFor({ state: 'visible' }).then(() => true).catch(() => false))) {
     throw new Error('Project form is missing the organization selector');
   }
 
+  await organization.locator('option').nth(1).waitFor({ state: 'attached' });
   const optionCount = await organization.locator('option').count();
   if (optionCount < 2) throw new Error('No work organization is available in the project form');
 
   const projectName = `Org visibility ${Date.now()}`;
-  await page.getByLabel('Project name').fill(projectName);
+  await createProjectForm.getByLabel('Project name').fill(projectName);
   await organization.selectOption({ index: 1 });
   const selectedLabel = await organization.locator('option:checked').textContent();
-  await page.getByRole('button', { name: 'Create project' }).click();
+  await createProjectForm.getByRole('button', { name: 'Create project' }).click();
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('heading', { name: projectName, exact: true }).waitFor({ state: 'hidden' });
 

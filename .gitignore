@@ -13,6 +13,9 @@ coverage
 playwright-report
 test-results
 .playwright-mcp
+.playwright-cli
+output
+apps/web/output
 # local dev screenshots / scratch
 /ops-*.png
 /*-smoke.png

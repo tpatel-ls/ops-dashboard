@@ -103,7 +103,11 @@ function CreateProjectForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="surface flex flex-col gap-3 p-4">
+    <form
+      aria-label="Create project"
+      onSubmit={handleSubmit}
+      className="surface flex flex-col gap-3 p-4"
+    >
       <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
         New project
       </div>
