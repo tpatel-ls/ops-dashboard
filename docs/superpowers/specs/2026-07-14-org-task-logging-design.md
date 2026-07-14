@@ -1,6 +1,6 @@
 # Organization-first task and project logging
 
-Date: 2026-07-14. Status: interaction design approved by Tanay; written spec awaiting review.
+Date: 2026-07-14. Status: approved by Tanay for end-to-end execution.
 
 ## Goal
 
@@ -179,4 +179,3 @@ existing owner-scoped RLS policies.
 - Replacing the existing natural-language capture and AI routing system.
 - Building a native Android, desktop, or Wear OS application in this change.
 - Syncing the active organization lens between devices.
-
