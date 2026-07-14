@@ -29,7 +29,7 @@
 - Produces: `WorkDestination`, `resolveWorkDestination`, `destinationOrgId`, `projectsForDestination`, `syncSaveMessage`.
 - Consumes: `OrgContext`, `Project`, and `SyncState` from existing modules.
 
-- [ ] **Step 1: Write failing tests for context priority and fallback**
+- [x] **Step 1: Write failing tests for context priority and fallback**
 
 ```ts
 expect(resolveWorkDestination('org-a', 'personal', ['org-a'])).toBe('org-a');
@@ -37,12 +37,12 @@ expect(resolveWorkDestination('all', 'org-a', ['org-a'])).toBe('org-a');
 expect(resolveWorkDestination('all', 'missing', ['org-a'])).toBe('personal');
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/work-logger.test.ts`
 Expected: FAIL because `work-logger` does not exist.
 
-- [ ] **Step 3: Implement the pure rules**
+- [x] **Step 3: Implement the pure rules**
 
 ```ts
 export type WorkDestination = 'personal' | string;
@@ -61,12 +61,12 @@ export function resolveWorkDestination(
 
 Add project filtering by exact `orgId` with missing `orgId` treated as Personal, and map sync states to `Saved and synced`, `Saved offline - sync queued`, or `Saved on this device - sign in to sync`.
 
-- [ ] **Step 4: Run the focused test and verify GREEN**
+- [x] **Step 4: Run the focused test and verify GREEN**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/work-logger.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/work-logger.ts apps/web/src/lib/work-logger.test.ts
