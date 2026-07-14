@@ -83,7 +83,7 @@ git commit -m "feat: add organization destination rules"
 - Produces: `WorkLoggerMode`, `openWorkLogger(mode?, projectId?)`, and `closeWorkLogger()`.
 - Preserves: `openQuickAdd()` and `closeQuickAdd()` as task-mode compatibility aliases.
 
-- [ ] **Step 1: Write a failing store test**
+- [x] **Step 1: Write a failing store test**
 
 ```ts
 useAppStore.getState().openWorkLogger('progress', 'project-1');
@@ -94,12 +94,12 @@ expect(useAppStore.getState()).toMatchObject({
 });
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/app-store.test.ts`
 Expected: FAIL because `openWorkLogger` is missing.
 
-- [ ] **Step 3: Add launch state and compatibility aliases**
+- [x] **Step 3: Add launch state and compatibility aliases**
 
 ```ts
 export type WorkLoggerMode = 'task' | 'project' | 'progress';
@@ -110,12 +110,12 @@ closeWorkLogger: () =>
   set({ workLoggerOpen: false, workLoggerMode: 'task', workLoggerProjectId: null }),
 ```
 
-- [ ] **Step 4: Run the store tests and verify GREEN**
+- [x] **Step 4: Run the store tests and verify GREEN**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/app-store.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/app-store.ts apps/web/src/lib/app-store.test.ts
