@@ -7,9 +7,16 @@ import { getDb } from '@ops-dashboard/core';
 import type { Project } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { runCapture } from '@/lib/capture-client';
-import { addTaskToProject } from '@/lib/tasks';
+import { addTask, addTaskToProject } from '@/lib/tasks';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { useVoiceInput } from '@/lib/use-voice-input';
+import { useOrgStore } from '@/lib/org-store';
+import {
+  destinationOrgId,
+  projectsForDestination,
+  resolveWorkDestination,
+  type WorkDestination,
+} from '@/lib/work-logger';
 
 export function QuickAdd() {
   const [value, setValue] = useState('');
@@ -21,14 +28,31 @@ export function QuickAdd() {
   const [project, setProject] = useState<Project | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [projectFilter, setProjectFilter] = useState('');
+  const [destinationOverride, setDestinationOverride] = useState<WorkDestination | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const ctx = useOrgStore((state) => state.ctx);
 
-  const projects = useLiveQuery(async () => {
-    const all = await getDb().projects.toArray();
-    return all
-      .filter((p) => !p.deletedAt && !p.archivedAt)
-      .sort((a, b) => a.name.localeCompare(b.name));
+  const data = useLiveQuery(async () => {
+    const db = getDb();
+    const [projects, organizations] = await Promise.all([
+      db.projects.toArray(),
+      db.organizations.toArray(),
+    ]);
+    return {
+      projects: projects.filter((p) => !p.deletedAt && !p.archivedAt),
+      organizations: organizations
+        .filter((organization) => !organization.deletedAt && !organization.archivedAt)
+        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+    };
   });
+
+  const defaultDestination = resolveWorkDestination(
+    ctx,
+    null,
+    (data?.organizations ?? []).map((organization) => organization.id),
+  );
+  const destination = destinationOverride ?? defaultDestination;
+  const projects = projectsForDestination(data?.projects ?? [], destination);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -43,6 +67,9 @@ export function QuickAdd() {
     hapticTap();
     startTransition(async () => {
       if (project) await addTaskToProject(text, project);
+      else if (destinationOrgId(destination)) {
+        await addTask(text, { orgId: destinationOrgId(destination) });
+      }
       else await runCapture(text, source);
       hapticSuccess();
       setValue('');
@@ -85,8 +112,28 @@ export function QuickAdd() {
         spellCheck={false}
       />
       <span className="hidden shrink-0 rounded-full border bg-card/70 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground xl:inline-flex">
-        {project ? 'Project mode' : pending ? 'Filing' : 'Triage mode'}
+        {project
+          ? 'Project mode'
+          : destination === 'personal'
+            ? pending ? 'Filing' : 'Triage mode'
+            : 'Org task'}
       </span>
+      {!project ? (
+        <select
+          value={destination}
+          onChange={(event) => {
+            setDestinationOverride(event.target.value);
+            setProject(null);
+          }}
+          aria-label="Quick capture organization"
+          className="hidden h-8 max-w-32 shrink-0 rounded-md border bg-card px-2 text-[11px] text-foreground outline-none md:block"
+        >
+          {(data?.organizations ?? []).map((organization) => (
+            <option key={organization.id} value={organization.id}>{organization.name}</option>
+          ))}
+          <option value="personal">Personal</option>
+        </select>
+      ) : null}
       <div ref={pickerRef} className="relative flex shrink-0 items-center">
         <button
           type="button"
@@ -155,7 +202,7 @@ export function QuickAdd() {
                 <span aria-hidden className="size-2 rounded-full bg-bg-sunken" />
                 <span>No project (AI triage)</span>
               </button>
-              {(projects ?? [])
+              {projects
                 .filter((p) =>
                   p.name.toLowerCase().includes(projectFilter.trim().toLowerCase()),
                 )

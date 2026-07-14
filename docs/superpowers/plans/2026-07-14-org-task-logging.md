@@ -251,19 +251,19 @@ git commit -m "feat: make projects organization aware"
 - Consumes: existing organization records, project records, and `openWorkLogger`.
 - Produces: visible organization assignment in desktop capture and direct universal-logger access everywhere else.
 
-- [ ] **Step 1: Group desktop project choices by destination**
+- [x] **Step 1: Group desktop project choices by destination**
 
 Load organizations with projects, show an organization dot and label on each project row, and filter the list by the active destination. When no project is selected, expose a compact destination picker that passes `orgId` to `addTask`.
 
-- [ ] **Step 2: Keep project inheritance authoritative**
+- [x] **Step 2: Keep project inheritance authoritative**
 
 When a project is selected, continue using `addTaskToProject` and ignore the standalone destination so the task always inherits the project's organization and domain.
 
-- [ ] **Step 3: Route mobile and dashboard launchers to the universal logger**
+- [x] **Step 3: Route mobile and dashboard launchers to the universal logger**
 
 The center mobile action opens Task mode. Today query-string capture and the dashboard Capture action do the same. Make the organization switcher available on phone using its existing compact dot-only rendering.
 
-- [ ] **Step 4: Verify 360px layout and commit**
+- [x] **Step 4: Verify 360px layout and commit**
 
 Run the browser overflow assertion at 360px on `/dashboard`, `/today`, `/tasks`, and `/projects`. Expected: `document.documentElement.scrollWidth <= window.innerWidth` on every route.
 

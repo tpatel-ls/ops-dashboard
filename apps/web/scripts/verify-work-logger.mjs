@@ -42,12 +42,55 @@ async function verifyProjectOrganization(page) {
   }
 }
 
+async function verifyResponsiveLayouts(page) {
+  const routes = ['/dashboard', '/today', '/tasks', '/projects'];
+  const widths = [360, 390, 412, 768, 1024, 1440];
+
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: width < 640 ? 844 : 900 });
+    for (const route of routes) {
+      await openApp(page, route);
+      const geometry = await page.evaluate(() => ({
+        viewport: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+      }));
+      if (geometry.documentWidth > geometry.viewport) {
+        throw new Error(
+          `${route} overflows at ${width}px: ${geometry.documentWidth}px document`,
+        );
+      }
+    }
+
+    await page.keyboard.press('g');
+    await page.keyboard.press('i');
+    const dialog = page.getByRole('dialog', { name: 'Put work in the right place' });
+    await dialog.waitFor({ state: 'visible' });
+    const dialogGeometry = await dialog.evaluate((element) => ({
+      width: element.getBoundingClientRect().width,
+      right: element.getBoundingClientRect().right,
+      viewport: window.innerWidth,
+      documentWidth: document.documentElement.scrollWidth,
+    }));
+    if (
+      dialogGeometry.width > Math.min(680, dialogGeometry.viewport) ||
+      dialogGeometry.right > dialogGeometry.viewport ||
+      dialogGeometry.documentWidth > dialogGeometry.viewport
+    ) {
+      throw new Error(`Logger overflows at ${width}px`);
+    }
+    await page.keyboard.press('Escape');
+  }
+}
+
 async function main() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   try {
     if (scenario === 'project-org' || scenario === 'all') {
       await verifyProjectOrganization(page);
+    }
+    if (scenario === 'responsive' || scenario === 'all') {
+      await verifyResponsiveLayouts(page);
     }
     console.log(`work logger verification passed: ${scenario}`);
   } finally {

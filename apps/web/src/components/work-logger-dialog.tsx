@@ -78,7 +78,10 @@ export function WorkLoggerDialog() {
   if (!data) {
     return (
       <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/55 sm:items-center sm:p-4">
-        <div className="surface flex h-40 w-full items-center justify-center rounded-b-none sm:max-w-[680px] sm:rounded-lg">
+        <div
+          className="surface work-logger-panel flex h-40 w-full items-center justify-center"
+          style={{ maxWidth: 680 }}
+        >
           <Loader2 className="size-5 animate-spin text-primary" aria-label="Loading logger" />
         </div>
       </div>
@@ -288,7 +291,8 @@ function WorkLoggerPanel({
         role="dialog"
         aria-modal="true"
         aria-labelledby="work-logger-title"
-        className="surface flex max-h-[calc(100dvh-0.5rem)] w-full flex-col overflow-hidden rounded-b-none border-b-0 sm:max-w-[680px] sm:rounded-lg sm:border-b"
+        className="surface work-logger-panel flex max-h-[calc(100dvh-0.5rem)] w-full flex-col overflow-hidden"
+        style={{ maxWidth: 680 }}
       >
         <header className="hairline flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
           <div className="min-w-0">
