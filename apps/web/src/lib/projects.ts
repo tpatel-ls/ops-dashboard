@@ -10,6 +10,7 @@ export interface CreateProjectOptions {
   domainId?: string;
   orgId?: string;
   description?: string;
+  dueDate?: string;
 }
 
 const DEFAULT_COLORS = [
@@ -37,6 +38,7 @@ export async function createProject(
     ...(opts.domainId ? { domainId: opts.domainId } : {}),
     ...(opts.orgId ? { orgId: opts.orgId } : {}),
     ...(opts.description ? { description: opts.description } : {}),
+    ...(opts.dueDate ? { dueDate: opts.dueDate } : {}),
     milestones: [],
     checklists: [],
     createdAt: now,
