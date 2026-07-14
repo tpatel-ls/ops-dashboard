@@ -5,20 +5,27 @@ import { useState } from 'react';
 import {
   AlertTriangle,
   Boxes,
-  ChevronDown,
   ChevronRight,
   Clock,
   Layers,
   Plus,
   RefreshCw,
+  Timer,
   X,
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
-import { getDb, matchesOrgContext } from '@ops-dashboard/core';
-import type { Domain, Project, ProjectKind, ProjectStatus } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
+import type {
+  Domain,
+  Organization,
+  Project,
+  ProjectKind,
+  ProjectStatus,
+} from '@ops-dashboard/core';
 import { useOrgStore } from '@/lib/org-store';
 import { createProject } from '@/lib/projects';
-import { patchRecord } from '@/lib/records';
+import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '@/lib/work-logger';
+import { useAppStore } from '@/lib/app-store';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
 
@@ -58,14 +65,23 @@ const SLIPPING_DAYS = 5;
 
 interface CreateProjectFormProps {
   domains: Domain[];
+  organizations: Organization[];
+  initialDestination: WorkDestination;
   onCreated: (project: Project) => void;
   onCancel: () => void;
 }
 
-function CreateProjectForm({ domains, onCreated, onCancel }: CreateProjectFormProps) {
+function CreateProjectForm({
+  domains,
+  organizations,
+  initialDestination,
+  onCreated,
+  onCancel,
+}: CreateProjectFormProps) {
   const [name, setName] = useState('');
   const [kind, setKind] = useState<ProjectKind>('project');
   const [domainId, setDomainId] = useState('');
+  const [destination, setDestination] = useState<WorkDestination>(initialDestination);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -77,6 +93,7 @@ function CreateProjectForm({ domains, onCreated, onCancel }: CreateProjectFormPr
       const project = await createProject(name.trim(), {
         kind,
         domainId: domainId || undefined,
+        orgId: destinationOrgId(destination),
         description: description.trim() || undefined,
       });
       onCreated(project);
@@ -90,33 +107,55 @@ function CreateProjectForm({ domains, onCreated, onCancel }: CreateProjectFormPr
       <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
         New project
       </div>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Name"
-        className="input"
-        autoFocus
-      />
-      <div className="grid grid-cols-2 gap-2">
-        <select
-          value={kind}
-          onChange={(e) => setKind(e.target.value as ProjectKind)}
-          className="input"
-        >
-          <option value="project">Project</option>
-          <option value="area">Area</option>
-          <option value="retainer">Retainer</option>
-        </select>
-        <select
-          value={domainId}
-          onChange={(e) => setDomainId(e.target.value)}
-          className="input"
-        >
-          <option value="">- no domain -</option>
-          {domains.map((d) => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
+      <label className="grid gap-1.5 text-xs text-muted-foreground">
+        <span>Project name</span>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name the outcome"
+          className="input min-h-11 text-foreground"
+          autoFocus
+        />
+      </label>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="grid gap-1.5 text-xs text-muted-foreground">
+          <span>Type</span>
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value as ProjectKind)}
+            className="input min-h-11 text-foreground"
+          >
+            <option value="project">Project</option>
+            <option value="area">Area</option>
+            <option value="retainer">Retainer</option>
+          </select>
+        </label>
+        <label className="grid gap-1.5 text-xs text-muted-foreground">
+          <span>Organization</span>
+          <select
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            className="input min-h-11 text-foreground"
+          >
+            <option value="personal">Personal</option>
+            {organizations.map((organization) => (
+              <option key={organization.id} value={organization.id}>{organization.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-1.5 text-xs text-muted-foreground">
+          <span>Domain</span>
+          <select
+            value={domainId}
+            onChange={(e) => setDomainId(e.target.value)}
+            className="input min-h-11 text-foreground"
+          >
+            <option value="">No domain</option>
+            {domains.map((d) => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        </label>
       </div>
       <textarea
         value={description}
@@ -138,7 +177,7 @@ function CreateProjectForm({ domains, onCreated, onCancel }: CreateProjectFormPr
           disabled={saving || !name.trim()}
           className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
         >
-          Create
+          Create project
         </button>
       </div>
     </form>
@@ -150,6 +189,7 @@ function CreateProjectForm({ domains, onCreated, onCancel }: CreateProjectFormPr
 interface ProjectCardData {
   project: Project;
   domain?: Domain;
+  organization?: Organization;
   taskCount: number;
   hoursLogged: number;
 }
@@ -157,10 +197,12 @@ interface ProjectCardData {
 interface ProjectCardProps {
   data: ProjectCardData;
   onClick: () => void;
+  onLogProgress: () => void;
+  showOrganization: boolean;
 }
 
-function ProjectCard({ data, onClick }: ProjectCardProps) {
-  const { project, domain, hoursLogged } = data;
+function ProjectCard({ data, onClick, onLogProgress, showOrganization }: ProjectCardProps) {
+  const { project, domain, organization, hoursLogged } = data;
 
   const milestones = project.milestones ?? [];
   const milestoneDone = milestones.filter((m) => m.done).length;
@@ -172,13 +214,13 @@ function ProjectCard({ data, onClick }: ProjectCardProps) {
   const isSlipping = daysAgo === null || daysAgo > SLIPPING_DAYS;
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="surface-flat group w-full cursor-pointer px-4 py-3 text-left transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]"
+    <article
+      data-project-card
+      className="surface-flat group overflow-hidden transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]"
     >
-      {/* Top row */}
-      <div className="flex items-start gap-2.5">
+      <button type="button" onClick={onClick} className="w-full px-4 py-3 text-left">
+        {/* Top row */}
+        <div className="flex items-start gap-2.5">
         <span
           className="mt-0.5 size-3.5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]"
           style={{ background: project.color }}
@@ -197,22 +239,35 @@ function ProjectCard({ data, onClick }: ProjectCardProps) {
             </span>
           </div>
 
-          {/* Domain chip */}
-          {domain ? (
-            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {showOrganization ? (
+              <span className="inline-flex min-w-0 items-center gap-1 rounded-full border px-2 py-0.5">
+                <span
+                  className="size-1.5 shrink-0 rounded-full"
+                  style={{ background: organization?.color ?? PERSONAL_COLOR }}
+                  aria-hidden
+                />
+                <span className="max-w-40 truncate font-mono text-[10px] text-subtle-foreground">
+                  {organization?.name ?? 'Personal'}
+                </span>
+              </span>
+            ) : null}
+            {domain ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
               <span
                 className="size-1.5 rounded-full"
                 style={{ background: domain.color }}
                 aria-hidden
               />
               <span className="font-mono text-[10px] text-subtle-foreground">{domain.name}</span>
-            </div>
-          ) : null}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 
       {/* Milestone bar */}
-      {milestonePct !== null ? (
+        {milestonePct !== null ? (
         <div className="mt-3">
           <div className="mb-1 flex items-center justify-between">
             <span className="font-mono text-[10px] text-subtle-foreground">
@@ -227,10 +282,10 @@ function ProjectCard({ data, onClick }: ProjectCardProps) {
             />
           </div>
         </div>
-      ) : null}
+        ) : null}
 
       {/* Footer row */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-subtle-foreground">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-subtle-foreground">
         {hoursLogged > 0 ? (
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3" aria-hidden />
@@ -251,8 +306,19 @@ function ProjectCard({ data, onClick }: ProjectCardProps) {
             Slipping
           </span>
         ) : null}
+        </div>
+      </button>
+      <div className="hairline flex justify-end border-t px-3 py-2">
+        <button
+          type="button"
+          onClick={onLogProgress}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <Timer className="size-3.5" aria-hidden />
+          Log progress
+        </button>
       </div>
-    </button>
+    </article>
   );
 }
 
@@ -262,10 +328,14 @@ function KindGroup({
   kind,
   items,
   onCardClick,
+  onLogProgress,
+  showOrganization,
 }: {
   kind: ProjectKind;
   items: ProjectCardData[];
   onCardClick: (project: Project) => void;
+  onLogProgress: (project: Project) => void;
+  showOrganization: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const Icon = KIND_ICONS[kind];
@@ -295,7 +365,13 @@ function KindGroup({
       {!collapsed ? (
         <div className="grid gap-1.5 lg:grid-cols-2">
           {items.map((item) => (
-            <ProjectCard key={item.project.id} data={item} onClick={() => onCardClick(item.project)} />
+            <ProjectCard
+              key={item.project.id}
+              data={item}
+              onClick={() => onCardClick(item.project)}
+              onLogProgress={() => onLogProgress(item.project)}
+              showOrganization={showOrganization}
+            />
           ))}
         </div>
       ) : null}
@@ -309,25 +385,31 @@ export function ProjectsBoard() {
   const [creating, setCreating] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const ctx = useOrgStore((s) => s.ctx);
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
   const data = useLiveQuery(async () => {
     const db = getDb();
-    const [projects, domains, tasks, workLogs] = await Promise.all([
+    const [projects, domains, organizations, tasks, workLogs] = await Promise.all([
       db.projects
         .toArray()
         .then((all) =>
           all.filter((p) => !p.deletedAt && !p.archivedAt && matchesOrgContext(p.orgId, ctx)),
         ),
       db.domains.toArray().then((all) => all.filter((d) => !d.deletedAt)),
+      db.organizations
+        .toArray()
+        .then((all) => all.filter((organization) => !organization.deletedAt && !organization.archivedAt)),
       db.tasks.toArray().then((all) => all.filter((t) => !t.deletedAt && t.status !== 'archived' && t.status !== 'done')),
       db.workLogs.toArray().then((all) => all.filter((w) => !w.deletedAt)),
     ]);
 
     const domainMap = new Map(domains.map((d) => [d.id, d]));
+    const organizationMap = new Map(organizations.map((organization) => [organization.id, organization]));
 
     const cardData: ProjectCardData[] = projects.map((project) => ({
       project,
       domain: project.domainId ? domainMap.get(project.domainId) : undefined,
+      organization: project.orgId ? organizationMap.get(project.orgId) : undefined,
       taskCount: tasks.filter((t) => t.projectId === project.id).length,
       hoursLogged:
         workLogs
@@ -335,7 +417,7 @@ export function ProjectsBoard() {
           .reduce((acc, w) => acc + w.minutes, 0) / 60,
     }));
 
-    return { cardData, domains };
+    return { cardData, domains, organizations };
   }, [ctx]);
 
   // When a project is updated (e.g. via ProjectDetail), refresh the selected project
@@ -386,6 +468,12 @@ export function ProjectsBoard() {
         {creating ? (
           <CreateProjectForm
             domains={data?.domains ?? []}
+            organizations={data?.organizations ?? []}
+            initialDestination={resolveWorkDestination(
+              ctx,
+              null,
+              (data?.organizations ?? []).map((organization) => organization.id),
+            )}
             onCreated={(project) => {
               setCreating(false);
               setSelectedProject(project);
@@ -414,6 +502,14 @@ export function ProjectsBoard() {
             <p className="max-w-xs text-sm text-muted-foreground">
               Create your first project, area, or retainer to track work and log hours.
             </p>
+            <button
+              type="button"
+              onClick={() => openWorkLogger('project')}
+              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground"
+            >
+              <Plus className="size-3.5" aria-hidden />
+              Create project
+            </button>
           </div>
         ) : (
           <div className="flex flex-col gap-6">
@@ -423,6 +519,8 @@ export function ProjectsBoard() {
                 kind={kind}
                 items={grouped[kind]}
                 onCardClick={setSelectedProject}
+                onLogProgress={(project) => openWorkLogger('progress', project.id)}
+                showOrganization={ctx === 'all'}
               />
             ))}
           </div>
