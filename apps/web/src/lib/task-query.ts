@@ -22,3 +22,11 @@ export function compareTasks(a: Task, b: Task): number {
 
   return a.title.localeCompare(b.title);
 }
+
+export function matchesTaskSearch(task: Task, query: string, projectName?: string): boolean {
+  const needle = query.trim().toLocaleLowerCase();
+  if (!needle) return true;
+  return [task.title, projectName]
+    .filter((value): value is string => Boolean(value))
+    .some((value) => value.toLocaleLowerCase().includes(needle));
+}
