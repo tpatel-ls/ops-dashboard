@@ -406,6 +406,8 @@ function WorkLoggerPanel({
                   value={newOrgName}
                   onChange={(event) => setNewOrgName(event.target.value)}
                   placeholder="Organization name"
+                  aria-invalid={Boolean(error) || undefined}
+                  aria-errormessage={error ? 'work-logger-error' : undefined}
                   className="input min-h-11 flex-1"
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
@@ -440,6 +442,7 @@ function WorkLoggerPanel({
                 onScheduledDateChange={setScheduledDate}
                 priority={priority}
                 onPriorityChange={setPriority}
+                invalid={Boolean(error)}
               />
             ) : null}
             {mode === 'project' ? (
@@ -452,6 +455,7 @@ function WorkLoggerPanel({
                 onDueDateChange={setProjectDueDate}
                 description={projectDescription}
                 onDescriptionChange={setProjectDescription}
+                invalid={Boolean(error)}
               />
             ) : null}
             {mode === 'progress' ? (
@@ -463,6 +467,7 @@ function WorkLoggerPanel({
                 onMinutesChange={setMinutes}
                 note={progressNote}
                 onNoteChange={setProgressNote}
+                invalid={Boolean(error)}
               />
             ) : null}
           </form>
@@ -475,7 +480,11 @@ function WorkLoggerPanel({
             </p>
           ) : null}
           {savedMessage ? (
-            <div className="flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-success">
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-success"
+            >
               <Check className="size-4" aria-hidden />
               {savedMessage}
             </div>
@@ -554,6 +563,7 @@ function TaskFields({
   onScheduledDateChange,
   priority,
   onPriorityChange,
+  invalid,
 }: {
   title: string;
   onTitleChange: (value: string) => void;
@@ -566,6 +576,7 @@ function TaskFields({
   onScheduledDateChange: (value: string) => void;
   priority: Priority;
   onPriorityChange: (value: Priority) => void;
+  invalid: boolean;
 }) {
   return (
     <>
@@ -577,7 +588,8 @@ function TaskFields({
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="What needs to happen?"
-          aria-describedby="work-logger-error"
+          aria-invalid={invalid || undefined}
+          aria-errormessage={invalid ? 'work-logger-error' : undefined}
           className="input min-h-12 text-base"
           autoComplete="off"
         />
@@ -662,6 +674,7 @@ function ProjectFields({
   onDueDateChange,
   description,
   onDescriptionChange,
+  invalid,
 }: {
   name: string;
   onNameChange: (value: string) => void;
@@ -671,6 +684,7 @@ function ProjectFields({
   onDueDateChange: (value: string) => void;
   description: string;
   onDescriptionChange: (value: string) => void;
+  invalid: boolean;
 }) {
   return (
     <>
@@ -682,7 +696,8 @@ function ProjectFields({
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
           placeholder="Name the outcome"
-          aria-describedby="work-logger-error"
+          aria-invalid={invalid || undefined}
+          aria-errormessage={invalid ? 'work-logger-error' : undefined}
           className="input min-h-12 text-base"
           autoComplete="off"
         />
@@ -735,6 +750,7 @@ function ProgressFields({
   onMinutesChange,
   note,
   onNoteChange,
+  invalid,
 }: {
   projectId: string;
   onProjectChange: (value: string) => void;
@@ -743,6 +759,7 @@ function ProgressFields({
   onMinutesChange: (value: number) => void;
   note: string;
   onNoteChange: (value: string) => void;
+  invalid: boolean;
 }) {
   return (
     <>
@@ -753,7 +770,8 @@ function ProgressFields({
           data-autofocus
           value={projectId}
           onChange={(event) => onProjectChange(event.target.value)}
-          aria-describedby="work-logger-error"
+          aria-invalid={invalid || undefined}
+          aria-errormessage={invalid ? 'work-logger-error' : undefined}
           className="input min-h-12 text-base"
         >
           <option value="">Choose a project</option>
@@ -794,6 +812,8 @@ function ProgressFields({
             value={minutes}
             onChange={(event) => onMinutesChange(Number(event.target.value))}
             aria-label="Custom minutes"
+            aria-invalid={invalid || undefined}
+            aria-errormessage={invalid ? 'work-logger-error' : undefined}
             className="input min-h-11 min-w-0 px-2 text-center"
           />
         </div>
