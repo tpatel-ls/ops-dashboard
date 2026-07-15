@@ -51,13 +51,20 @@ export function HelpOverlay() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="command-surface w-full max-w-3xl overflow-hidden rounded-[22px]">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="keyboard-help-title"
+        className="command-surface w-full max-w-3xl overflow-hidden rounded-[22px]"
+      >
         <header className="relative flex items-center justify-between border-b border-hairline px-5 py-4">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
               Reference
             </div>
-            <h2 className="text-lg font-semibold tracking-tight">Keyboard shortcuts</h2>
+            <h2 id="keyboard-help-title" className="text-lg font-semibold tracking-tight">
+              Keyboard shortcuts
+            </h2>
           </div>
           <button
             type="button"
