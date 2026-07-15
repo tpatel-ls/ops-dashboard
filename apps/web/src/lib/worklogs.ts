@@ -1,5 +1,6 @@
 'use client';
 
+import { getDb } from '@ops-dashboard/core';
 import type { Project, WorkLog } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
@@ -10,6 +11,21 @@ export async function logWork(
   note?: string,
   at?: string,
 ): Promise<WorkLog> {
+  if (!Number.isInteger(minutes) || minutes <= 0) {
+    throw new Error('Work log minutes must be a positive integer.');
+  }
+
+  const project = await getDb().projects.get(projectId);
+  if (
+    !project ||
+    project.deletedAt ||
+    project.archivedAt ||
+    project.status === 'done' ||
+    project.status === 'archived'
+  ) {
+    throw new Error('Project is not available for progress logging.');
+  }
+
   const ts = at ?? new Date().toISOString();
   const rec = await putRecord(
     'workLogs',
