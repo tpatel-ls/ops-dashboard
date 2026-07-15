@@ -12,6 +12,7 @@ import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
+import { compareTasks } from '@/lib/task-query';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -377,21 +378,7 @@ export function TasksView() {
       });
     }
 
-    // Sort: scheduledFor/dueAt ascending (null last), then priority desc
-    tasks.sort((a, b) => {
-      const aDate = a.scheduledFor ?? a.dueAt?.slice(0, 10) ?? null;
-      const bDate = b.scheduledFor ?? b.dueAt?.slice(0, 10) ?? null;
-
-      if (aDate && !bDate) return -1;
-      if (!aDate && bDate) return 1;
-      if (aDate && bDate) {
-        const cmp = aDate.localeCompare(bDate);
-        if (cmp !== 0) return cmp;
-      }
-
-      // Priority descending (3 = urgent first)
-      return b.priority - a.priority;
-    });
+    tasks.sort(compareTasks);
 
     // Attach lookup info
     return tasks.map((t) => ({
