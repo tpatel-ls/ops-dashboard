@@ -38,6 +38,8 @@ export function OrgSwitcher() {
   const mounted = useMounted();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const ctx = useOrgStore((s) => s.ctx);
   const setCtx = useOrgStore((s) => s.setCtx);
   const orgs = useActiveOrgs();
@@ -47,8 +49,16 @@ export function OrgSwitcher() {
     function onDown(e: MouseEvent) {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
     }
+    window.requestAnimationFrame(() => {
+      const activeItem = rootRef.current?.querySelector<HTMLButtonElement>('[aria-checked="true"]');
+      (activeItem ?? itemRefs.current[0])?.focus();
+    });
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     }
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
@@ -68,6 +78,7 @@ export function OrgSwitcher() {
   return (
     <div ref={rootRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
@@ -98,10 +109,13 @@ export function OrgSwitcher() {
           <div className="px-3 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
             Context
           </div>
-          {lanes.map((lane) => {
+          {lanes.map((lane, index) => {
             const active = lane.ctx === ctx;
             return (
               <button
+                ref={(node) => {
+                  itemRefs.current[index] = node;
+                }}
                 key={lane.ctx}
                 type="button"
                 role="menuitemradio"
