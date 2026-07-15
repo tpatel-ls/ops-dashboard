@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Task, Priority } from '@ops-dashboard/core';
 import { format, parseISO, isToday, isPast } from 'date-fns';
-import { Check, Star, ChevronDown, Circle, Search, X } from 'lucide-react';
+import { Check, Star, ChevronDown, Circle, Plus, Search, X } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
@@ -323,6 +323,7 @@ export function TasksView() {
   const [domainFilter, setDomainFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const ctx = useOrgStore((s) => s.ctx);
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
   // Load all data
   const data = useLiveQuery(async () => {
@@ -508,8 +509,17 @@ export function TasksView() {
           </button>
         )}
 
+        <button
+          type="button"
+          onClick={() => openWorkLogger('task')}
+          className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground sm:min-h-9"
+        >
+          <Plus className="size-3.5" aria-hidden />
+          New task
+        </button>
+
         {/* Count */}
-        <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-subtle-foreground">
           {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
         </div>
       </div>
