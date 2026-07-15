@@ -169,6 +169,11 @@ function WorkLoggerPanel({
     initialFocus?.focus();
 
     function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        event.preventDefault();
+        panelRef.current?.querySelector<HTMLFormElement>('#work-logger-form')?.requestSubmit();
+        return;
+      }
       if (event.key === 'Escape') {
         event.preventDefault();
         onClose();
