@@ -276,7 +276,13 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
 
 // ─── Empty State ─────────────────────────────────────────────────────────────
 
-function EmptyState({ statusFilter }: { statusFilter: StatusFilter }) {
+function EmptyState({
+  statusFilter,
+  onCreate,
+}: {
+  statusFilter: StatusFilter;
+  onCreate: () => void;
+}) {
   const heading =
     statusFilter === 'done'
       ? 'No completed tasks yet.'
@@ -294,6 +300,16 @@ function EmptyState({ statusFilter }: { statusFilter: StatusFilter }) {
       <Circle className="size-8 text-border-strong" aria-hidden />
       <h3 className="text-xl font-semibold tracking-tight">{heading}</h3>
       <p className="max-w-md text-sm text-muted-foreground">{body}</p>
+      {statusFilter !== 'done' ? (
+        <button
+          type="button"
+          onClick={onCreate}
+          className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground"
+        >
+          <Plus className="size-3.5" aria-hidden />
+          Create task
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -528,7 +544,7 @@ export function TasksView() {
       {filteredTasks === null ? (
         <SkeletonRows />
       ) : filteredTasks.length === 0 ? (
-        <EmptyState statusFilter={statusFilter} />
+        <EmptyState statusFilter={statusFilter} onCreate={() => openWorkLogger('task')} />
       ) : (
         <ul className="flex flex-col gap-1.5">
           {filteredTasks.map(({ task, project, domain }) => (
