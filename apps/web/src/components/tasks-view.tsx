@@ -11,6 +11,7 @@ import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
+import { isActiveProject } from '@/lib/project-query';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -330,7 +331,7 @@ export function TasksView() {
       db.domains.toArray(),
     ]);
 
-    const activeProjects = allProjects.filter((p) => !p.deletedAt);
+    const activeProjects = allProjects.filter(isActiveProject);
     const activeDomains = allDomains.filter((d) => !d.deletedAt);
 
     // Maps for fast lookup
