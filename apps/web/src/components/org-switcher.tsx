@@ -75,6 +75,23 @@ export function OrgSwitcher() {
   ];
   const current = lanes.find((l) => l.ctx === ctx) ?? lanes[0]!;
 
+  function moveMenuFocus(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    const items = itemRefs.current.filter((item): item is HTMLButtonElement => Boolean(item));
+    if (items.length === 0) return;
+    event.preventDefault();
+    const currentIndex = Math.max(items.indexOf(document.activeElement as HTMLButtonElement), 0);
+    const nextIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? items.length - 1
+          : event.key === 'ArrowDown'
+            ? (currentIndex + 1) % items.length
+            : (currentIndex - 1 + items.length) % items.length;
+    items[nextIndex]?.focus();
+  }
+
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -104,6 +121,7 @@ export function OrgSwitcher() {
       {open ? (
         <div
           role="menu"
+          onKeyDown={moveMenuFocus}
           className="surface absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden py-1"
         >
           <div className="px-3 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
