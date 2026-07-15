@@ -13,6 +13,7 @@ import {
   toRow,
   type DexieTableName,
 } from './mapping';
+import { parseSyncCursors } from './cursors';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
 const EPOCH = '1970-01-01T00:00:00Z';
@@ -131,11 +132,7 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
 
 function readCursors(): Record<string, string> {
   if (typeof window === 'undefined') return {};
-  try {
-    return JSON.parse(window.localStorage.getItem(CURSORS_KEY) ?? '{}') as Record<string, string>;
-  } catch {
-    return {};
-  }
+  return parseSyncCursors(window.localStorage.getItem(CURSORS_KEY));
 }
 
 function writeCursors(cursors: Record<string, string>): void {
