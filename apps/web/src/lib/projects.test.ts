@@ -46,4 +46,17 @@ describe('createProject', () => {
       expect.objectContaining({ table: 'projects', recordId: project.id, payload: project }),
     );
   });
+
+  it('trims project names before writing', async () => {
+    const project = await createProject('  Launch plan  ');
+
+    expect(project.name).toBe('Launch plan');
+    expect(mocks.put).toHaveBeenCalledWith(project);
+  });
+
+  it('rejects blank project names before writing', async () => {
+    await expect(createProject('   ')).rejects.toThrow('Project name is required');
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
 });
