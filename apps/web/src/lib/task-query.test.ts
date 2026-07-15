@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { compareTasks } from './task-query';
+import { compareTasks, matchesTaskSearch } from './task-query';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -45,5 +45,23 @@ describe('compareTasks', () => {
     ];
 
     expect(tasks.sort(compareTasks).map((item) => item.title)).toEqual(['Alpha', 'Beta', 'Zulu']);
+  });
+});
+
+describe('matchesTaskSearch', () => {
+  const launchTask = task('launch', { title: 'Prepare Launch Review' });
+
+  it('matches task titles without case sensitivity', () => {
+    expect(matchesTaskSearch(launchTask, 'launch')).toBe(true);
+    expect(matchesTaskSearch(launchTask, 'REVIEW')).toBe(true);
+  });
+
+  it('matches the related project name', () => {
+    expect(matchesTaskSearch(launchTask, 'blue text', 'Blue Text')).toBe(true);
+  });
+
+  it('keeps every task for an empty query and rejects unrelated text', () => {
+    expect(matchesTaskSearch(launchTask, '   ')).toBe(true);
+    expect(matchesTaskSearch(launchTask, 'billing')).toBe(false);
   });
 });
