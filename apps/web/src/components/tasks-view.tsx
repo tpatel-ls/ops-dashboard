@@ -5,14 +5,14 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Task, Priority } from '@ops-dashboard/core';
 import { format, parseISO, isToday, isPast } from 'date-fns';
-import { Check, Star, ChevronDown, Circle } from 'lucide-react';
+import { Check, Star, ChevronDown, Circle, Search, X } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
-import { compareTasks } from '@/lib/task-query';
+import { compareTasks, matchesTaskSearch } from '@/lib/task-query';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -321,6 +321,7 @@ export function TasksView() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [projectFilter, setProjectFilter] = useState<string | null>(null);
   const [domainFilter, setDomainFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const ctx = useOrgStore((s) => s.ctx);
 
   // Load all data
@@ -378,6 +379,16 @@ export function TasksView() {
       });
     }
 
+    if (searchQuery.trim()) {
+      tasks = tasks.filter((task) =>
+        matchesTaskSearch(
+          task,
+          searchQuery,
+          task.projectId ? projectMap.get(task.projectId)?.name : undefined,
+        ),
+      );
+    }
+
     tasks.sort(compareTasks);
 
     // Attach lookup info
@@ -391,7 +402,7 @@ export function TasksView() {
             ? domainMap.get(projectMap.get(t.projectId)!.domainId!)
             : undefined,
     }));
-  }, [data, statusFilter, projectFilter, domainFilter, ctx]);
+  }, [data, statusFilter, projectFilter, domainFilter, searchQuery, ctx]);
 
   const count = filteredTasks?.length ?? 0;
 
@@ -405,6 +416,33 @@ export function TasksView() {
     <div className="flex flex-col gap-4">
       {/* Control bar */}
       <div className="flex flex-wrap items-center gap-2">
+        <div className="relative order-first w-full sm:order-none sm:w-56">
+          <label htmlFor="task-search" className="sr-only">Search tasks</label>
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <input
+            id="task-search"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search tasks"
+            className="input min-h-11 pl-9 pr-10 sm:min-h-9"
+          />
+          {searchQuery ? (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear task search"
+              title="Clear search"
+              className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          ) : null}
+        </div>
+
         {/* Status tabs */}
         <div
           role="group"
