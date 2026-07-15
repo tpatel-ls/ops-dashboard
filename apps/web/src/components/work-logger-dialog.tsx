@@ -20,6 +20,7 @@ import {
   projectsForDestination,
   resolveWorkDestination,
   syncSaveMessage,
+  validWorkMinutes,
   type WorkDestination,
 } from '@/lib/work-logger';
 
@@ -259,8 +260,8 @@ function WorkLoggerPanel({
       setError('Choose a project before logging progress.');
       return;
     }
-    if (mode === 'progress' && (!Number.isInteger(minutes) || minutes <= 0)) {
-      setError('Enter a positive number of minutes.');
+    if (mode === 'progress' && !validWorkMinutes(minutes)) {
+      setError('Enter whole minutes between 1 and 1440.');
       return;
     }
 
@@ -813,6 +814,7 @@ function ProgressFields({
             id="work-progress-minutes"
             type="number"
             min={1}
+            max={1440}
             inputMode="numeric"
             value={minutes}
             onChange={(event) => onMinutesChange(Number(event.target.value))}

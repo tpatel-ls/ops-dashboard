@@ -6,6 +6,7 @@ import {
   projectsForDestination,
   resolveWorkDestination,
   syncSaveMessage,
+  validWorkMinutes,
 } from './work-logger';
 
 function project(id: string, orgId?: string): Project {
@@ -69,5 +70,19 @@ describe('syncSaveMessage', () => {
     expect(syncSaveMessage('live', 1)).toBe('Saved - syncing now');
     expect(syncSaveMessage('offline', 1)).toBe('Saved offline - sync queued');
     expect(syncSaveMessage('signed-out', 0)).toBe('Saved on this device - sign in to sync');
+  });
+});
+
+describe('validWorkMinutes', () => {
+  it('accepts whole-minute values from one minute through one day', () => {
+    expect(validWorkMinutes(1)).toBe(true);
+    expect(validWorkMinutes(1440)).toBe(true);
+  });
+
+  it('rejects zero, fractions, non-numbers, and values over one day', () => {
+    expect(validWorkMinutes(0)).toBe(false);
+    expect(validWorkMinutes(1.5)).toBe(false);
+    expect(validWorkMinutes(Number.NaN)).toBe(false);
+    expect(validWorkMinutes(1441)).toBe(false);
   });
 });
