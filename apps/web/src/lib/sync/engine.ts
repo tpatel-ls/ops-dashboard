@@ -13,10 +13,9 @@ import {
   toRow,
   type DexieTableName,
 } from './mapping';
-import { parseSyncCursors } from './cursors';
+import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
-const EPOCH = '1970-01-01T00:00:00Z';
 const MAX_ATTEMPTS = 12;
 const DRAIN_BATCH = 100;
 const BACKFILL_CHUNK = 200;
@@ -150,11 +149,8 @@ async function pull(supabase: SupabaseClient): Promise<void> {
 
   for (const table of DEXIE_TABLES) {
     const dbTable = SYNC_TABLES[table];
-    const cursor = cursors[dbTable] ?? EPOCH;
-    const since =
-      cursor === EPOCH
-        ? EPOCH
-        : new Date(Date.parse(cursor) - PULL_OVERLAP_MS).toISOString();
+    const cursor = cursors[dbTable] ?? SYNC_EPOCH;
+    const since = overlappedCursor(cursor, PULL_OVERLAP_MS);
 
     const { data, error } = await supabase
       .from(dbTable)
