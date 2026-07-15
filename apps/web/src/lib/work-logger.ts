@@ -44,3 +44,7 @@ export function syncSaveMessage(state: SyncState, pending: number): string {
   if (state === 'error') return 'Saved on this device - sync needs attention';
   return 'Saved offline - sync queued';
 }
+
+export function validWorkMinutes(minutes: number): boolean {
+  return Number.isInteger(minutes) && minutes >= 1 && minutes <= 1440;
+}
