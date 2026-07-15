@@ -406,14 +406,19 @@ export function TasksView() {
       {/* Control bar */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Status tabs */}
-        <div className="inline-flex items-center gap-0.5 rounded-[10px] border border-border bg-bg-sunken p-0.5">
+        <div
+          role="group"
+          aria-label="Task status"
+          className="inline-flex items-center gap-0.5 rounded-[10px] border border-border bg-bg-sunken p-0.5"
+        >
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
+              aria-pressed={statusFilter === tab.id}
               onClick={() => setStatusFilter(tab.id)}
               className={cn(
-                'rounded-[8px] px-3 py-1 text-[12px] font-medium transition-all',
+                'min-h-11 rounded-[8px] px-3 py-1 text-[12px] font-medium transition-all sm:min-h-9',
                 statusFilter === tab.id
                   ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
