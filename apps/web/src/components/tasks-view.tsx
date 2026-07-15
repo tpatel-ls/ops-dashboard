@@ -360,6 +360,14 @@ export function TasksView() {
     return { allTasks, activeProjects, activeDomains, projectMap, domainMap };
   });
 
+  const effectiveProjectFilter =
+    projectFilter &&
+    data?.activeProjects.some(
+      (project) => project.id === projectFilter && matchesOrgContext(project.orgId, ctx),
+    )
+      ? projectFilter
+      : null;
+
   // Filtered + sorted tasks (computed from live data + filter state)
   const filteredTasks = useMemo(() => {
     if (!data) return null;
@@ -379,8 +387,8 @@ export function TasksView() {
     }
 
     // Project filter
-    if (projectFilter) {
-      tasks = tasks.filter((t) => t.projectId === projectFilter);
+    if (effectiveProjectFilter) {
+      tasks = tasks.filter((t) => t.projectId === effectiveProjectFilter);
     }
 
     // Domain filter
@@ -419,7 +427,7 @@ export function TasksView() {
             ? domainMap.get(projectMap.get(t.projectId)!.domainId!)
             : undefined,
     }));
-  }, [data, statusFilter, projectFilter, domainFilter, searchQuery, ctx]);
+  }, [data, statusFilter, effectiveProjectFilter, domainFilter, searchQuery, ctx]);
 
   const count = filteredTasks?.length ?? 0;
 
@@ -504,7 +512,7 @@ export function TasksView() {
         {data && data.activeProjects.length > 0 && (
           <FilterDropdown
             label="Project"
-            value={projectFilter}
+            value={effectiveProjectFilter}
             options={data.activeProjects
               .filter((p) => matchesOrgContext(p.orgId, ctx))
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -515,7 +523,7 @@ export function TasksView() {
         )}
 
         {/* Clear filters */}
-        {(projectFilter || domainFilter) && (
+        {(effectiveProjectFilter || domainFilter) && (
           <button
             type="button"
             onClick={() => { setProjectFilter(null); setDomainFilter(null); }}
