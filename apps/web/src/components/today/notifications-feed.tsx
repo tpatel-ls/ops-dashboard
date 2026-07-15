@@ -24,31 +24,41 @@ export function NotificationsFeed() {
       .slice(0, 5);
   });
 
-  if (!notifications || notifications.length === 0) return null;
-
   return (
-    <section className="surface-flat">
+    <section
+      id="notifications"
+      tabIndex={-1}
+      aria-labelledby="notifications-title"
+      aria-busy={notifications === undefined}
+      className="surface-flat scroll-mt-20"
+    >
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5">
         <Bell className="size-3.5 text-primary" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span
+          id="notifications-title"
+          className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
+        >
           Notifications
         </span>
         <span className="ml-auto font-mono text-[10px] tabular-nums text-muted-foreground">
-          {notifications.length} unread
+          {notifications === undefined ? 'Loading' : `${notifications.length} unread`}
         </span>
-        <button
-          type="button"
-          onClick={() => markAllNotificationsRead()}
-          className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          aria-label="Mark all as read"
-        >
-          <CheckCheck className="size-3" aria-hidden />
-          All read
-        </button>
+        {notifications && notifications.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => markAllNotificationsRead()}
+            className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label="Mark all as read"
+          >
+            <CheckCheck className="size-3" aria-hidden />
+            All read
+          </button>
+        ) : null}
       </div>
 
-      <ul className="flex flex-col divide-y divide-border">
-        {notifications.map((n) => (
+      {notifications && notifications.length > 0 ? (
+        <ul className="flex flex-col divide-y divide-border">
+          {notifications.map((n) => (
           <li key={n.id} className="flex items-start gap-3 px-4 py-2.5">
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2">
@@ -77,8 +87,13 @@ export function NotificationsFeed() {
               <Check className="size-3.5" aria-hidden />
             </button>
           </li>
-        ))}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <p className="px-4 py-5 text-sm text-muted-foreground">
+          {notifications === undefined ? 'Loading notifications.' : 'You are all caught up.'}
+        </p>
+      )}
     </section>
   );
 }

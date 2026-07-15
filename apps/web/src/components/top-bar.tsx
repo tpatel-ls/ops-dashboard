@@ -62,13 +62,14 @@ export function TopBar() {
           <span className="hidden md:inline">Search</span>
           <span className="kbd ml-1 hidden md:inline-flex">⌘ K</span>
         </button>
-        <button
-          type="button"
+        <Link
+          href="/today#notifications"
           aria-label="Notifications"
+          title="Notifications"
           className="hairline hidden size-9 items-center justify-center rounded-[10px] border bg-card text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
         >
           <Bell className="size-4" aria-hidden />
-        </button>
+        </Link>
         <Link
           href="/settings"
           aria-label="Settings"
