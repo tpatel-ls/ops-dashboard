@@ -16,7 +16,7 @@ export function nextOrgColor(existingCount: number): string {
   return ORG_COLORS[existingCount % ORG_COLORS.length] ?? ORG_COLORS[0]!;
 }
 
-export function createOrganization(input: {
+export async function createOrganization(input: {
   name: string;
   color?: string;
   order?: number;
@@ -26,8 +26,11 @@ export function createOrganization(input: {
    */
   id?: string;
 }): Promise<Organization> {
+  const name = input.name.trim();
+  if (!name) throw new Error('Organization name is required.');
+
   const rec = newRecord<Organization>({
-    name: input.name,
+    name,
     color: input.color ?? ORG_COLORS[0]!,
     order: input.order ?? Date.now(),
   });
