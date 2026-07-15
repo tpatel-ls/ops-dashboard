@@ -11,10 +11,17 @@ import { AppShell } from '@/components/app-shell';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative flex h-[100dvh] w-full overflow-hidden">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main className="scrollbar-thin min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-4 md:pb-0">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="scrollbar-thin min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-4 md:pb-0"
+        >
           {children}
         </main>
         <MobileNav />
