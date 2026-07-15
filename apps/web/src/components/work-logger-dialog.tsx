@@ -130,6 +130,7 @@ function WorkLoggerPanel({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [mode, setMode] = useState<WorkLoggerMode>(launchMode);
   const [destination, setDestination] = useState<WorkDestination>(initialDestination);
   const [projectId, setProjectId] = useState(launchProjectId ?? '');
@@ -161,6 +162,9 @@ function WorkLoggerPanel({
   useEffect(() => {
     const panel = panelRef.current;
     if (!panel) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const initialFocus = panel.querySelector<HTMLElement>('[data-autofocus]');
     initialFocus?.focus();
 
@@ -191,9 +195,11 @@ function WorkLoggerPanel({
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = previousOverflow;
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
+      previousFocusRef.current?.focus();
     };
   }, [onClose]);
 
