@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/app-store';
 
 const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
@@ -43,6 +44,29 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
 export function HelpOverlay() {
   const open = useAppStore((s) => s.helpOpen);
   const close = useAppStore((s) => s.closeHelp);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') close();
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocusRef.current?.focus();
+    };
+  }, [open, close]);
+
   if (!open) return null;
   return (
     <div
@@ -67,6 +91,7 @@ export function HelpOverlay() {
             </h2>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={close}
             className="kbd"
