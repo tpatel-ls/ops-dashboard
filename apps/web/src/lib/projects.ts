@@ -26,12 +26,15 @@ export async function createProject(
   name: string,
   opts: CreateProjectOptions = {},
 ): Promise<Project> {
+  const normalizedName = name.trim();
+  if (!normalizedName) throw new Error('Project name is required.');
+
   const db = getDb();
   const count = await db.projects.count();
   const now = new Date().toISOString();
   const project: Project = {
     id: newId(),
-    name,
+    name: normalizedName,
     color: opts.color ?? DEFAULT_COLORS[count % DEFAULT_COLORS.length] ?? DEFAULT_COLORS[0]!,
     kind: opts.kind ?? 'project',
     status: 'active',
