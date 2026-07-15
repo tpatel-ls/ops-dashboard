@@ -257,7 +257,7 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
         type="button"
         onClick={() => updateTask(task.id, { starred: !task.starred })}
         className={cn(
-          'mt-0.5 shrink-0 inline-flex size-6 items-center justify-center rounded-md transition-all',
+          'touch-action-reveal mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-all',
           'opacity-0 group-hover:opacity-100',
           task.starred && 'opacity-100 text-warning',
           !task.starred && 'text-muted-foreground hover:text-warning',
