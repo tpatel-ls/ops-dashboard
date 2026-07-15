@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  toArray: vi.fn(),
   newRecord: vi.fn((fields: Record<string, unknown>) => ({
     ...fields,
     id: 'org-test',
@@ -11,6 +12,16 @@ const mocks = vi.hoisted(() => ({
   })),
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
 }));
+
+vi.mock('@ops-dashboard/core', async () => {
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>(
+    '@ops-dashboard/core',
+  );
+  return {
+    ...actual,
+    getDb: () => ({ organizations: { toArray: mocks.toArray } }),
+  };
+});
 
 vi.mock('./records', () => ({
   newRecord: mocks.newRecord,
@@ -23,6 +34,7 @@ import { createOrganization } from './organizations';
 
 describe('createOrganization', () => {
   beforeEach(() => {
+    mocks.toArray.mockReset().mockResolvedValue([]);
     mocks.newRecord.mockClear();
     mocks.putRecord.mockClear();
   });
@@ -39,5 +51,24 @@ describe('createOrganization', () => {
       'Organization name is required',
     );
     expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
+  it('rejects duplicate active organization names case-insensitively', async () => {
+    mocks.toArray.mockResolvedValue([{ id: 'org-existing', name: 'LS Global', order: 1 }]);
+
+    await expect(createOrganization({ name: '  ls GLOBAL  ' })).rejects.toThrow(
+      'Organization already exists',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
+  it('allows reusing a name from an archived organization', async () => {
+    mocks.toArray.mockResolvedValue([
+      { id: 'org-archived', name: 'Former Client', order: 1, archivedAt: '2026-07-01' },
+    ]);
+
+    const organization = await createOrganization({ name: 'Former Client' });
+
+    expect(organization.name).toBe('Former Client');
   });
 });

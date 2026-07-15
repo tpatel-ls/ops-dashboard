@@ -1,5 +1,6 @@
 'use client';
 
+import { getDb } from '@ops-dashboard/core';
 import type { Organization } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
@@ -28,6 +29,19 @@ export async function createOrganization(input: {
 }): Promise<Organization> {
   const name = input.name.trim();
   if (!name) throw new Error('Organization name is required.');
+
+  const normalizedName = name.toLocaleLowerCase();
+  const organizations = await getDb().organizations.toArray();
+  const duplicate = organizations.find(
+    (organization) =>
+      !organization.deletedAt &&
+      !organization.archivedAt &&
+      organization.name.trim().toLocaleLowerCase() === normalizedName,
+  );
+  if (duplicate) {
+    if (input.id && duplicate.id === input.id) return duplicate;
+    throw new Error('Organization already exists.');
+  }
 
   const rec = newRecord<Organization>({
     name,
