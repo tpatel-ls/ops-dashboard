@@ -321,6 +321,22 @@ body {
   animation: ops-pulse 2.4s ease-in-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .live-dot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 ::selection {
   background: color-mix(in oklch, var(--primary) 35%, transparent);
   color: var(--foreground);
