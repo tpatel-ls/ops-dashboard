@@ -136,6 +136,26 @@ main {
   outline-offset: 2px;
 }
 
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-150%);
+  border: 1px solid var(--ring);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: transform 120ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 html,
 body {
   max-width: 100%;
