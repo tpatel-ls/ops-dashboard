@@ -62,6 +62,13 @@ const STATUS_CLASSES: Record<ProjectStatus, string> = {
 };
 
 const SLIPPING_DAYS = 5;
+type ProjectStatusFilter = 'all' | Exclude<ProjectStatus, 'archived'>;
+const STATUS_FILTERS: Array<{ id: ProjectStatusFilter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'active', label: 'Active' },
+  { id: 'paused', label: 'Paused' },
+  { id: 'done', label: 'Done' },
+];
 
 // ─── Create project form ──────────────────────────────────────────────────────
 
@@ -391,6 +398,7 @@ export function ProjectsBoard() {
   const [creating, setCreating] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all');
   const ctx = useOrgStore((s) => s.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
@@ -439,8 +447,10 @@ export function ProjectsBoard() {
   const displayProject =
     liveSelectedProject !== undefined ? liveSelectedProject : selectedProject;
 
-  const filteredCardData = (data?.cardData ?? []).filter(({ project }) =>
-    matchesProjectSearch(project, searchQuery),
+  const filteredCardData = (data?.cardData ?? []).filter(
+    ({ project }) =>
+      matchesProjectSearch(project, searchQuery) &&
+      (statusFilter === 'all' || project.status === statusFilter),
   );
 
   const grouped = KIND_ORDER.reduce<Record<ProjectKind, ProjectCardData[]>>(
@@ -458,9 +468,7 @@ export function ProjectsBoard() {
       <div className="flex flex-col gap-5">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            {totalActive} active
-          </span>
+          <span className="text-sm text-muted-foreground">{totalActive} active</span>
           <div className="relative ml-auto w-full sm:w-56">
             <label htmlFor="project-search" className="sr-only">Search projects</label>
             <Search
@@ -502,6 +510,29 @@ export function ProjectsBoard() {
           </button>
         </div>
 
+        <div
+          role="group"
+          aria-label="Project status"
+          className="inline-flex w-fit max-w-full items-center gap-0.5 overflow-x-auto rounded-[10px] border bg-bg-sunken p-0.5"
+        >
+          {STATUS_FILTERS.map((filter) => (
+            <button
+              key={filter.id}
+              type="button"
+              aria-pressed={statusFilter === filter.id}
+              onClick={() => setStatusFilter(filter.id)}
+              className={cn(
+                'min-h-11 rounded-[8px] px-3 text-xs font-medium transition-colors sm:min-h-9',
+                statusFilter === filter.id
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
         {creating ? (
           <CreateProjectForm
             domains={data?.domains ?? []}
@@ -536,20 +567,23 @@ export function ProjectsBoard() {
               projects
             </div>
             <h3 className="text-xl font-semibold tracking-tight">
-              {searchQuery ? 'No matching projects.' : 'A clean slate.'}
+              {searchQuery || statusFilter !== 'all' ? 'No matching projects.' : 'A clean slate.'}
             </h3>
             <p className="max-w-xs text-sm text-muted-foreground">
-              {searchQuery
-                ? 'Try a different project name or description.'
+              {searchQuery || statusFilter !== 'all'
+                ? 'Try a different search or project status.'
                 : 'Create your first project, area, or retainer to track work and log hours.'}
             </p>
-            {searchQuery ? (
+            {searchQuery || statusFilter !== 'all' ? (
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('all');
+                }}
                 className="mt-2 min-h-11 rounded-md border px-4 text-xs font-medium"
               >
-                Clear search
+                Clear filters
               </button>
             ) : (
               <button
