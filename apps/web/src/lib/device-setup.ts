@@ -60,10 +60,22 @@ export const APP_SHORTCUTS: AppShortcut[] = [
     url: '/tasks',
   },
   {
+    name: 'Projects',
+    shortName: 'Projects',
+    description: 'Review outcomes, next actions, due dates, and progress.',
+    url: '/projects',
+  },
+  {
     name: 'Identity Calendar',
     shortName: 'Identity',
     description: 'Open the habit score and activity ledger.',
     url: '/habits',
+  },
+  {
+    name: 'Routines',
+    shortName: 'Routines',
+    description: 'Run repeatable daily and weekly operating routines.',
+    url: '/routines',
   },
   {
     name: 'Log Food',
