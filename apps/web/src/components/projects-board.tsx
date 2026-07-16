@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock,
   Layers,
+  ListTodo,
   Plus,
   RefreshCw,
   Search,
@@ -215,7 +216,7 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ data, onClick, onLogProgress, showOrganization }: ProjectCardProps) {
-  const { project, domain, organization, hoursLogged } = data;
+  const { project, domain, organization, hoursLogged, taskCount } = data;
 
   const milestones = project.milestones ?? [];
   const milestoneDone = milestones.filter((m) => m.done).length;
@@ -299,6 +300,10 @@ function ProjectCard({ data, onClick, onLogProgress, showOrganization }: Project
 
       {/* Footer row */}
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-subtle-foreground">
+        <span className="inline-flex items-center gap-1">
+          <ListTodo className="size-3" aria-hidden />
+          {taskCount} open task{taskCount === 1 ? '' : 's'}
+        </span>
         {hoursLogged > 0 ? (
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3" aria-hidden />
