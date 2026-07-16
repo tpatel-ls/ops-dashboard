@@ -6,7 +6,7 @@ export default function ProjectsPage() {
     <ViewShell
       eyebrow="Build"
       title="Projects"
-      subtitle="Projects, areas, and retainers - click any card to open the detail panel."
+      subtitle="Plan outcomes and keep their next tasks moving."
     >
       <ProjectsBoard />
     </ViewShell>
