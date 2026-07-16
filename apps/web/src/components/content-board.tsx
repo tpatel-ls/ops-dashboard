@@ -12,8 +12,6 @@ import {
   Trash2,
   X,
   ChevronDown,
-  LayoutGrid,
-  List,
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Content, ContentType, ContentStatus, Domain } from '@ops-dashboard/core';
@@ -31,16 +29,6 @@ const STATUSES: { key: ContentStatus; label: string }[] = [
   { key: 'published', label: 'Published' },
   { key: 'done', label: 'Done' },
 ];
-
-const STATUS_COLOR: Record<ContentStatus, string> = {
-  idea: 'text-subtle-foreground',
-  outline: 'text-primary',
-  draft: 'text-warning',
-  editing: 'text-priority-high',
-  waiting: 'text-muted-foreground',
-  published: 'text-success',
-  done: 'text-success',
-};
 
 const STATUS_DOT: Record<ContentStatus, string> = {
   idea: 'bg-subtle-foreground/40',

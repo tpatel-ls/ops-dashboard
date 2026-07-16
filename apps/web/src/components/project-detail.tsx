@@ -5,13 +5,10 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Check,
   CheckSquare,
-  ChevronDown,
   ChevronRight,
-  Clock,
   Layers,
   ListChecks,
   Plus,
-  Square,
   Timer,
   X,
 } from 'lucide-react';

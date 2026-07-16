@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
-import { Archive, Boxes, Check, ChevronRight, ListTodo, Pencil, Plus, X } from 'lucide-react';
+import { Archive, Boxes, ChevronRight, ListTodo, Pencil, Plus, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain } from '@ops-dashboard/core';
 import { archiveDomain, createDomain, updateDomain } from '@/lib/domains';

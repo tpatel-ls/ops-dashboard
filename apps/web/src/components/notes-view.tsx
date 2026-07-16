@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Flag, Plus, Trash2, X } from 'lucide-react';
+import { Flag, Plus, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Note } from '@ops-dashboard/core';
 import { createNote, updateNote, deleteNote } from '@/lib/notes';
@@ -97,7 +97,6 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
 
 function NoteCard({ note }: { note: Note }) {
   const [confirming, setConfirming] = useState(false);
-  const titleOrFirst = note.title ?? note.body.split('\n')[0] ?? '';
   const excerpt =
     note.title
       ? note.body.length > 240
