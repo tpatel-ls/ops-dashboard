@@ -7,44 +7,34 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 import {
   Calendar,
-  Hash,
+  FolderKanban,
   Inbox,
   KanbanSquare,
   LayoutDashboard,
-  LayoutGrid,
+  ListTodo,
   NotebookPen,
-  MonitorSmartphone,
-  Pencil,
   PhoneCall,
   Plus,
   Search,
   Settings as SettingsIcon,
-  Sun,
-  Target,
-  Utensils,
 } from 'lucide-react';
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { useOrgStore } from '@/lib/org-store';
-import { runCapture } from '@/lib/capture-client';
+import { addTask } from '@/lib/tasks';
+import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { useActiveOrgs } from './org-switcher';
 
 const NAV = [
-  { id: 'nav-dashboard', label: 'Life Command', href: '/dashboard', icon: LayoutDashboard, hint: 'g d' },
-  { id: 'nav-today', label: 'Briefing', href: '/today', icon: Sun, hint: 'g t' },
-  { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g p' },
-  { id: 'nav-week', label: 'Week', href: '/week', icon: LayoutGrid, hint: 'g w' },
-  { id: 'nav-month', label: 'Month', href: '/month', icon: Calendar, hint: 'g m' },
+  { id: 'nav-dashboard', label: 'Home', href: '/dashboard', icon: LayoutDashboard, hint: 'g h' },
+  { id: 'nav-tasks', label: 'Tasks', href: '/tasks', icon: ListTodo, hint: 'g t' },
+  { id: 'nav-projects', label: 'Projects', href: '/projects', icon: FolderKanban, hint: 'g p' },
   { id: 'nav-calendar', label: 'Calendar', href: '/calendar', icon: Calendar, hint: 'g c' },
+  { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g i' },
   { id: 'nav-kanban', label: 'Kanban', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
-  { id: 'nav-whiteboards', label: 'Whiteboards', href: '/whiteboards', icon: Pencil, hint: 'g b' },
-  { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g n' },
-  { id: 'nav-food', label: 'Food', href: '/food', icon: Utensils },
-  { id: 'nav-tags', label: 'Tags', href: '/tags', icon: Hash },
-  { id: 'nav-projects', label: 'Projects', href: '/projects', icon: Target },
   { id: 'nav-power-dialer', label: 'Power Dialer', href: '/power-dialer', icon: PhoneCall, hint: 'g l' },
-  { id: 'nav-devices', label: 'Devices', href: '/devices', icon: MonitorSmartphone, hint: 'g x' },
+  { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g n' },
   { id: 'nav-settings', label: 'Settings', href: '/settings', icon: SettingsIcon, hint: 'g s' },
 ];
 
@@ -57,7 +47,7 @@ export function CommandPalette() {
   const orgs = useActiveOrgs();
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [capturing, startCapture] = useTransition();
+  const [adding, startAdd] = useTransition();
 
   const lanes: { ctx: OrgContext; label: string; color: string }[] = [
     { ctx: 'all', label: 'All', color: 'var(--primary)' },
@@ -86,11 +76,17 @@ export function CommandPalette() {
 
   const results = query && fuse ? fuse.search(query).slice(0, 8).map((r) => r.item) : [];
 
-  function handleCapture() {
+  function handleCreateTask() {
     const text = query.trim();
     if (!text) return;
-    startCapture(async () => {
-      await runCapture(text, 'text');
+    startAdd(async () => {
+      const destination = resolveWorkDestination(
+        ctx,
+        null,
+        (orgs ?? []).map((organization) => organization.id),
+      );
+      const orgId = destinationOrgId(destination);
+      await addTask(text, orgId ? { orgId } : {});
       close();
       setQuery('');
     });
@@ -119,7 +115,7 @@ export function CommandPalette() {
               <Command.Input
                 value={query}
                 onValueChange={setQuery}
-                placeholder="Find tasks, switch context, or capture a thought..."
+                placeholder="Find tasks, switch workspace, or add a task..."
                 className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
                 autoFocus
               />
@@ -130,26 +126,26 @@ export function CommandPalette() {
               No matches.
             </Command.Empty>
 
-            {/* Prominent capture action - always visible when there is text */}
+            {/* Prominent task action, always visible when there is text. */}
             {query.trim() ? (
               <Command.Group
-                heading="Capture"
+                heading="Create"
                 className="text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
               >
                 <Command.Item
-                  value="capture-now"
+                  value="create-task"
                   keywords={[query]}
-                  onSelect={handleCapture}
-                  disabled={capturing}
+                  onSelect={handleCreateTask}
+                  disabled={adding}
                   className="group flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm text-foreground data-[selected=true]:bg-primary-soft data-[selected=true]:text-foreground"
                 >
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
                     <Plus className="size-3" aria-hidden />
                   </span>
                   <span className="flex-1 truncate">
-                    {capturing ? 'Capturing…' : (
+                    {adding ? 'Adding task...' : (
                       <>
-                        <span className="text-muted-foreground">Capture </span>
+                        <span className="text-muted-foreground">Create task </span>
                         <span className="font-medium">&ldquo;{query}&rdquo;</span>
                       </>
                     )}

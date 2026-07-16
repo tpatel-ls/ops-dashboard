@@ -4,28 +4,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
-  BookOpen,
   Calendar,
-  Clapperboard,
-  Flame,
   FolderKanban,
-  Globe,
-  Hash,
   Inbox,
   KanbanSquare,
   LayoutDashboard,
   LayoutGrid,
   ListTodo,
-  MessageCircle,
   NotebookPen,
-  MonitorSmartphone,
-  Pencil,
   PhoneCall,
-  Repeat,
   Settings as SettingsIcon,
-  Sun,
-  Users,
-  Utensils,
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -33,41 +21,25 @@ import { cn } from '@ops-dashboard/ui';
 interface NavItem {
   href: string;
   label: string;
-  icon: typeof Sun;
+  icon: typeof LayoutDashboard;
   shortcut?: string;
 }
 
-const PLAN: NavItem[] = [
-  { href: '/dashboard', label: 'Life Command', icon: LayoutDashboard, shortcut: 'g d' },
-  { href: '/today', label: 'Briefing', icon: Sun, shortcut: 'g t' },
-  { href: '/notepad', label: 'Notepad', icon: NotebookPen, shortcut: 'g p' },
-  { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g n' },
-  { href: '/tasks', label: 'Tasks', icon: ListTodo },
+const WORK: NavItem[] = [
+  { href: '/dashboard', label: 'Home', icon: LayoutDashboard, shortcut: 'g h' },
+  { href: '/tasks', label: 'Tasks', icon: ListTodo, shortcut: 'g t' },
+  { href: '/projects', label: 'Projects', icon: FolderKanban, shortcut: 'g p' },
   { href: '/calendar', label: 'Calendar', icon: Calendar, shortcut: 'g c' },
-  { href: '/week', label: 'Week', icon: LayoutGrid, shortcut: 'g w' },
-  { href: '/food', label: 'Food', icon: Utensils },
+  { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g i' },
 ];
 
-const BUILD: NavItem[] = [
-  { href: '/routines', label: 'Routines', icon: Repeat },
-  { href: '/habits', label: 'Habits', icon: Flame },
-  { href: '/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/power-dialer', label: 'Power Dialer', icon: PhoneCall, shortcut: 'g l' },
-  { href: '/content', label: 'Content', icon: Clapperboard },
+const TOOLS: NavItem[] = [
   { href: '/kanban', label: 'Kanban', icon: KanbanSquare, shortcut: 'g k' },
+  { href: '/power-dialer', label: 'Power Dialer', icon: PhoneCall, shortcut: 'g l' },
+  { href: '/notepad', label: 'Notepad', icon: NotebookPen, shortcut: 'g n' },
 ];
 
-const LIBRARY: NavItem[] = [
-  { href: '/library', label: 'Library', icon: BookOpen },
-  { href: '/people', label: 'People', icon: Users },
-  { href: '/whiteboards', label: 'Whiteboards', icon: Pencil, shortcut: 'g b' },
-];
-
-const META: NavItem[] = [
-  { href: '/ask', label: 'Ask', icon: MessageCircle },
-  { href: '/devices', label: 'Devices', icon: MonitorSmartphone, shortcut: 'g x' },
-  { href: '/domains', label: 'Domains', icon: Globe },
-  { href: '/tags', label: 'Tags', icon: Hash },
+const SYSTEM: NavItem[] = [
   { href: '/settings', label: 'Settings', icon: SettingsIcon, shortcut: 'g s' },
 ];
 
@@ -92,9 +64,9 @@ export function Sidebar() {
           <LayoutGrid className="size-4" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-[15px] font-semibold tracking-tight">Identity OS</span>
+          <span className="text-[15px] font-semibold tracking-tight">Taskify</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-            daily command
+            project command
           </span>
         </div>
         <span
@@ -104,8 +76,8 @@ export function Sidebar() {
         />
       </div>
 
-      <Section label="Plan">
-        {PLAN.map((item) => (
+      <Section label="Work">
+        {WORK.map((item) => (
           <NavLink
             key={item.href}
             item={item}
@@ -115,22 +87,16 @@ export function Sidebar() {
         ))}
       </Section>
 
-      <Section label="Build" trailing="identity">
-        {BUILD.map((item) => (
-          <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
-        ))}
-      </Section>
-
-      <Section label="Library">
-        {LIBRARY.map((item) => (
+      <Section label="Tools">
+        {TOOLS.map((item) => (
           <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
         ))}
       </Section>
 
       <div className="mt-auto" />
 
-      <Section label="More">
-        {META.map((item) => (
+      <Section label="System">
+        {SYSTEM.map((item) => (
           <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
         ))}
       </Section>
