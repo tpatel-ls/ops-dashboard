@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   AlertTriangle,
   Boxes,
+  CalendarClock,
   ChevronRight,
   Clock,
   Layers,
@@ -15,7 +16,7 @@ import {
   Timer,
   X,
 } from 'lucide-react';
-import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
+import { differenceInDays, format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type {
   Domain,
@@ -226,6 +227,11 @@ function ProjectCard({ data, onClick, onLogProgress, showOrganization }: Project
   const lastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
   const daysAgo = lastWorked ? differenceInDays(new Date(), lastWorked) : null;
   const isSlipping = daysAgo === null || daysAgo > SLIPPING_DAYS;
+  const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
+  const dueLabel = parsedDueDate && isValid(parsedDueDate) ? format(parsedDueDate, 'MMM d') : null;
+  const isOverdue = Boolean(
+    dueLabel && project.dueDate && project.dueDate < format(new Date(), 'yyyy-MM-dd'),
+  );
 
   return (
     <article
@@ -304,6 +310,12 @@ function ProjectCard({ data, onClick, onLogProgress, showOrganization }: Project
           <ListTodo className="size-3" aria-hidden />
           {taskCount} open task{taskCount === 1 ? '' : 's'}
         </span>
+        {dueLabel ? (
+          <span className={cn('inline-flex items-center gap-1', isOverdue && 'text-destructive')}>
+            <CalendarClock className="size-3" aria-hidden />
+            Due {dueLabel}
+          </span>
+        ) : null}
         {hoursLogged > 0 ? (
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3" aria-hidden />
