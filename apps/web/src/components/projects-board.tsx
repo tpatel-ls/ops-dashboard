@@ -10,6 +10,7 @@ import {
   Layers,
   Plus,
   RefreshCw,
+  Search,
   Timer,
   X,
 } from 'lucide-react';
@@ -28,6 +29,7 @@ import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '
 import { useAppStore } from '@/lib/app-store';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
+import { matchesProjectSearch } from '@/lib/project-query';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -388,6 +390,7 @@ function KindGroup({
 export function ProjectsBoard() {
   const [creating, setCreating] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const ctx = useOrgStore((s) => s.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
@@ -436,24 +439,54 @@ export function ProjectsBoard() {
   const displayProject =
     liveSelectedProject !== undefined ? liveSelectedProject : selectedProject;
 
+  const filteredCardData = (data?.cardData ?? []).filter(({ project }) =>
+    matchesProjectSearch(project, searchQuery),
+  );
+
   const grouped = KIND_ORDER.reduce<Record<ProjectKind, ProjectCardData[]>>(
     (acc, k) => {
-      acc[k] = (data?.cardData ?? []).filter((c) => c.project.kind === k);
+      acc[k] = filteredCardData.filter((c) => c.project.kind === k);
       return acc;
     },
     { project: [], area: [], retainer: [] },
   );
 
-  const totalActive = (data?.cardData ?? []).filter((c) => c.project.status === 'active').length;
+  const totalActive = filteredCardData.filter((c) => c.project.status === 'active').length;
 
   return (
     <>
       <div className="flex flex-col gap-5">
         {/* Toolbar */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">
             {totalActive} active
           </span>
+          <div className="relative ml-auto w-full sm:w-56">
+            <label htmlFor="project-search" className="sr-only">Search projects</label>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              id="project-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search projects"
+              className="input min-h-11 pl-9 pr-10 sm:min-h-9"
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear project search"
+                title="Clear search"
+                className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3.5" aria-hidden />
+              </button>
+            ) : null}
+          </div>
           <button
             type="button"
             onClick={() => setCreating((v) => !v)}
@@ -497,23 +530,37 @@ export function ProjectsBoard() {
               />
             ))}
           </div>
-        ) : data.cardData.length === 0 && !creating ? (
+        ) : filteredCardData.length === 0 && !creating ? (
           <div className="surface flex h-64 flex-col items-center justify-center gap-2 text-center">
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
               projects
             </div>
-            <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
+            <h3 className="text-xl font-semibold tracking-tight">
+              {searchQuery ? 'No matching projects.' : 'A clean slate.'}
+            </h3>
             <p className="max-w-xs text-sm text-muted-foreground">
-              Create your first project, area, or retainer to track work and log hours.
+              {searchQuery
+                ? 'Try a different project name or description.'
+                : 'Create your first project, area, or retainer to track work and log hours.'}
             </p>
-            <button
-              type="button"
-              onClick={() => openWorkLogger('project')}
-              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground"
-            >
-              <Plus className="size-3.5" aria-hidden />
-              Create project
-            </button>
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="mt-2 min-h-11 rounded-md border px-4 text-xs font-medium"
+              >
+                Clear search
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openWorkLogger('project')}
+                className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground"
+              >
+                <Plus className="size-3.5" aria-hidden />
+                Create project
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-6">
