@@ -6,7 +6,6 @@ import { FolderKanban, Loader2, Mic, MicOff, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Project } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
-import { runCapture } from '@/lib/capture-client';
 import { addTask, addTaskToProject } from '@/lib/tasks';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { useVoiceInput } from '@/lib/use-voice-input';
@@ -63,14 +62,14 @@ export function QuickAdd() {
     return () => document.removeEventListener('mousedown', onDown);
   }, [pickerOpen]);
 
-  function captureText(text: string, source: 'text' | 'voice') {
+  function captureText(text: string) {
     hapticTap();
     startTransition(async () => {
       if (project) await addTaskToProject(text, project);
-      else if (destinationOrgId(destination)) {
-        await addTask(text, { orgId: destinationOrgId(destination) });
+      else {
+        const orgId = destinationOrgId(destination);
+        await addTask(text, orgId ? { orgId } : {});
       }
-      else await runCapture(text, source);
       hapticSuccess();
       setValue('');
     });
@@ -84,7 +83,7 @@ export function QuickAdd() {
   } = useVoiceInput({
     onTranscript: (text) => {
       setValue(text);
-      captureText(text, 'voice');
+      captureText(text);
     },
   });
 
@@ -92,7 +91,7 @@ export function QuickAdd() {
     e.preventDefault();
     const text = value.trim();
     if (!text) return;
-    captureText(text, 'text');
+    captureText(text);
   }
 
   return (
@@ -103,7 +102,7 @@ export function QuickAdd() {
         placeholder={
           project
             ? `Add a task to ${project.name}...`
-            : 'Capture anything. Try: ship spec tomorrow 3pm #work !!'
+            : 'Add a task. Try: ship spec tomorrow 3pm !!'
         }
         className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
         aria-label="Quick add task"
@@ -115,7 +114,7 @@ export function QuickAdd() {
         {project
           ? 'Project mode'
           : destination === 'personal'
-            ? pending ? 'Filing' : 'Triage mode'
+            ? pending ? 'Adding' : 'Personal task'
             : 'Org task'}
       </span>
       {!project ? (
@@ -125,7 +124,7 @@ export function QuickAdd() {
             setDestinationOverride(event.target.value);
             setProject(null);
           }}
-          aria-label="Quick capture organization"
+          aria-label="Task organization"
           className="hidden h-8 max-w-32 shrink-0 rounded-md border bg-card px-2 text-[11px] text-foreground outline-none md:block"
         >
           {(data?.organizations ?? []).map((organization) => (
@@ -143,7 +142,7 @@ export function QuickAdd() {
           }}
           aria-haspopup="listbox"
           aria-expanded={pickerOpen}
-          aria-label={project ? `Capturing into ${project.name}` : 'File into a project'}
+          aria-label={project ? `Adding to ${project.name}` : 'Choose a project'}
           className={cn(
             'flex h-7 items-center gap-1.5 rounded-md px-1.5 text-[11px] transition-colors',
             project
@@ -177,7 +176,7 @@ export function QuickAdd() {
           <div className="surface absolute right-0 top-full z-50 mt-3 w-72 overflow-hidden">
             <div className="hairline flex items-center justify-between border-b px-3 py-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
-                File capture into
+                Choose project
               </span>
               <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-primary">
                 {project ? 'locked' : 'auto'}
@@ -200,7 +199,7 @@ export function QuickAdd() {
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <span aria-hidden className="size-2 rounded-full bg-bg-sunken" />
-                <span>No project (AI triage)</span>
+                <span>No project</span>
               </button>
               {projects
                 .filter((p) =>

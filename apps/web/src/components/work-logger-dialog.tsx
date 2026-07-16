@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { addDays, format } from 'date-fns';
-import { Check, FolderKanban, Loader2, Plus, Timer, X } from 'lucide-react';
+import { Check, ChevronDown, FolderKanban, Loader2, Plus, SlidersHorizontal, Timer, X } from 'lucide-react';
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Priority, Project, ProjectKind } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -15,6 +15,11 @@ import { createProject } from '@/lib/projects';
 import { createOrganization, nextOrgColor } from '@/lib/organizations';
 import { logWork } from '@/lib/worklogs';
 import {
+  LAST_TASK_DESTINATION_KEY,
+  LAST_TASK_PROJECT_KEY,
+  resolveRecentProject,
+} from '@/lib/task-capture';
+import {
   destinationOrgId,
   destinationForProject,
   projectsForDestination,
@@ -23,8 +28,6 @@ import {
   validWorkMinutes,
   type WorkDestination,
 } from '@/lib/work-logger';
-
-const LAST_DESTINATION_KEY = 'ops:last-work-destination';
 
 const MODE_META: Array<{
   id: WorkLoggerMode;
@@ -38,11 +41,16 @@ const MODE_META: Array<{
 
 function readLastDestination(): WorkDestination | null {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(LAST_DESTINATION_KEY);
+  return window.localStorage.getItem(LAST_TASK_DESTINATION_KEY);
+}
+
+function readLastProjectId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem(LAST_TASK_PROJECT_KEY);
 }
 
 function rememberDestination(destination: WorkDestination): void {
-  window.localStorage.setItem(LAST_DESTINATION_KEY, destination);
+  window.localStorage.setItem(LAST_TASK_DESTINATION_KEY, destination);
 }
 
 function localDate(offsetDays = 0): string {
@@ -71,7 +79,13 @@ export function WorkLoggerDialog() {
       organizations: organizations
         .filter((org) => !org.deletedAt && !org.archivedAt)
         .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
-      projects: projects.filter((project) => !project.deletedAt && !project.archivedAt),
+      projects: projects.filter(
+        (project) =>
+          !project.deletedAt &&
+          !project.archivedAt &&
+          project.status !== 'done' &&
+          project.status !== 'archived',
+      ),
     };
   });
 
@@ -100,12 +114,17 @@ export function WorkLoggerDialog() {
         readLastDestination(),
         data.organizations.map((org) => org.id),
       );
+  const initialProject = launchProject ?? resolveRecentProject(
+    data.projects,
+    initialDestination,
+    readLastProjectId(),
+  );
 
   return (
     <WorkLoggerPanel
-      key={`${launchMode}:${launchProjectId ?? 'none'}`}
+      key={`${launchMode}:${initialProject?.id ?? 'none'}`}
       launchMode={launchMode}
-      launchProjectId={launchProjectId}
+      launchProjectId={initialProject?.id ?? null}
       initialDestination={initialDestination}
       organizations={data.organizations}
       projects={data.projects}
@@ -139,6 +158,7 @@ function WorkLoggerPanel({
   const [schedule, setSchedule] = useState<'inbox' | 'today' | 'tomorrow' | 'date'>('inbox');
   const [scheduledDate, setScheduledDate] = useState(localDate());
   const [priority, setPriority] = useState<Priority>(0);
+  const [taskDetailsOpen, setTaskDetailsOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [projectKind, setProjectKind] = useState<ProjectKind>('project');
   const [projectDueDate, setProjectDueDate] = useState('');
@@ -282,6 +302,12 @@ function WorkLoggerPanel({
               ? { orgId }
               : {}),
         });
+        rememberDestination(destination);
+        if (selectedProject) {
+          window.localStorage.setItem(LAST_TASK_PROJECT_KEY, selectedProject.id);
+        } else {
+          window.localStorage.removeItem(LAST_TASK_PROJECT_KEY);
+        }
       } else if (mode === 'project') {
         await createProject(projectName.trim(), {
           kind: projectKind,
@@ -321,10 +347,10 @@ function WorkLoggerPanel({
         <header className="hairline flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
           <div className="min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
-              Quick log
+              Quick entry
             </p>
             <h2 id="work-logger-title" className="truncate text-base font-semibold">
-              Put work in the right place
+              Add work
             </h2>
           </div>
           <button
@@ -348,6 +374,7 @@ function WorkLoggerPanel({
                 aria-pressed={mode === id}
                 onClick={() => {
                   setMode(id);
+                  setTaskDetailsOpen(false);
                   setError(null);
                 }}
                 className={cn(
@@ -363,7 +390,32 @@ function WorkLoggerPanel({
             ))}
           </div>
 
-          <section className="mt-5" aria-labelledby="work-destination-label">
+          {mode === 'task' ? (
+            <TaskTitleField
+              title={taskTitle}
+              onTitleChange={setTaskTitle}
+              invalid={Boolean(error)}
+            />
+          ) : null}
+
+          {mode === 'task' ? (
+            <button
+              type="button"
+              aria-expanded={taskDetailsOpen}
+              aria-controls="work-task-details"
+              onClick={() => setTaskDetailsOpen((open) => !open)}
+              className="mt-3 flex min-h-11 w-full items-center gap-2 rounded-lg border bg-bg-sunken px-3 text-left text-xs text-muted-foreground hover:text-foreground"
+            >
+              <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
+              <span className="min-w-0 flex-1 truncate">
+                Details / {selectedProject?.name ?? selectedDestinationName}
+              </span>
+              <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', taskDetailsOpen && 'rotate-180')} aria-hidden />
+            </button>
+          ) : null}
+
+          {mode !== 'task' || taskDetailsOpen ? (
+          <section id={mode === 'task' ? 'work-task-details' : undefined} className="mt-5" aria-labelledby="work-destination-label">
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
                 <p
@@ -433,12 +485,11 @@ function WorkLoggerPanel({
               </div>
             ) : null}
           </section>
+          ) : null}
 
           <form id="work-logger-form" onSubmit={save} className="mt-5 flex flex-col gap-4">
-            {mode === 'task' ? (
-              <TaskFields
-                title={taskTitle}
-                onTitleChange={setTaskTitle}
+            {mode === 'task' && taskDetailsOpen ? (
+              <TaskDetailsFields
                 projectId={projectId}
                 onProjectChange={setProjectId}
                 projects={filteredProjects}
@@ -448,7 +499,6 @@ function WorkLoggerPanel({
                 onScheduledDateChange={setScheduledDate}
                 priority={priority}
                 onPriorityChange={setPriority}
-                invalid={Boolean(error)}
               />
             ) : null}
             {mode === 'project' ? (
@@ -503,10 +553,10 @@ function WorkLoggerPanel({
             >
               {saving ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
               {mode === 'task'
-                ? `Add to ${selectedDestinationName}`
+                ? 'Add task'
                 : mode === 'project'
-                  ? `Create in ${selectedDestinationName}`
-                  : `Log progress in ${selectedDestinationName}`}
+                  ? 'Create project'
+                  : 'Log progress'}
             </button>
           )}
         </footer>
@@ -557,9 +607,35 @@ function FieldLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor:
   );
 }
 
-function TaskFields({
+function TaskTitleField({
   title,
   onTitleChange,
+  invalid,
+}: {
+  title: string;
+  onTitleChange: (value: string) => void;
+  invalid: boolean;
+}) {
+  return (
+    <div className="mt-5 flex flex-col gap-1.5">
+      <FieldLabel htmlFor="work-task-title">Task</FieldLabel>
+      <input
+        id="work-task-title"
+        form="work-logger-form"
+        data-autofocus
+        value={title}
+        onChange={(event) => onTitleChange(event.target.value)}
+        placeholder="What needs to happen?"
+        aria-invalid={invalid || undefined}
+        aria-errormessage={invalid ? 'work-logger-error' : undefined}
+        className="input min-h-12 text-base"
+        autoComplete="off"
+      />
+    </div>
+  );
+}
+
+function TaskDetailsFields({
   projectId,
   onProjectChange,
   projects,
@@ -569,10 +645,7 @@ function TaskFields({
   onScheduledDateChange,
   priority,
   onPriorityChange,
-  invalid,
 }: {
-  title: string;
-  onTitleChange: (value: string) => void;
   projectId: string;
   onProjectChange: (value: string) => void;
   projects: Project[];
@@ -582,24 +655,9 @@ function TaskFields({
   onScheduledDateChange: (value: string) => void;
   priority: Priority;
   onPriorityChange: (value: Priority) => void;
-  invalid: boolean;
 }) {
   return (
     <>
-      <div className="flex flex-col gap-1.5">
-        <FieldLabel htmlFor="work-task-title">Task</FieldLabel>
-        <input
-          id="work-task-title"
-          data-autofocus
-          value={title}
-          onChange={(event) => onTitleChange(event.target.value)}
-          placeholder="What needs to happen?"
-          aria-invalid={invalid || undefined}
-          aria-errormessage={invalid ? 'work-logger-error' : undefined}
-          className="input min-h-12 text-base"
-          autoComplete="off"
-        />
-      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <FieldLabel htmlFor="work-task-project">Project</FieldLabel>
