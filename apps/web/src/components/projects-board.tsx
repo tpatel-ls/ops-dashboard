@@ -216,11 +216,12 @@ interface ProjectCardData {
 interface ProjectCardProps {
   data: ProjectCardData;
   onClick: () => void;
+  onAddTask: () => void;
   onLogProgress: () => void;
   showOrganization: boolean;
 }
 
-function ProjectCard({ data, onClick, onLogProgress, showOrganization }: ProjectCardProps) {
+function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization }: ProjectCardProps) {
   const { project, domain, organization, hoursLogged, taskCount } = data;
 
   const milestones = project.milestones ?? [];
@@ -342,7 +343,15 @@ function ProjectCard({ data, onClick, onLogProgress, showOrganization }: Project
         ) : null}
         </div>
       </button>
-      <div className="hairline flex justify-end border-t px-3 py-2">
+      <div className="hairline flex items-center justify-between border-t px-3 py-2">
+        <button
+          type="button"
+          onClick={onAddTask}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+        >
+          <Plus className="size-3.5" aria-hidden />
+          Add task
+        </button>
         <button
           type="button"
           onClick={onLogProgress}
@@ -362,12 +371,14 @@ function KindGroup({
   kind,
   items,
   onCardClick,
+  onAddTask,
   onLogProgress,
   showOrganization,
 }: {
   kind: ProjectKind;
   items: ProjectCardData[];
   onCardClick: (project: Project) => void;
+  onAddTask: (project: Project) => void;
   onLogProgress: (project: Project) => void;
   showOrganization: boolean;
 }) {
@@ -403,6 +414,7 @@ function KindGroup({
               key={item.project.id}
               data={item}
               onClick={() => onCardClick(item.project)}
+              onAddTask={() => onAddTask(item.project)}
               onLogProgress={() => onLogProgress(item.project)}
               showOrganization={showOrganization}
             />
@@ -640,6 +652,7 @@ export function ProjectsBoard() {
                 kind={kind}
                 items={grouped[kind]}
                 onCardClick={setSelectedProject}
+                onAddTask={(project) => openWorkLogger('task', project.id)}
                 onLogProgress={(project) => openWorkLogger('progress', project.id)}
                 showOrganization={ctx === 'all'}
               />

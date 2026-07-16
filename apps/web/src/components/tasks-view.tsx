@@ -13,6 +13,7 @@ import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
 import { compareTasks, matchesTaskSearch } from '@/lib/task-query';
+import { QuickTaskEntry } from '@/components/quick-task-entry';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -439,6 +440,8 @@ export function TasksView() {
 
   return (
     <div className="flex flex-col gap-4">
+      <QuickTaskEntry id="tasks-page-task-title" compact />
+
       {/* Control bar */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative order-first w-full sm:order-none sm:w-56">
