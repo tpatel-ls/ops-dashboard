@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ChevronDown, ChevronUp, MessageSquarePlus, Plus, Star, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
-import type { Quote, QuoteSourceType, Thought } from '@ops-dashboard/core';
+import type { Quote, QuoteSourceType } from '@ops-dashboard/core';
 import { createQuote, updateQuote, deleteQuote, makeThought } from '@/lib/quotes';
 import { cn } from '@ops-dashboard/ui';
 

@@ -19,7 +19,6 @@ import {
   makeInteraction,
   updatePerson,
 } from '@/lib/people';
-import { cn } from '@ops-dashboard/ui';
 
 // ─── Facts section ────────────────────────────────────────────────────────────
 
