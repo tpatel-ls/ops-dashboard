@@ -41,6 +41,9 @@ export function AppShell() {
     router.prefetch('/tasks');
     router.prefetch('/inbox');
     router.prefetch('/notepad');
+    router.prefetch('/projects');
+    router.prefetch('/habits');
+    router.prefetch('/routines');
     router.prefetch('/power-dialer');
   }, [router]);
 
@@ -73,6 +76,9 @@ export function AppShell() {
     { combo: 'g then b', handler: () => router.push('/whiteboards') },
     { combo: 'g then n', handler: () => router.push('/inbox') },
     { combo: 'g then p', handler: () => router.push('/notepad') },
+    { combo: 'g then j', handler: () => router.push('/projects') },
+    { combo: 'g then h', handler: () => router.push('/habits') },
+    { combo: 'g then r', handler: () => router.push('/routines') },
     { combo: 'g then x', handler: () => router.push('/devices') },
     { combo: 'g then s', handler: () => router.push('/settings') },
     { combo: 'f', handler: openFocus },
