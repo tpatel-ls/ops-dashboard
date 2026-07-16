@@ -42,10 +42,56 @@ async function verifyProjectOrganization(page) {
   if (!(await cardRoot.getByText(selectedLabel?.trim() ?? '').isVisible().catch(() => false))) {
     throw new Error('Created project is missing its organization label');
   }
+  return { projectName, organizationName: selectedLabel?.trim() ?? '' };
+}
+
+async function addRapidTask(page, title) {
+  const form = page.getByRole('form', { name: 'Quick task entry' });
+  const input = form.getByLabel('Task title');
+  await input.fill(title);
+  await input.press('Enter');
+  await form.locator('..').getByRole('status').waitFor({ state: 'visible' });
+  await page.waitForFunction(
+    ([inputId]) => {
+      const element = document.getElementById(inputId);
+      return element instanceof HTMLInputElement && element.value === '' && document.activeElement === element;
+    },
+    [await input.getAttribute('id')],
+  );
+}
+
+async function verifyRapidTaskEntry(page, projectTarget) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openApp(page, '/dashboard');
+  const stamp = Date.now();
+  const firstTask = `Rapid task one ${stamp}`;
+  const secondTask = `Rapid task two ${stamp}`;
+  await addRapidTask(page, firstTask);
+  await addRapidTask(page, secondTask);
+
+  await openApp(page, '/tasks');
+  await page.getByText(firstTask, { exact: true }).waitFor({ state: 'visible' });
+  await page.getByText(secondTask, { exact: true }).waitFor({ state: 'visible' });
+
+  if (!projectTarget) return;
+  await openApp(page, '/dashboard');
+  const form = page.getByRole('form', { name: 'Quick task entry' });
+  await form.getByRole('button', { name: 'Details' }).click();
+  await form.getByLabel('Organization').selectOption({ label: projectTarget.organizationName });
+  await form.getByLabel('Project').locator('option', { hasText: projectTarget.projectName }).waitFor({ state: 'attached' });
+  await form.getByLabel('Project').selectOption({ label: projectTarget.projectName });
+  const projectTask = `Project task ${stamp}`;
+  await addRapidTask(page, projectTask);
+
+  await openApp(page, '/projects');
+  const cardRoot = page.locator('[data-project-card]').filter({ hasText: projectTarget.projectName });
+  await cardRoot.getByRole('button').first().click();
+  await page.getByRole('heading', { name: projectTarget.projectName, exact: true }).waitFor({ state: 'visible' });
+  await page.getByText(projectTask, { exact: true }).waitFor({ state: 'visible' });
 }
 
 async function verifyResponsiveLayouts(page) {
-  const routes = ['/dashboard', '/today', '/tasks', '/projects'];
+  const routes = ['/dashboard', '/tasks', '/projects', '/calendar'];
   const widths = [360, 390, 412, 768, 1024, 1440];
 
   for (const width of widths) {
@@ -64,8 +110,8 @@ async function verifyResponsiveLayouts(page) {
     }
 
     await page.keyboard.press('g');
-    await page.keyboard.press('i');
-    const dialog = page.getByRole('dialog', { name: 'Put work in the right place' });
+    await page.keyboard.press('a');
+    const dialog = page.getByRole('dialog', { name: 'Add work' });
     await dialog.waitFor({ state: 'visible' });
     const dialogGeometry = await dialog.evaluate((element) => ({
       width: element.getBoundingClientRect().width,
@@ -82,17 +128,35 @@ async function verifyResponsiveLayouts(page) {
     }
     await page.keyboard.press('Escape');
   }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openApp(page, '/dashboard');
+  const mobileNav = page.getByRole('navigation', { name: 'Primary' });
+  for (const label of ['Home', 'Tasks', 'Add task', 'Projects', 'Calendar']) {
+    await mobileNav.getByRole(label === 'Add task' ? 'button' : 'link', { name: label, exact: true }).waitFor({ state: 'visible' });
+  }
 }
 
 async function main() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const consoleErrors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
   try {
+    let projectTarget;
     if (scenario === 'project-org' || scenario === 'all') {
-      await verifyProjectOrganization(page);
+      projectTarget = await verifyProjectOrganization(page);
+    }
+    if (scenario === 'rapid-entry' || scenario === 'all') {
+      await verifyRapidTaskEntry(page, projectTarget);
     }
     if (scenario === 'responsive' || scenario === 'all') {
       await verifyResponsiveLayouts(page);
+    }
+    if (consoleErrors.length > 0) {
+      throw new Error(`Browser console errors: ${consoleErrors.join(' | ')}`);
     }
     console.log(`work logger verification passed: ${scenario}`);
   } finally {
