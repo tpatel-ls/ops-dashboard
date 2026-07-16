@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Bell, Radio, Search, Settings, Sparkles } from 'lucide-react';
+import { Bell, Plus, Search, Settings } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { useNetworkStatus } from '@/lib/use-network-status';
@@ -19,17 +19,14 @@ export function TopBar() {
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <div className="command-surface flex h-11 min-w-0 max-w-3xl flex-1 items-center gap-2 rounded-[14px] px-2.5 md:px-3">
           <span className="hidden items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary md:inline-flex">
-            <Radio className="size-3" aria-hidden />
-            Universal capture
+            <Plus className="size-3" aria-hidden />
+            Quick task
           </span>
-          <Sparkles className="size-4 text-primary md:hidden" aria-hidden />
+          <Plus className="size-4 text-primary md:hidden" aria-hidden />
           <QuickAdd />
-          <span className="hidden rounded-full border bg-card/65 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground lg:inline-flex">
-            AI route
-          </span>
           <div className="hidden items-center gap-1 md:flex">
             <span className="kbd">Enter</span>
-            <span className="font-mono text-[10px] text-subtle-foreground">save</span>
+            <span className="font-mono text-[10px] text-subtle-foreground">add</span>
           </div>
         </div>
       </div>

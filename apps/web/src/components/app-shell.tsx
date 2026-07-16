@@ -37,14 +37,14 @@ export function AppShell() {
 
   useEffect(() => {
     router.prefetch('/dashboard');
-    router.prefetch('/today');
     router.prefetch('/tasks');
+    router.prefetch('/projects');
+    router.prefetch('/calendar');
     router.prefetch('/inbox');
     router.prefetch('/notepad');
-    router.prefetch('/projects');
-    router.prefetch('/habits');
-    router.prefetch('/routines');
+    router.prefetch('/kanban');
     router.prefetch('/power-dialer');
+    router.prefetch('/settings');
   }, [router]);
 
   // One-time clear of the bundled demo data, so the dashboard starts fresh.
@@ -65,21 +65,15 @@ export function AppShell() {
   useHotkeys([
     { combo: 'mod+k', handler: togglePalette },
     { combo: '?', handler: toggleHelp },
-    { combo: 'g then i', handler: () => openWorkLogger('task') },
-    { combo: 'g then d', handler: () => router.push('/dashboard') },
-    { combo: 'g then t', handler: () => router.push('/today') },
-    { combo: 'g then w', handler: () => router.push('/week') },
-    { combo: 'g then m', handler: () => router.push('/month') },
+    { combo: 'g then a', handler: () => openWorkLogger('task') },
+    { combo: 'g then h', handler: () => router.push('/dashboard') },
+    { combo: 'g then t', handler: () => router.push('/tasks') },
+    { combo: 'g then p', handler: () => router.push('/projects') },
     { combo: 'g then c', handler: () => router.push('/calendar') },
+    { combo: 'g then i', handler: () => router.push('/inbox') },
     { combo: 'g then k', handler: () => router.push('/kanban') },
     { combo: 'g then l', handler: () => router.push('/power-dialer') },
-    { combo: 'g then b', handler: () => router.push('/whiteboards') },
-    { combo: 'g then n', handler: () => router.push('/inbox') },
-    { combo: 'g then p', handler: () => router.push('/notepad') },
-    { combo: 'g then j', handler: () => router.push('/projects') },
-    { combo: 'g then h', handler: () => router.push('/habits') },
-    { combo: 'g then r', handler: () => router.push('/routines') },
-    { combo: 'g then x', handler: () => router.push('/devices') },
+    { combo: 'g then n', handler: () => router.push('/notepad') },
     { combo: 'g then s', handler: () => router.push('/settings') },
     { combo: 'f', handler: openFocus },
     { combo: 'escape', handler: closeAll },

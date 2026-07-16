@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flame, LayoutDashboard, Plus, Repeat, Sun } from 'lucide-react';
+import { Calendar, FolderKanban, LayoutDashboard, ListTodo, Plus } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 
 const LEFT = [
-  { href: '/dashboard', label: 'Command', icon: LayoutDashboard },
-  { href: '/today', label: 'Brief', icon: Sun },
+  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { href: '/tasks', label: 'Tasks', icon: ListTodo },
 ];
 const RIGHT = [
-  { href: '/routines', label: 'Routines', icon: Repeat },
-  { href: '/habits', label: 'Habits', icon: Flame },
+  { href: '/projects', label: 'Projects', icon: FolderKanban },
+  { href: '/calendar', label: 'Calendar', icon: Calendar },
 ];
 
 export function MobileNav() {
@@ -31,13 +31,13 @@ export function MobileNav() {
         <button
           type="button"
           onClick={() => openWorkLogger('task')}
-          aria-label="Capture"
+          aria-label="Add task"
           className="flex size-14 items-center justify-center rounded-full border border-primary/25 bg-primary text-primary-foreground shadow-[0_14px_34px_-14px_color-mix(in_oklch,var(--primary)_82%,transparent)] transition-transform active:scale-95"
         >
           <Plus className="size-5" />
         </button>
         <span className="mt-1 rounded-full border bg-card px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-primary shadow-sm">
-          Capture
+          Add task
         </span>
       </div>
       {RIGHT.map((it) => (
@@ -55,7 +55,7 @@ function Tab({
 }: {
   href: string;
   label: string;
-  icon: typeof Sun;
+  icon: typeof Calendar;
   active: boolean;
 }) {
   return (
