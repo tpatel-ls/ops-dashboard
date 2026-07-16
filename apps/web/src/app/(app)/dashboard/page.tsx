@@ -1,5 +1,5 @@
-import { LifeCommandCenter } from '@/components/dashboard/life-command-center';
+import { WorkDashboard } from '@/components/dashboard/work-dashboard';
 
 export default function DashboardPage() {
-  return <LifeCommandCenter />;
+  return <WorkDashboard />;
 }
