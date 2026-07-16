@@ -31,7 +31,11 @@ import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '
 import { useAppStore } from '@/lib/app-store';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
-import { matchesProjectSearch } from '@/lib/project-query';
+import {
+  compareProjects,
+  matchesProjectSearch,
+  type ProjectSort,
+} from '@/lib/project-query';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -416,6 +420,7 @@ export function ProjectsBoard() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all');
+  const [projectSort, setProjectSort] = useState<ProjectSort>('name');
   const ctx = useOrgStore((s) => s.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
@@ -464,11 +469,13 @@ export function ProjectsBoard() {
   const displayProject =
     liveSelectedProject !== undefined ? liveSelectedProject : selectedProject;
 
-  const filteredCardData = (data?.cardData ?? []).filter(
-    ({ project }) =>
-      matchesProjectSearch(project, searchQuery) &&
-      (statusFilter === 'all' || project.status === statusFilter),
-  );
+  const filteredCardData = (data?.cardData ?? [])
+    .filter(
+      ({ project }) =>
+        matchesProjectSearch(project, searchQuery) &&
+        (statusFilter === 'all' || project.status === statusFilter),
+    )
+    .sort((a, b) => compareProjects(a.project, b.project, projectSort));
 
   const grouped = KIND_ORDER.reduce<Record<ProjectKind, ProjectCardData[]>>(
     (acc, k) => {
@@ -549,6 +556,18 @@ export function ProjectsBoard() {
             </button>
           ))}
         </div>
+        <label className="flex w-fit items-center gap-2 text-xs text-muted-foreground">
+          <span>Sort</span>
+          <select
+            value={projectSort}
+            onChange={(event) => setProjectSort(event.target.value as ProjectSort)}
+            className="input min-h-11 w-auto pr-8 sm:min-h-9"
+          >
+            <option value="name">Name</option>
+            <option value="due">Due date</option>
+            <option value="recent">Recent work</option>
+          </select>
+        </label>
 
         {creating ? (
           <CreateProjectForm
