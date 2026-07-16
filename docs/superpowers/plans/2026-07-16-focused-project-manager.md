@@ -31,7 +31,7 @@
 - Consumes: `WorkDestination`, `Project`, and `Priority`.
 - Produces: `resolveRecentProject(projects, destination, recentProjectId)`, `taskCaptureOverrides(destination, project, scheduledFor, priority)`, and exported preference keys.
 
-- [ ] **Step 1: Write failing selection tests**
+- [x] **Step 1: Write failing selection tests**
 
 Cover a valid recent project, a project from another organization, an archived project, Personal fallback, and project inheritance of organization and domain.
 
@@ -47,13 +47,13 @@ expect(taskCaptureOverrides('personal', work, '2026-07-16', 2)).toMatchObject({
 });
 ```
 
-- [ ] **Step 2: Verify the tests fail**
+- [x] **Step 2: Verify the tests fail**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/task-capture.test.ts`
 
 Expected: FAIL because `task-capture.ts` does not exist.
 
-- [ ] **Step 3: Implement the pure helpers**
+- [x] **Step 3: Implement the pure helpers**
 
 ```ts
 export const LAST_TASK_DESTINATION_KEY = 'ops:last-task-destination';
@@ -72,13 +72,13 @@ export function resolveRecentProject(
 
 Build override objects so a selected project always wins over destination context.
 
-- [ ] **Step 4: Verify the focused tests pass**
+- [x] **Step 4: Verify the focused tests pass**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/task-capture.test.ts`
 
 Expected: all task-capture tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/task-capture.ts apps/web/src/lib/task-capture.test.ts
@@ -95,7 +95,7 @@ git commit -m "feat: add rapid task capture selection"
 - Consumes: Task 1 helpers, `useOrgStore`, `useSyncStatus`, `addTask`, active organizations, and active projects.
 - Produces: `QuickTaskEntry({ defaultSchedule, project, compact, autoFocus })`.
 
-- [ ] **Step 1: Build the entry shell**
+- [x] **Step 1: Build the entry shell**
 
 Render a labeled task title input, add button, and `Details` toggle. The default layout must keep the title field and add button visible at 360 pixels.
 
@@ -106,19 +106,19 @@ Render a labeled task title input, add button, and `Details` toggle. The default
 </form>
 ```
 
-- [ ] **Step 2: Add destination and project resolution**
+- [x] **Step 2: Add destination and project resolution**
 
 Use `resolveWorkDestination`, recent local preferences, and an optional fixed project. Invalid stored values must fall back to Personal or no project.
 
-- [ ] **Step 3: Add optional details**
+- [x] **Step 3: Add optional details**
 
 Expose organization, project, Inbox/Today/Tomorrow/date schedule, and Normal/Important/Critical priority in a collapsible region. Store valid destination and project choices after a successful save.
 
-- [ ] **Step 4: Preserve rapid entry behavior**
+- [x] **Step 4: Preserve rapid entry behavior**
 
 After a successful `addTask`, clear only the title, keep destination details, return focus to the title, and announce the save through `aria-live="polite"`. Keep input text on failure.
 
-- [ ] **Step 5: Verify component quality**
+- [x] **Step 5: Verify component quality**
 
 Run:
 
@@ -129,7 +129,7 @@ pnpm --filter @ops-dashboard/web typecheck
 
 Expected: zero ESLint errors and successful TypeScript completion.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/src/components/quick-task-entry.tsx apps/web/src/lib/work-logger.ts
@@ -146,27 +146,27 @@ git commit -m "feat: add rapid task entry"
 - Consumes: `Task`, `Project`, `OrgContext`, and a local date string.
 - Produces: `buildWorkDashboard(tasks, projects, ctx, today)` with overdue, today, upcoming, active project summaries, and counts.
 
-- [ ] **Step 1: Write failing dashboard tests**
+- [x] **Step 1: Write failing dashboard tests**
 
 Prove that deleted, archived, completed, and out-of-context records are excluded. Prove date buckets and project completion ratios are deterministic.
 
-- [ ] **Step 2: Verify the tests fail**
+- [x] **Step 2: Verify the tests fail**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/work-dashboard.test.ts`
 
 Expected: FAIL because `buildWorkDashboard` is missing.
 
-- [ ] **Step 3: Implement the query model**
+- [x] **Step 3: Implement the query model**
 
 Use `matchesOrgContext`, active project predicates, and `compareTasks`. Return at most eight attention tasks, eight upcoming tasks, and six active project summaries for dashboard rendering.
 
-- [ ] **Step 4: Verify the focused tests pass**
+- [x] **Step 4: Verify the focused tests pass**
 
 Run: `pnpm --filter @ops-dashboard/web test -- src/lib/work-dashboard.test.ts`
 
 Expected: all work-dashboard tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/work-dashboard.ts apps/web/src/lib/work-dashboard.test.ts
@@ -183,27 +183,27 @@ git commit -m "feat: add work dashboard model"
 - Consumes: `buildWorkDashboard`, `QuickTaskEntry`, `useOrgStore`, `setTaskStatus`, and `openEdit`.
 - Produces: the new `/dashboard` experience.
 
-- [ ] **Step 1: Build the operational header**
+- [x] **Step 1: Build the operational header**
 
 Use `ViewShell` with title `Work Dashboard`, the current date, organization context, and an `Add task` action that focuses the quick-entry field.
 
-- [ ] **Step 2: Put rapid capture first**
+- [x] **Step 2: Put rapid capture first**
 
 Render `QuickTaskEntry` before all metrics with `defaultSchedule="today"` and a stable focus target.
 
-- [ ] **Step 3: Render attention and upcoming work**
+- [x] **Step 3: Render attention and upcoming work**
 
 Use dense task rows with complete, edit, date, project, and organization signals. Empty sections must offer one `Add task` action.
 
-- [ ] **Step 4: Render active projects**
+- [x] **Step 4: Render active projects**
 
 Show project name, organization, due date, open count, completion ratio, and direct task capture. Use a responsive list and grid without nested cards.
 
-- [ ] **Step 5: Remove lifestyle dashboard dependencies**
+- [x] **Step 5: Remove lifestyle dashboard dependencies**
 
 The route must no longer import `LifeCommandCenter`, `summarizeLifeManagement`, identity score, routines, food logs, or journal metrics.
 
-- [ ] **Step 6: Verify dashboard quality**
+- [x] **Step 6: Verify dashboard quality**
 
 Run:
 
@@ -214,7 +214,7 @@ pnpm --filter @ops-dashboard/web typecheck
 
 Expected: successful lint and typecheck.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web/src/components/dashboard/work-dashboard.tsx 'apps/web/src/app/(app)/dashboard/page.tsx'
@@ -233,23 +233,23 @@ git commit -m "feat: replace life command with work dashboard"
 - Consumes: `QuickTaskEntry` and existing `openWorkLogger` project targeting.
 - Produces: immediate entry from Tasks and direct task actions on project cards.
 
-- [ ] **Step 1: Add task entry above task filters**
+- [x] **Step 1: Add task entry above task filters**
 
 Render `QuickTaskEntry` with Inbox as the default schedule. Keep the existing search, status, project, and domain filters below it.
 
-- [ ] **Step 2: Add project card task actions**
+- [x] **Step 2: Add project card task actions**
 
 Extend `ProjectCardProps` and `KindGroup` with `onAddTask(project)`. Place an `Add task` command next to `Log progress` and call `openWorkLogger('task', project.id)`.
 
-- [ ] **Step 3: Simplify page copy**
+- [x] **Step 3: Simplify page copy**
 
 Use direct subtitles: `Capture, organize, and complete your work.` and `Plan outcomes and keep their next tasks moving.`
 
-- [ ] **Step 4: Verify edited surfaces**
+- [x] **Step 4: Verify edited surfaces**
 
 Run focused ESLint and `pnpm --filter @ops-dashboard/web typecheck`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/tasks-view.tsx apps/web/src/components/projects-board.tsx 'apps/web/src/app/(app)/tasks/page.tsx' 'apps/web/src/app/(app)/projects/page.tsx'
@@ -269,31 +269,31 @@ git commit -m "feat: make task entry available everywhere"
 **Interfaces:**
 - Produces: Work, Tools, and System navigation groups plus matching keyboard shortcuts.
 
-- [ ] **Step 1: Reduce desktop navigation**
+- [x] **Step 1: Reduce desktop navigation**
 
 Use Home, Tasks, Projects, Calendar, and Inbox under Work. Use Kanban, Power Dialer, and Notepad under Tools. Keep Settings under System. Rename the brand to `Taskify` and descriptor to `Project command`.
 
-- [ ] **Step 2: Replace mobile navigation**
+- [x] **Step 2: Replace mobile navigation**
 
 Use Home and Tasks on the left, Projects and Calendar on the right, and keep the center `Add task` action.
 
-- [ ] **Step 3: Align shortcuts and prefetching**
+- [x] **Step 3: Align shortcuts and prefetching**
 
 Prefetch only core and tool routes. Use `g h`, `g t`, `g p`, `g c`, `g i`, `g k`, `g l`, `g n`, and `g s`. Remove habit and routine shortcuts.
 
-- [ ] **Step 4: Align command palette and top bar**
+- [x] **Step 4: Align command palette and top bar**
 
 Remove lifestyle destinations, make task creation the palette capture language, and replace `Universal capture` with `Quick task` in the top bar.
 
-- [ ] **Step 5: Update keyboard reference**
+- [x] **Step 5: Update keyboard reference**
 
 Document only active shortcuts and use `Add task` instead of `Work logger` in user-facing copy.
 
-- [ ] **Step 6: Verify edited surfaces**
+- [x] **Step 6: Verify edited surfaces**
 
 Run focused ESLint and web typecheck.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web/src/components/sidebar.tsx apps/web/src/components/mobile-nav.tsx apps/web/src/components/app-shell.tsx apps/web/src/components/command-palette.tsx apps/web/src/components/help-overlay.tsx apps/web/src/components/top-bar.tsx
@@ -310,27 +310,27 @@ git commit -m "feat: focus navigation on projects and tasks"
 - Consumes: the shared task preference keys and destination helpers.
 - Produces: task-first dialog layout and predictable quick task creation.
 
-- [ ] **Step 1: Put task title first**
+- [x] **Step 1: Put task title first**
 
 In Task mode, render the title field immediately below the mode selector. Move destination, project, schedule, and priority into a labeled details region below it.
 
-- [ ] **Step 2: Use recent valid destination and project**
+- [x] **Step 2: Use recent valid destination and project**
 
 Read the shared preference keys and preselect a valid project. Continue to honor an explicitly launched project.
 
-- [ ] **Step 3: Shorten task copy**
+- [x] **Step 3: Shorten task copy**
 
 Use title `Add work`, eyebrow `Quick entry`, task submit text `Add task`, project submit text `Create project`, and progress submit text `Log progress`.
 
-- [ ] **Step 4: Make top-bar quick add deterministic**
+- [x] **Step 4: Make top-bar quick add deterministic**
 
 Without a project, call `addTask` directly using the selected organization rather than routing Personal entries through AI capture. Keep voice input and project targeting.
 
-- [ ] **Step 5: Verify edited surfaces**
+- [x] **Step 5: Verify edited surfaces**
 
 Run focused ESLint, work logger unit tests, and web typecheck.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/src/components/work-logger-dialog.tsx apps/web/src/components/quick-add.tsx
@@ -346,19 +346,19 @@ git commit -m "fix: make task capture direct and predictable"
 **Interfaces:**
 - Verifies the complete local browser workflow and responsive behavior.
 
-- [ ] **Step 1: Add rapid-entry browser coverage**
+- [x] **Step 1: Add rapid-entry browser coverage**
 
 Create two tasks consecutively from the dashboard input. Confirm the input clears, retains focus, and both task titles appear in the task view.
 
-- [ ] **Step 2: Add organization and project coverage**
+- [x] **Step 2: Add organization and project coverage**
 
 Select an organization and project through Details, save a task, then confirm the task is visible under the correct context and project.
 
-- [ ] **Step 3: Update responsive routes**
+- [x] **Step 3: Update responsive routes**
 
 Verify `/dashboard`, `/tasks`, `/projects`, and `/calendar` at 360, 390, 412, 768, 1024, and 1440 pixels. Fail on document-level horizontal overflow or browser console errors.
 
-- [ ] **Step 4: Run the complete release gate**
+- [x] **Step 4: Run the complete release gate**
 
 ```bash
 pnpm test
@@ -371,11 +371,11 @@ git diff --check
 
 Expected: all tests pass, lint has zero warnings, production build exits zero, browser verification passes, and Git diff validation is clean.
 
-- [ ] **Step 5: Scan for removed primary language**
+- [x] **Step 5: Scan for removed primary language**
 
 Confirm primary navigation and dashboard files contain no references to Identity, Habits, Routines, Food, Life Command, workout, em dash, or en dash.
 
-- [ ] **Step 6: Commit verification updates**
+- [x] **Step 6: Commit verification updates**
 
 ```bash
 git add apps/web/scripts/verify-work-logger.mjs docs/superpowers/plans/2026-07-16-focused-project-manager.md
