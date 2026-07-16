@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { DEV_AUTH_COOKIE, DEV_AUTH_VALUE, isDevAuthAvailable } from '@/lib/dev-auth';
+import { DEFAULT_AUTH_DESTINATION } from '@/lib/auth-navigation';
 
 /**
  * Refreshes the Supabase session cookie on every matched request and gates page
@@ -22,7 +23,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   if (hasDevAuth) {
     if (pathname === '/login') {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = '/dashboard';
+      redirectUrl.pathname = DEFAULT_AUTH_DESTINATION;
       redirectUrl.search = '';
       return NextResponse.redirect(redirectUrl);
     }
@@ -70,7 +71,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   // Already signed in → skip the login screen.
   if (claims && pathname === '/login') {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/today';
+    redirectUrl.pathname = DEFAULT_AUTH_DESTINATION;
     redirectUrl.search = '';
     return NextResponse.redirect(redirectUrl);
   }

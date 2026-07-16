@@ -1,6 +1,7 @@
 import { login } from './actions';
+import { safeNextPath } from '@/lib/auth-navigation';
 
-export const metadata = { title: 'Sign in · Ops Dashboard' };
+export const metadata = { title: 'Sign in · Taskify' };
 
 const ERRORS: Record<string, string> = {
   invalid: 'Incorrect email or password.',
@@ -15,17 +16,14 @@ export default async function LoginPage({
   const { error, next: rawNext } = await searchParams;
   const message = error ? (ERRORS[error] ?? 'Sign-in failed.') : null;
   const localDevLogin = process.env.NODE_ENV !== 'production';
-  const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.startsWith('/\\')
-      ? rawNext
-      : '/today';
+  const next = safeNextPath(rawNext);
 
   return (
     <div className="flex min-h-[100dvh] w-full items-center justify-center p-6">
       <div className="surface w-full max-w-sm p-6">
         <div className="mb-5">
           <div className="dot-grid mb-3 size-9 rounded-lg border" aria-hidden />
-          <h1 className="text-lg font-semibold">Ops Dashboard</h1>
+          <h1 className="text-lg font-semibold">Taskify</h1>
           <p className="text-xs text-muted-foreground">Sign in to sync across your devices.</p>
         </div>
 

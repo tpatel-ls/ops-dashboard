@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import { safeNextPath } from '@/lib/auth-navigation';
 
 /**
  * Single-user email/password sign-in. Public signups are disabled in the
@@ -13,11 +14,7 @@ export async function login(formData: FormData): Promise<void> {
   const password = String(formData.get('password') ?? '');
   // Only allow same-origin absolute paths. Reject protocol-relative (`//evil`)
   // and backslash (`/\evil`) forms, which browsers resolve off-site (open redirect).
-  const rawNext = String(formData.get('next') ?? '/today');
-  const next =
-    rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.startsWith('/\\')
-      ? rawNext
-      : '/today';
+  const next = safeNextPath(String(formData.get('next') ?? ''));
 
   const supabase = await createClient();
   if (!supabase) {
