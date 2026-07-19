@@ -119,6 +119,7 @@
 
 * {
   border-color: var(--border);
+  letter-spacing: 0 !important;
 }
 
 button,

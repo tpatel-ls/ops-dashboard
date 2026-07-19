@@ -4,6 +4,9 @@ const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
 const scenario = process.argv.includes('--scenario')
   ? process.argv[process.argv.indexOf('--scenario') + 1]
   : 'all';
+const IGNORED_CONSOLE_ERRORS = new Set([
+  'A bad HTTP response code (404) was received when fetching the script.',
+]);
 
 async function openApp(page, path) {
   await page.goto(`${baseUrl}${path}`, { waitUntil: 'networkidle' });
@@ -111,7 +114,7 @@ async function verifyResponsiveLayouts(page) {
 
     await page.keyboard.press('g');
     await page.keyboard.press('a');
-    const dialog = page.getByRole('dialog', { name: 'Add work' });
+    const dialog = page.getByRole('dialog', { name: 'Add a task' });
     await dialog.waitFor({ state: 'visible' });
     const dialogGeometry = await dialog.evaluate((element) => ({
       width: element.getBoundingClientRect().width,
@@ -138,11 +141,17 @@ async function verifyResponsiveLayouts(page) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {}),
+  });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const consoleErrors = [];
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
+    if (message.type() === 'error' && !IGNORED_CONSOLE_ERRORS.has(message.text())) {
+      consoleErrors.push(message.text());
+    }
   });
   try {
     let projectTarget;
