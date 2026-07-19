@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Calendar,
+  CalendarDays,
+  CalendarRange,
   FolderKanban,
   Inbox,
   KanbanSquare,
@@ -30,6 +32,8 @@ const WORK: NavItem[] = [
   { href: '/tasks', label: 'Tasks', icon: ListTodo, shortcut: 'g t' },
   { href: '/projects', label: 'Projects', icon: FolderKanban, shortcut: 'g p' },
   { href: '/calendar', label: 'Calendar', icon: Calendar, shortcut: 'g c' },
+  { href: '/week', label: 'Week', icon: CalendarRange, shortcut: 'g w' },
+  { href: '/month', label: 'Month', icon: CalendarDays, shortcut: 'g m' },
   { href: '/inbox', label: 'Inbox', icon: Inbox, shortcut: 'g i' },
 ];
 
