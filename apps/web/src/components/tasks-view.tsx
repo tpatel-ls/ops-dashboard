@@ -29,16 +29,16 @@ const STATUS_TABS: Array<{ id: StatusFilter; label: string }> = [
 
 const PRIORITY_CLASS: Record<Priority, string> = {
   0: '',
-  1: 'text-priority-low',
-  2: 'text-priority-med',
-  3: 'text-priority-urgent',
+  1: 'border-priority-low/30 bg-priority-low/10 text-priority-low',
+  2: 'border-priority-med/30 bg-priority-med/10 text-priority-med',
+  3: 'border-priority-urgent/30 bg-priority-urgent/10 text-priority-urgent',
 };
 
 const PRIORITY_LABEL: Record<Priority, string> = {
-  0: 'None',
-  1: '!',
-  2: '!!',
-  3: '!!!',
+  0: 'Normal',
+  1: 'Low',
+  2: 'Important',
+  3: 'Critical',
 };
 
 // ─── Dropdown ────────────────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
           {task.priority > 0 && (
             <span
               className={cn(
-                'shrink-0 rounded font-mono text-[10px] font-semibold leading-none',
+                'shrink-0 rounded-md border px-1.5 py-1 text-[10px] font-semibold leading-none',
                 PRIORITY_CLASS[task.priority],
               )}
               aria-label={`Priority: ${PRIORITY_LABEL[task.priority]}`}
