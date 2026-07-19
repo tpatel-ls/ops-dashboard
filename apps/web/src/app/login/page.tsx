@@ -1,5 +1,6 @@
 import { login } from './actions';
 import { safeNextPath } from '@/lib/auth-navigation';
+import { Check, Grid2X2 } from 'lucide-react';
 
 export const metadata = { title: 'Sign in · Taskify' };
 
@@ -19,12 +20,16 @@ export default async function LoginPage({
   const next = safeNextPath(rawNext);
 
   return (
-    <div className="flex min-h-[100dvh] w-full items-center justify-center p-6">
-      <div className="surface w-full max-w-sm p-6">
-        <div className="mb-5">
-          <div className="dot-grid mb-3 size-9 rounded-lg border" aria-hidden />
-          <h1 className="text-lg font-semibold">Taskify</h1>
-          <p className="text-xs text-muted-foreground">Sign in to sync across your devices.</p>
+    <div className="flex min-h-[100dvh] w-full items-center justify-center bg-bg-sunken p-4 sm:p-6">
+      <div className="surface w-full max-w-md p-5 sm:p-6">
+        <div className="mb-5 flex items-start gap-3 border-b border-border/70 pb-5">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Grid2X2 className="size-5" aria-hidden />
+          </span>
+          <div>
+            <h1 className="text-xl font-semibold">Taskify</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Sign in to your project workspace.</p>
+          </div>
         </div>
 
         <form action={login} className="grid gap-3">
@@ -36,7 +41,7 @@ export default async function LoginPage({
               name="email"
               autoComplete="username"
               required
-              className="input"
+              className="input min-h-11"
               placeholder="you@example.com"
             />
           </label>
@@ -47,7 +52,7 @@ export default async function LoginPage({
               name="password"
               autoComplete="current-password"
               required
-              className="input"
+              className="input min-h-11"
               placeholder="••••••••"
             />
           </label>
@@ -60,22 +65,22 @@ export default async function LoginPage({
 
           <button
             type="submit"
-            className="mt-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+            className="mt-1 min-h-11 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           >
             Sign in
           </button>
         </form>
 
-        <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-          This is a single-user dashboard. Accounts are created in the Supabase
-          dashboard - there is no public signup.
+        <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+          <Check className="size-3.5 text-success" aria-hidden />
+          Approved accounts sync across signed-in devices.
         </p>
 
         {localDevLogin ? (
           <div className="mt-4 border-t pt-4">
             <a
               href={`/auth/dev-login?next=${encodeURIComponent(next)}`}
-              className="flex w-full items-center justify-center rounded-md border bg-bg-sunken px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="flex min-h-11 w-full items-center justify-center rounded-md border bg-bg-sunken px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
             >
               Continue locally
             </a>
