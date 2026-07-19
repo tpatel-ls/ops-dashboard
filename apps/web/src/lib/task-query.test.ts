@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { compareTasks, matchesTaskSearch } from './task-query';
+import { compareTasks, matchesTaskSearch, matchesTaskTag } from './task-query';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -63,5 +63,19 @@ describe('matchesTaskSearch', () => {
   it('keeps every task for an empty query and rejects unrelated text', () => {
     expect(matchesTaskSearch(launchTask, '   ')).toBe(true);
     expect(matchesTaskSearch(launchTask, 'billing')).toBe(false);
+  });
+});
+
+describe('matchesTaskTag', () => {
+  const taggedTask = task('tagged', { tags: ['Dialer', 'FollowUp'] });
+
+  it('matches a selected tag without case sensitivity', () => {
+    expect(matchesTaskTag(taggedTask, 'dialer')).toBe(true);
+    expect(matchesTaskTag(taggedTask, 'FOLLOWUP')).toBe(true);
+    expect(matchesTaskTag(taggedTask, 'finance')).toBe(false);
+  });
+
+  it('keeps every task when no tag is selected', () => {
+    expect(matchesTaskTag(taggedTask, null)).toBe(true);
   });
 });

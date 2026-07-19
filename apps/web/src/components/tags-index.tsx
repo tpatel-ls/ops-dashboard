@@ -1,11 +1,13 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { matchesTaskTag } from '@/lib/task-query';
 
 export function TagsIndex() {
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
     return all.filter((t) => !t.deletedAt);
@@ -19,6 +21,9 @@ export function TagsIndex() {
     }
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
   }, [tasks]);
+  const visibleTasks = (tasks ?? []).filter(
+    (task) => task.tags.length > 0 && matchesTaskTag(task, selectedTag),
+  );
 
   if (counts.length === 0) {
     return (
@@ -32,29 +37,31 @@ export function TagsIndex() {
     <div className="grid gap-3">
       <div className="flex flex-wrap gap-1.5">
         {counts.map(([tag, count]) => (
-          <span
+          <button
             key={tag}
-            className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs"
+            type="button"
+            onClick={() => setSelectedTag((current) => (current === tag ? null : tag))}
+            aria-pressed={selectedTag === tag}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border bg-card px-3 text-xs transition-colors hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-primary"
           >
             <span className="text-foreground">#{tag}</span>
             <span className="font-mono text-[10px] text-subtle-foreground">{count}</span>
-          </span>
+          </button>
         ))}
       </div>
       <div className="surface scrollbar-thin max-h-[60vh] overflow-y-auto p-2">
         <ul className="flex flex-col gap-1">
-          {(tasks ?? [])
-            .filter((t) => t.tags.length > 0)
+          {visibleTasks
             .slice(0, 200)
             .map((t) => (
               <li key={t.id}>
                 <button
                   type="button"
                   onClick={() => openEdit(t.id)}
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
+                  className="flex min-h-10 w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
                 >
                   <span className="truncate">{t.title}</span>
-                  <span className="ml-auto flex gap-1">
+                  <span className="ml-auto flex max-w-[55%] flex-wrap justify-end gap-1">
                     {t.tags.map((tag) => (
                       <span
                         key={tag}
@@ -68,6 +75,11 @@ export function TagsIndex() {
               </li>
             ))}
         </ul>
+        {visibleTasks.length === 0 ? (
+          <div className="flex min-h-28 items-center justify-center px-4 text-center text-sm text-muted-foreground">
+            No tasks use #{selectedTag}.
+          </div>
+        ) : null}
       </div>
     </div>
   );

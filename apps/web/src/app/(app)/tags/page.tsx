@@ -6,7 +6,9 @@ export default function TagsPage() {
     <ViewShell
       eyebrow="Workspace"
       title="Tags"
-      subtitle="Free form labels parsed from quick add (#tag)."
+      subtitle="Filter tagged work across every organization."
+      compactHeader
+      fullWidth
     >
       <TagsIndex />
     </ViewShell>
