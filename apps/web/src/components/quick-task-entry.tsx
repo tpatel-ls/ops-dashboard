@@ -167,11 +167,11 @@ export function QuickTaskEntry({
   }
 
   return (
-    <section className={cn('surface overflow-hidden', compact ? 'p-3' : 'p-4 sm:p-5')}>
-      <form aria-label="Quick task entry" onSubmit={save} className="flex flex-col gap-3">
+    <section className={cn('surface overflow-hidden', compact ? 'p-2.5 sm:p-3' : 'p-4 sm:p-5')}>
+      <form aria-label="Quick task entry" onSubmit={save} className={cn('flex flex-col', compact ? 'gap-2' : 'gap-3')}>
         <div className="flex min-w-0 items-center gap-2">
           <span
-            className="hidden size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex"
+            className={cn('hidden size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex', compact && 'sm:hidden')}
             aria-hidden
           >
             <Plus className="size-4" />
@@ -189,14 +189,14 @@ export function QuickTaskEntry({
             placeholder="Add a task and press Enter"
             aria-invalid={Boolean(error) || undefined}
             aria-errormessage={error ? `${id}-error` : undefined}
-            className="input min-h-12 min-w-0 flex-1 text-base"
+            className={cn('input min-w-0 flex-1', compact ? 'min-h-11 text-sm' : 'min-h-12 text-base')}
             autoComplete="off"
             autoFocus={autoFocus}
           />
           <button
             type="submit"
             disabled={saving || !title.trim()}
-            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className={cn('inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50', compact ? 'min-h-11 px-3' : 'min-h-12 px-4')}
           >
             {saving ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Plus className="size-4" aria-hidden />}
             <span className="hidden sm:inline">Add task</span>
@@ -218,7 +218,8 @@ export function QuickTaskEntry({
                   aria-pressed={schedule === option.value}
                   onClick={() => setSchedule(option.value)}
                   className={cn(
-                    'min-h-10 rounded-md px-3 text-xs font-medium transition-colors sm:min-h-8',
+                    'rounded-md px-3 text-xs font-medium transition-colors',
+                    compact ? 'min-h-9 sm:min-h-8' : 'min-h-10 sm:min-h-8',
                     schedule === option.value
                       ? 'bg-card text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground',
@@ -318,7 +319,7 @@ export function QuickTaskEntry({
         ) : null}
       </form>
 
-      <div className="min-h-5 pt-2 text-xs">
+      <div className={cn('text-xs', compact ? 'pt-1' : 'min-h-5 pt-2')}>
         {error ? <p id={`${id}-error`} role="alert" className="text-destructive">{error}</p> : null}
         {status ? (
           <p role="status" aria-live="polite" className="flex items-center gap-1.5 text-success">
