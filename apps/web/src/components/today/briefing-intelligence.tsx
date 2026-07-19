@@ -53,14 +53,10 @@ export function BriefingIntelligence() {
     readiness >= 80 ? 'clear' : readiness >= 55 ? 'loaded' : readiness >= 30 ? 'hot' : 'critical';
 
   return (
-    <section className="overflow-hidden rounded-[20px] border border-border bg-card shadow-sm">
-      <div className="relative isolate overflow-hidden border-b border-hairline px-4 py-4 md:px-5">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_10%_0%,color-mix(in_oklch,var(--primary)_28%,transparent),transparent_34%),radial-gradient(circle_at_90%_20%,color-mix(in_oklch,var(--success)_18%,transparent),transparent_35%)]"
-        />
+    <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="border-b border-hairline px-4 py-4 md:px-5">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-[14px] bg-primary text-primary-foreground shadow-[0_14px_36px_-20px_color-mix(in_oklch,var(--primary)_80%,transparent)]">
+          <div className="flex size-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Radar className="size-5" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
@@ -86,24 +82,13 @@ export function BriefingIntelligence() {
             <SignalPill label="Stale" value={briefing.summary.staleDomains} tone="danger" />
           </div>
         </div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-bg-sunken">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-success via-warning to-destructive"
-            style={{
-              width: `${Math.min(
-                100,
-                16 + briefing.summary.openToday * 8 + briefing.summary.routingIssues * 18 + briefing.summary.staleDomains * 18,
-              )}%`,
-            }}
-          />
-        </div>
       </div>
 
       <div className="grid gap-px bg-border md:grid-cols-2">
         <BriefingPanel
           icon={Layers3}
           title="Domains to touch"
-          description="Life areas that have gone quiet."
+          description="Work areas that have gone quiet."
           href="/domains"
           empty="No stale domains. The board is warm."
         >
@@ -139,7 +124,7 @@ function SignalPill({
   return (
     <div
       className={cn(
-        'min-w-[58px] rounded-[10px] border bg-card/72 px-2 py-1.5 shadow-sm backdrop-blur',
+        'min-w-[58px] rounded-md border bg-bg-sunken px-2 py-1.5',
         tone === 'warn' && value > 0 && 'border-warning/40 bg-warning/10',
         tone === 'danger' && value > 0 && 'border-destructive/40 bg-destructive/10',
       )}
@@ -171,7 +156,7 @@ function BriefingPanel({
   return (
     <div className="bg-card p-4 transition-colors hover:bg-bg-raised">
       <div className="mb-3 flex items-start gap-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-bg-sunken text-primary">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-primary">
           <Icon className="size-4" aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
@@ -189,7 +174,7 @@ function BriefingPanel({
       {hasChildren ? (
         <ul className="space-y-2">{children}</ul>
       ) : (
-        <div className="rounded-[12px] border border-dashed border-border bg-bg-sunken/60 px-3 py-4 text-center text-xs text-muted-foreground">
+        <div className="rounded-md border border-dashed border-border bg-bg-sunken/60 px-3 py-4 text-center text-xs text-muted-foreground">
           {empty}
         </div>
       )}
@@ -199,7 +184,7 @@ function BriefingPanel({
 
 function StaleDomainRow({ domain }: { domain: StaleDomain }) {
   return (
-    <li className="flex items-center gap-3 rounded-[12px] border bg-bg-sunken/50 px-3 py-2">
+    <li className="flex items-center gap-3 rounded-md border bg-bg-sunken/50 px-3 py-2">
       <span
         className="size-2.5 shrink-0 rounded-[4px] ring-1 ring-inset ring-black/10"
         style={{ background: domain.color }}
@@ -229,7 +214,7 @@ function CaptureIssueRow({ issue }: { issue: CaptureRoutingIssue }) {
         : 'missing record';
 
   return (
-    <li className="flex items-center gap-3 rounded-[12px] border bg-bg-sunken/50 px-3 py-2">
+    <li className="flex items-center gap-3 rounded-md border bg-bg-sunken/50 px-3 py-2">
       <AlertTriangle className="size-3.5 shrink-0 text-warning" aria-hidden />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm">{issue.title}</div>
