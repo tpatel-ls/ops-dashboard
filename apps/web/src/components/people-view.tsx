@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   Calendar,
   Plus,
+  Search,
   User,
   Users,
   X,
@@ -12,7 +13,7 @@ import {
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
-import { createPerson } from '@/lib/people';
+import { createPerson, matchesPersonSearch } from '@/lib/people';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
 
@@ -68,14 +69,14 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
         >
           Create
         </button>
@@ -179,6 +180,7 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
 export function PeopleView() {
   const [creating, setCreating] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [query, setQuery] = useState('');
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -206,27 +208,40 @@ export function PeopleView() {
   );
 
   const displayPerson = liveSelectedPerson !== undefined ? liveSelectedPerson : selectedPerson;
+  const visiblePeople =
+    data?.peopleWithDomains.filter(({ person }) => matchesPersonSearch(person, query)) ?? [];
 
   return (
     <>
       <div className="flex flex-col gap-5">
         {/* Toolbar */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            {data ? `${data.peopleWithDomains.length} ${data.peopleWithDomains.length === 1 ? 'person' : 'people'}` : '-'}
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="relative min-w-0 flex-1 sm:max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <span className="sr-only">Search people</span>
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search people"
+              className="input h-10 w-full pl-9"
+            />
+          </label>
+          <span className="text-xs text-muted-foreground">
+            {data ? `${visiblePeople.length} of ${data.peopleWithDomains.length}` : '-'}
           </span>
           <button
             type="button"
             onClick={() => setCreating((v) => !v)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+              'ml-auto inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors',
               creating
                 ? 'bg-bg-sunken text-muted-foreground'
                 : 'bg-primary text-primary-foreground hover:opacity-90',
             )}
           >
             {creating ? <X className="size-3.5" /> : <Plus className="size-3.5" />}
-            {creating ? 'Cancel' : 'New'}
+            {creating ? 'Cancel' : 'New person'}
           </button>
         </div>
 
@@ -275,9 +290,13 @@ export function PeopleView() {
               <Plus className="size-3.5" /> Add your first person
             </button>
           </div>
+        ) : visiblePeople.length === 0 ? (
+          <div className="flex min-h-36 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm text-muted-foreground">
+            No people match &quot;{query.trim()}&quot;.
+          </div>
         ) : (
           <div className="grid gap-1.5 lg:grid-cols-2">
-            {data.peopleWithDomains.map(({ person, domain }) => (
+            {visiblePeople.map(({ person, domain }) => (
               <PersonCard
                 key={person.id}
                 person={person}

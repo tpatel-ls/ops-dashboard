@@ -4,6 +4,17 @@ import { newId } from '@ops-dashboard/core';
 import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+export function matchesPersonSearch(person: Person, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+  return [
+    person.name,
+    person.relationship,
+    ...person.tags,
+    ...person.facts.flatMap((fact) => [fact.label, fact.value]),
+  ].some((value) => value?.toLowerCase().includes(normalized));
+}
+
 export function createPerson(input: {
   name: string;
   relationship?: string;
