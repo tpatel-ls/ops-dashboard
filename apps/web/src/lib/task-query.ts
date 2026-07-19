@@ -30,3 +30,9 @@ export function matchesTaskSearch(task: Task, query: string, projectName?: strin
     .filter((value): value is string => Boolean(value))
     .some((value) => value.toLocaleLowerCase().includes(needle));
 }
+
+export function matchesTaskTag(task: Task, selectedTag: string | null): boolean {
+  if (!selectedTag) return true;
+  const normalized = selectedTag.toLocaleLowerCase();
+  return task.tags.some((tag) => tag.toLocaleLowerCase() === normalized);
+}
