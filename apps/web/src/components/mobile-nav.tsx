@@ -12,8 +12,12 @@ const LEFT = [
 ];
 const RIGHT = [
   { href: '/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
+  { href: '/calendar', label: 'Calendar', icon: Calendar, matches: ['/calendar', '/week', '/month'] },
 ];
+
+function isActive(pathname: string, item: { href: string; matches?: string[] }): boolean {
+  return (item.matches ?? [item.href]).some((path) => pathname.startsWith(path));
+}
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -25,7 +29,7 @@ export function MobileNav() {
       className="hairline relative z-40 flex min-h-16 shrink-0 items-stretch justify-around border-t bg-bg-rail/94 px-1.5 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_32px_-28px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden"
     >
       {LEFT.map((it) => (
-        <Tab key={it.href} {...it} active={pathname.startsWith(it.href)} />
+        <Tab key={it.href} {...it} active={isActive(pathname, it)} />
       ))}
       <div className="relative -top-3 mx-1 flex w-16 shrink-0 flex-col items-center">
         <button
@@ -41,7 +45,7 @@ export function MobileNav() {
         </span>
       </div>
       {RIGHT.map((it) => (
-        <Tab key={it.href} {...it} active={pathname.startsWith(it.href)} />
+        <Tab key={it.href} {...it} active={isActive(pathname, it)} />
       ))}
     </nav>
   );
