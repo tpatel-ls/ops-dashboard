@@ -6,7 +6,9 @@ export default function DomainsPage() {
     <ViewShell
       eyebrow="More"
       title="Domains"
-      subtitle="Top-level areas of your life. Everything rolls up here."
+      subtitle="Group related projects and tasks into stable work areas."
+      compactHeader
+      fullWidth
     >
       <DomainsView />
     </ViewShell>
