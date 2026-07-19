@@ -38,19 +38,19 @@ export function CalendarWeek() {
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
-      <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <div className="surface flex min-w-0 flex-wrap items-center gap-2 p-2">
         <button
           type="button"
           aria-label="Previous week"
           onClick={() => setAnchor((d) => addDays(d, -7))}
-          className="kbd"
+          className="inline-flex size-10 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="size-3" />
         </button>
         <button
           type="button"
           onClick={() => setAnchor(new Date())}
-          className="rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+          className="min-h-10 rounded-md border bg-card px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           Today
         </button>
@@ -58,12 +58,12 @@ export function CalendarWeek() {
           type="button"
           aria-label="Next week"
           onClick={() => setAnchor((d) => addDays(d, 7))}
-          className="kbd"
+          className="inline-flex size-10 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
         >
           <ChevronRight className="size-3" />
         </button>
-        <span className="ml-1 font-mono text-[11px] text-subtle-foreground md:ml-2">
-          Week of {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d')}
+        <span className="ml-1 text-xs font-semibold text-foreground md:ml-2">
+          {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d')} to {format(addDays(startOfWeek(anchor, { weekStartsOn }), 6), 'MMM d')}
         </span>
         {lanes.showLegend ? (
           <div className="min-w-0 md:ml-auto">
