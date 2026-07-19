@@ -123,15 +123,23 @@ export function WorkDashboard() {
             </div>
 
             <section aria-labelledby="active-projects-title" className="min-w-0">
-              <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-                <div>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <FolderKanban className="size-4" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
                   <p className="eyebrow">Execution</p>
                   <h2 id="active-projects-title" className="mt-1 text-lg font-semibold">
                     Active projects
                   </h2>
+                  </div>
+                  <span className="rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-muted-foreground">
+                    {data.model.projects.length}
+                  </span>
                 </div>
-                <Link href="/projects" className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:text-foreground sm:min-h-9">
-                  View all projects
+                <Link href="/projects" className="inline-flex min-h-11 items-center gap-1.5 rounded-md border bg-card px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:min-h-9">
+                  Open projects
                   <ArrowRight className="size-3.5" aria-hidden />
                 </Link>
               </div>
