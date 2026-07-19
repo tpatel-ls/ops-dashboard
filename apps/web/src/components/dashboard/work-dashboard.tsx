@@ -70,7 +70,8 @@ export function WorkDashboard() {
           className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground sm:min-h-9"
         >
           <Plus className="size-4" aria-hidden />
-          Capture task
+          <span className="hidden sm:inline">Capture task</span>
+          <span className="sm:hidden">Add task</span>
         </button>
       }
     >
@@ -382,15 +383,29 @@ function ProjectSummary({
   const { project, openTasks, completedTasks, completionPct } = summary;
   const parsedDue = project.dueDate ? parseISO(project.dueDate) : null;
   const dueLabel = parsedDue && isValid(parsedDue) ? format(parsedDue, 'MMM d') : null;
+  const dueOverdue = Boolean(project.dueDate && project.dueDate < format(new Date(), 'yyyy-MM-dd'));
   return (
-    <article className="surface-flat flex min-w-0 flex-col p-4">
+    <article className="surface-flat group relative flex min-w-0 flex-col overflow-hidden p-4 pl-5 transition-colors hover:border-border-strong">
+      <span
+        className="absolute inset-y-0 left-0 w-1"
+        style={{ background: project.color }}
+        aria-hidden
+      />
       <div className="flex min-w-0 items-start gap-3">
-        <span className="mt-1 size-3 shrink-0 rounded-full" style={{ background: project.color }} aria-hidden />
         <div className="min-w-0 flex-1">
-          <Link href="/projects" className="block truncate text-sm font-semibold hover:text-primary">{project.name}</Link>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-subtle-foreground">
-            <span>{organization?.name ?? 'Personal'}</span>
-            {dueLabel ? <span>Due {dueLabel}</span> : null}
+          <Link href="/projects" className="block truncate text-sm font-semibold transition-colors hover:text-primary">
+            {project.name}
+          </Link>
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-subtle-foreground">
+            <span className="inline-flex items-center gap-1">
+              <span className="size-1.5 rounded-full" style={{ background: organization?.color ?? PERSONAL_COLOR }} aria-hidden />
+              {organization?.name ?? 'Personal'}
+            </span>
+            {dueLabel ? (
+              <span className={cn(dueOverdue && 'font-medium text-destructive')}>
+                {dueOverdue ? `Overdue ${dueLabel}` : `Due ${dueLabel}`}
+              </span>
+            ) : null}
           </p>
         </div>
         <button
@@ -398,18 +413,27 @@ function ProjectSummary({
           onClick={onAddTask}
           aria-label={`Add task to ${project.name}`}
           title="Add task"
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-md border bg-card text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
         >
           <Plus className="size-4" aria-hidden />
         </button>
       </div>
       <div className="mt-4">
-        <div className="mb-1.5 flex items-center justify-between gap-3 text-[11px] text-subtle-foreground">
-          <span>{openTasks} open / {completedTasks} done</span>
-          <span className="font-mono tabular-nums">{completionPct}%</span>
+        <div className="mb-2 flex items-end justify-between gap-3">
+          <span className="text-[11px] text-subtle-foreground">
+            <strong className="font-medium text-foreground">{openTasks}</strong> open / {completedTasks} done
+          </span>
+          <span className="font-mono text-xs font-medium tabular-nums text-foreground">{completionPct}%</span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-bg-sunken">
-          <div className="h-full rounded-full bg-primary" style={{ width: `${completionPct}%` }} />
+        <div
+          className="h-1.5 overflow-hidden rounded-full bg-bg-sunken"
+          role="progressbar"
+          aria-label={`${project.name} completion`}
+          aria-valuenow={completionPct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div className="h-full rounded-full" style={{ width: `${completionPct}%`, background: project.color }} />
         </div>
       </div>
     </article>
