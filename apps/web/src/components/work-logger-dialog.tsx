@@ -18,6 +18,8 @@ import {
   LAST_TASK_DESTINATION_KEY,
   LAST_TASK_PROJECT_KEY,
   resolveRecentProject,
+  taskScheduleLabel,
+  type TaskSchedule,
 } from '@/lib/task-capture';
 import {
   destinationOrgId,
@@ -155,7 +157,7 @@ function WorkLoggerPanel({
   const [destination, setDestination] = useState<WorkDestination>(initialDestination);
   const [projectId, setProjectId] = useState(launchProjectId ?? '');
   const [taskTitle, setTaskTitle] = useState('');
-  const [schedule, setSchedule] = useState<'inbox' | 'today' | 'tomorrow' | 'date'>('inbox');
+  const [schedule, setSchedule] = useState<TaskSchedule>('inbox');
   const [scheduledDate, setScheduledDate] = useState(localDate());
   const [priority, setPriority] = useState<Priority>(0);
   const [taskDetailsOpen, setTaskDetailsOpen] = useState(false);
@@ -331,7 +333,7 @@ function WorkLoggerPanel({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/55 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/65 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !saving) onClose();
       }}
@@ -341,16 +343,17 @@ function WorkLoggerPanel({
         role="dialog"
         aria-modal="true"
         aria-labelledby="work-logger-title"
-        className="surface work-logger-panel flex max-h-[calc(100dvh-0.5rem)] w-full flex-col overflow-hidden"
+        className="surface work-logger-panel flex max-h-[calc(100dvh-0.25rem)] w-full flex-col overflow-hidden sm:max-h-[calc(100dvh-2rem)]"
         style={{ maxWidth: 680 }}
       >
-        <header className="hairline flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border-strong sm:hidden" aria-hidden />
+        <header className="hairline flex items-center justify-between gap-3 border-b px-4 pb-3 pt-2 sm:px-5 sm:pt-3">
           <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
-              Quick entry
+            <p className="font-mono text-[10px] uppercase text-primary">
+              {selectedDestinationName}
             </p>
             <h2 id="work-logger-title" className="truncate text-base font-semibold">
-              Add work
+              {mode === 'task' ? 'Add a task' : mode === 'project' ? 'Create a project' : 'Log progress'}
             </h2>
           </div>
           <button
@@ -380,11 +383,11 @@ function WorkLoggerPanel({
                 className={cn(
                   'flex min-h-11 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors',
                   mode === id
-                    ? 'bg-card text-foreground shadow-sm'
+                    ? 'bg-card text-foreground shadow-sm ring-1 ring-primary/20'
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
-                <Icon className="size-3.5" aria-hidden />
+                <Icon className={cn('size-3.5', mode === id && 'text-primary')} aria-hidden />
                 {label}
               </button>
             ))}
@@ -408,7 +411,8 @@ function WorkLoggerPanel({
             >
               <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
               <span className="min-w-0 flex-1 truncate">
-                Details / {selectedProject?.name ?? selectedDestinationName}
+                {selectedProject?.name ?? selectedDestinationName} / {taskScheduleLabel(schedule, scheduledDate)}
+                {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
               </span>
               <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', taskDetailsOpen && 'rotate-180')} aria-hidden />
             </button>
@@ -425,7 +429,7 @@ function WorkLoggerPanel({
                   Organization
                 </p>
                 <p className="text-[11px] text-subtle-foreground">
-                  Projects stay inside this destination.
+                  Selected: {selectedDestinationName}
                 </p>
               </div>
               <button
@@ -649,8 +653,8 @@ function TaskDetailsFields({
   projectId: string;
   onProjectChange: (value: string) => void;
   projects: Project[];
-  schedule: 'inbox' | 'today' | 'tomorrow' | 'date';
-  onScheduleChange: (value: 'inbox' | 'today' | 'tomorrow' | 'date') => void;
+  schedule: TaskSchedule;
+  onScheduleChange: (value: TaskSchedule) => void;
   scheduledDate: string;
   onScheduledDateChange: (value: string) => void;
   priority: Priority;
