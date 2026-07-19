@@ -121,25 +121,28 @@ export function KanbanBoard() {
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
-      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-          Group by
+      <div className="surface flex min-w-0 flex-wrap items-center gap-2 p-2">
+        <div role="group" aria-label="Group board by" className="grid min-w-0 flex-1 grid-cols-4 gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:flex-none">
+          {(['status', 'project', 'priority', 'tag'] as const).map((g) => (
+            <button
+              key={g}
+              type="button"
+              aria-pressed={grouping === g}
+              onClick={() => setGrouping(g)}
+              className={cn(
+                'min-h-10 rounded-md px-2 text-[11px] font-medium capitalize sm:min-h-8 sm:px-3 sm:text-xs',
+                grouping === g
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-subtle-foreground">
+          {scopedTasks.length} task{scopedTasks.length === 1 ? '' : 's'}
         </span>
-        {(['status', 'project', 'priority', 'tag'] as const).map((g) => (
-          <button
-            key={g}
-            type="button"
-            onClick={() => setGrouping(g)}
-            className={cn(
-              'rounded-md border px-2.5 py-1 text-xs capitalize',
-              grouping === g
-                ? 'border-primary bg-primary/10 text-foreground'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {g}
-          </button>
-        ))}
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 pb-2 md:flex md:overflow-x-auto">

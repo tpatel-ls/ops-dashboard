@@ -7,6 +7,7 @@ export default function KanbanPage() {
       eyebrow="Work"
       title="Kanban"
       subtitle="Group by status, project, priority, or tag. Drag to update."
+      compactHeader
     >
       <KanbanBoard />
     </ViewShell>
