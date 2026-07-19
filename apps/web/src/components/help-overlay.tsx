@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import { useAppStore } from '@/lib/app-store';
 
 const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
   {
     heading: 'Global',
     rows: [
-      ['? ', 'Open this overlay'],
-      ['Cmd K', 'Command palette'],
+      ['?', 'Open this overlay'],
+      ['Cmd/Ctrl K', 'Command palette'],
       ['g a', 'Add task'],
       ['f', 'Focus mode'],
       ['Esc', 'Close any overlay'],
@@ -34,7 +35,7 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
       ['#tag', 'Adds a tag'],
       ['!! and !!!', 'Sets priority 2 or 3'],
       ['tomorrow 3pm', 'Schedules with time'],
-      ['Cmd Enter', 'Save'],
+      ['Cmd/Ctrl Enter', 'Save'],
     ],
   },
 ];
@@ -68,7 +69,7 @@ export function HelpOverlay() {
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) close();
       }}
@@ -77,7 +78,7 @@ export function HelpOverlay() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="keyboard-help-title"
-        className="command-surface w-full max-w-3xl overflow-hidden rounded-[22px]"
+        className="command-surface max-h-[92dvh] w-full max-w-3xl overflow-hidden rounded-t-lg sm:rounded-lg"
       >
         <header className="relative flex items-center justify-between border-b border-hairline px-5 py-4">
           <div>
@@ -92,15 +93,15 @@ export function HelpOverlay() {
             ref={closeButtonRef}
             type="button"
             onClick={close}
-            className="kbd"
-            aria-label="Close"
+            className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            aria-label="Close keyboard help"
           >
-            Esc
+            <X className="size-5" aria-hidden />
           </button>
         </header>
-        <div className="grid gap-4 p-5 sm:grid-cols-3">
+        <div className="scrollbar-thin grid max-h-[calc(92dvh-77px)] gap-4 overflow-y-auto p-5 sm:grid-cols-3">
           {SECTIONS.map((s) => (
-            <div key={s.heading} className="rounded-[16px] border bg-bg-sunken/45 p-3">
+            <section key={s.heading} className="border-t pt-4 first:border-t-0 first:pt-0 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0 sm:first:border-l-0 sm:first:pl-0">
               <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
                 {s.heading}
               </div>
@@ -112,7 +113,7 @@ export function HelpOverlay() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </section>
           ))}
         </div>
       </div>
