@@ -47,9 +47,9 @@ export function ChatPanel({
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="surface flex h-full min-h-[520px] flex-col overflow-hidden">
+    <div className="surface flex h-[min(680px,calc(100dvh-10rem))] min-h-[420px] flex-col overflow-hidden">
       {/* Message list */}
-      <div className="scrollbar-thin flex-1 overflow-y-auto p-4 md:p-6">
+      <div className="scrollbar-thin flex-1 overflow-y-auto p-3 sm:p-4 md:p-6" role="log" aria-live="polite">
         {isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center">
             <div className="flex size-12 items-center justify-center rounded-full bg-primary-soft">
@@ -58,11 +58,25 @@ export function ChatPanel({
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
               Ask anything
             </div>
-            <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
+            <h3 className="text-base font-semibold">Project intelligence</h3>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Ask about your tasks, projects, routines, journal, or anything else in your dashboard.
-              Your data stays local.
+              Ask about organizations, project status, deadlines, and open tasks.
             </p>
+            <div className="grid w-full max-w-sm gap-2 sm:grid-cols-2">
+              {['What is overdue?', 'What should I do next?', 'Summarize LSG work'].map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => {
+                    onInputChange(prompt);
+                    textareaRef.current?.focus();
+                  }}
+                  className="min-h-10 rounded-md border bg-card px-3 py-2 text-left text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
             {noKey && (
               <div className="mt-2 flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
                 <KeyRound className="size-4 shrink-0" aria-hidden />
@@ -102,7 +116,7 @@ export function ChatPanel({
                 {/* Bubble */}
                 <div
                   className={cn(
-                    'max-w-[78%] rounded-[14px] px-4 py-3 text-sm leading-relaxed',
+                    'max-w-[88%] rounded-lg px-3 py-2.5 text-sm leading-relaxed sm:max-w-[78%] sm:px-4 sm:py-3',
                     msg.role === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'surface-flat text-foreground',
@@ -145,7 +159,7 @@ export function ChatPanel({
           ref={textareaRef}
           className="input min-h-[40px] flex-1 resize-none leading-relaxed"
           rows={1}
-          placeholder="Ask about your tasks, projects, routines…"
+          placeholder="Ask about your work"
           value={input}
           onChange={(e) => {
             onInputChange(e.target.value);
@@ -163,7 +177,7 @@ export function ChatPanel({
           disabled={loading || !input.trim()}
           aria-label="Send message"
           className={cn(
-            'inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors',
+            'inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors',
             loading || !input.trim()
               ? 'cursor-not-allowed bg-muted text-muted-foreground'
               : 'bg-primary text-primary-foreground hover:opacity-90',
