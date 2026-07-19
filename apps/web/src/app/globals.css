@@ -198,23 +198,12 @@ body {
 
 html {
   color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--primary) 4%, var(--bg-base)),
-    var(--bg-base) 18rem
-  );
-  background-attachment: fixed;
-}
-
-.dark body {
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--primary) 5%, var(--bg-base)),
-    var(--bg-base) 18rem
-  );
+  background: var(--bg-base);
 }
 
 .dot-grid {
@@ -234,26 +223,10 @@ body {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border);
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in oklch, var(--card) 96%, var(--primary) 4%),
-      var(--card)
-    );
+  background: var(--card);
   box-shadow:
     0 1px 0 color-mix(in oklch, white 30%, transparent) inset,
     0 12px 34px -28px color-mix(in oklch, var(--foreground) 45%, transparent);
-}
-
-.os-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, color-mix(in oklch, var(--primary) 18%, transparent), transparent 28%),
-    radial-gradient(circle at 92% 0%, color-mix(in oklch, var(--success) 14%, transparent), transparent 34%);
-  opacity: 0.9;
 }
 
 .command-surface {
@@ -351,6 +324,24 @@ body {
   .live-dot {
     animation: none;
     opacity: 1;
+  }
+}
+
+@media (forced-colors: active) {
+  *:focus-visible {
+    outline: 3px solid CanvasText;
+  }
+
+  .surface,
+  .surface-flat,
+  .command-surface,
+  .input {
+    border-color: CanvasText;
+  }
+
+  .live-dot {
+    forced-color-adjust: none;
+    background: Highlight;
   }
 }
 
