@@ -8,6 +8,7 @@ export default function SettingsPage() {
       title="Settings"
       subtitle="Manage preferences, organizations, device sync, and backups."
       compactHeader
+      fullWidth
     >
       <SettingsForm />
     </ViewShell>
