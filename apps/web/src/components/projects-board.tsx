@@ -392,19 +392,21 @@ function KindGroup({
       <button
         type="button"
         onClick={() => setCollapsed((v) => !v)}
-        className="flex items-center gap-2 text-left"
+        className="flex min-h-10 w-full items-center gap-2 border-b border-border/70 pb-2 text-left"
       >
-        <ChevronRight
-          className={cn('size-3.5 text-muted-foreground transition-transform', !collapsed && 'rotate-90')}
-          aria-hidden
-        />
-        <Icon className="size-3.5 text-muted-foreground" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-muted-foreground">
+          <Icon className="size-3.5" aria-hidden />
+        </span>
+        <span className="text-xs font-semibold text-foreground">
           {KIND_LABELS[kind]}
         </span>
-        <span className="font-mono text-[10px] text-subtle-foreground">
-          ({items.length})
+        <span className="rounded-md border bg-card px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-subtle-foreground">
+          {items.length}
         </span>
+        <ChevronRight
+          className={cn('ml-auto size-3.5 text-muted-foreground transition-transform', !collapsed && 'rotate-90')}
+          aria-hidden
+        />
       </button>
 
       {!collapsed ? (
