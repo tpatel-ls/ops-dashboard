@@ -15,9 +15,9 @@ type ShareTargetManifest = MetadataRoute.Manifest & {
 
 export default function manifest(): ShareTargetManifest {
   return {
-    name: 'Ops Dashboard',
-    short_name: 'Ops',
-    description: 'Your personal operating system - capture, tasks, routines, projects, and journal.',
+    name: 'Taskify',
+    short_name: 'Taskify',
+    description: 'A focused workspace for organizations, projects, tasks, and schedules.',
     id: '/',
     start_url: '/dashboard',
     scope: '/',
@@ -26,7 +26,7 @@ export default function manifest(): ShareTargetManifest {
     orientation: 'any',
     background_color: '#15151b',
     theme_color: '#15151b',
-    categories: ['productivity', 'lifestyle'],
+    categories: ['productivity', 'business'],
     share_target: {
       action: '/notepad',
       method: 'GET',
