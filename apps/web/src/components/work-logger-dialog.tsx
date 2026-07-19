@@ -414,6 +414,9 @@ function WorkLoggerPanel({
                 {selectedProject?.name ?? selectedDestinationName} / {taskScheduleLabel(schedule, scheduledDate)}
                 {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
               </span>
+              <span className="shrink-0 text-[11px] font-semibold text-primary">
+                Change
+              </span>
               <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', taskDetailsOpen && 'rotate-180')} aria-hidden />
             </button>
           ) : null}
