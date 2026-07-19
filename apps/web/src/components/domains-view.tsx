@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Archive, Boxes, ChevronRight, ListTodo, Pencil, Plus, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain } from '@ops-dashboard/core';
-import { archiveDomain, createDomain, updateDomain } from '@/lib/domains';
+import { archiveDomain, countDomainWork, createDomain, updateDomain } from '@/lib/domains';
 import { cn } from '@ops-dashboard/ui';
 
 const PRESET_COLORS = [
@@ -33,9 +33,10 @@ function ColorPicker({
           key={c.value}
           type="button"
           title={c.label}
+          aria-label={`Select ${c.label}`}
           onClick={() => onChange(c.value)}
           className={cn(
-            'size-6 rounded-full transition-all ring-2 ring-offset-2 ring-offset-background',
+            'size-8 rounded-full transition-all ring-2 ring-offset-2 ring-offset-background',
             value === c.value ? 'ring-foreground scale-110' : 'ring-transparent hover:scale-105',
           )}
           style={{ background: c.value }}
@@ -95,14 +96,14 @@ function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
         >
           {initial ? 'Save' : 'Create'}
         </button>
@@ -116,13 +117,8 @@ function DomainCard({ domain }: { domain: Domain }) {
 
   const counts = useLiveQuery(async () => {
     const db = getDb();
-    const [projects, tasks] = await Promise.all([
-      db.projects.toArray().then((all) => all.filter((p) => !p.deletedAt && !p.archivedAt && p.domainId === domain.id)),
-      db.tasks.toArray().then((all) =>
-        all.filter((t) => !t.deletedAt && t.status !== 'archived' && t.status !== 'done' && t.domainId === domain.id),
-      ),
-    ]);
-    return { projects: projects.length, tasks: tasks.length };
+    const [projects, tasks] = await Promise.all([db.projects.toArray(), db.tasks.toArray()]);
+    return countDomainWork(domain.id, projects, tasks);
   }, [domain.id]);
 
   if (editing) {
@@ -174,20 +170,20 @@ function DomainCard({ domain }: { domain: Domain }) {
         </div>
       </div>
       {!domain.archivedAt ? (
-        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="flex items-center gap-1 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-            aria-label="Edit"
+            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            aria-label={`Edit ${domain.name}`}
           >
             <Pencil className="size-3.5" />
           </button>
           <button
             type="button"
             onClick={() => archiveDomain(domain.id)}
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-            aria-label="Archive"
+            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            aria-label={`Archive ${domain.name}`}
           >
             <Archive className="size-3.5" />
           </button>
@@ -219,7 +215,7 @@ export function DomainsView() {
           type="button"
           onClick={() => setCreating((v) => !v)}
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+            'inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors',
             creating
               ? 'bg-bg-sunken text-muted-foreground'
               : 'bg-primary text-primary-foreground hover:opacity-90',
@@ -251,7 +247,7 @@ export function DomainsView() {
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">domains</div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
           <p className="max-w-md text-sm text-muted-foreground">
-            Domains are the top-level areas of your life. Create one to start organising your projects and tasks.
+            Create a work area to group related projects and tasks.
           </p>
         </div>
       ) : (
@@ -269,7 +265,7 @@ export function DomainsView() {
           <button
             type="button"
             onClick={() => setShowArchived((v) => !v)}
-            className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground"
+            className="inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <ChevronRight
               className={cn('size-3.5 transition-transform', showArchived && 'rotate-90')}
