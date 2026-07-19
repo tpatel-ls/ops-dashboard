@@ -285,8 +285,8 @@ export function PowerDialerCommandCenter() {
         </section>
 
         <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.6fr)]">
-          <div className="surface min-w-0 p-4 md:p-5">
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-border/70 pb-3">
               <div>
                 <h2 className="text-base font-semibold tracking-tight">Capability map</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -308,10 +308,10 @@ export function PowerDialerCommandCenter() {
                 return (
                   <article
                     key={capability.title}
-                    className="min-w-0 rounded-[14px] border bg-bg-sunken/60 p-3"
+                    className="surface-flat min-w-0 p-3"
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <span className="flex size-9 items-center justify-center rounded-[12px] border bg-card text-primary">
+                      <span className="flex size-9 items-center justify-center rounded-lg border bg-card text-primary">
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <span className="font-mono text-[11px] text-subtle-foreground">
@@ -342,13 +342,13 @@ export function PowerDialerCommandCenter() {
               </p>
             </div>
             {summary.scheduled.length === 0 ? (
-              <div className="rounded-[14px] border border-dashed bg-bg-sunken/60 p-6 text-center text-sm text-muted-foreground">
+              <div className="rounded-lg border border-dashed bg-bg-sunken/60 p-6 text-center text-sm text-muted-foreground">
                 No scheduled launch work yet.
               </div>
             ) : (
               <ol className="flex flex-col gap-2">
                 {summary.scheduled.map(({ task }) => (
-                  <li key={task.id} className="rounded-[12px] border bg-bg-sunken/60 px-3 py-2.5">
+                  <li key={task.id} className="rounded-lg border bg-bg-sunken/60 px-3 py-2.5">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
                         {dateLabel(task)}
@@ -366,8 +366,8 @@ export function PowerDialerCommandCenter() {
         </section>
 
         <section className="grid min-w-0 gap-4 xl:grid-cols-3">
-          <div className="surface min-w-0 p-4 md:p-5 xl:col-span-2">
-            <div className="mb-4">
+          <div className="min-w-0 xl:col-span-2">
+            <div className="mb-3 border-b border-border/70 pb-3">
               <h2 className="text-base font-semibold tracking-tight">Integration rails</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Current research path for customer phone systems, blue messaging, and CRM.
@@ -377,9 +377,9 @@ export function PowerDialerCommandCenter() {
               {VENDOR_RAILS.map((rail) => {
                 const Icon = rail.icon;
                 return (
-                  <article key={rail.name} className="min-w-0 rounded-[14px] border bg-bg-sunken/60 p-4">
+                  <article key={rail.name} className="surface-flat min-w-0 p-4">
                     <div className="flex items-start gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-[13px] border bg-card text-primary">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-card text-primary">
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <div className="min-w-0">
@@ -403,7 +403,7 @@ export function PowerDialerCommandCenter() {
             </div>
             <ol className="flex flex-col gap-2">
               {SCRIPT_STEPS.map((step, index) => (
-                <li key={step} className="flex items-center gap-3 rounded-[12px] border bg-bg-sunken/60 px-3 py-2">
+                <li key={step} className="flex items-center gap-3 rounded-lg border bg-bg-sunken/60 px-3 py-2">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-card font-mono text-[10px] text-primary">
                     {index + 1}
                   </span>
@@ -427,7 +427,7 @@ export function PowerDialerCommandCenter() {
                 'Customer phone systems stay in place. We connect to RingCentral or NICE instead of forcing migration.',
                 'AI handoff must preserve lead, transcript, current script, and owner.',
               ].map((item) => (
-                <div key={item} className="flex gap-2 rounded-[12px] border bg-bg-sunken/60 px-3 py-2.5">
+                <div key={item} className="flex gap-2 rounded-lg border bg-bg-sunken/60 px-3 py-2.5">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
                   <p className="text-sm leading-5 text-muted-foreground">{item}</p>
                 </div>
@@ -470,7 +470,7 @@ function HeroMetric({
   tone?: 'primary' | 'danger';
 }) {
   return (
-    <div className="min-w-0 rounded-[14px] border bg-card/75 p-3 backdrop-blur">
+    <div className="min-w-0 border-l-2 border-primary/35 bg-bg-sunken px-3 py-2">
       <div className="mb-3 flex items-center justify-between">
         <Icon
           className={cn('size-4', tone === 'danger' ? 'text-destructive' : 'text-primary')}
@@ -487,7 +487,7 @@ function HeroMetric({
 
 function MiniMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="min-w-0 rounded-[12px] border bg-bg-sunken/70 p-2">
+    <div className="min-w-0 border-l-2 border-border-strong bg-bg-sunken p-2">
       <div className="font-mono text-xl font-semibold tabular-nums">{value}</div>
       <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
         {label}
@@ -498,7 +498,7 @@ function MiniMetric({ label, value }: { label: string; value: number }) {
 
 function TargetMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="min-w-0 rounded-[14px] border bg-bg-sunken/60 p-4">
+    <div className="min-w-0 border-l-2 border-primary/35 bg-bg-sunken p-3">
       <div className="font-mono text-2xl font-semibold tabular-nums">{value}</div>
       <div className="mt-2 text-sm font-semibold tracking-tight">{label}</div>
       <div className="mt-1 text-xs text-muted-foreground">{detail}</div>
