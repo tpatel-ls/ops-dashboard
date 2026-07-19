@@ -6,7 +6,9 @@ export default function PeoplePage() {
     <ViewShell
       eyebrow="Library"
       title="People"
-      subtitle="Remember what matters - facts, interactions, and context about the people in your life."
+      subtitle="Keep useful relationship context close to the work."
+      compactHeader
+      fullWidth
     >
       <PeopleView />
     </ViewShell>
