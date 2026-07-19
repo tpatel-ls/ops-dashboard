@@ -43,14 +43,16 @@ export default function LibraryPage() {
     <ViewShell
       eyebrow="Library"
       title="Library"
-      subtitle="Journal, notes, quotes, and books - all in one place."
+      subtitle="Keep reference material organized and searchable."
+      compactHeader
+      fullWidth
       actions={
         tab === 'journal' ? (
           <button
             type="button"
             onClick={() => setAddOpen((v) => !v)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-sm font-medium transition-colors',
+              'inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors',
               addOpen
                 ? 'bg-accent text-accent-foreground'
                 : 'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -74,16 +76,19 @@ export default function LibraryPage() {
       <div className="flex flex-col gap-4">
         {/* ── Tab bar ── */}
         <nav
-          className="flex items-center gap-1 rounded-[10px] bg-bg-sunken p-1"
+          className="grid grid-cols-4 gap-1 rounded-lg bg-bg-sunken p-1"
           aria-label="Library sections"
+          role="tablist"
         >
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
+              role="tab"
+              aria-selected={tab === id}
               onClick={() => handleTabChange(id)}
               className={cn(
-                'inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                'inline-flex h-10 min-w-0 items-center justify-center gap-1 rounded-md px-1 text-xs font-medium transition-colors sm:gap-1.5 sm:px-3 sm:text-sm',
                 tab === id
                   ? 'bg-card text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.12)]'
                   : 'text-muted-foreground hover:text-foreground',
@@ -91,7 +96,7 @@ export default function LibraryPage() {
               aria-current={tab === id ? 'page' : undefined}
             >
               <Icon className="size-3.5 shrink-0" aria-hidden />
-              <span className="hidden sm:inline">{label}</span>
+              <span className="min-w-0 truncate">{label}</span>
             </button>
           ))}
         </nav>
@@ -109,7 +114,7 @@ export default function LibraryPage() {
 
             {/* Upload / add panel */}
             {addOpen && (
-              <div className="rounded-[14px]">
+              <div className="rounded-lg">
                 <JournalUpload onSaved={() => setAddOpen(false)} />
               </div>
             )}
@@ -123,12 +128,12 @@ export default function LibraryPage() {
                 type="button"
                 onClick={() => setAddOpen(true)}
                 className={cn(
-                  'flex items-center gap-2 rounded-[14px] border border-dashed border-border px-4 py-4 text-sm text-muted-foreground transition-colors',
+                  'flex min-h-12 items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors',
                   'hover:border-primary hover:bg-primary-soft hover:text-primary',
                 )}
               >
                 <PenLine className="size-4" />
-                Add a journal entry - paste text or upload a photo
+                Add journal entry
               </button>
             )}
           </>
