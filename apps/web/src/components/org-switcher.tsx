@@ -69,7 +69,7 @@ export function OrgSwitcher() {
   }, [open]);
 
   const lanes: Lane[] = [
-    { ctx: 'all', label: 'All', color: 'var(--primary)' },
+    { ctx: 'all', label: 'All work', color: 'var(--primary)' },
     ...(orgs ?? []).map((o) => ({ ctx: o.id as OrgContext, label: o.name, color: o.color })),
     { ctx: 'personal', label: 'Personal', color: PERSONAL_COLOR },
   ];
@@ -102,7 +102,7 @@ export function OrgSwitcher() {
         aria-expanded={open}
         aria-label={mounted ? `Switch context, current ${current.label}` : 'Switch context'}
         title={mounted ? `Current workspace: ${current.label}` : 'Switch context'}
-        className="hairline inline-flex h-9 max-w-28 items-center gap-2 rounded-lg border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent sm:max-w-40"
+        className="hairline inline-flex h-10 max-w-28 items-center gap-2 rounded-lg border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent sm:max-w-40 lg:h-9"
       >
         {mounted ? (
           <>
@@ -125,8 +125,8 @@ export function OrgSwitcher() {
           onKeyDown={moveMenuFocus}
           className="surface absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden py-1"
         >
-          <div className="hairline border-b px-3 pb-2 pt-2 font-mono text-[10px] uppercase text-subtle-foreground">
-            Show work for
+          <div className="hairline border-b px-3 pb-2 pt-2 text-[10px] font-semibold uppercase text-subtle-foreground">
+            Filter work by
           </div>
           {lanes.map((lane, index) => {
             const active = lane.ctx === ctx;
