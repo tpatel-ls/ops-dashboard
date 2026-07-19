@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Project } from '@ops-dashboard/core';
-import { resolveRecentProject, taskCaptureOverrides } from './task-capture';
+import { resolveRecentProject, taskCaptureOverrides, taskScheduleLabel } from './task-capture';
 
 function project(id: string, orgId?: string, patch: Partial<Project> = {}): Project {
   const now = '2026-07-16T12:00:00.000Z';
@@ -67,5 +67,15 @@ describe('taskCaptureOverrides', () => {
     expect(taskCaptureOverrides('personal', undefined, undefined, 3)).toEqual({
       priority: 3,
     });
+  });
+});
+
+describe('taskScheduleLabel', () => {
+  it('returns a stable human label for every schedule choice', () => {
+    expect(taskScheduleLabel('inbox', '2026-07-20')).toBe('Inbox');
+    expect(taskScheduleLabel('today', '2026-07-20')).toBe('Today');
+    expect(taskScheduleLabel('tomorrow', '2026-07-20')).toBe('Tomorrow');
+    expect(taskScheduleLabel('date', '2026-07-20')).toBe('Jul 20');
+    expect(taskScheduleLabel('date', '')).toBe('Pick date');
   });
 });
