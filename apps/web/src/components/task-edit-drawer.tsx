@@ -35,14 +35,17 @@ export function TaskEditDrawer() {
       <div className="flex-1 bg-black/40 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none" />
       <div
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Edit task"
         className="surface scrollbar-thin pointer-events-auto relative h-full w-full max-w-md overflow-y-auto rounded-none border-y-0 border-r-0 lg:border-l lg:shadow-2xl"
       >
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-hairline bg-card px-5 py-4">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
-            Task
+        <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-2 border-b border-hairline bg-card/95 px-4 backdrop-blur sm:px-5">
+          <div className="text-xs font-semibold uppercase text-subtle-foreground">
+            Edit task
           </div>
-          <button type="button" onClick={close} className="kbd" aria-label="Close">
-            <X className="size-3" />
+          <button type="button" onClick={close} className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground sm:size-9" aria-label="Close">
+            <X className="size-4" />
           </button>
         </header>
         {task ? <DrawerBody key={task.id} task={task} onClose={close} /> : (
@@ -75,7 +78,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   return (
     <>
       {(
-        <div className="space-y-6 p-5">
+        <div className="space-y-5 p-4 sm:space-y-6 sm:p-5">
           {/* Title + notes */}
           <div>
             <div className="flex items-start gap-2">
