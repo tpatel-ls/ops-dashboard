@@ -243,7 +243,7 @@ export function PowerDialerCommandCenter() {
                   Track integration, dialing, rep assist, follow-up, CRM write-back, and manager controls.
                 </p>
               </div>
-              <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid min-w-0 grid-cols-2 gap-2 lg:grid-cols-4">
                 <HeroMetric label="Launch tasks" value={summary.total} icon={ClipboardList} />
                 <HeroMetric label="Open" value={summary.open} icon={Activity} />
                 <HeroMetric label="In progress" value={summary.doing} icon={Workflow} />

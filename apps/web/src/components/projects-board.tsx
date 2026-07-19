@@ -510,10 +510,10 @@ export function ProjectsBoard() {
       <div className="flex flex-col gap-5">
         <section aria-label="Project controls" className="surface flex flex-col gap-3 p-3">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="relative min-w-0 flex-1 sm:max-w-sm">
+            <div className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border bg-input px-3 transition-colors focus-within:border-ring focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--ring)_18%,transparent)] sm:min-h-9 sm:max-w-sm">
               <label htmlFor="project-search" className="sr-only">Search projects</label>
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none size-3.5 shrink-0 text-muted-foreground"
                 aria-hidden
               />
               <input
@@ -522,7 +522,7 @@ export function ProjectsBoard() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search projects and outcomes"
-                className="input min-h-11 pl-9 pr-10 sm:min-h-9"
+                className="min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-subtle-foreground"
               />
               {searchQuery ? (
                 <button
@@ -530,7 +530,7 @@ export function ProjectsBoard() {
                   onClick={() => setSearchQuery('')}
                   aria-label="Clear project search"
                   title="Clear search"
-                  className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                  className="-mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
