@@ -6,7 +6,8 @@ export default function SettingsPage() {
     <ViewShell
       eyebrow="Workspace"
       title="Settings"
-      subtitle="Local preferences. Sync is opt-in per device."
+      subtitle="Manage preferences, organizations, device sync, and backups."
+      compactHeader
     >
       <SettingsForm />
     </ViewShell>
