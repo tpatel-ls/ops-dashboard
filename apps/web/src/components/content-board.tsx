@@ -128,7 +128,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex size-6 items-center justify-center rounded-md text-subtle-foreground hover:text-foreground"
+          className="inline-flex size-9 items-center justify-center rounded-md text-subtle-foreground hover:bg-accent hover:text-foreground"
           aria-label="Close editor"
         >
           <X className="size-3.5" />
@@ -252,7 +252,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           type="button"
           onClick={handleDelete}
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+            'inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors',
             confirming
               ? 'bg-destructive text-destructive-foreground'
               : 'text-destructive hover:bg-destructive/10',
@@ -266,7 +266,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               Cancel
             </button>
@@ -275,7 +275,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             type="button"
             onClick={save}
             disabled={saving}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-60"
+            className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -380,18 +380,20 @@ function QuickAdd({ onAdd }: QuickAddProps) {
   }
 
   return (
-    <form onSubmit={submit} className="surface flex items-center gap-2 px-3 py-2">
+    <form onSubmit={submit} className="surface flex flex-wrap items-center gap-2 px-3 py-2">
       <Plus className="size-4 shrink-0 text-primary" aria-hidden />
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="New content idea…"
-        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+        placeholder="New content idea"
+        aria-label="Content title"
+        className="min-w-[12rem] flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
       />
       <select
         value={type}
         onChange={(e) => setType(e.target.value as ContentType)}
-        className="rounded-md bg-bg-sunken px-2 py-1 font-mono text-[11px] text-muted-foreground outline-none"
+        aria-label="Content type"
+        className="h-10 rounded-md bg-bg-sunken px-2 font-mono text-[11px] text-muted-foreground outline-none"
       >
         {CONTENT_TYPES.map((t) => (
           <option key={t.key} value={t.key}>{t.label}</option>
@@ -400,7 +402,7 @@ function QuickAdd({ onAdd }: QuickAddProps) {
       <button
         type="submit"
         disabled={busy || !title.trim()}
-        className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground disabled:opacity-50"
+        className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
       >
         Add
       </button>
