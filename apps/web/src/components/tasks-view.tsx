@@ -304,18 +304,20 @@ function EmptyState({
     statusFilter === 'done'
       ? 'No completed tasks yet.'
       : statusFilter === 'open'
-        ? 'A clean slate.'
-        : 'Nothing here yet.';
+        ? 'No open tasks.'
+        : 'No tasks found.';
   const body =
     statusFilter === 'done'
       ? 'Complete some tasks and they will appear here.'
       : statusFilter === 'open'
-        ? 'Open tasks will appear here. Use the quick-add bar to capture your next action.'
-        : 'Capture a task to get started.';
+        ? 'Capture the next action while it is clear.'
+        : 'Change the filters or capture a new task.';
   return (
-    <div className="surface flex min-h-60 flex-col items-center justify-center gap-2 p-10 text-center">
-      <Circle className="size-8 text-border-strong" aria-hidden />
-      <h3 className="text-xl font-semibold tracking-tight">{heading}</h3>
+    <div className="surface flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
+      <span className="flex size-9 items-center justify-center rounded-lg bg-bg-sunken text-muted-foreground">
+        <Circle className="size-4" aria-hidden />
+      </span>
+      <h3 className="text-base font-semibold">{heading}</h3>
       <p className="max-w-md text-sm text-muted-foreground">{body}</p>
       {statusFilter !== 'done' ? (
         <button
@@ -336,11 +338,11 @@ function EmptyState({
 function SkeletonRows() {
   return (
     <ul className="flex flex-col gap-1.5">
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <li
           key={i}
           aria-hidden
-          className="surface-flat h-[60px] animate-pulse"
+          className="surface-flat h-16 animate-pulse"
           style={{ animationDelay: `${i * 60}ms` }}
         />
       ))}
