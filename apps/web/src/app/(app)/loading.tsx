@@ -3,13 +3,14 @@ export default function AppLoading() {
     <div
       role="status"
       aria-label="Loading view"
+      aria-busy="true"
       className="mx-auto flex h-full w-full max-w-[1360px] flex-col gap-4 p-3 sm:p-4 md:gap-5 md:p-6"
     >
       <span className="sr-only">Loading</span>
-      <div className="os-panel h-32 animate-pulse rounded-xl p-5" aria-hidden>
-        <div className="h-3 w-24 rounded bg-bg-sunken" />
-        <div className="mt-4 h-8 w-48 max-w-full rounded bg-bg-sunken" />
-        <div className="mt-3 h-3 w-80 max-w-full rounded bg-bg-sunken" />
+      <div className="os-panel h-28 animate-pulse rounded-lg p-4 md:p-5" aria-hidden>
+        <div className="h-3 w-20 rounded bg-bg-sunken" />
+        <div className="mt-3 h-7 w-44 max-w-full rounded bg-bg-sunken" />
+        <div className="mt-2 h-3 w-72 max-w-full rounded bg-bg-sunken" />
       </div>
       <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-2" aria-hidden>
         <div className="surface animate-pulse p-4">
