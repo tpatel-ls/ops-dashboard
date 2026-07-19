@@ -9,6 +9,7 @@ import type { Project, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
+import { calendarDateOf, calendarKindOf, compareCalendarTasks } from '@/lib/calendar-agenda';
 
 const HOUR_HEIGHT = 48;
 const START_HOUR = 6;
@@ -22,7 +23,13 @@ export function CalendarWeek() {
 
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
-    return all.filter((t) => !t.deletedAt && t.startAt);
+    return all.filter(
+      (task) =>
+        !task.deletedAt &&
+        task.status !== 'archived' &&
+        task.status !== 'done' &&
+        Boolean(calendarDateOf(task)),
+    );
   });
   const projectsMap = useLiveQuery(async () => {
     const all = await getDb().projects.toArray();
@@ -31,6 +38,7 @@ export function CalendarWeek() {
 
   const lanes = useOrgLanes(projectsMap);
   const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
+  const timedTasks = visibleTasks.filter((task) => task.startAt);
 
   const openEdit = useAppStore((s) => s.openEdit);
   const today = isoDay(new Date());
@@ -111,7 +119,7 @@ export function CalendarWeek() {
                 key={h}
                 hour={h}
                 days={days}
-                tasks={visibleTasks}
+                tasks={timedTasks}
                 laneColor={(t) => lanes.colorOf(lanes.laneOf(t))}
                 onOpen={openEdit}
               />
@@ -136,8 +144,8 @@ function MobileDayAgenda({
 }) {
   const dayIso = isoDay(day);
   const blocks = tasks
-    .filter((task) => isoDay(parseISO(task.startAt!)) === dayIso)
-    .sort((a, b) => parseISO(a.startAt!).getTime() - parseISO(b.startAt!).getTime());
+    .filter((task) => calendarDateOf(task) === dayIso)
+    .sort(compareCalendarTasks);
   return (
     <section className="surface-flat min-w-0 p-3">
       <div className="mb-2 flex items-baseline justify-between gap-3">
@@ -158,7 +166,8 @@ function MobileDayAgenda({
       ) : (
         <div className="flex flex-col gap-1.5">
           {blocks.map((task) => {
-            const start = parseISO(task.startAt!);
+            const kind = calendarKindOf(task);
+            const start = task.startAt ? parseISO(task.startAt) : null;
             const color = laneColor(task);
             return (
               <button
@@ -174,8 +183,11 @@ function MobileDayAgenda({
                   style={{ background: color }}
                 />
                 <span className="min-w-0 flex-1 truncate text-sm font-medium">{task.title}</span>
-                <span className="shrink-0 font-mono text-[10px] text-subtle-foreground">
-                  {format(start, 'h:mm a')}
+                <span className={cn(
+                  'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium',
+                  kind === 'due' ? 'bg-warning/10 text-warning' : 'bg-card text-subtle-foreground',
+                )}>
+                  {start ? format(start, 'h:mm a') : kind === 'due' ? 'Due' : 'Scheduled'}
                 </span>
               </button>
             );
