@@ -12,7 +12,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { addDays, format, startOfWeek } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
@@ -32,6 +32,8 @@ export function WeekBoard() {
   const weekStartsOn = (settings?.weekStartsOn ?? DEFAULT_SETTINGS.weekStartsOn) as 0 | 1;
   const [anchor, setAnchor] = useState<Date>(() => new Date());
   const days = weekDays(anchor, weekStartsOn);
+  const weekStart = startOfWeek(anchor, { weekStartsOn });
+  const weekEnd = addDays(weekStart, 6);
 
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
@@ -57,19 +59,20 @@ export function WeekBoard() {
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="flex items-center rounded-md border bg-card p-0.5">
         <button
           type="button"
           aria-label="Previous week"
           onClick={() => setAnchor((d) => addDays(d, -7))}
-          className="kbd"
+          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
         >
-          <ChevronLeft className="size-3" />
+          <ChevronLeft className="size-4" />
         </button>
         <button
           type="button"
           onClick={() => setAnchor(new Date())}
-          className="rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+          className="h-10 border-x px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Today
         </button>
@@ -77,12 +80,19 @@ export function WeekBoard() {
           type="button"
           aria-label="Next week"
           onClick={() => setAnchor((d) => addDays(d, 7))}
-          className="kbd"
+          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
         >
-          <ChevronRight className="size-3" />
+          <ChevronRight className="size-4" />
         </button>
-        <span className="ml-2 font-mono text-[11px] text-subtle-foreground">
-          Week of {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d, yyyy')}
+        </div>
+        <span
+          aria-live="polite"
+          className="flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground"
+        >
+          <CalendarDays className="size-4 shrink-0" aria-hidden />
+          <span className="truncate">
+            {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
+          </span>
         </span>
         {lanes.showLegend ? (
           <div className="ml-auto">
