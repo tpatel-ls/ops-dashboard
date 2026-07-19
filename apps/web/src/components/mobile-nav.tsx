@@ -22,22 +22,22 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="hairline relative z-40 flex shrink-0 items-stretch justify-around border-t bg-bg-rail/90 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_42px_-34px_rgba(0,0,0,0.75)] backdrop-blur-xl md:hidden"
+      className="hairline relative z-40 flex min-h-16 shrink-0 items-stretch justify-around border-t bg-bg-rail/94 px-1.5 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_32px_-28px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden"
     >
       {LEFT.map((it) => (
         <Tab key={it.href} {...it} active={pathname.startsWith(it.href)} />
       ))}
-      <div className="relative -top-4 mx-1 flex shrink-0 flex-col items-center">
+      <div className="relative -top-3 mx-1 flex w-16 shrink-0 flex-col items-center">
         <button
           type="button"
           onClick={() => openWorkLogger('task')}
           aria-label="Add task"
-          className="flex size-14 items-center justify-center rounded-full border border-primary/25 bg-primary text-primary-foreground shadow-[0_14px_34px_-14px_color-mix(in_oklch,var(--primary)_82%,transparent)] transition-transform active:scale-95"
+          className="flex size-12 items-center justify-center rounded-full border border-primary/30 bg-primary text-primary-foreground shadow-[0_12px_28px_-14px_color-mix(in_oklch,var(--primary)_78%,transparent)] transition-transform active:scale-95"
         >
-          <Plus className="size-5" />
+          <Plus className="size-5" aria-hidden />
         </button>
-        <span className="mt-1 rounded-full border bg-card px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-primary shadow-sm">
-          Add task
+        <span className="mt-1 text-[10px] font-medium text-primary">
+          Add
         </span>
       </div>
       {RIGHT.map((it) => (
@@ -63,18 +63,15 @@ function Tab({
       href={href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] transition-colors',
+        'relative flex min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-1 py-2 text-[10px] transition-colors',
         active ? 'text-foreground' : 'text-muted-foreground',
       )}
     >
       {active ? (
-        <span className="absolute inset-x-3 top-1 bottom-1 rounded-[14px] bg-accent shadow-[inset_0_1px_0_0_color-mix(in_oklch,var(--foreground)_7%,transparent)]" aria-hidden />
+        <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary" aria-hidden />
       ) : null}
-      <Icon className={cn('relative size-5', active && 'text-primary')} aria-hidden />
-      <span className="relative">{label}</span>
-      {active ? (
-        <span className="relative mt-0.5 size-1 rounded-full bg-primary" aria-hidden />
-      ) : null}
+      <Icon className={cn('relative size-[19px]', active && 'text-primary')} aria-hidden />
+      <span className="relative max-w-full truncate px-1">{label}</span>
     </Link>
   );
 }
