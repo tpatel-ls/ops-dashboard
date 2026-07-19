@@ -168,7 +168,7 @@ export function DevicesHub() {
         </div>
 
         <aside className="flex min-w-0 flex-col gap-4">
-          <section className="rounded-[18px] border bg-card p-4 shadow-sm">
+          <section className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <Watch className="size-4 text-primary" aria-hidden />
               <h3 className="text-sm font-semibold tracking-tight">Watch webhook</h3>
@@ -196,7 +196,7 @@ export function DevicesHub() {
             />
           </section>
 
-          <section className="rounded-[18px] border bg-card p-4 shadow-sm">
+          <section className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <MonitorSmartphone className="size-4 text-primary" aria-hidden />
               <h3 className="text-sm font-semibold tracking-tight">Browser capabilities</h3>
@@ -210,7 +210,7 @@ export function DevicesHub() {
             </div>
           </section>
 
-          <section className="rounded-[18px] border bg-bg-sunken p-4">
+          <section className="rounded-lg border bg-bg-sunken p-4">
             <div className="mb-2 flex items-center gap-2">
               <WifiOff className="size-4 text-warning" aria-hidden />
               <h3 className="text-sm font-semibold tracking-tight">Honest limits</h3>
@@ -231,7 +231,7 @@ function CapabilityPill({ label, ready }: { label: string; ready: boolean }) {
   return (
     <div
       className={cn(
-        'rounded-[12px] border px-3 py-2',
+        'rounded-md border px-3 py-2',
         ready ? 'border-success/35 bg-success/10' : 'bg-bg-sunken',
       )}
     >
@@ -250,7 +250,7 @@ function ReadinessPill({ label, state }: { label: string; state: ReadinessState 
   return (
     <div
       className={cn(
-        'min-w-0 rounded-[14px] border bg-card/75 px-3 py-2 backdrop-blur',
+        'min-w-0 rounded-md border bg-card px-3 py-2',
         (state === 'ready' || state === 'installed') && 'border-success/35 bg-success/10',
         state === 'offline' && 'border-warning/40 bg-warning/10',
         state === 'unavailable' && 'border-border',
@@ -277,10 +277,9 @@ function ReadinessPill({ label, state }: { label: string; state: ReadinessState 
 function DeviceCard({ device }: { device: DeviceSetup }) {
   const Icon = ICONS[device.id];
   return (
-    <article className="group relative min-w-0 overflow-hidden rounded-[18px] border bg-card p-4 shadow-sm transition-colors hover:border-border-strong">
-      <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-warning to-success opacity-70" aria-hidden />
+    <article className="group min-w-0 overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-border-strong">
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-bg-sunken text-primary transition-transform group-hover:-translate-y-0.5">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-primary">
           <Icon className="size-5" aria-hidden />
         </div>
         <div className="min-w-0">
@@ -288,7 +287,7 @@ function DeviceCard({ device }: { device: DeviceSetup }) {
           <p className="text-xs text-muted-foreground">{device.role}</p>
         </div>
       </div>
-      <p className="mb-4 rounded-[14px] border bg-bg-sunken/60 px-3 py-2 text-sm leading-5 text-foreground break-words">
+      <p className="mb-4 border-l-2 border-primary pl-3 text-sm leading-5 text-foreground break-words">
         {device.primaryAction}
       </p>
       <div className="space-y-4">
@@ -366,13 +365,13 @@ function CopyBlock({
         <button
           type="button"
           onClick={onCopy}
-          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="inline-flex h-9 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Clipboard className="size-3" aria-hidden />
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="scrollbar-thin max-h-36 max-w-full whitespace-pre-wrap break-all rounded-[12px] border bg-bg-sunken p-3 text-[11px] leading-5 text-muted-foreground sm:overflow-auto sm:break-normal">
+      <pre className="scrollbar-thin max-h-36 max-w-full whitespace-pre-wrap break-all rounded-md border bg-bg-sunken p-3 text-[11px] leading-5 text-muted-foreground sm:overflow-auto sm:break-normal">
         <code>{value}</code>
       </pre>
     </div>
