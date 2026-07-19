@@ -26,15 +26,15 @@ const PRESET_COLORS = [
 function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      {PRESET_COLORS.map((c) => (
+      {PRESET_COLORS.map((c, index) => (
         <button
           key={c}
           type="button"
           onClick={() => onChange(c)}
-          aria-label={`Use color ${c}`}
+          aria-label={`Select organization color ${index + 1}`}
           aria-pressed={value === c}
           className={cn(
-            'size-5 rounded-full transition-transform hover:scale-110',
+            'size-8 rounded-full transition-transform hover:scale-105',
             value === c && 'ring-2 ring-primary ring-offset-2 ring-offset-card',
           )}
           style={{ background: c }}
@@ -75,6 +75,7 @@ function OrgForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Organization name"
+        aria-label="Organization name"
         className="input"
         autoFocus
       />
@@ -83,14 +84,14 @@ function OrgForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
         >
           {initial ? 'Save' : 'Create'}
         </button>
@@ -116,21 +117,21 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
   }
 
   return (
-    <div className="surface-flat group flex items-center gap-2.5 px-3 py-2">
+    <div className="surface-flat group flex min-w-0 items-center gap-2 px-3 py-2">
       <span
         aria-hidden
         className="size-3 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
         style={{ background: org.color }}
       />
       <span className="min-w-0 flex-1 truncate text-sm">{org.name}</span>
-      <span className="font-mono text-[10px] text-subtle-foreground">
+      <span className="hidden font-mono text-[10px] text-subtle-foreground sm:inline">
         {projectCount} project{projectCount === 1 ? '' : 's'}
       </span>
       <button
         type="button"
         onClick={() => setEditing(true)}
         aria-label={`Rename ${org.name}`}
-        className="rounded p-1 text-subtle-foreground opacity-0 transition-all hover:text-foreground group-hover:opacity-100"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
       >
         <Pencil className="size-3.5" aria-hidden />
       </button>
@@ -138,7 +139,7 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
         type="button"
         onClick={() => void archiveOrganization(org.id)}
         aria-label={`Archive ${org.name}`}
-        className="rounded p-1 text-subtle-foreground opacity-0 transition-all hover:text-destructive group-hover:opacity-100"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100"
       >
         <Archive className="size-3.5" aria-hidden />
       </button>
@@ -197,7 +198,7 @@ export function OrganizationsManager() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="hairline inline-flex w-fit items-center gap-1.5 rounded-md border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="hairline inline-flex h-10 w-fit items-center gap-1.5 rounded-md border bg-card px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Plus className="size-3.5" aria-hidden />
           Add organization
