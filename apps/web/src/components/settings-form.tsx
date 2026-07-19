@@ -82,7 +82,7 @@ export function SettingsForm() {
   }
 
   return (
-    <div className="grid max-w-5xl items-start gap-4 lg:grid-cols-2">
+    <div className="grid w-full items-start gap-4 lg:grid-cols-2">
       <Section title="Appearance" description="Light, dark, or follow the system.">
         <div role="group" aria-label="Color theme" className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1">
           {(['light', 'dark', 'system'] as const).map((opt) => (
@@ -231,7 +231,7 @@ export function SettingsForm() {
             <button
               type="button"
               onClick={async () => setPerm(await requestNotifications())}
-              className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+              className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground"
             >
               Request permission
             </button>
@@ -251,9 +251,9 @@ export function SettingsForm() {
           onChange={(v) => patch({ syncEnabled: v })}
         />
         {settings.syncEnabled ? (
-          <div className="mt-3 grid gap-2">
+          <div className="mt-3 grid gap-3 border-t pt-3">
             {!isSupabaseConfigured() ? (
-              <div className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
+              <div role="alert" className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
                 Supabase env vars are not set. Add NEXT_PUBLIC_SUPABASE_URL and
                 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env.local.
               </div>
@@ -262,14 +262,16 @@ export function SettingsForm() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <SyncStatus />
                   {userEmail ? (
-                    <span className="text-xs text-muted-foreground">{userEmail}</span>
+                    <span className="min-w-0 truncate text-xs text-muted-foreground">
+                      Signed in as {userEmail}
+                    </span>
                   ) : null}
                 </div>
                 {userEmail ? (
                   <form action="/auth/signout" method="post">
                     <button
                       type="submit"
-                      className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
+                      className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
                     >
                       Sign out
                     </button>
@@ -277,7 +279,7 @@ export function SettingsForm() {
                 ) : (
                   <a
                     href="/login"
-                    className="inline-flex w-fit rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                    className="inline-flex h-10 w-fit items-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground"
                   >
                     Sign in to sync
                   </a>
@@ -296,7 +298,7 @@ export function SettingsForm() {
               const data = await exportAll();
               downloadJson(data, `ops-dashboard-${new Date().toISOString().slice(0, 10)}.json`);
             }}
-            className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
+            className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
           >
             Export JSON
           </button>
@@ -307,14 +309,14 @@ export function SettingsForm() {
               const md = tasksToMarkdown(data.tasks, 'Ops Dashboard tasks');
               downloadText(md, `ops-dashboard-${new Date().toISOString().slice(0, 10)}.md`);
             }}
-            className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
+            className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
           >
             Export markdown
           </button>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="rounded-md border bg-card px-3 py-1.5 text-xs hover:bg-accent"
+            className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
           >
             Import JSON
           </button>
