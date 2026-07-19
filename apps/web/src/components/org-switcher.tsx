@@ -100,8 +100,9 @@ export function OrgSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Switch context"
-        className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+        aria-label={mounted ? `Switch context, current ${current.label}` : 'Switch context'}
+        title={mounted ? `Current workspace: ${current.label}` : 'Switch context'}
+        className="hairline inline-flex h-9 max-w-28 items-center gap-2 rounded-lg border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent sm:max-w-40"
       >
         {mounted ? (
           <>
@@ -110,7 +111,7 @@ export function OrgSwitcher() {
               className="size-2 shrink-0 rounded-full"
               style={{ background: current.color }}
             />
-            <span className="hidden max-w-28 truncate sm:inline">{current.label}</span>
+            <span className="max-w-16 truncate sm:max-w-28">{current.label}</span>
           </>
         ) : (
           <Layers className="size-3.5 text-muted-foreground" aria-hidden />
@@ -122,10 +123,10 @@ export function OrgSwitcher() {
         <div
           role="menu"
           onKeyDown={moveMenuFocus}
-          className="surface absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden py-1"
+          className="surface absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden py-1"
         >
-          <div className="px-3 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-            Context
+          <div className="hairline border-b px-3 pb-2 pt-2 font-mono text-[10px] uppercase text-subtle-foreground">
+            Show work for
           </div>
           {lanes.map((lane, index) => {
             const active = lane.ctx === ctx;
@@ -143,8 +144,10 @@ export function OrgSwitcher() {
                   setOpen(false);
                 }}
                 className={cn(
-                  'flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors',
-                  active ? 'bg-accent text-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+                  'mx-1 flex min-h-10 w-[calc(100%_-_0.5rem)] items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
+                  active
+                    ? 'bg-primary/10 text-foreground'
+                    : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
                 )}
               >
                 <span
@@ -153,13 +156,15 @@ export function OrgSwitcher() {
                   style={{ background: lane.color }}
                 />
                 <span className="min-w-0 flex-1 truncate">{lane.label}</span>
-                {active ? <Check className="size-3.5 text-primary" aria-hidden /> : null}
+                {active ? (
+                  <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-medium text-primary">
+                    Current
+                    <Check className="size-3.5" aria-hidden />
+                  </span>
+                ) : null}
               </button>
             );
           })}
-          <div className="hairline mt-1 border-t px-3 py-2 text-[11px] text-subtle-foreground">
-            Scopes Dashboard, Projects, Tasks, Kanban, Calendar.
-          </div>
         </div>
       ) : null}
     </div>
