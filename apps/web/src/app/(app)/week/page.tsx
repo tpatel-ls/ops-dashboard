@@ -6,7 +6,8 @@ export default function WeekPage() {
     <ViewShell
       eyebrow="Plan"
       title="Week"
-      subtitle="Drag cards between days to reschedule."
+      subtitle="Move scheduled work between days."
+      compactHeader
       fullWidth
     >
       <WeekBoard />
