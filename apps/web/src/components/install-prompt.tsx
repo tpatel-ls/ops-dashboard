@@ -22,20 +22,20 @@ export function InstallPrompt() {
   if (!canPrompt || dismissed) return null;
 
   return (
-    <div className="fixed right-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-50 max-w-[320px] rounded-[16px] border bg-card p-3 shadow-[0_24px_70px_-40px_rgba(0,0,0,0.65)] md:bottom-4">
+    <div className="fixed right-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] left-3 z-50 rounded-lg border bg-card p-3 shadow-[0_24px_70px_-40px_rgba(0,0,0,0.65)] sm:left-auto sm:max-w-[340px] md:right-4 md:bottom-4">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Download className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold tracking-tight">Install Identity OS</div>
+          <div className="text-sm font-semibold">Install Taskify</div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Pin the app for faster capture, shortcuts, and PWA features.
+            Add Taskify to this device for direct workspace access.
           </p>
           <button
             type="button"
             onClick={() => void prompt()}
-            className="mt-2 inline-flex h-8 items-center rounded-[9px] bg-primary px-3 text-xs font-medium text-primary-foreground"
+            className="mt-2 inline-flex min-h-10 items-center rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground"
           >
             Install app
           </button>
@@ -47,7 +47,7 @@ export function InstallPrompt() {
             window.localStorage.setItem(DISMISS_KEY, '1');
             setDismissed(true);
           }}
-          className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <X className="size-3.5" aria-hidden />
         </button>

@@ -94,7 +94,17 @@ async function verifyRapidTaskEntry(page, projectTarget) {
 }
 
 async function verifyResponsiveLayouts(page) {
-  const routes = ['/dashboard', '/tasks', '/projects', '/calendar'];
+  const routes = [
+    '/dashboard',
+    '/tasks',
+    '/projects',
+    '/calendar',
+    '/inbox',
+    '/kanban',
+    '/notepad',
+    '/power-dialer',
+    '/settings',
+  ];
   const widths = [360, 390, 412, 768, 1024, 1440];
 
   for (const width of widths) {
