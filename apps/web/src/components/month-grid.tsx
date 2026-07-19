@@ -42,18 +42,19 @@ export function MonthGrid() {
     <div className="grid h-full min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="flex items-center rounded-md border bg-card p-0.5">
           <button
             type="button"
             aria-label="Previous month"
             onClick={() => setAnchor((d) => addMonths(d, -1))}
-            className="kbd"
+            className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <ChevronLeft className="size-3" />
+            <ChevronLeft className="size-4" />
           </button>
           <button
             type="button"
             onClick={() => setAnchor(new Date())}
-            className="rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+            className="h-10 border-x px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             Today
           </button>
@@ -61,11 +62,12 @@ export function MonthGrid() {
             type="button"
             aria-label="Next month"
             onClick={() => setAnchor((d) => addMonths(d, 1))}
-            className="kbd"
+            className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <ChevronRight className="size-3" />
+            <ChevronRight className="size-4" />
           </button>
-          <span className="ml-1 text-sm font-semibold tracking-tight md:ml-2">
+          </div>
+          <span aria-live="polite" className="ml-1 text-sm font-semibold md:ml-2">
             {format(anchor, 'MMMM yyyy')}
           </span>
           {lanes.showLegend ? (
@@ -74,7 +76,7 @@ export function MonthGrid() {
             </div>
           ) : null}
         </div>
-        <div className="grid min-w-0 grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
+        <div className="grid min-w-0 grid-cols-7 gap-px overflow-hidden rounded-lg border border-border bg-border">
           {labels.map((d) => (
             <div
               key={d}
@@ -94,19 +96,27 @@ export function MonthGrid() {
                 key={iso}
                 type="button"
                 onClick={() => setSelected(iso)}
+                aria-label={`${format(day, 'MMMM d')}, ${dayTasks.length} ${dayTasks.length === 1 ? 'task' : 'tasks'}`}
                 className={cn(
                   'flex min-h-[54px] min-w-0 flex-col gap-1 bg-card p-1.5 text-left transition-colors sm:min-h-[88px] sm:p-2',
                   !inMonth && 'bg-bg-sunken text-muted-foreground/60',
                   isSelected && 'ring-2 ring-inset ring-primary/60',
                 )}
               >
-                <span
-                  className={cn(
-                    'font-mono text-xs',
-                    isToday && 'inline-flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground',
-                  )}
-                >
-                  {format(day, 'd')}
+                <span className="flex w-full items-center justify-between gap-1">
+                  <span
+                    className={cn(
+                      'font-mono text-xs',
+                      isToday && 'inline-flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground',
+                    )}
+                  >
+                    {format(day, 'd')}
+                  </span>
+                  {dayTasks.length > 0 ? (
+                    <span className="font-mono text-[9px] text-subtle-foreground sm:hidden">
+                      {dayTasks.length}
+                    </span>
+                  ) : null}
                 </span>
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <div className="flex flex-wrap gap-0.5 sm:hidden">
