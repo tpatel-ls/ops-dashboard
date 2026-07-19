@@ -201,7 +201,7 @@ function CountSignal({
   return (
     <span
       className={cn(
-        'inline-flex min-w-16 items-center justify-center gap-1.5 rounded-md border bg-card/75 px-2 py-1.5 text-[11px] text-muted-foreground',
+        'inline-flex min-w-0 items-center justify-center gap-1 rounded-md border bg-card/75 px-1.5 py-1.5 text-[10px] text-muted-foreground sm:min-w-16 sm:gap-1.5 sm:px-2 sm:text-[11px]',
         danger && 'border-destructive/35 bg-destructive/5 text-destructive',
         active && !danger && 'border-primary/30 bg-primary/5',
       )}
