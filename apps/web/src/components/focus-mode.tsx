@@ -78,12 +78,26 @@ export function FocusMode() {
     return () => window.clearInterval(id);
   }, [running]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') close();
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [close, open]);
+
   if (!open) return null;
 
   function start(task?: Task) {
     if (task) {
       setActiveId(task.id);
-      setTaskStatus(task.id, 'doing');
+      void setTaskStatus(task.id, 'doing');
     }
     startedRef.current = Date.now();
     setRunning(true);
@@ -105,16 +119,21 @@ export function FocusMode() {
   const active = activeId ? candidates?.find((t) => t.id === activeId) : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur">
+    <div
+      className="fixed inset-0 z-50 flex overflow-y-auto bg-black/80 p-4 backdrop-blur"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Focus mode"
+    >
       <button
         type="button"
         onClick={close}
-        className="absolute top-4 right-4 inline-flex size-9 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
+        className="fixed right-4 top-4 inline-flex size-11 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
         aria-label="Exit focus mode"
       >
         <X className="size-4" />
       </button>
-      <div className="flex w-full max-w-xl flex-col items-center gap-8 px-6">
+      <div className="m-auto flex min-h-full w-full max-w-xl flex-col items-center justify-center gap-5 py-12 sm:gap-8 sm:px-6">
         <div
           className={cn(
             'inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em]',
@@ -127,7 +146,7 @@ export function FocusMode() {
           {phase === 'focus' ? 'Focus' : 'Break'} session
         </div>
 
-        <div className="relative size-72">
+        <div className="relative size-60 sm:size-72">
           <svg viewBox="0 0 100 100" className="size-full -rotate-90">
             <circle cx="50" cy="50" r="44" fill="none" stroke="var(--border)" strokeWidth="2" />
             <circle
@@ -143,7 +162,7 @@ export function FocusMode() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div className="font-mono text-6xl font-light tabular-nums tracking-tight">
+            <div className="font-mono text-5xl font-light tabular-nums sm:text-6xl" role="timer" aria-live="off">
               {mm}:{ss}
             </div>
             {active ? (
@@ -154,12 +173,12 @@ export function FocusMode() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {running ? (
             <button
               type="button"
               onClick={pause}
-              className="inline-flex h-10 items-center gap-2 rounded-md border bg-card px-4 text-sm"
+              className="inline-flex h-11 items-center gap-2 rounded-md border bg-card px-4 text-sm"
             >
               <Pause className="size-4" /> Pause
             </button>
@@ -167,7 +186,7 @@ export function FocusMode() {
             <button
               type="button"
               onClick={() => start(active ?? candidates?.[0] ?? undefined)}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+              className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
             >
               <Play className="size-4" /> Start
             </button>
@@ -175,7 +194,9 @@ export function FocusMode() {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex h-10 items-center gap-2 rounded-md border bg-card px-3 text-sm text-muted-foreground hover:text-foreground"
+            className="inline-flex size-11 items-center justify-center rounded-md border bg-card text-sm text-muted-foreground hover:text-foreground"
+            aria-label="Reset timer"
+            title="Reset timer"
           >
             <RotateCcw className="size-4" />
           </button>
@@ -188,7 +209,7 @@ export function FocusMode() {
               setSecondsLeft(focusMin * 60);
               close();
             }}
-            className="inline-flex h-10 items-center gap-2 rounded-md border bg-card px-3 text-sm text-muted-foreground hover:text-foreground"
+            className="inline-flex h-11 items-center gap-2 rounded-md border bg-card px-3 text-sm text-muted-foreground hover:text-foreground"
           >
             <Square className="size-4" /> End
           </button>
@@ -205,7 +226,7 @@ export function FocusMode() {
                   key={t.id}
                   type="button"
                   onClick={() => start(t)}
-                  className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-accent"
+                  className="flex min-h-10 w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
                 >
                   <span className="truncate">{t.title}</span>
                   {t.estimateMinutes ? (
