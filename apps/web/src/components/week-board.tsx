@@ -101,7 +101,7 @@ export function WeekBoard() {
         ) : null}
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="grid h-full min-h-[420px] min-w-0 flex-1 grid-cols-1 gap-2 overflow-hidden sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:min-h-[420px] sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {days.map((day) => {
             const dayIso = isoDay(day);
             const dayTasks = visibleTasks.filter((t) => t.scheduledFor === dayIso);
@@ -143,7 +143,7 @@ function DayColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'surface-flat scrollbar-thin flex h-full min-h-[200px] min-w-0 flex-col overflow-y-auto p-2 transition-colors',
+        'surface-flat scrollbar-thin flex min-h-40 min-w-0 flex-col overflow-y-auto p-2 transition-colors sm:h-full sm:min-h-[200px]',
         isOver && 'border-primary/50 bg-primary/5',
       )}
     >
@@ -167,6 +167,11 @@ function DayColumn({
         {tasks.map((t) => (
           <DraggableCard key={t.id} task={t} projectsMap={projectsMap} laneColor={laneColor(t)} />
         ))}
+        {tasks.length === 0 ? (
+          <div className="flex min-h-20 items-center justify-center rounded border border-dashed px-3 text-center text-[11px] text-subtle-foreground">
+            No scheduled work
+          </div>
+        ) : null}
       </div>
     </div>
   );
