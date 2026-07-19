@@ -61,10 +61,10 @@ const STATUS_LABELS: Record<ProjectStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<ProjectStatus, string> = {
-  active: 'text-success',
-  paused: 'text-warning',
-  done: 'text-muted-foreground',
-  archived: 'text-subtle-foreground',
+  active: 'border-success/30 bg-success/10 text-success',
+  paused: 'border-warning/30 bg-warning/10 text-warning',
+  done: 'border-border bg-bg-sunken text-muted-foreground',
+  archived: 'border-border bg-bg-sunken text-subtle-foreground',
 };
 
 const SLIPPING_DAYS = 5;
@@ -256,7 +256,7 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
             <span className="text-[14px] font-medium leading-5">{project.name}</span>
             <span
               className={cn(
-                'font-mono text-[10px] uppercase tracking-[0.14em]',
+                'rounded-md border px-1.5 py-0.5 text-[10px] font-semibold',
                 STATUS_CLASSES[project.status],
               )}
             >
@@ -266,25 +266,25 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
 
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {showOrganization ? (
-              <span className="inline-flex min-w-0 items-center gap-1 rounded-full border px-2 py-0.5">
+              <span className="inline-flex min-w-0 items-center gap-1 rounded-md border px-2 py-0.5">
                 <span
                   className="size-1.5 shrink-0 rounded-full"
                   style={{ background: organization?.color ?? PERSONAL_COLOR }}
                   aria-hidden
                 />
-                <span className="max-w-40 truncate font-mono text-[10px] text-subtle-foreground">
-                  {organization?.name ?? 'Personal'}
+                <span className="max-w-40 truncate text-[10px] text-subtle-foreground">
+                  Org: {organization?.name ?? 'Personal'}
                 </span>
               </span>
             ) : null}
             {domain ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 rounded-md bg-bg-sunken px-2 py-0.5">
               <span
                 className="size-1.5 rounded-full"
                 style={{ background: domain.color }}
                 aria-hidden
               />
-              <span className="font-mono text-[10px] text-subtle-foreground">{domain.name}</span>
+              <span className="text-[10px] text-subtle-foreground">Domain: {domain.name}</span>
               </span>
             ) : null}
           </div>
@@ -331,14 +331,14 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
         {lastWorked ? (
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3" aria-hidden />
-            {formatDistanceToNow(lastWorked, { addSuffix: true })}
+            Worked {formatDistanceToNow(lastWorked, { addSuffix: true })}
           </span>
         ) : null}
 
         {isSlipping && project.status === 'active' ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[10px] text-warning">
             <AlertTriangle className="size-3" aria-hidden />
-            Slipping
+            {lastWorked ? 'Needs update' : 'No work logged'}
           </span>
         ) : null}
         </div>
