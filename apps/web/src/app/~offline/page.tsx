@@ -1,20 +1,28 @@
-export const metadata = { title: 'Offline · Taskify' };
+import { CloudOff, RefreshCw } from 'lucide-react';
+
+export const metadata = { title: 'Offline · Ops Dashboard' };
 
 export default function OfflinePage() {
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center gap-3 p-6 text-center">
-      <div className="dot-grid size-10 rounded-xl border" aria-hidden />
-      <h1 className="text-lg font-semibold">You&rsquo;re offline</h1>
+    <main className="flex min-h-[100dvh] w-full flex-col items-center justify-center gap-4 p-6 text-center">
+      <div className="flex size-12 items-center justify-center rounded-lg border bg-card text-warning">
+        <CloudOff className="size-5" aria-hidden />
+      </div>
+      <div>
+        <p className="text-xs font-medium text-muted-foreground">Connection status</p>
+        <h1 className="mt-1 text-lg font-semibold">You&rsquo;re offline</h1>
+      </div>
       <p className="max-w-xs text-sm text-muted-foreground">
-        Taskify works offline - your data is on this device. Reconnect to sync
-        changes across your phone, tablet, and watch.
+        Cached work remains available on this device. New changes will sync after
+        the connection returns.
       </p>
       <a
         href="/dashboard"
-        className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        className="mt-2 inline-flex h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
       >
-        Back to Home
+        <RefreshCw className="size-4" aria-hidden />
+        Try dashboard
       </a>
-    </div>
+    </main>
   );
 }
