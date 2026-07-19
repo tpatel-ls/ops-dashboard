@@ -80,7 +80,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
   const KindIcon = cap.aiKind ? KIND_ICON[cap.aiKind] : FileText;
 
   return (
-    <li className="surface-flat group flex items-start gap-3 rounded-[14px] px-4 py-3">
+    <li className="surface-flat group flex items-start gap-2.5 px-3 py-3 sm:gap-3 sm:px-4">
       {/* Icon */}
       <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-subtle-foreground">
         <KindIcon className="size-4" aria-hidden />
@@ -98,7 +98,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
           {/* Status chip */}
           <span
             className={cn(
-              'rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em]',
+              'rounded-md px-2 py-0.5 text-[10px] font-semibold',
               STATUS_CLASS[cap.status],
             )}
           >
@@ -107,7 +107,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
 
           {/* Route chip */}
           {routeLabel ? (
-            <span className="rounded-full bg-bg-sunken px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="rounded-md bg-bg-sunken px-2 py-0.5 text-[10px] text-muted-foreground">
               {routeLabel}
             </span>
           ) : null}
@@ -125,13 +125,13 @@ function CaptureRow({ cap }: { cap: Capture }) {
       </div>
 
       {/* Actions */}
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
         {cap.status !== 'dismissed' ? (
           <button
             type="button"
             title="Dismiss"
             onClick={() => dismissCapture(cap.id)}
-            className="flex size-7 items-center justify-center rounded-md text-subtle-foreground hover:bg-bg-sunken hover:text-foreground"
+            className="flex size-10 items-center justify-center rounded-md text-subtle-foreground hover:bg-bg-sunken hover:text-foreground sm:size-8"
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -140,7 +140,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
           type="button"
           title="Delete"
           onClick={() => deleteCapture(cap.id)}
-          className="flex size-7 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive"
+          className="flex size-10 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive sm:size-8"
         >
           <Trash2 className="size-4" aria-hidden />
         </button>
@@ -198,7 +198,7 @@ function SkeletonRows() {
   return (
     <ul className="flex flex-col gap-2" aria-label="Loading">
       {[1, 2, 3].map((i) => (
-        <li key={i} className="surface-flat h-16 animate-pulse rounded-[14px] bg-bg-sunken" />
+        <li key={i} className="surface-flat h-16 animate-pulse bg-bg-sunken" />
       ))}
     </ul>
   );
