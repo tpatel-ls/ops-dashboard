@@ -10,6 +10,7 @@ interface ViewShellProps {
   children: ReactNode;
   rail?: ReactNode;
   fullWidth?: boolean;
+  compactHeader?: boolean;
 }
 
 export function ViewShell({
@@ -21,18 +22,20 @@ export function ViewShell({
   children,
   rail,
   fullWidth = false,
+  compactHeader = false,
 }: ViewShellProps) {
   return (
     <div
       className={cn(
-        'mx-auto flex h-full w-full min-w-0 flex-col gap-4 overflow-x-clip p-3 sm:p-4 md:gap-5 md:p-6',
+        'mx-auto flex h-full w-full min-w-0 flex-col overflow-x-clip p-3 sm:p-4 md:p-6',
+        compactHeader ? 'gap-3 md:gap-4' : 'gap-4 md:gap-5',
         fullWidth ? 'max-w-none' : 'max-w-[1360px]',
       )}
     >
-      <header className="os-panel min-w-0 rounded-xl px-4 py-4 md:px-5 md:py-5">
+      <header className={cn('os-panel min-w-0 rounded-xl px-4 md:px-5', compactHeader ? 'py-3 md:py-3.5' : 'py-4 md:py-5')}>
         <div className="relative flex min-w-0 flex-wrap items-start justify-between gap-3 md:gap-4">
           <div className="min-w-0 flex-1">
-            <div className="mb-2 flex min-h-6 flex-wrap items-center gap-2">
+            <div className={cn('flex flex-wrap items-center gap-2', compactHeader ? 'mb-1 min-h-5' : 'mb-2 min-h-6')}>
               {eyebrow ? (
                 <div className="inline-flex rounded-full border bg-card/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground backdrop-blur">
                   {eyebrow}
@@ -43,11 +46,11 @@ export function ViewShell({
                 Live workspace
               </div>
             </div>
-            <h1 className="text-[26px] font-semibold leading-[1.08] text-foreground sm:text-[30px] md:text-[32px]">
+            <h1 className={cn('font-semibold leading-[1.08] text-foreground', compactHeader ? 'text-2xl md:text-[28px]' : 'text-[26px] sm:text-[30px] md:text-[32px]')}>
               {title}
             </h1>
             {subtitle ? (
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{subtitle}</p>
+              <p className={cn('max-w-3xl text-sm text-muted-foreground', compactHeader ? 'mt-1 leading-5' : 'mt-2 leading-6')}>{subtitle}</p>
             ) : null}
           </div>
           <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 pt-0.5 sm:w-auto sm:justify-end">
