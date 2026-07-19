@@ -59,9 +59,9 @@ export function WorkDashboard() {
 
   return (
     <ViewShell
-      eyebrow={format(new Date(), 'EEEE')}
-      title="Work Dashboard"
-      subtitle={`${format(new Date(), 'MMMM d')} / ${contextLabel}. Capture work, choose what matters, and keep projects moving.`}
+      eyebrow={contextLabel}
+      title="Today's work"
+      subtitle={`${format(new Date(), 'EEEE, MMMM d')} / Focus on what is due, then move one project forward.`}
       meta={data ? <DashboardCounts model={data.model.counts} /> : null}
       actions={
         <button
@@ -70,7 +70,7 @@ export function WorkDashboard() {
           className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground sm:min-h-9"
         >
           <Plus className="size-4" aria-hidden />
-          Add task
+          Capture task
         </button>
       }
     >
@@ -177,19 +177,35 @@ function DashboardCounts({
   model: { overdue: number; today: number; activeProjects: number };
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <CountPill label="Overdue" value={model.overdue} danger={model.overdue > 0} />
-      <CountPill label="Today" value={model.today} />
-      <CountPill label="Projects" value={model.activeProjects} />
+    <div className="flex min-w-0 items-center gap-1.5" aria-label="Work summary">
+      <CountSignal label="Overdue" value={model.overdue} danger={model.overdue > 0} />
+      <CountSignal label="Today" value={model.today} active={model.today > 0} />
+      <CountSignal label="Projects" value={model.activeProjects} />
     </div>
   );
 }
 
-function CountPill({ label, value, danger = false }: { label: string; value: number; danger?: boolean }) {
+function CountSignal({
+  label,
+  value,
+  danger = false,
+  active = false,
+}: {
+  label: string;
+  value: number;
+  danger?: boolean;
+  active?: boolean;
+}) {
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs', danger ? 'text-destructive' : 'text-muted-foreground')}>
-      <strong className="font-mono tabular-nums text-foreground">{value}</strong>
-      {label}
+    <span
+      className={cn(
+        'inline-flex min-w-16 items-center justify-center gap-1.5 rounded-md border bg-card/75 px-2 py-1.5 text-[11px] text-muted-foreground',
+        danger && 'border-destructive/35 bg-destructive/5 text-destructive',
+        active && !danger && 'border-primary/30 bg-primary/5',
+      )}
+    >
+      <strong className="font-mono text-xs tabular-nums text-foreground">{value}</strong>
+      <span className="truncate">{label}</span>
     </span>
   );
 }
