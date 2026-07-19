@@ -343,11 +343,11 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
         ) : null}
         </div>
       </button>
-      <div className="hairline flex items-center justify-between border-t px-3 py-2">
+      <div className="hairline grid grid-cols-2 border-t p-1.5">
         <button
           type="button"
           onClick={onAddTask}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
         >
           <Plus className="size-3.5" aria-hidden />
           Add task
@@ -355,7 +355,7 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
         <button
           type="button"
           onClick={onLogProgress}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Timer className="size-3.5" aria-hidden />
           Log progress
@@ -497,89 +497,97 @@ export function ProjectsBoard() {
     { project: [], area: [], retainer: [] },
   );
 
-  const totalActive = filteredCardData.filter((c) => c.project.status === 'active').length;
-
   return (
     <>
       <div className="flex flex-col gap-5">
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">{totalActive} active</span>
-          <div className="relative ml-auto w-full sm:w-56">
-            <label htmlFor="project-search" className="sr-only">Search projects</label>
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <input
-              id="project-search"
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search projects"
-              className="input min-h-11 pl-9 pr-10 sm:min-h-9"
-            />
-            {searchQuery ? (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                aria-label="Clear project search"
-                title="Clear search"
-                className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-              >
-                <X className="size-3.5" aria-hidden />
-              </button>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            onClick={() => setCreating((v) => !v)}
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-              creating
-                ? 'bg-bg-sunken text-muted-foreground'
-                : 'bg-primary text-primary-foreground hover:opacity-90',
-            )}
-          >
-            {creating ? <X className="size-3.5" /> : <Plus className="size-3.5" />}
-            {creating ? 'Cancel' : 'New'}
-          </button>
-        </div>
-
-        <div
-          role="group"
-          aria-label="Project status"
-          className="inline-flex w-fit max-w-full items-center gap-0.5 overflow-x-auto rounded-[10px] border bg-bg-sunken p-0.5"
-        >
-          {STATUS_FILTERS.map((filter) => (
+        <section aria-label="Project controls" className="surface flex flex-col gap-3 p-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="relative min-w-0 flex-1 sm:max-w-sm">
+              <label htmlFor="project-search" className="sr-only">Search projects</label>
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <input
+                id="project-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search projects and outcomes"
+                className="input min-h-11 pl-9 pr-10 sm:min-h-9"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear project search"
+                  title="Clear search"
+                  className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              ) : null}
+            </div>
             <button
-              key={filter.id}
               type="button"
-              aria-pressed={statusFilter === filter.id}
-              onClick={() => setStatusFilter(filter.id)}
+              onClick={() => setCreating((v) => !v)}
               className={cn(
-                'min-h-11 rounded-[8px] px-3 text-xs font-medium transition-colors sm:min-h-9',
-                statusFilter === filter.id
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground',
+                'inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors sm:min-h-9',
+                creating
+                  ? 'bg-bg-sunken text-muted-foreground'
+                  : 'bg-primary text-primary-foreground hover:opacity-90',
               )}
             >
-              {filter.label}
+              {creating ? <X className="size-3.5" aria-hidden /> : <Plus className="size-3.5" aria-hidden />}
+              {creating ? 'Cancel' : (
+                <>
+                  <span className="hidden sm:inline">New project</span>
+                  <span className="sm:hidden">New</span>
+                </>
+              )}
             </button>
-          ))}
-        </div>
-        <label className="flex w-fit items-center gap-2 text-xs text-muted-foreground">
-          <span>Sort</span>
-          <select
-            value={projectSort}
-            onChange={(event) => setProjectSort(event.target.value as ProjectSort)}
-            className="input min-h-11 w-auto pr-8 sm:min-h-9"
-          >
-            <option value="name">Name</option>
-            <option value="due">Due date</option>
-            <option value="recent">Recent work</option>
-          </select>
-        </label>
+          </div>
+
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <div
+              role="group"
+              aria-label="Project status"
+              className="grid w-full grid-cols-4 items-center gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:w-auto"
+            >
+              {STATUS_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  aria-pressed={statusFilter === filter.id}
+                  onClick={() => setStatusFilter(filter.id)}
+                  className={cn(
+                    'min-h-10 rounded-md px-3 text-xs font-medium transition-colors sm:min-h-8',
+                    statusFilter === filter.id
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+            <label className="flex min-h-10 items-center gap-2 text-xs text-muted-foreground sm:min-h-8">
+              <span>Sort</span>
+              <select
+                value={projectSort}
+                onChange={(event) => setProjectSort(event.target.value as ProjectSort)}
+                className="input min-h-10 w-auto pr-8 sm:min-h-8"
+              >
+                <option value="name">Name</option>
+                <option value="due">Due date</option>
+                <option value="recent">Recent work</option>
+              </select>
+            </label>
+            <span className="ml-auto font-mono text-[11px] uppercase text-subtle-foreground">
+              {filteredCardData.length} shown
+            </span>
+          </div>
+        </section>
 
         {creating ? (
           <CreateProjectForm
@@ -611,10 +619,10 @@ export function ProjectsBoard() {
           </div>
         ) : filteredCardData.length === 0 && !creating ? (
           <div className="surface flex h-64 flex-col items-center justify-center gap-2 text-center">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+            <div className="font-mono text-[10px] uppercase text-subtle-foreground">
               projects
             </div>
-            <h3 className="text-xl font-semibold tracking-tight">
+            <h3 className="text-xl font-semibold">
               {searchQuery || statusFilter !== 'all' ? 'No matching projects.' : 'A clean slate.'}
             </h3>
             <p className="max-w-xs text-sm text-muted-foreground">
