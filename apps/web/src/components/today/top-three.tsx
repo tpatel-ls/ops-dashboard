@@ -61,12 +61,8 @@ export function TopThree() {
             return (
               <li
                 key={task.id}
-                onClick={(e) => {
-                  if ((e.target as HTMLElement).closest('button')) return;
-                  openEdit(task.id);
-                }}
                 className={cn(
-                  'surface group relative flex cursor-pointer items-center gap-3 px-4 py-3 transition-all',
+                  'surface group relative flex items-center gap-2 px-3 py-2 transition-all sm:gap-3 sm:px-4',
                   'hover:border-border-strong hover:shadow-[0_6px_24px_-14px_rgba(0,0,0,0.5)]',
                 )}
               >
@@ -91,22 +87,26 @@ export function TopThree() {
                     hapticSuccess();
                     void setTaskStatus(task.id, 'done');
                   }}
-                  className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10"
-                  aria-label="Mark done"
+                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10 hover:text-primary"
+                  aria-label={`Complete ${task.title}`}
                 >
                   <Check className="size-3" strokeWidth={3} aria-hidden />
                 </button>
 
-                <span className="min-w-0 flex-1 truncate text-[14px] font-medium leading-5">
+                <button
+                  type="button"
+                  onClick={() => openEdit(task.id)}
+                  className="min-w-0 flex-1 truncate py-2 text-left text-[14px] font-medium leading-5 hover:text-primary"
+                >
                   {task.title}
-                </span>
+                </button>
 
                 {/* unstar button */}
                 <button
                   type="button"
                   onClick={() => updateTask(task.id, { starred: false })}
-                  className="shrink-0 text-primary opacity-70 transition-opacity hover:opacity-100"
-                  aria-label="Unstar task"
+                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-primary opacity-80 transition-colors hover:bg-accent hover:opacity-100"
+                  aria-label={`Remove ${task.title} from daily mission`}
                 >
                   <Star className="size-4" fill="currentColor" aria-hidden />
                 </button>
