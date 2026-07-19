@@ -19,6 +19,12 @@ import { QuickTaskEntry } from '@/components/quick-task-entry';
 
 type StatusFilter = 'open' | 'done' | 'all';
 
+const STATUS_TABS: Array<{ id: StatusFilter; label: string }> = [
+  { id: 'open', label: 'Open' },
+  { id: 'done', label: 'Done' },
+  { id: 'all', label: 'All' },
+];
+
 // ─── Priority helpers ────────────────────────────────────────────────────────
 
 const PRIORITY_CLASS: Record<Priority, string> = {
@@ -55,7 +61,7 @@ function FilterDropdown({ label, value, options, onChange, placeholder }: Dropdo
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-[10px] border px-3 py-1.5 text-[12px] font-medium transition-all',
+          'inline-flex min-h-10 max-w-44 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-all sm:min-h-8',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
           value
             ? 'border-primary/40 bg-primary-soft text-primary'
@@ -92,7 +98,7 @@ function FilterDropdown({ label, value, options, onChange, placeholder }: Dropdo
                   type="button"
                   onClick={() => { onChange(null); setOpen(false); }}
                   className={cn(
-                    'w-full px-3 py-1.5 text-left text-[13px] text-muted-foreground hover:bg-bg-sunken transition-colors',
+                    'min-h-9 w-full px-3 py-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:bg-bg-sunken',
                     !value && 'text-foreground font-medium',
                   )}
                 >
@@ -105,7 +111,7 @@ function FilterDropdown({ label, value, options, onChange, placeholder }: Dropdo
                     type="button"
                     onClick={() => { onChange(opt.id); setOpen(false); }}
                     className={cn(
-                      'w-full px-3 py-1.5 text-left text-[13px] hover:bg-bg-sunken transition-colors flex items-center gap-2',
+                      'flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors hover:bg-bg-sunken',
                       value === opt.id ? 'text-primary font-medium' : 'text-foreground',
                     )}
                   >
@@ -158,7 +164,7 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
         openEdit(task.id);
       }}
       className={cn(
-        'group surface-flat relative flex cursor-pointer items-start gap-3 px-4 py-3 transition-all',
+        'group surface-flat relative flex cursor-pointer items-start gap-2.5 px-3 py-3 transition-all sm:gap-3 sm:px-4',
         'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]',
         done && 'opacity-60',
       )}
@@ -180,14 +186,22 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
         type="button"
         onClick={() => setTaskStatus(task.id, done ? 'todo' : 'done')}
         className={cn(
-          'mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
+          '-ml-2 -mt-1.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors',
           done
-            ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border-strong text-transparent hover:border-primary hover:bg-primary/10',
+            ? 'text-primary'
+            : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
         )}
         aria-label={done ? 'Mark as todo' : 'Mark as done'}
       >
-        <Check className="size-3" strokeWidth={3} aria-hidden />
+        <span
+          className={cn(
+            'inline-flex size-5 items-center justify-center rounded-full border',
+            done ? 'border-primary bg-primary text-primary-foreground' : 'border-current text-transparent',
+          )}
+          aria-hidden
+        >
+          <Check className="size-3" strokeWidth={3} />
+        </span>
       </button>
 
       {/* Main content */}
@@ -195,7 +209,7 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
         <div className="flex items-baseline gap-2">
           <span
             className={cn(
-              'truncate text-[14px] leading-5',
+              'line-clamp-2 text-[14px] leading-5',
               done && 'text-muted-foreground line-through decoration-muted-foreground/50',
             )}
           >
@@ -432,124 +446,115 @@ export function TasksView() {
 
   const count = filteredTasks?.length ?? 0;
 
-  const STATUS_TABS: Array<{ id: StatusFilter; label: string }> = [
-    { id: 'open', label: 'Open' },
-    { id: 'done', label: 'Done' },
-    { id: 'all', label: 'All' },
-  ];
-
   return (
     <div className="flex flex-col gap-4">
       <QuickTaskEntry id="tasks-page-task-title" compact />
 
-      {/* Control bar */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative order-first w-full sm:order-none sm:w-56">
-          <label htmlFor="task-search" className="sr-only">Search tasks</label>
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <input
-            id="task-search"
-            type="search"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search tasks"
-            className="input min-h-11 pl-9 pr-10 sm:min-h-9"
-          />
-          {searchQuery ? (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              aria-label="Clear task search"
-              title="Clear search"
-              className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-            >
-              <X className="size-3.5" aria-hidden />
-            </button>
-          ) : null}
-        </div>
-
-        {/* Status tabs */}
-        <div
-          role="group"
-          aria-label="Task status"
-          className="inline-flex items-center gap-0.5 rounded-[10px] border border-border bg-bg-sunken p-0.5"
-        >
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              aria-pressed={statusFilter === tab.id}
-              onClick={() => setStatusFilter(tab.id)}
-              className={cn(
-                'min-h-11 rounded-[8px] px-3 py-1 text-[12px] font-medium transition-all sm:min-h-9',
-                statusFilter === tab.id
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Separator */}
-        <div className="h-4 w-px bg-border" aria-hidden />
-
-        {/* Domain filter */}
-        {data && data.activeDomains.length > 0 && (
-          <FilterDropdown
-            label="Domain"
-            value={domainFilter}
-            options={data.activeDomains
-              .sort((a, b) => a.order - b.order)
-              .map((d) => ({ id: d.id, name: d.name, color: d.color }))}
-            onChange={setDomainFilter}
-            placeholder="All domains"
-          />
-        )}
-
-        {/* Project filter */}
-        {data && data.activeProjects.length > 0 && (
-          <FilterDropdown
-            label="Project"
-            value={effectiveProjectFilter}
-            options={data.activeProjects
-              .filter((p) => matchesOrgContext(p.orgId, ctx))
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((p) => ({ id: p.id, name: p.name, color: p.color }))}
-            onChange={setProjectFilter}
-            placeholder="All projects"
-          />
-        )}
-
-        {/* Clear filters */}
-        {(effectiveProjectFilter || domainFilter) && (
+      <section aria-label="Task controls" className="surface flex flex-col gap-3 p-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="relative min-w-0 flex-1 sm:max-w-sm">
+            <label htmlFor="task-search" className="sr-only">Search tasks</label>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              id="task-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search tasks and projects"
+              className="input min-h-11 pl-9 pr-10 sm:min-h-9"
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear task search"
+                title="Clear search"
+                className="absolute right-1 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3.5" aria-hidden />
+              </button>
+            ) : null}
+          </div>
           <button
             type="button"
-            onClick={() => { setProjectFilter(null); setDomainFilter(null); }}
-            className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground hover:text-destructive transition-colors"
+            onClick={() => openWorkLogger('task')}
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground sm:min-h-9"
           >
-            Clear
+            <Plus className="size-3.5" aria-hidden />
+            <span className="hidden sm:inline">New task</span>
+            <span className="sm:hidden">New</span>
           </button>
-        )}
-
-        <button
-          type="button"
-          onClick={() => openWorkLogger('task')}
-          className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground sm:min-h-9"
-        >
-          <Plus className="size-3.5" aria-hidden />
-          New task
-        </button>
-
-        {/* Count */}
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-subtle-foreground">
-          {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
         </div>
-      </div>
+
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div
+            role="group"
+            aria-label="Task status"
+            className="grid w-full grid-cols-3 items-center gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:w-auto"
+          >
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                aria-pressed={statusFilter === tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={cn(
+                  'min-h-10 rounded-md px-3 py-1 text-[12px] font-medium transition-all sm:min-h-8',
+                  statusFilter === tab.id
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Domain filter */}
+          {data && data.activeDomains.length > 0 && (
+            <FilterDropdown
+              label="Domain"
+              value={domainFilter}
+              options={data.activeDomains
+                .sort((a, b) => a.order - b.order)
+                .map((d) => ({ id: d.id, name: d.name, color: d.color }))}
+              onChange={setDomainFilter}
+              placeholder="All domains"
+            />
+          )}
+
+          {/* Project filter */}
+          {data && data.activeProjects.length > 0 && (
+            <FilterDropdown
+              label="Project"
+              value={effectiveProjectFilter}
+              options={data.activeProjects
+                .filter((p) => matchesOrgContext(p.orgId, ctx))
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((p) => ({ id: p.id, name: p.name, color: p.color }))}
+              onChange={setProjectFilter}
+              placeholder="All projects"
+            />
+          )}
+
+          {(effectiveProjectFilter || domainFilter) && (
+            <button
+              type="button"
+              onClick={() => { setProjectFilter(null); setDomainFilter(null); }}
+              className="font-mono text-[11px] uppercase text-muted-foreground transition-colors hover:text-destructive"
+            >
+              Clear
+            </button>
+          )}
+
+          <div className="ml-auto font-mono text-[11px] uppercase text-subtle-foreground">
+            {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
+          </div>
+        </div>
+      </section>
 
       {/* Task list */}
       {filteredTasks === null ? (
