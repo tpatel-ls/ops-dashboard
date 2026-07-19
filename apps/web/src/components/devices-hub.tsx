@@ -122,24 +122,17 @@ export function DevicesHub() {
 
   return (
     <div className="flex min-w-0 flex-col gap-5">
-      <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-border bg-card p-4 shadow-sm md:p-6">
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,color-mix(in_oklch,var(--primary)_28%,transparent),transparent_34%),radial-gradient(circle_at_88%_10%,color-mix(in_oklch,var(--success)_18%,transparent),transparent_36%)]"
-        />
-        <div className="relative flex min-w-0 flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 max-w-2xl">
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+            <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <Radio className="size-3.5 text-primary" aria-hidden />
-              One system, every device
+              Device overview
             </div>
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              Capture anywhere. Review everywhere.
-            </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-              The full app runs as a PWA on phone, tablet, Mac, and Windows. The watch
-              stays lean: it sends spoken captures through the paired S24 Ultra into the
-              same triage pipeline.
+            <h2 className="text-lg font-semibold">One workspace on every device</h2>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+              Phone, tablet, Mac, and Windows run the full PWA. The watch sends voice
+              captures through the paired phone into the same task inbox.
             </p>
           </div>
           <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
@@ -149,14 +142,13 @@ export function DevicesHub() {
             <ReadinessPill label="Sync" state={readiness.sync} />
           </div>
         </div>
-        <div className="relative mt-5 grid min-w-0 grid-cols-5 gap-2">
-          {DEVICE_SETUPS.map((device, index) => {
+        <div className="mt-4 grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-5">
+          {DEVICE_SETUPS.map((device) => {
             const Icon = ICONS[device.id];
             return (
               <div
                 key={device.id}
-                className="rounded-[14px] border bg-card/62 px-2 py-2 text-center backdrop-blur"
-                style={{ transform: `translateY(${index % 2 === 0 ? 0 : 6}px)` }}
+                className="rounded-md border bg-bg-sunken px-2 py-2 text-center"
               >
                 <Icon className="mx-auto size-4 text-primary" aria-hidden />
                 <div className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">

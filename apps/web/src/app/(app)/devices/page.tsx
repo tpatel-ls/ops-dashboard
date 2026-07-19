@@ -6,7 +6,9 @@ export default function DevicesPage() {
     <ViewShell
       eyebrow="Deploy"
       title="Devices"
-      subtitle="Galaxy phone, tablet, watch, Mac, and Windows running one owned dashboard."
+      subtitle="Install, verify, and troubleshoot every connected screen."
+      compactHeader
+      fullWidth
     >
       <DevicesHub />
     </ViewShell>
