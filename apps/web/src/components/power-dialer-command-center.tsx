@@ -211,12 +211,13 @@ export function PowerDialerCommandCenter() {
       title="Power Dialer"
       subtitle="Blue text, phone-system integration, rep assist, follow-up, CRM write-back, and manager controls in one launch surface."
       fullWidth
+      compactHeader
       actions={
         <button
           type="button"
           onClick={handleSync}
           disabled={syncing}
-          className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-60"
+          className="hairline inline-flex min-h-11 items-center gap-2 rounded-lg border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-60 sm:min-h-9"
         >
           <Sparkles className="size-3.5 text-primary" aria-hidden />
           {syncing ? 'Syncing' : 'Sync launch plan'}
@@ -224,31 +225,22 @@ export function PowerDialerCommandCenter() {
       }
     >
       <div className="grid min-w-0 gap-5">
-        <section className="surface relative min-w-0 overflow-hidden p-4 md:p-6">
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,color-mix(in_oklch,var(--success)_26%,transparent),transparent_34%),radial-gradient(circle_at_88%_8%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_38%)]"
-          />
-          <div className="relative grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-            <div className="flex min-w-0 flex-col gap-5">
+        <section className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="surface flex min-w-0 flex-col gap-4 p-4 md:p-5">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border bg-card/75 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+                <span className="inline-flex items-center gap-2 rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground">
                   <Radar className="size-3.5 text-primary" aria-hidden />
-                  LSG launch command
+                  Launch command
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full border bg-card/75 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+                <span className="inline-flex items-center gap-2 rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground">
                   <span className="size-1.5 rounded-full bg-success live-dot" aria-hidden />
                   {data?.powerDialer ? 'Power Dialer tracked' : 'Ready to create project'}
                 </span>
               </div>
               <div>
-                <h2 className="max-w-4xl text-3xl font-semibold tracking-tight break-words md:text-5xl">
-                  Build the dialer that makes reps talk, not click.
-                </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
-                  The system plugs into RingCentral or NICE, pulls leads from CRM or upload,
-                  orders the calls, dials in parallel, assists reps live, follows up no-answers,
-                  writes everything back, and gives managers a live operating view.
+                <h2 className="text-lg font-semibold">Launch overview</h2>
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+                  Track integration, dialing, rep assist, follow-up, CRM write-back, and manager controls.
                 </p>
               </div>
               <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -259,7 +251,7 @@ export function PowerDialerCommandCenter() {
               </div>
             </div>
 
-            <div className="min-w-0 rounded-[18px] border bg-card/75 p-4 backdrop-blur">
+            <div className="surface min-w-0 p-4 md:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-semibold tracking-tight">Launch progress</h3>
@@ -283,14 +275,13 @@ export function PowerDialerCommandCenter() {
               </div>
               <Link
                 href="/calendar"
-                className="mt-4 flex items-center gap-2 rounded-[12px] border bg-bg-sunken/70 px-3 py-2.5 text-sm transition-colors hover:bg-accent"
+                className="mt-4 flex min-h-11 items-center gap-2 rounded-lg border bg-bg-sunken px-3 py-2.5 text-sm transition-colors hover:bg-accent"
               >
                 <CalendarDays className="size-4 text-primary" aria-hidden />
                 <span className="min-w-0 flex-1">Open calendar schedule</span>
                 <ArrowRight className="size-3.5 text-subtle-foreground" aria-hidden />
               </Link>
             </div>
-          </div>
         </section>
 
         <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.6fr)]">
