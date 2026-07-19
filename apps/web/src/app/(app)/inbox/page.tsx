@@ -7,6 +7,7 @@ import {
   BookOpen,
   FileText,
   Inbox,
+  Plus,
   Repeat,
   StickyNote,
   Trash2,
@@ -18,6 +19,7 @@ import type { Capture, CaptureKind } from '@ops-dashboard/core';
 import { dismissCapture, deleteCapture } from '@/lib/captures';
 import { ViewShell } from '@/components/view-shell';
 import { cn } from '@ops-dashboard/ui';
+import { useAppStore } from '@/lib/app-store';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */
@@ -152,6 +154,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
 /* ------------------------------------------------------------------ */
 
 export default function InboxPage() {
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   const captures = useLiveQuery(async () => {
     const db = getDb();
     const all = await db.captures.toArray();
@@ -172,13 +175,14 @@ export default function InboxPage() {
     <ViewShell
       eyebrow="Plan"
       title="Inbox"
-      subtitle="Everything you captured - review, route, and clear."
+      subtitle="Review captured work, route it, and keep the queue clear."
       meta={meta}
+      compactHeader
     >
       {captures === undefined ? (
         <SkeletonRows />
       ) : captures.length === 0 ? (
-        <EmptyState />
+        <EmptyState onCapture={() => openWorkLogger('task')} />
       ) : (
         <ul className="flex flex-col gap-2">
           {captures.map((cap) => (
@@ -200,17 +204,24 @@ function SkeletonRows() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ onCapture }: { onCapture: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-      <span className="flex size-12 items-center justify-center rounded-[14px] bg-bg-sunken text-subtle-foreground">
-        <Inbox className="size-6" aria-hidden />
+    <div className="surface flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
+      <span className="flex size-9 items-center justify-center rounded-lg bg-bg-sunken text-subtle-foreground">
+        <Inbox className="size-4" aria-hidden />
       </span>
-      <p className="text-sm font-medium text-foreground">A clean slate.</p>
+      <p className="text-sm font-semibold text-foreground">Inbox cleared</p>
       <p className="max-w-xs text-xs text-muted-foreground">
-        Nothing in your capture inbox. Use the quick-add bar or press{' '}
-        <kbd className="kbd">Space</kbd> to start capturing thoughts.
+        Capture the next task before it gets lost.
       </p>
+      <button
+        type="button"
+        onClick={onCapture}
+        className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-primary-foreground"
+      >
+        <Plus className="size-3.5" aria-hidden />
+        Capture task
+      </button>
     </div>
   );
 }
