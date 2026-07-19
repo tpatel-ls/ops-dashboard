@@ -7,6 +7,7 @@ export default function TasksPage() {
       eyebrow="Plan"
       title="Tasks"
       subtitle="Capture, organize, and complete your work."
+      compactHeader
     >
       <TasksView />
     </ViewShell>
