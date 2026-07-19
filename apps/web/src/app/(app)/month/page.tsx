@@ -3,7 +3,13 @@ import { MonthGrid } from '@/components/month-grid';
 
 export default function MonthPage() {
   return (
-    <ViewShell eyebrow="Plan" title="Month" subtitle="Pick a day to triage in the side panel.">
+    <ViewShell
+      eyebrow="Plan"
+      title="Month"
+      subtitle="Review every scheduled task by day."
+      compactHeader
+      fullWidth
+    >
       <MonthGrid />
     </ViewShell>
   );
