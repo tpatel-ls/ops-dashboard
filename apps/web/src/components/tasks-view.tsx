@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Task, Priority } from '@ops-dashboard/core';
 import { format, parseISO, isToday, isPast } from 'date-fns';
-import { Check, Star, ChevronDown, Circle, Plus, Search, X } from 'lucide-react';
+import { CalendarClock, Check, Star, ChevronDown, Circle, Plus, Search, X } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
@@ -151,10 +151,10 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
   const dueChipClass = useMemo(() => {
     if (!task.dueAt) return '';
     const due = parseISO(task.dueAt);
-    if (done) return 'text-muted-foreground';
-    if (isPast(due) && !isToday(due)) return 'text-destructive font-semibold';
-    if (isToday(due)) return 'text-warning font-semibold';
-    return 'text-muted-foreground';
+    if (done) return 'border-border bg-bg-sunken text-muted-foreground';
+    if (isPast(due) && !isToday(due)) return 'border-destructive/30 bg-destructive/10 text-destructive font-semibold';
+    if (isToday(due)) return 'border-warning/30 bg-warning/10 text-warning font-semibold';
+    return 'border-border bg-bg-sunken text-muted-foreground';
   }, [task.dueAt, done]);
 
   return (
@@ -231,12 +231,14 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
         {/* Meta row */}
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
           {task.dueAt && (
-            <span className={cn('font-mono text-[11px]', dueChipClass)}>
+            <span className={cn('inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]', dueChipClass)}>
+              <CalendarClock className="size-3" aria-hidden />
               Due {format(parseISO(task.dueAt), 'MMM d')}
             </span>
           )}
           {task.scheduledFor && !task.dueAt && (
-            <span className="font-mono text-[11px] text-subtle-foreground">
+            <span className="inline-flex items-center gap-1 rounded-md bg-bg-sunken px-1.5 py-0.5 text-[10px] text-subtle-foreground">
+              <CalendarClock className="size-3" aria-hidden />
               {format(parseISO(`${task.scheduledFor}T00:00:00`), 'EEE d MMM')}
             </span>
           )}
