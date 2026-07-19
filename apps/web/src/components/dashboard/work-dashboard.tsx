@@ -116,6 +116,7 @@ export function WorkDashboard() {
                   empty="No upcoming tasks scheduled."
                   onOpen={openEdit}
                   onAdd={focusQuickTask}
+                  timeline
                 />
               </section>
             </div>
@@ -249,6 +250,7 @@ function TaskSection({
   empty,
   onOpen,
   onAdd,
+  timeline = false,
 }: {
   tasks: Task[];
   projects: Project[];
@@ -257,6 +259,7 @@ function TaskSection({
   empty: string;
   onOpen: (id: string) => void;
   onAdd: () => void;
+  timeline?: boolean;
 }) {
   if (tasks.length === 0) {
     return (
@@ -280,6 +283,7 @@ function TaskSection({
           organization={organizations.find((organization) => organization.id === task.orgId)}
           today={today}
           onOpen={() => onOpen(task.id)}
+          timeline={timeline}
         />
       ))}
     </ul>
@@ -292,12 +296,14 @@ function DashboardTaskRow({
   organization,
   today,
   onOpen,
+  timeline,
 }: {
   task: Task;
   project?: Project;
   organization?: Organization;
   today: string;
   onOpen: () => void;
+  timeline: boolean;
 }) {
   const date = task.scheduledFor ?? task.dueAt?.slice(0, 10) ?? task.startAt?.slice(0, 10);
   const overdue = Boolean(date && date < today);
@@ -310,6 +316,7 @@ function DashboardTaskRow({
         : date;
   return (
     <li className="group flex min-w-0 items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-accent/35 sm:px-4">
+      {timeline && parsedDate && isValid(parsedDate) ? <DateBadge date={parsedDate} /> : null}
       <button
         type="button"
         onClick={() => void setTaskStatus(task.id, 'done')}
@@ -332,7 +339,7 @@ function DashboardTaskRow({
             <span className="size-1.5 rounded-full" style={{ background: organization?.color ?? PERSONAL_COLOR }} aria-hidden />
             {organization?.name ?? 'Personal'}
           </span>
-          {dateLabel ? (
+          {dateLabel && !timeline ? (
             <span className={cn('font-medium', overdue ? 'text-destructive' : 'text-muted-foreground')}>
               {overdue ? `Overdue ${dateLabel}` : dateLabel}
             </span>
@@ -347,6 +354,19 @@ function DashboardTaskRow({
         />
       ) : null}
     </li>
+  );
+}
+
+function DateBadge({ date }: { date: Date }) {
+  return (
+    <span className="mt-0.5 flex w-9 shrink-0 flex-col items-center rounded-md border bg-bg-sunken px-1 py-1 text-center leading-none">
+      <span className="font-mono text-[9px] uppercase text-subtle-foreground">
+        {format(date, 'MMM')}
+      </span>
+      <strong className="mt-0.5 font-mono text-sm font-semibold tabular-nums text-foreground">
+        {format(date, 'd')}
+      </strong>
+    </span>
   );
 }
 
