@@ -301,29 +301,50 @@ function DashboardTaskRow({
 }) {
   const date = task.scheduledFor ?? task.dueAt?.slice(0, 10) ?? task.startAt?.slice(0, 10);
   const overdue = Boolean(date && date < today);
+  const parsedDate = date ? parseISO(date) : null;
+  const dateLabel =
+    date === today
+      ? 'Today'
+      : parsedDate && isValid(parsedDate)
+        ? format(parsedDate, 'MMM d')
+        : date;
   return (
-    <li className="group flex min-w-0 items-center gap-2.5 px-3 py-2.5 sm:px-4">
+    <li className="group flex min-w-0 items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-accent/35 sm:px-4">
       <button
         type="button"
         onClick={() => void setTaskStatus(task.id, 'done')}
         aria-label={`Complete ${task.title}`}
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-success/10 hover:text-success"
+        className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-success/10 hover:text-success"
       >
         <span className="size-4 rounded-full border border-current" aria-hidden />
+        <Check className="absolute size-3 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
       </button>
       <button type="button" onClick={onOpen} className="min-w-0 flex-1 py-1 text-left">
-        <span className="block truncate text-sm font-medium">{task.title}</span>
-        <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-subtle-foreground">
-          {project ? <span className="truncate">{project.name}</span> : null}
+        <span className="line-clamp-2 text-sm font-medium leading-5">{task.title}</span>
+        <span className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-subtle-foreground">
+          {project ? (
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-muted-foreground">
+              <span className="size-1.5 shrink-0 rounded-sm" style={{ background: project.color }} aria-hidden />
+              <span className="max-w-44 truncate">{project.name}</span>
+            </span>
+          ) : null}
           <span className="inline-flex items-center gap-1">
             <span className="size-1.5 rounded-full" style={{ background: organization?.color ?? PERSONAL_COLOR }} aria-hidden />
             {organization?.name ?? 'Personal'}
           </span>
-          {date ? <span className={cn(overdue && 'text-destructive')}>{date === today ? 'Today' : date}</span> : null}
+          {dateLabel ? (
+            <span className={cn('font-medium', overdue ? 'text-destructive' : 'text-muted-foreground')}>
+              {overdue ? `Overdue ${dateLabel}` : dateLabel}
+            </span>
+          ) : null}
         </span>
       </button>
       {task.priority >= 2 ? (
-        <span className={cn('size-2 shrink-0 rounded-full', task.priority === 3 ? 'bg-destructive' : 'bg-warning')} title={task.priority === 3 ? 'Critical' : 'Important'} />
+        <span
+          className={cn('mt-2.5 size-2 shrink-0 rounded-full', task.priority === 3 ? 'bg-destructive' : 'bg-warning')}
+          title={task.priority === 3 ? 'Critical priority' : 'Important priority'}
+          aria-label={task.priority === 3 ? 'Critical priority' : 'Important priority'}
+        />
       ) : null}
     </li>
   );
