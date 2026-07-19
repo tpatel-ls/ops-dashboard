@@ -301,8 +301,14 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
       <div
         role="button"
         tabIndex={0}
+        aria-expanded={isOpen}
         onClick={onToggle}
-        onKeyDown={(e) => e.key === 'Enter' && onToggle()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
         className={cn(
           'surface-flat cursor-pointer px-3 py-3 transition-all',
           'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]',
@@ -319,7 +325,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="shrink-0 text-subtle-foreground hover:text-primary"
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-subtle-foreground hover:bg-accent hover:text-primary"
               aria-label="Open link"
             >
               <ExternalLink className="size-3.5" />
@@ -424,7 +430,7 @@ interface ColumnProps {
 function Column({ status, label, items, domains, openId, onToggle }: ColumnProps) {
   const domainMap = Object.fromEntries(domains.map((d) => [d.id, d]));
   return (
-    <div className="flex min-w-[220px] flex-col gap-2 lg:min-w-[200px] xl:min-w-[220px]">
+    <div className="flex min-w-0 flex-col gap-2">
       {/* column header */}
       <div className="flex items-center gap-2 px-0.5">
         <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
@@ -439,7 +445,7 @@ function Column({ status, label, items, domains, openId, onToggle }: ColumnProps
       {/* cards */}
       <div className="flex flex-col gap-1.5">
         {items.length === 0 ? (
-          <div className="surface-flat flex h-20 items-center justify-center rounded-[10px] text-[11px] text-subtle-foreground">
+          <div className="surface-flat flex h-20 items-center justify-center rounded-md text-[11px] text-subtle-foreground">
             Empty
           </div>
         ) : (
@@ -580,21 +586,19 @@ export function ContentBoard() {
         <EmptyState />
       ) : (
         <>
-          {/* kanban columns - lg+ only */}
-          <div className="hidden overflow-x-auto pb-4 lg:block scrollbar-thin">
-            <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
-              {STATUSES.map((s) => (
-                <Column
-                  key={s.key}
-                  status={s.key}
-                  label={s.label}
-                  items={byStatus[s.key]}
-                  domains={domains ?? []}
-                  openId={openId}
-                  onToggle={toggleOpen}
-                />
-              ))}
-            </div>
+          {/* responsive kanban grid for larger screens */}
+          <div className="hidden min-w-0 grid-cols-2 gap-3 lg:grid xl:grid-cols-4 2xl:grid-cols-7">
+            {STATUSES.map((s) => (
+              <Column
+                key={s.key}
+                status={s.key}
+                label={s.label}
+                items={byStatus[s.key]}
+                domains={domains ?? []}
+                openId={openId}
+                onToggle={toggleOpen}
+              />
+            ))}
           </div>
 
           {/* grouped list - phone */}
