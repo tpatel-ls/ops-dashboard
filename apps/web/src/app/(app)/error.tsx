@@ -8,6 +8,7 @@ export default function AppError({ reset }: { error: Error & { digest?: string }
     <div className="mx-auto flex h-full w-full max-w-[1360px] items-center justify-center p-4 md:p-7">
       <section
         role="alert"
+        aria-live="assertive"
         aria-labelledby="app-error-title"
         className="surface w-full max-w-xl px-5 py-8 text-center sm:px-8 sm:py-10"
       >
@@ -21,12 +22,12 @@ export default function AppError({ reset }: { error: Error & { digest?: string }
         <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
           Your saved data is unchanged. Retry the view or return to the work dashboard.
         </p>
-        <div className="mt-7 flex flex-col justify-center gap-2 sm:flex-row">
-          <button type="button" className="btn-primary justify-center" onClick={reset}>
+        <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
+          <button type="button" className="btn-primary min-h-11 w-full justify-center sm:w-auto" onClick={reset} autoFocus>
             <RefreshCw className="size-4" aria-hidden />
             Try again
           </button>
-          <Link href="/dashboard" className="btn-secondary justify-center">
+          <Link href="/dashboard" className="btn-secondary min-h-11 w-full justify-center sm:w-auto">
             <LayoutDashboard className="size-4" aria-hidden />
             Work dashboard
           </Link>
