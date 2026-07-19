@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 import {
   Calendar,
+  CalendarDays,
+  CalendarRange,
   Check,
   FolderKanban,
   Inbox,
@@ -33,6 +35,8 @@ const NAV = [
   { id: 'nav-tasks', label: 'Tasks', href: '/tasks', icon: ListTodo, hint: 'g t' },
   { id: 'nav-projects', label: 'Projects', href: '/projects', icon: FolderKanban, hint: 'g p' },
   { id: 'nav-calendar', label: 'Calendar', href: '/calendar', icon: Calendar, hint: 'g c' },
+  { id: 'nav-week', label: 'Week', href: '/week', icon: CalendarRange, hint: 'g w' },
+  { id: 'nav-month', label: 'Month', href: '/month', icon: CalendarDays, hint: 'g m' },
   { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g i' },
   { id: 'nav-kanban', label: 'Kanban', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
   { id: 'nav-power-dialer', label: 'Power Dialer', href: '/power-dialer', icon: PhoneCall, hint: 'g l' },
@@ -52,7 +56,7 @@ export function CommandPalette() {
   const [adding, startAdd] = useTransition();
 
   const lanes: { ctx: OrgContext; label: string; color: string }[] = [
-    { ctx: 'all', label: 'All', color: 'var(--primary)' },
+    { ctx: 'all', label: 'All work', color: 'var(--primary)' },
     ...(orgs ?? []).map((o) => ({ ctx: o.id as OrgContext, label: o.name, color: o.color })),
     { ctx: 'personal', label: 'Personal', color: PERSONAL_COLOR },
   ];
