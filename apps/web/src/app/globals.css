@@ -3,8 +3,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --radius-card: 14px;
-  --radius-button: 10px;
+  --radius-card: 8px;
+  --radius-button: 7px;
 
   /* Light: warm paper. Linear meets a paper notebook. */
   --bg-base: oklch(0.985 0.005 80);
@@ -121,6 +121,19 @@
   border-color: var(--border);
 }
 
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
 main,
 main * {
   min-width: 0;
@@ -187,16 +200,20 @@ html {
 }
 
 body {
-  background-image:
-    radial-gradient(1200px 600px at 100% -10%, color-mix(in oklch, var(--primary) 14%, transparent), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, color-mix(in oklch, var(--ring) 8%, transparent), transparent 55%);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--primary) 4%, var(--bg-base)),
+    var(--bg-base) 18rem
+  );
   background-attachment: fixed;
 }
 
 .dark body {
-  background-image:
-    radial-gradient(1200px 600px at 100% -10%, color-mix(in oklch, var(--primary) 18%, transparent), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, color-mix(in oklch, var(--ring) 10%, transparent), transparent 55%);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--primary) 5%, var(--bg-base)),
+    var(--bg-base) 18rem
+  );
 }
 
 .dot-grid {
@@ -223,8 +240,8 @@ body {
       var(--card)
     );
   box-shadow:
-    0 1px 0 color-mix(in oklch, white 38%, transparent) inset,
-    0 18px 48px -40px color-mix(in oklch, var(--foreground) 55%, transparent);
+    0 1px 0 color-mix(in oklch, white 30%, transparent) inset,
+    0 12px 34px -28px color-mix(in oklch, var(--foreground) 45%, transparent);
 }
 
 .os-panel::before {
@@ -239,13 +256,13 @@ body {
 }
 
 .command-surface {
-  border: 1px solid color-mix(in oklch, var(--primary) 22%, var(--border));
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, var(--border));
   background:
     linear-gradient(180deg, color-mix(in oklch, var(--card) 94%, var(--primary) 6%), var(--card)),
     var(--card);
   box-shadow:
-    0 24px 70px -42px color-mix(in oklch, var(--primary) 70%, transparent),
-    0 1px 0 color-mix(in oklch, white 35%, transparent) inset;
+    0 14px 36px -30px color-mix(in oklch, var(--primary) 62%, transparent),
+    0 1px 0 color-mix(in oklch, white 28%, transparent) inset;
 }
 
 .surface {
@@ -256,8 +273,7 @@ body {
   border-radius: var(--radius-card);
   box-shadow:
     inset 0 1px 0 0 color-mix(in oklch, var(--foreground) 4%, transparent),
-    0 1px 0 0 color-mix(in oklch, #000 4%, transparent),
-    0 8px 24px -16px color-mix(in oklch, #000 45%, transparent);
+    0 8px 24px -20px color-mix(in oklch, #000 52%, transparent);
 }
 
 .surface-flat {
@@ -338,7 +354,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklch, var(--primary) 35%, transparent);
+  background: color-mix(in oklch, var(--primary) 28%, transparent);
   color: var(--foreground);
 }
 
@@ -348,8 +364,8 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -358,7 +374,7 @@ body {
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: color-mix(in oklch, var(--border-strong) 72%, transparent);
-  border: 3px solid transparent;
+  border: 2px solid transparent;
   border-radius: 999px;
   background-clip: padding-box;
 }
