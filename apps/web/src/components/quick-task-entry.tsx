@@ -15,6 +15,8 @@ import {
   LAST_TASK_PROJECT_KEY,
   resolveRecentProject,
   taskCaptureOverrides,
+  taskScheduleLabel,
+  type TaskSchedule,
 } from '@/lib/task-capture';
 import {
   destinationForProject,
@@ -25,7 +27,11 @@ import {
 } from '@/lib/work-logger';
 import { isActiveProject } from '@/lib/project-query';
 
-type TaskSchedule = 'inbox' | 'today' | 'tomorrow' | 'date';
+const QUICK_SCHEDULES: Array<{ value: Exclude<TaskSchedule, 'date'>; label: string }> = [
+  { value: 'inbox', label: 'Inbox' },
+  { value: 'today', label: 'Today' },
+  { value: 'tomorrow', label: 'Tomorrow' },
+];
 
 interface QuickTaskEntryProps {
   id?: string;
@@ -199,23 +205,46 @@ export function QuickTaskEntry({
         </div>
 
         {!fixedProject ? (
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <button
-              type="button"
-              aria-expanded={detailsOpen}
-              aria-controls={`${id}-details`}
-              onClick={() => setDetailsOpen((open) => !open)}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground sm:min-h-9"
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+            <div
+              role="group"
+              aria-label="Schedule task"
+              className="grid w-full grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1 sm:w-auto"
             >
-              <SlidersHorizontal className="size-3.5" aria-hidden />
-              Details
-              <ChevronDown className={cn('size-3.5 transition-transform', detailsOpen && 'rotate-180')} aria-hidden />
-            </button>
-            <span className="min-w-0 truncate text-xs text-subtle-foreground">
-              {destinationLabel}
-              {schedule === 'inbox' ? ' / Inbox' : schedule === 'date' ? ` / ${scheduledDate}` : ` / ${schedule}`}
-              {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
-            </span>
+              {QUICK_SCHEDULES.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={schedule === option.value}
+                  onClick={() => setSchedule(option.value)}
+                  className={cn(
+                    'min-h-10 rounded-md px-3 text-xs font-medium transition-colors sm:min-h-8',
+                    schedule === option.value
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex min-w-0 items-center gap-2 sm:ml-auto">
+              <button
+                type="button"
+                aria-expanded={detailsOpen}
+                aria-controls={`${id}-details`}
+                onClick={() => setDetailsOpen((open) => !open)}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground sm:min-h-8"
+              >
+                <SlidersHorizontal className="size-3.5" aria-hidden />
+                Details
+                <ChevronDown className={cn('size-3.5 transition-transform', detailsOpen && 'rotate-180')} aria-hidden />
+              </button>
+              <span className="min-w-0 flex-1 truncate text-xs text-subtle-foreground sm:max-w-64">
+                {destinationLabel} / {taskScheduleLabel(schedule, scheduledDate)}
+                {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
+              </span>
+            </div>
           </div>
         ) : (
           <p className="text-xs text-subtle-foreground">New task in {fixedProject.name}</p>

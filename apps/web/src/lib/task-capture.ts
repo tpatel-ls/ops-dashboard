@@ -2,8 +2,23 @@ import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { destinationOrgId, projectsForDestination, type WorkDestination } from './work-logger';
 import { isActiveProject } from './project-query';
 
+export type TaskSchedule = 'inbox' | 'today' | 'tomorrow' | 'date';
+
 export const LAST_TASK_DESTINATION_KEY = 'ops:last-task-destination';
 export const LAST_TASK_PROJECT_KEY = 'ops:last-task-project';
+
+export function taskScheduleLabel(schedule: TaskSchedule, scheduledDate: string): string {
+  if (schedule === 'inbox') return 'Inbox';
+  if (schedule === 'today') return 'Today';
+  if (schedule === 'tomorrow') return 'Tomorrow';
+  if (!scheduledDate) return 'Pick date';
+
+  const [year, month, day] = scheduledDate.split('-').map(Number);
+  if (!year || !month || !day) return 'Pick date';
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(
+    new Date(Date.UTC(year, month - 1, day)),
+  );
+}
 
 export function resolveRecentProject(
   projects: Project[],
