@@ -1,13 +1,15 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Plus } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
+import { useAppStore } from '@/lib/app-store';
 
 const SLIP_DAYS = 5;
 
 export function SlippingProjects() {
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   const projects = useLiveQuery(async () => {
     const all = await getDb().projects.toArray();
     const threshold = new Date();
@@ -29,7 +31,7 @@ export function SlippingProjects() {
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5">
         <AlertTriangle className="size-3.5 text-warning" aria-hidden />
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-          Slipping
+          Needs attention
         </span>
       </div>
       <ul className="flex flex-col divide-y divide-border">
@@ -51,6 +53,14 @@ export function SlippingProjects() {
             <span className="shrink-0 rounded bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] text-warning">
               {p.kind}
             </span>
+            <button
+              type="button"
+              onClick={() => openWorkLogger('task', p.id)}
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              aria-label={`Add task to ${p.name}`}
+            >
+              <Plus className="size-4" aria-hidden />
+            </button>
           </li>
         ))}
       </ul>
