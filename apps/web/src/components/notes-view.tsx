@@ -77,14 +77,14 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !body.trim()}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save Note'}
         </button>
@@ -132,13 +132,13 @@ function NoteCard({ note }: { note: Note }) {
             </p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="flex shrink-0 items-center gap-1 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
           <button
             type="button"
             onClick={handleFlag}
             title={note.flaggedForReview ? 'Unflag for review' : 'Flag for review'}
             className={cn(
-              'inline-flex size-7 items-center justify-center rounded-md transition-colors',
+              'inline-flex size-9 items-center justify-center rounded-md transition-colors',
               note.flaggedForReview
                 ? 'text-warning'
                 : 'text-muted-foreground hover:text-warning',
@@ -152,7 +152,7 @@ function NoteCard({ note }: { note: Note }) {
             onBlur={() => setConfirming(false)}
             title={confirming ? 'Click again to confirm' : 'Delete note'}
             className={cn(
-              'inline-flex size-7 items-center justify-center rounded-md transition-colors',
+              'inline-flex size-9 items-center justify-center rounded-md transition-colors',
               confirming
                 ? 'bg-destructive text-destructive-foreground'
                 : 'text-muted-foreground hover:text-destructive',
@@ -214,12 +214,12 @@ export function NotesView() {
           type="button"
           onClick={() => setFormOpen(true)}
           className={cn(
-            'flex items-center gap-2 rounded-[14px] border border-dashed border-border px-4 py-4 text-sm text-muted-foreground transition-colors',
+            'flex min-h-12 items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
           <Plus className="size-4" />
-          Capture a note - idea, excerpt, or reference
+          Add note
         </button>
       )}
 

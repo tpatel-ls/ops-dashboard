@@ -83,14 +83,14 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !title.trim()}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Add Book'}
         </button>
@@ -117,7 +117,7 @@ function StarRating({ value, onChange }: { value?: number; onChange: (v: number)
             onClick={() => onChange(star === value ? 0 : star)}
             title={`${star} star${star !== 1 ? 's' : ''}`}
             className={cn(
-              'transition-colors',
+              'inline-flex size-8 items-center justify-center rounded-md transition-colors',
               active ? 'text-warning' : 'text-border-strong hover:text-warning/60',
             )}
           >
@@ -243,7 +243,7 @@ function BookCard({ book, quotes }: BookCardProps) {
             onBlur={() => setConfirming(false)}
             title={confirming ? 'Click again to confirm' : 'Delete book'}
             className={cn(
-              'inline-flex size-7 shrink-0 items-center justify-center rounded-md opacity-0 transition-colors group-hover:opacity-100',
+              'inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-hover:opacity-100',
               confirming
                 ? 'bg-destructive text-destructive-foreground'
                 : 'text-muted-foreground hover:text-destructive',
@@ -257,7 +257,7 @@ function BookCard({ book, quotes }: BookCardProps) {
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <StarRating value={book.rating} onChange={handleRating} />
           <select
-            className="rounded-md border border-border bg-input px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-foreground focus:outline-none"
+            className="h-9 rounded-md border border-border bg-input px-2 font-mono text-[10px] uppercase tracking-[0.12em] text-foreground focus:outline-none"
             value={book.status}
             onChange={(e) => handleStatus(e.target.value as BookStatus)}
           >
@@ -351,7 +351,7 @@ export function BooksView() {
           type="button"
           onClick={() => setFormOpen(true)}
           className={cn(
-            'flex items-center gap-2 rounded-[14px] border border-dashed border-border px-4 py-4 text-sm text-muted-foreground transition-colors',
+            'flex min-h-12 items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
