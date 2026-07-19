@@ -104,6 +104,18 @@ async function verifyResponsiveLayouts(page) {
     '/notepad',
     '/power-dialer',
     '/settings',
+    '/week',
+    '/month',
+    '/today',
+    '/devices',
+    '/people',
+    '/content',
+    '/library',
+    '/ask',
+    '/tags',
+    '/domains',
+    '/whiteboards',
+    '/~offline',
   ];
   const widths = [360, 390, 412, 768, 1024, 1440];
 
@@ -122,6 +134,7 @@ async function verifyResponsiveLayouts(page) {
       }
     }
 
+    await openApp(page, '/dashboard');
     await page.keyboard.press('g');
     await page.keyboard.press('a');
     const dialog = page.getByRole('dialog', { name: 'Add a task' });
