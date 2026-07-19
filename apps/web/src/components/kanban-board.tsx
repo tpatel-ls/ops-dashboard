@@ -11,7 +11,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { Plus } from 'lucide-react';
+import { GripVertical, Plus } from 'lucide-react';
 import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type { Project, Task } from '@ops-dashboard/core';
 import { addTask, updateTask } from '@/lib/tasks';
@@ -43,6 +43,14 @@ const PRIORITY_COLUMNS: Column[] = [
   { id: '1', label: 'Low', color: 'var(--color-priority-low)' },
   { id: '0', label: 'None', color: 'var(--color-subtle-foreground)' },
 ];
+
+const PRIORITY_LABEL = ['', 'Low', 'High', 'Urgent'] as const;
+const PRIORITY_CLASS = [
+  '',
+  'border-priority-low/30 bg-priority-low/10 text-priority-low',
+  'border-priority-med/30 bg-priority-med/10 text-priority-med',
+  'border-priority-urgent/30 bg-priority-urgent/10 text-priority-urgent',
+] as const;
 
 export function KanbanBoard() {
   const [grouping, setGrouping] = useState<Grouping>('status');
@@ -184,14 +192,14 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'surface-flat scrollbar-thin flex min-h-[260px] w-full min-w-0 flex-col overflow-hidden p-2 transition-colors md:h-full md:min-h-[320px] md:w-[280px] md:shrink-0',
+        'surface-flat scrollbar-thin flex min-h-[140px] w-full min-w-0 flex-col overflow-hidden p-2 transition-colors md:h-full md:min-h-[320px] md:w-[280px] md:shrink-0',
         isOver && 'border-primary/50 bg-primary/5',
       )}
     >
       <div className="mb-2 flex min-w-0 items-center gap-2 px-1.5">
         <span aria-hidden className="size-2 rounded-full" style={{ background: column.color }} />
         <span className="min-w-0 truncate text-sm font-semibold tracking-tight">{column.label}</span>
-        <span className="ml-auto font-mono text-[10px] text-subtle-foreground">{tasks.length}</span>
+        <span className="ml-auto rounded-md border bg-card px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-subtle-foreground">{tasks.length}</span>
       </div>
       <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
         {tasks.map((t) => (
@@ -258,9 +266,16 @@ function KanbanCard({
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
-      <div className="min-w-0 truncate">{task.title}</div>
+      <div className="flex min-w-0 items-start gap-2">
+        <span className="line-clamp-2 min-w-0 flex-1 font-medium leading-5">{task.title}</span>
+        <GripVertical className="mt-0.5 size-3.5 shrink-0 text-subtle-foreground" aria-hidden />
+      </div>
       <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[10px] text-subtle-foreground">
-        {task.priority > 0 ? <span className="font-mono">!{task.priority}</span> : null}
+        {task.priority > 0 ? (
+          <span className={cn('rounded-md border px-1.5 py-0.5 font-semibold', PRIORITY_CLASS[task.priority])}>
+            {PRIORITY_LABEL[task.priority]}
+          </span>
+        ) : null}
         {project ? (
           <span
             className="inline-flex min-w-0 items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-accent-foreground"
@@ -270,14 +285,15 @@ function KanbanCard({
               className="size-1.5 rounded-full"
               style={{ background: project.color }}
             />
-            <span className="min-w-0 max-w-[80px] truncate">{project.name}</span>
+            <span className="min-w-0 max-w-[112px] truncate">{project.name}</span>
           </span>
         ) : null}
-        {task.tags.slice(0, 2).map((tag) => (
+        {task.tags.slice(0, 1).map((tag) => (
           <span key={tag} className="rounded bg-accent px-1.5 py-0.5">
             #{tag}
           </span>
         ))}
+        {task.tags.length > 1 ? <span className="text-subtle-foreground">+{task.tags.length - 1}</span> : null}
       </div>
     </div>
   );
