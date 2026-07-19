@@ -6,7 +6,9 @@ export default function WhiteboardsPage() {
     <ViewShell
       eyebrow="Work"
       title="Whiteboards"
-      subtitle="Infinite canvas with first-class S-Pen, palm rejection, and autosave."
+      subtitle="Open a board or create a new planning canvas."
+      compactHeader
+      fullWidth
     >
       <WhiteboardList />
     </ViewShell>

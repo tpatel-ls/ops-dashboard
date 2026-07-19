@@ -25,24 +25,31 @@ export function WhiteboardList() {
           await createWhiteboard(text);
           setName('');
         }}
-        className="surface flex items-center gap-2 px-3 py-2"
+        className="surface flex min-w-0 items-center gap-2 px-3 py-2"
       >
         <Plus className="size-4 text-primary" aria-hidden />
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="New whiteboard"
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+          aria-label="Whiteboard name"
+          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
         />
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+          disabled={!name.trim()}
+          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
         >
           Create
         </button>
       </form>
 
-      {boards?.length === 0 ? (
+      {boards === undefined ? (
+        <div className="grid gap-2 sm:grid-cols-2" aria-busy="true" aria-label="Loading whiteboards">
+          <div className="surface-flat h-36 animate-pulse" />
+          <div className="surface-flat h-36 animate-pulse" />
+        </div>
+      ) : boards.length === 0 ? (
         <div className="surface flex h-40 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
           <Pencil className="size-5 text-primary" aria-hidden />
           No whiteboards yet. Create one above.
@@ -50,30 +57,27 @@ export function WhiteboardList() {
       ) : (
         <ul className="grid gap-2 sm:grid-cols-2">
           {boards?.map((b) => (
-            <li key={b.id}>
+            <li key={b.id} className="surface dot-grid relative h-36 overflow-hidden">
               <Link
                 href={`/whiteboards/${b.id}`}
-                className="surface dot-grid relative flex h-40 flex-col justify-end overflow-hidden p-3 transition-colors hover:border-border-strong"
+                className="flex h-full flex-col justify-between p-3 pr-12 transition-colors hover:bg-accent/30"
               >
-                <div className="absolute inset-x-3 top-3 flex items-center gap-2 text-xs">
+                <div className="flex min-w-0 items-center gap-2 text-xs">
                   <Pencil className="size-3.5 text-primary" aria-hidden />
                   <span className="truncate font-medium text-foreground">{b.name}</span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      softDeleteWhiteboard(b.id);
-                    }}
-                    className="ml-auto inline-flex size-6 items-center justify-center rounded text-subtle-foreground hover:text-destructive"
-                    aria-label="Delete"
-                  >
-                    <Trash2 className="size-3" />
-                  </button>
                 </div>
                 <div className="font-mono text-[10px] text-subtle-foreground">
                   Updated {format(new Date(b.updatedAt), 'MMM d, HH:mm')}
                 </div>
               </Link>
+              <button
+                type="button"
+                onClick={() => void softDeleteWhiteboard(b.id)}
+                className="absolute right-2 top-2 inline-flex size-9 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`Delete ${b.name}`}
+              >
+                <Trash2 className="size-4" aria-hidden />
+              </button>
             </li>
           ))}
         </ul>
