@@ -46,10 +46,10 @@ const KIND_LABELS: Record<ProjectKind, string> = {
 };
 
 const STATUS_CLASSES: Record<ProjectStatus, string> = {
-  active: 'text-success',
-  paused: 'text-warning',
-  done: 'text-muted-foreground',
-  archived: 'text-subtle-foreground',
+  active: 'border-success/30 bg-success/10 text-success',
+  paused: 'border-warning/30 bg-warning/10 text-warning',
+  done: 'border-border bg-bg-sunken text-muted-foreground',
+  archived: 'border-border bg-bg-sunken text-subtle-foreground',
 };
 
 // ─── Milestone section ───────────────────────────────────────────────────────
@@ -710,22 +710,25 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
       {/* Panel */}
       <div
         ref={panelRef}
-        className="relative z-10 flex h-full w-full max-w-lg flex-col bg-background shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-detail-title"
+        className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-border bg-background shadow-2xl"
       >
         {/* Header */}
-        <div className="hairline flex items-start justify-between border-b px-5 py-4">
+        <div className="hairline flex items-start justify-between border-b px-3 py-3 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5">
             <span
               className="size-4 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]"
               style={{ background: project.color }}
             />
             <div>
-              <h2 className="text-[15px] font-semibold leading-tight">{project.name}</h2>
+              <h2 id="project-detail-title" className="text-[15px] font-semibold leading-tight">{project.name}</h2>
               <div className="mt-0.5 flex items-center gap-2">
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
                   {KIND_LABELS[project.kind]}
                 </span>
-                <span className={cn('font-mono text-[10px] uppercase tracking-[0.18em]', STATUS_CLASSES[project.status])}>
+                <span className={cn('rounded-md border px-1.5 py-0.5 text-[10px] font-semibold', STATUS_CLASSES[project.status])}>
                   {STATUS_LABELS[project.status]}
                 </span>
               </div>
@@ -734,7 +737,7 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
             aria-label="Close"
           >
             <X className="size-4" />
@@ -742,8 +745,8 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
         </div>
 
         {/* Body */}
-        <div className="scrollbar-thin flex-1 overflow-y-auto p-5">
-          <div className="flex flex-col gap-6">
+        <div className="scrollbar-thin flex-1 overflow-y-auto p-3 sm:p-5">
+          <div className="flex flex-col gap-5 sm:gap-6">
             {project.description ? (
               <p className="text-sm text-muted-foreground">{project.description}</p>
             ) : null}
