@@ -20,9 +20,9 @@ const PRIORITY_COLOR: Record<Priority, string> = {
 
 const PRIORITY_LABEL: Record<Priority, string> = {
   0: '',
-  1: '!',
-  2: '!!',
-  3: '!!!',
+  1: 'P1',
+  2: 'P2',
+  3: 'P3',
 };
 
 function sortKey(t: Task): string {
@@ -79,7 +79,8 @@ export function OpenTasks() {
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
-        className="mb-2.5 flex w-full items-center gap-2 rounded-[12px] px-1 py-1 text-left transition-colors hover:bg-accent/55"
+        aria-expanded={!collapsed}
+        className="mb-2.5 flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-accent/55"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
           Open Tasks
@@ -107,7 +108,7 @@ export function OpenTasks() {
               ))}
             </ul>
           ) : tasks.length === 0 ? (
-            <div className="os-panel flex min-h-[118px] flex-col items-center justify-center gap-2 rounded-[18px] p-6 text-center">
+            <div className="os-panel flex min-h-[118px] flex-col items-center justify-center gap-2 rounded-lg p-6 text-center">
               <span className="relative font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
                 open tasks
               </span>
@@ -141,12 +142,8 @@ export function OpenTasks() {
                 return (
                   <li
                     key={task.id}
-                    onClick={(e) => {
-                      if ((e.target as HTMLElement).closest('button')) return;
-                      openEdit(task.id);
-                    }}
                     className={cn(
-                      'surface-flat group relative flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-all',
+                      'surface-flat group relative flex items-center gap-2 px-3 py-2 transition-all sm:gap-3 sm:px-4',
                       'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]',
                     )}
                   >
@@ -164,20 +161,25 @@ export function OpenTasks() {
                     <button
                       type="button"
                       onClick={() => setTaskStatus(task.id, 'done')}
-                      className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10"
-                      aria-label="Mark done"
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10 hover:text-primary"
+                      aria-label={`Complete ${task.title}`}
                     >
                       <Check className="size-3" strokeWidth={3} aria-hidden />
                     </button>
 
                     {/* title + meta */}
-                    <div className="min-w-0 flex-1">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(task.id)}
+                      className="min-w-0 flex-1 py-1 text-left"
+                    >
                       <div className="flex items-baseline gap-2">
                         <span className="truncate text-[13px] leading-5">{task.title}</span>
                         {task.priority > 0 && (
                           <span
-                            className="font-mono text-[10px] font-semibold leading-none"
-                            style={{ color: priorityColor }}
+                            className="rounded border px-1 py-0.5 font-mono text-[9px] font-semibold leading-none"
+                            style={{ borderColor: priorityColor, color: priorityColor }}
+                            aria-label={`Priority ${task.priority}`}
                           >
                             {PRIORITY_LABEL[task.priority]}
                           </span>
@@ -211,17 +213,17 @@ export function OpenTasks() {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </button>
 
                     {/* star to promote */}
                     <button
                       type="button"
                       onClick={() => updateTask(task.id, { starred: true })}
                       className={cn(
-                        'shrink-0 text-muted-foreground opacity-0 transition-all group-hover:opacity-100',
+                        'inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-70 transition-all sm:opacity-0 sm:group-hover:opacity-100',
                         'hover:text-primary',
                       )}
-                      aria-label="Star task"
+                      aria-label={`Add ${task.title} to daily mission`}
                     >
                       <Star className="size-4" aria-hidden />
                     </button>
