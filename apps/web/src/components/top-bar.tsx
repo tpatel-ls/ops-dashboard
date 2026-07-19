@@ -56,8 +56,9 @@ export function TopBar() {
           type="button"
           onClick={togglePalette}
           aria-label="Open command search"
+          aria-keyshortcuts="Meta+K Control+K"
           title="Search and commands"
-          className="hairline inline-flex size-9 items-center justify-center rounded-lg border bg-card text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:w-auto lg:gap-2 lg:px-3"
+          className="hairline inline-flex size-10 items-center justify-center rounded-lg border bg-card text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:h-9 lg:w-auto lg:gap-2 lg:px-3"
         >
           <Search className="size-3.5" aria-hidden />
           <span className="hidden lg:inline">Search</span>
@@ -66,7 +67,7 @@ export function TopBar() {
         <Link
           href="/settings"
           aria-label="Settings"
-          className="hairline hidden size-9 items-center justify-center rounded-lg border bg-card text-muted-foreground transition-colors hover:text-foreground lg:inline-flex"
+          className="hairline hidden size-10 items-center justify-center rounded-lg border bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:inline-flex lg:size-9"
         >
           <Settings className="size-4" aria-hidden />
         </Link>
