@@ -82,9 +82,9 @@ export function SettingsForm() {
   }
 
   return (
-    <div className="grid max-w-2xl gap-6">
+    <div className="grid max-w-5xl items-start gap-4 lg:grid-cols-2">
       <Section title="Appearance" description="Light, dark, or follow the system.">
-        <div className="flex gap-2">
+        <div role="group" aria-label="Color theme" className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1">
           {(['light', 'dark', 'system'] as const).map((opt) => (
             <button
               key={opt}
@@ -94,9 +94,9 @@ export function SettingsForm() {
                 patch({ theme: opt });
               }}
               className={cn(
-                'rounded-md border px-3 py-1.5 text-sm capitalize',
+                'min-h-10 rounded-md px-3 text-sm font-medium capitalize',
                 theme === opt
-                  ? 'border-primary bg-primary/10 text-foreground'
+                  ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
@@ -161,7 +161,8 @@ export function SettingsForm() {
 
       <Section
         title="Organizations"
-        description="The orgs you work for. The top-bar switcher scopes Dashboard, Projects, Tasks, Kanban, and Calendar to one lane; everything without an org is Personal."
+        description="Create work lanes for each company or team. Unassigned work stays Personal."
+        wide
       >
         <OrganizationsManager />
       </Section>
@@ -240,7 +241,8 @@ export function SettingsForm() {
 
       <Section
         title="Sync"
-        description="Realtime multi-device sync via Supabase. Disabled by default."
+        description="Keep task and project changes current across signed-in devices."
+        wide
       >
         <Toggle
           label="Enable sync on this device"
@@ -286,7 +288,7 @@ export function SettingsForm() {
         ) : null}
       </Section>
 
-      <Section title="Data" description="Export everything, or import a backup.">
+      <Section title="Data" description="Export everything, or import a backup." wide>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -344,13 +346,15 @@ function Section({
   title,
   description,
   children,
+  wide = false,
 }: {
   title: string;
   description: string;
   children: React.ReactNode;
+  wide?: boolean;
 }) {
   return (
-    <section className="surface p-4">
+    <section className={cn('surface p-4', wide && 'lg:col-span-2')}>
       <header className="mb-3">
         <h2 className="text-sm font-semibold">{title}</h2>
         <p className="text-xs text-muted-foreground">{description}</p>
@@ -381,7 +385,7 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-start justify-between gap-3 rounded-md border bg-input px-3 py-2">
+    <label className="flex cursor-pointer items-start justify-between gap-3 border-t border-border/70 py-3 first:border-t-0">
       <div>
         <div className="text-sm">{label}</div>
         <div className="text-xs text-muted-foreground">{description}</div>
