@@ -6,7 +6,8 @@ export default function CalendarPage() {
     <ViewShell
       eyebrow="Plan"
       title="Calendar"
-      subtitle="Time blocks render from startAt and endAt. Click a block to edit."
+      subtitle="See scheduled work across every organization in one weekly view."
+      compactHeader
     >
       <CalendarWeek />
     </ViewShell>
