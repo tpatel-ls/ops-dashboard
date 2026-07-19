@@ -132,11 +132,12 @@ export function Notepad() {
   return (
     <ViewShell
       eyebrow="Capture"
-      title="Notepad"
-      subtitle="Dump everything on your mind. AI splits it into items and files each one."
+      title="Work notes"
+      subtitle="Capture tasks, decisions, and project updates in one pass."
+      compactHeader
     >
       <div className="flex flex-col gap-5">
-        <div className="command-surface flex flex-col gap-2 rounded-[16px] p-3">
+        <div className="command-surface flex flex-col gap-2 rounded-lg p-3">
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">
             <div className="flex items-center gap-2">
               <span className="flex size-7 items-center justify-center rounded-[9px] bg-primary/10 text-primary">
@@ -144,16 +145,16 @@ export function Notepad() {
               </span>
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-                  Life input
+                  Work intake
                 </div>
-                <div className="text-sm font-semibold tracking-tight">Write once. File everywhere.</div>
+                <div className="text-sm font-semibold">Capture once. Route the work.</div>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              {['tasks', 'meals', 'journal', 'routines'].map((label) => (
+              {['tasks', 'notes', 'decisions', 'updates'].map((label) => (
                 <span
                   key={label}
-                  className="rounded-full border bg-card/65 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-subtle-foreground"
+                  className="rounded-md border bg-card/65 px-2 py-0.5 text-[9px] font-medium uppercase text-subtle-foreground"
                 >
                   {label}
                 </span>
@@ -172,10 +173,10 @@ export function Notepad() {
             }}
             rows={6}
             placeholder={
-              'Anything, in any order. Tasks, meals, thoughts, quotes...\n' +
-              'call Bryan tomorrow 2pm about the RAG prompt\n' +
-              'had 2 eggs and toast for breakfast\n' +
-              'did my morning workout'
+              'Add tasks, decisions, and project updates in any order.\n' +
+              'follow up with the RingCentral owner tomorrow 2pm\n' +
+              'decision: sequence blue text after no-answer calls\n' +
+              'project update: dashboard visuals ready for review'
             }
             className="input min-h-36 resize-none !bg-transparent !border-0 !p-1 text-sm leading-6 focus:!shadow-none"
             disabled={pending || transcribing}
@@ -229,7 +230,7 @@ export function Notepad() {
                 ) : (
                   <Sparkles className="size-3.5" aria-hidden />
                 )}
-                Process
+                Route items
               </button>
             </div>
           </div>
@@ -255,7 +256,7 @@ export function Notepad() {
                 entry.type === 'notice' ? (
                   <li
                     key={entry.id}
-                    className="flex items-center gap-2.5 rounded-[14px] border border-warning/40 bg-warning/10 px-4 py-2.5 text-xs text-warning"
+                    className="flex items-center gap-2.5 rounded-lg border border-warning/40 bg-warning/10 px-4 py-2.5 text-xs text-warning"
                   >
                     <CloudOff className="size-4 shrink-0" aria-hidden />
                     <span>{entry.text}</span>
@@ -288,7 +289,7 @@ function FeedRow({
   return (
     <li
       className={cn(
-        'surface-flat group flex items-center gap-3 rounded-[14px] px-4 py-2.5',
+        'surface-flat group flex items-center gap-3 px-4 py-2.5',
         undone && 'opacity-60',
       )}
     >
@@ -303,7 +304,7 @@ function FeedRow({
       >
         {result.title}
       </span>
-      <span className="shrink-0 rounded-full bg-bg-sunken px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+      <span className="shrink-0 rounded-md bg-bg-sunken px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
         {undone ? 'undone' : destinationLabel(result)}
       </span>
       {!undone ? (
@@ -323,19 +324,19 @@ function FeedRow({
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <span className="flex size-12 items-center justify-center rounded-[14px] bg-bg-sunken text-subtle-foreground">
-        <NotebookPen className="size-6" aria-hidden />
+    <div className="surface flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
+      <span className="flex size-9 items-center justify-center rounded-lg bg-bg-sunken text-subtle-foreground">
+        <NotebookPen className="size-4" aria-hidden />
       </span>
-      <p className="text-sm font-medium text-foreground">One box for everything.</p>
+      <p className="text-sm font-semibold text-foreground">Ready for work intake</p>
       <div className="max-w-sm text-xs leading-5 text-muted-foreground">
-        <p>Type or dictate a whole braindump, then hit Process. Try:</p>
+        <p>Type or dictate a batch, then route each line.</p>
         <p className="mt-2 font-mono text-[11px] text-subtle-foreground">
-          call Bryan tomorrow 2pm about the RAG prompt
+          follow up with the integration owner tomorrow 2pm
           <br />
-          had 2 eggs and toast for breakfast
+          decision: prioritize inbound transfer reliability
           <br />
-          did my morning workout
+          project update: scripting review complete
         </p>
       </div>
     </div>
