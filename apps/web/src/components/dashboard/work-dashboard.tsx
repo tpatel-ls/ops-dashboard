@@ -82,7 +82,7 @@ export function WorkDashboard() {
           <DashboardSkeleton />
         ) : (
           <>
-            <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
               <section className="surface min-w-0 overflow-hidden" aria-labelledby="attention-title">
                 <SectionHeader
                   id="attention-title"
