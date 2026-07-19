@@ -146,9 +146,20 @@ function MobileDayAgenda({
   const blocks = tasks
     .filter((task) => calendarDateOf(task) === dayIso)
     .sort(compareCalendarTasks);
+  const isToday = dayIso === isoDay(new Date());
+
+  if (blocks.length === 0) {
+    return (
+      <section className={cn('hairline flex min-h-12 items-center gap-3 border-b px-1 py-2', isToday && 'text-primary')}>
+        <span className="w-24 shrink-0 text-sm font-semibold">{format(day, 'EEE, MMM d')}</span>
+        <span className="text-xs text-subtle-foreground">No scheduled work</span>
+      </section>
+    );
+  }
+
   return (
-    <section className="surface-flat min-w-0 p-3">
-      <div className="mb-2 flex items-baseline justify-between gap-3">
+    <section className="min-w-0 py-2">
+      <div className={cn('mb-2 flex items-baseline justify-between gap-3 border-b border-border/70 px-1 pb-2', isToday && 'text-primary')}>
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
             {format(day, 'EEE')}
@@ -157,14 +168,11 @@ function MobileDayAgenda({
             {format(day, 'MMM d')}
           </div>
         </div>
-        <span className="font-mono text-[10px] text-subtle-foreground">{blocks.length}</span>
+        <span className="rounded-md border bg-card px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-subtle-foreground">
+          {blocks.length} item{blocks.length === 1 ? '' : 's'}
+        </span>
       </div>
-      {blocks.length === 0 ? (
-        <p className="rounded-[12px] border border-dashed bg-bg-sunken/60 px-3 py-3 text-xs text-muted-foreground">
-          No time blocks.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5">
           {blocks.map((task) => {
             const kind = calendarKindOf(task);
             const start = task.startAt ? parseISO(task.startAt) : null;
@@ -174,7 +182,7 @@ function MobileDayAgenda({
                 key={task.id}
                 type="button"
                 onClick={() => onOpen(task.id)}
-                className="flex min-w-0 items-center gap-2 rounded-[12px] border bg-bg-sunken/60 px-3 py-2 text-left"
+                className="flex min-w-0 items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-accent"
                 style={{ borderColor: `color-mix(in oklch, ${color} 34%, var(--border))` }}
               >
                 <span
@@ -192,8 +200,7 @@ function MobileDayAgenda({
               </button>
             );
           })}
-        </div>
-      )}
+      </div>
     </section>
   );
 }
