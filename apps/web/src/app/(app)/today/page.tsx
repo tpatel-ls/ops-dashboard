@@ -29,14 +29,15 @@ export default function TodayPage() {
   return (
     <ViewShell
       eyebrow={format(now, 'EEEE').toUpperCase()}
-      title="Briefing"
-      subtitle={`${format(now, 'MMMM d')} · Capture, route, and keep every life area warm.`}
+      title="Today"
+      subtitle={`${format(now, 'MMMM d')} · Capture work, choose priorities, and execute.`}
+      compactHeader
       meta={<TodayStats />}
       actions={
         <button
           type="button"
           onClick={openFocus}
-          className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          className="hairline inline-flex h-10 items-center gap-2 rounded-md border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
           <Focus className="size-3.5 text-primary" aria-hidden />
           Focus mode
