@@ -121,10 +121,16 @@ function CreateProjectForm({
     <form
       aria-label="Create project"
       onSubmit={handleSubmit}
-      className="surface flex flex-col gap-3 p-4"
+      className="surface flex flex-col gap-3 p-3 sm:p-4"
     >
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
-        New project
+      <div className="flex items-center gap-2 border-b border-border/70 pb-3">
+        <span className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <Layers className="size-4" aria-hidden />
+        </span>
+        <div>
+          <h2 className="text-sm font-semibold">Create project</h2>
+          <p className="text-xs text-muted-foreground">Define the outcome, owner, and work lane.</p>
+        </div>
       </div>
       <label className="grid gap-1.5 text-xs text-muted-foreground">
         <span>Project name</span>
@@ -132,17 +138,17 @@ function CreateProjectForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name the outcome"
-          className="input min-h-11 text-foreground"
+          className="input min-h-10 text-foreground"
           autoFocus
         />
       </label>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <label className="grid gap-1.5 text-xs text-muted-foreground">
           <span>Type</span>
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as ProjectKind)}
-            className="input min-h-11 text-foreground"
+            className="input min-h-10 text-foreground"
           >
             <option value="project">Project</option>
             <option value="area">Area</option>
@@ -154,7 +160,7 @@ function CreateProjectForm({
           <select
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            className="input min-h-11 text-foreground"
+            className="input min-h-10 text-foreground"
           >
             <option value="personal">Personal</option>
             {organizations.map((organization) => (
@@ -167,7 +173,7 @@ function CreateProjectForm({
           <select
             value={domainId}
             onChange={(e) => setDomainId(e.target.value)}
-            className="input min-h-11 text-foreground"
+            className="input min-h-10 text-foreground"
           >
             <option value="">No domain</option>
             {domains.map((d) => (
@@ -179,7 +185,7 @@ function CreateProjectForm({
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description (optional)"
+        placeholder="Outcome or definition of done (optional)"
         rows={2}
         className="input resize-none"
       />
@@ -187,14 +193,14 @@ function CreateProjectForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="min-h-10 rounded-md px-3 text-xs text-muted-foreground hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="min-h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
         >
           Create project
         </button>
