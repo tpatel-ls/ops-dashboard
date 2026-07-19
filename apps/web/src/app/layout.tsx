@@ -16,11 +16,11 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Ops Dashboard',
-  description: 'Your personal operating system - capture, tasks, routines, projects, and journal.',
-  applicationName: 'Ops Dashboard',
+  title: 'Taskify',
+  description: 'A focused workspace for organizations, projects, tasks, and schedules.',
+  applicationName: 'Taskify',
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, title: 'Ops Dashboard', statusBarStyle: 'black-translucent' },
+  appleWebApp: { capable: true, title: 'Taskify', statusBarStyle: 'black-translucent' },
 };
 
 export const viewport: Viewport = {

@@ -1,6 +1,6 @@
 import { CloudOff, RefreshCw } from 'lucide-react';
 
-export const metadata = { title: 'Offline · Ops Dashboard' };
+export const metadata = { title: 'Offline · Taskify' };
 
 export default function OfflinePage() {
   return (
