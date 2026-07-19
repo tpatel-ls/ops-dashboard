@@ -447,12 +447,13 @@ export function TasksView() {
   }, [data, statusFilter, effectiveProjectFilter, domainFilter, searchQuery, ctx]);
 
   const count = filteredTasks?.length ?? 0;
+  const activeFilterCount = [effectiveProjectFilter, domainFilter, searchQuery.trim()].filter(Boolean).length;
 
   return (
     <div className="flex flex-col gap-4">
       <QuickTaskEntry id="tasks-page-task-title" compact />
 
-      <section aria-label="Task controls" className="surface flex flex-col gap-3 p-3">
+      <section aria-label="Task controls" className="surface flex flex-col gap-2.5 p-2.5 sm:p-3">
         <div className="flex min-w-0 items-center gap-2">
           <div className="relative min-w-0 flex-1 sm:max-w-sm">
             <label htmlFor="task-search" className="sr-only">Search tasks</label>
@@ -465,7 +466,7 @@ export function TasksView() {
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search tasks and projects"
+              placeholder="Search tasks"
               className="input min-h-11 pl-9 pr-10 sm:min-h-9"
             />
             {searchQuery ? (
@@ -542,17 +543,22 @@ export function TasksView() {
             />
           )}
 
-          {(effectiveProjectFilter || domainFilter) && (
+          {activeFilterCount > 0 && (
             <button
               type="button"
-              onClick={() => { setProjectFilter(null); setDomainFilter(null); }}
-              className="font-mono text-[11px] uppercase text-muted-foreground transition-colors hover:text-destructive"
+              onClick={() => {
+                setProjectFilter(null);
+                setDomainFilter(null);
+                setSearchQuery('');
+              }}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:min-h-8"
             >
-              Clear
+              <X className="size-3" aria-hidden />
+              Clear {activeFilterCount}
             </button>
           )}
 
-          <div className="ml-auto font-mono text-[11px] uppercase text-subtle-foreground">
+          <div className="ml-auto rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-subtle-foreground">
             {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
           </div>
         </div>
