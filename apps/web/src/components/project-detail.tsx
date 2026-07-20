@@ -712,6 +712,7 @@ interface ProjectDetailProps {
 
 export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
   // Close on Escape
   useEffect(() => {
@@ -757,14 +758,24 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => openWorkLogger('task', project.id)}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-primary hover:bg-primary/10"
+            >
+              <Plus className="size-3.5" aria-hidden />
+              Add task
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Close"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
