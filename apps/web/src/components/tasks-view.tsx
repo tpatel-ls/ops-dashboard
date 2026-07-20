@@ -467,6 +467,11 @@ export function TasksView() {
   }, [data, statusFilter, effectiveProjectFilter, domainFilter, searchQuery, ctx]);
 
   const count = filteredTasks?.length ?? 0;
+  const overdueCount =
+    filteredTasks?.filter(({ task }) => {
+      const taskDate = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
+      return task.status !== 'done' && Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'));
+    }).length ?? 0;
   const activeFilterCount = [effectiveProjectFilter, domainFilter, searchQuery.trim()].filter(Boolean).length;
 
   return (
@@ -578,8 +583,15 @@ export function TasksView() {
             </button>
           )}
 
-          <div className="ml-auto rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-subtle-foreground">
-            {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
+          <div className="ml-auto flex items-center gap-1.5">
+            {overdueCount > 0 ? (
+              <span className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1 font-mono text-[11px] tabular-nums text-destructive">
+                {overdueCount} overdue
+              </span>
+            ) : null}
+            <div className="rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-subtle-foreground">
+              {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
+            </div>
           </div>
         </div>
       </section>
