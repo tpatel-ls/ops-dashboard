@@ -89,6 +89,7 @@ export function WorkDashboard() {
                   icon={CircleAlert}
                   title="Needs attention"
                   detail={`${data.model.counts.overdue} overdue / ${data.model.counts.today} today`}
+                  href="/tasks"
                 />
                 <TaskSection
                   tasks={[...data.model.overdue, ...data.model.today]}
