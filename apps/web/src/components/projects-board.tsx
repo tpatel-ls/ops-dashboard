@@ -602,7 +602,7 @@ export function ProjectsBoard() {
                 <option value="recent">Recent work</option>
               </select>
             </label>
-            <span className="ml-auto font-mono text-[11px] uppercase text-subtle-foreground">
+            <span role="status" aria-live="polite" className="ml-auto font-mono text-[11px] uppercase text-subtle-foreground">
               {filteredCardData.length} shown
             </span>
           </div>
