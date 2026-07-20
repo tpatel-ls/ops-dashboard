@@ -498,7 +498,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-h-10 items-center gap-2">
       <button
         type="button"
         onClick={() => {
@@ -508,11 +508,13 @@ function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
           setChecklist(task.id, next);
         }}
         className={cn(
-          'inline-flex size-4 items-center justify-center rounded border',
+          'inline-flex size-9 shrink-0 items-center justify-center rounded-md border',
           item.done ? 'border-primary bg-primary' : 'border-border-strong',
         )}
-        aria-label="Toggle"
-      />
+        aria-label={`${item.done ? 'Mark incomplete' : 'Complete'} ${item.text}`}
+      >
+        {item.done ? <Check className="size-3.5" aria-hidden /> : null}
+      </button>
       <span
         className={cn(
           'flex-1 text-sm',
@@ -527,8 +529,8 @@ function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
           const next = task.checklist.filter((c) => c.id !== item.id);
           setChecklist(task.id, next);
         }}
-        className="text-subtle-foreground hover:text-destructive"
-        aria-label="Remove"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive"
+        aria-label={`Remove ${item.text}`}
       >
         <X className="size-3" />
       </button>
