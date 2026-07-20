@@ -153,7 +153,7 @@ export function KanbanBoard() {
         </span>
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 pb-2 md:flex md:overflow-x-auto">
+        <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 pb-2 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
           {columns.map((col) => {
             const bucket = scopedTasks.filter((t) => bucketOf(t) === col.id);
             return (
@@ -192,7 +192,7 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'surface-flat scrollbar-thin flex min-h-[140px] w-full min-w-0 flex-col overflow-hidden p-2 transition-colors md:h-full md:min-h-[320px] md:w-[280px] md:shrink-0',
+        'surface-flat scrollbar-thin flex min-h-[140px] w-full min-w-0 flex-col overflow-hidden p-2 transition-colors md:h-full md:min-h-[320px]',
         isOver && 'border-primary/50 bg-primary/5',
       )}
     >
