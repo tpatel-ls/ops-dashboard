@@ -326,6 +326,8 @@ function ChecklistGroup({
       <button
         type="button"
         onClick={onToggleExpand}
+        aria-expanded={expanded}
+        aria-controls={`project-checklist-${checklist.id}`}
         className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-bg-sunken"
       >
         <ChevronRight
@@ -338,7 +340,7 @@ function ChecklistGroup({
         </span>
       </button>
       {expanded ? (
-        <div className="border-t border-border px-3 pb-2 pt-1">
+        <div id={`project-checklist-${checklist.id}`} className="border-t border-border px-3 pb-2 pt-1">
           <ul className="flex flex-col gap-1 pb-1">
             {checklist.items.length === 0 ? (
               <li className="text-xs text-subtle-foreground py-1">Empty checklist.</li>
