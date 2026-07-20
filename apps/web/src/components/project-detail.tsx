@@ -485,13 +485,9 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
   return (
     <li
       className={cn(
-        'group surface-flat flex cursor-pointer items-center gap-2.5 px-3 py-2 transition-all hover:border-border-strong',
+        'group surface-flat flex items-center gap-2.5 px-3 py-2 transition-all hover:border-border-strong',
         done && 'opacity-60',
       )}
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button')) return;
-        onOpen();
-      }}
     >
       <button
         type="button"
@@ -502,13 +498,18 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
             ? 'border-primary bg-primary text-primary-foreground'
             : 'border-border-strong text-transparent hover:border-primary',
         )}
-        aria-label={done ? 'Mark as todo' : 'Mark as done'}
+        aria-label={`${done ? 'Mark as todo' : 'Mark as done'}: ${task.title}`}
       >
         <Check className="size-2.5" strokeWidth={3} />
       </button>
-      <span className={cn('flex-1 truncate text-sm', done && 'text-muted-foreground line-through')}>
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Edit task: ${task.title}`}
+        className={cn('min-w-0 flex-1 truncate text-left text-sm outline-none focus-visible:text-primary', done && 'text-muted-foreground line-through')}
+      >
         {task.title}
-      </span>
+      </button>
     </li>
   );
 }
