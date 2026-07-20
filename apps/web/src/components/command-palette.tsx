@@ -170,6 +170,9 @@ export function CommandPalette() {
                       </>
                     )}
                   </span>
+                  <span className="hidden max-w-24 truncate rounded-md bg-bg-sunken px-1.5 py-1 text-[10px] text-subtle-foreground sm:inline">
+                    {lanes.find((lane) => lane.ctx === ctx)?.label ?? 'Personal'}
+                  </span>
                   <span className="font-mono text-[10px] text-subtle-foreground">Enter</span>
                 </Command.Item>
               </Command.Group>
