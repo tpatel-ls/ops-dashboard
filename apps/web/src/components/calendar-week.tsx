@@ -155,7 +155,10 @@ function MobileDayAgenda({
 
   if (blocks.length === 0) {
     return (
-      <section className={cn('hairline flex min-h-12 items-center gap-3 border-b px-1 py-2', isToday && 'text-primary')}>
+      <section
+        aria-label={`${format(day, 'EEEE, MMMM d')}, no scheduled work`}
+        className={cn('hairline flex min-h-12 items-center gap-3 border-b px-1 py-2', isToday && 'text-primary')}
+      >
         <span className="w-24 shrink-0 text-sm font-semibold">{format(day, 'EEE, MMM d')}</span>
         <span className="text-xs text-subtle-foreground">No scheduled work</span>
       </section>
@@ -163,7 +166,7 @@ function MobileDayAgenda({
   }
 
   return (
-    <section className="min-w-0 py-2">
+    <section aria-label={`${format(day, 'EEEE, MMMM d')}, ${blocks.length} scheduled items`} className="min-w-0 py-2">
       <div className={cn('mb-2 flex items-baseline justify-between gap-3 border-b border-border/70 px-1 pb-2', isToday && 'text-primary')}>
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
@@ -187,7 +190,8 @@ function MobileDayAgenda({
                 key={task.id}
                 type="button"
                 onClick={() => onOpen(task.id)}
-                className="flex min-w-0 items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-accent"
+                aria-label={`Open ${task.title}`}
+                className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-accent"
                 style={{ borderColor: `color-mix(in oklch, ${color} 34%, var(--border))` }}
               >
                 <span
