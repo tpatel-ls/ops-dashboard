@@ -8,6 +8,7 @@ export default function CalendarPage() {
       title="Calendar"
       subtitle="See scheduled work across every organization in one weekly view."
       compactHeader
+      fullWidth
     >
       <CalendarWeek />
     </ViewShell>
