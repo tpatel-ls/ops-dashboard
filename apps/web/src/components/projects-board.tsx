@@ -401,6 +401,7 @@ function KindGroup({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const Icon = KIND_ICONS[kind];
+  const listId = `project-group-${kind}`;
 
   if (items.length === 0) return null;
 
@@ -409,6 +410,8 @@ function KindGroup({
       <button
         type="button"
         onClick={() => setCollapsed((v) => !v)}
+        aria-expanded={!collapsed}
+        aria-controls={listId}
         className="flex min-h-10 w-full items-center gap-2 border-b border-border/70 pb-2 text-left"
       >
         <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-muted-foreground">
@@ -427,7 +430,7 @@ function KindGroup({
       </button>
 
       {!collapsed ? (
-        <div className="grid gap-1.5 lg:grid-cols-2">
+        <div id={listId} className="grid gap-1.5 lg:grid-cols-2">
           {items.map((item) => (
             <ProjectCard
               key={item.project.id}
