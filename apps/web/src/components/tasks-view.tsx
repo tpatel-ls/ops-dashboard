@@ -60,6 +60,9 @@ function FilterDropdown({ label, value, options, onChange, placeholder }: Dropdo
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-label={`${label} filter`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className={cn(
           'inline-flex min-h-10 max-w-44 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-all sm:min-h-8',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
@@ -91,12 +94,14 @@ function FilterDropdown({ label, value, options, onChange, placeholder }: Dropdo
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute top-full left-0 z-20 mt-1.5 min-w-[160px] rounded-[10px] border border-border bg-card shadow-[0_8px_30px_-8px_rgba(0,0,0,0.25)] overflow-hidden">
-            <ul className="py-1 max-h-60 overflow-y-auto scrollbar-thin">
+          <div className="absolute top-full left-0 z-20 mt-1.5 min-w-[160px] overflow-hidden rounded-md border border-border bg-card shadow-[0_8px_30px_-8px_rgba(0,0,0,0.25)]">
+            <ul role="listbox" aria-label={`${label} options`} className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
               <li>
                 <button
                   type="button"
                   onClick={() => { onChange(null); setOpen(false); }}
+                  role="option"
+                  aria-selected={!value}
                   className={cn(
                     'min-h-9 w-full px-3 py-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:bg-bg-sunken',
                     !value && 'text-foreground font-medium',
@@ -110,6 +115,8 @@ function FilterDropdown({ label, value, options, onChange, placeholder }: Dropdo
                   <button
                     type="button"
                     onClick={() => { onChange(opt.id); setOpen(false); }}
+                    role="option"
+                    aria-selected={value === opt.id}
                     className={cn(
                       'flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors hover:bg-bg-sunken',
                       value === opt.id ? 'text-primary font-medium' : 'text-foreground',
