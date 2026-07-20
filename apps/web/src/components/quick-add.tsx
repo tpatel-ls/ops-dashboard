@@ -144,7 +144,7 @@ export function QuickAdd() {
           aria-expanded={pickerOpen}
           aria-label={project ? `Adding to ${project.name}` : 'Choose a project'}
           className={cn(
-            'flex h-7 items-center gap-1.5 rounded-md px-1.5 text-[11px] transition-colors',
+            'flex min-h-10 min-w-10 items-center justify-center gap-1.5 rounded-md px-1.5 text-[11px] transition-colors md:h-8 md:min-h-8 md:min-w-8',
             project
               ? 'bg-accent text-foreground'
               : 'text-subtle-foreground hover:text-foreground',
@@ -196,7 +196,7 @@ export function QuickAdd() {
                   setProject(null);
                   setPickerOpen(false);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <span aria-hidden className="size-2 rounded-full bg-bg-sunken" />
                 <span>No project</span>
@@ -213,7 +213,7 @@ export function QuickAdd() {
                       setProject(p);
                       setPickerOpen(false);
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    className="flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                   >
                     <span
                       aria-hidden
@@ -236,7 +236,7 @@ export function QuickAdd() {
             transcribing ? 'Transcribing' : listening ? 'Stop recording' : 'Start voice capture'
           }
           className={cn(
-            'flex shrink-0 items-center justify-center rounded-md p-1 transition-colors',
+            'flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-md p-1 transition-colors md:min-h-8 md:min-w-8',
             listening
               ? 'text-destructive animate-pulse'
               : 'text-subtle-foreground hover:text-foreground',
