@@ -3,7 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { addDays, format, parseISO, startOfWeek } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Project, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
@@ -20,6 +20,8 @@ export function CalendarWeek() {
   const weekStartsOn = (settings?.weekStartsOn ?? DEFAULT_SETTINGS.weekStartsOn) as 0 | 1;
   const [anchor, setAnchor] = useState<Date>(() => new Date());
   const days = weekDays(anchor, weekStartsOn);
+  const weekStart = startOfWeek(anchor, { weekStartsOn });
+  const weekEnd = addDays(weekStart, 6);
 
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
@@ -46,19 +48,20 @@ export function CalendarWeek() {
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
-      <div className="surface flex min-w-0 flex-wrap items-center gap-2 p-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="flex items-center rounded-md border bg-card p-0.5">
         <button
           type="button"
           aria-label="Previous week"
           onClick={() => setAnchor((d) => addDays(d, -7))}
-          className="inline-flex size-10 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
+          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
         >
-          <ChevronLeft className="size-3" />
+          <ChevronLeft className="size-4" />
         </button>
         <button
           type="button"
           onClick={() => setAnchor(new Date())}
-          className="min-h-10 rounded-md border bg-card px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
+          className="h-10 border-x px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Today
         </button>
@@ -66,12 +69,14 @@ export function CalendarWeek() {
           type="button"
           aria-label="Next week"
           onClick={() => setAnchor((d) => addDays(d, 7))}
-          className="inline-flex size-10 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
+          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
         >
-          <ChevronRight className="size-3" />
+          <ChevronRight className="size-4" />
         </button>
-        <span className="ml-1 text-xs font-semibold text-foreground md:ml-2">
-          {format(startOfWeek(anchor, { weekStartsOn }), 'MMM d')} to {format(addDays(startOfWeek(anchor, { weekStartsOn }), 6), 'MMM d')}
+        </div>
+        <span aria-live="polite" className="ml-1 flex items-center gap-2 text-xs font-semibold text-foreground md:ml-2">
+          <CalendarDays className="size-4 text-muted-foreground" aria-hidden />
+          {format(weekStart, 'MMM d')} to {format(weekEnd, 'MMM d')}
         </span>
         {lanes.showLegend ? (
           <div className="min-w-0 md:ml-auto">
