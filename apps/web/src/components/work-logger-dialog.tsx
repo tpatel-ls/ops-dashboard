@@ -402,23 +402,45 @@ function WorkLoggerPanel({
           ) : null}
 
           {mode === 'task' ? (
-            <button
-              type="button"
-              aria-expanded={taskDetailsOpen}
-              aria-controls="work-task-details"
-              onClick={() => setTaskDetailsOpen((open) => !open)}
-              className="mt-3 flex min-h-11 w-full items-center gap-2 rounded-lg border bg-bg-sunken px-3 text-left text-xs text-muted-foreground hover:text-foreground"
-            >
-              <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
-              <span className="min-w-0 flex-1 truncate">
-                {selectedProject?.name ?? selectedDestinationName} / {taskScheduleLabel(schedule, scheduledDate)}
-                {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
-              </span>
-              <span className="shrink-0 text-[11px] font-semibold text-primary">
-                Change
-              </span>
-              <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', taskDetailsOpen && 'rotate-180')} aria-hidden />
-            </button>
+            <div className="mt-3 flex flex-col gap-2">
+              <div className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1" role="group" aria-label="Quick schedule">
+                {([
+                  ['inbox', 'Inbox'],
+                  ['today', 'Today'],
+                  ['tomorrow', 'Tomorrow'],
+                ] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={schedule === value}
+                    onClick={() => setSchedule(value)}
+                    className={cn(
+                      'min-h-10 rounded-md px-2 text-xs font-medium transition-colors',
+                      schedule === value ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                aria-expanded={taskDetailsOpen}
+                aria-controls="work-task-details"
+                onClick={() => setTaskDetailsOpen((open) => !open)}
+                className="flex min-h-11 w-full items-center gap-2 rounded-lg border bg-bg-sunken px-3 text-left text-xs text-muted-foreground hover:text-foreground"
+              >
+                <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
+                <span className="min-w-0 flex-1 truncate">
+                  {selectedProject?.name ?? selectedDestinationName} / {taskScheduleLabel(schedule, scheduledDate)}
+                  {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
+                </span>
+                <span className="shrink-0 text-[11px] font-semibold text-primary">
+                  Change
+                </span>
+                <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', taskDetailsOpen && 'rotate-180')} aria-hidden />
+              </button>
+            </div>
           ) : null}
 
           {mode !== 'task' || taskDetailsOpen ? (
