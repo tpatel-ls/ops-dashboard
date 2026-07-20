@@ -137,7 +137,9 @@ export function CommandPalette() {
           </div>
           <Command.List className="scrollbar-thin max-h-[calc(100dvh-6rem)] overflow-y-auto p-2 sm:max-h-[60vh]">
             <Command.Empty className="px-3 py-6 text-center text-xs text-muted-foreground">
-              No matches.
+              {query.trim()
+                ? 'No existing tasks match. Create this as a new task above.'
+                : 'Start typing to find a task, change workspace, or capture work.'}
             </Command.Empty>
 
             {/* Prominent task action, always visible when there is text. */}
