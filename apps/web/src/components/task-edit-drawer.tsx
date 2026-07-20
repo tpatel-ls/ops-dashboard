@@ -346,10 +346,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   onClick={() =>
                     updateTask(task.id, { tags: task.tags.filter((x) => x !== t) })
                   }
-                  className="group inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-accent-foreground"
+                  aria-label={`Remove tag ${t}`}
+                  className="group inline-flex min-h-8 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-accent-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
                   #{t}
-                  <X className="size-2.5 opacity-0 group-hover:opacity-100" aria-hidden />
+                  <X className="size-2.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100" aria-hidden />
                 </button>
               ))}
               <input
@@ -366,7 +367,8 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   }
                 }}
                 placeholder="add tag"
-                className="bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
+                aria-label="Add tag"
+                className="min-h-9 min-w-24 bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
               />
             </div>
           </Section>
