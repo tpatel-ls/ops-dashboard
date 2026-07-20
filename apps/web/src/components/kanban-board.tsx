@@ -215,6 +215,7 @@ function KanbanColumn({
             await addTask(text, { status: column.id as Task['status'], ...addOverrides });
             setAdding('');
           }}
+          aria-label={`Add task to ${column.label}`}
           className="mt-2 flex min-w-0 items-center gap-1.5 rounded-md border bg-input px-2 py-1.5"
         >
           <Plus className="size-3 text-muted-foreground" aria-hidden />
@@ -222,8 +223,17 @@ function KanbanColumn({
             value={adding}
             onChange={(e) => setAdding(e.target.value)}
             placeholder="New task"
+            aria-label={`New task in ${column.label}`}
             className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
           />
+          <button
+            type="submit"
+            disabled={!adding.trim()}
+            aria-label={`Add task to ${column.label}`}
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-primary hover:bg-primary/10 disabled:opacity-40"
+          >
+            <Plus className="size-4" aria-hidden />
+          </button>
         </form>
       ) : null}
     </div>
