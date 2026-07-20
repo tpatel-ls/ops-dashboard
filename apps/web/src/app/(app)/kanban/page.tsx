@@ -8,6 +8,7 @@ export default function KanbanPage() {
       title="Kanban"
       subtitle="Group by status, project, priority, or tag. Drag to update."
       compactHeader
+      fullWidth
     >
       <KanbanBoard />
     </ViewShell>
