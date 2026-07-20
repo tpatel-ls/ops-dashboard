@@ -103,7 +103,7 @@ function MilestonesSection({ project }: { project: Project }) {
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+            className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <Plus className="size-3" /> Add
           </button>
@@ -176,12 +176,12 @@ function MilestonesSection({ project }: { project: Project }) {
                 type="button"
                 onClick={() => toggleMilestone(m.id)}
                 className={cn(
-                  'inline-flex size-4 shrink-0 items-center justify-center rounded border transition-all',
+                  'inline-flex size-9 shrink-0 items-center justify-center rounded-md border transition-all',
                   m.done
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border-strong text-transparent hover:border-primary',
                 )}
-                aria-label={m.done ? 'Mark incomplete' : 'Mark done'}
+                aria-label={`${m.done ? 'Mark incomplete' : 'Mark complete'}: ${m.title}`}
               >
                 <Check className="size-2.5" strokeWidth={3} />
               </button>
