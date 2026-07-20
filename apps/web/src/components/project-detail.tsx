@@ -575,7 +575,9 @@ function LogWorkSection({ project }: { project: Project }) {
           ))}
         </div>
         <div className="flex gap-2">
+          <label htmlFor={`project-${project.id}-minutes`} className="sr-only">Minutes worked</label>
           <input
+            id={`project-${project.id}-minutes`}
             type="number"
             min={1}
             placeholder="Minutes"
@@ -583,7 +585,9 @@ function LogWorkSection({ project }: { project: Project }) {
             onChange={(e) => setMinutes(e.target.value)}
             className="input w-28"
           />
+          <label htmlFor={`project-${project.id}-note`} className="sr-only">Progress note</label>
           <input
+            id={`project-${project.id}-note`}
             placeholder="Note (optional)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -594,7 +598,7 @@ function LogWorkSection({ project }: { project: Project }) {
             type="button"
             onClick={handleLog}
             disabled={saving || !minutes || parseInt(minutes, 10) <= 0}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+            className="min-h-11 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
           >
             Log
           </button>
