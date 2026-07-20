@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Bell, CalendarClock, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
+import { Bell, CalendarClock, Check, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
 import { addDays, format } from 'date-fns';
 import { getDb, newId } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
@@ -44,9 +44,21 @@ export function TaskEditDrawer() {
           <div className="text-xs font-semibold uppercase text-subtle-foreground">
             Edit task
           </div>
-          <button type="button" onClick={close} className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground sm:size-9" aria-label="Close">
-            <X className="size-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            {task && task.status !== 'done' ? (
+              <button
+                type="button"
+                onClick={() => updateTask(task.id, { status: 'done' })}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-success hover:bg-success/10 sm:min-h-9"
+              >
+                <Check className="size-3.5" aria-hidden />
+                Complete
+              </button>
+            ) : null}
+            <button type="button" onClick={close} className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground sm:size-9" aria-label="Close">
+              <X className="size-4" />
+            </button>
+          </div>
         </header>
         {task ? <DrawerBody key={task.id} task={task} onClose={close} /> : (
           <div className="p-6 text-sm text-muted-foreground">Loading...</div>
