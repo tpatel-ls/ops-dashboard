@@ -135,6 +135,7 @@ export function Notepad() {
       title="Work notes"
       subtitle="Capture tasks, decisions, and project updates in one pass."
       compactHeader
+      fullWidth
     >
       <div className="flex flex-col gap-5">
         <div className="command-surface flex flex-col gap-2 rounded-lg p-3">
@@ -192,7 +193,7 @@ export function Notepad() {
                   transcribing ? 'Transcribing' : listening ? 'Stop recording' : 'Start dictating'
                 }
                 className={cn(
-                  'flex size-8 shrink-0 items-center justify-center rounded-md border border-border transition-colors',
+                  'flex size-11 shrink-0 items-center justify-center rounded-md border border-border transition-colors',
                   listening
                     ? 'text-destructive animate-pulse'
                     : 'text-subtle-foreground hover:text-foreground',
@@ -223,7 +224,7 @@ export function Notepad() {
                 type="button"
                 onClick={process}
                 disabled={pending || transcribing || !value.trim()}
-                className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {pending ? (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden />
@@ -313,7 +314,7 @@ function FeedRow({
           onClick={onUndo}
           title="Undo"
           aria-label={`Undo ${result.title}`}
-          className="flex size-7 shrink-0 items-center justify-center rounded-md text-subtle-foreground opacity-0 transition-opacity hover:bg-bg-sunken hover:text-foreground group-hover:opacity-100"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground opacity-70 transition-opacity hover:bg-bg-sunken hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
         >
           <RotateCcw className="size-4" aria-hidden />
         </button>
