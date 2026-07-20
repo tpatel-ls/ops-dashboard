@@ -109,7 +109,7 @@ export function Sidebar() {
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           <span className="size-1.5 rounded-full bg-success live-dot" aria-hidden />
           <span className="min-w-0 flex-1 truncate">Local workspace ready</span>
-          <span className="kbd shrink-0">⌘ K</span>
+          <span className="kbd shrink-0">Cmd/Ctrl K</span>
         </div>
       </div>
     </aside>
