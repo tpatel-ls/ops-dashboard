@@ -282,11 +282,12 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
         onClick={() => updateTask(task.id, { starred: !task.starred })}
         className={cn(
           'touch-action-reveal mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-all',
-          'opacity-0 group-hover:opacity-100',
+          'opacity-70 sm:opacity-0 sm:group-hover:opacity-100',
           task.starred && 'opacity-100 text-warning',
           !task.starred && 'text-muted-foreground hover:text-warning',
         )}
         aria-label={task.starred ? 'Unstar task' : 'Star task'}
+        title={task.starred ? 'Remove from daily mission' : 'Add to daily mission'}
       >
         <Star
           className="size-3.5"
