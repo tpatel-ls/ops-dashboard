@@ -657,9 +657,13 @@ function TaskTitleField({
         placeholder="What needs to happen?"
         aria-invalid={invalid || undefined}
         aria-errormessage={invalid ? 'work-logger-error' : undefined}
+        aria-describedby="work-task-shortcut"
         className="input min-h-12 text-base"
         autoComplete="off"
       />
+      <p id="work-task-shortcut" className="text-[11px] text-subtle-foreground">
+        Press Enter to add, or Cmd/Ctrl Enter from anywhere in this panel.
+      </p>
     </div>
   );
 }
