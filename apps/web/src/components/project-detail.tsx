@@ -111,7 +111,14 @@ function MilestonesSection({ project }: { project: Project }) {
       </div>
 
       {milestones.length > 0 ? (
-        <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-bg-sunken">
+        <div
+          className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-bg-sunken"
+          role="progressbar"
+          aria-label="Milestone completion"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+        >
           <div
             className="h-full rounded-full bg-primary transition-all"
             style={{ width: `${pct}%` }}
