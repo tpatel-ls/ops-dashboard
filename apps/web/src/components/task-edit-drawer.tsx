@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, CalendarClock, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { getDb, newId } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
@@ -158,6 +158,27 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           </Section>
 
           <Section title="Schedule" icon={<CalendarClock className="size-3.5" />}>
+            <div className="mb-2 flex flex-wrap gap-1.5" role="group" aria-label="Quick schedule task">
+              {[
+                { label: 'Today', value: format(new Date(), 'yyyy-MM-dd') },
+                { label: 'Tomorrow', value: format(addDays(new Date(), 1), 'yyyy-MM-dd') },
+                { label: 'Clear date', value: undefined },
+              ].map((option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => updateTask(task.id, { scheduledFor: option.value })}
+                  className={cn(
+                    'min-h-9 rounded-md border px-2.5 text-xs font-medium transition-colors',
+                    task.scheduledFor === option.value
+                      ? 'border-primary bg-primary/10 text-foreground'
+                      : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Date">
                 <input
