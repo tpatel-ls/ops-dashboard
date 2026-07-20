@@ -94,6 +94,9 @@ export function OrgSwitcher() {
 
   return (
     <div ref={rootRef} className="relative">
+      <span role="status" aria-live="polite" className="sr-only">
+        {mounted ? `Current workspace: ${current.label}` : ''}
+      </span>
       <button
         ref={triggerRef}
         type="button"
