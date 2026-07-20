@@ -4,7 +4,7 @@ import { Command } from 'cmdk';
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import {
   Calendar,
   CalendarDays,
@@ -55,9 +55,10 @@ export function CommandPalette() {
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
 
-  useEffect(() => {
-    if (open) setQuery('');
-  }, [open]);
+  function dismiss() {
+    setQuery('');
+    close();
+  }
 
   const lanes: { ctx: OrgContext; label: string; color: string }[] = [
     { ctx: 'all', label: 'All work', color: 'var(--primary)' },
@@ -97,7 +98,7 @@ export function CommandPalette() {
       );
       const orgId = destinationOrgId(destination);
       await addTask(text, orgId ? { orgId } : {});
-      close();
+      dismiss();
       setQuery('');
     });
   }
@@ -108,7 +109,7 @@ export function CommandPalette() {
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-3 pt-3 backdrop-blur-sm sm:px-4 sm:pt-[12vh]"
       onClick={(e) => {
-        if (e.target === e.currentTarget) close();
+        if (e.target === e.currentTarget) dismiss();
       }}
     >
       <div className="command-surface w-full max-w-2xl overflow-hidden rounded-xl">
@@ -189,7 +190,7 @@ export function CommandPalette() {
                     value={`task-${t.id}`}
                     onSelect={() => {
                       openEdit(t.id);
-                      close();
+                      dismiss();
                     }}
                     className="group flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-foreground data-[selected=true]:bg-accent"
                   >
@@ -216,7 +217,7 @@ export function CommandPalette() {
                   keywords={['switch', 'context', lane.label]}
                   onSelect={() => {
                     setCtx(lane.ctx);
-                    close();
+                    dismiss();
                   }}
                   className="group flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
                 >
@@ -249,7 +250,7 @@ export function CommandPalette() {
                     keywords={[n.label]}
                     onSelect={() => {
                       router.push(n.href);
-                      close();
+                      dismiss();
                     }}
                     className="group flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
                   >
