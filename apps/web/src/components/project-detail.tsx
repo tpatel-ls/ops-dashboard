@@ -556,6 +556,24 @@ function LogWorkSection({ project }: { project: Project }) {
         ) : null}
       </div>
       <div className="surface-flat flex flex-col gap-2 p-3">
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Set work minutes">
+          {['15', '30', '60'].map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={minutes === value}
+              onClick={() => setMinutes(value)}
+              className={cn(
+                'min-h-8 rounded-md border px-2.5 text-[11px] font-medium transition-colors',
+                minutes === value
+                  ? 'border-primary bg-primary/10 text-foreground'
+                  : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
+              )}
+            >
+              {value}m
+            </button>
+          ))}
+        </div>
         <div className="flex gap-2">
           <input
             type="number"
