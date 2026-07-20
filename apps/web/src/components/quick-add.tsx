@@ -20,6 +20,7 @@ import {
 export function QuickAdd() {
   const [value, setValue] = useState('');
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   // Optional project target: captures file straight into it (skips AI triage)
   // and inherit its domain + org lane. Cleared manually, not per capture, so
@@ -64,14 +65,19 @@ export function QuickAdd() {
 
   function captureText(text: string) {
     hapticTap();
+    setError(null);
     startTransition(async () => {
-      if (project) await addTaskToProject(text, project);
-      else {
-        const orgId = destinationOrgId(destination);
-        await addTask(text, orgId ? { orgId } : {});
+      try {
+        if (project) await addTaskToProject(text, project);
+        else {
+          const orgId = destinationOrgId(destination);
+          await addTask(text, orgId ? { orgId } : {});
+        }
+        hapticSuccess();
+        setValue('');
+      } catch {
+        setError('Could not add task. Your text is still available.');
       }
-      hapticSuccess();
-      setValue('');
     });
   }
 
@@ -106,6 +112,8 @@ export function QuickAdd() {
         }
         className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
         aria-label="Quick add task"
+        aria-invalid={Boolean(error) || undefined}
+        aria-errormessage={error ? 'quick-add-error' : undefined}
         disabled={pending || listening || transcribing}
         autoComplete="off"
         spellCheck={false}
@@ -251,6 +259,7 @@ export function QuickAdd() {
           )}
         </button>
       ) : null}
+      {error ? <span id="quick-add-error" role="alert" className="sr-only">{error}</span> : null}
     </form>
   );
 }
