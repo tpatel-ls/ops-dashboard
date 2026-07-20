@@ -1,6 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useState } from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import {
   Archive,
@@ -60,6 +61,15 @@ const STATUS_CLASS = {
   triaged: 'bg-bg-sunken text-muted-foreground',
   dismissed: 'bg-bg-rail text-subtle-foreground',
 } as const;
+
+type CaptureFilter = 'all' | Capture['status'];
+
+const CAPTURE_FILTERS: Array<{ id: CaptureFilter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'pending', label: 'Pending' },
+  { id: 'triaged', label: 'Triaged' },
+  { id: 'dismissed', label: 'Dismissed' },
+];
 
 function relativeTime(iso: string): string {
   try {
@@ -155,6 +165,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
 
 export default function InboxPage() {
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
+  const [filter, setFilter] = useState<CaptureFilter>('pending');
   const captures = useLiveQuery(async () => {
     const db = getDb();
     const all = await db.captures.toArray();
@@ -164,6 +175,7 @@ export default function InboxPage() {
   });
 
   const pending = captures?.filter((c) => c.status === 'pending').length ?? 0;
+  const visibleCaptures = captures?.filter((capture) => filter === 'all' || capture.status === filter);
 
   const meta = pending > 0 ? (
     <span className="rounded-full bg-primary px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
@@ -178,17 +190,44 @@ export default function InboxPage() {
       subtitle="Review captured work, route it, and keep the queue clear."
       meta={meta}
       compactHeader
+      fullWidth
     >
       {captures === undefined ? (
         <SkeletonRows />
       ) : captures.length === 0 ? (
         <EmptyState onCapture={() => openWorkLogger('task')} />
       ) : (
-        <ul className="flex flex-col gap-2">
-          {captures.map((cap) => (
-            <CaptureRow key={cap.id} cap={cap} />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-3">
+          <div role="group" aria-label="Inbox status" className="grid grid-cols-4 gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:w-fit">
+            {CAPTURE_FILTERS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={filter === item.id}
+                onClick={() => setFilter(item.id)}
+                className={cn(
+                  'min-h-10 rounded-md px-2 text-[11px] font-medium transition-colors sm:min-h-8 sm:px-3 sm:text-xs',
+                  filter === item.id
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          {visibleCaptures?.length ? (
+            <ul className="flex flex-col gap-2">
+              {visibleCaptures.map((cap) => (
+                <CaptureRow key={cap.id} cap={cap} />
+              ))}
+            </ul>
+          ) : (
+            <div className="flex min-h-32 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm text-muted-foreground">
+              No {filter} captures.
+            </div>
+          )}
+        </div>
       )}
     </ViewShell>
   );
