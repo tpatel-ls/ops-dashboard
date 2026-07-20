@@ -166,9 +166,19 @@ function TaskRow({ task, projectName, projectColor, domainName, domainColor }: T
 
   return (
     <li
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${task.title}`}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest('button')) return;
         openEdit(task.id);
+      }}
+      onKeyDown={(e) => {
+        if ((e.target as HTMLElement).closest('button')) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openEdit(task.id);
+        }
       }}
       className={cn(
         'group surface-flat relative flex cursor-pointer items-start gap-2.5 px-3 py-3 transition-all sm:gap-3 sm:px-4',
