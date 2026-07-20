@@ -4,7 +4,7 @@ import { Command } from 'cmdk';
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import {
   Calendar,
   CalendarDays,
@@ -54,6 +54,10 @@ export function CommandPalette() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
+
+  useEffect(() => {
+    if (open) setQuery('');
+  }, [open]);
 
   const lanes: { ctx: OrgContext; label: string; color: string }[] = [
     { ctx: 'all', label: 'All work', color: 'var(--primary)' },
