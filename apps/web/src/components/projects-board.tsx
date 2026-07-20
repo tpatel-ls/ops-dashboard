@@ -250,7 +250,12 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
       data-project-card
       className="surface-flat group overflow-hidden transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]"
     >
-      <button type="button" onClick={onClick} className="w-full px-4 py-3 text-left">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`Open project ${project.name}`}
+        className="w-full px-4 py-3 text-left"
+      >
         {/* Top row */}
         <div className="flex items-start gap-2.5">
         <span
@@ -309,6 +314,11 @@ function ProjectCard({ data, onClick, onAddTask, onLogProgress, showOrganization
           </div>
           <div className="h-1 w-full overflow-hidden rounded-full bg-bg-sunken">
             <div
+              role="progressbar"
+              aria-label={`${project.name} milestone progress`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={milestonePct}
               className="h-full rounded-full bg-primary transition-all"
               style={{ width: `${milestonePct}%` }}
             />
