@@ -186,6 +186,7 @@ function CreateProjectForm({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Outcome or definition of done (optional)"
+        aria-label="Outcome or definition of done"
         rows={2}
         className="input resize-none"
       />
@@ -193,14 +194,14 @@ function CreateProjectForm({
         <button
           type="button"
           onClick={onCancel}
-          className="min-h-10 rounded-md px-3 text-xs text-muted-foreground hover:text-foreground"
+          className="min-h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="min-h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="min-h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           Create project
         </button>
