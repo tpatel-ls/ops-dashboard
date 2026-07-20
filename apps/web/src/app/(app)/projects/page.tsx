@@ -6,7 +6,9 @@ export default function ProjectsPage() {
     <ViewShell
       eyebrow="Build"
       title="Projects"
-      subtitle="Plan outcomes and keep their next tasks moving."
+      subtitle="Plan outcomes, assign ownership, and keep next actions moving."
+      compactHeader
+      fullWidth
     >
       <ProjectsBoard />
     </ViewShell>
