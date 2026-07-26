@@ -95,6 +95,10 @@ function CreateProjectForm({
   const [destination, setDestination] = useState<WorkDestination>(initialDestination);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
+  const destinationOrganization = organizations.find(
+    (organization) => organization.id === destination,
+  );
+  const destinationName = destinationOrganization?.name ?? 'Personal';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -127,6 +131,17 @@ function CreateProjectForm({
           <h2 className="text-sm font-semibold">Create project</h2>
           <p className="text-muted-foreground text-xs">Define the outcome, owner, and work lane.</p>
         </div>
+      </div>
+      <div
+        role="status"
+        className="bg-bg-sunken text-muted-foreground inline-flex min-h-9 items-center gap-2 rounded-lg border px-3 text-xs"
+      >
+        <span
+          className="size-2 rounded-full"
+          style={{ background: destinationOrganization?.color ?? PERSONAL_COLOR }}
+          aria-hidden
+        />
+        Creating in <span className="text-foreground font-medium">{destinationName}</span>
       </div>
       <label className="text-muted-foreground grid gap-1.5 text-xs">
         <span>Project name</span>
