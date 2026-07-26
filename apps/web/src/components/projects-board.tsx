@@ -427,7 +427,7 @@ function ProjectCard({
         <button
           type="button"
           onClick={onAddTask}
-          className="text-primary hover:bg-primary/10 inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-colors"
+          className="text-primary hover:bg-primary/10 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-colors"
         >
           <Plus className="size-3.5" aria-hidden />
           Add task
@@ -435,7 +435,7 @@ function ProjectCard({
         <button
           type="button"
           onClick={onLogProgress}
-          className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-colors"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-colors"
         >
           <Timer className="size-3.5" aria-hidden />
           Log progress
