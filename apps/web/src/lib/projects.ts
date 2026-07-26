@@ -1,7 +1,7 @@
 'use client';
 
 import { getDb, getDeviceId, newId } from '@ops-dashboard/core';
-import type { Project, ProjectKind } from '@ops-dashboard/core';
+import type { Project, ProjectKind, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 export interface CreateProjectOptions {
@@ -21,6 +21,27 @@ const DEFAULT_COLORS = [
   'oklch(0.62 0.16 200)',
   'oklch(0.68 0.18 350)',
 ];
+
+export interface ProjectTaskProgress {
+  open: number;
+  done: number;
+  total: number;
+  percent: number;
+}
+
+export function projectTaskProgress(tasks: Task[], projectId: string): ProjectTaskProgress {
+  const live = tasks.filter(
+    (task) => task.projectId === projectId && !task.deletedAt && task.status !== 'archived',
+  );
+  const done = live.filter((task) => task.status === 'done').length;
+  const open = live.length - done;
+  return {
+    open,
+    done,
+    total: live.length,
+    percent: live.length > 0 ? Math.round((done / live.length) * 100) : 0,
+  };
+}
 
 export async function createProject(
   name: string,

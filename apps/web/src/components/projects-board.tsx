@@ -26,7 +26,7 @@ import type {
   ProjectStatus,
 } from '@ops-dashboard/core';
 import { useOrgStore } from '@/lib/org-store';
-import { createProject } from '@/lib/projects';
+import { createProject, projectTaskProgress, type ProjectTaskProgress } from '@/lib/projects';
 import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '@/lib/work-logger';
 import { useAppStore } from '@/lib/app-store';
 import { ProjectDetail } from '@/components/project-detail';
@@ -216,7 +216,7 @@ interface ProjectCardData {
   project: Project;
   domain?: Domain;
   organization?: Organization;
-  taskCount: number;
+  taskProgress: ProjectTaskProgress;
   hoursLogged: number;
 }
 
@@ -235,7 +235,7 @@ function ProjectCard({
   onLogProgress,
   showOrganization,
 }: ProjectCardProps) {
-  const { project, domain, organization, hoursLogged, taskCount } = data;
+  const { project, domain, organization, hoursLogged, taskProgress } = data;
 
   const milestones = project.milestones ?? [];
   const milestoneDone = milestones.filter((m) => m.done).length;
@@ -332,11 +332,33 @@ function ProjectCard({
           </div>
         ) : null}
 
+        {taskProgress.total > 0 ? (
+          <div className="mt-3">
+            <div className="mb-1 flex items-center justify-between text-[10px]">
+              <span className="text-subtle-foreground">
+                {taskProgress.open} open · {taskProgress.done} done
+              </span>
+              <span className="text-muted-foreground tabular-nums">{taskProgress.percent}%</span>
+            </div>
+            <div className="bg-bg-sunken h-1 w-full overflow-hidden rounded-full">
+              <div
+                role="progressbar"
+                aria-label={`${project.name} task progress`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={taskProgress.percent}
+                className="bg-success h-full rounded-full transition-all"
+                style={{ width: `${taskProgress.percent}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
+
         {/* Footer row */}
         <div className="text-subtle-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
           <span className="inline-flex items-center gap-1">
             <ListTodo className="size-3" aria-hidden />
-            {taskCount} open task{taskCount === 1 ? '' : 's'}
+            {taskProgress.open} open task{taskProgress.open === 1 ? '' : 's'}
           </span>
           {dueLabel ? (
             <span className={cn('inline-flex items-center gap-1', isOverdue && 'text-destructive')}>
@@ -480,11 +502,7 @@ export function ProjectsBoard() {
         .then((all) =>
           all.filter((organization) => !organization.deletedAt && !organization.archivedAt),
         ),
-      db.tasks
-        .toArray()
-        .then((all) =>
-          all.filter((t) => !t.deletedAt && t.status !== 'archived' && t.status !== 'done'),
-        ),
+      db.tasks.toArray(),
       db.workLogs.toArray().then((all) => all.filter((w) => !w.deletedAt)),
     ]);
 
@@ -497,7 +515,7 @@ export function ProjectsBoard() {
       project,
       domain: project.domainId ? domainMap.get(project.domainId) : undefined,
       organization: project.orgId ? organizationMap.get(project.orgId) : undefined,
-      taskCount: tasks.filter((t) => t.projectId === project.id).length,
+      taskProgress: projectTaskProgress(tasks, project.id),
       hoursLogged:
         workLogs.filter((w) => w.projectId === project.id).reduce((acc, w) => acc + w.minutes, 0) /
         60,
