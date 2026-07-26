@@ -9,7 +9,7 @@ export function TopBar() {
   const togglePalette = useAppStore((state) => state.togglePalette);
 
   return (
-    <header className="hairline bg-bg-base/92 relative flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur-xl sm:px-3 md:gap-3 md:px-5">
+    <header className="hairline bg-bg-base/92 sticky top-0 z-30 flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-2 border-b px-2.5 pt-[env(safe-area-inset-top)] backdrop-blur-xl sm:px-3 md:h-14 md:gap-3 md:px-5 md:pt-0">
       <div className="flex min-w-0 flex-1 items-center md:hidden">
         <span className="inline-flex items-center gap-2 text-sm font-semibold">
           <CheckSquare2 className="text-primary size-4" aria-hidden />
