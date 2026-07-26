@@ -23,6 +23,16 @@ export function compareTasks(a: Task, b: Task): number {
   return a.title.localeCompare(b.title);
 }
 
+export type TaskSort = 'default' | 'due' | 'priority';
+
+export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
+  if (sort === 'priority') {
+    const priorityOrder = b.priority - a.priority;
+    if (priorityOrder !== 0) return priorityOrder;
+  }
+  return compareTasks(a, b);
+}
+
 export function matchesTaskSearch(task: Task, query: string, projectName?: string): boolean {
   const needle = query.trim().toLocaleLowerCase();
   if (!needle) return true;
