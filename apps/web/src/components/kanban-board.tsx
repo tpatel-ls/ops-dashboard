@@ -88,14 +88,17 @@ export function KanbanBoard() {
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-muted-foreground text-sm">Drag a task to change its status.</p>
+        <p className="text-muted-foreground text-sm">
+          <span className="md:hidden">Swipe between lanes.</span>
+          <span className="hidden md:inline">Drag a task to change its status.</span>
+        </p>
         <span className="bg-bg-sunken text-muted-foreground rounded-full px-2.5 py-1 text-xs tabular-nums">
           {scopedTasks.length} {scopedTasks.length === 1 ? 'task' : 'tasks'}
         </span>
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <div className="scrollbar-thin -mx-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-3 pb-3 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
-          {SIMPLE_KANBAN_COLUMNS.map((column) => (
+          {SIMPLE_KANBAN_COLUMNS.map((column, index) => (
             <KanbanColumn
               key={column.id}
               column={column}
@@ -104,6 +107,7 @@ export function KanbanBoard() {
               organizationsMap={organizationsMap}
               showOrganization={ctx === 'all'}
               addOverrides={addOverrides}
+              position={index + 1}
             />
           ))}
         </div>
@@ -119,6 +123,7 @@ function KanbanColumn({
   organizationsMap,
   showOrganization,
   addOverrides,
+  position,
 }: {
   column: SimpleKanbanColumn;
   tasks: Task[];
@@ -126,6 +131,7 @@ function KanbanColumn({
   organizationsMap: Map<string, Organization>;
   showOrganization: boolean;
   addOverrides: Partial<Task>;
+  position: number;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const [title, setTitle] = useState('');
@@ -166,7 +172,10 @@ function KanbanColumn({
           <h2 id={`board-${column.id}`} className="text-sm font-semibold">
             {column.label}
           </h2>
-          <p className="text-subtle-foreground mt-0.5 text-[11px]">{column.description}</p>
+          <p className="text-subtle-foreground mt-0.5 text-[11px]">
+            {column.description}
+            <span className="md:hidden"> · Lane {position} of 3</span>
+          </p>
         </div>
         <span className="bg-bg-sunken text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs tabular-nums">
           {tasks.length}
