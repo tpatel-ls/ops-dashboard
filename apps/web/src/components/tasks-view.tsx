@@ -1,446 +1,256 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { format, isPast, isToday, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getDb, matchesOrgContext } from '@ops-dashboard/core';
-import type { Task, Priority } from '@ops-dashboard/core';
-import { format, parseISO, isToday, isPast } from 'date-fns';
-import { CalendarClock, Check, Star, ChevronDown, Circle, Plus, Search, X } from 'lucide-react';
+import { CalendarClock, Check, Circle, ListFilter, Search, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
+import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
-import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
 import { compareTasks, matchesTaskSearch } from '@/lib/task-query';
-import { QuickTaskEntry } from '@/components/quick-task-entry';
+import { setTaskStatus } from '@/lib/tasks';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type StatusFilter = 'open' | 'done' | 'all';
+type StatusFilter = 'open' | 'done';
 
 const STATUS_TABS: Array<{ id: StatusFilter; label: string }> = [
   { id: 'open', label: 'Open' },
   { id: 'done', label: 'Done' },
-  { id: 'all', label: 'All' },
 ];
-
-// ─── Priority helpers ────────────────────────────────────────────────────────
-
-const PRIORITY_CLASS: Record<Priority, string> = {
-  0: '',
-  1: 'border-priority-low/30 bg-priority-low/10 text-priority-low',
-  2: 'border-priority-med/30 bg-priority-med/10 text-priority-med',
-  3: 'border-priority-urgent/30 bg-priority-urgent/10 text-priority-urgent',
-};
-
-const PRIORITY_LABEL: Record<Priority, string> = {
-  0: 'Normal',
-  1: 'Low',
-  2: 'Important',
-  3: 'Critical',
-};
-
-// ─── Dropdown ────────────────────────────────────────────────────────────────
-
-interface DropdownProps {
-  label: string;
-  value: string | null;
-  options: Array<{ id: string; name: string; color?: string }>;
-  onChange: (id: string | null) => void;
-  placeholder: string;
-}
-
-function FilterDropdown({ label, value, options, onChange, placeholder }: DropdownProps) {
-  const [open, setOpen] = useState(false);
-  const selected = options.find((o) => o.id === value);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={`${label} filter`}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className={cn(
-          'inline-flex min-h-10 max-w-44 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-all sm:min-h-8',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-          value
-            ? 'border-primary/40 bg-primary-soft text-primary'
-            : 'border-border bg-card text-muted-foreground hover:border-border-strong hover:text-foreground',
-        )}
-      >
-        {selected ? (
-          <>
-            {selected.color && (
-              <span
-                className="size-2 rounded-full"
-                style={{ background: selected.color }}
-                aria-hidden
-              />
-            )}
-            <span className="max-w-[120px] truncate">{selected.name}</span>
-          </>
-        ) : (
-          <span>{label}</span>
-        )}
-        <ChevronDown className={cn('size-3 transition-transform', open && 'rotate-180')} aria-hidden />
-      </button>
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setOpen(false)}
-            aria-hidden
-          />
-          <div className="absolute top-full left-0 z-20 mt-1.5 min-w-[160px] overflow-hidden rounded-md border border-border bg-card shadow-[0_8px_30px_-8px_rgba(0,0,0,0.25)]">
-            <ul role="listbox" aria-label={`${label} options`} className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
-              <li>
-                <button
-                  type="button"
-                  onClick={() => { onChange(null); setOpen(false); }}
-                  role="option"
-                  aria-selected={!value}
-                  className={cn(
-                    'min-h-9 w-full px-3 py-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:bg-bg-sunken',
-                    !value && 'text-foreground font-medium',
-                  )}
-                >
-                  {placeholder}
-                </button>
-              </li>
-              {options.map((opt) => (
-                <li key={opt.id}>
-                  <button
-                    type="button"
-                    onClick={() => { onChange(opt.id); setOpen(false); }}
-                    role="option"
-                    aria-selected={value === opt.id}
-                    className={cn(
-                      'flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors hover:bg-bg-sunken',
-                      value === opt.id ? 'text-primary font-medium' : 'text-foreground',
-                    )}
-                  >
-                    {opt.color && (
-                      <span
-                        className="size-2 shrink-0 rounded-full"
-                        style={{ background: opt.color }}
-                        aria-hidden
-                      />
-                    )}
-                    <span className="truncate">{opt.name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ─── Task Row ────────────────────────────────────────────────────────────────
 
 interface TaskRowProps {
   task: Task;
   projectName?: string;
   projectColor?: string;
-  domainName?: string;
-  domainColor?: string;
+  organizationName?: string;
+  organizationColor?: string;
 }
 
-function TaskRow({ task, projectName, projectColor, domainName, domainColor }: TaskRowProps) {
+function TaskRow({
+  task,
+  projectName,
+  projectColor,
+  organizationName,
+  organizationColor,
+}: TaskRowProps) {
   const done = task.status === 'done';
-  const openEdit = useAppStore((s) => s.openEdit);
-
+  const openEdit = useAppStore((state) => state.openEdit);
   const dueChipClass = useMemo(() => {
     if (!task.dueAt) return '';
     const due = parseISO(task.dueAt);
-    if (done) return 'border-border bg-bg-sunken text-muted-foreground';
-    if (isPast(due) && !isToday(due)) return 'border-destructive/30 bg-destructive/10 text-destructive font-semibold';
-    if (isToday(due)) return 'border-warning/30 bg-warning/10 text-warning font-semibold';
-    return 'border-border bg-bg-sunken text-muted-foreground';
-  }, [task.dueAt, done]);
+    if (done) return 'text-muted-foreground';
+    if (isPast(due) && !isToday(due)) return 'font-medium text-destructive';
+    if (isToday(due)) return 'font-medium text-warning';
+    return 'text-muted-foreground';
+  }, [done, task.dueAt]);
 
   return (
     <li
       role="button"
       tabIndex={0}
       aria-label={`Open ${task.title}`}
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button')) return;
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest('button')) return;
         openEdit(task.id);
       }}
-      onKeyDown={(e) => {
-        if ((e.target as HTMLElement).closest('button')) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
+      onKeyDown={(event) => {
+        if ((event.target as HTMLElement).closest('button')) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
           openEdit(task.id);
         }
       }}
       className={cn(
-        'group surface-flat relative flex cursor-pointer items-start gap-2.5 px-3 py-3 transition-all sm:gap-3 sm:px-4',
-        'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]',
+        'group surface-flat flex cursor-pointer items-start gap-2 px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-accent/20 sm:px-4',
         done && 'opacity-60',
       )}
     >
-      {/* Priority bar */}
-      <span
-        aria-hidden
-        className={cn(
-          'absolute inset-y-2 left-0 w-[3px] rounded-r-full transition-opacity',
-          task.priority === 1 && 'bg-priority-low',
-          task.priority === 2 && 'bg-priority-med',
-          task.priority === 3 && 'bg-priority-urgent',
-          task.priority === 0 && 'opacity-0',
-        )}
-      />
-
-      {/* Checkbox */}
       <button
         type="button"
-        onClick={() => setTaskStatus(task.id, done ? 'todo' : 'done')}
+        onClick={() => void setTaskStatus(task.id, done ? 'todo' : 'done')}
         className={cn(
-          '-ml-2 -mt-1.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors',
+          'relative -ml-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors',
           done
             ? 'text-primary'
             : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
         )}
-        aria-label={done ? 'Mark as todo' : 'Mark as done'}
+        aria-label={done ? 'Mark as to do' : 'Mark as done'}
       >
         <span
           className={cn(
-            'inline-flex size-5 items-center justify-center rounded-full border',
-            done ? 'border-primary bg-primary text-primary-foreground' : 'border-current text-transparent',
+            'inline-flex size-[18px] items-center justify-center rounded-full border',
+            done ? 'border-primary bg-primary text-primary-foreground' : 'border-current',
           )}
           aria-hidden
         >
-          <Check className="size-3" strokeWidth={3} />
+          {done ? <Check className="size-3" strokeWidth={3} /> : null}
         </span>
       </button>
 
-      {/* Main content */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
+      <div className="min-w-0 flex-1 py-1">
+        <div className="flex min-w-0 items-start gap-2">
           <span
             className={cn(
-              'line-clamp-2 text-[14px] leading-5',
+              'line-clamp-2 min-w-0 flex-1 text-sm leading-5',
               done && 'text-muted-foreground line-through decoration-muted-foreground/50',
             )}
           >
             {task.title}
           </span>
-          {task.priority > 0 && (
+          {task.priority >= 2 ? (
             <span
               className={cn(
-                'shrink-0 rounded-md border px-1.5 py-1 text-[10px] font-semibold leading-none',
-                PRIORITY_CLASS[task.priority],
+                'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                task.priority === 3
+                  ? 'bg-destructive/12 text-destructive'
+                  : 'bg-warning/12 text-warning',
               )}
-              aria-label={`Priority: ${PRIORITY_LABEL[task.priority]}`}
             >
-              {PRIORITY_LABEL[task.priority]}
+              {task.priority === 3 ? 'Critical' : 'Important'}
             </span>
-          )}
+          ) : null}
         </div>
 
-        {/* Meta row */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-          {task.dueAt && (
-            <span className={cn('inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]', dueChipClass)}>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-subtle-foreground">
+          {task.dueAt ? (
+            <span className={cn('inline-flex items-center gap-1', dueChipClass)}>
               <CalendarClock className="size-3" aria-hidden />
               Due {format(parseISO(task.dueAt), 'MMM d')}
             </span>
-          )}
-          {task.scheduledFor && !task.dueAt && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-bg-sunken px-1.5 py-0.5 text-[10px] text-subtle-foreground">
+          ) : task.scheduledFor ? (
+            <span className="inline-flex items-center gap-1">
               <CalendarClock className="size-3" aria-hidden />
-              {format(parseISO(`${task.scheduledFor}T00:00:00`), 'EEE d MMM')}
+              {format(parseISO(`${task.scheduledFor}T00:00:00`), 'EEE, MMM d')}
             </span>
-          )}
-          {projectName && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium text-accent-foreground">
-              {projectColor && (
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ background: projectColor }}
-                  aria-hidden
-                />
-              )}
-              {projectName}
+          ) : null}
+          {projectName ? (
+            <span className="inline-flex min-w-0 items-center gap-1.5">
+              <span
+                className="size-1.5 shrink-0 rounded-full"
+                style={{ background: projectColor }}
+                aria-hidden
+              />
+              <span className="max-w-44 truncate">{projectName}</span>
             </span>
-          )}
-          {domainName && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-              {domainColor && (
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ background: domainColor }}
-                  aria-hidden
-                />
-              )}
-              {domainName}
+          ) : null}
+          {organizationName ? (
+            <span className="inline-flex min-w-0 items-center gap-1.5">
+              <span
+                className="size-1.5 shrink-0 rounded-full"
+                style={{ background: organizationColor ?? PERSONAL_COLOR }}
+                aria-hidden
+              />
+              <span className="max-w-36 truncate">{organizationName}</span>
             </span>
-          )}
+          ) : null}
         </div>
       </div>
-
-      {/* Star toggle */}
-      <button
-        type="button"
-        onClick={() => updateTask(task.id, { starred: !task.starred })}
-        className={cn(
-          'touch-action-reveal mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-all',
-          'opacity-70 sm:opacity-0 sm:group-hover:opacity-100',
-          task.starred && 'opacity-100 text-warning',
-          !task.starred && 'text-muted-foreground hover:text-warning',
-        )}
-        aria-label={task.starred ? 'Unstar task' : 'Star task'}
-        title={task.starred ? 'Remove from daily mission' : 'Add to daily mission'}
-      >
-        <Star
-          className="size-3.5"
-          aria-hidden
-          fill={task.starred ? 'currentColor' : 'none'}
-        />
-      </button>
     </li>
   );
 }
 
-// ─── Empty State ─────────────────────────────────────────────────────────────
-
-function EmptyState({
-  statusFilter,
-  onCreate,
-}: {
-  statusFilter: StatusFilter;
-  onCreate: () => void;
-}) {
-  const heading =
-    statusFilter === 'done'
-      ? 'No completed tasks yet.'
-      : statusFilter === 'open'
-        ? 'No open tasks.'
-        : 'No tasks found.';
-  const body =
-    statusFilter === 'done'
-      ? 'Complete some tasks and they will appear here.'
-      : statusFilter === 'open'
-        ? 'Capture the next action while it is clear.'
-        : 'Change the filters or capture a new task.';
+function EmptyState({ statusFilter }: { statusFilter: StatusFilter }) {
+  const done = statusFilter === 'done';
   return (
-    <div className="surface flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
-      <span className="flex size-9 items-center justify-center rounded-lg bg-bg-sunken text-muted-foreground">
-        <Circle className="size-4" aria-hidden />
+    <div className="surface flex min-h-48 flex-col items-center justify-center gap-2 p-6 text-center">
+      <span className="flex size-10 items-center justify-center rounded-full bg-bg-sunken text-muted-foreground">
+        {done ? <Check className="size-5" aria-hidden /> : <Circle className="size-5" aria-hidden />}
       </span>
-      <h3 className="text-base font-semibold">{heading}</h3>
-      <p className="max-w-md text-sm text-muted-foreground">{body}</p>
-      {statusFilter !== 'done' ? (
-        <button
-          type="button"
-          onClick={onCreate}
-          className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground"
-        >
-          <Plus className="size-3.5" aria-hidden />
-          Create task
-        </button>
-      ) : null}
+      <h3 className="text-base font-semibold">
+        {done ? 'No completed tasks yet.' : 'No open tasks.'}
+      </h3>
+      <p className="max-w-md text-sm text-muted-foreground">
+        {done
+          ? 'Completed tasks will appear here.'
+          : 'Use Add below on mobile, or the task bar above on desktop.'}
+      </p>
     </div>
   );
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-
 function SkeletonRows() {
   return (
-    <ul className="flex flex-col gap-1.5">
-      {Array.from({ length: 4 }).map((_, i) => (
+    <ul className="flex flex-col gap-2">
+      {Array.from({ length: 5 }).map((_, index) => (
         <li
-          key={i}
+          key={index}
           aria-hidden
           className="surface-flat h-16 animate-pulse"
-          style={{ animationDelay: `${i * 60}ms` }}
+          style={{ animationDelay: `${index * 60}ms` }}
         />
       ))}
     </ul>
   );
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
-
 export function TasksView() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
-  const [projectFilter, setProjectFilter] = useState<string | null>(null);
-  const [domainFilter, setDomainFilter] = useState<string | null>(null);
+  const [projectFilter, setProjectFilter] = useState('');
+  const [domainFilter, setDomainFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const ctx = useOrgStore((s) => s.ctx);
-  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const ctx = useOrgStore((state) => state.ctx);
 
-  // Load all data
   const data = useLiveQuery(async () => {
     const db = getDb();
-    const [allTasks, allProjects, allDomains] = await Promise.all([
+    const [allTasks, allProjects, allDomains, allOrganizations] = await Promise.all([
       db.tasks.toArray(),
       db.projects.toArray(),
       db.domains.toArray(),
+      db.organizations.toArray(),
     ]);
-
     const activeProjects = allProjects.filter(isActiveProject);
-    const activeDomains = allDomains.filter((d) => !d.deletedAt);
-
-    // Maps for fast lookup
-    const projectMap = new Map(activeProjects.map((p) => [p.id, p]));
-    const domainMap = new Map(activeDomains.map((d) => [d.id, d]));
-
-    return { allTasks, activeProjects, activeDomains, projectMap, domainMap };
+    const activeDomains = allDomains
+      .filter((domain) => !domain.deletedAt)
+      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+    const activeOrganizations = allOrganizations.filter(
+      (organization) => !organization.deletedAt && !organization.archivedAt,
+    );
+    return {
+      allTasks,
+      activeProjects,
+      activeDomains,
+      projectMap: new Map(activeProjects.map((project) => [project.id, project])),
+      organizationMap: new Map(
+        activeOrganizations.map((organization) => [organization.id, organization]),
+      ),
+    };
   });
 
-  const effectiveProjectFilter =
+  const visibleProjectFilter =
     projectFilter &&
     data?.activeProjects.some(
       (project) => project.id === projectFilter && matchesOrgContext(project.orgId, ctx),
     )
       ? projectFilter
-      : null;
+      : '';
 
-  // Filtered + sorted tasks (computed from live data + filter state)
   const filteredTasks = useMemo(() => {
     if (!data) return null;
-    const { allTasks, projectMap, domainMap } = data;
+    const { allTasks, projectMap, organizationMap } = data;
+    let tasks = allTasks.filter((task) => !task.deletedAt && task.status !== 'archived');
 
-    let tasks = allTasks.filter((t) => !t.deletedAt && t.status !== 'archived');
+    tasks = tasks.filter((task) =>
+      matchesOrgContext(taskLane(task, projectMap), ctx),
+    );
+    tasks = tasks.filter((task) =>
+      statusFilter === 'open' ? task.status !== 'done' : task.status === 'done',
+    );
 
-    // Org context (top-bar switcher). Lane falls back through the project for
-    // records created before orgId denormalization.
-    tasks = tasks.filter((t) => matchesOrgContext(taskLane(t, projectMap), ctx));
-
-    // Status filter
-    if (statusFilter === 'open') {
-      tasks = tasks.filter((t) => t.status !== 'done');
-    } else if (statusFilter === 'done') {
-      tasks = tasks.filter((t) => t.status === 'done');
+    if (visibleProjectFilter) {
+      tasks = tasks.filter((task) => task.projectId === visibleProjectFilter);
     }
-
-    // Project filter
-    if (effectiveProjectFilter) {
-      tasks = tasks.filter((t) => t.projectId === effectiveProjectFilter);
-    }
-
-    // Domain filter
     if (domainFilter) {
-      tasks = tasks.filter((t) => {
-        if (t.domainId === domainFilter) return true;
-        // Also match via project's domain
-        if (t.projectId) {
-          const proj = projectMap.get(t.projectId);
-          if (proj && proj.domainId === domainFilter) return true;
-        }
-        return false;
+      tasks = tasks.filter((task) => {
+        if (task.domainId === domainFilter) return true;
+        return Boolean(
+          task.projectId && projectMap.get(task.projectId)?.domainId === domainFilter,
+        );
       });
     }
-
     if (searchQuery.trim()) {
       tasks = tasks.filter((task) =>
         matchesTaskSearch(
@@ -451,77 +261,83 @@ export function TasksView() {
       );
     }
 
-    tasks.sort(compareTasks);
+    return tasks.sort(compareTasks).map((task) => {
+      const project = task.projectId ? projectMap.get(task.projectId) : undefined;
+      const laneId = taskLane(task, projectMap);
+      return {
+        task,
+        project,
+        organization: laneId ? organizationMap.get(laneId) : undefined,
+      };
+    });
+  }, [ctx, data, domainFilter, searchQuery, statusFilter, visibleProjectFilter]);
 
-    // Attach lookup info
-    return tasks.map((t) => ({
-      task: t,
-      project: t.projectId ? projectMap.get(t.projectId) : undefined,
-      domain:
-        t.domainId
-          ? domainMap.get(t.domainId)
-          : t.projectId && projectMap.get(t.projectId)?.domainId
-            ? domainMap.get(projectMap.get(t.projectId)!.domainId!)
-            : undefined,
-    }));
-  }, [data, statusFilter, effectiveProjectFilter, domainFilter, searchQuery, ctx]);
-
+  const activeFilterCount = Number(Boolean(visibleProjectFilter)) + Number(Boolean(domainFilter));
   const count = filteredTasks?.length ?? 0;
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
       const taskDate = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
-      return task.status !== 'done' && Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'));
+      return (
+        task.status !== 'done' &&
+        Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'))
+      );
     }).length ?? 0;
-  const activeFilterCount = [effectiveProjectFilter, domainFilter, searchQuery.trim()].filter(Boolean).length;
 
   return (
     <div className="flex flex-col gap-4">
-      <QuickTaskEntry id="tasks-page-task-title" compact />
-
       <section aria-label="Task controls" className="surface flex flex-col gap-2.5 p-2.5 sm:p-3">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border bg-input px-3 transition-colors focus-within:border-ring focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--ring)_18%,transparent)] sm:min-h-9 sm:max-w-sm">
-            <label htmlFor="task-search" className="sr-only">Search tasks</label>
-            <Search
-              className="pointer-events-none size-3.5 shrink-0 text-muted-foreground"
-              aria-hidden
-            />
+          <div className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg border bg-input px-3 focus-within:border-ring sm:max-w-lg">
+            <label htmlFor="task-search" className="sr-only">
+              Search tasks
+            </label>
+            <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             <input
               id="task-search"
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search tasks"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-subtle-foreground"
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
             />
             {searchQuery ? (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear task search"
-                title="Clear search"
-                className="-mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                className="-mr-2 inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
               >
-                <X className="size-3.5" aria-hidden />
+                <X className="size-4" aria-hidden />
               </button>
             ) : null}
           </div>
           <button
             type="button"
-            onClick={() => openWorkLogger('task')}
-            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground sm:min-h-9"
+            onClick={() => setFiltersOpen((open) => !open)}
+            aria-expanded={filtersOpen}
+            aria-controls="task-filters"
+            className={cn(
+              'inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors',
+              filtersOpen || activeFilterCount > 0
+                ? 'border-primary/40 bg-primary/10 text-primary'
+                : 'bg-card text-muted-foreground hover:text-foreground',
+            )}
           >
-            <Plus className="size-3.5" aria-hidden />
-            <span className="hidden sm:inline">New task</span>
-            <span className="sm:hidden">New</span>
+            <ListFilter className="size-4" aria-hidden />
+            <span className="hidden sm:inline">Filters</span>
+            {activeFilterCount > 0 ? (
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                {activeFilterCount}
+              </span>
+            ) : null}
           </button>
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <div
             role="group"
             aria-label="Task status"
-            className="grid w-full grid-cols-3 items-center gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:w-auto"
+            className="grid grid-cols-2 gap-0.5 rounded-lg border bg-bg-sunken p-0.5"
           >
             {STATUS_TABS.map((tab) => (
               <button
@@ -530,7 +346,7 @@ export function TasksView() {
                 aria-pressed={statusFilter === tab.id}
                 onClick={() => setStatusFilter(tab.id)}
                 className={cn(
-                  'min-h-10 rounded-md px-3 py-1 text-[12px] font-medium transition-all sm:min-h-8',
+                  'min-h-10 rounded-md px-4 text-xs font-medium transition-colors sm:min-h-8',
                   statusFilter === tab.id
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground',
@@ -541,76 +357,89 @@ export function TasksView() {
             ))}
           </div>
 
-          {/* Domain filter */}
-          {data && data.activeDomains.length > 0 && (
-            <FilterDropdown
-              label="Domain"
-              value={domainFilter}
-              options={data.activeDomains
-                .sort((a, b) => a.order - b.order)
-                .map((d) => ({ id: d.id, name: d.name, color: d.color }))}
-              onChange={setDomainFilter}
-              placeholder="All domains"
-            />
-          )}
-
-          {/* Project filter */}
-          {data && data.activeProjects.length > 0 && (
-            <FilterDropdown
-              label="Project"
-              value={effectiveProjectFilter}
-              options={data.activeProjects
-                .filter((p) => matchesOrgContext(p.orgId, ctx))
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((p) => ({ id: p.id, name: p.name, color: p.color }))}
-              onChange={setProjectFilter}
-              placeholder="All projects"
-            />
-          )}
-
-          {activeFilterCount > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setProjectFilter(null);
-                setDomainFilter(null);
-                setSearchQuery('');
-              }}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:min-h-8"
-            >
-              <X className="size-3" aria-hidden />
-              Clear {activeFilterCount}
-            </button>
-          )}
-
           <div className="ml-auto flex items-center gap-1.5">
             {overdueCount > 0 ? (
-              <span className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1 font-mono text-[11px] tabular-nums text-destructive">
+              <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-medium text-destructive">
                 {overdueCount} overdue
               </span>
             ) : null}
-            <div className="rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-subtle-foreground">
-              {filteredTasks === null ? '-' : `${count} task${count !== 1 ? 's' : ''}`}
-            </div>
+            <span className="rounded-full bg-bg-sunken px-2.5 py-1 text-[11px] tabular-nums text-muted-foreground">
+              {filteredTasks === null ? '-' : `${count} ${count === 1 ? 'task' : 'tasks'}`}
+            </span>
           </div>
         </div>
+
+        {filtersOpen ? (
+          <div
+            id="task-filters"
+            className="grid gap-2 border-t pt-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+          >
+            <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+              Project
+              <select
+                value={visibleProjectFilter}
+                onChange={(event) => setProjectFilter(event.target.value)}
+                className="input min-h-11"
+              >
+                <option value="">All projects</option>
+                {(data?.activeProjects ?? [])
+                  .filter((project) => matchesOrgContext(project.orgId, ctx))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+              Domain
+              <select
+                value={domainFilter}
+                onChange={(event) => setDomainFilter(event.target.value)}
+                className="input min-h-11"
+              >
+                <option value="">All domains</option>
+                {(data?.activeDomains ?? []).map((domain) => (
+                  <option key={domain.id} value={domain.id}>
+                    {domain.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setProjectFilter('');
+                setDomainFilter('');
+              }}
+              disabled={activeFilterCount === 0}
+              className="min-h-11 self-end rounded-lg px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : null}
       </section>
 
-      {/* Task list */}
       {filteredTasks === null ? (
         <SkeletonRows />
       ) : filteredTasks.length === 0 ? (
-        <EmptyState statusFilter={statusFilter} onCreate={() => openWorkLogger('task')} />
+        <EmptyState statusFilter={statusFilter} />
       ) : (
-        <ul className="flex flex-col gap-1.5">
-          {filteredTasks.map(({ task, project, domain }) => (
+        <ul className="flex flex-col gap-2">
+          {filteredTasks.map(({ task, project, organization }) => (
             <TaskRow
               key={task.id}
               task={task}
               projectName={project?.name}
               projectColor={project?.color}
-              domainName={domain?.name}
-              domainColor={domain?.color}
+              organizationName={
+                ctx === 'all' ? (organization?.name ?? 'Personal') : undefined
+              }
+              organizationColor={
+                ctx === 'all' ? (organization?.color ?? PERSONAL_COLOR) : undefined
+              }
             />
           ))}
         </ul>
