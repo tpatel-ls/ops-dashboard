@@ -36,6 +36,7 @@ export function QuickAdd() {
     value: WorkDestination;
   } | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
   const storedDestination = useSyncExternalStore(
     emptySubscribe,
@@ -102,7 +103,7 @@ export function QuickAdd() {
   } = useVoiceInput({
     onTranscript: (text) => {
       setValue(text);
-      captureText(text);
+      window.requestAnimationFrame(() => inputRef.current?.focus());
     },
   });
 
@@ -116,6 +117,7 @@ export function QuickAdd() {
   return (
     <form onSubmit={submit} className="flex min-w-0 flex-1 items-center gap-1.5 md:gap-2">
       <input
+        ref={inputRef}
         data-quick-task-input
         value={value}
         onChange={(e) => setValue(e.target.value)}
