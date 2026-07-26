@@ -262,7 +262,11 @@ export function TasksView() {
     });
   }, [ctx, data, domainFilter, searchQuery, statusFilter, visibleProjectFilter]);
 
-  const activeFilterCount = Number(Boolean(visibleProjectFilter)) + Number(Boolean(domainFilter));
+  const activeFilterCount =
+    Number(Boolean(visibleProjectFilter)) +
+    Number(Boolean(domainFilter)) +
+    Number(Boolean(searchQuery.trim()));
+  const hasActiveFilters = activeFilterCount > 0;
   const count = filteredTasks?.length ?? 0;
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
@@ -406,8 +410,9 @@ export function TasksView() {
               onClick={() => {
                 setProjectFilter('');
                 setDomainFilter('');
+                setSearchQuery('');
               }}
-              disabled={activeFilterCount === 0}
+              disabled={!hasActiveFilters}
               className="text-muted-foreground hover:bg-accent hover:text-foreground min-h-11 self-end rounded-lg px-3 text-xs font-medium disabled:opacity-40"
             >
               Clear filters
