@@ -4,9 +4,9 @@ import { KanbanBoard } from '@/components/kanban-board';
 export default function KanbanPage() {
   return (
     <ViewShell
-      eyebrow="Work"
-      title="Kanban"
-      subtitle="Group by status, project, priority, or tag. Drag to update."
+      eyebrow="Tasks"
+      title="Board"
+      subtitle="Move work from to do, to in progress, to done."
       compactHeader
       fullWidth
     >
