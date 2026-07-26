@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { FolderKanban, Loader2, Mic, MicOff, X } from 'lucide-react';
+import { ArrowUp, FolderKanban, Loader2, Mic, MicOff, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Project } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -253,6 +253,21 @@ export function QuickAdd() {
           </div>
         ) : null}
       </div>
+      {value.trim() ? (
+        <button
+          type="submit"
+          disabled={pending || listening || transcribing}
+          aria-label="Add task"
+          title="Add task"
+          className="bg-primary text-primary-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-transform active:scale-95 disabled:opacity-50"
+        >
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <ArrowUp className="size-4" aria-hidden />
+          )}
+        </button>
+      ) : null}
       {micAvailable ? (
         <button
           type="button"
