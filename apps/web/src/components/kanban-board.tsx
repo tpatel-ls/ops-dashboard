@@ -21,7 +21,7 @@ import {
   Pencil,
   Plus,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -138,6 +138,7 @@ function KanbanColumn({
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function addToColumn(event: React.FormEvent) {
     event.preventDefault();
@@ -145,16 +146,21 @@ function KanbanColumn({
     if (!input || saving) return;
     setSaving(true);
     setError(null);
+    let added = false;
     try {
       await addTask(input, {
         status: statusForSimpleKanbanColumn(column.id),
         ...addOverrides,
       });
       setTitle('');
+      added = true;
     } catch {
       setError('Could not add task');
     } finally {
       setSaving(false);
+      if (added) {
+        window.requestAnimationFrame(() => inputRef.current?.focus());
+      }
     }
   }
 
@@ -209,6 +215,7 @@ function KanbanColumn({
       >
         <Plus className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
         <input
+          ref={inputRef}
           value={title}
           onChange={(event) => {
             setTitle(event.target.value);
