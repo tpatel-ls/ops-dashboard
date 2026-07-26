@@ -1,8 +1,17 @@
 'use client';
 
-import { format, isPast, isToday, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowUpDown, CalendarClock, Check, Circle, ListFilter, Search, X } from 'lucide-react';
+import {
+  ArrowUpDown,
+  CalendarClock,
+  Check,
+  Circle,
+  CircleAlert,
+  ListFilter,
+  Search,
+  X,
+} from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
@@ -40,17 +49,16 @@ function TaskRow({
   const done = task.status === 'done';
   const openEdit = useAppStore((state) => state.openEdit);
   const dateValue = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
-  const dateLabel = dateValue
-    ? taskDateLabel(dateValue, format(new Date(), 'yyyy-MM-dd'), done)
-    : null;
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const overdue = Boolean(!done && dateValue && dateValue < today);
+  const dueToday = Boolean(!done && dateValue === today);
+  const dateLabel = dateValue ? taskDateLabel(dateValue, today, done) : null;
   const dueChipClass = useMemo(() => {
-    if (!task.dueAt) return '';
-    const due = parseISO(task.dueAt);
     if (done) return 'text-muted-foreground';
-    if (isPast(due) && !isToday(due)) return 'font-medium text-destructive';
-    if (isToday(due)) return 'font-medium text-warning';
+    if (overdue) return 'font-medium text-destructive';
+    if (dueToday) return 'font-medium text-warning';
     return 'text-muted-foreground';
-  }, [done, task.dueAt]);
+  }, [done, dueToday, overdue]);
 
   return (
     <li
@@ -111,7 +119,11 @@ function TaskRow({
         <div className="text-subtle-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
           {dateLabel ? (
             <span className={cn('inline-flex items-center gap-1', dueChipClass)}>
-              <CalendarClock className="size-3" aria-hidden />
+              {overdue ? (
+                <CircleAlert className="size-3" aria-hidden />
+              ) : (
+                <CalendarClock className="size-3" aria-hidden />
+              )}
               {dateLabel}
             </span>
           ) : null}
