@@ -147,9 +147,12 @@ function KanbanColumn({
     >
       <header className="mb-2 flex items-center gap-2 px-1.5 py-1">
         <span className="size-2.5 rounded-full" style={{ background: column.color }} aria-hidden />
-        <h2 id={`board-${column.id}`} className="text-sm font-semibold">
-          {column.label}
-        </h2>
+        <div className="min-w-0 flex-1">
+          <h2 id={`board-${column.id}`} className="text-sm font-semibold">
+            {column.label}
+          </h2>
+          <p className="text-subtle-foreground mt-0.5 text-[11px]">{column.description}</p>
+        </div>
         <span className="bg-bg-sunken text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs tabular-nums">
           {tasks.length}
         </span>
