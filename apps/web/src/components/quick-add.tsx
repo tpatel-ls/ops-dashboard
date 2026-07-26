@@ -254,19 +254,34 @@ export function QuickAdd() {
         ) : null}
       </div>
       {value.trim() ? (
-        <button
-          type="submit"
-          disabled={pending || listening || transcribing}
-          aria-label="Add task"
-          title="Add task"
-          className="bg-primary text-primary-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-transform active:scale-95 disabled:opacity-50"
-        >
-          {pending ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-          ) : (
-            <ArrowUp className="size-4" aria-hidden />
-          )}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              setValue('');
+              setError(null);
+              inputRef.current?.focus();
+            }}
+            aria-label="Clear task draft"
+            title="Clear draft"
+            className="text-subtle-foreground hover:bg-accent hover:text-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-colors"
+          >
+            <X className="size-3.5" aria-hidden />
+          </button>
+          <button
+            type="submit"
+            disabled={pending || listening || transcribing}
+            aria-label="Add task"
+            title="Add task"
+            className="bg-primary text-primary-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-transform active:scale-95 disabled:opacity-50"
+          >
+            {pending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <ArrowUp className="size-4" aria-hidden />
+            )}
+          </button>
+        </>
       ) : null}
       {micAvailable ? (
         <button
