@@ -32,6 +32,14 @@ export function AppShell() {
     s.closeFocus();
     s.closeReview();
   }, []);
+  const focusCapture = useCallback(() => {
+    const input = document.querySelector<HTMLInputElement>('[data-quick-task-input]');
+    if (input?.offsetParent) {
+      input.focus();
+      return;
+    }
+    openWorkLogger('task');
+  }, [openWorkLogger]);
 
   useEffect(() => {
     router.prefetch('/dashboard');
@@ -55,6 +63,7 @@ export function AppShell() {
     { combo: 'mod+k', handler: togglePalette },
     { combo: '?', handler: toggleHelp },
     { combo: 'g then a', handler: () => openWorkLogger('task') },
+    { combo: 'q', handler: focusCapture },
     { combo: 'g then h', handler: () => router.push('/dashboard') },
     { combo: 'g then t', handler: () => router.push('/tasks') },
     { combo: 'g then p', handler: () => router.push('/projects') },

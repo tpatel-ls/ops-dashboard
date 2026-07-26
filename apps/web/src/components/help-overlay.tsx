@@ -10,6 +10,7 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
     rows: [
       ['?', 'Open this overlay'],
       ['Cmd/Ctrl K', 'Command palette'],
+      ['Q', 'Capture a task'],
       ['g a', 'Add task'],
       ['f', 'Focus mode'],
       ['Esc', 'Close any overlay'],
@@ -80,9 +81,9 @@ export function HelpOverlay() {
         aria-labelledby="keyboard-help-title"
         className="command-surface max-h-[92dvh] w-full max-w-3xl overflow-hidden rounded-t-lg sm:rounded-lg"
       >
-        <header className="relative flex items-center justify-between border-b border-hairline px-5 py-4">
+        <header className="border-hairline relative flex items-center justify-between border-b px-5 py-4">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+            <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
               Reference
             </div>
             <h2 id="keyboard-help-title" className="text-lg font-semibold tracking-tight">
@@ -93,7 +94,7 @@ export function HelpOverlay() {
             ref={closeButtonRef}
             type="button"
             onClick={close}
-            className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-11 items-center justify-center rounded-md"
             aria-label="Close keyboard help"
           >
             <X className="size-5" aria-hidden />
@@ -101,8 +102,11 @@ export function HelpOverlay() {
         </header>
         <div className="scrollbar-thin grid max-h-[calc(92dvh-77px)] gap-4 overflow-y-auto p-5 sm:grid-cols-3">
           {SECTIONS.map((s) => (
-            <section key={s.heading} className="border-t pt-4 first:border-t-0 first:pt-0 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0 sm:first:border-l-0 sm:first:pl-0">
-              <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <section
+              key={s.heading}
+              className="border-t pt-4 first:border-t-0 first:pt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 sm:first:border-l-0 sm:first:pl-0"
+            >
+              <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
                 {s.heading}
               </div>
               <ul className="space-y-1.5 text-sm">

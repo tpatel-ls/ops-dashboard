@@ -116,6 +116,7 @@ export function QuickAdd() {
   return (
     <form onSubmit={submit} className="flex min-w-0 flex-1 items-center gap-1.5 md:gap-2">
       <input
+        data-quick-task-input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={
