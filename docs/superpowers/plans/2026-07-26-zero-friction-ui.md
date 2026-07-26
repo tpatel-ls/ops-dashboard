@@ -347,4 +347,3 @@ expect(taskResultSummary(4, true)).toBe('4 matching tasks');
 - [ ] Run `pnpm --filter @ops-dashboard/web build`.
 - [ ] Run desktop and mobile Playwright smoke checks.
 - [ ] Push `main`, confirm `origin/main...main` is `0 0`, deploy production, and inspect logs.
-
