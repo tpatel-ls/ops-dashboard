@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { FolderKanban, Loader2, Mic, MicOff, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
@@ -10,12 +10,15 @@ import { addTask, addTaskToProject } from '@/lib/tasks';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { useVoiceInput } from '@/lib/use-voice-input';
 import { useOrgStore } from '@/lib/org-store';
+import { LAST_TASK_DESTINATION_KEY } from '@/lib/task-capture';
 import {
   destinationOrgId,
   projectsForDestination,
   resolveWorkDestination,
   type WorkDestination,
 } from '@/lib/work-logger';
+
+const emptySubscribe = () => () => {};
 
 export function QuickAdd() {
   const [value, setValue] = useState('');
@@ -28,9 +31,17 @@ export function QuickAdd() {
   const [project, setProject] = useState<Project | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [projectFilter, setProjectFilter] = useState('');
-  const [destinationOverride, setDestinationOverride] = useState<WorkDestination | null>(null);
+  const [destinationOverride, setDestinationOverride] = useState<{
+    ctx: string;
+    value: WorkDestination;
+  } | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
+  const storedDestination = useSyncExternalStore(
+    emptySubscribe,
+    () => window.localStorage.getItem(LAST_TASK_DESTINATION_KEY),
+    () => null,
+  );
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -48,10 +59,11 @@ export function QuickAdd() {
 
   const defaultDestination = resolveWorkDestination(
     ctx,
-    null,
+    storedDestination,
     (data?.organizations ?? []).map((organization) => organization.id),
   );
-  const destination = destinationOverride ?? defaultDestination;
+  const destination =
+    destinationOverride?.ctx === ctx ? destinationOverride.value : defaultDestination;
   const projects = projectsForDestination(data?.projects ?? [], destination);
 
   useEffect(() => {
@@ -85,6 +97,7 @@ export function QuickAdd() {
     available: micAvailable,
     listening,
     transcribing,
+    error: voiceError,
     toggle: toggleMic,
   } = useVoiceInput({
     onTranscript: (text) => {
@@ -112,8 +125,8 @@ export function QuickAdd() {
         }
         className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
         aria-label="Quick add task"
-        aria-invalid={Boolean(error) || undefined}
-        aria-errormessage={error ? 'quick-add-error' : undefined}
+        aria-invalid={Boolean(error || voiceError) || undefined}
+        aria-errormessage={error || voiceError ? 'quick-add-error' : undefined}
         disabled={pending || listening || transcribing}
         autoComplete="off"
         spellCheck={false}
@@ -129,7 +142,9 @@ export function QuickAdd() {
         <select
           value={destination}
           onChange={(event) => {
-            setDestinationOverride(event.target.value);
+            const nextDestination = event.target.value;
+            window.localStorage.setItem(LAST_TASK_DESTINATION_KEY, nextDestination);
+            setDestinationOverride({ ctx, value: nextDestination });
             setProject(null);
           }}
           aria-label="Task organization"
@@ -259,7 +274,11 @@ export function QuickAdd() {
           )}
         </button>
       ) : null}
-      {error ? <span id="quick-add-error" role="alert" className="sr-only">{error}</span> : null}
+      {error || voiceError ? (
+        <span id="quick-add-error" role="alert" className="sr-only">
+          {error ?? voiceError}
+        </span>
+      ) : null}
     </form>
   );
 }
