@@ -26,7 +26,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="hairline bg-bg-rail/94 relative z-40 flex min-h-16 shrink-0 items-stretch justify-around border-t px-1.5 pt-1 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-12px_32px_-28px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden"
+      className="hairline bg-bg-rail/94 relative z-40 flex min-h-[calc(4rem+env(safe-area-inset-bottom))] shrink-0 items-stretch justify-around border-t px-1.5 pt-1 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-12px_32px_-28px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden"
     >
       {LEFT.map((it) => (
         <Tab key={it.href} {...it} active={isActive(pathname, it)} />
@@ -37,7 +37,7 @@ export function MobileNav() {
           onClick={() => openWorkLogger('task')}
           aria-label="Add task"
           aria-haspopup="dialog"
-          className="border-primary/30 bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-full border shadow-[0_12px_28px_-14px_color-mix(in_oklch,var(--primary)_78%,transparent)] transition-transform active:scale-95"
+          className="border-primary/30 bg-primary text-primary-foreground flex size-12 touch-manipulation items-center justify-center rounded-full border shadow-[0_12px_28px_-14px_color-mix(in_oklch,var(--primary)_78%,transparent)] transition-transform active:scale-95"
         >
           <Plus className="size-5" aria-hidden />
         </button>
@@ -66,8 +66,8 @@ function Tab({
       href={href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'relative flex min-h-14 min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-1 py-2 text-[10px] transition-colors',
-        active ? 'text-foreground' : 'text-muted-foreground',
+        'relative flex min-h-14 min-w-0 flex-1 basis-0 touch-manipulation flex-col items-center justify-center gap-1 py-2 text-[10px] transition-[color,transform] active:scale-95',
+        active ? 'text-foreground font-semibold' : 'text-muted-foreground',
       )}
     >
       {active ? (
