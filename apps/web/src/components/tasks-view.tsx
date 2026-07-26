@@ -306,6 +306,10 @@ export function TasksView() {
     Number(Boolean(domainFilter)) +
     Number(Boolean(searchQuery.trim()));
   const hasActiveFilters = activeFilterCount > 0;
+  const activeProjectName = data?.activeProjects.find(
+    (project) => project.id === visibleProjectFilter,
+  )?.name;
+  const activeDomainName = data?.activeDomains.find((domain) => domain.id === domainFilter)?.name;
   const count = filteredTasks?.length ?? 0;
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
@@ -419,6 +423,47 @@ export function TasksView() {
             </span>
           </div>
         </div>
+
+        {hasActiveFilters ? (
+          <div role="group" aria-label="Active filters" className="flex flex-wrap gap-1.5">
+            {searchQuery.trim() ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  searchRef.current?.focus();
+                }}
+                aria-label={`Remove search filter ${searchQuery.trim()}`}
+                className="bg-primary/10 text-primary hover:bg-primary/15 inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-full px-3 text-xs font-medium"
+              >
+                <span className="max-w-48 truncate">Search: {searchQuery.trim()}</span>
+                <X className="size-3.5 shrink-0" aria-hidden />
+              </button>
+            ) : null}
+            {activeProjectName ? (
+              <button
+                type="button"
+                onClick={() => setProjectFilter('')}
+                aria-label={`Remove project filter ${activeProjectName}`}
+                className="bg-bg-sunken text-muted-foreground hover:text-foreground inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-full border px-3 text-xs font-medium"
+              >
+                <span className="max-w-48 truncate">Project: {activeProjectName}</span>
+                <X className="size-3.5 shrink-0" aria-hidden />
+              </button>
+            ) : null}
+            {activeDomainName ? (
+              <button
+                type="button"
+                onClick={() => setDomainFilter('')}
+                aria-label={`Remove domain filter ${activeDomainName}`}
+                className="bg-bg-sunken text-muted-foreground hover:text-foreground inline-flex min-h-9 max-w-full items-center gap-1.5 rounded-full border px-3 text-xs font-medium"
+              >
+                <span className="max-w-48 truncate">Domain: {activeDomainName}</span>
+                <X className="size-3.5 shrink-0" aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
         {filtersOpen ? (
           <div
