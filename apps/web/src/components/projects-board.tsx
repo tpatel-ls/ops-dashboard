@@ -10,6 +10,7 @@ import {
   Clock,
   Layers,
   ListTodo,
+  Loader2,
   Plus,
   RefreshCw,
   Search,
@@ -228,9 +229,16 @@ function CreateProjectForm({
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="bg-primary text-primary-foreground min-h-10 rounded-md px-3 text-xs font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="bg-primary text-primary-foreground inline-flex min-h-10 min-w-28 items-center justify-center gap-2 rounded-md px-3 text-xs font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          Create project
+          {saving ? (
+            <>
+              <Loader2 className="size-3.5 animate-spin" aria-hidden />
+              Creating…
+            </>
+          ) : (
+            'Create project'
+          )}
         </button>
       </div>
     </form>
