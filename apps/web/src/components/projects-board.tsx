@@ -724,7 +724,7 @@ export function ProjectsBoard() {
             ) : (
               <button
                 type="button"
-                onClick={() => openWorkLogger('project')}
+                onClick={() => setCreating(true)}
                 className="bg-primary text-primary-foreground mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md px-4 text-xs font-medium"
               >
                 <Plus className="size-3.5" aria-hidden />
