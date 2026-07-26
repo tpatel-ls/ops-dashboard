@@ -2,7 +2,7 @@
 
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarClock, Check, Circle, ListFilter, Search, X } from 'lucide-react';
+import { ArrowUpDown, CalendarClock, Check, Circle, ListFilter, Search, X } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
@@ -11,7 +11,7 @@ import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
-import { compareTasks, matchesTaskSearch } from '@/lib/task-query';
+import { compareTasksBy, matchesTaskSearch, type TaskSort } from '@/lib/task-query';
 import { setTaskStatus } from '@/lib/tasks';
 import { taskResultSummary } from '@/lib/task-presentation';
 
@@ -186,6 +186,7 @@ export function TasksView() {
   const [domainFilter, setDomainFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sort, setSort] = useState<TaskSort>('default');
   const searchRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
 
@@ -252,16 +253,18 @@ export function TasksView() {
       );
     }
 
-    return tasks.sort(compareTasks).map((task) => {
-      const project = task.projectId ? projectMap.get(task.projectId) : undefined;
-      const laneId = taskLane(task, projectMap);
-      return {
-        task,
-        project,
-        organization: laneId ? organizationMap.get(laneId) : undefined,
-      };
-    });
-  }, [ctx, data, domainFilter, searchQuery, statusFilter, visibleProjectFilter]);
+    return tasks
+      .sort((a, b) => compareTasksBy(sort, a, b))
+      .map((task) => {
+        const project = task.projectId ? projectMap.get(task.projectId) : undefined;
+        const laneId = taskLane(task, projectMap);
+        return {
+          task,
+          project,
+          organization: laneId ? organizationMap.get(laneId) : undefined,
+        };
+      });
+  }, [ctx, data, domainFilter, searchQuery, sort, statusFilter, visibleProjectFilter]);
 
   const activeFilterCount =
     Number(Boolean(visibleProjectFilter)) +
@@ -357,6 +360,20 @@ export function TasksView() {
           </div>
 
           <div className="ml-auto flex items-center gap-1.5">
+            <label className="bg-bg-sunken text-muted-foreground flex min-h-8 items-center gap-1.5 rounded-lg border px-2 text-[11px]">
+              <ArrowUpDown className="size-3.5" aria-hidden />
+              <span className="sr-only">Sort tasks</span>
+              <select
+                value={sort}
+                onChange={(event) => setSort(event.target.value as TaskSort)}
+                className="bg-transparent outline-none"
+                aria-label="Sort tasks"
+              >
+                <option value="default">Default</option>
+                <option value="due">Due date</option>
+                <option value="priority">Priority</option>
+              </select>
+            </label>
             {overdueCount > 0 ? (
               <span className="bg-destructive/10 text-destructive rounded-full px-2.5 py-1 text-[11px] font-medium">
                 {overdueCount} overdue

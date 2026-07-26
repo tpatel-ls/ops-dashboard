@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { compareTasks, matchesTaskSearch, matchesTaskTag } from './task-query';
+import { compareTasks, compareTasksBy, matchesTaskSearch, matchesTaskTag } from './task-query';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -45,6 +45,29 @@ describe('compareTasks', () => {
     ];
 
     expect(tasks.sort(compareTasks).map((item) => item.title)).toEqual(['Alpha', 'Beta', 'Zulu']);
+  });
+});
+
+describe('compareTasksBy', () => {
+  const dated = task('dated', { scheduledFor: '2026-07-16', priority: 0 });
+  const urgent = task('urgent', { priority: 3 });
+
+  it('preserves the current order as the default', () => {
+    expect([urgent, dated].sort((a, b) => compareTasksBy('default', a, b))).toEqual([
+      dated,
+      urgent,
+    ]);
+  });
+
+  it('keeps dated work first for due-date sorting', () => {
+    expect([urgent, dated].sort((a, b) => compareTasksBy('due', a, b))).toEqual([dated, urgent]);
+  });
+
+  it('puts urgent work first for priority sorting', () => {
+    expect([dated, urgent].sort((a, b) => compareTasksBy('priority', a, b))).toEqual([
+      urgent,
+      dated,
+    ]);
   });
 });
 
