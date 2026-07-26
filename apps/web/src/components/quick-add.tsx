@@ -24,6 +24,7 @@ export function QuickAdd() {
   const [value, setValue] = useState('');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // Optional project target: captures file straight into it (skips AI triage)
   // and inherit its domain + org lane. Cleared manually, not per capture, so
@@ -76,9 +77,16 @@ export function QuickAdd() {
     return () => document.removeEventListener('mousedown', onDown);
   }, [pickerOpen]);
 
+  useEffect(() => {
+    if (notice !== 'Task added') return;
+    const timeout = window.setTimeout(() => setNotice(null), 2_000);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
+
   function captureText(text: string) {
     hapticTap();
     setError(null);
+    setNotice(null);
     startTransition(async () => {
       try {
         if (project) await addTaskToProject(text, project);
@@ -88,6 +96,7 @@ export function QuickAdd() {
         }
         hapticSuccess();
         setValue('');
+        setNotice('Task added');
       } catch {
         setError('Could not add task. Your text is still available.');
       }
@@ -103,6 +112,7 @@ export function QuickAdd() {
   } = useVoiceInput({
     onTranscript: (text) => {
       setValue(text);
+      setNotice('Voice draft ready');
       window.requestAnimationFrame(() => inputRef.current?.focus());
     },
   });
@@ -120,7 +130,10 @@ export function QuickAdd() {
         ref={inputRef}
         data-quick-task-input
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setNotice(null);
+        }}
         placeholder={
           project
             ? `Add a task to ${project.name}...`
@@ -312,6 +325,9 @@ export function QuickAdd() {
           {error ?? voiceError}
         </span>
       ) : null}
+      <span role="status" aria-live="polite" className="sr-only">
+        {listening ? 'Recording' : transcribing ? 'Transcribing' : notice}
+      </span>
     </form>
   );
 }
