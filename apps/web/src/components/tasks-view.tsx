@@ -13,7 +13,7 @@ import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
 import { compareTasksBy, matchesTaskSearch, type TaskSort } from '@/lib/task-query';
 import { setTaskStatus } from '@/lib/tasks';
-import { taskResultSummary } from '@/lib/task-presentation';
+import { taskDateLabel, taskResultSummary } from '@/lib/task-presentation';
 
 type StatusFilter = 'open' | 'done';
 
@@ -39,6 +39,10 @@ function TaskRow({
 }: TaskRowProps) {
   const done = task.status === 'done';
   const openEdit = useAppStore((state) => state.openEdit);
+  const dateValue = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
+  const dateLabel = dateValue
+    ? taskDateLabel(dateValue, format(new Date(), 'yyyy-MM-dd'), done)
+    : null;
   const dueChipClass = useMemo(() => {
     if (!task.dueAt) return '';
     const due = parseISO(task.dueAt);
@@ -105,15 +109,10 @@ function TaskRow({
         </div>
 
         <div className="text-subtle-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
-          {task.dueAt ? (
+          {dateLabel ? (
             <span className={cn('inline-flex items-center gap-1', dueChipClass)}>
               <CalendarClock className="size-3" aria-hidden />
-              Due {format(parseISO(task.dueAt), 'MMM d')}
-            </span>
-          ) : task.scheduledFor ? (
-            <span className="inline-flex items-center gap-1">
-              <CalendarClock className="size-3" aria-hidden />
-              {format(parseISO(`${task.scheduledFor}T00:00:00`), 'EEE, MMM d')}
+              {dateLabel}
             </span>
           ) : null}
           {projectName ? (
