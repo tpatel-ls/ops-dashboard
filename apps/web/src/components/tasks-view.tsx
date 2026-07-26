@@ -17,6 +17,7 @@ import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { useHotkeys } from '@/lib/hotkeys';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
@@ -224,6 +225,7 @@ export function TasksView() {
   const searchRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
+  useHotkeys([{ combo: '/', handler: () => searchRef.current?.focus() }]);
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -337,6 +339,11 @@ export function TasksView() {
               placeholder="Search tasks"
               className="placeholder:text-subtle-foreground min-w-0 flex-1 bg-transparent text-sm outline-none"
             />
+            {!searchQuery ? (
+              <kbd className="bg-bg-sunken text-subtle-foreground hidden rounded border px-1.5 py-0.5 font-mono text-[10px] sm:inline">
+                /
+              </kbd>
+            ) : null}
             {searchQuery ? (
               <button
                 type="button"
