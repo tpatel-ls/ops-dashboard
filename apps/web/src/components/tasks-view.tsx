@@ -153,7 +153,15 @@ function TaskRow({
   );
 }
 
-function EmptyState({ statusFilter }: { statusFilter: StatusFilter }) {
+function EmptyState({
+  statusFilter,
+  onAdd,
+  onViewOpen,
+}: {
+  statusFilter: StatusFilter;
+  onAdd: () => void;
+  onViewOpen: () => void;
+}) {
   const done = statusFilter === 'done';
   return (
     <div className="surface flex min-h-48 flex-col items-center justify-center gap-2 p-6 text-center">
@@ -172,6 +180,13 @@ function EmptyState({ statusFilter }: { statusFilter: StatusFilter }) {
           ? 'Completed tasks will appear here.'
           : 'Use Add below on mobile, or the task bar above on desktop.'}
       </p>
+      <button
+        type="button"
+        onClick={done ? onViewOpen : onAdd}
+        className="bg-primary text-primary-foreground mt-2 inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold"
+      >
+        {done ? 'View open tasks' : 'Add task'}
+      </button>
     </div>
   );
 }
@@ -200,6 +215,7 @@ export function TasksView() {
   const [sort, setSort] = useState<TaskSort>('default');
   const searchRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
+  const openWorkLogger = useAppStore((state) => state.openWorkLogger);
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -453,7 +469,11 @@ export function TasksView() {
       {filteredTasks === null ? (
         <SkeletonRows />
       ) : filteredTasks.length === 0 ? (
-        <EmptyState statusFilter={statusFilter} />
+        <EmptyState
+          statusFilter={statusFilter}
+          onAdd={() => openWorkLogger('task')}
+          onViewOpen={() => setStatusFilter('open')}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {filteredTasks.map(({ task, project, organization }) => (
