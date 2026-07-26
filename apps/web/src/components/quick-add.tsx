@@ -67,6 +67,9 @@ export function QuickAdd() {
   const destination =
     destinationOverride?.ctx === ctx ? destinationOverride.value : defaultDestination;
   const projects = projectsForDestination(data?.projects ?? [], destination);
+  const filteredProjects = projects.filter((candidate) =>
+    candidate.name.toLowerCase().includes(projectFilter.trim().toLowerCase()),
+  );
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -223,13 +226,26 @@ export function QuickAdd() {
                 {project ? 'locked' : 'auto'}
               </span>
             </div>
-            <input
-              value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-              placeholder="Type to filter projects..."
-              autoFocus
-              className="hairline text-foreground placeholder:text-subtle-foreground w-full border-b bg-transparent px-3 py-2 text-xs outline-none"
-            />
+            <div className="hairline relative border-b">
+              <input
+                value={projectFilter}
+                onChange={(e) => setProjectFilter(e.target.value)}
+                placeholder="Filter projects"
+                aria-label="Filter projects"
+                autoFocus
+                className="text-foreground placeholder:text-subtle-foreground w-full bg-transparent px-3 py-2 pr-10 text-xs outline-none"
+              />
+              {projectFilter ? (
+                <button
+                  type="button"
+                  onClick={() => setProjectFilter('')}
+                  aria-label="Clear project search"
+                  className="text-subtle-foreground hover:text-foreground absolute inset-y-0 right-1 inline-flex w-9 items-center justify-center"
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              ) : null}
+            </div>
             <div className="scrollbar-thin max-h-56 overflow-y-auto py-1" role="listbox">
               <button
                 type="button"
@@ -240,28 +256,31 @@ export function QuickAdd() {
                 className="text-muted-foreground hover:bg-accent hover:text-foreground flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
               >
                 <span aria-hidden className="bg-bg-sunken size-2 rounded-full" />
-                <span>No project</span>
+                <span>{project ? 'Add without project' : 'No project'}</span>
               </button>
-              {projects
-                .filter((p) => p.name.toLowerCase().includes(projectFilter.trim().toLowerCase()))
-                .map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => {
-                      setProject(p);
-                      setPickerOpen(false);
-                    }}
-                    className="text-muted-foreground hover:bg-accent hover:text-foreground flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
-                  >
-                    <span
-                      aria-hidden
-                      className="size-2 rounded-full"
-                      style={{ background: p.color }}
-                    />
-                    <span className="truncate">{p.name}</span>
-                  </button>
-                ))}
+              {filteredProjects.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    setProject(p);
+                    setPickerOpen(false);
+                  }}
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
+                >
+                  <span
+                    aria-hidden
+                    className="size-2 rounded-full"
+                    style={{ background: p.color }}
+                  />
+                  <span className="truncate">{p.name}</span>
+                </button>
+              ))}
+              {filteredProjects.length === 0 ? (
+                <p className="text-subtle-foreground px-3 py-4 text-center text-xs">
+                  {projects.length === 0 ? 'No projects yet' : 'No matching projects'}
+                </p>
+              ) : null}
             </div>
           </div>
         ) : null}
