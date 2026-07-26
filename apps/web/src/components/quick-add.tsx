@@ -67,6 +67,11 @@ export function QuickAdd() {
   const destination =
     destinationOverride?.ctx === ctx ? destinationOverride.value : defaultDestination;
   const projects = projectsForDestination(data?.projects ?? [], destination);
+  const destinationName =
+    destination === 'personal'
+      ? 'Personal'
+      : (data?.organizations.find((organization) => organization.id === destination)?.name ??
+        'Workspace');
   const filteredProjects = projects.filter((candidate) =>
     candidate.name.toLowerCase().includes(projectFilter.trim().toLowerCase()),
   );
@@ -150,14 +155,12 @@ export function QuickAdd() {
         autoComplete="off"
         spellCheck={false}
       />
-      <span className="bg-card/70 text-subtle-foreground hidden shrink-0 rounded-full border px-2 py-1 font-mono text-[10px] tracking-[0.12em] uppercase xl:inline-flex">
-        {project
-          ? 'Project mode'
-          : destination === 'personal'
-            ? pending
-              ? 'Adding'
-              : 'Personal task'
-            : 'Org task'}
+      <span className="bg-card/70 text-subtle-foreground hidden max-w-40 shrink-0 truncate rounded-full border px-2 py-1 text-[10px] xl:inline-flex">
+        {pending
+          ? 'Adding task'
+          : project
+            ? `Saving to ${project.name}`
+            : `Saving to ${destinationName}`}
       </span>
       {!project ? (
         <select
@@ -168,7 +171,8 @@ export function QuickAdd() {
             setDestinationOverride({ ctx, value: nextDestination });
             setProject(null);
           }}
-          aria-label="Task organization"
+          aria-label="Task workspace"
+          title="Choose where this task will be saved"
           className="bg-card text-foreground hidden h-8 max-w-32 shrink-0 rounded-md border px-2 text-[11px] outline-none md:block"
         >
           {(data?.organizations ?? []).map((organization) => (
