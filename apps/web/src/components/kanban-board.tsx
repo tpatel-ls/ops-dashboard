@@ -11,7 +11,15 @@ import {
 } from '@dnd-kit/core';
 import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarClock, Check, ChevronLeft, ChevronRight, CircleAlert, Plus } from 'lucide-react';
+import {
+  CalendarClock,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  Loader2,
+  Plus,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
@@ -122,18 +130,22 @@ function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function addToColumn(event: React.FormEvent) {
     event.preventDefault();
     const input = title.trim();
     if (!input || saving) return;
     setSaving(true);
+    setError(null);
     try {
       await addTask(input, {
         status: statusForSimpleKanbanColumn(column.id),
         ...addOverrides,
       });
       setTitle('');
+    } catch {
+      setError('Could not add task');
     } finally {
       setSaving(false);
     }
@@ -188,7 +200,10 @@ function KanbanColumn({
         <Plus className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
         <input
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(event) => {
+            setTitle(event.target.value);
+            setError(null);
+          }}
           placeholder="Add task"
           aria-label={`New task in ${column.label}`}
           disabled={saving}
@@ -200,9 +215,21 @@ function KanbanColumn({
           aria-label={`Add task to ${column.label}`}
           className="text-primary hover:bg-primary/10 inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors disabled:opacity-40"
         >
-          <Plus className="size-4" aria-hidden />
+          {saving ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <Plus className="size-4" aria-hidden />
+          )}
         </button>
       </form>
+      <span className={cn('mt-1 min-h-4 px-1 text-[11px]', error && 'text-destructive')}>
+        {saving ? 'Adding…' : error}
+      </span>
+      {error ? (
+        <span role="alert" className="sr-only">
+          {error}. Your draft is still available.
+        </span>
+      ) : null}
     </section>
   );
 }
