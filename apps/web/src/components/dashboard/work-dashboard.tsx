@@ -46,6 +46,24 @@ export function WorkDashboard() {
       eyebrow={contextLabel}
       title="Today"
       subtitle={format(new Date(), 'EEEE, MMMM d')}
+      meta={
+        data ? (
+          <div
+            className="bg-bg-sunken text-muted-foreground inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs tabular-nums"
+            aria-label={`${data.model.counts.openTasks} open tasks, ${data.model.counts.overdue} overdue, ${data.model.upcoming.length} upcoming`}
+          >
+            <span>{data.model.counts.openTasks} open</span>
+            {data.model.counts.overdue > 0 ? (
+              <>
+                <span aria-hidden>·</span>
+                <span className="text-destructive">{data.model.counts.overdue} overdue</span>
+              </>
+            ) : null}
+            <span aria-hidden>·</span>
+            <span>{data.model.upcoming.length} upcoming</span>
+          </div>
+        ) : null
+      }
       compactHeader
       fullWidth
     >
