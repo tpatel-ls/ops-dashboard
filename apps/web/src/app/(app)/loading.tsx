@@ -4,26 +4,35 @@ export default function AppLoading() {
       role="status"
       aria-label="Loading view"
       aria-busy="true"
-      className="mx-auto flex h-full w-full max-w-[1360px] flex-col gap-4 p-3 sm:p-4 md:gap-5 md:p-6"
+      className="mx-auto flex h-full w-full max-w-[1360px] flex-col gap-4 p-3 sm:p-4 md:p-6"
     >
       <span className="sr-only">Loading</span>
-      <div className="os-panel h-28 animate-pulse rounded-lg p-4 md:p-5" aria-hidden>
-        <div className="h-3 w-20 rounded bg-bg-sunken" />
-        <div className="mt-3 h-7 w-44 max-w-full rounded bg-bg-sunken" />
-        <div className="mt-2 h-3 w-72 max-w-full rounded bg-bg-sunken" />
+      <div className="border-border/70 animate-pulse border-b py-2 pb-4" aria-hidden>
+        <div className="bg-bg-sunken h-3 w-16 rounded" />
+        <div className="bg-bg-sunken mt-2 h-7 w-36 max-w-full rounded" />
+        <div className="bg-bg-sunken mt-2 h-3 w-56 max-w-full rounded" />
       </div>
-      <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-2" aria-hidden>
-        <div className="surface animate-pulse p-4">
-          <div className="h-4 w-32 rounded bg-bg-sunken" />
-          <div className="mt-5 space-y-3">
+      <div className="mx-auto w-full max-w-4xl" aria-hidden>
+        <div className="surface overflow-hidden">
+          <div className="hairline flex items-center justify-between border-b px-4 py-3">
+            <div className="bg-bg-sunken h-4 w-24 animate-pulse rounded" />
+            <div className="bg-bg-sunken h-5 w-8 animate-pulse rounded-full" />
+          </div>
+          <div className="divide-border/70 divide-y">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="h-14 rounded-md bg-bg-sunken" />
+              <div
+                key={index}
+                className="flex min-h-16 animate-pulse items-center gap-3 px-4"
+                style={{ animationDelay: `${index * 60}ms` }}
+              >
+                <span className="border-border-strong size-[18px] rounded-full border" />
+                <span className="min-w-0 flex-1">
+                  <span className="bg-bg-sunken block h-3.5 w-3/5 rounded" />
+                  <span className="bg-bg-sunken mt-2 block h-2.5 w-2/5 rounded" />
+                </span>
+              </div>
             ))}
           </div>
-        </div>
-        <div className="surface animate-pulse p-4">
-          <div className="h-4 w-28 rounded bg-bg-sunken" />
-          <div className="mt-5 h-52 rounded-md bg-bg-sunken" />
         </div>
       </div>
     </div>
