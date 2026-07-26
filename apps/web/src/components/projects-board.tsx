@@ -95,6 +95,7 @@ function CreateProjectForm({
   const [destination, setDestination] = useState<WorkDestination>(initialDestination);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const destinationOrganization = organizations.find(
     (organization) => organization.id === destination,
   );
@@ -104,6 +105,7 @@ function CreateProjectForm({
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       const project = await createProject(name.trim(), {
         kind,
@@ -112,6 +114,8 @@ function CreateProjectForm({
         description: description.trim() || undefined,
       });
       onCreated(project);
+    } catch {
+      setError('Could not create the project. Your details are still here.');
     } finally {
       setSaving(false);
     }
@@ -143,11 +147,19 @@ function CreateProjectForm({
         />
         Creating in <span className="text-foreground font-medium">{destinationName}</span>
       </div>
+      {error ? (
+        <p role="alert" className="bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-xs">
+          {error}
+        </p>
+      ) : null}
       <label className="text-muted-foreground grid gap-1.5 text-xs">
         <span>Project name</span>
         <input
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setError(null);
+          }}
           placeholder="Name the outcome"
           className="input text-foreground min-h-10"
           autoFocus
