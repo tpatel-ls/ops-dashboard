@@ -418,6 +418,7 @@ export function TasksView() {
                 <option value="default">Default</option>
                 <option value="due">Due date</option>
                 <option value="priority">Priority</option>
+                <option value="recent">Recently updated</option>
               </select>
             </label>
             {overdueCount > 0 ? (

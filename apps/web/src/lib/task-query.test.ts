@@ -69,6 +69,22 @@ describe('compareTasksBy', () => {
       dated,
     ]);
   });
+
+  it('puts the most recently updated work first for recent sorting', () => {
+    const older = task('older', {
+      priority: 3,
+      scheduledFor: '2026-07-15',
+      updatedAt: '2026-07-15T09:00:00.000Z',
+    });
+    const newer = task('newer', {
+      updatedAt: '2026-07-16T09:00:00.000Z',
+    });
+
+    expect([older, newer].sort((a, b) => compareTasksBy('recent', a, b))).toEqual([
+      newer,
+      older,
+    ]);
+  });
 });
 
 describe('matchesTaskSearch', () => {
