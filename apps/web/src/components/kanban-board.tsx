@@ -18,6 +18,7 @@ import {
   ChevronRight,
   CircleAlert,
   Loader2,
+  Pencil,
   Plus,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -296,6 +297,19 @@ function KanbanCard({
     >
       <div className="flex items-start gap-2">
         <p className="line-clamp-3 min-w-0 flex-1 text-sm leading-5 font-medium">{task.title}</p>
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            openEdit(task.id);
+          }}
+          aria-label={`Edit ${task.title}`}
+          title="Edit task"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground -m-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-colors"
+        >
+          <Pencil className="size-3.5" aria-hidden />
+        </button>
         <button
           type="button"
           onPointerDown={(event) => event.stopPropagation()}
