@@ -74,7 +74,7 @@ function TaskRow({
           'relative -ml-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors',
           done ? 'text-primary' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
         )}
-        aria-label={done ? 'Mark as to do' : 'Mark as done'}
+        aria-label={done ? `Restore ${task.title}` : `Complete ${task.title}`}
       >
         <span
           className={cn(
@@ -149,6 +149,14 @@ function TaskRow({
           ) : null}
         </div>
       </button>
+      {done ? (
+        <span
+          aria-hidden
+          className="text-primary self-center text-[11px] font-medium opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+        >
+          Restore
+        </span>
+      ) : null}
     </li>
   );
 }
