@@ -10,7 +10,7 @@ import { AppShell } from '@/components/app-shell';
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex h-[100dvh] w-full overflow-hidden">
+    <div className="app-viewport relative flex w-full overflow-hidden">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -20,7 +20,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main
           id="main-content"
           tabIndex={-1}
-          className="scrollbar-thin min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-4 md:pb-0"
+          className="app-scroll-region scrollbar-thin min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto pb-4 md:pb-0"
         >
           {children}
         </main>

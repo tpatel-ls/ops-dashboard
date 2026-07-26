@@ -206,11 +206,30 @@ body {
   background: var(--bg-base);
 }
 
+.app-viewport {
+  height: 100dvh;
+}
+
+.app-scroll-region {
+  scroll-padding-block: 1rem 7rem;
+  overscroll-behavior-y: contain;
+}
+
+@media (min-width: 768px) {
+  .app-scroll-region {
+    scroll-padding-block: 1rem;
+  }
+}
+
 .dot-grid {
   background-color: var(--bg-sunken);
   background-image:
     radial-gradient(circle, var(--dot-grid) 1px, transparent 1px),
-    radial-gradient(circle, color-mix(in oklch, var(--dot-grid) 60%, transparent) 1px, transparent 1px);
+    radial-gradient(
+      circle,
+      color-mix(in oklch, var(--dot-grid) 60%, transparent) 1px,
+      transparent 1px
+    );
   background-size:
     24px 24px,
     96px 96px;
@@ -303,8 +322,13 @@ body {
 }
 
 @keyframes ops-pulse {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .live-dot {
