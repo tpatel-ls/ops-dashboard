@@ -23,9 +23,13 @@ export function compareTasks(a: Task, b: Task): number {
   return a.title.localeCompare(b.title);
 }
 
-export type TaskSort = 'default' | 'due' | 'priority';
+export type TaskSort = 'default' | 'due' | 'priority' | 'recent';
 
 export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
+  if (sort === 'recent') {
+    const updatedOrder = b.updatedAt.localeCompare(a.updatedAt);
+    if (updatedOrder !== 0) return updatedOrder;
+  }
   if (sort === 'priority') {
     const priorityOrder = b.priority - a.priority;
     if (priorityOrder !== 0) return priorityOrder;
