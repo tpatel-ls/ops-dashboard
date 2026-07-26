@@ -1,6 +1,7 @@
 'use client';
 
 import { Command } from 'cmdk';
+import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
@@ -27,6 +28,7 @@ import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { useOrgStore } from '@/lib/org-store';
+import { taskDateLabel } from '@/lib/task-presentation';
 import { addTask } from '@/lib/tasks';
 import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { useActiveOrgs } from './org-switcher';
@@ -62,6 +64,7 @@ export function CommandPalette() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   function dismiss() {
     setQuery('');
@@ -200,25 +203,44 @@ export function CommandPalette() {
                 heading="Tasks"
                 className="text-subtle-foreground mt-2 text-[10px] uppercase"
               >
-                {results.map((t) => (
-                  <Command.Item
-                    key={t.id}
-                    value={`task-${t.id}`}
-                    onSelect={() => {
-                      openEdit(t.id);
-                      dismiss();
-                    }}
-                    className="group text-foreground data-[selected=true]:bg-accent flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
-                  >
-                    <span className="bg-primary size-1.5 rounded-full" aria-hidden />
-                    <span className="truncate">{t.title}</span>
-                    {t.tags.length ? (
-                      <span className="text-subtle-foreground ml-auto truncate font-mono text-[10px]">
-                        #{t.tags[0]}
+                {results.map((t) => {
+                  const dateValue = t.dueAt?.slice(0, 10) ?? t.scheduledFor;
+                  const dateLabel = dateValue
+                    ? taskDateLabel(dateValue, today, t.status === 'done')
+                    : null;
+                  return (
+                    <Command.Item
+                      key={t.id}
+                      value={`task-${t.id}`}
+                      onSelect={() => {
+                        openEdit(t.id);
+                        dismiss();
+                      }}
+                      className="group text-foreground data-[selected=true]:bg-accent flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+                    >
+                      <span
+                        className={
+                          t.status === 'done'
+                            ? 'bg-success size-1.5 rounded-full'
+                            : 'bg-primary size-1.5 rounded-full'
+                        }
+                        aria-hidden
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate">{t.title}</span>
+                        <span className="text-subtle-foreground text-[10px] normal-case">
+                          {t.status === 'done' ? 'Done' : 'Open'}
+                          {dateLabel ? ` · ${dateLabel}` : ''}
+                        </span>
                       </span>
-                    ) : null}
-                  </Command.Item>
-                ))}
+                      {t.tags.length ? (
+                        <span className="text-subtle-foreground max-w-24 truncate font-mono text-[10px]">
+                          #{t.tags[0]}
+                        </span>
+                      ) : null}
+                    </Command.Item>
+                  );
+                })}
               </Command.Group>
             ) : null}
 
