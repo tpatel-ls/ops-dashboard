@@ -24,7 +24,12 @@ async function verifyProjectOrganization(page) {
 
   const createProjectForm = page.getByRole('form', { name: 'Create project' });
   const organization = createProjectForm.getByLabel('Organization');
-  if (!(await organization.waitFor({ state: 'visible' }).then(() => true).catch(() => false))) {
+  if (
+    !(await organization
+      .waitFor({ state: 'visible' })
+      .then(() => true)
+      .catch(() => false))
+  ) {
     throw new Error('Project form is missing the organization selector');
   }
 
@@ -42,7 +47,12 @@ async function verifyProjectOrganization(page) {
 
   const cardRoot = page.locator('[data-project-card]').filter({ hasText: projectName });
   await cardRoot.waitFor({ state: 'visible' });
-  if (!(await cardRoot.getByText(selectedLabel?.trim() ?? '').isVisible().catch(() => false))) {
+  if (
+    !(await cardRoot
+      .getByText(selectedLabel?.trim() ?? '')
+      .isVisible()
+      .catch(() => false))
+  ) {
     throw new Error('Created project is missing its organization label');
   }
   return { projectName, organizationName: selectedLabel?.trim() ?? '' };
@@ -57,7 +67,11 @@ async function addRapidTask(page, title) {
   await page.waitForFunction(
     ([inputId]) => {
       const element = document.getElementById(inputId);
-      return element instanceof HTMLInputElement && element.value === '' && document.activeElement === element;
+      return (
+        element instanceof HTMLInputElement &&
+        element.value === '' &&
+        document.activeElement === element
+      );
     },
     [await input.getAttribute('id')],
   );
@@ -81,15 +95,22 @@ async function verifyRapidTaskEntry(page, projectTarget) {
   const form = page.getByRole('form', { name: 'Quick task entry' });
   await form.getByRole('button', { name: 'Details' }).click();
   await form.getByLabel('Organization').selectOption({ label: projectTarget.organizationName });
-  await form.getByLabel('Project').locator('option', { hasText: projectTarget.projectName }).waitFor({ state: 'attached' });
+  await form
+    .getByLabel('Project')
+    .locator('option', { hasText: projectTarget.projectName })
+    .waitFor({ state: 'attached' });
   await form.getByLabel('Project').selectOption({ label: projectTarget.projectName });
   const projectTask = `Project task ${stamp}`;
   await addRapidTask(page, projectTask);
 
   await openApp(page, '/projects');
-  const cardRoot = page.locator('[data-project-card]').filter({ hasText: projectTarget.projectName });
+  const cardRoot = page
+    .locator('[data-project-card]')
+    .filter({ hasText: projectTarget.projectName });
   await cardRoot.getByRole('button').first().click();
-  await page.getByRole('heading', { name: projectTarget.projectName, exact: true }).waitFor({ state: 'visible' });
+  await page
+    .getByRole('heading', { name: projectTarget.projectName, exact: true })
+    .waitFor({ state: 'visible' });
   await page.getByText(projectTask, { exact: true }).waitFor({ state: 'visible' });
 }
 
@@ -128,9 +149,7 @@ async function verifyResponsiveLayouts(page) {
         documentWidth: document.documentElement.scrollWidth,
       }));
       if (geometry.documentWidth > geometry.viewport) {
-        throw new Error(
-          `${route} overflows at ${width}px: ${geometry.documentWidth}px document`,
-        );
+        throw new Error(`${route} overflows at ${width}px: ${geometry.documentWidth}px document`);
       }
     }
 
@@ -159,7 +178,9 @@ async function verifyResponsiveLayouts(page) {
   await openApp(page, '/dashboard');
   const mobileNav = page.getByRole('navigation', { name: 'Primary' });
   for (const label of ['Today', 'Tasks', 'Add task', 'Board', 'Projects']) {
-    await mobileNav.getByRole(label === 'Add task' ? 'button' : 'link', { name: label, exact: true }).waitFor({ state: 'visible' });
+    await mobileNav
+      .getByRole(label === 'Add task' ? 'button' : 'link', { name: label, exact: true })
+      .waitFor({ state: 'visible' });
   }
 }
 

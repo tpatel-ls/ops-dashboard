@@ -49,22 +49,8 @@ function TaskRow({
 
   return (
     <li
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${task.title}`}
-      onClick={(event) => {
-        if ((event.target as HTMLElement).closest('button')) return;
-        openEdit(task.id);
-      }}
-      onKeyDown={(event) => {
-        if ((event.target as HTMLElement).closest('button')) return;
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openEdit(task.id);
-        }
-      }}
       className={cn(
-        'group surface-flat flex cursor-pointer items-start gap-2 px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-accent/20 sm:px-4',
+        'group surface-flat hover:border-border-strong hover:bg-accent/20 flex items-start gap-2 px-3 py-2.5 transition-colors sm:px-4',
         done && 'opacity-60',
       )}
     >
@@ -73,9 +59,7 @@ function TaskRow({
         onClick={() => void setTaskStatus(task.id, done ? 'todo' : 'done')}
         className={cn(
           'relative -ml-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors',
-          done
-            ? 'text-primary'
-            : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
+          done ? 'text-primary' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
         )}
         aria-label={done ? 'Mark as to do' : 'Mark as done'}
       >
@@ -90,12 +74,17 @@ function TaskRow({
         </span>
       </button>
 
-      <div className="min-w-0 flex-1 py-1">
+      <button
+        type="button"
+        onClick={() => openEdit(task.id)}
+        aria-label={`Open ${task.title}`}
+        className="min-w-0 flex-1 py-1 text-left"
+      >
         <div className="flex min-w-0 items-start gap-2">
           <span
             className={cn(
               'line-clamp-2 min-w-0 flex-1 text-sm leading-5',
-              done && 'text-muted-foreground line-through decoration-muted-foreground/50',
+              done && 'text-muted-foreground decoration-muted-foreground/50 line-through',
             )}
           >
             {task.title}
@@ -114,7 +103,7 @@ function TaskRow({
           ) : null}
         </div>
 
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-subtle-foreground">
+        <div className="text-subtle-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
           {task.dueAt ? (
             <span className={cn('inline-flex items-center gap-1', dueChipClass)}>
               <CalendarClock className="size-3" aria-hidden />
@@ -147,7 +136,7 @@ function TaskRow({
             </span>
           ) : null}
         </div>
-      </div>
+      </button>
     </li>
   );
 }
@@ -156,13 +145,17 @@ function EmptyState({ statusFilter }: { statusFilter: StatusFilter }) {
   const done = statusFilter === 'done';
   return (
     <div className="surface flex min-h-48 flex-col items-center justify-center gap-2 p-6 text-center">
-      <span className="flex size-10 items-center justify-center rounded-full bg-bg-sunken text-muted-foreground">
-        {done ? <Check className="size-5" aria-hidden /> : <Circle className="size-5" aria-hidden />}
+      <span className="bg-bg-sunken text-muted-foreground flex size-10 items-center justify-center rounded-full">
+        {done ? (
+          <Check className="size-5" aria-hidden />
+        ) : (
+          <Circle className="size-5" aria-hidden />
+        )}
       </span>
       <h3 className="text-base font-semibold">
         {done ? 'No completed tasks yet.' : 'No open tasks.'}
       </h3>
-      <p className="max-w-md text-sm text-muted-foreground">
+      <p className="text-muted-foreground max-w-md text-sm">
         {done
           ? 'Completed tasks will appear here.'
           : 'Use Add below on mobile, or the task bar above on desktop.'}
@@ -233,9 +226,7 @@ export function TasksView() {
     const { allTasks, projectMap, organizationMap } = data;
     let tasks = allTasks.filter((task) => !task.deletedAt && task.status !== 'archived');
 
-    tasks = tasks.filter((task) =>
-      matchesOrgContext(taskLane(task, projectMap), ctx),
-    );
+    tasks = tasks.filter((task) => matchesOrgContext(taskLane(task, projectMap), ctx));
     tasks = tasks.filter((task) =>
       statusFilter === 'open' ? task.status !== 'done' : task.status === 'done',
     );
@@ -246,9 +237,7 @@ export function TasksView() {
     if (domainFilter) {
       tasks = tasks.filter((task) => {
         if (task.domainId === domainFilter) return true;
-        return Boolean(
-          task.projectId && projectMap.get(task.projectId)?.domainId === domainFilter,
-        );
+        return Boolean(task.projectId && projectMap.get(task.projectId)?.domainId === domainFilter);
       });
     }
     if (searchQuery.trim()) {
@@ -278,8 +267,7 @@ export function TasksView() {
     filteredTasks?.filter(({ task }) => {
       const taskDate = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
       return (
-        task.status !== 'done' &&
-        Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'))
+        task.status !== 'done' && Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'))
       );
     }).length ?? 0;
 
@@ -287,25 +275,25 @@ export function TasksView() {
     <div className="flex flex-col gap-4">
       <section aria-label="Task controls" className="surface flex flex-col gap-2.5 p-2.5 sm:p-3">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg border bg-input px-3 focus-within:border-ring sm:max-w-lg">
+          <div className="bg-input focus-within:border-ring flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg border px-3 sm:max-w-lg">
             <label htmlFor="task-search" className="sr-only">
               Search tasks
             </label>
-            <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <Search className="text-muted-foreground size-4 shrink-0" aria-hidden />
             <input
               id="task-search"
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search tasks"
-              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+              className="placeholder:text-subtle-foreground min-w-0 flex-1 bg-transparent text-sm outline-none"
             />
             {searchQuery ? (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear task search"
-                className="-mr-2 inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground -mr-2 inline-flex size-9 items-center justify-center rounded-md"
               >
                 <X className="size-4" aria-hidden />
               </button>
@@ -314,6 +302,7 @@ export function TasksView() {
           <button
             type="button"
             onClick={() => setFiltersOpen((open) => !open)}
+            aria-label="Filters"
             aria-expanded={filtersOpen}
             aria-controls="task-filters"
             className={cn(
@@ -326,7 +315,7 @@ export function TasksView() {
             <ListFilter className="size-4" aria-hidden />
             <span className="hidden sm:inline">Filters</span>
             {activeFilterCount > 0 ? (
-              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+              <span className="bg-primary text-primary-foreground inline-flex min-w-5 items-center justify-center rounded-full text-[10px]">
                 {activeFilterCount}
               </span>
             ) : null}
@@ -337,7 +326,7 @@ export function TasksView() {
           <div
             role="group"
             aria-label="Task status"
-            className="grid grid-cols-2 gap-0.5 rounded-lg border bg-bg-sunken p-0.5"
+            className="bg-bg-sunken grid grid-cols-2 gap-0.5 rounded-lg border p-0.5"
           >
             {STATUS_TABS.map((tab) => (
               <button
@@ -359,11 +348,11 @@ export function TasksView() {
 
           <div className="ml-auto flex items-center gap-1.5">
             {overdueCount > 0 ? (
-              <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-medium text-destructive">
+              <span className="bg-destructive/10 text-destructive rounded-full px-2.5 py-1 text-[11px] font-medium">
                 {overdueCount} overdue
               </span>
             ) : null}
-            <span className="rounded-full bg-bg-sunken px-2.5 py-1 text-[11px] tabular-nums text-muted-foreground">
+            <span className="bg-bg-sunken text-muted-foreground rounded-full px-2.5 py-1 text-[11px] tabular-nums">
               {filteredTasks === null ? '-' : `${count} ${count === 1 ? 'task' : 'tasks'}`}
             </span>
           </div>
@@ -374,7 +363,7 @@ export function TasksView() {
             id="task-filters"
             className="grid gap-2 border-t pt-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
           >
-            <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+            <label className="text-muted-foreground flex flex-col gap-1.5 text-xs font-medium">
               Project
               <select
                 value={visibleProjectFilter}
@@ -392,7 +381,7 @@ export function TasksView() {
                   ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+            <label className="text-muted-foreground flex flex-col gap-1.5 text-xs font-medium">
               Domain
               <select
                 value={domainFilter}
@@ -414,7 +403,7 @@ export function TasksView() {
                 setDomainFilter('');
               }}
               disabled={activeFilterCount === 0}
-              className="min-h-11 self-end rounded-lg px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground min-h-11 self-end rounded-lg px-3 text-xs font-medium disabled:opacity-40"
             >
               Clear filters
             </button>
@@ -434,9 +423,7 @@ export function TasksView() {
               task={task}
               projectName={project?.name}
               projectColor={project?.color}
-              organizationName={
-                ctx === 'all' ? (organization?.name ?? 'Personal') : undefined
-              }
+              organizationName={ctx === 'all' ? (organization?.name ?? 'Personal') : undefined}
               organizationColor={
                 ctx === 'all' ? (organization?.color ?? PERSONAL_COLOR) : undefined
               }

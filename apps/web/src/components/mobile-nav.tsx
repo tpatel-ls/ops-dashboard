@@ -26,7 +26,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="hairline relative z-40 flex min-h-16 shrink-0 items-stretch justify-around border-t bg-bg-rail/94 px-1.5 pt-1 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-12px_32px_-28px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden"
+      className="hairline bg-bg-rail/94 relative z-40 flex min-h-16 shrink-0 items-stretch justify-around border-t px-1.5 pt-1 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-12px_32px_-28px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden"
     >
       {LEFT.map((it) => (
         <Tab key={it.href} {...it} active={isActive(pathname, it)} />
@@ -37,13 +37,11 @@ export function MobileNav() {
           onClick={() => openWorkLogger('task')}
           aria-label="Add task"
           aria-haspopup="dialog"
-          className="flex size-12 items-center justify-center rounded-full border border-primary/30 bg-primary text-primary-foreground shadow-[0_12px_28px_-14px_color-mix(in_oklch,var(--primary)_78%,transparent)] transition-transform active:scale-95"
+          className="border-primary/30 bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-full border shadow-[0_12px_28px_-14px_color-mix(in_oklch,var(--primary)_78%,transparent)] transition-transform active:scale-95"
         >
           <Plus className="size-5" aria-hidden />
         </button>
-        <span className="mt-1 text-[10px] font-medium text-primary">
-          Add
-        </span>
+        <span className="text-primary mt-1 text-[10px] font-medium">Add</span>
       </div>
       {RIGHT.map((it) => (
         <Tab key={it.href} {...it} active={isActive(pathname, it)} />
@@ -73,7 +71,7 @@ function Tab({
       )}
     >
       {active ? (
-        <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary" aria-hidden />
+        <span className="bg-primary absolute inset-x-4 top-0 h-0.5 rounded-full" aria-hidden />
       ) : null}
       <Icon className={cn('relative size-[19px]', active && 'text-primary')} aria-hidden />
       <span className="relative max-w-full truncate px-1">{label}</span>

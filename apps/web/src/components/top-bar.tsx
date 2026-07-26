@@ -9,15 +9,15 @@ export function TopBar() {
   const togglePalette = useAppStore((state) => state.togglePalette);
 
   return (
-    <header className="hairline relative flex h-14 shrink-0 items-center gap-2 border-b bg-bg-base/92 px-2.5 backdrop-blur-xl sm:px-3 md:gap-3 md:px-5">
+    <header className="hairline bg-bg-base/92 relative flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur-xl sm:px-3 md:gap-3 md:px-5">
       <div className="flex min-w-0 flex-1 items-center md:hidden">
         <span className="inline-flex items-center gap-2 text-sm font-semibold">
-          <CheckSquare2 className="size-4 text-primary" aria-hidden />
+          <CheckSquare2 className="text-primary size-4" aria-hidden />
           Taskify
         </span>
       </div>
 
-      <div className="hidden min-w-0 max-w-4xl flex-1 md:block">
+      <div className="hidden max-w-4xl min-w-0 flex-1 md:block">
         <div className="command-surface flex h-10 min-w-0 items-center rounded-lg px-3">
           <QuickAdd />
         </div>
@@ -31,7 +31,7 @@ export function TopBar() {
           aria-label="Open search and commands"
           aria-keyshortcuts="Meta+K Control+K"
           title="Search and commands"
-          className="hairline inline-flex size-10 items-center justify-center rounded-lg border bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:h-9 lg:w-auto lg:gap-2 lg:px-3"
+          className="hairline bg-card text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded-lg border transition-colors lg:h-9 lg:w-auto lg:gap-2 lg:px-3"
         >
           <Search className="size-4" aria-hidden />
           <span className="hidden lg:inline">Search</span>

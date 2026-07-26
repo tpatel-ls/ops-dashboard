@@ -52,24 +52,16 @@ export function KanbanBoard() {
   );
   const organizationsMap = useMemo(
     () =>
-      new Map(
-        (data?.organizations ?? []).map((organization) => [organization.id, organization]),
-      ),
+      new Map((data?.organizations ?? []).map((organization) => [organization.id, organization])),
     [data?.organizations],
   );
   const ctx = useOrgStore((state) => state.ctx);
   const scopedTasks = useMemo(
-    () =>
-      (data?.tasks ?? []).filter((task) =>
-        matchesOrgContext(taskLane(task, projectsMap), ctx),
-      ),
+    () => (data?.tasks ?? []).filter((task) => matchesOrgContext(taskLane(task, projectsMap), ctx)),
     [ctx, data?.tasks, projectsMap],
   );
-  const addOverrides: Partial<Task> =
-    ctx !== 'all' && ctx !== 'personal' ? { orgId: ctx } : {};
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-  );
+  const addOverrides: Partial<Task> = ctx !== 'all' && ctx !== 'personal' ? { orgId: ctx } : {};
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   function tasksForColumn(columnId: SimpleKanbanColumnId): Task[] {
     return scopedTasks.filter((task) => simpleKanbanColumn(task.status) === columnId);
@@ -85,8 +77,8 @@ export function KanbanBoard() {
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-sm text-muted-foreground">Drag a task to change its status.</p>
-        <span className="rounded-full bg-bg-sunken px-2.5 py-1 text-xs tabular-nums text-muted-foreground">
+        <p className="text-muted-foreground text-sm">Drag a task to change its status.</p>
+        <span className="bg-bg-sunken text-muted-foreground rounded-full px-2.5 py-1 text-xs tabular-nums">
           {scopedTasks.length} {scopedTasks.length === 1 ? 'task' : 'tasks'}
         </span>
       </div>
@@ -158,7 +150,7 @@ function KanbanColumn({
         <h2 id={`board-${column.id}`} className="text-sm font-semibold">
           {column.label}
         </h2>
-        <span className="ml-auto rounded-full bg-bg-sunken px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
+        <span className="bg-bg-sunken text-muted-foreground ml-auto rounded-full px-2 py-0.5 text-xs tabular-nums">
           {tasks.length}
         </span>
       </header>
@@ -176,7 +168,7 @@ function KanbanColumn({
             />
           ))
         ) : (
-          <p className="flex min-h-24 items-center justify-center rounded-lg border border-dashed px-4 text-center text-xs text-subtle-foreground">
+          <p className="text-subtle-foreground flex min-h-24 items-center justify-center rounded-lg border border-dashed px-4 text-center text-xs">
             No tasks here
           </p>
         )}
@@ -185,22 +177,22 @@ function KanbanColumn({
       <form
         onSubmit={addToColumn}
         aria-label={`Add task to ${column.label}`}
-        className="mt-2 flex min-w-0 items-center gap-1.5 rounded-lg border bg-input px-2 py-1.5 focus-within:border-ring"
+        className="bg-input focus-within:border-ring mt-2 flex min-w-0 items-center gap-1.5 rounded-lg border px-2 py-1.5"
       >
-        <Plus className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+        <Plus className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
         <input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="Add task"
           aria-label={`New task in ${column.label}`}
           disabled={saving}
-          className="min-h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+          className="placeholder:text-subtle-foreground min-h-8 min-w-0 flex-1 bg-transparent text-sm outline-none"
         />
         <button
           type="submit"
           disabled={!title.trim() || saving}
           aria-label={`Add task to ${column.label}`}
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10 disabled:opacity-40"
+          className="text-primary hover:bg-primary/10 inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors disabled:opacity-40"
         >
           <Plus className="size-4" aria-hidden />
         </button>
@@ -248,14 +240,14 @@ function KanbanCard({
         }
       }}
       className={cn(
-        'surface-flat min-w-0 cursor-grab touch-auto select-none p-3 transition-all hover:border-border-strong',
+        'surface-flat hover:border-border-strong min-w-0 cursor-grab touch-auto p-3 transition-all select-none',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
-      <p className="line-clamp-3 text-sm font-medium leading-5">{task.title}</p>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
+      <p className="line-clamp-3 text-sm leading-5 font-medium">{task.title}</p>
+      <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
         {task.status === 'blocked' ? (
-          <span className="rounded-full bg-destructive/12 px-2 py-0.5 font-medium text-destructive">
+          <span className="bg-destructive/12 text-destructive rounded-full px-2 py-0.5 font-medium">
             Blocked
           </span>
         ) : null}
@@ -272,13 +264,17 @@ function KanbanCard({
           </span>
         ) : null}
         {project ? (
-          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-bg-sunken px-2 py-0.5">
-            <span className="size-1.5 shrink-0 rounded-full" style={{ background: project.color }} aria-hidden />
+          <span className="bg-bg-sunken inline-flex min-w-0 items-center gap-1.5 rounded-full px-2 py-0.5">
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={{ background: project.color }}
+              aria-hidden
+            />
             <span className="max-w-32 truncate">{project.name}</span>
           </span>
         ) : null}
         {showOrganization ? (
-          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-bg-sunken px-2 py-0.5">
+          <span className="bg-bg-sunken inline-flex min-w-0 items-center gap-1.5 rounded-full px-2 py-0.5">
             <span
               className="size-1.5 shrink-0 rounded-full"
               style={{ background: organization?.color ?? PERSONAL_COLOR }}

@@ -63,18 +63,18 @@ export function Sidebar() {
   return (
     <aside
       aria-label="Primary"
-      className="hairline scrollbar-thin relative hidden w-[210px] shrink-0 flex-col overflow-y-auto border-r bg-bg-rail/82 md:flex xl:w-[220px]"
+      className="hairline scrollbar-thin bg-bg-rail/82 relative hidden w-[210px] shrink-0 flex-col overflow-y-auto border-r md:flex xl:w-[220px]"
     >
       <div className="hairline mx-3 flex h-16 items-center gap-2.5 border-b px-1">
         <span
           aria-hidden
-          className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
+          className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg"
         >
           <LayoutGrid className="size-4" />
         </span>
         <span className="flex flex-col leading-tight">
           <span className="text-[15px] font-semibold">Taskify</span>
-          <span className="text-[11px] text-subtle-foreground">Your tasks</span>
+          <span className="text-subtle-foreground text-[11px]">Your tasks</span>
         </span>
       </div>
 
@@ -85,7 +85,7 @@ export function Sidebar() {
       </Section>
 
       <details className="group mx-2.5 mt-4" open={secondaryActive || undefined}>
-        <summary className="flex min-h-10 list-none items-center gap-2 rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground">
+        <summary className="text-muted-foreground hover:bg-accent/60 hover:text-foreground flex min-h-10 list-none items-center gap-2 rounded-lg px-2.5 text-xs font-medium transition-colors">
           <ChevronDown
             className="size-3.5 transition-transform group-open:rotate-180"
             aria-hidden
@@ -117,7 +117,7 @@ export function Sidebar() {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="px-2.5 pt-4">
-      <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase text-subtle-foreground">
+      <p className="text-subtle-foreground px-2.5 pb-1.5 text-[10px] font-semibold uppercase">
         {label}
       </p>
       <nav className="flex flex-col gap-0.5">{children}</nav>
@@ -139,16 +139,16 @@ function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badg
       )}
     >
       {active ? (
-        <span className="absolute inset-y-2 left-0 w-0.5 rounded-r-full bg-primary" aria-hidden />
+        <span className="bg-primary absolute inset-y-2 left-0 w-0.5 rounded-r-full" aria-hidden />
       ) : null}
       <Icon className={cn('size-4', active && 'text-primary')} aria-hidden />
       <span className="truncate">{item.label}</span>
       {badge ? (
-        <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+        <span className="bg-primary text-primary-foreground ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-medium">
           {badge}
         </span>
       ) : item.shortcut ? (
-        <span className="ml-auto text-[10px] text-subtle-foreground opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="text-subtle-foreground ml-auto text-[10px] opacity-0 transition-opacity group-hover:opacity-100">
           {item.shortcut}
         </span>
       ) : null}

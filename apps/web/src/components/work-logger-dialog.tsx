@@ -112,7 +112,7 @@ export function WorkLoggerDialog() {
           className="surface work-logger-panel flex h-40 w-full items-center justify-center"
           style={{ maxWidth: 680 }}
         >
-          <Loader2 className="size-5 animate-spin text-primary" aria-label="Loading logger" />
+          <Loader2 className="text-primary size-5 animate-spin" aria-label="Loading logger" />
         </div>
       </div>
     );
@@ -128,11 +128,8 @@ export function WorkLoggerDialog() {
         readLastDestination(),
         data.organizations.map((org) => org.id),
       );
-  const initialProject = launchProject ?? resolveRecentProject(
-    data.projects,
-    initialDestination,
-    readLastProjectId(),
-  );
+  const initialProject =
+    launchProject ?? resolveRecentProject(data.projects, initialDestination, readLastProjectId());
 
   return (
     <WorkLoggerPanel
@@ -358,14 +355,21 @@ function WorkLoggerPanel({
         className="surface work-logger-panel flex max-h-[calc(100dvh-0.25rem)] w-full flex-col overflow-hidden sm:max-h-[calc(100dvh-2rem)]"
         style={{ maxWidth: 680 }}
       >
-        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border-strong sm:hidden" aria-hidden />
-        <header className="hairline flex items-center justify-between gap-3 border-b px-4 pb-3 pt-2 sm:px-5 sm:pt-3">
+        <div
+          className="bg-border-strong mx-auto mt-2 h-1 w-10 rounded-full sm:hidden"
+          aria-hidden
+        />
+        <header className="hairline flex items-center justify-between gap-3 border-b px-4 pt-2 pb-3 sm:px-5 sm:pt-3">
           <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase text-primary">
+            <p className="text-primary font-mono text-[10px] uppercase">
               {selectedDestinationName}
             </p>
             <h2 id="work-logger-title" className="truncate text-base font-semibold">
-              {mode === 'task' ? 'Add a task' : mode === 'project' ? 'Create a project' : 'Log progress'}
+              {mode === 'task'
+                ? 'Add a task'
+                : mode === 'project'
+                  ? 'Create a project'
+                  : 'Log progress'}
             </h2>
           </div>
           <button
@@ -374,7 +378,7 @@ function WorkLoggerPanel({
             disabled={saving}
             aria-label="Close logger"
             title="Close"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:size-9"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors sm:size-9"
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -382,7 +386,7 @@ function WorkLoggerPanel({
 
         <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
           {launchMode !== 'task' ? (
-            <div className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1">
+            <div className="bg-bg-sunken grid grid-cols-3 gap-1 rounded-lg border p-1">
               {MODE_META.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
@@ -396,14 +400,11 @@ function WorkLoggerPanel({
                   className={cn(
                     'flex min-h-11 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors',
                     mode === id
-                      ? 'bg-card text-foreground shadow-sm ring-1 ring-primary/20'
+                      ? 'bg-card text-foreground ring-primary/20 shadow-sm ring-1'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  <Icon
-                    className={cn('size-3.5', mode === id && 'text-primary')}
-                    aria-hidden
-                  />
+                  <Icon className={cn('size-3.5', mode === id && 'text-primary')} aria-hidden />
                   {label}
                 </button>
               ))}
@@ -420,12 +421,18 @@ function WorkLoggerPanel({
 
           {mode === 'task' ? (
             <div className="mt-3 flex flex-col gap-2">
-              <div className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1" role="group" aria-label="Quick schedule">
-                {([
-                  ['inbox', 'Inbox'],
-                  ['today', 'Today'],
-                  ['tomorrow', 'Tomorrow'],
-                ] as const).map(([value, label]) => (
+              <div
+                className="bg-bg-sunken grid grid-cols-3 gap-1 rounded-lg border p-1"
+                role="group"
+                aria-label="Quick schedule"
+              >
+                {(
+                  [
+                    ['inbox', 'Inbox'],
+                    ['today', 'Today'],
+                    ['tomorrow', 'Tomorrow'],
+                  ] as const
+                ).map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
@@ -433,7 +440,9 @@ function WorkLoggerPanel({
                     onClick={() => setSchedule(value)}
                     className={cn(
                       'min-h-10 rounded-md px-2 text-xs font-medium transition-colors',
-                      schedule === value ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                      schedule === value
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground',
                     )}
                   >
                     {label}
@@ -445,7 +454,7 @@ function WorkLoggerPanel({
                 aria-expanded={taskDetailsOpen}
                 aria-controls="work-task-details"
                 onClick={() => setTaskDetailsOpen((open) => !open)}
-                className="flex min-h-11 w-full items-center gap-2 rounded-lg border bg-bg-sunken px-3 text-left text-xs text-muted-foreground hover:text-foreground"
+                className="bg-bg-sunken text-muted-foreground hover:text-foreground flex min-h-11 w-full items-center gap-2 rounded-lg border px-3 text-left text-xs"
               >
                 <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
                 <span className="min-w-0 flex-1 truncate">
@@ -453,85 +462,92 @@ function WorkLoggerPanel({
                   {taskScheduleLabel(schedule, scheduledDate)}
                   {priority >= 2 ? ` · ${priority === 3 ? 'Critical' : 'Important'}` : ''}
                 </span>
-                <span className="shrink-0 text-[11px] font-semibold text-primary">
-                  Change
-                </span>
-                <ChevronDown className={cn('size-3.5 shrink-0 transition-transform', taskDetailsOpen && 'rotate-180')} aria-hidden />
+                <span className="text-primary shrink-0 text-[11px] font-semibold">Change</span>
+                <ChevronDown
+                  className={cn(
+                    'size-3.5 shrink-0 transition-transform',
+                    taskDetailsOpen && 'rotate-180',
+                  )}
+                  aria-hidden
+                />
               </button>
             </div>
           ) : null}
 
           {mode !== 'task' || taskDetailsOpen ? (
-          <section id={mode === 'task' ? 'work-task-details' : undefined} className="mt-5" aria-labelledby="work-destination-label">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <div>
-                <p
-                  id="work-destination-label"
-                  className="text-xs font-medium text-foreground"
-                >
-                  Organization
-                </p>
-                <p className="text-[11px] text-subtle-foreground">
-                  Selected: {selectedDestinationName}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCreatingOrg((value) => !value)}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground sm:min-h-8"
-              >
-                <Plus className="size-3.5" aria-hidden />
-                Add org
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              {organizations.map((org) => (
-                <DestinationButton
-                  key={org.id}
-                  label={org.name}
-                  color={org.color}
-                  active={destination === org.id}
-                  onClick={() => chooseDestination(org.id)}
-                />
-              ))}
-              <DestinationButton
-                label="Personal"
-                color={PERSONAL_COLOR}
-                active={destination === 'personal'}
-                onClick={() => chooseDestination('personal')}
-              />
-            </div>
-
-            {creatingOrg ? (
-              <div className="mt-2 flex flex-col gap-2 rounded-lg border bg-bg-sunken p-3 sm:flex-row">
-                <label className="sr-only" htmlFor="new-org-name">Organization name</label>
-                <input
-                  id="new-org-name"
-                  value={newOrgName}
-                  onChange={(event) => setNewOrgName(event.target.value)}
-                  placeholder="Organization name"
-                  aria-invalid={Boolean(error) || undefined}
-                  aria-errormessage={error ? 'work-logger-error' : undefined}
-                  className="input min-h-11 flex-1"
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      void addOrganization();
-                    }
-                  }}
-                />
+            <section
+              id={mode === 'task' ? 'work-task-details' : undefined}
+              className="mt-5"
+              aria-labelledby="work-destination-label"
+            >
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div>
+                  <p id="work-destination-label" className="text-foreground text-xs font-medium">
+                    Organization
+                  </p>
+                  <p className="text-subtle-foreground text-[11px]">
+                    Selected: {selectedDestinationName}
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => void addOrganization()}
-                  disabled={saving || !newOrgName.trim()}
-                  className="min-h-11 rounded-md bg-foreground px-4 text-xs font-medium text-background disabled:opacity-50"
+                  onClick={() => setCreatingOrg((value) => !value)}
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-xs sm:min-h-8"
                 >
-                  Create org
+                  <Plus className="size-3.5" aria-hidden />
+                  Add org
                 </button>
               </div>
-            ) : null}
-          </section>
+
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                {organizations.map((org) => (
+                  <DestinationButton
+                    key={org.id}
+                    label={org.name}
+                    color={org.color}
+                    active={destination === org.id}
+                    onClick={() => chooseDestination(org.id)}
+                  />
+                ))}
+                <DestinationButton
+                  label="Personal"
+                  color={PERSONAL_COLOR}
+                  active={destination === 'personal'}
+                  onClick={() => chooseDestination('personal')}
+                />
+              </div>
+
+              {creatingOrg ? (
+                <div className="bg-bg-sunken mt-2 flex flex-col gap-2 rounded-lg border p-3 sm:flex-row">
+                  <label className="sr-only" htmlFor="new-org-name">
+                    Organization name
+                  </label>
+                  <input
+                    id="new-org-name"
+                    value={newOrgName}
+                    onChange={(event) => setNewOrgName(event.target.value)}
+                    placeholder="Organization name"
+                    aria-invalid={Boolean(error) || undefined}
+                    aria-errormessage={error ? 'work-logger-error' : undefined}
+                    className="input min-h-11 flex-1"
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        void addOrganization();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void addOrganization()}
+                    disabled={saving || !newOrgName.trim()}
+                    className="bg-foreground text-background min-h-11 rounded-md px-4 text-xs font-medium disabled:opacity-50"
+                  >
+                    Create org
+                  </button>
+                </div>
+              ) : null}
+            </section>
           ) : null}
 
           <form id="work-logger-form" onSubmit={save} className="mt-5 flex flex-col gap-4">
@@ -576,9 +592,9 @@ function WorkLoggerPanel({
           </form>
         </div>
 
-        <footer className="hairline border-t bg-card/92 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:px-5 sm:pb-3">
+        <footer className="hairline bg-card/92 border-t px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:px-5 sm:pb-3">
           {error ? (
-            <p id="work-logger-error" role="alert" className="mb-2 text-xs text-destructive">
+            <p id="work-logger-error" role="alert" className="text-destructive mb-2 text-xs">
               {error}
             </p>
           ) : null}
@@ -586,7 +602,7 @@ function WorkLoggerPanel({
             <div
               role="status"
               aria-live="polite"
-              className="flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-success"
+              className="text-success flex min-h-11 items-center justify-center gap-2 text-sm font-medium"
             >
               <Check className="size-4" aria-hidden />
               {savedMessage}
@@ -596,7 +612,7 @@ function WorkLoggerPanel({
               type="submit"
               form="work-logger-form"
               disabled={saving}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
+              className="bg-primary text-primary-foreground flex min-h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-opacity disabled:opacity-60"
             >
               {saving ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
               {mode === 'task'
@@ -641,14 +657,14 @@ function DestinationButton({
         aria-hidden
       />
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      {active ? <Check className="size-3.5 shrink-0 text-primary" aria-hidden /> : null}
+      {active ? <Check className="text-primary size-3.5 shrink-0" aria-hidden /> : null}
     </button>
   );
 }
 
 function FieldLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor: string }) {
   return (
-    <label htmlFor={htmlFor} className="text-xs font-medium text-foreground">
+    <label htmlFor={htmlFor} className="text-foreground text-xs font-medium">
       {children}
     </label>
   );
@@ -697,7 +713,7 @@ function TaskTitleField({
                   : 'Start voice task'
             }
             className={cn(
-              'absolute right-1 top-1 inline-flex size-10 items-center justify-center rounded-lg transition-colors',
+              'absolute top-1 right-1 inline-flex size-10 items-center justify-center rounded-lg transition-colors',
               listening
                 ? 'bg-destructive text-destructive-foreground'
                 : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
@@ -713,20 +729,20 @@ function TaskTitleField({
           </button>
         ) : null}
       </div>
-      <p id="work-task-shortcut" className="text-[11px] text-subtle-foreground">
+      <p id="work-task-shortcut" className="text-subtle-foreground text-[11px]">
         Type the task, or use the microphone. Press Enter to add.
       </p>
       {listening ? (
-        <p role="status" className="text-xs font-medium text-destructive">
+        <p role="status" className="text-destructive text-xs font-medium">
           Listening... tap the microphone to stop.
         </p>
       ) : transcribing ? (
-        <p role="status" className="text-xs font-medium text-primary">
+        <p role="status" className="text-primary text-xs font-medium">
           Transcribing...
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-destructive text-xs">
           {error}
         </p>
       ) : null}
@@ -768,7 +784,9 @@ function TaskDetailsFields({
           >
             <option value="">No project</option>
             {projects.map((project) => (
-              <option key={project.id} value={project.id}>{project.name}</option>
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
             ))}
           </select>
         </div>
@@ -800,13 +818,15 @@ function TaskDetailsFields({
         </div>
       ) : null}
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-foreground">Priority</span>
+        <span className="text-foreground text-xs font-medium">Priority</span>
         <div className="grid grid-cols-3 gap-2">
-          {([
-            [0, 'Normal'],
-            [2, 'Important'],
-            [3, 'Critical'],
-          ] as const).map(([value, label]) => (
+          {(
+            [
+              [0, 'Normal'],
+              [2, 'Important'],
+              [3, 'Critical'],
+            ] as const
+          ).map(([value, label]) => (
             <button
               key={value}
               type="button"
@@ -939,11 +959,13 @@ function ProgressFields({
         >
           <option value="">Choose a project</option>
           {projects.map((project) => (
-            <option key={project.id} value={project.id}>{project.name}</option>
+            <option key={project.id} value={project.id}>
+              {project.name}
+            </option>
           ))}
         </select>
         {projects.length === 0 ? (
-          <p className="text-[11px] text-subtle-foreground">
+          <p className="text-subtle-foreground text-[11px]">
             Create a project in this organization before logging progress.
           </p>
         ) : null}
