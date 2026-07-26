@@ -3,7 +3,7 @@
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CalendarClock, Check, Circle, ListFilter, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -185,6 +185,7 @@ export function TasksView() {
   const [domainFilter, setDomainFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
 
   const data = useLiveQuery(async () => {
@@ -281,6 +282,7 @@ export function TasksView() {
             </label>
             <Search className="text-muted-foreground size-4 shrink-0" aria-hidden />
             <input
+              ref={searchRef}
               id="task-search"
               type="search"
               value={searchQuery}
@@ -291,7 +293,10 @@ export function TasksView() {
             {searchQuery ? (
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  searchRef.current?.focus();
+                }}
                 aria-label="Clear task search"
                 className="text-muted-foreground hover:text-foreground -mr-2 inline-flex size-9 items-center justify-center rounded-md"
               >
