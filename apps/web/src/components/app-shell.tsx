@@ -13,7 +13,6 @@ import { FocusMode } from './focus-mode';
 import { ReminderTicker } from './reminder-ticker';
 import { SyncBoot } from './sync-boot';
 import { AppBadgeSync } from './app-badge-sync';
-import { InstallPrompt } from './install-prompt';
 import { DailyReviewDialog } from './daily-review';
 
 export function AppShell() {
@@ -87,7 +86,6 @@ export function AppShell() {
       <ReminderTicker />
       <SyncBoot />
       <AppBadgeSync />
-      <InstallPrompt />
       <DailyReviewDialog />
     </>
   );
