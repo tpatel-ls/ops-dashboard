@@ -16,6 +16,7 @@ test-results
 .playwright-cli
 output
 apps/web/output
+.worktrees
 # local dev screenshots / scratch
 /ops-*.png
 /*-smoke.png
