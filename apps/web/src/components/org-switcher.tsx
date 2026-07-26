@@ -139,7 +139,7 @@ export function OrgSwitcher() {
         aria-expanded={open}
         aria-label={mounted ? `Switch context, current ${current.label}` : 'Switch context'}
         title={mounted ? `Current workspace: ${current.label}` : 'Switch context'}
-        className="hairline bg-card text-foreground hover:bg-accent inline-flex h-10 max-w-28 items-center gap-2 rounded-lg border px-2.5 text-xs font-medium transition-colors sm:max-w-40 lg:h-9"
+        className="hairline bg-card text-foreground hover:bg-accent inline-flex h-11 max-w-28 items-center gap-2 rounded-lg border px-2.5 text-xs font-medium transition-colors sm:max-w-40 lg:h-9"
       >
         {mounted ? (
           <>
@@ -160,7 +160,7 @@ export function OrgSwitcher() {
         <div
           role="menu"
           onKeyDown={moveMenuFocus}
-          className="surface absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden py-1"
+          className="bg-card absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-1rem)] overflow-hidden rounded-lg border py-1 shadow-lg"
         >
           <div className="hairline text-subtle-foreground border-b px-3 pt-2 pb-2 text-[10px] font-semibold uppercase">
             Choose workspace
@@ -181,7 +181,7 @@ export function OrgSwitcher() {
                   setOpen(false);
                 }}
                 className={cn(
-                  'mx-1 flex min-h-10 w-[calc(100%_-_0.5rem)] items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
+                  'mx-1 flex min-h-12 w-[calc(100%_-_0.5rem)] items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
                   active
                     ? 'bg-primary/10 text-foreground'
                     : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
