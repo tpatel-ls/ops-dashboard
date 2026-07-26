@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarClock, CircleAlert, Plus } from 'lucide-react';
+import { CalendarClock, Check, CircleAlert, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
@@ -253,7 +253,36 @@ function KanbanCard({
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
-      <p className="line-clamp-3 text-sm leading-5 font-medium">{task.title}</p>
+      <div className="flex items-start gap-2">
+        <p className="line-clamp-3 min-w-0 flex-1 text-sm leading-5 font-medium">{task.title}</p>
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            void updateTask(task.id, { status: task.status === 'done' ? 'todo' : 'done' });
+          }}
+          aria-label={
+            task.status === 'done' ? `Move ${task.title} to To do` : `Complete ${task.title}`
+          }
+          className={cn(
+            '-m-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-colors',
+            task.status === 'done'
+              ? 'text-success'
+              : 'text-muted-foreground hover:bg-success/10 hover:text-success',
+          )}
+        >
+          <span
+            className={cn(
+              'inline-flex size-[18px] items-center justify-center rounded-full border',
+              task.status === 'done' && 'border-success bg-success text-white',
+            )}
+            aria-hidden
+          >
+            {task.status === 'done' ? <Check className="size-3" strokeWidth={3} /> : null}
+          </span>
+        </button>
+      </div>
       <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
         {dateLabel ? (
           <span
