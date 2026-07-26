@@ -291,7 +291,7 @@ function KanbanCard({
         }
       }}
       className={cn(
-        'surface-flat hover:border-border-strong min-w-0 cursor-grab touch-auto p-3 transition-all select-none',
+        'surface-flat group hover:border-border-strong min-w-0 cursor-grab touch-auto p-3 transition-all select-none',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
@@ -392,7 +392,7 @@ function KanbanCard({
           </span>
         ) : null}
       </div>
-      <div className="mt-1 flex justify-end gap-0.5">
+      <div className="mt-1 flex justify-end gap-0.5 transition-opacity md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
         {previousColumn ? (
           <BoardMoveButton
             task={task}
