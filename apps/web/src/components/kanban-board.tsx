@@ -283,6 +283,7 @@ function KanbanCard({
       aria-label={`Open ${task.title}`}
       onClick={() => openEdit(task.id)}
       onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           openEdit(task.id);

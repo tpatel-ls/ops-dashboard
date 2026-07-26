@@ -32,14 +32,14 @@ import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { useActiveOrgs } from './org-switcher';
 
 const NAV = [
-  { id: 'nav-dashboard', label: 'Home', href: '/dashboard', icon: LayoutDashboard, hint: 'g h' },
+  { id: 'nav-dashboard', label: 'Today', href: '/dashboard', icon: LayoutDashboard, hint: 'g h' },
   { id: 'nav-tasks', label: 'Tasks', href: '/tasks', icon: ListTodo, hint: 'g t' },
   { id: 'nav-projects', label: 'Projects', href: '/projects', icon: FolderKanban, hint: 'g p' },
   { id: 'nav-calendar', label: 'Calendar', href: '/calendar', icon: Calendar, hint: 'g c' },
   { id: 'nav-week', label: 'Week', href: '/week', icon: CalendarRange, hint: 'g w' },
   { id: 'nav-month', label: 'Month', href: '/month', icon: CalendarDays, hint: 'g m' },
   { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g i' },
-  { id: 'nav-kanban', label: 'Kanban', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
+  { id: 'nav-kanban', label: 'Board', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
   {
     id: 'nav-power-dialer',
     label: 'Power Dialer',

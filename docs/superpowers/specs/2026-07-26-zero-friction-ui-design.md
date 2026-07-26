@@ -191,4 +191,3 @@ oversized typography, gradients, or ornamental numbering.
 - Desktop and mobile browser smoke checks cover capture, Tasks, Board, Projects,
   workspace switching, keyboard access, and empty states.
 - The final branch contains exactly 37 new commits after `53c97ca`.
-

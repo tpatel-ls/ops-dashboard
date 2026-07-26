@@ -19,12 +19,12 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
   {
     heading: 'Navigate',
     rows: [
-      ['g h', 'Home'],
+      ['g h', 'Today'],
       ['g t', 'Tasks'],
       ['g p', 'Projects'],
       ['g c', 'Calendar'],
       ['g i', 'Inbox'],
-      ['g k', 'Kanban'],
+      ['g k', 'Board'],
       ['g l', 'Power Dialer'],
       ['g n', 'Notepad'],
       ['g s', 'Settings'],
