@@ -71,7 +71,7 @@ function TaskRow({
         type="button"
         onClick={() => void setTaskStatus(task.id, done ? 'todo' : 'done')}
         className={cn(
-          'relative -ml-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors',
+          'relative -ml-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-colors sm:size-10',
           done ? 'text-primary' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
         )}
         aria-label={done ? `Restore ${task.title}` : `Complete ${task.title}`}
