@@ -6,6 +6,7 @@ import { Check, ChevronDown, Layers } from 'lucide-react';
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext, Organization } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
+import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 
 const emptySubscribe = () => () => {};
@@ -23,6 +24,7 @@ interface Lane {
   ctx: OrgContext;
   label: string;
   color: string;
+  count: number;
 }
 
 export function useActiveOrgs(): Organization[] | undefined {
@@ -43,6 +45,19 @@ export function OrgSwitcher() {
   const ctx = useOrgStore((s) => s.ctx);
   const setCtx = useOrgStore((s) => s.setCtx);
   const orgs = useActiveOrgs();
+  const taskCounts = useLiveQuery(async () => {
+    const db = getDb();
+    const [tasks, projects] = await Promise.all([db.tasks.toArray(), db.projects.toArray()]);
+    const projectMap = new Map(projects.map((project) => [project.id, project]));
+    const counts: Record<string, number> = { all: 0, personal: 0 };
+    for (const task of tasks) {
+      if (task.deletedAt || task.status === 'done' || task.status === 'archived') continue;
+      counts.all = (counts.all ?? 0) + 1;
+      const lane = taskLane(task, projectMap) ?? 'personal';
+      counts[lane] = (counts[lane] ?? 0) + 1;
+    }
+    return counts;
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -69,9 +84,24 @@ export function OrgSwitcher() {
   }, [open]);
 
   const lanes: Lane[] = [
-    { ctx: 'all', label: 'All work', color: 'var(--primary)' },
-    ...(orgs ?? []).map((o) => ({ ctx: o.id as OrgContext, label: o.name, color: o.color })),
-    { ctx: 'personal', label: 'Personal', color: PERSONAL_COLOR },
+    {
+      ctx: 'all',
+      label: 'All work',
+      color: 'var(--primary)',
+      count: taskCounts?.all ?? 0,
+    },
+    ...(orgs ?? []).map((o) => ({
+      ctx: o.id as OrgContext,
+      label: o.name,
+      color: o.color,
+      count: taskCounts?.[o.id] ?? 0,
+    })),
+    {
+      ctx: 'personal',
+      label: 'Personal',
+      color: PERSONAL_COLOR,
+      count: taskCounts?.personal ?? 0,
+    },
   ];
   const current = lanes.find((l) => l.ctx === ctx) ?? lanes[0]!;
 
@@ -105,7 +135,7 @@ export function OrgSwitcher() {
         aria-expanded={open}
         aria-label={mounted ? `Switch context, current ${current.label}` : 'Switch context'}
         title={mounted ? `Current workspace: ${current.label}` : 'Switch context'}
-        className="hairline inline-flex h-10 max-w-28 items-center gap-2 rounded-lg border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent sm:max-w-40 lg:h-9"
+        className="hairline bg-card text-foreground hover:bg-accent inline-flex h-10 max-w-28 items-center gap-2 rounded-lg border px-2.5 text-xs font-medium transition-colors sm:max-w-40 lg:h-9"
       >
         {mounted ? (
           <>
@@ -117,18 +147,18 @@ export function OrgSwitcher() {
             <span className="max-w-16 truncate sm:max-w-28">{current.label}</span>
           </>
         ) : (
-          <Layers className="size-3.5 text-muted-foreground" aria-hidden />
+          <Layers className="text-muted-foreground size-3.5" aria-hidden />
         )}
-        <ChevronDown className="size-3 text-subtle-foreground" aria-hidden />
+        <ChevronDown className="text-subtle-foreground size-3" aria-hidden />
       </button>
 
       {open ? (
         <div
           role="menu"
           onKeyDown={moveMenuFocus}
-          className="surface absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden py-1"
+          className="surface absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden py-1"
         >
-          <div className="hairline border-b px-3 pb-2 pt-2 text-[10px] font-semibold uppercase text-subtle-foreground">
+          <div className="hairline text-subtle-foreground border-b px-3 pt-2 pb-2 text-[10px] font-semibold uppercase">
             Filter work by
           </div>
           {lanes.map((lane, index) => {
@@ -159,8 +189,14 @@ export function OrgSwitcher() {
                   style={{ background: lane.color }}
                 />
                 <span className="min-w-0 flex-1 truncate">{lane.label}</span>
+                <span
+                  className="bg-bg-sunken text-subtle-foreground inline-flex min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] tabular-nums"
+                  aria-label={`${lane.count} open tasks`}
+                >
+                  {lane.count}
+                </span>
                 {active ? (
-                  <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-medium text-primary">
+                  <span className="text-primary ml-auto inline-flex items-center gap-1 text-[10px] font-medium">
                     Current
                     <Check className="size-3.5" aria-hidden />
                   </span>
