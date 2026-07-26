@@ -5,8 +5,6 @@ import { useCallback, useEffect } from 'react';
 import { useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
 import { ensureOrgSetup } from '@/lib/org-setup';
-import { ensureLsgWorkSetup } from '@/lib/lsg-work-setup';
-import { wipeLocalData } from '@/lib/reset';
 import { CommandPalette } from './command-palette';
 import { HelpOverlay } from './help-overlay';
 import { TaskEditDrawer } from './task-edit-drawer';
@@ -47,19 +45,10 @@ export function AppShell() {
     router.prefetch('/settings');
   }, [router]);
 
-  // One-time clear of the bundled demo data, so the dashboard starts fresh.
-  // Guarded so it never wipes real data the user adds later.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (localStorage.getItem('ops:demo-cleared') === '1') return;
-    localStorage.setItem('ops:demo-cleared', '1');
-    void wipeLocalData();
-  }, []);
-
   // One-time org lane setup: seed the default org and move the known LSG
   // projects into it. Idempotent; no-op on devices with nothing to migrate.
   useEffect(() => {
-    void ensureOrgSetup().then(() => ensureLsgWorkSetup());
+    void ensureOrgSetup();
   }, []);
 
   useHotkeys([

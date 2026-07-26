@@ -23,6 +23,29 @@ import type {
   WorkLog,
 } from './types';
 
+const RESET_CONTENT_TABLES = [
+  'tasks',
+  'projects',
+  'organizations',
+  'whiteboards',
+  'reminders',
+  'syncOps',
+  'domains',
+  'routines',
+  'routineChecks',
+  'captures',
+  'journalEntries',
+  'workLogs',
+  'content',
+  'notifications',
+  'checklistTemplates',
+  'people',
+  'notes',
+  'quotes',
+  'books',
+  'foodLogs',
+] as const;
+
 export class OpsDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
   projects!: EntityTable<Project, 'id'>;
@@ -98,6 +121,12 @@ export class OpsDB extends Dexie {
     this.version(6).stores({
       foodLogs: 'id, date, mealType, updatedAt, deletedAt',
     });
+    // v7 - One-time full content reset. Settings stay in place so theme and
+    // device preferences survive, but no old local-first records or queued
+    // sync operations can repopulate the intentionally emptied server.
+    this.version(7)
+      .stores({})
+      .upgrade((tx) => Promise.all(RESET_CONTENT_TABLES.map((table) => tx.table(table).clear())));
   }
 }
 
