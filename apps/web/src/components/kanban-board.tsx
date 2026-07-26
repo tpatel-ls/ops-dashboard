@@ -1,7 +1,5 @@
 'use client';
 
-import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo, useState } from 'react';
 import {
   DndContext,
   PointerSensor,
@@ -11,162 +9,100 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { GripVertical, Plus } from 'lucide-react';
-import { getDb, matchesOrgContext } from '@ops-dashboard/core';
-import type { Project, Task } from '@ops-dashboard/core';
-import { addTask, updateTask } from '@/lib/tasks';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Plus } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
+import type { Organization, Project, Task } from '@ops-dashboard/core';
+import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
+import {
+  SIMPLE_KANBAN_COLUMNS,
+  simpleKanbanColumn,
+  statusForSimpleKanbanColumn,
+  type SimpleKanbanColumn,
+  type SimpleKanbanColumnId,
+} from '@/lib/simple-kanban';
+import { addTask, updateTask } from '@/lib/tasks';
 import { useOrgStore } from '@/lib/org-store';
-import { cn } from '@ops-dashboard/ui';
 
-type Grouping = 'status' | 'project' | 'priority' | 'tag';
-
-interface Column {
-  id: string;
-  label: string;
-  hint?: string;
-  color: string;
-}
-
-const STATUS_COLUMNS: Column[] = [
-  { id: 'backlog', label: 'Backlog', color: 'var(--color-subtle-foreground)' },
-  { id: 'todo', label: 'Todo', color: 'var(--color-priority-low)' },
-  { id: 'doing', label: 'Doing', color: 'var(--color-warning)' },
-  { id: 'blocked', label: 'Blocked', color: 'var(--color-destructive)' },
-  { id: 'done', label: 'Done', color: 'var(--color-success)' },
-];
-
-const PRIORITY_COLUMNS: Column[] = [
-  { id: '3', label: 'Urgent', color: 'var(--color-priority-urgent)' },
-  { id: '2', label: 'High', color: 'var(--color-priority-high)' },
-  { id: '1', label: 'Low', color: 'var(--color-priority-low)' },
-  { id: '0', label: 'None', color: 'var(--color-subtle-foreground)' },
-];
-
-const PRIORITY_LABEL = ['', 'Low', 'High', 'Urgent'] as const;
-const PRIORITY_CLASS = [
-  '',
-  'border-priority-low/30 bg-priority-low/10 text-priority-low',
-  'border-priority-med/30 bg-priority-med/10 text-priority-med',
-  'border-priority-urgent/30 bg-priority-urgent/10 text-priority-urgent',
-] as const;
+const PRIORITY_LABEL = ['', '', 'Important', 'Critical'] as const;
 
 export function KanbanBoard() {
-  const [grouping, setGrouping] = useState<Grouping>('status');
-  const tasks = useLiveQuery(async () => {
-    const all = await getDb().tasks.toArray();
-    return all.filter((t) => !t.deletedAt && t.status !== 'archived');
+  const data = useLiveQuery(async () => {
+    const db = getDb();
+    const [tasks, projects, organizations] = await Promise.all([
+      db.tasks.toArray(),
+      db.projects.toArray(),
+      db.organizations.toArray(),
+    ]);
+    return {
+      tasks: tasks.filter((task) => !task.deletedAt && task.status !== 'archived'),
+      projects: projects.filter((project) => !project.deletedAt),
+      organizations: organizations.filter(
+        (organization) => !organization.deletedAt && !organization.archivedAt,
+      ),
+    };
   });
-  const projects = useLiveQuery(async () => getDb().projects.toArray());
 
   const projectsMap = useMemo(
-    () => new Map((projects ?? []).map((p) => [p.id, p])),
-    [projects],
+    () => new Map((data?.projects ?? []).map((project) => [project.id, project])),
+    [data?.projects],
   );
-
-  const ctx = useOrgStore((s) => s.ctx);
+  const organizationsMap = useMemo(
+    () =>
+      new Map(
+        (data?.organizations ?? []).map((organization) => [organization.id, organization]),
+      ),
+    [data?.organizations],
+  );
+  const ctx = useOrgStore((state) => state.ctx);
   const scopedTasks = useMemo(
-    () => (tasks ?? []).filter((t) => matchesOrgContext(taskLane(t, projectsMap), ctx)),
-    [tasks, projectsMap, ctx],
+    () =>
+      (data?.tasks ?? []).filter((task) =>
+        matchesOrgContext(taskLane(task, projectsMap), ctx),
+      ),
+    [ctx, data?.tasks, projectsMap],
   );
-  // Tasks added inline under an org lens land in that lane.
-  const addOverrides: Partial<Task> = ctx !== 'all' && ctx !== 'personal' ? { orgId: ctx } : {};
+  const addOverrides: Partial<Task> =
+    ctx !== 'all' && ctx !== 'personal' ? { orgId: ctx } : {};
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
 
-  const columns = useMemo<Column[]>(() => {
-    if (grouping === 'status') return STATUS_COLUMNS;
-    if (grouping === 'priority') return PRIORITY_COLUMNS;
-    if (grouping === 'project') {
-      const cols: Column[] = [{ id: '__none', label: 'No project', color: 'oklch(0.55 0.04 280)' }];
-      for (const p of projects ?? []) {
-        if (p.archivedAt) continue;
-        if (!matchesOrgContext(p.orgId, ctx)) continue;
-        cols.push({ id: p.id, label: p.name, color: p.color });
-      }
-      return cols;
-    }
-    const tagSet = new Set<string>();
-    for (const t of scopedTasks) for (const tag of t.tags) tagSet.add(tag);
-    const list = Array.from(tagSet).sort();
-    return list.length
-      ? list.map((tag) => ({ id: tag, label: `#${tag}`, color: 'oklch(0.65 0.18 280)' }))
-      : [{ id: '__notag', label: 'No tag', color: 'oklch(0.55 0.04 280)' }];
-  }, [grouping, projects, scopedTasks, ctx]);
-
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
-
-  function bucketOf(task: Task): string {
-    if (grouping === 'status') return task.status;
-    if (grouping === 'priority') return String(task.priority);
-    if (grouping === 'project') return task.projectId ?? '__none';
-    return task.tags[0] ?? '__notag';
+  function tasksForColumn(columnId: SimpleKanbanColumnId): Task[] {
+    return scopedTasks.filter((task) => simpleKanbanColumn(task.status) === columnId);
   }
 
-  function onDragEnd(e: DragEndEvent) {
-    if (!e.over) return;
-    const id = String(e.active.id);
-    const target = String(e.over.id);
-    const task = tasks?.find((t) => t.id === id);
-    if (!task) return;
-    if (grouping === 'status') {
-      updateTask(id, { status: target as Task['status'] });
-    } else if (grouping === 'priority') {
-      const p = Number(target);
-      if (p >= 0 && p <= 3) updateTask(id, { priority: p as Task['priority'] });
-    } else if (grouping === 'project') {
-      const proj = target === '__none' ? undefined : projectsMap.get(target);
-      // Clears travel as SQL null: the sync mapper drops absent keys, so an
-      // undefined here would leave the previous value on other devices.
-      updateTask(id, {
-        projectId: (target === '__none' ? null : target) as unknown as Task['projectId'],
-        orgId: (proj?.orgId ?? null) as unknown as Task['orgId'],
-      });
-    } else {
-      const newTags = target === '__notag' ? task.tags : Array.from(new Set([target, ...task.tags]));
-      updateTask(id, { tags: newTags });
-    }
+  function onDragEnd(event: DragEndEvent) {
+    if (!event.over) return;
+    const taskId = String(event.active.id);
+    const columnId = String(event.over.id) as SimpleKanbanColumnId;
+    void updateTask(taskId, { status: statusForSimpleKanbanColumn(columnId) });
   }
 
   return (
-    <div className="flex h-full min-w-0 flex-col gap-3">
-      <div className="surface flex min-w-0 flex-wrap items-center gap-2 p-2">
-        <div role="group" aria-label="Group board by" className="grid min-w-0 flex-1 grid-cols-4 gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:flex-none">
-          {(['status', 'project', 'priority', 'tag'] as const).map((g) => (
-            <button
-              key={g}
-              type="button"
-              aria-pressed={grouping === g}
-              onClick={() => setGrouping(g)}
-              className={cn(
-                'min-h-10 rounded-md px-2 text-[11px] font-medium capitalize sm:min-h-8 sm:px-3 sm:text-xs',
-                grouping === g
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {g}
-            </button>
-          ))}
-        </div>
-        <span className="ml-auto rounded-md border bg-card px-2 py-1 font-mono text-[11px] tabular-nums text-subtle-foreground">
-          {scopedTasks.length} task{scopedTasks.length === 1 ? '' : 's'}
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex items-center justify-between gap-3 px-1">
+        <p className="text-sm text-muted-foreground">Drag a task to change its status.</p>
+        <span className="rounded-full bg-bg-sunken px-2.5 py-1 text-xs tabular-nums text-muted-foreground">
+          {scopedTasks.length} {scopedTasks.length === 1 ? 'task' : 'tasks'}
         </span>
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 pb-2 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
-          {columns.map((col) => {
-            const bucket = scopedTasks.filter((t) => bucketOf(t) === col.id);
-            return (
-              <KanbanColumn
-                key={col.id}
-                column={col}
-                tasks={bucket}
-                grouping={grouping}
-                projectsMap={projectsMap}
-                addOverrides={addOverrides}
-              />
-            );
-          })}
+        <div className="scrollbar-thin -mx-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-3 pb-3 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+          {SIMPLE_KANBAN_COLUMNS.map((column) => (
+            <KanbanColumn
+              key={column.id}
+              column={column}
+              tasks={tasksForColumn(column.id)}
+              projectsMap={projectsMap}
+              organizationsMap={organizationsMap}
+              showOrganization={ctx === 'all'}
+              addOverrides={addOverrides}
+            />
+          ))}
         </div>
       </DndContext>
     </div>
@@ -176,135 +112,182 @@ export function KanbanBoard() {
 function KanbanColumn({
   column,
   tasks,
-  grouping,
   projectsMap,
+  organizationsMap,
+  showOrganization,
   addOverrides,
 }: {
-  column: Column;
+  column: SimpleKanbanColumn;
   tasks: Task[];
-  grouping: Grouping;
   projectsMap: Map<string, Project>;
+  organizationsMap: Map<string, Organization>;
+  showOrganization: boolean;
   addOverrides: Partial<Task>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
-  const [adding, setAdding] = useState('');
+  const [title, setTitle] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function addToColumn(event: React.FormEvent) {
+    event.preventDefault();
+    const input = title.trim();
+    if (!input || saving) return;
+    setSaving(true);
+    try {
+      await addTask(input, {
+        status: statusForSimpleKanbanColumn(column.id),
+        ...addOverrides,
+      });
+      setTitle('');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <div
+    <section
       ref={setNodeRef}
+      aria-labelledby={`board-${column.id}`}
       className={cn(
-        'surface-flat scrollbar-thin flex min-h-[140px] w-full min-w-0 flex-col overflow-hidden p-2 transition-colors md:h-full md:min-h-[320px]',
-        isOver && 'border-primary/50 bg-primary/5',
+        'surface-flat flex min-h-[62vh] w-[calc(100vw-2rem)] max-w-[380px] shrink-0 snap-center flex-col overflow-hidden p-2.5 transition-colors md:min-h-[560px] md:w-auto md:max-w-none md:snap-none',
+        isOver && 'border-primary/55 bg-primary/5',
       )}
     >
-      <div className="mb-2 flex min-w-0 items-center gap-2 px-1.5">
-        <span aria-hidden className="size-2 rounded-full" style={{ background: column.color }} />
-        <span className="min-w-0 truncate text-sm font-semibold tracking-tight">{column.label}</span>
-        <span className="ml-auto rounded-md border bg-card px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-subtle-foreground">{tasks.length}</span>
+      <header className="mb-2 flex items-center gap-2 px-1.5 py-1">
+        <span className="size-2.5 rounded-full" style={{ background: column.color }} aria-hidden />
+        <h2 id={`board-${column.id}`} className="text-sm font-semibold">
+          {column.label}
+        </h2>
+        <span className="ml-auto rounded-full bg-bg-sunken px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
+          {tasks.length}
+        </span>
+      </header>
+
+      <div className="scrollbar-thin flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto">
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            <KanbanCard
+              key={task.id}
+              task={task}
+              project={task.projectId ? projectsMap.get(task.projectId) : undefined}
+              organizationId={taskLane(task, projectsMap)}
+              organizationsMap={organizationsMap}
+              showOrganization={showOrganization}
+            />
+          ))
+        ) : (
+          <p className="flex min-h-24 items-center justify-center rounded-lg border border-dashed px-4 text-center text-xs text-subtle-foreground">
+            No tasks here
+          </p>
+        )}
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
-        {tasks.map((t) => (
-          <KanbanCard key={t.id} task={t} grouping={grouping} projectsMap={projectsMap} />
-        ))}
-      </div>
-      {grouping === 'status' ? (
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const text = adding.trim();
-            if (!text) return;
-            await addTask(text, { status: column.id as Task['status'], ...addOverrides });
-            setAdding('');
-          }}
+
+      <form
+        onSubmit={addToColumn}
+        aria-label={`Add task to ${column.label}`}
+        className="mt-2 flex min-w-0 items-center gap-1.5 rounded-lg border bg-input px-2 py-1.5 focus-within:border-ring"
+      >
+        <Plus className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+        <input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Add task"
+          aria-label={`New task in ${column.label}`}
+          disabled={saving}
+          className="min-h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+        />
+        <button
+          type="submit"
+          disabled={!title.trim() || saving}
           aria-label={`Add task to ${column.label}`}
-          className="mt-2 flex min-w-0 items-center gap-1.5 rounded-md border bg-input px-2 py-1.5"
+          className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10 disabled:opacity-40"
         >
-          <Plus className="size-3 text-muted-foreground" aria-hidden />
-          <input
-            value={adding}
-            onChange={(e) => setAdding(e.target.value)}
-            placeholder="New task"
-            aria-label={`New task in ${column.label}`}
-            className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
-          />
-          <button
-            type="submit"
-            disabled={!adding.trim()}
-            aria-label={`Add task to ${column.label}`}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-primary hover:bg-primary/10 disabled:opacity-40"
-          >
-            <Plus className="size-4" aria-hidden />
-          </button>
-        </form>
-      ) : null}
-    </div>
+          <Plus className="size-4" aria-hidden />
+        </button>
+      </form>
+    </section>
   );
 }
 
 function KanbanCard({
   task,
-  grouping,
-  projectsMap,
+  project,
+  organizationId,
+  organizationsMap,
+  showOrganization,
 }: {
   task: Task;
-  grouping: Grouping;
-  projectsMap: Map<string, Project>;
+  project?: Project;
+  organizationId?: string;
+  organizationsMap: Map<string, Organization>;
+  showOrganization: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   });
-  const openEdit = useAppStore((s) => s.openEdit);
+  const openEdit = useAppStore((state) => state.openEdit);
+  const organization = organizationId ? organizationsMap.get(organizationId) : undefined;
   const style: React.CSSProperties | undefined = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
     : undefined;
 
-  const project =
-    grouping !== 'project' && task.projectId ? projectsMap.get(task.projectId) : undefined;
-
   return (
-    <div
+    <article
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
-      onClick={(e) => {
-        e.stopPropagation();
-        openEdit(task.id);
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${task.title}`}
+      onClick={() => openEdit(task.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openEdit(task.id);
+        }
       }}
       className={cn(
-        'surface-flat min-w-0 cursor-grab touch-none select-none px-2.5 py-2 text-[13px] transition-colors',
-        'hover:border-border-strong',
+        'surface-flat min-w-0 cursor-grab touch-auto select-none p-3 transition-all hover:border-border-strong',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
     >
-      <div className="flex min-w-0 items-start gap-2">
-        <span className="line-clamp-2 min-w-0 flex-1 font-medium leading-5">{task.title}</span>
-        <GripVertical className="mt-0.5 size-3.5 shrink-0 text-subtle-foreground" aria-hidden />
-      </div>
-      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[10px] text-subtle-foreground">
-        {task.priority > 0 ? (
-          <span className={cn('rounded-md border px-1.5 py-0.5 font-semibold', PRIORITY_CLASS[task.priority])}>
+      <p className="line-clamp-3 text-sm font-medium leading-5">{task.title}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
+        {task.status === 'blocked' ? (
+          <span className="rounded-full bg-destructive/12 px-2 py-0.5 font-medium text-destructive">
+            Blocked
+          </span>
+        ) : null}
+        {task.priority >= 2 ? (
+          <span
+            className={cn(
+              'rounded-full px-2 py-0.5 font-medium',
+              task.priority === 3
+                ? 'bg-destructive/12 text-destructive'
+                : 'bg-warning/12 text-warning',
+            )}
+          >
             {PRIORITY_LABEL[task.priority]}
           </span>
         ) : null}
         {project ? (
-          <span
-            className="inline-flex min-w-0 items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-accent-foreground"
-          >
-            <span
-              aria-hidden
-              className="size-1.5 rounded-full"
-              style={{ background: project.color }}
-            />
-            <span className="min-w-0 max-w-[112px] truncate">{project.name}</span>
+          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-bg-sunken px-2 py-0.5">
+            <span className="size-1.5 shrink-0 rounded-full" style={{ background: project.color }} aria-hidden />
+            <span className="max-w-32 truncate">{project.name}</span>
           </span>
         ) : null}
-        {task.tags.slice(0, 1).map((tag) => (
-          <span key={tag} className="rounded bg-accent px-1.5 py-0.5">
-            #{tag}
+        {showOrganization ? (
+          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-bg-sunken px-2 py-0.5">
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={{ background: organization?.color ?? PERSONAL_COLOR }}
+              aria-hidden
+            />
+            <span className="max-w-28 truncate">{organization?.name ?? 'Personal'}</span>
           </span>
-        ))}
-        {task.tags.length > 1 ? <span className="text-subtle-foreground">+{task.tags.length - 1}</span> : null}
+        ) : null}
       </div>
-    </div>
+    </article>
   );
 }
