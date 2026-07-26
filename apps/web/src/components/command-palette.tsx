@@ -11,6 +11,7 @@ import {
   CalendarDays,
   CalendarRange,
   Check,
+  Download,
   FolderKanban,
   Inbox,
   KanbanSquare,
@@ -27,6 +28,7 @@ import {
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { useInstallPrompt } from '@/lib/use-install-prompt';
 import { useOrgStore } from '@/lib/org-store';
 import { taskDateLabel } from '@/lib/task-presentation';
 import { addTask } from '@/lib/tasks';
@@ -65,6 +67,7 @@ export function CommandPalette() {
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
   const today = format(new Date(), 'yyyy-MM-dd');
+  const { canPrompt: canInstall, prompt: promptInstall } = useInstallPrompt();
 
   function dismiss() {
     setQuery('');
@@ -248,6 +251,20 @@ export function CommandPalette() {
               heading="Actions"
               className="text-subtle-foreground mt-2 text-[10px] uppercase"
             >
+              {canInstall ? (
+                <Command.Item
+                  value="install-taskify"
+                  keywords={['download', 'app', 'device']}
+                  onSelect={() => {
+                    void promptInstall();
+                    dismiss();
+                  }}
+                  className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+                >
+                  <Download className="size-4" aria-hidden />
+                  <span>Install Taskify on this device</span>
+                </Command.Item>
+              ) : null}
               <Command.Item
                 value="review-today"
                 keywords={['daily', 'review', 'roll forward']}
