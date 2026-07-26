@@ -229,7 +229,7 @@ function AgendaTaskRow({
         type="button"
         onClick={() => void setTaskStatus(task.id, 'done')}
         aria-label={`Complete ${task.title}`}
-        className="text-muted-foreground hover:bg-success/10 hover:text-success relative inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors"
+        className="text-muted-foreground hover:bg-success/10 hover:text-success relative inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-colors sm:size-10"
       >
         <span className="size-[18px] rounded-full border border-current" aria-hidden />
         <Check
