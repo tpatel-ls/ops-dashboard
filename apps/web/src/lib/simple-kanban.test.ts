@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { simpleKanbanColumn, statusForSimpleKanbanColumn } from './simple-kanban';
+import {
+  SIMPLE_KANBAN_COLUMNS,
+  simpleKanbanColumn,
+  statusForSimpleKanbanColumn,
+} from './simple-kanban';
+
+it('gives every lane a concise purpose', () => {
+  expect(SIMPLE_KANBAN_COLUMNS.map(({ id, description }) => [id, description])).toEqual([
+    ['todo', 'Ready to start'],
+    ['doing', 'Currently moving'],
+    ['done', 'Finished'],
+  ]);
+});
 
 describe('simpleKanbanColumn', () => {
   it.each([
