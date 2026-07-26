@@ -13,6 +13,7 @@ import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
 import { compareTasks, matchesTaskSearch } from '@/lib/task-query';
 import { setTaskStatus } from '@/lib/tasks';
+import { taskResultSummary } from '@/lib/task-presentation';
 
 type StatusFilter = 'open' | 'done';
 
@@ -362,7 +363,7 @@ export function TasksView() {
               </span>
             ) : null}
             <span className="bg-bg-sunken text-muted-foreground rounded-full px-2.5 py-1 text-[11px] tabular-nums">
-              {filteredTasks === null ? '-' : `${count} ${count === 1 ? 'task' : 'tasks'}`}
+              {filteredTasks === null ? '-' : taskResultSummary(count, hasActiveFilters)}
             </span>
           </div>
         </div>
