@@ -9,14 +9,16 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Plus } from 'lucide-react';
+import { CalendarClock, CircleAlert, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { taskLane } from '@/lib/org-lanes';
+import { taskDateLabel } from '@/lib/task-presentation';
 import {
   SIMPLE_KANBAN_COLUMNS,
   simpleKanbanColumn,
@@ -222,6 +224,10 @@ function KanbanCard({
   });
   const openEdit = useAppStore((state) => state.openEdit);
   const organization = organizationId ? organizationsMap.get(organizationId) : undefined;
+  const dateValue = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const overdue = Boolean(task.status !== 'done' && dateValue && dateValue < today);
+  const dateLabel = dateValue ? taskDateLabel(dateValue, today, task.status === 'done') : null;
   const style: React.CSSProperties | undefined = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
     : undefined;
@@ -249,6 +255,21 @@ function KanbanCard({
     >
       <p className="line-clamp-3 text-sm leading-5 font-medium">{task.title}</p>
       <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
+        {dateLabel ? (
+          <span
+            className={cn(
+              'bg-bg-sunken inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium',
+              overdue && 'bg-destructive/10 text-destructive',
+            )}
+          >
+            {overdue ? (
+              <CircleAlert className="size-3" aria-hidden />
+            ) : (
+              <CalendarClock className="size-3" aria-hidden />
+            )}
+            {dateLabel}
+          </span>
+        ) : null}
         {task.status === 'blocked' ? (
           <span className="bg-destructive/12 text-destructive rounded-full px-2 py-0.5 font-medium">
             Blocked
