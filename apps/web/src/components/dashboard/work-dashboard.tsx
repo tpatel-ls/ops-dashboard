@@ -75,6 +75,7 @@ export function WorkDashboard() {
             {data.model.overdue.length > 0 ? (
               <AgendaSection
                 title="Overdue"
+                description="Needs a new date or a quick finish."
                 tasks={data.model.overdue}
                 projects={data.projects}
                 organizations={data.organizations}
@@ -87,6 +88,7 @@ export function WorkDashboard() {
 
             <AgendaSection
               title="Today"
+              description="Your focus for today."
               tasks={data.model.today}
               projects={data.projects}
               organizations={data.organizations}
@@ -99,6 +101,7 @@ export function WorkDashboard() {
             {data.model.upcoming.length > 0 ? (
               <AgendaSection
                 title="Upcoming"
+                description="Next scheduled work."
                 tasks={data.model.upcoming}
                 projects={data.projects}
                 organizations={data.organizations}
@@ -116,6 +119,7 @@ export function WorkDashboard() {
 
 function AgendaSection({
   title,
+  description,
   tasks,
   projects,
   organizations,
@@ -126,6 +130,7 @@ function AgendaSection({
   tone = 'default',
 }: {
   title: string;
+  description: string;
   tasks: Task[];
   projects: Project[];
   organizations: Organization[];
@@ -138,12 +143,15 @@ function AgendaSection({
   return (
     <section className="surface overflow-hidden" aria-labelledby={`agenda-${title.toLowerCase()}`}>
       <header className="hairline flex items-center gap-2 border-b px-4 py-3">
-        <h2
-          id={`agenda-${title.toLowerCase()}`}
-          className={cn('text-sm font-semibold', tone === 'danger' && 'text-destructive')}
-        >
-          {title}
-        </h2>
+        <div className="min-w-0 flex-1">
+          <h2
+            id={`agenda-${title.toLowerCase()}`}
+            className={cn('text-sm font-semibold', tone === 'danger' && 'text-destructive')}
+          >
+            {title}
+          </h2>
+          <p className="text-subtle-foreground mt-0.5 truncate text-[11px]">{description}</p>
+        </div>
         <span className="bg-bg-sunken text-muted-foreground rounded-full px-2 py-0.5 text-xs tabular-nums">
           {tasks.length}
         </span>
