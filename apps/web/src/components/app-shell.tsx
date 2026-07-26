@@ -10,7 +10,6 @@ import { HelpOverlay } from './help-overlay';
 import { TaskEditDrawer } from './task-edit-drawer';
 import { WorkLoggerDialog } from './work-logger-dialog';
 import { FocusMode } from './focus-mode';
-import { DailyReviewTrigger } from './daily-review';
 import { ReminderTicker } from './reminder-ticker';
 import { SyncBoot } from './sync-boot';
 import { AppBadgeSync } from './app-badge-sync';
@@ -75,7 +74,6 @@ export function AppShell() {
       <TaskEditDrawer />
       <WorkLoggerDialog />
       <FocusMode />
-      <DailyReviewTrigger />
       <ReminderTicker />
       <SyncBoot />
       <AppBadgeSync />
