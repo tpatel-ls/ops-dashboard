@@ -4,9 +4,9 @@ import { ProjectsBoard } from '@/components/projects-board';
 export default function ProjectsPage() {
   return (
     <ViewShell
-      eyebrow="Build"
+      eyebrow="Tasks"
       title="Projects"
-      subtitle="Plan outcomes, assign ownership, and keep next actions moving."
+      subtitle="Group related tasks around an outcome."
       compactHeader
       fullWidth
     >

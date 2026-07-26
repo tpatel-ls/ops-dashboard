@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, FolderKanban, LayoutDashboard, ListTodo, Plus } from 'lucide-react';
+import { CalendarCheck, FolderKanban, KanbanSquare, ListTodo, Plus } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 
 const LEFT = [
-  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Today', icon: CalendarCheck },
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
 ];
 const RIGHT = [
+  { href: '/kanban', label: 'Board', icon: KanbanSquare },
   { href: '/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/calendar', label: 'Calendar', icon: Calendar, matches: ['/calendar', '/week', '/month'] },
 ];
 
 function isActive(pathname: string, item: { href: string; matches?: string[] }): boolean {
@@ -60,7 +60,7 @@ function Tab({
 }: {
   href: string;
   label: string;
-  icon: typeof Calendar;
+  icon: typeof CalendarCheck;
   active: boolean;
 }) {
   return (

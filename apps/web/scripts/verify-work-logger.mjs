@@ -158,7 +158,7 @@ async function verifyResponsiveLayouts(page) {
   await page.setViewportSize({ width: 390, height: 844 });
   await openApp(page, '/dashboard');
   const mobileNav = page.getByRole('navigation', { name: 'Primary' });
-  for (const label of ['Home', 'Tasks', 'Add task', 'Projects', 'Calendar']) {
+  for (const label of ['Today', 'Tasks', 'Add task', 'Board', 'Projects']) {
     await mobileNav.getByRole(label === 'Add task' ? 'button' : 'link', { name: label, exact: true }).waitFor({ state: 'visible' });
   }
 }

@@ -4,9 +4,9 @@ import { TasksView } from '@/components/tasks-view';
 export default function TasksPage() {
   return (
     <ViewShell
-      eyebrow="Plan"
-      title="Tasks"
-      subtitle="Capture, organize, and complete work across every organization."
+      eyebrow="Tasks"
+      title="All tasks"
+      subtitle="Find, finish, or update a task."
       compactHeader
       fullWidth
     >
