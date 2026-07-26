@@ -15,6 +15,7 @@ import {
   KanbanSquare,
   LayoutDashboard,
   ListTodo,
+  MoonStar,
   NotebookPen,
   PhoneCall,
   Plus,
@@ -39,7 +40,13 @@ const NAV = [
   { id: 'nav-month', label: 'Month', href: '/month', icon: CalendarDays, hint: 'g m' },
   { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g i' },
   { id: 'nav-kanban', label: 'Kanban', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
-  { id: 'nav-power-dialer', label: 'Power Dialer', href: '/power-dialer', icon: PhoneCall, hint: 'g l' },
+  {
+    id: 'nav-power-dialer',
+    label: 'Power Dialer',
+    href: '/power-dialer',
+    icon: PhoneCall,
+    hint: 'g l',
+  },
   { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g n' },
   { id: 'nav-settings', label: 'Settings', href: '/settings', icon: SettingsIcon, hint: 'g s' },
 ];
@@ -48,6 +55,7 @@ export function CommandPalette() {
   const open = useAppStore((s) => s.paletteOpen);
   const close = useAppStore((s) => s.closePalette);
   const openEdit = useAppStore((s) => s.openEdit);
+  const openReview = useAppStore((s) => s.openReview);
   const ctx = useOrgStore((s) => s.ctx);
   const setCtx = useOrgStore((s) => s.setCtx);
   const orgs = useActiveOrgs();
@@ -85,7 +93,13 @@ export function CommandPalette() {
     });
   }, [tasks]);
 
-  const results = query && fuse ? fuse.search(query).slice(0, 8).map((r) => r.item) : [];
+  const results =
+    query && fuse
+      ? fuse
+          .search(query)
+          .slice(0, 8)
+          .map((r) => r.item)
+      : [];
 
   function handleCreateTask() {
     const text = query.trim();
@@ -114,9 +128,9 @@ export function CommandPalette() {
     >
       <div className="command-surface w-full max-w-2xl overflow-hidden rounded-xl">
         <Command label="Command palette" shouldFilter={false} className="flex flex-col">
-          <div className="border-b border-hairline px-4 py-3">
+          <div className="border-hairline border-b px-4 py-3">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="font-mono text-[10px] uppercase text-subtle-foreground">
+              <span className="text-subtle-foreground font-mono text-[10px] uppercase">
                 Search and capture
               </span>
               <button
@@ -124,24 +138,24 @@ export function CommandPalette() {
                 onClick={close}
                 aria-label="Close command palette"
                 title="Close"
-                className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-9 items-center justify-center rounded-md"
               >
                 <X className="size-4" aria-hidden />
               </button>
             </div>
-            <div className="flex min-h-12 items-center gap-2 rounded-lg border bg-bg-sunken px-3 py-2">
-              <Search className="size-4 text-primary" aria-hidden />
+            <div className="bg-bg-sunken flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2">
+              <Search className="text-primary size-4" aria-hidden />
               <Command.Input
                 value={query}
                 onValueChange={setQuery}
                 placeholder="Find tasks, switch workspace, or add a task..."
-                className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
+                className="text-foreground placeholder:text-subtle-foreground flex-1 bg-transparent text-sm outline-none"
                 autoFocus
               />
             </div>
           </div>
           <Command.List className="scrollbar-thin max-h-[calc(100dvh-6rem)] overflow-y-auto p-2 sm:max-h-[60vh]">
-            <Command.Empty className="px-3 py-6 text-center text-xs text-muted-foreground">
+            <Command.Empty className="text-muted-foreground px-3 py-6 text-center text-xs">
               {query.trim()
                 ? 'No existing tasks match. Create this as a new task above.'
                 : 'Start typing to find a task, change workspace, or capture work.'}
@@ -151,30 +165,32 @@ export function CommandPalette() {
             {query.trim() ? (
               <Command.Group
                 heading="Create"
-                className="text-[10px] uppercase text-subtle-foreground"
+                className="text-subtle-foreground text-[10px] uppercase"
               >
                 <Command.Item
                   value="create-task"
                   keywords={[query]}
                   onSelect={handleCreateTask}
                   disabled={adding}
-                  className="group flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm text-foreground data-[selected=true]:bg-primary-soft data-[selected=true]:text-foreground"
+                  className="group text-foreground data-[selected=true]:bg-primary-soft data-[selected=true]:text-foreground flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm"
                 >
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <span className="bg-primary text-primary-foreground flex size-5 shrink-0 items-center justify-center rounded-md">
                     <Plus className="size-3" aria-hidden />
                   </span>
                   <span className="flex-1 truncate">
-                    {adding ? 'Adding task...' : (
+                    {adding ? (
+                      'Adding task...'
+                    ) : (
                       <>
                         <span className="text-muted-foreground">Create task </span>
                         <span className="font-medium">&ldquo;{query}&rdquo;</span>
                       </>
                     )}
                   </span>
-                  <span className="hidden max-w-24 truncate rounded-md bg-bg-sunken px-1.5 py-1 text-[10px] text-subtle-foreground sm:inline">
+                  <span className="bg-bg-sunken text-subtle-foreground hidden max-w-24 truncate rounded-md px-1.5 py-1 text-[10px] sm:inline">
                     {lanes.find((lane) => lane.ctx === ctx)?.label ?? 'Personal'}
                   </span>
-                  <span className="font-mono text-[10px] text-subtle-foreground">Enter</span>
+                  <span className="text-subtle-foreground font-mono text-[10px]">Enter</span>
                 </Command.Item>
               </Command.Group>
             ) : null}
@@ -182,7 +198,7 @@ export function CommandPalette() {
             {results.length > 0 ? (
               <Command.Group
                 heading="Tasks"
-                className="mt-2 text-[10px] uppercase text-subtle-foreground"
+                className="text-subtle-foreground mt-2 text-[10px] uppercase"
               >
                 {results.map((t) => (
                   <Command.Item
@@ -192,12 +208,12 @@ export function CommandPalette() {
                       openEdit(t.id);
                       dismiss();
                     }}
-                    className="group flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-foreground data-[selected=true]:bg-accent"
+                    className="group text-foreground data-[selected=true]:bg-accent flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
                   >
-                    <span className="size-1.5 rounded-full bg-primary" aria-hidden />
+                    <span className="bg-primary size-1.5 rounded-full" aria-hidden />
                     <span className="truncate">{t.title}</span>
                     {t.tags.length ? (
-                      <span className="ml-auto truncate font-mono text-[10px] text-subtle-foreground">
+                      <span className="text-subtle-foreground ml-auto truncate font-mono text-[10px]">
                         #{t.tags[0]}
                       </span>
                     ) : null}
@@ -207,8 +223,26 @@ export function CommandPalette() {
             ) : null}
 
             <Command.Group
+              heading="Actions"
+              className="text-subtle-foreground mt-2 text-[10px] uppercase"
+            >
+              <Command.Item
+                value="review-today"
+                keywords={['daily', 'review', 'roll forward']}
+                onSelect={() => {
+                  dismiss();
+                  openReview();
+                }}
+                className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+              >
+                <MoonStar className="size-4" aria-hidden />
+                <span>Review today</span>
+              </Command.Item>
+            </Command.Group>
+
+            <Command.Group
               heading="Context"
-              className="mt-2 text-[10px] uppercase text-subtle-foreground"
+              className="text-subtle-foreground mt-2 text-[10px] uppercase"
             >
               {lanes.map((lane) => (
                 <Command.Item
@@ -219,7 +253,7 @@ export function CommandPalette() {
                     setCtx(lane.ctx);
                     dismiss();
                   }}
-                  className="group flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
+                  className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
                 >
                   <span
                     className="size-2.5 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
@@ -228,7 +262,7 @@ export function CommandPalette() {
                   />
                   <span>Switch to {lane.label}</span>
                   {ctx === lane.ctx ? (
-                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-medium text-primary">
+                    <span className="text-primary ml-auto inline-flex items-center gap-1 text-[10px] font-medium">
                       Current
                       <Check className="size-3.5" aria-hidden />
                     </span>
@@ -239,7 +273,7 @@ export function CommandPalette() {
 
             <Command.Group
               heading="Jump"
-              className="mt-2 text-[10px] uppercase text-subtle-foreground"
+              className="text-subtle-foreground mt-2 text-[10px] uppercase"
             >
               {NAV.map((n) => {
                 const Icon = n.icon;
@@ -252,12 +286,12 @@ export function CommandPalette() {
                       router.push(n.href);
                       dismiss();
                     }}
-                    className="group flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
+                    className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
                   >
                     <Icon className="size-4" aria-hidden />
                     <span>{n.label}</span>
                     {n.hint ? (
-                      <span className="ml-auto font-mono text-[10px] text-subtle-foreground">
+                      <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
                         {n.hint}
                       </span>
                     ) : null}
