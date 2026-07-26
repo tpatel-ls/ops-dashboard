@@ -23,6 +23,7 @@ function useMounted(): boolean {
 interface Lane {
   ctx: OrgContext;
   label: string;
+  description: string;
   color: string;
   count: number;
 }
@@ -87,18 +88,21 @@ export function OrgSwitcher() {
     {
       ctx: 'all',
       label: 'All work',
+      description: 'Everything together',
       color: 'var(--primary)',
       count: taskCounts?.all ?? 0,
     },
     ...(orgs ?? []).map((o) => ({
       ctx: o.id as OrgContext,
       label: o.name,
+      description: 'Organization workspace',
       color: o.color,
       count: taskCounts?.[o.id] ?? 0,
     })),
     {
       ctx: 'personal',
       label: 'Personal',
+      description: 'Personal tasks',
       color: PERSONAL_COLOR,
       count: taskCounts?.personal ?? 0,
     },
@@ -159,7 +163,7 @@ export function OrgSwitcher() {
           className="surface absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden py-1"
         >
           <div className="hairline text-subtle-foreground border-b px-3 pt-2 pb-2 text-[10px] font-semibold uppercase">
-            Filter work by
+            Choose workspace
           </div>
           {lanes.map((lane, index) => {
             const active = lane.ctx === ctx;
@@ -188,7 +192,12 @@ export function OrgSwitcher() {
                   className="size-2.5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
                   style={{ background: lane.color }}
                 />
-                <span className="min-w-0 flex-1 truncate">{lane.label}</span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate">{lane.label}</span>
+                  <span className="text-subtle-foreground truncate text-[10px]">
+                    {lane.description}
+                  </span>
+                </span>
                 <span
                   className="bg-bg-sunken text-subtle-foreground inline-flex min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] tabular-nums"
                   aria-label={`${lane.count} open tasks`}
