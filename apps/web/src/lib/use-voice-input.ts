@@ -165,7 +165,9 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
     typeof navigator !== 'undefined' &&
     !!navigator.mediaDevices &&
     typeof MediaRecorder !== 'undefined';
-  const micAvailable = whisperEnabled ? canRecord || !!SpeechRecognitionAPI : !!SpeechRecognitionAPI;
+  const micAvailable = whisperEnabled
+    ? canRecord || !!SpeechRecognitionAPI
+    : !!SpeechRecognitionAPI;
 
   function toggle() {
     if (listening) {

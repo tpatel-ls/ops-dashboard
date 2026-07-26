@@ -38,8 +38,8 @@ export function WorkDashboard() {
       ? 'All work'
       : ctx === 'personal'
         ? 'Personal'
-        : data?.organizations.find((organization) => organization.id === ctx)?.name ??
-          'Workspace';
+        : (data?.organizations.find((organization) => organization.id === ctx)?.name ??
+          'Workspace');
 
   return (
     <ViewShell
@@ -126,21 +126,19 @@ function AgendaSection({
         >
           {title}
         </h2>
-        <span className="rounded-full bg-bg-sunken px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
+        <span className="bg-bg-sunken text-muted-foreground rounded-full px-2 py-0.5 text-xs tabular-nums">
           {tasks.length}
         </span>
       </header>
 
       {tasks.length > 0 ? (
-        <ul className="divide-y divide-border/70">
+        <ul className="divide-border/70 divide-y">
           {tasks.map((task) => (
             <AgendaTaskRow
               key={task.id}
               task={task}
               project={projects.find((project) => project.id === task.projectId)}
-              organization={organizations.find(
-                (organization) => organization.id === task.orgId,
-              )}
+              organization={organizations.find((organization) => organization.id === task.orgId)}
               today={today}
               showOrganization={showOrganization}
               onOpen={() => onOpen(task.id)}
@@ -149,12 +147,12 @@ function AgendaSection({
         </ul>
       ) : (
         <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-5 text-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-success/10 text-success">
+          <span className="bg-success/10 text-success flex size-10 items-center justify-center rounded-full">
             <Check className="size-5" aria-hidden />
           </span>
           <div>
             <p className="text-sm font-medium">Nothing due today.</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-xs">
               Add the next thing you want to finish.
             </p>
           </div>
@@ -162,7 +160,7 @@ function AgendaSection({
             <button
               type="button"
               onClick={emptyAction}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground"
+              className="bg-primary text-primary-foreground inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 text-sm font-semibold"
             >
               <Plus className="size-4" aria-hidden />
               Add task
@@ -200,12 +198,12 @@ function AgendaTaskRow({
   const overdue = Boolean(date && date < today);
 
   return (
-    <li className="group flex min-w-0 items-start gap-2 px-3 py-2.5 transition-colors hover:bg-accent/35 sm:px-4">
+    <li className="group hover:bg-accent/35 flex min-w-0 items-start gap-2 px-3 py-2.5 transition-colors sm:px-4">
       <button
         type="button"
         onClick={() => void setTaskStatus(task.id, 'done')}
         aria-label={`Complete ${task.title}`}
-        className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-success/10 hover:text-success"
+        className="text-muted-foreground hover:bg-success/10 hover:text-success relative inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-colors"
       >
         <span className="size-[18px] rounded-full border border-current" aria-hidden />
         <Check
@@ -215,8 +213,8 @@ function AgendaTaskRow({
       </button>
 
       <button type="button" onClick={onOpen} className="min-w-0 flex-1 py-1 text-left">
-        <span className="line-clamp-2 text-sm font-medium leading-5">{task.title}</span>
-        <span className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-subtle-foreground">
+        <span className="line-clamp-2 text-sm leading-5 font-medium">{task.title}</span>
+        <span className="text-subtle-foreground mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
           {dateLabel ? (
             <span className={cn('font-medium', overdue && 'text-destructive')}>
               {overdue ? `Overdue ${dateLabel}` : dateLabel}
@@ -262,10 +260,10 @@ function AgendaTaskRow({
 function AgendaSkeleton() {
   return (
     <div className="surface h-72 animate-pulse p-4" aria-label="Loading Today">
-      <div className="h-4 w-24 rounded bg-bg-sunken" />
+      <div className="bg-bg-sunken h-4 w-24 rounded" />
       <div className="mt-5 space-y-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-12 rounded bg-bg-sunken" aria-hidden />
+          <div key={index} className="bg-bg-sunken h-12 rounded" aria-hidden />
         ))}
       </div>
     </div>

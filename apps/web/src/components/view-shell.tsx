@@ -34,7 +34,7 @@ export function ViewShell({
     >
       <header
         className={cn(
-          'min-w-0 border-b border-border/70 px-0',
+          'border-border/70 min-w-0 border-b px-0',
           compactHeader ? 'py-1 pb-3 md:pb-4' : 'py-2 pb-4 md:pb-5',
         )}
       >
@@ -47,14 +47,12 @@ export function ViewShell({
               )}
             >
               {eyebrow ? (
-                <div className="inline-flex text-[11px] font-medium text-primary">
-                  {eyebrow}
-                </div>
+                <div className="text-primary inline-flex text-[11px] font-medium">{eyebrow}</div>
               ) : null}
             </div>
             <h1
               className={cn(
-                'font-semibold leading-tight text-foreground',
+                'text-foreground leading-tight font-semibold',
                 compactHeader ? 'text-2xl' : 'text-2xl md:text-[28px]',
               )}
             >
@@ -63,7 +61,7 @@ export function ViewShell({
             {subtitle ? (
               <p
                 className={cn(
-                  'max-w-3xl text-sm text-muted-foreground',
+                  'text-muted-foreground max-w-3xl text-sm',
                   compactHeader ? 'mt-1 leading-5' : 'mt-1.5 leading-6',
                 )}
               >
