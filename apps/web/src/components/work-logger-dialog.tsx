@@ -3,13 +3,25 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { addDays, format } from 'date-fns';
-import { Check, ChevronDown, FolderKanban, Loader2, Plus, SlidersHorizontal, Timer, X } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  FolderKanban,
+  Loader2,
+  Mic,
+  MicOff,
+  Plus,
+  SlidersHorizontal,
+  Timer,
+  X,
+} from 'lucide-react';
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Priority, Project, ProjectKind } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore, type WorkLoggerMode } from '@/lib/app-store';
 import { useOrgStore } from '@/lib/org-store';
 import { useSyncStatus } from '@/lib/sync/status';
+import { useVoiceInput } from '@/lib/use-voice-input';
 import { addTask } from '@/lib/tasks';
 import { createProject } from '@/lib/projects';
 import { createOrganization, nextOrgColor } from '@/lib/organizations';
@@ -369,29 +381,34 @@ function WorkLoggerPanel({
         </header>
 
         <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
-          <div className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1">
-            {MODE_META.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={mode === id}
-                onClick={() => {
-                  setMode(id);
-                  setTaskDetailsOpen(false);
-                  setError(null);
-                }}
-                className={cn(
-                  'flex min-h-11 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors',
-                  mode === id
-                    ? 'bg-card text-foreground shadow-sm ring-1 ring-primary/20'
-                    : 'text-muted-foreground hover:text-foreground',
-                )}
-              >
-                <Icon className={cn('size-3.5', mode === id && 'text-primary')} aria-hidden />
-                {label}
-              </button>
-            ))}
-          </div>
+          {launchMode !== 'task' ? (
+            <div className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1">
+              {MODE_META.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={mode === id}
+                  onClick={() => {
+                    setMode(id);
+                    setTaskDetailsOpen(false);
+                    setError(null);
+                  }}
+                  className={cn(
+                    'flex min-h-11 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors',
+                    mode === id
+                      ? 'bg-card text-foreground shadow-sm ring-1 ring-primary/20'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <Icon
+                    className={cn('size-3.5', mode === id && 'text-primary')}
+                    aria-hidden
+                  />
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           {mode === 'task' ? (
             <TaskTitleField
@@ -432,8 +449,9 @@ function WorkLoggerPanel({
               >
                 <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
                 <span className="min-w-0 flex-1 truncate">
-                  {selectedProject?.name ?? selectedDestinationName} / {taskScheduleLabel(schedule, scheduledDate)}
-                  {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
+                  {selectedProject?.name ?? selectedDestinationName} ·{' '}
+                  {taskScheduleLabel(schedule, scheduledDate)}
+                  {priority >= 2 ? ` · ${priority === 3 ? 'Critical' : 'Important'}` : ''}
                 </span>
                 <span className="shrink-0 text-[11px] font-semibold text-primary">
                   Change
@@ -645,25 +663,73 @@ function TaskTitleField({
   onTitleChange: (value: string) => void;
   invalid: boolean;
 }) {
+  const { available, listening, transcribing, error, toggle } = useVoiceInput({
+    onTranscript: onTitleChange,
+  });
+
   return (
     <div className="mt-5 flex flex-col gap-1.5">
       <FieldLabel htmlFor="work-task-title">Task</FieldLabel>
-      <input
-        id="work-task-title"
-        form="work-logger-form"
-        data-autofocus
-        value={title}
-        onChange={(event) => onTitleChange(event.target.value)}
-        placeholder="What needs to happen?"
-        aria-invalid={invalid || undefined}
-        aria-errormessage={invalid ? 'work-logger-error' : undefined}
-        aria-describedby="work-task-shortcut"
-        className="input min-h-12 text-base"
-        autoComplete="off"
-      />
+      <div className="relative">
+        <input
+          id="work-task-title"
+          form="work-logger-form"
+          data-autofocus
+          value={title}
+          onChange={(event) => onTitleChange(event.target.value)}
+          placeholder="What needs to happen?"
+          aria-invalid={invalid || undefined}
+          aria-errormessage={invalid ? 'work-logger-error' : undefined}
+          aria-describedby="work-task-shortcut"
+          className={cn('input min-h-12 text-base', available && 'pr-14')}
+          autoComplete="off"
+        />
+        {available ? (
+          <button
+            type="button"
+            onClick={toggle}
+            disabled={transcribing}
+            aria-label={
+              transcribing
+                ? 'Transcribing voice task'
+                : listening
+                  ? 'Stop recording'
+                  : 'Start voice task'
+            }
+            className={cn(
+              'absolute right-1 top-1 inline-flex size-10 items-center justify-center rounded-lg transition-colors',
+              listening
+                ? 'bg-destructive text-destructive-foreground'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
+            )}
+          >
+            {transcribing ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : listening ? (
+              <MicOff className="size-4" aria-hidden />
+            ) : (
+              <Mic className="size-4" aria-hidden />
+            )}
+          </button>
+        ) : null}
+      </div>
       <p id="work-task-shortcut" className="text-[11px] text-subtle-foreground">
-        Press Enter to add, or Cmd/Ctrl Enter from anywhere in this panel.
+        Type the task, or use the microphone. Press Enter to add.
       </p>
+      {listening ? (
+        <p role="status" className="text-xs font-medium text-destructive">
+          Listening... tap the microphone to stop.
+        </p>
+      ) : transcribing ? (
+        <p role="status" className="text-xs font-medium text-primary">
+          Transcribing...
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

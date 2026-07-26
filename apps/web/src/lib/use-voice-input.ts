@@ -51,6 +51,7 @@ export interface VoiceInput {
   available: boolean;
   listening: boolean;
   transcribing: boolean;
+  error: string | null;
   toggle: () => void;
 }
 
@@ -64,6 +65,7 @@ export interface VoiceInput {
 export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInput {
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // Gate `available` on mount so SSR and first client render match (the
   // feature-detect is client-only -> avoids hydration mismatch).
   const mounted = useSyncExternalStore(
@@ -91,6 +93,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
 
   // --- Whisper path: record audio -> /api/transcribe ---
   async function startRecording() {
+    setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mime = pickAudioMime();
@@ -107,11 +110,15 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
         }
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
         setListening(false);
-        if (blob.size === 0) return;
+        if (blob.size === 0) {
+          setError('I could not transcribe that recording. Try again or type the task.');
+          return;
+        }
         setTranscribing(true);
         const text = await transcribeBlob(blob);
         setTranscribing(false);
         if (text) onTranscriptRef.current(text);
+        else setError('I could not transcribe that recording. Try again or type the task.');
       };
       recorderRef.current = recorder;
       recorder.start();
@@ -121,6 +128,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
       }, MAX_RECORD_MS);
     } catch {
       setListening(false);
+      setError('Microphone access was not available.');
     }
   }
 
@@ -131,6 +139,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
   // --- Web Speech path (fallback / when Whisper isn't configured) ---
   function startWebSpeech() {
     if (!SpeechRecognitionAPI) return;
+    setError(null);
     const recog = new SpeechRecognitionAPI();
     recog.lang = 'en-US';
     recog.continuous = false;
@@ -142,7 +151,10 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
         onTranscriptRef.current(transcript.trim());
       }
     };
-    recog.onerror = () => setListening(false);
+    recog.onerror = () => {
+      setListening(false);
+      setError('Voice input stopped. Try again or type the task.');
+    };
     recog.onend = () => setListening(false);
     recogRef.current = recog;
     recog.start();
@@ -169,5 +181,5 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
     else startWebSpeech();
   }
 
-  return { available: mounted && micAvailable, listening, transcribing, toggle };
+  return { available: mounted && micAvailable, listening, transcribing, error, toggle };
 }
