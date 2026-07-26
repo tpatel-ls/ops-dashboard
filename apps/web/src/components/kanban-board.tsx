@@ -11,12 +11,13 @@ import {
 } from '@dnd-kit/core';
 import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarClock, Check, CircleAlert, Plus } from 'lucide-react';
+import { CalendarClock, Check, ChevronLeft, ChevronRight, CircleAlert, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { nextBoardColumn, previousBoardColumn } from '@/lib/board-actions';
 import { taskLane } from '@/lib/org-lanes';
 import { taskDateLabel } from '@/lib/task-presentation';
 import {
@@ -228,6 +229,9 @@ function KanbanCard({
   const today = format(new Date(), 'yyyy-MM-dd');
   const overdue = Boolean(task.status !== 'done' && dateValue && dateValue < today);
   const dateLabel = dateValue ? taskDateLabel(dateValue, today, task.status === 'done') : null;
+  const currentColumn = simpleKanbanColumn(task.status) ?? 'todo';
+  const previousColumn = previousBoardColumn(currentColumn);
+  const nextColumn = nextBoardColumn(currentColumn);
   const style: React.CSSProperties | undefined = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
     : undefined;
@@ -337,6 +341,54 @@ function KanbanCard({
           </span>
         ) : null}
       </div>
+      <div className="mt-1 flex justify-end gap-0.5">
+        {previousColumn ? (
+          <BoardMoveButton
+            task={task}
+            column={previousColumn}
+            direction="previous"
+            icon={<ChevronLeft className="size-4" aria-hidden />}
+          />
+        ) : null}
+        {nextColumn ? (
+          <BoardMoveButton
+            task={task}
+            column={nextColumn}
+            direction="next"
+            icon={<ChevronRight className="size-4" aria-hidden />}
+          />
+        ) : null}
+      </div>
     </article>
+  );
+}
+
+function BoardMoveButton({
+  task,
+  column,
+  direction,
+  icon,
+}: {
+  task: Task;
+  column: SimpleKanbanColumnId;
+  direction: 'previous' | 'next';
+  icon: React.ReactNode;
+}) {
+  const label = SIMPLE_KANBAN_COLUMNS.find((candidate) => candidate.id === column)?.label ?? column;
+  return (
+    <button
+      type="button"
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={(event) => {
+        event.stopPropagation();
+        void updateTask(task.id, { status: statusForSimpleKanbanColumn(column) });
+      }}
+      aria-label={`Move ${task.title} to ${label}`}
+      title={`Move to ${label}`}
+      className="text-subtle-foreground hover:bg-accent hover:text-foreground inline-flex size-11 items-center justify-center rounded-md transition-colors md:size-8"
+    >
+      {icon}
+      <span className="sr-only">{direction} lane</span>
+    </button>
   );
 }
