@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
+import { boundedText } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
 const MAX_CONTEXT = 60_000;
+const MAX_QUESTION = 4_000;
 
 const CHAT_SYSTEM = `You are the project intelligence assistant inside Taskify. The user is asking about their organizations, projects, domains, schedules, and open tasks.
 
@@ -19,15 +21,13 @@ export async function POST(req: Request): Promise<Response> {
   let context = '';
   try {
     const body = (await req.json()) as { question?: unknown; context?: unknown };
-    question = typeof body?.question === 'string' ? body.question.trim() : '';
-    context = typeof body?.context === 'string' ? body.context.trim() : '';
+    question = boundedText(body?.question, MAX_QUESTION);
+    context = boundedText(body?.context, MAX_CONTEXT);
   } catch {
     /* ignore malformed body */
   }
 
   if (!question) return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
-  if (context.length > MAX_CONTEXT) context = context.slice(0, MAX_CONTEXT);
-
   const client = getAnthropic();
   if (!client) return NextResponse.json({ ok: false, reason: 'no-key' });
 
