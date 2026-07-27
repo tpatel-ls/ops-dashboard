@@ -1,5 +1,6 @@
 import { addDays, addMonths, addWeeks, addYears, parseISO } from 'date-fns';
 import type { RecurrenceRule, Task } from './types';
+import { isoDay } from './dates';
 
 const DAY_INDEX: Record<NonNullable<RecurrenceRule['byDay']>[number], number> = {
   SU: 0,
@@ -50,11 +51,19 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
       : now;
   const next = nextOccurrence(task.recurrence, anchor);
   if (!shouldGenerateNext(task.recurrence, 1, next)) return null;
-  const isoDate = next.toISOString().slice(0, 10);
+  const isoDate = isoDay(next);
   const offsetMs = task.startAt && task.endAt ? parseISO(task.endAt).getTime() - parseISO(task.startAt).getTime() : 0;
-  const startAt = task.startAt
-    ? new Date(next.getTime() + (parseISO(task.startAt).getHours() * 60 + parseISO(task.startAt).getMinutes()) * 60000 - (anchor.getHours() * 60 + anchor.getMinutes()) * 60000).toISOString()
-    : undefined;
+  const startAtSource = task.startAt ? parseISO(task.startAt) : undefined;
+  const nextStart = new Date(next);
+  if (startAtSource) {
+    nextStart.setHours(
+      startAtSource.getHours(),
+      startAtSource.getMinutes(),
+      startAtSource.getSeconds(),
+      startAtSource.getMilliseconds(),
+    );
+  }
+  const startAt = startAtSource ? nextStart.toISOString() : undefined;
   const endAt = startAt && offsetMs > 0 ? new Date(parseISO(startAt).getTime() + offsetMs).toISOString() : undefined;
   const nowIso = now.toISOString();
   const projected: Task = {
