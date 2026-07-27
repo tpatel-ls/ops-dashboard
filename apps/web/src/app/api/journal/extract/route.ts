@@ -2,6 +2,10 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
+import {
+  type JournalImageMediaType,
+  validateJournalImage,
+} from '@/lib/server/journal-image';
 
 export const runtime = 'nodejs';
 
@@ -25,7 +29,7 @@ export async function POST(req: Request): Promise<Response> {
 
   let text = '';
   let imageBase64: string | undefined;
-  let mediaType: string | undefined;
+  let mediaType: JournalImageMediaType | undefined;
   let routineNames: string[] = [];
 
   try {
@@ -37,7 +41,18 @@ export async function POST(req: Request): Promise<Response> {
     };
     text = typeof body?.text === 'string' ? body.text.trim() : '';
     imageBase64 = typeof body?.imageBase64 === 'string' ? body.imageBase64 : undefined;
-    mediaType = typeof body?.mediaType === 'string' ? body.mediaType : 'image/jpeg';
+    const requestedMediaType = typeof body?.mediaType === 'string' ? body.mediaType : 'image/jpeg';
+    if (imageBase64) {
+      const image = validateJournalImage(imageBase64, requestedMediaType);
+      if (!image.ok) {
+        return NextResponse.json(
+          { ok: false, reason: image.reason },
+          { status: image.reason === 'image-too-large' ? 413 : 400 },
+        );
+      }
+      imageBase64 = image.data;
+      mediaType = image.mediaType;
+    }
     routineNames = Array.isArray(body?.routineNames)
       ? (body.routineNames as unknown[]).filter((r): r is string => typeof r === 'string')
       : [];
@@ -65,11 +80,7 @@ export async function POST(req: Request): Promise<Response> {
           type: 'image',
           source: {
             type: 'base64',
-            media_type: (mediaType || 'image/jpeg') as
-              | 'image/jpeg'
-              | 'image/png'
-              | 'image/gif'
-              | 'image/webp',
+            media_type: mediaType || 'image/jpeg',
             data: imageBase64,
           },
         },
