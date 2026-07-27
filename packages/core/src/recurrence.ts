@@ -20,13 +20,14 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
   if (rule.freq === 'yearly') return addYears(from, interval);
   if (rule.freq === 'weekly') {
     if (!rule.byDay || rule.byDay.length === 0) return addWeeks(from, interval);
-    const allowed = rule.byDay.map((d) => DAY_INDEX[d]).sort((a, b) => a - b);
-    let candidate = addDays(from, 1);
-    for (let i = 0; i < 7 * interval; i += 1) {
-      if (allowed.includes(candidate.getDay())) return candidate;
-      candidate = addDays(candidate, 1);
+    const allowed = [...new Set(rule.byDay.map((d) => DAY_INDEX[d]))].sort((a, b) => a - b);
+    const laterThisWeek = allowed.find((day) => day > from.getDay());
+    if (laterThisWeek !== undefined) {
+      return addDays(from, laterThisWeek - from.getDay());
     }
-    return addWeeks(from, interval);
+    const firstAllowed = allowed[0];
+    if (firstAllowed === undefined) return addWeeks(from, interval);
+    return addDays(from, interval * 7 - from.getDay() + firstAllowed);
   }
   return from;
 }
