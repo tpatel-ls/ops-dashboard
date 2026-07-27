@@ -12,7 +12,9 @@ const DAY_INDEX: Record<NonNullable<RecurrenceRule['byDay']>[number], number> = 
 };
 
 export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
-  const interval = Math.max(1, rule.interval);
+  const interval = Number.isFinite(rule.interval)
+    ? Math.max(1, Math.floor(rule.interval))
+    : 1;
   if (rule.freq === 'daily') return addDays(from, interval);
   if (rule.freq === 'monthly') return addMonths(from, interval);
   if (rule.freq === 'yearly') return addYears(from, interval);
