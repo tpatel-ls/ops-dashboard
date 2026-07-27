@@ -22,4 +22,14 @@ describe('nextOccurrence', () => {
     const next = nextOccurrence({ freq: 'monthly', interval: 1 }, new Date('2026-04-26'));
     expect(next.toISOString().slice(0, 10)).toBe('2026-05-26');
   });
+
+  it('normalizes malformed intervals instead of producing an invalid date', () => {
+    const anchor = new Date('2026-04-26');
+    expect(nextOccurrence({ freq: 'daily', interval: Number.NaN }, anchor)).toEqual(
+      new Date('2026-04-27'),
+    );
+    expect(nextOccurrence({ freq: 'daily', interval: 2.9 }, anchor)).toEqual(
+      new Date('2026-04-28'),
+    );
+  });
 });
