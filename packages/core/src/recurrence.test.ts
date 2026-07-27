@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { nextOccurrence } from './recurrence';
+import type { Task } from './types';
+import { nextOccurrence, projectNextTask } from './recurrence';
 
 describe('nextOccurrence', () => {
   it('handles daily', () => {
@@ -42,5 +43,35 @@ describe('nextOccurrence', () => {
     expect(nextOccurrence({ freq: 'daily', interval: 2.9 }, anchor)).toEqual(
       new Date('2026-04-28'),
     );
+  });
+});
+
+describe('projectNextTask', () => {
+  it('preserves local wall-clock time across daylight-saving changes', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Weekly planning',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-03-01',
+      startAt: new Date(2026, 2, 1, 9).toISOString(),
+      endAt: new Date(2026, 2, 1, 10).toISOString(),
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'weekly', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-03-01T14:00:00.000Z',
+      updatedAt: '2026-03-01T16:00:00.000Z',
+      completedAt: '2026-03-01T16:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    const projected = projectNextTask(task, new Date('2026-03-01T16:00:00.000Z'));
+
+    expect(projected?.scheduledFor).toBe('2026-03-08');
+    expect(new Date(projected?.startAt ?? '').getHours()).toBe(9);
+    expect(new Date(projected?.endAt ?? '').getHours()).toBe(10);
   });
 });
