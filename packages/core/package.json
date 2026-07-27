@@ -19,7 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.47.10",
+    "@supabase/supabase-js": "^2.110.8",
     "chrono-node": "^2.7.7",
     "date-fns": "^4.1.0",
     "dexie": "^4.0.10",
