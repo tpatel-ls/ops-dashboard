@@ -18,6 +18,17 @@ describe('nextOccurrence', () => {
     expect(next.getDay()).toBe(1);
   });
 
+  it('honors the interval when rolling weekly byDay rules into their next cycle', () => {
+    const friday = new Date('2026-04-24T12:00:00');
+    const next = nextOccurrence(
+      { freq: 'weekly', interval: 2, byDay: ['MO', 'WE', 'FR'] },
+      friday,
+    );
+    expect(next.getDay()).toBe(1);
+    expect(next.getDate()).toBe(4);
+    expect(next.getMonth()).toBe(4);
+  });
+
   it('handles monthly', () => {
     const next = nextOccurrence({ freq: 'monthly', interval: 1 }, new Date('2026-04-26'));
     expect(next.toISOString().slice(0, 10)).toBe('2026-05-26');
