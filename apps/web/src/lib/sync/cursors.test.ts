@@ -32,4 +32,10 @@ describe('overlappedCursor', () => {
     expect(overlappedCursor(SYNC_EPOCH, 120_000)).toBe(SYNC_EPOCH);
     expect(overlappedCursor('not-a-date', 120_000)).toBe(SYNC_EPOCH);
   });
+
+  it('never advances a cursor when given a malformed overlap', () => {
+    const cursor = '2026-07-15T12:00:00.000Z';
+    expect(overlappedCursor(cursor, -120_000)).toBe(cursor);
+    expect(overlappedCursor(cursor, Number.NaN)).toBe(cursor);
+  });
 });
