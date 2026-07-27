@@ -17,5 +17,6 @@ export function overlappedCursor(cursor: string, overlapMs: number): string {
   if (cursor === SYNC_EPOCH) return SYNC_EPOCH;
   const timestamp = Date.parse(cursor);
   if (!Number.isFinite(timestamp)) return SYNC_EPOCH;
-  return new Date(Math.max(Date.parse(SYNC_EPOCH), timestamp - overlapMs)).toISOString();
+  const safeOverlapMs = Number.isFinite(overlapMs) ? Math.max(0, overlapMs) : 0;
+  return new Date(Math.max(Date.parse(SYNC_EPOCH), timestamp - safeOverlapMs)).toISOString();
 }
