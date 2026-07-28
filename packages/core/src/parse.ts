@@ -19,7 +19,8 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   const tags: string[] = [];
 
   for (const match of working.matchAll(TAG_RE)) {
-    if (match[1]) tags.push(match[1].toLowerCase());
+    const tag = match[1]?.toLowerCase();
+    if (tag && !tags.includes(tag)) tags.push(tag);
   }
   working = working.replace(TAG_RE, ' ').trim();
 
