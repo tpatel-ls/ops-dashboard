@@ -6,10 +6,13 @@ import {
   type JournalImageMediaType,
   validateJournalImage,
 } from '@/lib/server/journal-image';
+import { boundedTextList } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
 const MAX_TEXT = 8000;
+const MAX_ROUTINE_NAMES = 100;
+const MAX_ROUTINE_NAME_LENGTH = 200;
 
 const EXTRACT_INSTRUCTION = `You are a journal analysis assistant for a personal life-OS app.
 
@@ -53,9 +56,11 @@ export async function POST(req: Request): Promise<Response> {
       imageBase64 = image.data;
       mediaType = image.mediaType;
     }
-    routineNames = Array.isArray(body?.routineNames)
-      ? (body.routineNames as unknown[]).filter((r): r is string => typeof r === 'string')
-      : [];
+    routineNames = boundedTextList(
+      body?.routineNames,
+      MAX_ROUTINE_NAMES,
+      MAX_ROUTINE_NAME_LENGTH,
+    );
   } catch {
     /* ignore malformed body */
   }
