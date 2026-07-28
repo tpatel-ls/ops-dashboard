@@ -7,6 +7,10 @@ export interface FoodTotals {
   totalFat?: number;
 }
 
+function validEstimate(value: number | undefined): number | undefined {
+  return value !== undefined && Number.isFinite(value) && value >= 0 ? value : undefined;
+}
+
 /**
  * Sum AI-estimated macros across the items of one log. Calories always sum;
  * a macro total is omitted when no item reports that macro (unknown, not 0).
@@ -18,10 +22,13 @@ export function computeFoodTotals(items: FoodItem[]): FoodTotals {
   let carbs: number | undefined;
   let fat: number | undefined;
   for (const item of items) {
-    calories += item.calories || 0;
-    if (item.protein !== undefined) protein = (protein ?? 0) + item.protein;
-    if (item.carbs !== undefined) carbs = (carbs ?? 0) + item.carbs;
-    if (item.fat !== undefined) fat = (fat ?? 0) + item.fat;
+    calories += validEstimate(item.calories) ?? 0;
+    const itemProtein = validEstimate(item.protein);
+    const itemCarbs = validEstimate(item.carbs);
+    const itemFat = validEstimate(item.fat);
+    if (itemProtein !== undefined) protein = (protein ?? 0) + itemProtein;
+    if (itemCarbs !== undefined) carbs = (carbs ?? 0) + itemCarbs;
+    if (itemFat !== undefined) fat = (fat ?? 0) + itemFat;
   }
   return {
     totalCalories: Math.round(calories),
