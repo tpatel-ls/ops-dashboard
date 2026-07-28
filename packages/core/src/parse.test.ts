@@ -18,6 +18,12 @@ describe('parseQuickAdd', () => {
     expect(r.title).toBe('Pay bills');
   });
 
+  it('deduplicates hashtags without changing their order', () => {
+    const r = parseQuickAdd('Pay bills #Money #personal #money', anchor);
+    expect(r.tags).toEqual(['money', 'personal']);
+    expect(r.title).toBe('Pay bills');
+  });
+
   it('extracts priority bangs', () => {
     const r = parseQuickAdd('Ship release !!', anchor);
     expect(r.priority).toBe(2);
