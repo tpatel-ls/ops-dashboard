@@ -1,6 +1,6 @@
 'use client';
 
-import { format, parseISO } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 
@@ -52,7 +52,8 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
   const lines: string[] = [`# ${heading}`, ''];
   const grouped: Record<string, Task[]> = {};
   for (const t of tasks) {
-    const k = t.scheduledFor ?? 'unscheduled';
+    const parsedDay = t.scheduledFor ? parseISO(t.scheduledFor) : null;
+    const k = parsedDay && isValid(parsedDay) ? t.scheduledFor! : 'unscheduled';
     grouped[k] = grouped[k] ?? [];
     grouped[k].push(t);
   }
