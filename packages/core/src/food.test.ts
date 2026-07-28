@@ -36,4 +36,14 @@ describe('computeFoodTotals', () => {
   it('returns zero calories for an empty list', () => {
     expect(computeFoodTotals([])).toEqual({ totalCalories: 0 });
   });
+
+  it('ignores invalid and negative AI estimates', () => {
+    expect(
+      computeFoodTotals([
+        { name: 'unknown', calories: Number.NaN, protein: Number.POSITIVE_INFINITY },
+        { name: 'correction', calories: -50, protein: -2 },
+        { name: 'valid', calories: 100, protein: 5 },
+      ]),
+    ).toEqual({ totalCalories: 100, totalProtein: 5 });
+  });
 });
