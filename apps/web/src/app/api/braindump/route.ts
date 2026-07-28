@@ -2,11 +2,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
+import { boundedTextList } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
 const MAX_TEXT = 8000;
 const MAX_NAMES = 100;
+const MAX_NAME_LENGTH = 200;
 
 const BRAINDUMP_SYSTEM = `You are the capture brain for a personal life dashboard. The user speaks or types freely: single thoughts, long rambles, mixed lists. Split the input into distinct items and call route_items exactly once with all of them.
 
@@ -34,10 +36,7 @@ For kind food, also return food:
 Never invent projects or routines that are not in the provided lists.`;
 
 function cleanNames(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter((n): n is string => typeof n === 'string' && n.trim().length > 0)
-    .slice(0, MAX_NAMES);
+  return boundedTextList(value, MAX_NAMES, MAX_NAME_LENGTH);
 }
 
 export async function POST(req: Request): Promise<Response> {
