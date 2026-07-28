@@ -19,15 +19,17 @@ function isTypingTarget(e: KeyboardEvent): boolean {
   return false;
 }
 
-function matchSingle(combo: string, e: KeyboardEvent): boolean {
+export function matchesHotkey(combo: string, e: KeyboardEvent): boolean {
   const parts = combo.toLowerCase().split('+').map((p) => p.trim());
   const key = parts.pop()!;
-  const wantMeta = parts.includes('mod') || parts.includes('cmd');
+  const wantMod = parts.includes('mod');
+  const wantMeta = parts.includes('cmd');
   const wantCtrl = parts.includes('ctrl');
   const wantShift = parts.includes('shift');
   const wantAlt = parts.includes('alt');
-  if (wantMeta && !(e.metaKey || e.ctrlKey)) return false;
-  if (wantCtrl && !e.ctrlKey) return false;
+  if (wantMod && !(e.metaKey || e.ctrlKey)) return false;
+  if (wantMeta !== e.metaKey && !wantMod) return false;
+  if (wantCtrl !== e.ctrlKey && !wantMod) return false;
   if (wantShift !== e.shiftKey) return false;
   if (wantAlt !== e.altKey) return false;
   if (e.key.toLowerCase() !== key) return false;
@@ -76,7 +78,7 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
         }
         const allowsMeta = combo.includes('mod') || combo.includes('cmd') || combo.includes('ctrl');
         if (inField && !allowsMeta) continue;
-        if (matchSingle(combo, e)) {
+        if (matchesHotkey(combo, e)) {
           e.preventDefault();
           hk.handler(e);
           clearChord();
