@@ -63,10 +63,10 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
       if (reg) await reg.showNotification(task.title, opts);
       else new Notification(task.title, opts);
       fired += 1;
+      await db.reminders.update(r.id, { delivered: true });
     } catch {
       /* ignore */
     }
-    await db.reminders.update(r.id, { delivered: true });
   }
   return fired;
 }
