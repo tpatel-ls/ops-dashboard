@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
+import { healthRequestAuthorized } from '@/lib/server/health-auth';
 import { createAdminClient } from '@/utils/supabase/admin';
 
 export const runtime = 'nodejs';
@@ -12,17 +12,8 @@ export const runtime = 'nodejs';
  * is set. We also accept OPS_API_SECRET. If neither is configured, the endpoint
  * is open (it only reads one row id and reveals nothing).
  */
-function authorized(req: Request): boolean {
-  const expected = process.env.CRON_SECRET || process.env.OPS_API_SECRET;
-  if (!expected) return true;
-  const provided = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 export async function GET(req: Request): Promise<Response> {
-  if (!authorized(req)) {
+  if (!healthRequestAuthorized(req)) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 
