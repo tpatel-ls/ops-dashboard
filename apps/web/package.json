@@ -20,7 +20,7 @@
     "@ops-dashboard/core": "workspace:*",
     "@ops-dashboard/ui": "workspace:*",
     "@ops-dashboard/whiteboard": "workspace:*",
-    "@supabase/ssr": "^0.10.3",
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
