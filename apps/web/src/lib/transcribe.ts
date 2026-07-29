@@ -12,6 +12,8 @@ export function pickAudioMime(): string {
 
 /** POST a recorded audio blob to /api/transcribe; returns the transcript or null. */
 export async function transcribeBlob(blob: Blob): Promise<string | null> {
+  if (blob.size === 0) return null;
+
   const ext = blob.type.includes('mp4')
     ? 'mp4'
     : blob.type.includes('ogg')
