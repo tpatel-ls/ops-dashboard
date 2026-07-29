@@ -18,7 +18,8 @@ export async function updateAppBadge(count: number): Promise<boolean> {
   if (!nav?.setAppBadge || !nav.clearAppBadge) return false;
 
   try {
-    if (count > 0) await nav.setAppBadge(count);
+    const badgeCount = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+    if (badgeCount > 0) await nav.setAppBadge(badgeCount);
     else await nav.clearAppBadge();
     return true;
   } catch {
