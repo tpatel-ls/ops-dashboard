@@ -49,7 +49,8 @@ export function aggregateActivity(
 
   while (cursor <= endTime) {
     const date = toLocalDate(cursor);
-    const count = scores.get(date) ?? 0;
+    const score = scores.get(date);
+    const count = typeof score === 'number' && Number.isFinite(score) ? Math.max(0, score) : 0;
     result.push({ date, count, level: toLevel(count) });
     cursor.setDate(cursor.getDate() + 1);
   }
@@ -78,11 +79,7 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   // Tasks completed within the window
   const tasks = await db.tasks
     .filter(
-      (t) =>
-        !t.deletedAt &&
-        t.status === 'done' &&
-        !!t.completedAt &&
-        t.completedAt >= startISO,
+      (t) => !t.deletedAt && t.status === 'done' && !!t.completedAt && t.completedAt >= startISO,
     )
     .toArray();
   for (const t of tasks) {
@@ -93,10 +90,7 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
 
   // Routine checks that are done within the window
   const checks = await db.routineChecks
-    .filter(
-      (c: RoutineCheck) =>
-        !c.deletedAt && c.done && c.date >= toLocalDate(start),
-    )
+    .filter((c: RoutineCheck) => !c.deletedAt && c.done && c.date >= toLocalDate(start))
     .toArray();
   for (const c of checks) {
     add(c.date, WEIGHTS.routine);
@@ -111,9 +105,7 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   }
 
   // WorkLogs within the window
-  const worklogs = await db.workLogs
-    .filter((w) => !w.deletedAt && w.at >= startISO)
-    .toArray();
+  const worklogs = await db.workLogs.filter((w) => !w.deletedAt && w.at >= startISO).toArray();
   for (const w of worklogs) {
     const contribution = (w.minutes / 30) * WEIGHTS.workPer30Min;
     add(toLocalDate(w.at), contribution);
