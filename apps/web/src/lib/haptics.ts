@@ -8,7 +8,11 @@ const PATTERNS = {
 
 function trigger(pattern: HapticPattern): boolean {
   if (typeof navigator === 'undefined' || !('vibrate' in navigator)) return false;
-  return navigator.vibrate(pattern);
+  try {
+    return navigator.vibrate(pattern);
+  } catch {
+    return false;
+  }
 }
 
 export function hapticTap(): boolean {
