@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const reminders = {
+    delete: vi.fn(),
     update: vi.fn(),
     where: vi.fn(),
   };
@@ -41,5 +42,15 @@ describe('checkAndFireDueReminders', () => {
 
     await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(0);
     expect(mocks.reminders.update).not.toHaveBeenCalled();
+  });
+
+  it('removes a due reminder whose task no longer exists', async () => {
+    mocks.tasks.get.mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', {
+      serviceWorker: { getRegistration: vi.fn() },
+    });
+
+    await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(0);
+    expect(mocks.reminders.delete).toHaveBeenCalledWith('reminder-1');
   });
 });

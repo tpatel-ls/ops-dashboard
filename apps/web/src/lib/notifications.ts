@@ -52,7 +52,10 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
   let fired = 0;
   for (const r of due) {
     const task = await db.tasks.get(r.taskId);
-    if (!task) continue;
+    if (!task) {
+      await db.reminders.delete(r.id);
+      continue;
+    }
     try {
       const reg = await navigator.serviceWorker.getRegistration('/');
       const opts: NotificationOptions = {
