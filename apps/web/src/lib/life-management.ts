@@ -8,6 +8,8 @@ import type {
   RoutineCheck,
   Task,
 } from '@ops-dashboard/core';
+import { isoDay, todayIso } from '@ops-dashboard/core';
+import { addDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import { computeIdentityScore, type IdentityScoreInput } from './identity-score';
 import { findStaleDomains } from './briefing';
 
@@ -65,8 +67,6 @@ export interface LifeManagementInput {
   now?: Date;
 }
 
-const DAY_MS = 86_400_000;
-
 function clamp(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -78,10 +78,7 @@ function datePart(value?: string): string | null {
 }
 
 function daysBetween(from: string, to: string): number {
-  return Math.max(
-    0,
-    Math.floor((new Date(`${to}T00:00:00`).getTime() - new Date(`${from}T00:00:00`).getTime()) / DAY_MS),
-  );
+  return Math.max(0, differenceInCalendarDays(parseISO(to), parseISO(from)));
 }
 
 function uniqueActiveDays(input: LifeManagementInput): number {
@@ -108,11 +105,11 @@ function bestRoutineStreak(checks: RoutineCheck[], today: string): number {
     checks.filter((check) => !check.deletedAt && check.done).map((check) => check.date),
   );
   let streak = 0;
-  const cursor = new Date(`${today}T00:00:00`);
+  let cursor = today;
 
-  while (doneDates.has(cursor.toISOString().slice(0, 10))) {
+  while (doneDates.has(cursor)) {
     streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor = isoDay(addDays(parseISO(cursor), -1));
   }
 
   return streak;
@@ -133,7 +130,7 @@ function buildModule(
 
 export function summarizeLifeManagement(input: LifeManagementInput): LifeManagementSummary {
   const now = input.now ?? new Date();
-  const today = input.today ?? now.toISOString().slice(0, 10);
+  const today = input.today ?? todayIso();
   const liveTasks = input.tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
   const openTasks = liveTasks.filter((task) => task.status !== 'done');
   const overdue = openTasks.filter(
