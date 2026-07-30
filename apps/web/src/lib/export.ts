@@ -74,6 +74,14 @@ export function downloadJson(data: unknown, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
+function markdownInline(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function markdownTag(value: string): string {
+  return markdownInline(value).replace(/\s/g, '-');
+}
+
 export function tasksToMarkdown(tasks: Task[], heading: string): string {
   const lines: string[] = [`# ${heading}`, ''];
   const grouped: Record<string, Task[]> = {};
@@ -89,8 +97,8 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
     lines.push(`## ${label}`, '');
     for (const t of list) {
       const box = t.status === 'done' ? '[x]' : '[ ]';
-      const tags = t.tags.length ? ` ${t.tags.map((x) => `#${x}`).join(' ')}` : '';
-      lines.push(`- ${box} ${t.title}${tags}`);
+      const tags = t.tags.length ? ` ${t.tags.map((x) => `#${markdownTag(x)}`).join(' ')}` : '';
+      lines.push(`- ${box} ${markdownInline(t.title)}${tags}`);
     }
     lines.push('');
   }
