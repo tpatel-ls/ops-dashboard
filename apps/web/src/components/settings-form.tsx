@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTheme } from './theme-provider';
-import { DEFAULT_SETTINGS, getDb, todayIso } from '@ops-dashboard/core';
+import { todayIso } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import {
@@ -21,6 +21,7 @@ import {
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
 import { OrganizationsManager } from '@/components/organizations-manager';
+import { getSettings, updateSettings } from '@/lib/settings';
 
 const VIEW_OPTIONS: Settings['defaultView'][] = [
   'today',
@@ -42,15 +43,9 @@ export function SettingsForm() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const db = getDb();
-      const existing = await db.settings.get('singleton');
+      const existing = await getSettings();
       if (cancelled) return;
-      if (existing) setSettings(existing);
-      else {
-        const seeded: Settings = { ...DEFAULT_SETTINGS, updatedAt: new Date().toISOString() };
-        await db.settings.put(seeded);
-        setSettings(seeded);
-      }
+      setSettings(existing);
       setPerm(notificationPermission());
     })();
     return () => {
@@ -60,9 +55,8 @@ export function SettingsForm() {
 
   async function patch(update: Partial<Settings>) {
     if (!settings) return;
-    const next: Settings = { ...settings, ...update, updatedAt: new Date().toISOString() };
+    const next = await updateSettings(update);
     setSettings(next);
-    await getDb().settings.put(next);
   }
 
   useEffect(() => {
