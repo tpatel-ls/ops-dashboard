@@ -5,6 +5,7 @@ import { newId, parseQuickAdd, quickAddToTask } from '@ops-dashboard/core';
 import type { Capture, CaptureKind, JournalEntry, Task, AppNotification } from '@ops-dashboard/core';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
+import { normalizeTimezoneOffset } from '@/lib/server/timezone';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient, getSingleUserId } from '@/utils/supabase/admin';
 import { SYNC_TABLES, toRow } from '@/lib/sync/mapping';
@@ -154,7 +155,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body = (await req.json()) as { raw?: unknown; tzOffsetMinutes?: unknown };
     raw = typeof body?.raw === 'string' ? body.raw.trim() : '';
-    if (typeof body?.tzOffsetMinutes === 'number') tzOffsetMinutes = body.tzOffsetMinutes;
+    tzOffsetMinutes = normalizeTimezoneOffset(body?.tzOffsetMinutes);
   } catch {
     /* malformed body */
   }
