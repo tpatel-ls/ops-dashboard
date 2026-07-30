@@ -193,4 +193,35 @@ describe('life management summary', () => {
     expect(summary.journalGapDays).toBeNull();
     expect(summary.attention.some((item) => item.id === 'food')).toBe(true);
   });
+
+  it('counts calendar days across daylight-saving changes', () => {
+    const originalTimezone = process.env.TZ;
+    process.env.TZ = 'America/Chicago';
+    try {
+      const summary = summarizeLifeManagement({
+        tasks: [],
+        projects: [],
+        domains: [],
+        routines: [],
+        routineChecks: [],
+        captures: [],
+        journalEntries: [
+          {
+            ...meta('journal', '2026-03-08T18:00:00.000Z'),
+            date: '2026-03-08',
+            body: 'Spring forward.',
+            mediaUrls: [],
+            tags: [],
+          },
+        ],
+        foodLogs: [],
+        today: '2026-03-09',
+        now: new Date('2026-03-09T17:00:00.000Z'),
+      });
+
+      expect(summary.journalGapDays).toBe(1);
+    } finally {
+      process.env.TZ = originalTimezone;
+    }
+  });
 });
