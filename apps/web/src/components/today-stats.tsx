@@ -2,11 +2,11 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Flame, ListTodo, Target } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 
 export function TodayStats() {
   const stats = useLiveQuery(async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     const all = await getDb().tasks.toArray();
     const live = all.filter((t) => !t.deletedAt && t.status !== 'archived');
     const todays = live.filter(
