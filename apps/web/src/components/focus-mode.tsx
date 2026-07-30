@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
+import { DEFAULT_SETTINGS, getDb, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
@@ -19,7 +19,7 @@ export function FocusMode() {
   const breakMin = settings?.pomodoroBreakMinutes ?? DEFAULT_SETTINGS.pomodoroBreakMinutes;
 
   const candidates = useLiveQuery(async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     const all = await getDb().tasks.toArray();
     return all
       .filter(

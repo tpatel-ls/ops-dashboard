@@ -1,3 +1,4 @@
+import { todayIso } from '@ops-dashboard/core';
 import type { Capture, Domain, Project, Task } from '@ops-dashboard/core';
 
 export interface StaleDomain {
@@ -134,7 +135,7 @@ export function summarizeBriefing(input: {
   routingIssues: number;
   staleDomains: number;
 }): BriefingSummary {
-  const today = input.today ?? new Date().toISOString().slice(0, 10);
+  const today = input.today ?? todayIso();
   const live = input.tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
   const todays = live.filter(
     (task) =>
