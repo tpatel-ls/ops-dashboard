@@ -12,6 +12,32 @@ export interface OpsExport {
   whiteboards: Whiteboard[];
 }
 
+function isRecordWithId(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { id?: unknown }).id === 'string' &&
+    Boolean((value as { id: string }).id)
+  );
+}
+
+export function validateOpsExport(value: unknown): OpsExport {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error('Invalid export payload');
+  }
+  const payload = value as Partial<OpsExport>;
+  if (payload.version !== 1) throw new Error('Unsupported export version');
+
+  for (const key of ['tasks', 'projects', 'whiteboards'] as const) {
+    const records = payload[key];
+    if (!Array.isArray(records) || !records.every(isRecordWithId)) {
+      throw new Error(`Invalid export ${key}`);
+    }
+  }
+
+  return payload as OpsExport;
+}
+
 export async function exportAll(): Promise<OpsExport> {
   const db = getDb();
   const [tasks, projects, whiteboards] = await Promise.all([
@@ -28,8 +54,8 @@ export async function exportAll(): Promise<OpsExport> {
   };
 }
 
-export async function importAll(payload: OpsExport): Promise<void> {
-  if (payload.version !== 1) throw new Error('Unsupported export version');
+export async function importAll(value: unknown): Promise<void> {
+  const payload = validateOpsExport(value);
   const db = getDb();
   await db.transaction('rw', db.tasks, db.projects, db.whiteboards, async () => {
     if (payload.projects) await db.projects.bulkPut(payload.projects);

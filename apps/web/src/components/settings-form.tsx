@@ -16,7 +16,6 @@ import {
   exportAll,
   importAll,
   tasksToMarkdown,
-  type OpsExport,
 } from '@/lib/export';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
@@ -324,7 +323,7 @@ export function SettingsForm() {
               if (!file) return;
               try {
                 const text = await file.text();
-                const parsed = JSON.parse(text) as OpsExport;
+                const parsed: unknown = JSON.parse(text);
                 await importAll(parsed);
                 e.target.value = '';
               } catch (err) {
