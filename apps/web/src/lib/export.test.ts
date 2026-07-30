@@ -33,6 +33,16 @@ describe('tasksToMarkdown', () => {
 
     expect(markdown).toContain('## Tuesday, July 28');
   });
+
+  it('keeps multiline titles and tags on one task line', () => {
+    const multiline = task('First line\n## Injected heading');
+    multiline.tags = ['work\nnotes'];
+
+    const markdown = tasksToMarkdown([multiline], 'Tasks');
+
+    expect(markdown).toContain('- [ ] First line ## Injected heading #work-notes');
+    expect(markdown).not.toContain('\n## Injected heading');
+  });
 });
 
 describe('validateOpsExport', () => {
