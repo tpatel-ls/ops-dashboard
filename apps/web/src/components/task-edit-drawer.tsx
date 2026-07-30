@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, CalendarClock, Check, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
 import { addDays, format } from 'date-fns';
-import { getDb, newId } from '@ops-dashboard/core';
+import { getDb, newId, todayIso } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { setChecklist, softDeleteTask, updateTask } from '@/lib/tasks';
@@ -222,7 +222,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   type="time"
                   value={task.startAt ? format(new Date(task.startAt), 'HH:mm') : ''}
                   onChange={(e) => {
-                    const day = task.scheduledFor ?? new Date().toISOString().slice(0, 10);
+                    const day = task.scheduledFor ?? todayIso();
                     const iso = e.target.value
                       ? new Date(`${day}T${e.target.value}:00`).toISOString()
                       : undefined;
@@ -236,7 +236,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   type="time"
                   value={task.endAt ? format(new Date(task.endAt), 'HH:mm') : ''}
                   onChange={(e) => {
-                    const day = task.scheduledFor ?? new Date().toISOString().slice(0, 10);
+                    const day = task.scheduledFor ?? todayIso();
                     const iso = e.target.value
                       ? new Date(`${day}T${e.target.value}:00`).toISOString()
                       : undefined;

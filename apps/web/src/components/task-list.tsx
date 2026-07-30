@@ -3,7 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Task, Priority } from '@ops-dashboard/core';
 import { setTaskStatus } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
@@ -33,7 +33,7 @@ export function TaskList({ filter = 'all' }: TaskListProps) {
     let all = await db.tasks.toArray();
     all = all.filter((t) => !t.deletedAt && t.status !== 'archived');
     if (filter === 'today') {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayIso();
       all = all.filter(
         (t) => t.scheduledFor === today || (t.dueAt && t.dueAt.slice(0, 10) <= today),
       );

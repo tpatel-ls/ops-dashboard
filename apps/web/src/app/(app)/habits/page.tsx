@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, isoDay } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { loadActivity } from '@/lib/activity';
@@ -98,7 +98,7 @@ export default function HabitsPage() {
       const day = d.getDay(); // 0=Sun
       const offset = day === 0 ? -6 : 1 - day;
       d.setDate(d.getDate() + offset);
-      return d.toISOString().slice(0, 10);
+      return isoDay(d);
     })();
 
     const journalEntries = await db.journalEntries

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { format, parseISO } from 'date-fns';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { usePageVisibility } from '@/lib/use-page-visibility';
 
@@ -27,7 +27,7 @@ export function TodayRail() {
   }, [visibility]);
 
   const blocks = useLiveQuery(async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     const all = await getDb().tasks.toArray();
     return all.filter((t) => !t.deletedAt && t.startAt && t.startAt.slice(0, 10) === today);
   });

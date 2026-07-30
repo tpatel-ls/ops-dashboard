@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTheme } from './theme-provider';
-import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
+import { DEFAULT_SETTINGS, getDb, todayIso } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import {
@@ -296,7 +296,7 @@ export function SettingsForm() {
             type="button"
             onClick={async () => {
               const data = await exportAll();
-              downloadJson(data, `ops-dashboard-${new Date().toISOString().slice(0, 10)}.json`);
+              downloadJson(data, `ops-dashboard-${todayIso()}.json`);
             }}
             className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
           >
@@ -307,7 +307,7 @@ export function SettingsForm() {
             onClick={async () => {
               const data = await exportAll();
               const md = tasksToMarkdown(data.tasks, 'Ops Dashboard tasks');
-              downloadText(md, `ops-dashboard-${new Date().toISOString().slice(0, 10)}.md`);
+              downloadText(md, `ops-dashboard-${todayIso()}.md`);
             }}
             className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
           >
