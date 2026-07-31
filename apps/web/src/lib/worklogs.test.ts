@@ -48,6 +48,14 @@ describe('logWork', () => {
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 
+  it.each(['', 'not-a-date'])('rejects an invalid work time before writing: %s', async (at) => {
+    await expect(logWork('project-1', 30, undefined, at)).rejects.toThrow(
+      'Work log time must be a valid date',
+    );
+    expect(mocks.getProject).not.toHaveBeenCalled();
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
   it('rejects logs for missing projects', async () => {
     mocks.getProject.mockResolvedValue(undefined);
 
