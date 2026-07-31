@@ -17,9 +17,11 @@ export async function sendPushover(msg: PushoverMessage): Promise<PushoverResult
   const token = process.env.PUSHOVER_TOKEN;
   const user = process.env.PUSHOVER_USER;
   if (!token || !user) return { ok: false, reason: 'not-configured' };
+  const message = msg.message.trim();
+  if (!message) return { ok: false, reason: 'empty-message' };
 
-  const body = new URLSearchParams({ token, user, message: msg.message });
-  if (msg.title) body.set('title', msg.title);
+  const body = new URLSearchParams({ token, user, message: message.slice(0, 1024) });
+  if (msg.title?.trim()) body.set('title', msg.title.trim().slice(0, 250));
   if (msg.priority !== undefined) body.set('priority', String(msg.priority));
   if (msg.url) body.set('url', msg.url);
   if (msg.urlTitle) body.set('url_title', msg.urlTitle);
