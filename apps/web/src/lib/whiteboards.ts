@@ -5,10 +5,12 @@ import type { Whiteboard } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 export async function createWhiteboard(name: string): Promise<Whiteboard> {
+  const normalizedName = name.trim();
+  if (!normalizedName) throw new Error('Whiteboard name is required.');
   const now = new Date().toISOString();
   const wb: Whiteboard = {
     id: newId(),
-    name,
+    name: normalizedName,
     document: null,
     linkedTaskIds: [],
     createdAt: now,
@@ -36,12 +38,14 @@ export async function saveWhiteboard(id: string, document: unknown): Promise<voi
 }
 
 export async function renameWhiteboard(id: string, name: string): Promise<void> {
+  const normalizedName = name.trim();
+  if (!normalizedName) throw new Error('Whiteboard name is required.');
   const db = getDb();
   const existing = await db.whiteboards.get(id);
   if (!existing) return;
   const next: Whiteboard = {
     ...existing,
-    name,
+    name: normalizedName,
     updatedAt: new Date().toISOString(),
     version: existing.version + 1,
   };
