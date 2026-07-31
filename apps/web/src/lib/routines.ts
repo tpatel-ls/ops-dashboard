@@ -38,6 +38,12 @@ export function addDaysISO(iso: string, days: number): string {
 }
 
 export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
+  if (
+    input.durationDays !== undefined &&
+    (!Number.isInteger(input.durationDays) || input.durationDays <= 0)
+  ) {
+    throw new Error('Routine duration must be a positive whole number of days.');
+  }
   const startDate = input.startDate ?? todayISO();
   const kind = input.kind ?? 'ongoing';
   const endDate =
