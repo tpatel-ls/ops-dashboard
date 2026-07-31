@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { calendarDateOf, calendarKindOf, compareCalendarTasks } from './calendar-agenda';
 
@@ -32,6 +33,15 @@ describe('calendar agenda', () => {
     expect(calendarKindOf(task('block', { startAt: '2026-07-20T09:00:00', scheduledFor: '2026-07-20' }))).toBe('time-block');
     expect(calendarKindOf(task('scheduled', { scheduledFor: '2026-07-20', dueAt: '2026-07-20' }))).toBe('scheduled');
     expect(calendarKindOf(task('due', { dueAt: '2026-07-20' }))).toBe('due');
+  });
+
+  it('places timestamped tasks on the browser-local calendar day', () => {
+    const timestamp = '2026-07-20T00:30:00+14:00';
+
+    expect(calendarDateOf(task('block', { startAt: timestamp }))).toBe(
+      isoDay(new Date(timestamp)),
+    );
+    expect(calendarDateOf(task('due', { dueAt: timestamp }))).toBe(isoDay(new Date(timestamp)));
   });
 
   it('sorts timed work first, followed by priority and title', () => {
