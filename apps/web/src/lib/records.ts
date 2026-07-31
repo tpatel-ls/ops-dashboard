@@ -37,9 +37,13 @@ export async function patchRecord<T extends SyncMeta>(
   const t = getDb().table<T>(table);
   const existing = await t.get(id);
   if (!existing) return null;
+  const mutablePatch = { ...patch } as Partial<T> & Record<string, unknown>;
+  for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId']) {
+    delete mutablePatch[key];
+  }
   const merged = {
     ...existing,
-    ...patch,
+    ...mutablePatch,
     updatedAt: new Date().toISOString(),
     version: existing.version + 1,
   } as T;
