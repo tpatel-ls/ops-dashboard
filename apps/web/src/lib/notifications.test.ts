@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => {
   const reminders = {
     delete: vi.fn(),
+    put: vi.fn(),
     update: vi.fn(),
     where: vi.fn(),
   };
@@ -15,7 +16,16 @@ vi.mock('@ops-dashboard/core', () => ({
   newId: () => 'reminder-test',
 }));
 
-import { checkAndFireDueReminders } from './notifications';
+import { checkAndFireDueReminders, scheduleReminder } from './notifications';
+
+describe('scheduleReminder', () => {
+  it.each(['', 'not-a-date'])('rejects an invalid trigger time: %s', async (triggerAt) => {
+    await expect(scheduleReminder('task-1', triggerAt)).rejects.toThrow(
+      'Reminder time must be a valid date',
+    );
+    expect(mocks.reminders.put).not.toHaveBeenCalled();
+  });
+});
 
 describe('checkAndFireDueReminders', () => {
   beforeEach(() => {
