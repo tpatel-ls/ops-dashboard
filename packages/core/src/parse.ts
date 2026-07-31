@@ -11,7 +11,7 @@ export interface ParsedQuickAdd {
   priority: Priority;
 }
 
-const TAG_RE = /(?:^|\s)#([\w-]+)/g;
+const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-]+)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {

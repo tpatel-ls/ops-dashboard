@@ -24,6 +24,13 @@ describe('parseQuickAdd', () => {
     expect(r.title).toBe('Pay bills');
   });
 
+  it('preserves international letters in hashtags', () => {
+    const r = parseQuickAdd('Plan trip #Québec #日本', anchor);
+
+    expect(r.tags).toEqual(['québec', '日本']);
+    expect(r.title).toBe('Plan trip');
+  });
+
   it('extracts priority bangs', () => {
     const r = parseQuickAdd('Ship release !!', anchor);
     expect(r.priority).toBe(2);
