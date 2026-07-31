@@ -14,6 +14,9 @@ export async function logWork(
   if (!Number.isInteger(minutes) || minutes <= 0) {
     throw new Error('Work log minutes must be a positive integer.');
   }
+  if (at !== undefined && (!at.trim() || !Number.isFinite(Date.parse(at)))) {
+    throw new Error('Work log time must be a valid date.');
+  }
 
   const project = await getDb().projects.get(projectId);
   if (
