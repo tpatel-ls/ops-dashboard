@@ -32,7 +32,9 @@ export function createFoodLog(input: CreateFoodLogInput): Promise<FoodLog> {
   );
 }
 
-export const updateFoodLog = (id: string, patch: Partial<FoodLog>) =>
-  patchRecord<FoodLog>('foodLogs', id, patch);
+export function updateFoodLog(id: string, patch: Partial<FoodLog>) {
+  const next = patch.items ? { ...patch, ...computeFoodTotals(patch.items) } : patch;
+  return patchRecord<FoodLog>('foodLogs', id, next);
+}
 
 export const deleteFoodLog = (id: string) => softDeleteRecord<FoodLog>('foodLogs', id);
