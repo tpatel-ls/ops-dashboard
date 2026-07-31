@@ -24,11 +24,17 @@ export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'co
       await nav.share(data);
       return 'shared';
     }
+  } catch (error) {
+    // A cancelled share is intentional. Other native-share failures can still
+    // use the clipboard fallback.
+    if (error instanceof DOMException && error.name === 'AbortError') return 'failed';
+  }
 
-    await navigator.clipboard.writeText(
+  try {
+    await nav.clipboard?.writeText(
       [payload.title, payload.text, payload.url].filter(Boolean).join('\n'),
     );
-    return 'copied';
+    return nav.clipboard ? 'copied' : 'failed';
   } catch {
     return 'failed';
   }
