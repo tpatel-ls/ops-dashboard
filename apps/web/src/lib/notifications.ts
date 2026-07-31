@@ -29,6 +29,9 @@ export async function ensureServiceWorker(): Promise<ServiceWorkerRegistration |
 }
 
 export async function scheduleReminder(taskId: string, triggerAt: string): Promise<Reminder> {
+  if (!triggerAt.trim() || !Number.isFinite(Date.parse(triggerAt))) {
+    throw new Error('Reminder time must be a valid date.');
+  }
   const db = getDb();
   const reminder: Reminder = { id: newId(), taskId, triggerAt, delivered: false };
   await db.reminders.put(reminder);
