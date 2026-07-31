@@ -68,6 +68,19 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects duplicate IDs before bulk import can overwrite records', () => {
+    const duplicate = task('Duplicate task');
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [duplicate, { ...duplicate }],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
   it('accepts a structurally valid version one export', () => {
     const payload = {
       version: 1 as const,
