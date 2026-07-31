@@ -50,7 +50,15 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
   if (!local) return remote;
   if (local.version > remote.version) return local;
   if (remote.version > local.version) return remote;
-  return remote.updatedAt >= local.updatedAt ? remote : local;
+  if (remote.updatedAt > local.updatedAt) return remote;
+  if (local.updatedAt > remote.updatedAt) return local;
+
+  // Equal version/timestamp conflicts must converge regardless of which copy is
+  // considered local. Preserve deletions first, then use the stable device ID.
+  if (Boolean(remote.deletedAt) !== Boolean(local.deletedAt)) {
+    return remote.deletedAt ? remote : local;
+  }
+  return remote.deviceId > local.deviceId ? remote : local;
 }
 
 export function bumpVersion<T extends Syncable>(rec: T): T {

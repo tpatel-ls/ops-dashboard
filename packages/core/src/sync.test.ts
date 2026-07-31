@@ -1,0 +1,39 @@
+import { describe, expect, it } from 'vitest';
+import type { Task } from './types';
+import { pickWinner } from './sync';
+
+function task(deviceId: string, patch: Partial<Task> = {}): Task {
+  return {
+    id: 'task-1',
+    title: deviceId,
+    status: 'todo',
+    priority: 0,
+    tags: [],
+    order: 0,
+    reminders: [],
+    checklist: [],
+    createdAt: '2026-07-31T12:00:00.000Z',
+    updatedAt: '2026-07-31T12:00:00.000Z',
+    version: 2,
+    deviceId,
+    ...patch,
+  };
+}
+
+describe('pickWinner', () => {
+  it('converges on one device when versions and timestamps tie', () => {
+    const alpha = task('device-a');
+    const bravo = task('device-b');
+
+    expect(pickWinner(alpha, bravo)).toBe(bravo);
+    expect(pickWinner(bravo, alpha)).toBe(bravo);
+  });
+
+  it('preserves a tombstone when versions and timestamps tie', () => {
+    const live = task('device-z');
+    const deleted = task('device-a', { deletedAt: '2026-07-31T12:00:00.000Z' });
+
+    expect(pickWinner(live, deleted)).toBe(deleted);
+    expect(pickWinner(deleted, live)).toBe(deleted);
+  });
+});
