@@ -21,6 +21,11 @@ function isRecordWithId(value: unknown): boolean {
   );
 }
 
+function hasUniqueIds(records: unknown[]): boolean {
+  const ids = records.map((record) => (record as { id: string }).id);
+  return new Set(ids).size === ids.length;
+}
+
 export function validateOpsExport(value: unknown): OpsExport {
   if (typeof value !== 'object' || value === null) {
     throw new Error('Invalid export payload');
@@ -30,7 +35,7 @@ export function validateOpsExport(value: unknown): OpsExport {
 
   for (const key of ['tasks', 'projects', 'whiteboards'] as const) {
     const records = payload[key];
-    if (!Array.isArray(records) || !records.every(isRecordWithId)) {
+    if (!Array.isArray(records) || !records.every(isRecordWithId) || !hasUniqueIds(records)) {
       throw new Error(`Invalid export ${key}`);
     }
   }
