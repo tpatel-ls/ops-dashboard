@@ -35,8 +35,9 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
 
 export function shouldGenerateNext(rule: RecurrenceRule, count: number, next: Date): boolean {
   if (rule.endsOn) {
-    const end = parseISO(rule.endsOn);
-    if (next > end) return false;
+    // endsOn is a local calendar day, so a timed occurrence later on that day
+    // is still eligible.
+    if (isoDay(next) > rule.endsOn.slice(0, 10)) return false;
   }
   if (rule.count !== undefined && count >= rule.count) return false;
   return true;
