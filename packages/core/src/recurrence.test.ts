@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from './types';
-import { nextOccurrence, projectNextTask } from './recurrence';
+import { nextOccurrence, projectNextTask, shouldGenerateNext } from './recurrence';
 
 describe('nextOccurrence', () => {
   it('handles daily', () => {
@@ -73,5 +73,14 @@ describe('projectNextTask', () => {
     expect(projected?.scheduledFor).toBe('2026-03-08');
     expect(new Date(projected?.startAt ?? '').getHours()).toBe(9);
     expect(new Date(projected?.endAt ?? '').getHours()).toBe(10);
+  });
+});
+
+describe('shouldGenerateNext', () => {
+  it('includes timed occurrences on the recurrence end date', () => {
+    const rule = { freq: 'daily', interval: 1, endsOn: '2026-04-27' } as const;
+
+    expect(shouldGenerateNext(rule, 1, new Date(2026, 3, 27, 17, 30))).toBe(true);
+    expect(shouldGenerateNext(rule, 1, new Date(2026, 3, 28, 9))).toBe(false);
   });
 });
