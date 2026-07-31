@@ -12,7 +12,7 @@ export interface ParsedQuickAdd {
 }
 
 const TAG_RE = /(?:^|\s)#([\w-]+)/g;
-const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/;
+const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {
   let working = input.trim();
@@ -25,11 +25,10 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   working = working.replace(TAG_RE, ' ').trim();
 
   let priority: Priority = 0;
-  const pMatch = working.match(PRIORITY_RE);
-  if (pMatch && pMatch[1]) {
-    priority = Math.min(3, pMatch[1].length) as Priority;
-    working = working.replace(PRIORITY_RE, ' ').trim();
+  for (const match of working.matchAll(PRIORITY_RE)) {
+    priority = Math.max(priority, Math.min(3, match[1]?.length ?? 0)) as Priority;
   }
+  working = working.replace(PRIORITY_RE, ' ').replace(/\s+/g, ' ').trim();
 
   const results = chrono.parse(working, now, { forwardDate: true });
   let scheduledFor: string | undefined;

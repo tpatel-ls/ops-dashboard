@@ -30,6 +30,13 @@ describe('parseQuickAdd', () => {
     expect(r.title).toBe('Ship release');
   });
 
+  it('removes every priority marker and keeps the highest priority', () => {
+    const r = parseQuickAdd('!! Ship release ! after review !!!', anchor);
+
+    expect(r.priority).toBe(3);
+    expect(r.title).toBe('Ship release after review');
+  });
+
   it('parses tomorrow with time', () => {
     const r = parseQuickAdd('Call dentist tomorrow 3pm', anchor);
     expect(r.title.toLowerCase()).toContain('call dentist');
