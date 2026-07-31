@@ -1,3 +1,4 @@
+import { isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 
 export type CalendarTaskKind = 'time-block' | 'scheduled' | 'due';
@@ -10,9 +11,15 @@ export function calendarKindOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'du
 }
 
 export function calendarDateOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>): string | undefined {
-  if (task.startAt) return task.startAt.slice(0, 10);
+  if (task.startAt) {
+    const start = new Date(task.startAt);
+    return Number.isFinite(start.getTime()) ? isoDay(start) : undefined;
+  }
   if (task.scheduledFor) return task.scheduledFor.slice(0, 10);
-  if (task.dueAt) return task.dueAt.slice(0, 10);
+  if (task.dueAt) {
+    const due = new Date(task.dueAt);
+    return Number.isFinite(due.getTime()) ? isoDay(due) : undefined;
+  }
   return undefined;
 }
 
