@@ -1,0 +1,58 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Task } from '@ops-dashboard/core';
+
+const mocks = vi.hoisted(() => ({
+  get: vi.fn(),
+  put: vi.fn(),
+  enqueueOp: vi.fn(),
+}));
+
+vi.mock('@ops-dashboard/core', async () => {
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
+  return {
+    ...actual,
+    getDb: () => ({ table: () => ({ get: mocks.get, put: mocks.put }) }),
+  };
+});
+
+vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
+
+import { patchRecord } from './records';
+
+describe('patchRecord', () => {
+  beforeEach(() => {
+    mocks.get.mockReset().mockResolvedValue({
+      id: 'task-1',
+      title: 'Original',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-02T12:00:00.000Z',
+      version: 4,
+      deviceId: 'device-original',
+    });
+    mocks.put.mockReset();
+    mocks.enqueueOp.mockReset();
+  });
+
+  it('does not let callers replace immutable sync metadata', async () => {
+    const result = await patchRecord<Task>('tasks', 'task-1', {
+      id: 'task-other',
+      title: 'Updated',
+      createdAt: '2000-01-01T00:00:00.000Z',
+      updatedAt: '2000-01-01T00:00:00.000Z',
+      version: 99,
+      deviceId: 'device-other',
+    });
+
+    expect(result).toMatchObject({
+      id: 'task-1',
+      title: 'Updated',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      version: 5,
+      deviceId: 'device-original',
+    });
+    expect(mocks.put).toHaveBeenCalledWith(result);
+    expect(mocks.enqueueOp).toHaveBeenCalledWith(
+      expect.objectContaining({ recordId: 'task-1', payload: result }),
+    );
+  });
+});
