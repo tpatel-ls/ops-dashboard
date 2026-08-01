@@ -11,6 +11,10 @@ describe('boundedText', () => {
     expect(boundedText('text', Number.NaN)).toBe('');
     expect(boundedText('text', -1)).toBe('');
   });
+
+  it('does not split Unicode code points at the limit', () => {
+    expect(boundedText('A😀B', 2)).toBe('A😀');
+  });
 });
 
 describe('boundedTextList', () => {
