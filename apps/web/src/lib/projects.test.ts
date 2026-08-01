@@ -3,6 +3,7 @@ import type { Task } from '@ops-dashboard/core';
 
 const mocks = vi.hoisted(() => ({
   count: vi.fn(),
+  get: vi.fn(),
   put: vi.fn(),
   enqueueOp: vi.fn(),
 }));
@@ -11,7 +12,7 @@ vi.mock('@ops-dashboard/core', async () => {
   const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
-    getDb: () => ({ projects: { count: mocks.count, put: mocks.put } }),
+    getDb: () => ({ projects: { count: mocks.count, get: mocks.get, put: mocks.put } }),
     getDeviceId: () => 'device-test',
     newId: () => 'project-test',
   };
@@ -19,7 +20,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { createProject, projectTaskProgress } from './projects';
+import { createProject, projectTaskProgress, renameProject } from './projects';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -101,5 +102,38 @@ describe('createProject', () => {
     await expect(createProject('   ')).rejects.toThrow('Project name is required');
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+});
+
+describe('renameProject', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue({
+      id: 'project-test',
+      name: 'Old name',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      milestones: [],
+      checklists: [],
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'device-test',
+    });
+  });
+
+  it('trims a usable project name', async () => {
+    await renameProject('project-test', '  New name  ');
+
+    expect(mocks.put).toHaveBeenCalledWith(expect.objectContaining({ name: 'New name' }));
+  });
+
+  it('rejects blank project names before writing', async () => {
+    await expect(renameProject('project-test', '   ')).rejects.toThrow(
+      'Project name is required',
+    );
+    expect(mocks.get).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
   });
 });
