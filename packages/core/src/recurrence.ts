@@ -49,6 +49,8 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
     ? parseISO(`${task.scheduledFor}T00:00:00`)
     : task.startAt
       ? parseISO(task.startAt)
+      : task.dueAt
+        ? parseISO(task.dueAt)
       : now;
   const next = nextOccurrence(task.recurrence, anchor);
   if (!shouldGenerateNext(task.recurrence, 1, next)) return null;
@@ -66,6 +68,17 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
   }
   const startAt = startAtSource ? nextStart.toISOString() : undefined;
   const endAt = startAt && offsetMs > 0 ? new Date(parseISO(startAt).getTime() + offsetMs).toISOString() : undefined;
+  const dueAtSource = task.dueAt ? parseISO(task.dueAt) : undefined;
+  const nextDue = new Date(next);
+  if (dueAtSource) {
+    nextDue.setHours(
+      dueAtSource.getHours(),
+      dueAtSource.getMinutes(),
+      dueAtSource.getSeconds(),
+      dueAtSource.getMilliseconds(),
+    );
+  }
+  const dueAt = dueAtSource ? nextDue.toISOString() : undefined;
   const nowIso = now.toISOString();
   const projected: Task = {
     ...task,
@@ -81,5 +94,7 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
   else delete projected.startAt;
   if (endAt) projected.endAt = endAt;
   else delete projected.endAt;
+  if (dueAt) projected.dueAt = dueAt;
+  else delete projected.dueAt;
   return projected;
 }
