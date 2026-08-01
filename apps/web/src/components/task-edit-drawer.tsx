@@ -7,7 +7,7 @@ import { addDays, format } from 'date-fns';
 import { getDb, newId, todayIso } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { setChecklist, softDeleteTask, updateTask } from '@/lib/tasks';
+import { setChecklist, setTaskStatus, softDeleteTask, updateTask } from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { cn } from '@ops-dashboard/ui';
 
@@ -48,7 +48,7 @@ export function TaskEditDrawer() {
             {task && task.status !== 'done' ? (
               <button
                 type="button"
-                onClick={() => updateTask(task.id, { status: 'done' })}
+                onClick={() => setTaskStatus(task.id, 'done')}
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-success hover:bg-success/10 sm:min-h-9"
               >
                 <Check className="size-3.5" aria-hidden />
@@ -135,7 +135,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <button
                   key={s}
                   type="button"
-                  onClick={() => updateTask(task.id, { status: s })}
+                  onClick={() => setTaskStatus(task.id, s)}
                   className={cn(
                     'rounded-md border px-2.5 py-1 text-xs capitalize',
                     task.status === s
