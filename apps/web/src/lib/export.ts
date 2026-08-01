@@ -91,6 +91,7 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
   const lines: string[] = [`# ${heading}`, ''];
   const grouped: Record<string, Task[]> = {};
   for (const t of tasks) {
+    if (t.deletedAt || t.status === 'archived') continue;
     const parsedDay = t.scheduledFor ? parseISO(t.scheduledFor) : null;
     const k = parsedDay && isValid(parsedDay) ? t.scheduledFor! : 'unscheduled';
     grouped[k] = grouped[k] ?? [];
