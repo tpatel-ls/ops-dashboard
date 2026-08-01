@@ -14,6 +14,14 @@ export function isoDay(d: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+/** Resolve a date-only value or timestamp to its browser-local calendar day. */
+export function localDay(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? isoDay(parsed) : undefined;
+}
+
 export function todayIso(): string {
   return isoDay(new Date());
 }

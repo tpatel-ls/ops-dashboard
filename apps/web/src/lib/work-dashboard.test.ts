@@ -59,6 +59,21 @@ describe('buildWorkDashboard', () => {
     expect(result.counts.openTasks).toBe(4);
   });
 
+  it('buckets timestamps by the browser-local day', () => {
+    const timestamp = '2026-08-01T00:30:00+14:00';
+    const localDate = `${new Date(timestamp).getFullYear()}-${String(
+      new Date(timestamp).getMonth() + 1,
+    ).padStart(2, '0')}-${String(new Date(timestamp).getDate()).padStart(2, '0')}`;
+    const result = buildWorkDashboard(
+      [task('local-due', { dueAt: timestamp })],
+      [],
+      'all',
+      localDate,
+    );
+
+    expect(result.today.map((item) => item.id)).toEqual(['local-due']);
+  });
+
   it('excludes completed, archived, deleted, and out-of-context tasks', () => {
     const result = buildWorkDashboard(
       [

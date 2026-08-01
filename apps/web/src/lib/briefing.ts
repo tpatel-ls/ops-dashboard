@@ -1,4 +1,4 @@
-import { todayIso } from '@ops-dashboard/core';
+import { localDay, todayIso } from '@ops-dashboard/core';
 import type { Capture, Domain, Project, Task } from '@ops-dashboard/core';
 
 export interface StaleDomain {
@@ -140,14 +140,14 @@ export function summarizeBriefing(input: {
   const todays = live.filter(
     (task) =>
       task.scheduledFor === today ||
-      Boolean(task.dueAt && task.dueAt.slice(0, 10) <= today) ||
-      Boolean(task.startAt && task.startAt.slice(0, 10) === today),
+      Boolean(localDay(task.dueAt) && localDay(task.dueAt)! <= today) ||
+      localDay(task.startAt) === today,
   );
   const doneToday = todays.filter((task) => task.status === 'done').length;
   const overdue = live.filter(
     (task) =>
       task.status !== 'done' &&
-      ((task.dueAt && task.dueAt.slice(0, 10) < today) ||
+      ((localDay(task.dueAt) && localDay(task.dueAt)! < today) ||
         (task.scheduledFor && task.scheduledFor < today)),
   ).length;
 
