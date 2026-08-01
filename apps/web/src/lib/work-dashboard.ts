@@ -1,4 +1,4 @@
-import { matchesOrgContext } from '@ops-dashboard/core';
+import { localDay, matchesOrgContext } from '@ops-dashboard/core';
 import type { OrgContext, Project, Task } from '@ops-dashboard/core';
 import { isActiveProject } from './project-query';
 import { compareTasks } from './task-query';
@@ -24,7 +24,7 @@ export interface WorkDashboardModel {
 }
 
 function taskDate(task: Task): string | undefined {
-  return task.scheduledFor ?? task.dueAt?.slice(0, 10) ?? task.startAt?.slice(0, 10);
+  return task.scheduledFor ?? localDay(task.dueAt) ?? localDay(task.startAt);
 }
 
 function projectOrder(a: WorkProjectSummary, b: WorkProjectSummary): number {
