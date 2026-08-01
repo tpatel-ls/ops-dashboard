@@ -74,6 +74,34 @@ describe('projectNextTask', () => {
     expect(new Date(projected?.startAt ?? '').getHours()).toBe(9);
     expect(new Date(projected?.endAt ?? '').getHours()).toBe(10);
   });
+
+  it('advances due timestamps with the recurring task', () => {
+    const dueAt = new Date(2026, 6, 31, 17, 30);
+    const task = {
+      id: 'task-1',
+      title: 'Daily report',
+      status: 'done',
+      priority: 0,
+      dueAt: dueAt.toISOString(),
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-07-31T12:00:00.000Z',
+      updatedAt: '2026-07-31T22:30:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    const projected = projectNextTask(task, new Date('2026-07-31T22:30:00.000Z'));
+    const projectedDue = new Date(projected?.dueAt ?? '');
+
+    expect(projected?.scheduledFor).toBe('2026-08-01');
+    expect(projectedDue.getDate()).toBe(1);
+    expect(projectedDue.getHours()).toBe(17);
+    expect(projectedDue.getMinutes()).toBe(30);
+  });
 });
 
 describe('shouldGenerateNext', () => {
