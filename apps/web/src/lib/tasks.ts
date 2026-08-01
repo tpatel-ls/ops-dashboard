@@ -38,9 +38,13 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing) return;
+  const mutablePatch = { ...patch };
+  for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId'] as const) {
+    delete mutablePatch[key];
+  }
   const merged: Task = {
     ...existing,
-    ...patch,
+    ...mutablePatch,
     updatedAt: new Date().toISOString(),
     version: existing.version + 1,
   };
