@@ -43,6 +43,19 @@ describe('tasksToMarkdown', () => {
     expect(markdown).toContain('- [ ] First line ## Injected heading #work-notes');
     expect(markdown).not.toContain('\n## Injected heading');
   });
+
+  it('omits deleted and archived tasks from readable exports', () => {
+    const deleted = task('Deleted task');
+    deleted.deletedAt = '2026-08-01T12:00:00.000Z';
+    const archived = task('Archived task');
+    archived.status = 'archived';
+
+    const markdown = tasksToMarkdown([task('Active task'), deleted, archived], 'Tasks');
+
+    expect(markdown).toContain('Active task');
+    expect(markdown).not.toContain('Deleted task');
+    expect(markdown).not.toContain('Archived task');
+  });
 });
 
 describe('validateOpsExport', () => {
