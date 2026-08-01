@@ -56,6 +56,7 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing) return;
+  if (existing.status === status) return;
   const now = new Date().toISOString();
   const next: Task = {
     ...existing,
