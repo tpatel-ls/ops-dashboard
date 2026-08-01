@@ -23,14 +23,16 @@ export async function runCapture(
 ): Promise<CaptureResult> {
   const results = await processBrainDump(raw, source);
 
-  for (const r of results.slice(0, MAX_NOTIFICATIONS)) {
-    await pushNotification({
-      title: `Captured: ${r.title}`,
-      kind: 'capture',
-      refType: r.kind,
-      refId: r.recordId,
-    });
-  }
+  await Promise.allSettled(
+    results.slice(0, MAX_NOTIFICATIONS).map((r) =>
+      pushNotification({
+        title: `Captured: ${r.title}`,
+        kind: 'capture',
+        refType: r.kind,
+        refId: r.recordId,
+      }),
+    ),
+  );
 
   const first = results[0];
   return first ? { kind: first.kind, id: first.recordId } : { kind: 'task', id: '' };
