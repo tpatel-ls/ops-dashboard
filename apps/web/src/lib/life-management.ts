@@ -8,7 +8,7 @@ import type {
   RoutineCheck,
   Task,
 } from '@ops-dashboard/core';
-import { isoDay, todayIso } from '@ops-dashboard/core';
+import { isoDay, localDay, todayIso } from '@ops-dashboard/core';
 import { addDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import { computeIdentityScore, type IdentityScoreInput } from './identity-score';
 import { findStaleDomains } from './briefing';
@@ -73,8 +73,7 @@ function clamp(value: number): number {
 }
 
 function datePart(value?: string): string | null {
-  if (!value) return null;
-  return value.slice(0, 10);
+  return localDay(value) ?? null;
 }
 
 function daysBetween(from: string, to: string): number {
