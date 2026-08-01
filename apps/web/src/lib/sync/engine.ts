@@ -14,6 +14,7 @@ import {
   type DexieTableName,
 } from './mapping';
 import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
+import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
 const MAX_ATTEMPTS = 12;
@@ -130,12 +131,11 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
 // ---- Pull (Supabase -> local) ---------------------------------------------
 
 function readCursors(): Record<string, string> {
-  if (typeof window === 'undefined') return {};
-  return parseSyncCursors(window.localStorage.getItem(CURSORS_KEY));
+  return parseSyncCursors(readLocalStorage(CURSORS_KEY));
 }
 
 function writeCursors(cursors: Record<string, string>): void {
-  if (typeof window !== 'undefined') window.localStorage.setItem(CURSORS_KEY, JSON.stringify(cursors));
+  writeLocalStorage(CURSORS_KEY, JSON.stringify(cursors));
 }
 
 /**
@@ -185,7 +185,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 
 async function backfillIfNeeded(supabase: SupabaseClient, userId: string): Promise<void> {
   const key = `ops.sync.backfilled.${userId}`;
-  if (typeof window !== 'undefined' && window.localStorage.getItem(key) === '1') return;
+  if (readLocalStorage(key) === '1') return;
 
   for (const table of DEXIE_TABLES) {
     const rows = (await db().table(table).toArray()) as Array<Record<string, unknown>>;
@@ -196,7 +196,7 @@ async function backfillIfNeeded(supabase: SupabaseClient, userId: string): Promi
       if (error) throw error; // leave the flag unset so we retry next start
     }
   }
-  if (typeof window !== 'undefined') window.localStorage.setItem(key, '1');
+  writeLocalStorage(key, '1');
 }
 
 // ---- Realtime --------------------------------------------------------------
