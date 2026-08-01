@@ -76,12 +76,15 @@ export async function createProject(
 }
 
 export async function renameProject(id: string, name: string): Promise<void> {
+  const normalizedName = name.trim();
+  if (!normalizedName) throw new Error('Project name is required.');
+
   const db = getDb();
   const existing = await db.projects.get(id);
   if (!existing) return;
   const next: Project = {
     ...existing,
-    name,
+    name: normalizedName,
     updatedAt: new Date().toISOString(),
     version: existing.version + 1,
   };
