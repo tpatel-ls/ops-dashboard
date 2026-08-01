@@ -17,7 +17,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { updateTask } from './tasks';
+import { setTaskStatus, updateTask } from './tasks';
 
 describe('updateTask', () => {
   beforeEach(() => {
@@ -61,5 +61,32 @@ describe('updateTask', () => {
     expect(mocks.enqueueOp).toHaveBeenCalledWith(
       expect.objectContaining({ recordId: 'task-1' }),
     );
+  });
+});
+
+describe('setTaskStatus', () => {
+  it('does not duplicate work when the task already has that status', async () => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      title: 'Recurring task',
+      status: 'done',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      completedAt: '2026-08-01T12:00:00.000Z',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 5,
+      deviceId: 'device-original',
+    } satisfies Task);
+
+    await setTaskStatus('task-1', 'done');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
 });
