@@ -14,4 +14,10 @@ describe('localDay', () => {
   it('rejects invalid timestamps', () => {
     expect(localDay('not-a-date')).toBeUndefined();
   });
+
+  it('rejects impossible date-only calendar values', () => {
+    expect(localDay('2026-02-29')).toBeUndefined();
+    expect(localDay('2026-13-01')).toBeUndefined();
+    expect(localDay('2028-02-29')).toBe('2028-02-29');
+  });
 });
