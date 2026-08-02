@@ -224,4 +224,35 @@ describe('life management summary', () => {
       process.env.TZ = originalTimezone;
     }
   });
+
+  it('does not count future activity in the current week', () => {
+    const futureTask = {
+      ...meta('future-task', '2026-07-10T12:00:00.000Z'),
+      title: 'Future completion',
+      status: 'done',
+      priority: 0,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      completedAt: '2026-07-10T12:00:00.000Z',
+    } satisfies Task;
+
+    const summary = summarizeLifeManagement({
+      tasks: [futureTask],
+      projects: [],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.modules.find((module) => module.id === 'identity')?.detail).toBe(
+      '0/7 active days',
+    );
+  });
 });
