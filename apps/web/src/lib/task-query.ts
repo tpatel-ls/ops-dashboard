@@ -1,7 +1,8 @@
+import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 
 function taskDate(task: Task): string | null {
-  return task.scheduledFor ?? task.dueAt?.slice(0, 10) ?? null;
+  return task.scheduledFor ?? localDay(task.dueAt) ?? localDay(task.startAt) ?? null;
 }
 
 export function compareTasks(a: Task, b: Task): number {
