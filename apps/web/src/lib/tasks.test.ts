@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Task } from '@ops-dashboard/core';
+import type { Project, Task } from '@ops-dashboard/core';
 
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
+  last: vi.fn(),
   put: vi.fn(),
   enqueueOp: vi.fn(),
 }));
@@ -11,13 +12,52 @@ vi.mock('@ops-dashboard/core', async () => {
   const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
-    getDb: () => ({ tasks: { get: mocks.get, put: mocks.put } }),
+    getDb: () => ({
+      tasks: {
+        get: mocks.get,
+        put: mocks.put,
+        orderBy: () => ({ last: mocks.last }),
+      },
+    }),
+    getDeviceId: () => 'device-test',
+    newId: () => 'task-test',
   };
 });
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { setTaskStatus, updateTask } from './tasks';
+import { addTaskToProject, setTaskStatus, updateTask } from './tasks';
+
+describe('addTaskToProject', () => {
+  it('keeps capture metadata while enforcing the project context', async () => {
+    mocks.last.mockResolvedValue({ order: 3 });
+
+    const task = await addTaskToProject(
+      'Prepare launch',
+      {
+        id: 'project-1',
+        domainId: 'domain-1',
+        orgId: 'org-1',
+      } as Project,
+      {
+        priority: 3,
+        tags: ['launch'],
+        notes: 'Confirm the final checklist',
+        projectId: 'wrong-project',
+      },
+    );
+
+    expect(task).toMatchObject({
+      projectId: 'project-1',
+      domainId: 'domain-1',
+      orgId: 'org-1',
+      priority: 3,
+      tags: ['launch'],
+      notes: 'Confirm the final checklist',
+      order: 4,
+    });
+  });
+});
 
 describe('updateTask', () => {
   beforeEach(() => {
@@ -58,9 +98,7 @@ describe('updateTask', () => {
         deviceId: 'device-original',
       }),
     );
-    expect(mocks.enqueueOp).toHaveBeenCalledWith(
-      expect.objectContaining({ recordId: 'task-1' }),
-    );
+    expect(mocks.enqueueOp).toHaveBeenCalledWith(expect.objectContaining({ recordId: 'task-1' }));
   });
 });
 
