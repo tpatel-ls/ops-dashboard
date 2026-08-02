@@ -14,6 +14,7 @@ import {
   type DexieTableName,
 } from './mapping';
 import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
+import { shouldAcceptRemote } from './conflicts';
 import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
@@ -41,13 +42,6 @@ function db() {
   return getDb();
 }
 
-function remoteIsNewer(local: Syncable | undefined, remote: Syncable): boolean {
-  if (!local) return true;
-  if (remote.version > local.version) return true;
-  if (remote.version < local.version) return false;
-  return remote.updatedAt > local.updatedAt;
-}
-
 async function getLocalRow(table: DexieTableName, id: string): Promise<Syncable | undefined> {
   return (await db().table(table).get(id)) as Syncable | undefined;
 }
@@ -63,7 +57,7 @@ async function mergeInbound(table: DexieTableName, row: Record<string, unknown>)
   const rec = fromRow(row);
   if (!rec?.id) return;
   const local = await getLocalRow(table, rec.id);
-  if (!remoteIsNewer(local, rec)) return;
+  if (!shouldAcceptRemote(local, rec)) return;
   await putLocalRow(table, rec);
 }
 
