@@ -42,7 +42,7 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
 export async function updateTask(id: string, patch: Partial<Task>): Promise<void> {
   const db = getDb();
   const existing = await db.tasks.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const mutablePatch = { ...patch };
   for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId'] as const) {
     delete mutablePatch[key];
@@ -60,7 +60,7 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
 export async function setTaskStatus(id: string, status: Task['status']): Promise<void> {
   const db = getDb();
   const existing = await db.tasks.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   if (existing.status === status) return;
   const now = new Date().toISOString();
   const next: Task = {
@@ -92,7 +92,7 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
 export async function softDeleteTask(id: string): Promise<void> {
   const db = getDb();
   const existing = await db.tasks.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const now = new Date().toISOString();
   const tomb: Task = {
     ...existing,
