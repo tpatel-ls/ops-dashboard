@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getProject: vi.fn(),
+  getWorkLog: vi.fn(),
+  listProjectWorkLogs: vi.fn(),
   newRecord: vi.fn((fields: Record<string, unknown>) => ({
     ...fields,
     id: 'work-log-test',
@@ -12,15 +14,20 @@ const mocks = vi.hoisted(() => ({
   })),
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
   patchRecord: vi.fn(),
+  softDeleteRecord: vi.fn(),
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
-  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>(
-    '@ops-dashboard/core',
-  );
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
-    getDb: () => ({ projects: { get: mocks.getProject } }),
+    getDb: () => ({
+      projects: { get: mocks.getProject },
+      workLogs: {
+        get: mocks.getWorkLog,
+        where: () => ({ equals: () => ({ toArray: mocks.listProjectWorkLogs }) }),
+      },
+    }),
   };
 });
 
@@ -28,10 +35,10 @@ vi.mock('./records', () => ({
   newRecord: mocks.newRecord,
   putRecord: mocks.putRecord,
   patchRecord: mocks.patchRecord,
-  softDeleteRecord: vi.fn(),
+  softDeleteRecord: mocks.softDeleteRecord,
 }));
 
-import { logWork } from './worklogs';
+import { deleteWorkLog, logWork } from './worklogs';
 
 describe('logWork', () => {
   beforeEach(() => {
@@ -39,6 +46,9 @@ describe('logWork', () => {
     mocks.newRecord.mockClear();
     mocks.putRecord.mockClear();
     mocks.patchRecord.mockReset().mockResolvedValue(undefined);
+    mocks.getWorkLog.mockReset();
+    mocks.listProjectWorkLogs.mockReset().mockResolvedValue([]);
+    mocks.softDeleteRecord.mockReset();
   });
 
   it.each([0, -5, 1.5])('rejects invalid minutes before writing: %s', async (minutes) => {
@@ -73,10 +83,44 @@ describe('logWork', () => {
   it('writes a valid log and stamps the project', async () => {
     const log = await logWork('project-1', 30, 'Moved launch forward', '2026-07-15T12:00:00.000Z');
 
-    expect(log).toMatchObject({ projectId: 'project-1', minutes: 30, note: 'Moved launch forward' });
-    expect(mocks.putRecord).toHaveBeenCalledWith('workLogs', expect.objectContaining({ minutes: 30 }));
+    expect(log).toMatchObject({
+      projectId: 'project-1',
+      minutes: 30,
+      note: 'Moved launch forward',
+    });
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'workLogs',
+      expect.objectContaining({ minutes: 30 }),
+    );
     expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
       lastWorkedAt: '2026-07-15T12:00:00.000Z',
+    });
+  });
+});
+
+describe('deleteWorkLog', () => {
+  it('restores the previous project activity timestamp when the latest log is deleted', async () => {
+    const latest = {
+      id: 'work-latest',
+      projectId: 'project-1',
+      at: '2026-08-02T12:00:00.000Z',
+    };
+    mocks.getWorkLog.mockResolvedValue(latest);
+    mocks.getProject.mockResolvedValue({
+      id: 'project-1',
+      status: 'active',
+      lastWorkedAt: latest.at,
+    });
+    mocks.listProjectWorkLogs.mockResolvedValue([
+      latest,
+      { id: 'work-previous', projectId: 'project-1', at: '2026-08-01T12:00:00.000Z' },
+    ]);
+
+    await deleteWorkLog(latest.id);
+
+    expect(mocks.softDeleteRecord).toHaveBeenCalledWith('workLogs', latest.id);
+    expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
+      lastWorkedAt: '2026-08-01T12:00:00.000Z',
     });
   });
 });

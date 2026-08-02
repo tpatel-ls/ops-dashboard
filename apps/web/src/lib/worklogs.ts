@@ -38,4 +38,20 @@ export async function logWork(
   return rec;
 }
 
-export const deleteWorkLog = (id: string) => softDeleteRecord<WorkLog>('workLogs', id);
+export async function deleteWorkLog(id: string): Promise<void> {
+  const db = getDb();
+  const existing = await db.workLogs.get(id);
+  if (!existing || existing.deletedAt) return;
+
+  await softDeleteRecord<WorkLog>('workLogs', id);
+  const project = await db.projects.get(existing.projectId);
+  if (!project || project.lastWorkedAt !== existing.at) return;
+
+  const remaining = await db.workLogs.where('projectId').equals(existing.projectId).toArray();
+  const latest = remaining
+    .filter((log) => log.id !== id && !log.deletedAt)
+    .sort((a, b) => b.at.localeCompare(a.at))[0];
+  await patchRecord<Project>('projects', existing.projectId, {
+    lastWorkedAt: latest?.at,
+  });
+}
