@@ -1,5 +1,6 @@
 import { localDay, matchesOrgContext } from '@ops-dashboard/core';
 import type { OrgContext, Project, Task } from '@ops-dashboard/core';
+import { taskLane } from './org-lanes';
 import { isActiveProject } from './project-query';
 import { compareTasks } from './task-query';
 
@@ -45,8 +46,12 @@ export function buildWorkDashboard(
   ctx: OrgContext,
   today: string,
 ): WorkDashboardModel {
+  const projectMap = new Map(projects.map((project) => [project.id, project]));
   const visibleTasks = tasks.filter(
-    (task) => !task.deletedAt && task.status !== 'archived' && matchesOrgContext(task.orgId, ctx),
+    (task) =>
+      !task.deletedAt &&
+      task.status !== 'archived' &&
+      matchesOrgContext(taskLane(task, projectMap), ctx),
   );
   const openTasks = visibleTasks.filter((task) => task.status !== 'done');
   const sortedOpenTasks = [...openTasks].sort(compareTasks);
