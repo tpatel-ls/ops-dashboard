@@ -12,11 +12,16 @@ import type { ChecklistItem, Project, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 /** Add a task straight into a project, inheriting its domain and org lane. */
-export function addTaskToProject(input: string, project: Project): Promise<Task> {
+export function addTaskToProject(
+  input: string,
+  project: Project,
+  overrides: Partial<Task> = {},
+): Promise<Task> {
   return addTask(input, {
+    ...overrides,
     projectId: project.id,
-    ...(project.domainId ? { domainId: project.domainId } : {}),
-    ...(project.orgId ? { orgId: project.orgId } : {}),
+    domainId: project.domainId,
+    orgId: project.orgId,
   });
 }
 

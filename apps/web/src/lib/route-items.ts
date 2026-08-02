@@ -9,6 +9,7 @@ import type {
   Priority,
   Project,
   Routine,
+  Task,
 } from '@ops-dashboard/core';
 import { createCapture, dismissCapture, setCaptureRoute } from './captures';
 import { createFoodLog, deleteFoodLog } from './food-logs';
@@ -157,13 +158,14 @@ async function routeTask(
   const project = matchByName(ctx.projects, draft.projectName);
   const dueText = draft.dueText?.trim();
   const input = dueText ? `${title} ${dueText}` : title;
+  const overrides: Partial<Task> = {
+    priority: clampPriority(draft.priority),
+    tags: cleanTags(draft.tags),
+    ...(draft.notes?.trim() ? { notes: draft.notes.trim() } : {}),
+  };
   const task = project
-    ? await addTaskToProject(input, project)
-    : await addTask(input, {
-        priority: clampPriority(draft.priority),
-        tags: cleanTags(draft.tags),
-        ...(draft.notes?.trim() ? { notes: draft.notes.trim() } : {}),
-      });
+    ? await addTaskToProject(input, project, overrides)
+    : await addTask(input, overrides);
   await setCaptureRoute(captureId, { type: 'task', id: task.id }, aiKind, title);
   return {
     captureId,
@@ -185,9 +187,7 @@ async function routeFood(
   draft: RoutedItemDraft,
   source: CaptureSource,
 ): Promise<RoutedResult> {
-  const items = (draft.food?.items ?? [])
-    .map(toFoodItem)
-    .filter((i): i is FoodItem => i !== null);
+  const items = (draft.food?.items ?? []).map(toFoodItem).filter((i): i is FoodItem => i !== null);
   const log = await createFoodLog({
     description: title,
     items,
