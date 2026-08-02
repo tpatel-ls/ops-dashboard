@@ -160,7 +160,7 @@ async function routeTask(
   const input = dueText ? `${title} ${dueText}` : title;
   const overrides: Partial<Task> = {
     priority: clampPriority(draft.priority),
-    tags: cleanTags(draft.tags),
+    tags: normalizeCaptureTags(draft.tags),
     ...(draft.notes?.trim() ? { notes: draft.notes.trim() } : {}),
   };
   const task = project
@@ -264,7 +264,7 @@ async function routeNote(
   const note = await createNote({
     title,
     body: draft.notes?.trim() || title,
-    tags: cleanTags(draft.tags),
+    tags: normalizeCaptureTags(draft.tags),
   });
   await setCaptureRoute(captureId, { type: 'note', id: note.id }, aiKind, title);
   return {
@@ -285,7 +285,7 @@ async function routeQuote(
   title: string,
   draft: RoutedItemDraft,
 ): Promise<RoutedResult> {
-  const quote = await createQuote({ text: title, tags: cleanTags(draft.tags) });
+  const quote = await createQuote({ text: title, tags: normalizeCaptureTags(draft.tags) });
   await setCaptureRoute(captureId, { type: 'quote', id: quote.id }, 'quote', title);
   return {
     captureId,
@@ -348,9 +348,13 @@ function clampPriority(p: number | undefined): Priority {
   return Math.min(3, Math.max(0, Math.round(p))) as Priority;
 }
 
-function cleanTags(tags: string[] | undefined): string[] {
+export function normalizeCaptureTags(tags: string[] | undefined): string[] {
   if (!Array.isArray(tags)) return [];
-  return tags.filter((t): t is string => typeof t === 'string' && t.trim().length > 0);
+  const normalized = tags
+    .filter((tag): tag is string => typeof tag === 'string')
+    .map((tag) => tag.trim().toLocaleLowerCase())
+    .filter(Boolean);
+  return Array.from(new Set(normalized));
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
