@@ -37,6 +37,16 @@ describe('compareTasks', () => {
     ]);
   });
 
+  it('sorts timestamps by their browser-local calendar day', () => {
+    const timestamp = '2026-08-01T00:30:00+14:00';
+    const tasks = [
+      task('calendar-day', { scheduledFor: '2026-08-01' }),
+      task('local-day', { dueAt: timestamp }),
+    ];
+
+    expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['local-day', 'calendar-day']);
+  });
+
   it('uses order and title as stable tie breakers', () => {
     const tasks = [
       task('z', { title: 'Zulu', order: 2 }),
@@ -80,10 +90,7 @@ describe('compareTasksBy', () => {
       updatedAt: '2026-07-16T09:00:00.000Z',
     });
 
-    expect([older, newer].sort((a, b) => compareTasksBy('recent', a, b))).toEqual([
-      newer,
-      older,
-    ]);
+    expect([older, newer].sort((a, b) => compareTasksBy('recent', a, b))).toEqual([newer, older]);
   });
 });
 
