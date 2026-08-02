@@ -85,20 +85,24 @@ function isRecentPastDay(date: string, today: string, maximumAge: number): boole
   return age >= 0 && age <= maximumAge;
 }
 
-function uniqueActiveDays(input: LifeManagementInput): number {
+function uniqueActiveDays(input: LifeManagementInput, today: string): number {
   const days = new Set<string>();
+  const addDay = (value: string | undefined) => {
+    const day = localDay(value);
+    if (day && day <= today) days.add(day);
+  };
 
   for (const task of input.tasks) {
-    if (!task.deletedAt && task.completedAt) days.add(datePart(task.completedAt)!);
+    if (!task.deletedAt) addDay(task.completedAt);
   }
   for (const check of input.routineChecks) {
-    if (!check.deletedAt && check.done) days.add(check.date);
+    if (!check.deletedAt && check.done) addDay(check.date);
   }
   for (const entry of input.journalEntries) {
-    if (!entry.deletedAt) days.add(entry.date);
+    if (!entry.deletedAt) addDay(entry.date);
   }
   for (const log of input.foodLogs) {
-    if (!log.deletedAt) days.add(log.date);
+    if (!log.deletedAt) addDay(log.date);
   }
 
   return days.size;
@@ -190,7 +194,7 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     now,
     staleAfterDays: 7,
   });
-  const activeDays = uniqueActiveDays(input);
+  const activeDays = uniqueActiveDays(input, today);
   const weeklyActiveDays = new Set([
     ...liveTasks
       .map((task) => datePart(task.completedAt))
