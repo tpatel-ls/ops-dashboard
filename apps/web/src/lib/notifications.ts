@@ -33,6 +33,10 @@ export async function scheduleReminder(taskId: string, triggerAt: string): Promi
     throw new Error('Reminder time must be a valid date.');
   }
   const db = getDb();
+  const task = await db.tasks.get(taskId);
+  if (!task || task.deletedAt || task.status === 'done' || task.status === 'archived') {
+    throw new Error('Task is not available for reminders.');
+  }
   const reminder: Reminder = { id: newId(), taskId, triggerAt, delivered: false };
   await db.reminders.put(reminder);
   return reminder;
@@ -55,7 +59,7 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
   let fired = 0;
   for (const r of due) {
     const task = await db.tasks.get(r.taskId);
-    if (!task) {
+    if (!task || task.deletedAt || task.status === 'done' || task.status === 'archived') {
       await db.reminders.delete(r.id);
       continue;
     }
