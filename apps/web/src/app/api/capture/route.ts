@@ -2,10 +2,17 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { newId, parseQuickAdd, quickAddToTask } from '@ops-dashboard/core';
-import type { Capture, CaptureKind, JournalEntry, Task, AppNotification } from '@ops-dashboard/core';
+import type {
+  Capture,
+  CaptureKind,
+  JournalEntry,
+  Task,
+  AppNotification,
+} from '@ops-dashboard/core';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { normalizeTimezoneOffset } from '@/lib/server/timezone';
+import { boundedText } from '@/lib/server/input';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient, getSingleUserId } from '@/utils/supabase/admin';
 import { SYNC_TABLES, toRow } from '@/lib/sync/mapping';
@@ -122,7 +129,10 @@ async function triage(raw: string): Promise<TriageResult | null> {
           input_schema: {
             type: 'object',
             properties: {
-              kind: { type: 'string', enum: ['task', 'note', 'journal', 'event', 'person', 'quote'] },
+              kind: {
+                type: 'string',
+                enum: ['task', 'note', 'journal', 'event', 'person', 'quote'],
+              },
               title: { type: 'string', description: 'Cleaned, concise title' },
               notes: { type: 'string', description: 'Any extra detail' },
               dueText: { type: 'string', description: 'Natural-language date/time, verbatim' },
@@ -154,14 +164,12 @@ export async function POST(req: Request): Promise<Response> {
   let tzOffsetMinutes: number | undefined;
   try {
     const body = (await req.json()) as { raw?: unknown; tzOffsetMinutes?: unknown };
-    raw = typeof body?.raw === 'string' ? body.raw.trim() : '';
+    raw = boundedText(body?.raw, MAX_RAW);
     tzOffsetMinutes = normalizeTimezoneOffset(body?.tzOffsetMinutes);
   } catch {
     /* malformed body */
   }
   if (!raw) return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
-  if (raw.length > MAX_RAW) raw = raw.slice(0, MAX_RAW);
-
   const result = await triage(raw);
 
   // Persistence target (so the capture propagates to every device via realtime).
