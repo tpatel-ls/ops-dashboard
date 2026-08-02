@@ -16,6 +16,7 @@ import {
 import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
 import { shouldAcceptRemote } from './conflicts';
 import { visitPullPages } from './pagination';
+import { nextRecordedAttempt } from './outbox';
 import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
@@ -100,12 +101,10 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
         // newer remote, so a stale push is a harmless no-op.
         const { error } = await supabase.from(dbTable).upsert(row);
         if (error) {
-          const attempts = (op.attempts ?? 0) + 1;
-          if (attempts >= MAX_ATTEMPTS) {
-            await db().syncOps.delete(op.id);
-          } else {
-            await db().syncOps.update(op.id, { attempts, lastError: error.message });
-          }
+          const attempts = nextRecordedAttempt(op.attempts, MAX_ATTEMPTS);
+          // Keep the operation queued until it succeeds. Dropping it after a
+          // retry limit would silently strand the local change on this device.
+          await db().syncOps.update(op.id, { attempts, lastError: error.message });
           // Back off on this table only; others keep draining this cycle.
           failedTables.add(op.table);
           continue;
