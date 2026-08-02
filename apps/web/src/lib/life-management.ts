@@ -80,6 +80,11 @@ function daysBetween(from: string, to: string): number {
   return Math.max(0, differenceInCalendarDays(parseISO(to), parseISO(from)));
 }
 
+function isRecentPastDay(date: string, today: string, maximumAge: number): boolean {
+  const age = differenceInCalendarDays(parseISO(today), parseISO(date));
+  return age >= 0 && age <= maximumAge;
+}
+
 function uniqueActiveDays(input: LifeManagementInput): number {
   const days = new Set<string>();
 
@@ -145,7 +150,7 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   );
   const completedThisWeek = liveTasks.filter((task) => {
     const completed = datePart(task.completedAt);
-    return completed && daysBetween(completed, today) <= 6;
+    return completed && isRecentPastDay(completed, today, 6);
   }).length;
 
   const activeProjects = input.projects.filter(
@@ -156,13 +161,17 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     return daysBetween(datePart(project.lastWorkedAt)!, today) > 7;
   });
 
-  const activeRoutines = input.routines.filter((routine) => !routine.deletedAt && !routine.archivedAt);
+  const activeRoutines = input.routines.filter(
+    (routine) => !routine.deletedAt && !routine.archivedAt,
+  );
   const checksToday = new Map(
     input.routineChecks
       .filter((check) => !check.deletedAt && check.date === today)
       .map((check) => [check.routineId, check.done]),
   );
-  const routineDone = activeRoutines.filter((routine) => checksToday.get(routine.id) === true).length;
+  const routineDone = activeRoutines.filter(
+    (routine) => checksToday.get(routine.id) === true,
+  ).length;
   const routineTotal = activeRoutines.length;
   const routinePct = routineTotal > 0 ? clamp((routineDone / routineTotal) * 100) : 100;
 
@@ -182,23 +191,21 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     staleAfterDays: 7,
   });
   const activeDays = uniqueActiveDays(input);
-  const weeklyActiveDays = new Set(
-    [
-      ...liveTasks
-        .map((task) => datePart(task.completedAt))
-        .filter((date): date is string => Boolean(date))
-        .filter((date) => daysBetween(date, today) <= 6),
-      ...input.routineChecks
-        .filter((check) => !check.deletedAt && check.done && daysBetween(check.date, today) <= 6)
-        .map((check) => check.date),
-      ...input.journalEntries
-        .filter((entry) => !entry.deletedAt && daysBetween(entry.date, today) <= 6)
-        .map((entry) => entry.date),
-      ...input.foodLogs
-        .filter((log) => !log.deletedAt && daysBetween(log.date, today) <= 6)
-        .map((log) => log.date),
-    ],
-  ).size;
+  const weeklyActiveDays = new Set([
+    ...liveTasks
+      .map((task) => datePart(task.completedAt))
+      .filter((date): date is string => Boolean(date))
+      .filter((date) => isRecentPastDay(date, today, 6)),
+    ...input.routineChecks
+      .filter((check) => !check.deletedAt && check.done && isRecentPastDay(check.date, today, 6))
+      .map((check) => check.date),
+    ...input.journalEntries
+      .filter((entry) => !entry.deletedAt && isRecentPastDay(entry.date, today, 6))
+      .map((entry) => entry.date),
+    ...input.foodLogs
+      .filter((log) => !log.deletedAt && isRecentPastDay(log.date, today, 6))
+      .map((log) => log.date),
+  ]).size;
 
   const identityInput: IdentityScoreInput = {
     bestStreak: bestRoutineStreak(input.routineChecks, today),
@@ -206,7 +213,7 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     activeDays,
     completedCount: completedThisWeek,
     journalCount: input.journalEntries.filter(
-      (entry) => !entry.deletedAt && daysBetween(entry.date, today) <= 6,
+      (entry) => !entry.deletedAt && isRecentPastDay(entry.date, today, 6),
     ).length,
     totalPoints: activeDays + completedThisWeek + routineDone + mealsLogged,
   };
