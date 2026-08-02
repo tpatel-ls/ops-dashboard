@@ -36,7 +36,7 @@ export async function patchRecord<T extends SyncMeta>(
 ): Promise<T | null> {
   const t = getDb().table<T>(table);
   const existing = await t.get(id);
-  if (!existing) return null;
+  if (!existing || existing.deletedAt) return null;
   const mutablePatch = { ...patch } as Partial<T> & Record<string, unknown>;
   for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId']) {
     delete mutablePatch[key];
@@ -58,7 +58,7 @@ export async function softDeleteRecord<T extends SyncMeta>(
 ): Promise<void> {
   const t = getDb().table<T>(table);
   const existing = await t.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const now = new Date().toISOString();
   const tomb = { ...existing, deletedAt: now, updatedAt: now, version: existing.version + 1 } as T;
   await t.put(tomb);
