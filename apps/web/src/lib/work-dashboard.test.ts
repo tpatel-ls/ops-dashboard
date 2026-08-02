@@ -93,6 +93,19 @@ describe('buildWorkDashboard', () => {
     expect(result.counts.openTasks).toBe(1);
   });
 
+  it('inherits the organization lane for legacy project tasks', () => {
+    const legacyProject = project('legacy-project', { orgId: 'org-a' });
+    const result = buildWorkDashboard(
+      [task('legacy-task', { projectId: legacyProject.id, scheduledFor: '2026-07-16' })],
+      [legacyProject],
+      'org-a',
+      '2026-07-16',
+    );
+
+    expect(result.today.map((item) => item.id)).toEqual(['legacy-task']);
+    expect(result.counts.openTasks).toBe(1);
+  });
+
   it('summarizes active projects and their completion ratios', () => {
     const active = project('active', { orgId: 'org-a', dueDate: '2026-07-20' });
     const paused = project('paused', { orgId: 'org-a', status: 'paused' });
@@ -109,7 +122,11 @@ describe('buildWorkDashboard', () => {
     );
 
     expect(result.projects.map((summary) => summary.project.id)).toEqual(['active', 'paused']);
-    expect(result.projects[0]).toMatchObject({ openTasks: 1, completedTasks: 1, completionPct: 50 });
+    expect(result.projects[0]).toMatchObject({
+      openTasks: 1,
+      completedTasks: 1,
+      completionPct: 50,
+    });
     expect(result.counts.activeProjects).toBe(2);
   });
 
