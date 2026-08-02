@@ -26,7 +26,7 @@ export async function createWhiteboard(name: string): Promise<Whiteboard> {
 export async function saveWhiteboard(id: string, document: unknown): Promise<void> {
   const db = getDb();
   const existing = await db.whiteboards.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const next: Whiteboard = {
     ...existing,
     document,
@@ -42,7 +42,7 @@ export async function renameWhiteboard(id: string, name: string): Promise<void> 
   if (!normalizedName) throw new Error('Whiteboard name is required.');
   const db = getDb();
   const existing = await db.whiteboards.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const next: Whiteboard = {
     ...existing,
     name: normalizedName,
@@ -56,7 +56,7 @@ export async function renameWhiteboard(id: string, name: string): Promise<void> 
 export async function softDeleteWhiteboard(id: string): Promise<void> {
   const db = getDb();
   const existing = await db.whiteboards.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const now = new Date().toISOString();
   const tomb: Whiteboard = {
     ...existing,

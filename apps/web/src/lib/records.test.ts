@@ -17,7 +17,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { patchRecord } from './records';
+import { patchRecord, softDeleteRecord } from './records';
 
 describe('patchRecord', () => {
   beforeEach(() => {
@@ -54,5 +54,25 @@ describe('patchRecord', () => {
     expect(mocks.enqueueOp).toHaveBeenCalledWith(
       expect.objectContaining({ recordId: 'task-1', payload: result }),
     );
+  });
+});
+
+describe('softDeleteRecord', () => {
+  it('does not rewrite or re-enqueue an existing tombstone', async () => {
+    mocks.put.mockReset();
+    mocks.enqueueOp.mockReset();
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      deletedAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      version: 5,
+      deviceId: 'device-original',
+    });
+
+    await softDeleteRecord<Task>('tasks', 'task-1');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
 });

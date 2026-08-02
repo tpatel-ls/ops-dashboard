@@ -18,7 +18,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { createWhiteboard, renameWhiteboard } from './whiteboards';
+import { createWhiteboard, renameWhiteboard, softDeleteWhiteboard } from './whiteboards';
 
 describe('whiteboard names', () => {
   beforeEach(() => {
@@ -41,5 +41,17 @@ describe('whiteboard names', () => {
     );
     expect(mocks.get).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
+  });
+
+  it('does not create another operation for a deleted board', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'whiteboard-test',
+      deletedAt: '2026-08-01T12:00:00.000Z',
+    });
+
+    await softDeleteWhiteboard('whiteboard-test');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
 });

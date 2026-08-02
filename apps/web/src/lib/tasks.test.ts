@@ -26,7 +26,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { addTaskToProject, setTaskStatus, updateTask } from './tasks';
+import { addTaskToProject, setTaskStatus, softDeleteTask, updateTask } from './tasks';
 
 describe('addTaskToProject', () => {
   it('keeps capture metadata while enforcing the project context', async () => {
@@ -123,6 +123,18 @@ describe('setTaskStatus', () => {
     } satisfies Task);
 
     await setTaskStatus('task-1', 'done');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+});
+
+describe('softDeleteTask', () => {
+  it('does not create another operation for a deleted task', async () => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue({ id: 'task-1', deletedAt: '2026-08-01T12:00:00.000Z' });
+
+    await softDeleteTask('task-1');
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
