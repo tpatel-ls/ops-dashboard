@@ -18,4 +18,25 @@ describe('countDomainWork', () => {
   it('counts direct and project-inherited open tasks', () => {
     expect(countDomainWork('domain-1', projects, tasks)).toEqual({ projects: 1, tasks: 2 });
   });
+
+  it('excludes tasks whose project is inactive', () => {
+    const archivedProject = {
+      id: 'project-archived',
+      domainId: 'domain-1',
+      status: 'archived',
+    } as Project;
+    const attachedTask = {
+      id: 'attached',
+      projectId: archivedProject.id,
+      domainId: 'domain-1',
+      status: 'todo',
+    } as Task;
+
+    expect(
+      countDomainWork('domain-1', [...projects, archivedProject], [...tasks, attachedTask]),
+    ).toEqual({
+      projects: 1,
+      tasks: 2,
+    });
+  });
 });
