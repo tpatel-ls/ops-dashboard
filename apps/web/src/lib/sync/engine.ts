@@ -15,6 +15,7 @@ import {
 } from './mapping';
 import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
 import { shouldAcceptRemote } from './conflicts';
+import { visitPullPages } from './pagination';
 import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
@@ -27,6 +28,7 @@ const KICK_DEBOUNCE_MS = 300;
 // slightly clock-behind device isn't permanently skipped. mergeInbound is
 // idempotent, so the overlap is harmless.
 const PULL_OVERLAP_MS = 120_000;
+const PULL_PAGE_SIZE = 1_000;
 
 // `generation` is bumped on every start/stop so an in-flight startSync that is
 // superseded (user toggled off, signed out, restarted) bails before installing
@@ -146,20 +148,25 @@ async function pull(supabase: SupabaseClient): Promise<void> {
     const cursor = cursors[dbTable] ?? SYNC_EPOCH;
     const since = overlappedCursor(cursor, PULL_OVERLAP_MS);
 
-    const { data, error } = await supabase
-      .from(dbTable)
-      .select('*')
-      .gte('updated_at', since)
-      .order('updated_at', { ascending: true })
-      .limit(1000);
-    if (error || !data) continue; // leave THIS table's cursor untouched → retried next cycle
-
     let maxSeen = cursor;
-    for (const row of data as Array<Record<string, unknown>>) {
-      await mergeInbound(table, row);
-      const ts = row.updated_at;
-      if (typeof ts === 'string' && ts > maxSeen) maxSeen = ts;
-    }
+    const pulled = await visitPullPages(
+      async ({ from, to }) => {
+        const { data, error } = await supabase
+          .from(dbTable)
+          .select('*')
+          .gte('updated_at', since)
+          .order('updated_at', { ascending: true })
+          .range(from, to);
+        return error || !data ? null : (data as Array<Record<string, unknown>>);
+      },
+      async (row) => {
+        await mergeInbound(table, row);
+        const ts = row.updated_at;
+        if (typeof ts === 'string' && ts > maxSeen) maxSeen = ts;
+      },
+      PULL_PAGE_SIZE,
+    );
+    if (!pulled) continue; // leave THIS table's cursor untouched so the full pull retries
     if (maxSeen !== cursor) {
       cursors[dbTable] = maxSeen;
       changed = true;
