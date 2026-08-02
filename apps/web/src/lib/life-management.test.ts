@@ -254,5 +254,31 @@ describe('life management summary', () => {
     expect(summary.modules.find((module) => module.id === 'identity')?.detail).toBe(
       '0/7 active days',
     );
+    expect(summary.activeDays).toBe(0);
+  });
+
+  it('ignores malformed dates in the all-time activity count', () => {
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [
+        {
+          ...meta('invalid-journal'),
+          date: '2026-02-30',
+          body: 'Corrupt import',
+          mediaUrls: [],
+          tags: [],
+        },
+      ],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.activeDays).toBe(0);
   });
 });
