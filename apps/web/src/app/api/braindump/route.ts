@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
-import { boundedTextList } from '@/lib/server/input';
+import { boundedText, boundedTextList } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
@@ -54,7 +54,7 @@ export async function POST(req: Request): Promise<Response> {
       text?: unknown;
       context?: { projects?: unknown; routines?: unknown; date?: unknown };
     };
-    text = typeof body?.text === 'string' ? body.text.trim() : '';
+    text = boundedText(body?.text, MAX_TEXT);
     projects = cleanNames(body?.context?.projects);
     routines = cleanNames(body?.context?.routines);
     date = typeof body?.context?.date === 'string' ? body.context.date : '';
@@ -63,8 +63,6 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   if (!text) return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
-  if (text.length > MAX_TEXT) text = text.slice(0, MAX_TEXT);
-
   const client = getAnthropic();
   if (!client) return NextResponse.json({ ok: false, reason: 'no-key' });
 
@@ -96,7 +94,16 @@ export async function POST(req: Request): Promise<Response> {
                   properties: {
                     kind: {
                       type: 'string',
-                      enum: ['task', 'food', 'habit', 'journal', 'note', 'quote', 'event', 'person'],
+                      enum: [
+                        'task',
+                        'food',
+                        'habit',
+                        'journal',
+                        'note',
+                        'quote',
+                        'event',
+                        'person',
+                      ],
                     },
                     title: { type: 'string', description: 'Cleaned, concise title' },
                     notes: { type: 'string', description: 'Any extra detail' },
@@ -152,9 +159,7 @@ export async function POST(req: Request): Promise<Response> {
       messages: [{ role: 'user', content: `${contextLines}\n\nCapture:\n${text}` }],
     });
 
-    const toolUse = resp.content.find(
-      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use',
-    );
+    const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
     const items = (toolUse?.input as { items?: unknown } | undefined)?.items;
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ ok: false, reason: 'no-result' });

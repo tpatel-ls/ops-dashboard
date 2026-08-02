@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
+import { boundedText } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
@@ -34,13 +35,11 @@ export async function POST(req: Request): Promise<Response> {
   let raw = '';
   try {
     const body = (await req.json()) as { raw?: unknown };
-    raw = typeof body?.raw === 'string' ? body.raw.trim() : '';
+    raw = boundedText(body?.raw, MAX_RAW);
   } catch {
     /* ignore malformed body */
   }
   if (!raw) return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
-  if (raw.length > MAX_RAW) raw = raw.slice(0, MAX_RAW);
-
   const client = getAnthropic();
   if (!client) return NextResponse.json({ ok: false, reason: 'no-key' });
 
@@ -76,9 +75,7 @@ export async function POST(req: Request): Promise<Response> {
       messages: [{ role: 'user', content: raw }],
     });
 
-    const toolUse = resp.content.find(
-      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use',
-    );
+    const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
     if (!toolUse) return NextResponse.json({ ok: false, reason: 'no-result' });
     return NextResponse.json({ ok: true, result: toolUse.input });
   } catch (err) {

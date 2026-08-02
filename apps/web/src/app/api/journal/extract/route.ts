@@ -2,11 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
-import {
-  type JournalImageMediaType,
-  validateJournalImage,
-} from '@/lib/server/journal-image';
-import { boundedTextList } from '@/lib/server/input';
+import { type JournalImageMediaType, validateJournalImage } from '@/lib/server/journal-image';
+import { boundedText, boundedTextList } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
@@ -42,7 +39,7 @@ export async function POST(req: Request): Promise<Response> {
       mediaType?: unknown;
       routineNames?: unknown;
     };
-    text = typeof body?.text === 'string' ? body.text.trim() : '';
+    text = boundedText(body?.text, MAX_TEXT);
     imageBase64 = typeof body?.imageBase64 === 'string' ? body.imageBase64 : undefined;
     const requestedMediaType = typeof body?.mediaType === 'string' ? body.mediaType : 'image/jpeg';
     if (imageBase64) {
@@ -56,11 +53,7 @@ export async function POST(req: Request): Promise<Response> {
       imageBase64 = image.data;
       mediaType = image.mediaType;
     }
-    routineNames = boundedTextList(
-      body?.routineNames,
-      MAX_ROUTINE_NAMES,
-      MAX_ROUTINE_NAME_LENGTH,
-    );
+    routineNames = boundedTextList(body?.routineNames, MAX_ROUTINE_NAMES, MAX_ROUTINE_NAME_LENGTH);
   } catch {
     /* ignore malformed body */
   }
@@ -68,8 +61,6 @@ export async function POST(req: Request): Promise<Response> {
   if (!text && !imageBase64) {
     return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
   }
-
-  if (text.length > MAX_TEXT) text = text.slice(0, MAX_TEXT);
 
   const client = getAnthropic();
   if (!client) return NextResponse.json({ ok: false, reason: 'no-key' });
@@ -111,7 +102,7 @@ export async function POST(req: Request): Promise<Response> {
               },
               body: {
                 type: 'string',
-                description: 'Cleaned, readable journal text preserving the user\'s voice.',
+                description: "Cleaned, readable journal text preserving the user's voice.",
               },
               mood: {
                 type: 'string',
@@ -137,9 +128,7 @@ export async function POST(req: Request): Promise<Response> {
       messages: [{ role: 'user', content: userContent }],
     });
 
-    const toolUse = resp.content.find(
-      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use',
-    );
+    const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
     if (!toolUse) return NextResponse.json({ ok: false, reason: 'no-result' });
     return NextResponse.json({ ok: true, result: toolUse.input });
   } catch (err) {

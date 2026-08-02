@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sendPushover } from '@/lib/server/pushover';
 import { requestAllowed } from '@/lib/server/guard';
+import { boundedText } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,7 @@ export async function POST(req: Request): Promise<Response> {
     /* ignore */
   }
 
-  const message = (typeof body.message === 'string' ? body.message : '').slice(0, MAX_MESSAGE);
+  const message = boundedText(body.message, MAX_MESSAGE);
   if (!message) return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
 
   // Clamp priority to non-emergency levels (2 requires retry/expire; -2 silent).
@@ -27,7 +28,7 @@ export async function POST(req: Request): Promise<Response> {
 
   const result = await sendPushover({
     message,
-    ...(typeof body.title === 'string' ? { title: body.title.slice(0, MAX_TITLE) } : {}),
+    ...(typeof body.title === 'string' ? { title: boundedText(body.title, MAX_TITLE) } : {}),
     priority,
   });
   return NextResponse.json({ ok: result.ok, ...(result.reason ? { reason: result.reason } : {}) });
