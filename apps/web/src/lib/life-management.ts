@@ -181,7 +181,10 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
 
   const mealsLogged = input.foodLogs.filter((log) => !log.deletedAt && log.date === today).length;
   const latestJournal = input.journalEntries
-    .filter((entry) => !entry.deletedAt)
+    .filter((entry) => {
+      const date = localDay(entry.date);
+      return !entry.deletedAt && Boolean(date && date <= today);
+    })
     .sort((a, b) => b.date.localeCompare(a.date))[0];
   const journalGapDays = latestJournal ? daysBetween(latestJournal.date, today) : null;
   const pendingCaptures = input.captures.filter(
