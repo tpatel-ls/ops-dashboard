@@ -136,7 +136,7 @@ async function routeItem(draft: RoutedItemDraft, ctx: RouteContext): Promise<Rou
       return routeTask(cap.id, aiKind, title, draft, ctx);
     }
     case 'journal':
-      return routeJournal(cap.id, title, draft);
+      return routeJournal(cap.id, title, draft, ctx.source);
     case 'note':
     case 'person':
       return routeNote(cap.id, aiKind, title, draft);
@@ -235,11 +235,12 @@ async function routeJournal(
   captureId: string,
   title: string,
   draft: RoutedItemDraft,
+  source: CaptureSource,
 ): Promise<RoutedResult> {
   const notes = draft.notes?.trim();
   const entry = await createJournalEntry({
     body: notes ? `${title}\n${notes}` : title,
-    source: 'text',
+    source: journalEntrySource(source),
   });
   await setCaptureRoute(captureId, { type: 'journal', id: entry.id }, 'journal', title);
   return {
@@ -253,6 +254,10 @@ async function routeJournal(
       await dismissCapture(captureId);
     },
   };
+}
+
+export function journalEntrySource(source: CaptureSource): 'voice' | 'text' {
+  return source === 'voice' || source === 'watch' ? 'voice' : 'text';
 }
 
 async function routeNote(
