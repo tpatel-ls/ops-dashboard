@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
-import { boundedText, boundedTextList } from '@/lib/server/input';
+import { boundedText, boundedTextList, dateOnlyText } from '@/lib/server/input';
 
 export const runtime = 'nodejs';
 
@@ -57,7 +57,7 @@ export async function POST(req: Request): Promise<Response> {
     text = boundedText(body?.text, MAX_TEXT);
     projects = cleanNames(body?.context?.projects);
     routines = cleanNames(body?.context?.routines);
-    date = typeof body?.context?.date === 'string' ? body.context.date : '';
+    date = dateOnlyText(body?.context?.date);
   } catch {
     /* ignore malformed body */
   }
