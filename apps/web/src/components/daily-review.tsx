@@ -7,6 +7,7 @@ import { CheckCircle2, ListChecks, MoonStar, X } from 'lucide-react';
 import { getDb, isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
 import { updateTask } from '@/lib/tasks';
 
 export function DailyReviewDialog() {
@@ -24,16 +25,8 @@ function DailyReview({ onClose }: { onClose: () => void }) {
   const today = isoDay(new Date());
   const summary = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
-    const live = all.filter((t) => !t.deletedAt);
-    const completedToday = live.filter(
-      (t) => t.completedAt && t.completedAt.slice(0, 10) === today,
-    );
-    const slipped = live.filter(
-      (t) =>
-        t.status !== 'done' &&
-        t.status !== 'archived' &&
-        ((t.scheduledFor && t.scheduledFor <= today) || (t.dueAt && t.dueAt.slice(0, 10) <= today)),
-    );
+    const completedToday = all.filter((task) => taskCompletedOn(task, today));
+    const slipped = all.filter((task) => taskNeedsRollForward(task, today));
     return { completedToday, slipped };
   });
   const [rolling, setRolling] = useState(false);
@@ -127,7 +120,7 @@ function DailyReview({ onClose }: { onClose: () => void }) {
             tone="text-priority-urgent"
           />
         </div>
-        <div className="scrollbar-thin max-h-72 overflow-y-auto p-5">
+        <div className="max-h-72 scrollbar-thin overflow-y-auto p-5">
           {summary?.slipped.length ? (
             <>
               <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
