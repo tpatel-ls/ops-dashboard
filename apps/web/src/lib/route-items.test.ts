@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { journalEntrySource, normalizeCaptureTags } from './route-items';
+import { journalEntrySource, normalizeCaptureKind, normalizeCaptureTags } from './route-items';
 
 describe('normalizeCaptureTags', () => {
   it('trims, normalizes, and deduplicates untrusted AI tags', () => {
@@ -16,5 +16,14 @@ describe('journalEntrySource', () => {
     expect(journalEntrySource('watch')).toBe('voice');
     expect(journalEntrySource('text')).toBe('text');
     expect(journalEntrySource('notepad')).toBe('text');
+  });
+});
+
+describe('normalizeCaptureKind', () => {
+  it('normalizes AI casing and whitespace before routing', () => {
+    expect(normalizeCaptureKind(' Journal ')).toBe('journal');
+    expect(normalizeCaptureKind('FOOD')).toBe('food');
+    expect(normalizeCaptureKind('unknown')).toBe('task');
+    expect(normalizeCaptureKind(undefined)).toBe('task');
   });
 });

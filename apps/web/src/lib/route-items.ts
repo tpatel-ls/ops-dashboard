@@ -123,7 +123,7 @@ export async function processBrainDump(
 
 async function routeItem(draft: RoutedItemDraft, ctx: RouteContext): Promise<RoutedResult> {
   const title = (draft.title ?? '').trim();
-  const aiKind = normalizeKind(draft.kind);
+  const aiKind = normalizeCaptureKind(draft.kind);
   const cap = await createCapture(title, ctx.source);
 
   switch (aiKind) {
@@ -344,8 +344,9 @@ const KNOWN_KINDS: CaptureKind[] = [
   'habit',
 ];
 
-function normalizeKind(kind: string | undefined): CaptureKind {
-  return KNOWN_KINDS.includes(kind as CaptureKind) ? (kind as CaptureKind) : 'task';
+export function normalizeCaptureKind(kind: string | undefined): CaptureKind {
+  const normalized = kind?.trim().toLocaleLowerCase();
+  return KNOWN_KINDS.includes(normalized as CaptureKind) ? (normalized as CaptureKind) : 'task';
 }
 
 function clampPriority(p: number | undefined): Priority {
