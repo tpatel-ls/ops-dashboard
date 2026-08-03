@@ -8,6 +8,7 @@ export function normalizeTimezoneOffset(value: unknown): number | undefined {
   if (
     typeof value !== 'number' ||
     !Number.isFinite(value) ||
+    !Number.isInteger(value) ||
     Math.abs(value) > MAX_TIMEZONE_OFFSET_MINUTES
   ) {
     return undefined;

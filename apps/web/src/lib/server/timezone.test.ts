@@ -12,6 +12,7 @@ describe('normalizeTimezoneOffset', () => {
     expect(normalizeTimezoneOffset('360')).toBeUndefined();
     expect(normalizeTimezoneOffset(Number.NaN)).toBeUndefined();
     expect(normalizeTimezoneOffset(Number.POSITIVE_INFINITY)).toBeUndefined();
+    expect(normalizeTimezoneOffset(90.5)).toBeUndefined();
     expect(normalizeTimezoneOffset(841)).toBeUndefined();
     expect(normalizeTimezoneOffset(-841)).toBeUndefined();
   });
