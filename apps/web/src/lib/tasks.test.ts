@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   last: vi.fn(),
   put: vi.fn(),
+  bulkPutReminders: vi.fn(),
   enqueueOp: vi.fn(),
 }));
 
@@ -18,6 +19,7 @@ vi.mock('@ops-dashboard/core', async () => {
         put: mocks.put,
         orderBy: () => ({ last: mocks.last }),
       },
+      reminders: { bulkPut: mocks.bulkPutReminders },
     }),
     getDeviceId: () => 'device-test',
     newId: () => 'task-test',
@@ -160,6 +162,50 @@ describe('setTaskStatus', () => {
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+
+  it('moves reminders onto the next recurring task', async () => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      title: 'Daily planning',
+      status: 'todo',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      tags: [],
+      reminders: [
+        {
+          id: 'reminder-old',
+          taskId: 'task-1',
+          triggerAt: '2026-08-01T13:00:00.000Z',
+          delivered: true,
+        },
+      ],
+      checklist: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'device-original',
+    } satisfies Task);
+    mocks.last.mockResolvedValue({ order: 1 });
+
+    await setTaskStatus('task-1', 'done');
+
+    expect(mocks.bulkPutReminders).toHaveBeenCalledWith([
+      expect.objectContaining({
+        taskId: 'task-test',
+        triggerAt: '2026-08-02T13:00:00.000Z',
+        delivered: false,
+      }),
+    ]);
+    expect(mocks.put).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: 'task-test',
+        reminders: [expect.objectContaining({ taskId: 'task-test' })],
+      }),
+    );
   });
 });
 
