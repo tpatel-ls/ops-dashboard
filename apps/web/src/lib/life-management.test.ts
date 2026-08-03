@@ -313,4 +313,36 @@ describe('life management summary', () => {
 
     expect(summary.journalGapDays).toBe(2);
   });
+
+  it('counts only routines active on the summary day', () => {
+    const routine = (id: string, startDate: string, endDate?: string): Routine => ({
+      ...meta(id),
+      name: id,
+      timeOfDay: 'anytime',
+      notify: false,
+      kind: endDate ? 'fixed' : 'ongoing',
+      startDate,
+      ...(endDate ? { endDate } : {}),
+      order: 1,
+    });
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [],
+      domains: [],
+      routines: [
+        routine('current', '2026-07-01'),
+        routine('future', '2026-07-07'),
+        routine('expired', '2026-06-01', '2026-07-05'),
+      ],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.routineTotal).toBe(1);
+    expect(summary.attention.find((item) => item.id === 'routines')?.detail).toBe('1 left today');
+  });
 });
