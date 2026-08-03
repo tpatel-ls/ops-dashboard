@@ -8,7 +8,7 @@ import {
   projectNextTask,
   quickAddToTask,
 } from '@ops-dashboard/core';
-import type { ChecklistItem, Project, Task } from '@ops-dashboard/core';
+import type { ChecklistItem, Project, Reminder, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
 /** Add a task straight into a project, inheriting its domain and org lane. */
@@ -90,16 +90,52 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
     const projected = projectNextTask(existing);
     if (projected) {
       const last = await db.tasks.orderBy('order').last();
+      const newTaskId = newId();
+      const reminders = projectRecurringReminders(existing, projected, newTaskId);
       const newTask: Task = {
         ...projected,
-        id: newId(),
+        id: newTaskId,
+        reminders,
         order: (last?.order ?? 0) + 1,
         deviceId: getDeviceId(),
       };
       await db.tasks.put(newTask);
+      if (reminders.length > 0) await db.reminders.bulkPut(reminders);
       await enqueueOp({ table: 'tasks', recordId: newTask.id, op: 'put', payload: newTask });
     }
   }
+}
+
+function recurrenceAnchor(task: Task): number | undefined {
+  const value = task.scheduledFor ? `${task.scheduledFor}T00:00:00` : (task.startAt ?? task.dueAt);
+  if (!value) return undefined;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
+export function projectRecurringReminders(
+  previous: Task,
+  projected: Task,
+  taskId: string,
+): Reminder[] {
+  const previousAnchor = recurrenceAnchor(previous);
+  const nextAnchor = recurrenceAnchor(projected);
+  if (previousAnchor === undefined || nextAnchor === undefined) return [];
+  const shift = nextAnchor - previousAnchor;
+
+  return previous.reminders.flatMap((reminder) => {
+    const trigger = Date.parse(reminder.triggerAt);
+    if (!Number.isFinite(trigger)) return [];
+    return [
+      {
+        ...reminder,
+        id: newId(),
+        taskId,
+        triggerAt: new Date(trigger + shift).toISOString(),
+        delivered: false,
+      },
+    ];
+  });
 }
 
 export async function softDeleteTask(id: string): Promise<void> {
