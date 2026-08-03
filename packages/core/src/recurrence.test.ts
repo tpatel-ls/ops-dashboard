@@ -21,10 +21,7 @@ describe('nextOccurrence', () => {
 
   it('honors the interval when rolling weekly byDay rules into their next cycle', () => {
     const friday = new Date('2026-04-24T12:00:00');
-    const next = nextOccurrence(
-      { freq: 'weekly', interval: 2, byDay: ['MO', 'WE', 'FR'] },
-      friday,
-    );
+    const next = nextOccurrence({ freq: 'weekly', interval: 2, byDay: ['MO', 'WE', 'FR'] }, friday);
     expect(next.getDay()).toBe(1);
     expect(next.getDate()).toBe(4);
     expect(next.getMonth()).toBe(4);
@@ -101,6 +98,33 @@ describe('projectNextTask', () => {
     expect(projectedDue.getDate()).toBe(1);
     expect(projectedDue.getHours()).toBe(17);
     expect(projectedDue.getMinutes()).toBe(30);
+  });
+
+  it('stops a recurrence chain after its configured count', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Three day reset',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1, count: 3 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    const second = projectNextTask(task, new Date('2026-08-01T13:00:00.000Z'));
+    const third = projectNextTask(second!, new Date('2026-08-02T13:00:00.000Z'));
+
+    expect(second?.recurrence?.count).toBe(2);
+    expect(third?.scheduledFor).toBe('2026-08-03');
+    expect(third?.recurrence?.count).toBe(1);
+    expect(projectNextTask(third!, new Date('2026-08-03T13:00:00.000Z'))).toBeNull();
   });
 });
 
