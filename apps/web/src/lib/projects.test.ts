@@ -20,7 +20,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { createProject, projectTaskProgress, renameProject } from './projects';
+import { archiveProject, createProject, projectTaskProgress, renameProject } from './projects';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -103,6 +103,36 @@ describe('createProject', () => {
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
+
+  it('does not rename a deleted project', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'project-test',
+      deletedAt: '2026-08-03T12:00:00.000Z',
+    });
+
+    await renameProject('project-test', 'New name');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+});
+
+describe('archiveProject', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it.each([{ deletedAt: '2026-08-03T12:00:00.000Z' }, { archivedAt: '2026-08-03T12:00:00.000Z' }])(
+    'does not rewrite an unavailable project',
+    async (state) => {
+      mocks.get.mockResolvedValue({ id: 'project-test', ...state });
+
+      await archiveProject('project-test');
+
+      expect(mocks.put).not.toHaveBeenCalled();
+      expect(mocks.enqueueOp).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe('renameProject', () => {
@@ -130,9 +160,7 @@ describe('renameProject', () => {
   });
 
   it('rejects blank project names before writing', async () => {
-    await expect(renameProject('project-test', '   ')).rejects.toThrow(
-      'Project name is required',
-    );
+    await expect(renameProject('project-test', '   ')).rejects.toThrow('Project name is required');
     expect(mocks.get).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
   });
