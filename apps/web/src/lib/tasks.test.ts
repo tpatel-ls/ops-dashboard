@@ -26,7 +26,41 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { addTaskToProject, setTaskStatus, softDeleteTask, updateTask } from './tasks';
+import { addTask, addTaskToProject, setTaskStatus, softDeleteTask, updateTask } from './tasks';
+
+describe('addTask', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.last.mockResolvedValue({ order: 3 });
+  });
+
+  it('rejects a blank title before opening the database', async () => {
+    await expect(addTask('   ')).rejects.toThrow('Task title is required');
+    expect(mocks.last).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
+  it('does not let creation overrides replace identity or sync metadata', async () => {
+    const task = await addTask('Created task', {
+      id: 'wrong-id',
+      title: 'Wrong title',
+      createdAt: '2000-01-01T00:00:00.000Z',
+      updatedAt: '2000-01-01T00:00:00.000Z',
+      version: 99,
+      deviceId: 'wrong-device',
+      deletedAt: '2000-01-01T00:00:00.000Z',
+    });
+
+    expect(task).toMatchObject({
+      id: 'task-test',
+      title: 'Created task',
+      version: 1,
+      deviceId: 'device-test',
+    });
+    expect(task.deletedAt).toBeUndefined();
+    expect(task.createdAt).not.toBe('2000-01-01T00:00:00.000Z');
+  });
+});
 
 describe('addTaskToProject', () => {
   it('keeps capture metadata while enforcing the project context', async () => {
