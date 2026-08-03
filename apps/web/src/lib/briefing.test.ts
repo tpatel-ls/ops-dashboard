@@ -62,6 +62,48 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('ignores malformed and future timestamps when measuring domain activity', () => {
+    const domain = {
+      ...meta('body', '2026-06-01T12:00:00.000Z'),
+      name: 'Body',
+      color: '#111',
+      order: 1,
+    } satisfies Domain;
+    const tasks = [
+      {
+        ...meta('malformed', 'not-a-date'),
+        title: 'Imported task',
+        status: 'todo',
+        priority: 0,
+        tags: [],
+        order: 1,
+        reminders: [],
+        checklist: [],
+        domainId: domain.id,
+      },
+      {
+        ...meta('future', '2026-07-10T12:00:00.000Z'),
+        title: 'Clock skew task',
+        status: 'todo',
+        priority: 0,
+        tags: [],
+        order: 2,
+        reminders: [],
+        checklist: [],
+        domainId: domain.id,
+      },
+    ] satisfies Task[];
+
+    expect(
+      findStaleDomains({ domains: [domain], projects: [], tasks, now, staleAfterDays: 7 }),
+    ).toEqual([
+      expect.objectContaining({
+        domainId: 'body',
+        lastTouchedAt: '2026-06-01T12:00:00.000Z',
+      }),
+    ]);
+  });
+
   it('flags captures that are pending or routed to unattached tasks', () => {
     const captures = [
       {
@@ -146,7 +188,9 @@ describe('briefing helpers', () => {
       },
     ] satisfies Task[];
 
-    expect(summarizeBriefing({ tasks, today: '2026-07-03', routingIssues: 2, staleDomains: 1 })).toEqual({
+    expect(
+      summarizeBriefing({ tasks, today: '2026-07-03', routingIssues: 2, staleDomains: 1 }),
+    ).toEqual({
       todayTotal: 3,
       doneToday: 1,
       openToday: 2,

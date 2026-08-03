@@ -43,16 +43,27 @@ export function findStaleDomains(input: {
     .filter((domain) => !deletedOrArchived(domain))
     .map((domain) => {
       const connectedProjectDates = input.projects
-        .filter((project) => !project.deletedAt && !project.archivedAt && project.domainId === domain.id)
+        .filter(
+          (project) => !project.deletedAt && !project.archivedAt && project.domainId === domain.id,
+        )
         .flatMap((project) => [project.lastWorkedAt, project.updatedAt, project.createdAt])
         .filter(Boolean) as string[];
       const connectedTaskDates = input.tasks
         .filter((task) => !task.deletedAt && task.domainId === domain.id)
         .flatMap((task) => [task.completedAt, task.updatedAt, task.createdAt])
         .filter(Boolean) as string[];
-      const candidates = [domain.updatedAt, domain.createdAt, ...connectedProjectDates, ...connectedTaskDates]
+      const candidates = [
+        domain.updatedAt,
+        domain.createdAt,
+        ...connectedProjectDates,
+        ...connectedTaskDates,
+      ]
         .filter(Boolean)
-        .sort((a, b) => b.localeCompare(a));
+        .filter((value) => {
+          const timestamp = Date.parse(value);
+          return Number.isFinite(timestamp) && timestamp <= nowMs;
+        })
+        .sort((a, b) => Date.parse(b) - Date.parse(a));
       const lastTouchedAt = candidates[0];
       if (!lastTouchedAt) {
         return {
@@ -81,7 +92,10 @@ export function findStaleDomains(input: {
     .sort((a, b) => b.daysIdle - a.daysIdle || a.domainName.localeCompare(b.domainName));
 }
 
-export function findCaptureRoutingIssues(captures: Capture[], tasks: Task[]): CaptureRoutingIssue[] {
+export function findCaptureRoutingIssues(
+  captures: Capture[],
+  tasks: Task[],
+): CaptureRoutingIssue[] {
   const taskById = new Map(tasks.map((task) => [task.id, task]));
 
   return captures
