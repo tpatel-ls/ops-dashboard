@@ -166,7 +166,11 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   });
 
   const activeRoutines = input.routines.filter(
-    (routine) => !routine.deletedAt && !routine.archivedAt,
+    (routine) =>
+      !routine.deletedAt &&
+      !routine.archivedAt &&
+      routine.startDate <= today &&
+      (!routine.endDate || routine.endDate >= today),
   );
   const checksToday = new Map(
     input.routineChecks
