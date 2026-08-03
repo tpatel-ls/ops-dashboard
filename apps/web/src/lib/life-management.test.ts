@@ -281,4 +281,36 @@ describe('life management summary', () => {
 
     expect(summary.activeDays).toBe(0);
   });
+
+  it('uses the latest past journal entry for the journal gap', () => {
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [
+        {
+          ...meta('past-journal'),
+          date: '2026-07-04',
+          body: 'A completed entry',
+          mediaUrls: [],
+          tags: [],
+        },
+        {
+          ...meta('future-journal'),
+          date: '2026-07-10',
+          body: 'A scheduled prompt',
+          mediaUrls: [],
+          tags: [],
+        },
+      ],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.journalGapDays).toBe(2);
+  });
 });
