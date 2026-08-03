@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requestAllowed } from '@/lib/server/guard';
+import { transcriptionFileError, transcriptionText } from '@/lib/server/transcription';
 
 export const runtime = 'nodejs';
-
-const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /**
  * Speech-to-text proxy. Forwards an uploaded audio blob to a self-hosted
@@ -30,7 +29,13 @@ export async function POST(req: Request): Promise<Response> {
     /* ignore malformed body */
   }
   if (!file) return NextResponse.json({ ok: false, reason: 'no-file' }, { status: 400 });
-  if (file.size > MAX_BYTES) return NextResponse.json({ ok: false, reason: 'too-large' }, { status: 413 });
+  const fileError = transcriptionFileError(file.size);
+  if (fileError) {
+    return NextResponse.json(
+      { ok: false, reason: fileError },
+      { status: fileError === 'too-large' ? 413 : 400 },
+    );
+  }
 
   const filename = file instanceof File && file.name ? file.name : 'audio.webm';
   const upstream = new FormData();
@@ -49,7 +54,8 @@ export async function POST(req: Request): Promise<Response> {
       return NextResponse.json({ ok: false, reason: 'upstream' }, { status: 502 });
     }
     const data = (await res.json()) as { text?: unknown };
-    const text = typeof data?.text === 'string' ? data.text.trim() : '';
+    const text = transcriptionText(data?.text);
+    if (!text) return NextResponse.json({ ok: false, reason: 'no-result' }, { status: 502 });
     return NextResponse.json({ ok: true, text });
   } catch (err) {
     console.error('[api/transcribe] error:', err);
