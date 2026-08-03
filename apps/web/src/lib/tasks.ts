@@ -27,12 +27,25 @@ export function addTaskToProject(
 
 export async function addTask(input: string, overrides: Partial<Task> = {}): Promise<Task> {
   const parsed = parseQuickAdd(input);
+  if (!parsed.title.trim()) throw new Error('Task title is required.');
   const db = getDb();
   const last = await db.tasks.orderBy('order').last();
   const order = (last?.order ?? 0) + 1;
+  const mutableOverrides = { ...overrides };
+  for (const key of [
+    'id',
+    'title',
+    'createdAt',
+    'updatedAt',
+    'version',
+    'deviceId',
+    'deletedAt',
+  ] as const) {
+    delete mutableOverrides[key];
+  }
   const task: Task = {
     ...quickAddToTask(parsed, { id: newId(), deviceId: getDeviceId(), order }),
-    ...overrides,
+    ...mutableOverrides,
   };
   await db.tasks.put(task);
   await enqueueOp({ table: 'tasks', recordId: task.id, op: 'put', payload: task });
