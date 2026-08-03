@@ -81,7 +81,7 @@ export async function renameProject(id: string, name: string): Promise<void> {
 
   const db = getDb();
   const existing = await db.projects.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt) return;
   const next: Project = {
     ...existing,
     name: normalizedName,
@@ -95,7 +95,7 @@ export async function renameProject(id: string, name: string): Promise<void> {
 export async function archiveProject(id: string): Promise<void> {
   const db = getDb();
   const existing = await db.projects.get(id);
-  if (!existing) return;
+  if (!existing || existing.deletedAt || existing.archivedAt) return;
   const now = new Date().toISOString();
   const next: Project = {
     ...existing,
