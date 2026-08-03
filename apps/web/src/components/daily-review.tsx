@@ -7,7 +7,7 @@ import { CheckCircle2, ListChecks, MoonStar, X } from 'lucide-react';
 import { getDb, isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
+import { rollForwardPatch, taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
 import { updateTask } from '@/lib/tasks';
 
 export function DailyReviewDialog() {
@@ -64,7 +64,7 @@ function DailyReview({ onClose }: { onClose: () => void }) {
     setRolling(true);
     const tomorrow = isoDay(addDays(new Date(), 1));
     for (const t of summary.slipped) {
-      await updateTask(t.id, { scheduledFor: tomorrow });
+      await updateTask(t.id, rollForwardPatch(t, today, tomorrow));
     }
     setRolling(false);
     onClose();
