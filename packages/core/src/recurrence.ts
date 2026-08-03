@@ -13,9 +13,7 @@ const DAY_INDEX: Record<NonNullable<RecurrenceRule['byDay']>[number], number> = 
 };
 
 export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
-  const interval = Number.isFinite(rule.interval)
-    ? Math.max(1, Math.floor(rule.interval))
-    : 1;
+  const interval = Number.isFinite(rule.interval) ? Math.max(1, Math.floor(rule.interval)) : 1;
   if (rule.freq === 'daily') return addDays(from, interval);
   if (rule.freq === 'monthly') return addMonths(from, interval);
   if (rule.freq === 'yearly') return addYears(from, interval);
@@ -51,11 +49,14 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
       ? parseISO(task.startAt)
       : task.dueAt
         ? parseISO(task.dueAt)
-      : now;
+        : now;
   const next = nextOccurrence(task.recurrence, anchor);
   if (!shouldGenerateNext(task.recurrence, 1, next)) return null;
   const isoDate = isoDay(next);
-  const offsetMs = task.startAt && task.endAt ? parseISO(task.endAt).getTime() - parseISO(task.startAt).getTime() : 0;
+  const offsetMs =
+    task.startAt && task.endAt
+      ? parseISO(task.endAt).getTime() - parseISO(task.startAt).getTime()
+      : 0;
   const startAtSource = task.startAt ? parseISO(task.startAt) : undefined;
   const nextStart = new Date(next);
   if (startAtSource) {
@@ -67,7 +68,10 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
     );
   }
   const startAt = startAtSource ? nextStart.toISOString() : undefined;
-  const endAt = startAt && offsetMs > 0 ? new Date(parseISO(startAt).getTime() + offsetMs).toISOString() : undefined;
+  const endAt =
+    startAt && offsetMs > 0
+      ? new Date(parseISO(startAt).getTime() + offsetMs).toISOString()
+      : undefined;
   const dueAtSource = task.dueAt ? parseISO(task.dueAt) : undefined;
   const nextDue = new Date(next);
   if (dueAtSource) {
@@ -80,11 +84,16 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
   }
   const dueAt = dueAtSource ? nextDue.toISOString() : undefined;
   const nowIso = now.toISOString();
+  const recurrence =
+    task.recurrence.count === undefined
+      ? task.recurrence
+      : { ...task.recurrence, count: task.recurrence.count - 1 };
   const projected: Task = {
     ...task,
     id: '',
     status: 'todo',
     scheduledFor: isoDate,
+    recurrence,
     createdAt: nowIso,
     updatedAt: nowIso,
     version: 1,
