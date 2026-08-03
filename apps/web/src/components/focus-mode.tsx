@@ -6,6 +6,7 @@ import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { elapsedSessionMinutes, elapsedSessionMs } from '@/lib/focus-timer';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { cn } from '@ops-dashboard/ui';
 
@@ -37,17 +38,22 @@ export function FocusMode() {
   const [running, setRunning] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const startedRef = useRef<number | null>(null);
+  const elapsedRef = useRef(0);
 
   const completePhase = useCallback(async () => {
     if (phase === 'focus' && activeId && startedRef.current) {
-      const elapsed = Math.round((Date.now() - startedRef.current) / 60000);
+      const elapsed = elapsedSessionMinutes(
+        elapsedSessionMs(elapsedRef.current, startedRef.current, Date.now()),
+      );
       const task = await getDb().tasks.get(activeId);
-      if (task) {
+      if (task && elapsed > 0) {
         await updateTask(activeId, {
           actualMinutes: (task.actualMinutes ?? 0) + elapsed,
         });
       }
     }
+    startedRef.current = null;
+    elapsedRef.current = 0;
     setPhase((p) => (p === 'focus' ? 'break' : 'focus'));
   }, [phase, activeId]);
 
@@ -104,17 +110,23 @@ export function FocusMode() {
   }
 
   function pause() {
+    elapsedRef.current = elapsedSessionMs(elapsedRef.current, startedRef.current, Date.now());
+    startedRef.current = null;
     setRunning(false);
   }
 
   function reset() {
     setRunning(false);
+    startedRef.current = null;
+    elapsedRef.current = 0;
     setSecondsLeft((phase === 'focus' ? focusMin : breakMin) * 60);
   }
 
   const total = (phase === 'focus' ? focusMin : breakMin) * 60;
   const progress = ((total - secondsLeft) / total) * 100;
-  const mm = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+  const mm = Math.floor(secondsLeft / 60)
+    .toString()
+    .padStart(2, '0');
   const ss = (secondsLeft % 60).toString().padStart(2, '0');
   const active = activeId ? candidates?.find((t) => t.id === activeId) : null;
 
@@ -128,7 +140,7 @@ export function FocusMode() {
       <button
         type="button"
         onClick={close}
-        className="fixed right-4 top-4 inline-flex size-11 items-center justify-center rounded-md border bg-card text-muted-foreground hover:text-foreground"
+        className="bg-card text-muted-foreground hover:text-foreground fixed top-4 right-4 inline-flex size-11 items-center justify-center rounded-md border"
         aria-label="Exit focus mode"
       >
         <X className="size-4" />
@@ -136,13 +148,13 @@ export function FocusMode() {
       <div className="m-auto flex min-h-full w-full max-w-xl flex-col items-center justify-center gap-5 py-12 sm:gap-8 sm:px-6">
         <div
           className={cn(
-            'inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em]',
+            'inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] tracking-[0.22em] uppercase',
             phase === 'focus'
               ? 'border-primary/30 bg-primary/10 text-primary'
               : 'border-success/30 bg-success/10 text-success',
           )}
         >
-          <span className="size-1.5 rounded-full bg-current live-dot" aria-hidden />
+          <span className="live-dot size-1.5 rounded-full bg-current" aria-hidden />
           {phase === 'focus' ? 'Focus' : 'Break'} session
         </div>
 
@@ -162,11 +174,15 @@ export function FocusMode() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div className="font-mono text-5xl font-light tabular-nums sm:text-6xl" role="timer" aria-live="off">
+            <div
+              className="font-mono text-5xl font-light tabular-nums sm:text-6xl"
+              role="timer"
+              aria-live="off"
+            >
               {mm}:{ss}
             </div>
             {active ? (
-              <div className="mt-2 max-w-[14rem] truncate text-sm text-muted-foreground">
+              <div className="text-muted-foreground mt-2 max-w-[14rem] truncate text-sm">
                 {active.title}
               </div>
             ) : null}
@@ -178,7 +194,7 @@ export function FocusMode() {
             <button
               type="button"
               onClick={pause}
-              className="inline-flex h-11 items-center gap-2 rounded-md border bg-card px-4 text-sm"
+              className="bg-card inline-flex h-11 items-center gap-2 rounded-md border px-4 text-sm"
             >
               <Pause className="size-4" /> Pause
             </button>
@@ -186,7 +202,7 @@ export function FocusMode() {
             <button
               type="button"
               onClick={() => start(active ?? candidates?.[0] ?? undefined)}
-              className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+              className="bg-primary text-primary-foreground inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm font-medium"
             >
               <Play className="size-4" /> Start
             </button>
@@ -194,7 +210,7 @@ export function FocusMode() {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex size-11 items-center justify-center rounded-md border bg-card text-sm text-muted-foreground hover:text-foreground"
+            className="bg-card text-muted-foreground hover:text-foreground inline-flex size-11 items-center justify-center rounded-md border text-sm"
             aria-label="Reset timer"
             title="Reset timer"
           >
@@ -206,10 +222,12 @@ export function FocusMode() {
               setRunning(false);
               setPhase('focus');
               setActiveId(null);
+              startedRef.current = null;
+              elapsedRef.current = 0;
               setSecondsLeft(focusMin * 60);
               close();
             }}
-            className="inline-flex h-11 items-center gap-2 rounded-md border bg-card px-3 text-sm text-muted-foreground hover:text-foreground"
+            className="bg-card text-muted-foreground hover:text-foreground inline-flex h-11 items-center gap-2 rounded-md border px-3 text-sm"
           >
             <Square className="size-4" /> End
           </button>
@@ -217,20 +235,20 @@ export function FocusMode() {
 
         {!active && candidates && candidates.length > 0 ? (
           <div className="w-full">
-            <div className="mb-2 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <div className="text-subtle-foreground mb-2 text-center font-mono text-[10px] tracking-[0.18em] uppercase">
               Choose a focus task
             </div>
-            <div className="surface-flat scrollbar-thin max-h-40 overflow-y-auto p-1">
+            <div className="surface-flat max-h-40 scrollbar-thin overflow-y-auto p-1">
               {candidates.slice(0, 6).map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => start(t)}
-                  className="flex min-h-10 w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                  className="hover:bg-accent flex min-h-10 w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm"
                 >
                   <span className="truncate">{t.title}</span>
                   {t.estimateMinutes ? (
-                    <span className="font-mono text-xs text-muted-foreground">
+                    <span className="text-muted-foreground font-mono text-xs">
                       {t.estimateMinutes}m
                     </span>
                   ) : null}
