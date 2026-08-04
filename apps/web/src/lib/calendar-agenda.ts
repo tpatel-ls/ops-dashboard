@@ -9,14 +9,18 @@ function validTimestamp(value: string | undefined): number | undefined {
   return Number.isFinite(timestamp) ? timestamp : undefined;
 }
 
-export function calendarKindOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>): CalendarTaskKind | undefined {
+export function calendarKindOf(
+  task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>,
+): CalendarTaskKind | undefined {
   if (validTimestamp(task.startAt) !== undefined) return 'time-block';
   if (task.scheduledFor && localDay(task.scheduledFor) === task.scheduledFor) return 'scheduled';
   if (validTimestamp(task.dueAt) !== undefined) return 'due';
   return undefined;
 }
 
-export function calendarDateOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>): string | undefined {
+export function calendarDateOf(
+  task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>,
+): string | undefined {
   if (task.startAt) {
     const start = new Date(task.startAt);
     if (Number.isFinite(start.getTime())) return isoDay(start);
@@ -33,9 +37,11 @@ export function calendarDateOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'du
 }
 
 export function compareCalendarTasks(a: Task, b: Task): number {
-  if (a.startAt && b.startAt) return new Date(a.startAt).getTime() - new Date(b.startAt).getTime();
-  if (a.startAt) return -1;
-  if (b.startAt) return 1;
+  const aStart = validTimestamp(a.startAt);
+  const bStart = validTimestamp(b.startAt);
+  if (aStart !== undefined && bStart !== undefined) return aStart - bStart;
+  if (aStart !== undefined) return -1;
+  if (bStart !== undefined) return 1;
   if (a.priority !== b.priority) return b.priority - a.priority;
   return a.title.localeCompare(b.title);
 }

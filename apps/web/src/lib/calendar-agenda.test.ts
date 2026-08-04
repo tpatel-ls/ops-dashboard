@@ -30,17 +30,19 @@ describe('calendar agenda', () => {
   });
 
   it('uses the most specific calendar kind', () => {
-    expect(calendarKindOf(task('block', { startAt: '2026-07-20T09:00:00', scheduledFor: '2026-07-20' }))).toBe('time-block');
-    expect(calendarKindOf(task('scheduled', { scheduledFor: '2026-07-20', dueAt: '2026-07-20' }))).toBe('scheduled');
+    expect(
+      calendarKindOf(task('block', { startAt: '2026-07-20T09:00:00', scheduledFor: '2026-07-20' })),
+    ).toBe('time-block');
+    expect(
+      calendarKindOf(task('scheduled', { scheduledFor: '2026-07-20', dueAt: '2026-07-20' })),
+    ).toBe('scheduled');
     expect(calendarKindOf(task('due', { dueAt: '2026-07-20' }))).toBe('due');
   });
 
   it('places timestamped tasks on the browser-local calendar day', () => {
     const timestamp = '2026-07-20T00:30:00+14:00';
 
-    expect(calendarDateOf(task('block', { startAt: timestamp }))).toBe(
-      isoDay(new Date(timestamp)),
-    );
+    expect(calendarDateOf(task('block', { startAt: timestamp }))).toBe(isoDay(new Date(timestamp)));
     expect(calendarDateOf(task('due', { dueAt: timestamp }))).toBe(isoDay(new Date(timestamp)));
   });
 
@@ -64,12 +66,14 @@ describe('calendar agenda', () => {
       task('critical', { scheduledFor: '2026-07-20', priority: 3, title: 'Critical' }),
       task('later', { startAt: '2026-07-20T14:00:00', title: 'Later' }),
       task('early', { startAt: '2026-07-20T09:00:00', title: 'Early' }),
+      task('invalid', { startAt: 'not-a-date', scheduledFor: '2026-07-20', priority: 2 }),
     ];
 
     expect(items.sort(compareCalendarTasks).map((item) => item.id)).toEqual([
       'early',
       'later',
       'critical',
+      'invalid',
       'normal',
     ]);
   });
