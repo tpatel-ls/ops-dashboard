@@ -123,6 +123,7 @@ describe('updateTask', () => {
       updatedAt: '2000-01-01T00:00:00.000Z',
       version: 99,
       deviceId: 'device-other',
+      deletedAt: '2000-01-01T00:00:00.000Z',
     });
 
     expect(mocks.put).toHaveBeenCalledWith(
@@ -134,6 +135,7 @@ describe('updateTask', () => {
         deviceId: 'device-original',
       }),
     );
+    expect(mocks.put.mock.calls[0]?.[0]).not.toHaveProperty('deletedAt');
     expect(mocks.enqueueOp).toHaveBeenCalledWith(expect.objectContaining({ recordId: 'task-1' }));
   });
 });
