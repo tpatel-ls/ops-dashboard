@@ -26,6 +26,17 @@ describe('boundedTextList', () => {
     expect(boundedTextList('alpha', 2, 10)).toEqual([]);
     expect(boundedTextList(['alpha'], Number.NaN, 10)).toEqual([]);
   });
+
+  it('stops reading input after collecting the requested number of items', () => {
+    const values = ['alpha', 'bravo'];
+    Object.defineProperty(values, 1, {
+      get: () => {
+        throw new Error('read past item limit');
+      },
+    });
+
+    expect(boundedTextList(values, 1, 10)).toEqual(['alpha']);
+  });
 });
 
 describe('dateOnlyText', () => {
