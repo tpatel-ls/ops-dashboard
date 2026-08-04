@@ -51,4 +51,13 @@ describe('createRoutine', () => {
     );
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
+
+  it('validates and trims a specific reminder time', async () => {
+    await expect(createRoutine({ name: 'Reset', specificTime: ' 08:05 ' })).resolves.toMatchObject({
+      specificTime: '08:05',
+    });
+    expect(() => createRoutine({ name: 'Reset', specificTime: '25:00' })).toThrow(
+      'Routine time must use 24-hour HH:mm format',
+    );
+  });
 });

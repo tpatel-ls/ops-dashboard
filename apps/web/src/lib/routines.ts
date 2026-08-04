@@ -43,6 +43,10 @@ export function addDaysISO(iso: string, days: number): string {
 export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
   const name = input.name.trim();
   if (!name) throw new Error('Routine name is required.');
+  const specificTime = input.specificTime?.trim();
+  if (specificTime && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(specificTime)) {
+    throw new Error('Routine time must use 24-hour HH:mm format.');
+  }
   if (
     input.durationDays !== undefined &&
     (!Number.isInteger(input.durationDays) || input.durationDays <= 0)
@@ -55,14 +59,16 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
   }
   const kind = input.kind ?? 'ongoing';
   const endDate =
-    kind === 'fixed' && input.durationDays ? addDaysISO(startDate, input.durationDays - 1) : undefined;
+    kind === 'fixed' && input.durationDays
+      ? addDaysISO(startDate, input.durationDays - 1)
+      : undefined;
   return putRecord(
     'routines',
     newRecord<Routine>({
       name,
       ...(input.description ? { description: input.description } : {}),
       timeOfDay: input.timeOfDay ?? 'anytime',
-      ...(input.specificTime ? { specificTime: input.specificTime } : {}),
+      ...(specificTime ? { specificTime } : {}),
       notify: input.notify ?? false,
       ...(input.domainId ? { domainId: input.domainId } : {}),
       kind,
@@ -91,7 +97,10 @@ export async function toggleRoutineCheck(
   source: 'manual' | 'journal' | 'capture' = 'manual',
 ): Promise<void> {
   const db = getDb();
-  const existing = await db.routineChecks.where('[routineId+date]').equals([routineId, date]).first();
+  const existing = await db.routineChecks
+    .where('[routineId+date]')
+    .equals([routineId, date])
+    .first();
   const completedAt = done ? new Date().toISOString() : undefined;
   if (existing) {
     await patchRecord<RoutineCheck>('routineChecks', existing.id, {
