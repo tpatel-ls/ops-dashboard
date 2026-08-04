@@ -44,6 +44,13 @@ describe('calendar agenda', () => {
     expect(calendarDateOf(task('due', { dueAt: timestamp }))).toBe(isoDay(new Date(timestamp)));
   });
 
+  it('does not place malformed scheduled days on the calendar', () => {
+    expect(calendarDateOf(task('impossible', { scheduledFor: '2026-02-30' }))).toBeUndefined();
+    expect(
+      calendarDateOf(task('trailing', { scheduledFor: '2026-07-20 ignore this' })),
+    ).toBeUndefined();
+  });
+
   it('sorts timed work first, followed by priority and title', () => {
     const items = [
       task('normal', { scheduledFor: '2026-07-20', title: 'Normal' }),
