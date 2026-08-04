@@ -16,8 +16,10 @@ export function dateOnlyText(value: unknown): string {
 export function boundedTextList(value: unknown, maxItems: number, maxItemLength: number): string[] {
   if (!Array.isArray(value)) return [];
   const itemLimit = Number.isFinite(maxItems) ? Math.max(0, Math.floor(maxItems)) : 0;
-  return value
-    .map((item) => boundedText(item, maxItemLength))
-    .filter(Boolean)
-    .slice(0, itemLimit);
+  const result: string[] = [];
+  for (let index = 0; index < value.length && result.length < itemLimit; index += 1) {
+    const text = boundedText(value[index], maxItemLength);
+    if (text) result.push(text);
+  }
+  return result;
 }
