@@ -41,6 +41,7 @@ describe('patchRecord', () => {
       updatedAt: '2000-01-01T00:00:00.000Z',
       version: 99,
       deviceId: 'device-other',
+      deletedAt: '2000-01-01T00:00:00.000Z',
     });
 
     expect(result).toMatchObject({
@@ -50,6 +51,7 @@ describe('patchRecord', () => {
       version: 5,
       deviceId: 'device-original',
     });
+    expect(result).not.toHaveProperty('deletedAt');
     expect(mocks.put).toHaveBeenCalledWith(result);
     expect(mocks.enqueueOp).toHaveBeenCalledWith(
       expect.objectContaining({ recordId: 'task-1', payload: result }),
