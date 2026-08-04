@@ -126,6 +126,27 @@ describe('projectNextTask', () => {
     expect(third?.recurrence?.count).toBe(1);
     expect(projectNextTask(third!, new Date('2026-08-03T13:00:00.000Z'))).toBeNull();
   });
+
+  it('rejects malformed recurrence anchors without throwing', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Broken schedule',
+      status: 'done',
+      priority: 0,
+      scheduledFor: 'not-a-date',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    expect(projectNextTask(task)).toBeNull();
+  });
 });
 
 describe('shouldGenerateNext', () => {
