@@ -27,6 +27,13 @@ describe('createRoutine', () => {
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 
+  it('requires a name and trims it before storage', async () => {
+    expect(() => createRoutine({ name: '   ' })).toThrow('Routine name is required');
+    await expect(createRoutine({ name: '  Morning reset  ' })).resolves.toMatchObject({
+      name: 'Morning reset',
+    });
+  });
+
   it('includes both endpoints in a fixed routine duration', async () => {
     const routine = await createRoutine({
       name: 'Reset',

@@ -38,6 +38,8 @@ export function addDaysISO(iso: string, days: number): string {
 }
 
 export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
+  const name = input.name.trim();
+  if (!name) throw new Error('Routine name is required.');
   if (
     input.durationDays !== undefined &&
     (!Number.isInteger(input.durationDays) || input.durationDays <= 0)
@@ -51,7 +53,7 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
   return putRecord(
     'routines',
     newRecord<Routine>({
-      name: input.name,
+      name,
       ...(input.description ? { description: input.description } : {}),
       timeOfDay: input.timeOfDay ?? 'anytime',
       ...(input.specificTime ? { specificTime: input.specificTime } : {}),
