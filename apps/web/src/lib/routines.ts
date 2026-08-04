@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb } from '@ops-dashboard/core';
+import { getDb, localDay } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
@@ -31,6 +31,9 @@ export function todayISO(): string {
 }
 
 export function addDaysISO(iso: string, days: number): string {
+  if (localDay(iso) !== iso || !Number.isInteger(days)) {
+    throw new Error('Routine date must be a valid calendar day.');
+  }
   const [y, m, d] = iso.split('-').map(Number);
   const date = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
   date.setDate(date.getDate() + days);
@@ -47,6 +50,9 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
     throw new Error('Routine duration must be a positive whole number of days.');
   }
   const startDate = input.startDate ?? todayISO();
+  if (localDay(startDate) !== startDate) {
+    throw new Error('Routine start date must be a valid calendar day.');
+  }
   const kind = input.kind ?? 'ongoing';
   const endDate =
     kind === 'fixed' && input.durationDays ? addDaysISO(startDate, input.durationDays - 1) : undefined;
