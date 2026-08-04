@@ -52,11 +52,10 @@ describe('calendar agenda', () => {
   });
 
   it('falls back to a valid scheduled day when a time block is malformed', () => {
-    expect(
-      calendarDateOf(
-        task('fallback', { startAt: 'not-a-date', scheduledFor: '2026-07-20' }),
-      ),
-    ).toBe('2026-07-20');
+    const fallback = task('fallback', { startAt: 'not-a-date', scheduledFor: '2026-07-20' });
+
+    expect(calendarDateOf(fallback)).toBe('2026-07-20');
+    expect(calendarKindOf(fallback)).toBe('scheduled');
   });
 
   it('sorts timed work first, followed by priority and title', () => {
