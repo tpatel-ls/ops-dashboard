@@ -44,4 +44,11 @@ describe('createRoutine', () => {
 
     expect(routine).toMatchObject({ startDate: '2026-07-31', endDate: '2026-08-01' });
   });
+
+  it.each(['2026-02-30', 'not-a-date'])('rejects an invalid start date: %s', (startDate) => {
+    expect(() => createRoutine({ name: 'Reset', startDate })).toThrow(
+      'Routine start date must be a valid calendar day',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
 });
