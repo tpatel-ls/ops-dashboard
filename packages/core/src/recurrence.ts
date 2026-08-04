@@ -19,7 +19,13 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
   if (rule.freq === 'yearly') return addYears(from, interval);
   if (rule.freq === 'weekly') {
     if (!rule.byDay || rule.byDay.length === 0) return addWeeks(from, interval);
-    const allowed = [...new Set(rule.byDay.map((d) => DAY_INDEX[d]))].sort((a, b) => a - b);
+    const allowed = [
+      ...new Set(
+        rule.byDay
+          .map((day) => (DAY_INDEX as Record<string, number | undefined>)[day])
+          .filter((day): day is number => day !== undefined),
+      ),
+    ].sort((a, b) => a - b);
     const laterThisWeek = allowed.find((day) => day > from.getDay());
     if (laterThisWeek !== undefined) {
       return addDays(from, laterThisWeek - from.getDay());

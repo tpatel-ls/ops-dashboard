@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Task } from './types';
+import type { RecurrenceRule, Task } from './types';
 import { nextOccurrence, projectNextTask, shouldGenerateNext } from './recurrence';
 
 describe('nextOccurrence', () => {
@@ -40,6 +40,17 @@ describe('nextOccurrence', () => {
     expect(nextOccurrence({ freq: 'daily', interval: 2.9 }, anchor)).toEqual(
       new Date('2026-04-28'),
     );
+  });
+
+  it('ignores malformed weekly day values from synced data', () => {
+    const anchor = new Date('2026-04-26');
+    const rule = {
+      freq: 'weekly',
+      interval: 1,
+      byDay: ['invalid', 'WE'],
+    } as unknown as RecurrenceRule;
+
+    expect(nextOccurrence(rule, anchor).getDay()).toBe(3);
   });
 });
 
