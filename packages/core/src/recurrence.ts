@@ -1,6 +1,6 @@
 import { addDays, addMonths, addWeeks, addYears, isValid, parseISO } from 'date-fns';
 import type { RecurrenceRule, Task } from './types';
-import { isoDay } from './dates';
+import { isoDay, localDay } from './dates';
 
 const DAY_INDEX: Record<NonNullable<RecurrenceRule['byDay']>[number], number> = {
   SU: 0,
@@ -41,7 +41,7 @@ export function shouldGenerateNext(rule: RecurrenceRule, count: number, next: Da
   if (rule.endsOn) {
     // endsOn is a local calendar day, so a timed occurrence later on that day
     // is still eligible.
-    if (isoDay(next) > rule.endsOn.slice(0, 10)) return false;
+    if (localDay(rule.endsOn) !== rule.endsOn || isoDay(next) > rule.endsOn) return false;
   }
   if (rule.count !== undefined && count >= rule.count) return false;
   return true;

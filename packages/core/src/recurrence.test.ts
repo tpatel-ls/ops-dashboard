@@ -167,4 +167,10 @@ describe('shouldGenerateNext', () => {
     expect(shouldGenerateNext(rule, 1, new Date(2026, 3, 27, 17, 30))).toBe(true);
     expect(shouldGenerateNext(rule, 1, new Date(2026, 3, 28, 9))).toBe(false);
   });
+
+  it('stops recurrences with malformed end dates', () => {
+    const rule = { freq: 'daily', interval: 1, endsOn: '2026-02-30' } as const;
+
+    expect(shouldGenerateNext(rule, 1, new Date(2026, 1, 28, 9))).toBe(false);
+  });
 });
