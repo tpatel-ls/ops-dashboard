@@ -1,4 +1,4 @@
-import { isoDay } from '@ops-dashboard/core';
+import { isoDay, localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 
 export type CalendarTaskKind = 'time-block' | 'scheduled' | 'due';
@@ -15,7 +15,7 @@ export function calendarDateOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'du
     const start = new Date(task.startAt);
     return Number.isFinite(start.getTime()) ? isoDay(start) : undefined;
   }
-  if (task.scheduledFor) return task.scheduledFor.slice(0, 10);
+  if (task.scheduledFor) return localDay(task.scheduledFor);
   if (task.dueAt) {
     const due = new Date(task.dueAt);
     return Number.isFinite(due.getTime()) ? isoDay(due) : undefined;
