@@ -1,4 +1,4 @@
-import { addDays, addMonths, addWeeks, addYears, parseISO } from 'date-fns';
+import { addDays, addMonths, addWeeks, addYears, isValid, parseISO } from 'date-fns';
 import type { RecurrenceRule, Task } from './types';
 import { isoDay } from './dates';
 
@@ -50,14 +50,18 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
       : task.dueAt
         ? parseISO(task.dueAt)
         : now;
+  if (!isValid(anchor) || !isValid(now)) return null;
   const next = nextOccurrence(task.recurrence, anchor);
+  if (!isValid(next)) return null;
   if (!shouldGenerateNext(task.recurrence, 1, next)) return null;
   const isoDate = isoDay(next);
+  const parsedStartAt = task.startAt ? parseISO(task.startAt) : undefined;
+  const startAtSource = parsedStartAt && isValid(parsedStartAt) ? parsedStartAt : undefined;
+  const parsedEndAt = task.endAt ? parseISO(task.endAt) : undefined;
   const offsetMs =
-    task.startAt && task.endAt
-      ? parseISO(task.endAt).getTime() - parseISO(task.startAt).getTime()
+    startAtSource && parsedEndAt && isValid(parsedEndAt)
+      ? parsedEndAt.getTime() - startAtSource.getTime()
       : 0;
-  const startAtSource = task.startAt ? parseISO(task.startAt) : undefined;
   const nextStart = new Date(next);
   if (startAtSource) {
     nextStart.setHours(
@@ -72,7 +76,8 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
     startAt && offsetMs > 0
       ? new Date(parseISO(startAt).getTime() + offsetMs).toISOString()
       : undefined;
-  const dueAtSource = task.dueAt ? parseISO(task.dueAt) : undefined;
+  const parsedDueAt = task.dueAt ? parseISO(task.dueAt) : undefined;
+  const dueAtSource = parsedDueAt && isValid(parsedDueAt) ? parsedDueAt : undefined;
   const nextDue = new Date(next);
   if (dueAtSource) {
     nextDue.setHours(
