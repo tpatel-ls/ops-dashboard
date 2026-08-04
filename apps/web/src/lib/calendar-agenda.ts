@@ -13,9 +13,12 @@ export function calendarKindOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'du
 export function calendarDateOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>): string | undefined {
   if (task.startAt) {
     const start = new Date(task.startAt);
-    return Number.isFinite(start.getTime()) ? isoDay(start) : undefined;
+    if (Number.isFinite(start.getTime())) return isoDay(start);
   }
-  if (task.scheduledFor) return localDay(task.scheduledFor);
+  if (task.scheduledFor) {
+    const scheduled = localDay(task.scheduledFor);
+    if (scheduled) return scheduled;
+  }
   if (task.dueAt) {
     const due = new Date(task.dueAt);
     return Number.isFinite(due.getTime()) ? isoDay(due) : undefined;
