@@ -3,10 +3,16 @@ import type { Task } from '@ops-dashboard/core';
 
 export type CalendarTaskKind = 'time-block' | 'scheduled' | 'due';
 
+function validTimestamp(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
 export function calendarKindOf(task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>): CalendarTaskKind | undefined {
-  if (task.startAt) return 'time-block';
-  if (task.scheduledFor) return 'scheduled';
-  if (task.dueAt) return 'due';
+  if (validTimestamp(task.startAt) !== undefined) return 'time-block';
+  if (task.scheduledFor && localDay(task.scheduledFor) === task.scheduledFor) return 'scheduled';
+  if (validTimestamp(task.dueAt) !== undefined) return 'due';
   return undefined;
 }
 
