@@ -51,6 +51,14 @@ describe('calendar agenda', () => {
     ).toBeUndefined();
   });
 
+  it('falls back to a valid scheduled day when a time block is malformed', () => {
+    expect(
+      calendarDateOf(
+        task('fallback', { startAt: 'not-a-date', scheduledFor: '2026-07-20' }),
+      ),
+    ).toBe('2026-07-20');
+  });
+
   it('sorts timed work first, followed by priority and title', () => {
     const items = [
       task('normal', { scheduledFor: '2026-07-20', title: 'Normal' }),
