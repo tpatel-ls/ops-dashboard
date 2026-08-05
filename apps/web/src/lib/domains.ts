@@ -43,10 +43,13 @@ export function createDomain(input: {
   description?: string;
   order?: number;
 }): Promise<Domain> {
+  const name = input.name.trim();
+  if (!name) throw new Error('Domain name is required.');
+
   return putRecord(
     'domains',
     newRecord<Domain>({
-      name: input.name,
+      name,
       color: input.color,
       ...(input.icon ? { icon: input.icon } : {}),
       ...(input.description ? { description: input.description } : {}),
