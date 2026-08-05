@@ -13,6 +13,7 @@ vi.mock('./records', () => ({
 }));
 
 import { createDomain } from './domains';
+import { createBook } from './books';
 import { createPerson } from './people';
 
 beforeEach(() => vi.clearAllMocks());
@@ -45,6 +46,22 @@ describe('createPerson', () => {
 
   it('rejects blank person names before persistence', () => {
     expect(() => createPerson({ name: '   ' })).toThrow('Person name is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createBook', () => {
+  it('trims book titles before persistence', async () => {
+    await createBook({ title: '  The Checklist Manifesto  ' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'books',
+      expect.objectContaining({ title: 'The Checklist Manifesto' }),
+    );
+  });
+
+  it('rejects blank book titles before persistence', () => {
+    expect(() => createBook({ title: '   ' })).toThrow('Book title is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });

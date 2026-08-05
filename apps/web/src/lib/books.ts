@@ -10,10 +10,13 @@ export function createBook(input: {
   coverUrl?: string;
   isbn?: string;
 }): Promise<Book> {
+  const title = input.title.trim();
+  if (!title) throw new Error('Book title is required.');
+
   return putRecord(
     'books',
     newRecord<Book>({
-      title: input.title,
+      title,
       ...(input.author ? { author: input.author } : {}),
       status: input.status ?? 'want',
       ...(input.coverUrl ? { coverUrl: input.coverUrl } : {}),
