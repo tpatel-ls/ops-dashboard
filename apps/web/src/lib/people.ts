@@ -42,7 +42,12 @@ export const updatePerson = (id: string, patch: Partial<Person>) =>
 export const deletePerson = (id: string) => softDeleteRecord<Person>('people', id);
 
 export function makeFact(label: string, value: string): PersonFact {
-  return { id: newId(), label, value };
+  const normalizedLabel = label.trim();
+  const normalizedValue = value.trim();
+  if (!normalizedLabel || !normalizedValue) {
+    throw new Error('Fact label and value are required.');
+  }
+  return { id: newId(), label: normalizedLabel, value: normalizedValue };
 }
 
 export function makeInteraction(note: string, date?: string): Interaction {

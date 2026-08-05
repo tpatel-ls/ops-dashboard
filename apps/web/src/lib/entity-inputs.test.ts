@@ -18,7 +18,7 @@ import { createJournalEntry } from './journal';
 import { createBook } from './books';
 import { createContent } from './content';
 import { createNote } from './notes';
-import { createPerson, makeInteraction } from './people';
+import { createPerson, makeFact, makeInteraction } from './people';
 import { createQuote } from './quotes';
 
 beforeEach(() => vi.clearAllMocks());
@@ -68,6 +68,20 @@ describe('makeInteraction', () => {
     expect(() => makeInteraction('Follow up', '2026-02-30')).toThrow(
       'Interaction date must be valid',
     );
+  });
+});
+
+describe('makeFact', () => {
+  it('trims fact labels and values', () => {
+    expect(makeFact('  Timezone  ', '  Central  ')).toMatchObject({
+      label: 'Timezone',
+      value: 'Central',
+    });
+  });
+
+  it('rejects incomplete facts', () => {
+    expect(() => makeFact('   ', 'Central')).toThrow('Fact label and value are required');
+    expect(() => makeFact('Timezone', '   ')).toThrow('Fact label and value are required');
   });
 });
 
