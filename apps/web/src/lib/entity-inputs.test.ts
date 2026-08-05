@@ -13,6 +13,7 @@ vi.mock('./records', () => ({
 }));
 
 import { createDomain } from './domains';
+import { createJournalEntry } from './journal';
 import { createBook } from './books';
 import { createContent } from './content';
 import { createNote } from './notes';
@@ -113,6 +114,22 @@ describe('createNote', () => {
 
   it('rejects notes without a title or body', () => {
     expect(() => createNote({ title: '   ', body: '   ' })).toThrow('Note content is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createJournalEntry', () => {
+  it('trims journal bodies before persistence', async () => {
+    await createJournalEntry({ body: '  Closed the launch checklist.  ' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'journalEntries',
+      expect.objectContaining({ body: 'Closed the launch checklist.' }),
+    );
+  });
+
+  it('rejects blank journal bodies before persistence', () => {
+    expect(() => createJournalEntry({ body: '   ' })).toThrow('Journal entry body is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
