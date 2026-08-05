@@ -37,4 +37,22 @@ describe('normalizeSettings', () => {
       pomodoroBreakMinutes: 30,
     });
   });
+
+  it('repairs malformed clock settings', () => {
+    expect(
+      normalizeSettings({
+        workdayStart: '8:00',
+        workdayEnd: '25:00',
+        dailyReviewAt: '17:90',
+      }),
+    ).toMatchObject({
+      workdayStart: DEFAULT_SETTINGS.workdayStart,
+      workdayEnd: DEFAULT_SETTINGS.workdayEnd,
+      dailyReviewAt: DEFAULT_SETTINGS.dailyReviewAt,
+    });
+
+    expect(
+      normalizeSettings({ workdayStart: '07:30', workdayEnd: '19:15', dailyReviewAt: '18:45' }),
+    ).toMatchObject({ workdayStart: '07:30', workdayEnd: '19:15', dailyReviewAt: '18:45' });
+  });
 });
