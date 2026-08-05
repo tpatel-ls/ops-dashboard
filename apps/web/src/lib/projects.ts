@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, getDeviceId, newId } from '@ops-dashboard/core';
+import { getDb, getDeviceId, localDay, newId } from '@ops-dashboard/core';
 import type { Project, ProjectKind, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
@@ -49,6 +49,9 @@ export async function createProject(
 ): Promise<Project> {
   const normalizedName = name.trim();
   if (!normalizedName) throw new Error('Project name is required.');
+  if (opts.dueDate !== undefined && localDay(opts.dueDate) !== opts.dueDate) {
+    throw new Error('Project due date must be a valid calendar date.');
+  }
 
   const db = getDb();
   const count = await db.projects.count();
