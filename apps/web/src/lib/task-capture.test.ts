@@ -77,5 +77,7 @@ describe('taskScheduleLabel', () => {
     expect(taskScheduleLabel('tomorrow', '2026-07-20')).toBe('Tomorrow');
     expect(taskScheduleLabel('date', '2026-07-20')).toBe('Jul 20');
     expect(taskScheduleLabel('date', '')).toBe('Pick date');
+    expect(taskScheduleLabel('date', '2026-02-30')).toBe('Pick date');
+    expect(taskScheduleLabel('date', 'not-a-date')).toBe('Pick date');
   });
 });
