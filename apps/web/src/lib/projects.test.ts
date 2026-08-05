@@ -104,6 +104,15 @@ describe('createProject', () => {
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
 
+  it('rejects impossible due dates before writing', async () => {
+    await expect(createProject('Launch', { dueDate: '2026-02-30' })).rejects.toThrow(
+      'Project due date must be a valid calendar date',
+    );
+    expect(mocks.count).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+
   it('does not rename a deleted project', async () => {
     mocks.get.mockResolvedValue({
       id: 'project-test',
