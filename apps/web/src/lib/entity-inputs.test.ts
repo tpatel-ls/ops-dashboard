@@ -15,6 +15,7 @@ vi.mock('./records', () => ({
 import { createDomain } from './domains';
 import { createBook } from './books';
 import { createPerson } from './people';
+import { createQuote } from './quotes';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -62,6 +63,22 @@ describe('createBook', () => {
 
   it('rejects blank book titles before persistence', () => {
     expect(() => createBook({ title: '   ' })).toThrow('Book title is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createQuote', () => {
+  it('trims quote text before persistence', async () => {
+    await createQuote({ text: '  Make it work, then make it better.  ' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'quotes',
+      expect.objectContaining({ text: 'Make it work, then make it better.' }),
+    );
+  });
+
+  it('rejects blank quote text before persistence', () => {
+    expect(() => createQuote({ text: '   ' })).toThrow('Quote text is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
