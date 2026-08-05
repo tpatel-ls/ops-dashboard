@@ -10,10 +10,13 @@ export function createContent(input: {
   domainId?: string;
   url?: string;
 }): Promise<Content> {
+  const title = input.title.trim();
+  if (!title) throw new Error('Content title is required.');
+
   return putRecord(
     'content',
     newRecord<Content>({
-      title: input.title,
+      title,
       type: input.type ?? 'video',
       status: 'idea',
       ...(input.channel ? { channel: input.channel } : {}),

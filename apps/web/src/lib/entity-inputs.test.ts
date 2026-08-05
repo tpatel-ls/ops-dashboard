@@ -14,6 +14,7 @@ vi.mock('./records', () => ({
 
 import { createDomain } from './domains';
 import { createBook } from './books';
+import { createContent } from './content';
 import { createPerson } from './people';
 import { createQuote } from './quotes';
 
@@ -79,6 +80,22 @@ describe('createQuote', () => {
 
   it('rejects blank quote text before persistence', () => {
     expect(() => createQuote({ text: '   ' })).toThrow('Quote text is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createContent', () => {
+  it('trims content titles before persistence', async () => {
+    await createContent({ title: '  August launch video  ' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'content',
+      expect.objectContaining({ title: 'August launch video' }),
+    );
+  });
+
+  it('rejects blank content titles before persistence', () => {
+    expect(() => createContent({ title: '   ' })).toThrow('Content title is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
