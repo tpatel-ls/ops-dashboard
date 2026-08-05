@@ -35,5 +35,7 @@ export const updateQuote = (id: string, patch: Partial<Quote>) =>
 export const deleteQuote = (id: string) => softDeleteRecord<Quote>('quotes', id);
 
 export function makeThought(text: string): Thought {
-  return { id: newId(), text, at: new Date().toISOString() };
+  const normalizedText = text.trim();
+  if (!normalizedText) throw new Error('Thought text is required.');
+  return { id: newId(), text: normalizedText, at: new Date().toISOString() };
 }

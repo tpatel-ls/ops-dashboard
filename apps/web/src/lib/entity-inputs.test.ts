@@ -19,7 +19,7 @@ import { createBook } from './books';
 import { createContent } from './content';
 import { createNote } from './notes';
 import { createPerson, makeFact, makeInteraction } from './people';
-import { createQuote } from './quotes';
+import { createQuote, makeThought } from './quotes';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -114,6 +114,16 @@ describe('createQuote', () => {
   it('rejects blank quote text before persistence', () => {
     expect(() => createQuote({ text: '   ' })).toThrow('Quote text is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('makeThought', () => {
+  it('trims thought text', () => {
+    expect(makeThought('  Apply this to onboarding.  ').text).toBe('Apply this to onboarding.');
+  });
+
+  it('rejects blank thoughts', () => {
+    expect(() => makeThought('   ')).toThrow('Thought text is required');
   });
 });
 
