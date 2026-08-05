@@ -18,7 +18,7 @@ import { createJournalEntry } from './journal';
 import { createBook } from './books';
 import { createContent } from './content';
 import { createNote } from './notes';
-import { createPerson } from './people';
+import { createPerson, makeInteraction } from './people';
 import { createQuote } from './quotes';
 
 beforeEach(() => vi.clearAllMocks());
@@ -52,6 +52,22 @@ describe('createPerson', () => {
   it('rejects blank person names before persistence', () => {
     expect(() => createPerson({ name: '   ' })).toThrow('Person name is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('makeInteraction', () => {
+  it('trims useful interaction notes', () => {
+    expect(makeInteraction('  Discussed Q3 roadmap  ', '2026-08-05')).toMatchObject({
+      date: '2026-08-05',
+      note: 'Discussed Q3 roadmap',
+    });
+  });
+
+  it('rejects blank notes and impossible dates', () => {
+    expect(() => makeInteraction('   ', '2026-08-05')).toThrow('Interaction note is required');
+    expect(() => makeInteraction('Follow up', '2026-02-30')).toThrow(
+      'Interaction date must be valid',
+    );
   });
 });
 
