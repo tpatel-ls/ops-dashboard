@@ -12,10 +12,13 @@ export function createQuote(input: {
   bookId?: string;
   tags?: string[];
 }): Promise<Quote> {
+  const text = input.text.trim();
+  if (!text) throw new Error('Quote text is required.');
+
   return putRecord(
     'quotes',
     newRecord<Quote>({
-      text: input.text,
+      text,
       ...(input.author ? { author: input.author } : {}),
       ...(input.source ? { source: input.source } : {}),
       ...(input.sourceType ? { sourceType: input.sourceType } : {}),
