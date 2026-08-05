@@ -8,12 +8,24 @@ function boundedMinutes(value: unknown, fallback: number, min: number, max: numb
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
+function clockTime(value: unknown, fallback: string): string {
+  if (typeof value !== 'string') return fallback;
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return fallback;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours <= 23 && minutes <= 59 ? value : fallback;
+}
+
 /** Fill settings added after the first schema and repair invalid timer values. */
 export function normalizeSettings(value?: Partial<Settings> | null): Settings {
   return {
     ...DEFAULT_SETTINGS,
     ...value,
     id: 'singleton',
+    workdayStart: clockTime(value?.workdayStart, DEFAULT_SETTINGS.workdayStart),
+    workdayEnd: clockTime(value?.workdayEnd, DEFAULT_SETTINGS.workdayEnd),
+    dailyReviewAt: clockTime(value?.dailyReviewAt, DEFAULT_SETTINGS.dailyReviewAt),
     pomodoroFocusMinutes: boundedMinutes(
       value?.pomodoroFocusMinutes,
       DEFAULT_SETTINGS.pomodoroFocusMinutes,
