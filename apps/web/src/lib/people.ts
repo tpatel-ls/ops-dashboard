@@ -20,10 +20,13 @@ export function createPerson(input: {
   relationship?: string;
   domainId?: string;
 }): Promise<Person> {
+  const name = input.name.trim();
+  if (!name) throw new Error('Person name is required.');
+
   return putRecord(
     'people',
     newRecord<Person>({
-      name: input.name,
+      name,
       ...(input.relationship ? { relationship: input.relationship } : {}),
       ...(input.domainId ? { domainId: input.domainId } : {}),
       facts: [],
