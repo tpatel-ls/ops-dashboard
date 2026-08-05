@@ -10,11 +10,15 @@ export function createNote(input: {
   tags?: string[];
   bookId?: string;
 }): Promise<Note> {
+  const title = input.title?.trim();
+  const body = input.body.trim();
+  if (!title && !body) throw new Error('Note content is required.');
+
   return putRecord(
     'notes',
     newRecord<Note>({
-      ...(input.title ? { title: input.title } : {}),
-      body: input.body,
+      ...(title ? { title } : {}),
+      body,
       ...(input.source ? { source: input.source } : {}),
       tags: input.tags ?? [],
       ...(input.bookId ? { bookId: input.bookId } : {}),

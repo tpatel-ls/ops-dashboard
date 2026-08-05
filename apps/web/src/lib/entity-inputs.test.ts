@@ -15,6 +15,7 @@ vi.mock('./records', () => ({
 import { createDomain } from './domains';
 import { createBook } from './books';
 import { createContent } from './content';
+import { createNote } from './notes';
 import { createPerson } from './people';
 import { createQuote } from './quotes';
 
@@ -96,6 +97,22 @@ describe('createContent', () => {
 
   it('rejects blank content titles before persistence', () => {
     expect(() => createContent({ title: '   ' })).toThrow('Content title is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createNote', () => {
+  it('trims note text before persistence', async () => {
+    await createNote({ title: '  Launch notes  ', body: '  Confirm rollout owner.  ' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'notes',
+      expect.objectContaining({ title: 'Launch notes', body: 'Confirm rollout owner.' }),
+    );
+  });
+
+  it('rejects notes without a title or body', () => {
+    expect(() => createNote({ title: '   ', body: '   ' })).toThrow('Note content is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
