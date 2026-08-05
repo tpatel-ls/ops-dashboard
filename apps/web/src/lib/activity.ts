@@ -14,6 +14,14 @@ const WEIGHTS = {
   workPer30Min: 0.5,
 } as const;
 
+const DEFAULT_ACTIVITY_DAYS = 365;
+const MAX_ACTIVITY_DAYS = 3660;
+
+export function normalizeActivityDays(days: number): number {
+  if (!Number.isFinite(days)) return DEFAULT_ACTIVITY_DAYS;
+  return Math.min(MAX_ACTIVITY_DAYS, Math.max(1, Math.floor(days)));
+}
+
 /** Convert any ISO/Date to a local YYYY-MM-DD string. */
 function toLocalDate(ts: string | Date): string {
   const d = typeof ts === 'string' ? new Date(ts) : ts;
@@ -62,11 +70,12 @@ export function aggregateActivity(
  * aggregate, and return a dense ActivityDay[] array.
  */
 export async function loadActivity(days = 365): Promise<ActivityDay[]> {
+  const safeDays = normalizeActivityDays(days);
   const db = getDb();
   const end = new Date();
   end.setHours(23, 59, 59, 999);
   const start = new Date(end);
-  start.setDate(start.getDate() - days + 1);
+  start.setDate(start.getDate() - safeDays + 1);
   start.setHours(0, 0, 0, 0);
 
   const startISO = start.toISOString();
