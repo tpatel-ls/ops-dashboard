@@ -13,6 +13,7 @@ vi.mock('./records', () => ({
 }));
 
 import { createDomain } from './domains';
+import { createPerson } from './people';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -28,6 +29,22 @@ describe('createDomain', () => {
 
   it('rejects blank domain names before persistence', () => {
     expect(() => createDomain({ name: '   ', color: '#0a6' })).toThrow('Domain name is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createPerson', () => {
+  it('trims person names before persistence', async () => {
+    await createPerson({ name: '  Avery Morgan  ' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'people',
+      expect.objectContaining({ name: 'Avery Morgan' }),
+    );
+  });
+
+  it('rejects blank person names before persistence', () => {
+    expect(() => createPerson({ name: '   ' })).toThrow('Person name is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
