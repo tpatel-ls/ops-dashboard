@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aggregateActivity } from './activity';
+import { aggregateActivity, normalizeActivityDays } from './activity';
 
 describe('aggregateActivity', () => {
   it('normalizes invalid and negative scores to an empty day', () => {
@@ -28,5 +28,18 @@ describe('aggregateActivity', () => {
     );
 
     expect(result).toEqual([{ date: '2026-07-29', count: 2.5, level: 1 }]);
+  });
+});
+
+describe('normalizeActivityDays', () => {
+  it('bounds history windows to a positive ten-year range', () => {
+    expect(normalizeActivityDays(0)).toBe(1);
+    expect(normalizeActivityDays(30.9)).toBe(30);
+    expect(normalizeActivityDays(50_000)).toBe(3660);
+  });
+
+  it('falls back for non-finite history windows', () => {
+    expect(normalizeActivityDays(Number.NaN)).toBe(365);
+    expect(normalizeActivityDays(Number.POSITIVE_INFINITY)).toBe(365);
   });
 });
