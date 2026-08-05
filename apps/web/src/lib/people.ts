@@ -1,6 +1,6 @@
 'use client';
 
-import { newId } from '@ops-dashboard/core';
+import { localDay, newId } from '@ops-dashboard/core';
 import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
@@ -46,5 +46,10 @@ export function makeFact(label: string, value: string): PersonFact {
 }
 
 export function makeInteraction(note: string, date?: string): Interaction {
-  return { id: newId(), date: date ?? new Date().toISOString(), note };
+  const normalizedNote = note.trim();
+  if (!normalizedNote) throw new Error('Interaction note is required.');
+  if (date !== undefined && localDay(date) === undefined) {
+    throw new Error('Interaction date must be valid.');
+  }
+  return { id: newId(), date: date ?? new Date().toISOString(), note: normalizedNote };
 }
