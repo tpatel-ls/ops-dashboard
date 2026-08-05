@@ -19,12 +19,15 @@ export interface CreateFoodLogInput {
 
 /** Create a food log; totals are always derived from the items. */
 export function createFoodLog(input: CreateFoodLogInput): Promise<FoodLog> {
+  const description = input.description.trim();
+  if (!description) throw new Error('Food description is required.');
+
   return putRecord(
     'foodLogs',
     newRecord<FoodLog>({
       date: input.date ?? todayISO(),
       mealType: input.mealType ?? 'snack',
-      description: input.description,
+      description,
       items: input.items,
       ...computeFoodTotals(input.items),
       ...(input.source ? { source: input.source } : {}),

@@ -13,6 +13,7 @@ vi.mock('./records', () => ({
 }));
 
 import { createDomain } from './domains';
+import { createFoodLog } from './food-logs';
 import { createJournalEntry } from './journal';
 import { createBook } from './books';
 import { createContent } from './content';
@@ -130,6 +131,24 @@ describe('createJournalEntry', () => {
 
   it('rejects blank journal bodies before persistence', () => {
     expect(() => createJournalEntry({ body: '   ' })).toThrow('Journal entry body is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createFoodLog', () => {
+  it('trims food descriptions before persistence', async () => {
+    await createFoodLog({ description: '  Eggs and toast  ', items: [] });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'foodLogs',
+      expect.objectContaining({ description: 'Eggs and toast' }),
+    );
+  });
+
+  it('rejects blank food descriptions before persistence', () => {
+    expect(() => createFoodLog({ description: '   ', items: [] })).toThrow(
+      'Food description is required',
+    );
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
