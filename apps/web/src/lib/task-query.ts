@@ -26,10 +26,21 @@ export function compareTasks(a: Task, b: Task): number {
 
 export type TaskSort = 'default' | 'due' | 'priority' | 'recent';
 
+function validTimestamp(value: string): number | undefined {
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
 export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
   if (sort === 'recent') {
-    const updatedOrder = b.updatedAt.localeCompare(a.updatedAt);
-    if (updatedOrder !== 0) return updatedOrder;
+    const aUpdatedAt = validTimestamp(a.updatedAt);
+    const bUpdatedAt = validTimestamp(b.updatedAt);
+    if (aUpdatedAt !== undefined && bUpdatedAt === undefined) return -1;
+    if (aUpdatedAt === undefined && bUpdatedAt !== undefined) return 1;
+    if (aUpdatedAt !== undefined && bUpdatedAt !== undefined) {
+      const updatedOrder = bUpdatedAt - aUpdatedAt;
+      if (updatedOrder !== 0) return updatedOrder;
+    }
   }
   if (sort === 'priority') {
     const priorityOrder = b.priority - a.priority;
