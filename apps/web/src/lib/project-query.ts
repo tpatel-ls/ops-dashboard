@@ -1,4 +1,4 @@
-import type { Project } from '@ops-dashboard/core';
+import { localDay, type Project } from '@ops-dashboard/core';
 
 export type ProjectSort = 'name' | 'due' | 'recent';
 
@@ -28,7 +28,7 @@ function compareOptionalDates(a?: string, b?: string, descending = false): numbe
 
 export function compareProjects(a: Project, b: Project, sort: ProjectSort): number {
   if (sort === 'due') {
-    const dueOrder = compareOptionalDates(a.dueDate, b.dueDate);
+    const dueOrder = compareOptionalDates(localDay(a.dueDate), localDay(b.dueDate));
     if (dueOrder !== 0) return dueOrder;
   }
   if (sort === 'recent') {
