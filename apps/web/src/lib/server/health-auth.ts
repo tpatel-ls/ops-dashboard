@@ -6,7 +6,8 @@ export function healthRequestAuthorized(req: Request): boolean {
   );
   if (expectedSecrets.length === 0) return true;
 
-  const provided = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+  const match = /^Bearer ([^\s]+)$/i.exec(req.headers.get('authorization') ?? '');
+  const provided = match?.[1] ?? '';
   const providedBytes = Buffer.from(provided);
   return expectedSecrets.some((expected) => {
     const expectedBytes = Buffer.from(expected);
