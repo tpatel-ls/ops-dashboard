@@ -15,7 +15,8 @@ import { timingSafeEqual } from 'node:crypto';
 export function requestAllowed(req: Request): boolean {
   const secret = process.env.OPS_API_SECRET;
   if (secret) {
-    const provided = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+    const match = /^Bearer ([^\s]+)$/i.exec(req.headers.get('authorization') ?? '');
+    const provided = match?.[1] ?? '';
     const a = Buffer.from(provided);
     const b = Buffer.from(secret);
     if (a.length === b.length && timingSafeEqual(a, b)) return true;
