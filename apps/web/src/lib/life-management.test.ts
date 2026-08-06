@@ -257,6 +257,35 @@ describe('life management summary', () => {
     expect(summary.activeDays).toBe(0);
   });
 
+  it('does not classify malformed task dates as overdue', () => {
+    const malformed = {
+      ...meta('malformed-task'),
+      title: 'Imported task',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      scheduledFor: '2020-invalid',
+    } satisfies Task;
+
+    const summary = summarizeLifeManagement({
+      tasks: [malformed],
+      projects: [],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.overdue).toBe(0);
+  });
+
   it('ignores malformed dates in the all-time activity count', () => {
     const summary = summarizeLifeManagement({
       tasks: [],

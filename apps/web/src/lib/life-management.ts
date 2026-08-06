@@ -141,11 +141,11 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   const today = input.today ?? todayIso();
   const liveTasks = input.tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
   const openTasks = liveTasks.filter((task) => task.status !== 'done');
-  const overdue = openTasks.filter(
-    (task) =>
-      (task.scheduledFor && task.scheduledFor < today) ||
-      (task.dueAt && datePart(task.dueAt)! < today),
-  );
+  const overdue = openTasks.filter((task) => {
+    const scheduledDay = datePart(task.scheduledFor);
+    const dueDay = datePart(task.dueAt);
+    return Boolean((scheduledDay && scheduledDay < today) || (dueDay && dueDay < today));
+  });
   const dueToday = openTasks.filter(
     (task) =>
       task.scheduledFor === today ||
