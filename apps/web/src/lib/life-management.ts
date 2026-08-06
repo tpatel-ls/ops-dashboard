@@ -161,8 +161,9 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     (project) => !project.deletedAt && !project.archivedAt && project.status === 'active',
   );
   const slippingProjects = activeProjects.filter((project) => {
-    if (!project.lastWorkedAt) return true;
-    return daysBetween(datePart(project.lastWorkedAt)!, today) > 7;
+    const lastWorkedDay = datePart(project.lastWorkedAt);
+    if (!lastWorkedDay) return true;
+    return daysBetween(lastWorkedDay, today) > 7;
   });
 
   const activeRoutines = input.routines.filter(
