@@ -47,6 +47,15 @@ describe('compareTasks', () => {
     expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['local-day', 'calendar-day']);
   });
 
+  it('treats impossible scheduled days as undated', () => {
+    const tasks = [
+      task('invalid', { scheduledFor: '2026-02-30', priority: 3 }),
+      task('valid', { scheduledFor: '2026-03-01' }),
+    ];
+
+    expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['valid', 'invalid']);
+  });
+
   it('uses order and title as stable tie breakers', () => {
     const tasks = [
       task('z', { title: 'Zulu', order: 2 }),
