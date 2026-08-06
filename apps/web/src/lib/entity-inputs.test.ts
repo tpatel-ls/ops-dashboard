@@ -13,6 +13,7 @@ vi.mock('./records', () => ({
 }));
 
 import { createDomain } from './domains';
+import { createCapture } from './captures';
 import { createFoodLog } from './food-logs';
 import { createJournalEntry } from './journal';
 import { createBook } from './books';
@@ -35,6 +36,22 @@ describe('createDomain', () => {
 
   it('rejects blank domain names before persistence', () => {
     expect(() => createDomain({ name: '   ', color: '#0a6' })).toThrow('Domain name is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('createCapture', () => {
+  it('trims captured text before persistence', async () => {
+    await createCapture('  Call the vendor  ');
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'captures',
+      expect.objectContaining({ raw: 'Call the vendor' }),
+    );
+  });
+
+  it('rejects blank captures before persistence', () => {
+    expect(() => createCapture('   ')).toThrow('Capture text is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
