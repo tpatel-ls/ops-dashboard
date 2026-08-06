@@ -12,11 +12,15 @@ export function pushNotification(input: {
   refType?: string;
   refId?: string;
 }): Promise<AppNotification> {
+  const title = input.title.trim();
+  const body = input.body?.trim();
+  if (!title) throw new Error('Notification title is required.');
+
   return putRecord(
     'notifications',
     newRecord<AppNotification>({
-      title: input.title,
-      ...(input.body ? { body: input.body } : {}),
+      title,
+      ...(body ? { body } : {}),
       kind: input.kind,
       ...(input.refType ? { refType: input.refType } : {}),
       ...(input.refId ? { refId: input.refId } : {}),

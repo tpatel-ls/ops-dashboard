@@ -15,6 +15,7 @@ vi.mock('./records', () => ({
 import { createDomain } from './domains';
 import { createCapture } from './captures';
 import { createFoodLog } from './food-logs';
+import { pushNotification } from './feed';
 import { createJournalEntry } from './journal';
 import { createBook } from './books';
 import { createContent } from './content';
@@ -52,6 +53,24 @@ describe('createCapture', () => {
 
   it('rejects blank captures before persistence', () => {
     expect(() => createCapture('   ')).toThrow('Capture text is required');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('pushNotification', () => {
+  it('trims notification content before persistence', async () => {
+    await pushNotification({ title: '  Capture saved  ', body: '  Call Alex  ', kind: 'capture' });
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'notifications',
+      expect.objectContaining({ title: 'Capture saved', body: 'Call Alex' }),
+    );
+  });
+
+  it('rejects blank notification titles before persistence', () => {
+    expect(() => pushNotification({ title: '   ', kind: 'system' })).toThrow(
+      'Notification title is required',
+    );
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
