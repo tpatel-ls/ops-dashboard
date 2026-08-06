@@ -390,6 +390,8 @@ describe('life management summary', () => {
         routine('current', '2026-07-01'),
         routine('future', '2026-07-07'),
         routine('expired', '2026-06-01', '2026-07-05'),
+        routine('invalid-start', '2026-02-30'),
+        routine('invalid-end', '2026-07-01', '2026-02-30'),
       ],
       routineChecks: [],
       captures: [],

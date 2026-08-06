@@ -166,13 +166,17 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     return daysBetween(lastWorkedDay, today) > 7;
   });
 
-  const activeRoutines = input.routines.filter(
-    (routine) =>
+  const activeRoutines = input.routines.filter((routine) => {
+    const startDay = localDay(routine.startDate);
+    const endDay = routine.endDate ? localDay(routine.endDate) : undefined;
+    return Boolean(
       !routine.deletedAt &&
       !routine.archivedAt &&
-      routine.startDate <= today &&
-      (!routine.endDate || routine.endDate >= today),
-  );
+      startDay === routine.startDate &&
+      startDay <= today &&
+      (!routine.endDate || (endDay === routine.endDate && endDay >= today)),
+    );
+  });
   const checksToday = new Map(
     input.routineChecks
       .filter((check) => !check.deletedAt && check.date === today)
