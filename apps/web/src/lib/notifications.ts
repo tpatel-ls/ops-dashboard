@@ -54,6 +54,7 @@ export async function cancelReminder(reminderId: string): Promise<void> {
 
 export async function checkAndFireDueReminders(now: Date = new Date()): Promise<number> {
   if (notificationPermission() !== 'granted') return 0;
+  if (!Number.isFinite(now.getTime())) return 0;
   const db = getDb();
   // `delivered` is a boolean and cannot be an IndexedDB key; query by the
   // indexed `triggerAt` and filter undelivered in memory.
