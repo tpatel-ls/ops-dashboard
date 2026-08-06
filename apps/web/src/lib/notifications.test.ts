@@ -83,6 +83,11 @@ describe('checkAndFireDueReminders', () => {
     expect(mocks.reminders.update).not.toHaveBeenCalled();
   });
 
+  it('skips reminder checks for an invalid clock value', async () => {
+    await expect(checkAndFireDueReminders(new Date('invalid'))).resolves.toBe(0);
+    expect(mocks.reminders.where).not.toHaveBeenCalled();
+  });
+
   it('removes a due reminder whose task no longer exists', async () => {
     mocks.tasks.get.mockResolvedValue(undefined);
     vi.stubGlobal('navigator', {
