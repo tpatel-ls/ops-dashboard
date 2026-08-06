@@ -77,6 +77,16 @@ describe('compareProjects', () => {
     ]);
   });
 
+  it('treats impossible project deadlines as undated', () => {
+    const valid = project({ id: 'valid', name: 'Valid', dueDate: '2026-03-01' });
+    const malformed = project({ id: 'malformed', name: 'Malformed', dueDate: '2026-02-30' });
+
+    expect([malformed, valid].sort((a, b) => compareProjects(a, b, 'due'))).toEqual([
+      valid,
+      malformed,
+    ]);
+  });
+
   it('sorts recently worked projects first', () => {
     expect([alpha, gamma, beta].sort((a, b) => compareProjects(a, b, 'recent'))).toEqual([
       beta,
