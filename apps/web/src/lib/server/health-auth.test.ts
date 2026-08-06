@@ -21,6 +21,18 @@ describe('healthRequestAuthorized', () => {
     expect(healthRequestAuthorized(request('wrong-secret'))).toBe(false);
   });
 
+  it('rejects configured secrets without the Bearer scheme', () => {
+    vi.stubEnv('CRON_SECRET', 'cron-secret');
+
+    expect(
+      healthRequestAuthorized(
+        new Request('http://localhost/api/health', {
+          headers: { authorization: 'cron-secret' },
+        }),
+      ),
+    ).toBe(false);
+  });
+
   it('remains open when neither secret is configured', () => {
     vi.stubEnv('CRON_SECRET', '');
     vi.stubEnv('OPS_API_SECRET', '');
