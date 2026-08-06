@@ -94,4 +94,28 @@ describe('compareProjects', () => {
       alpha,
     ]);
   });
+
+  it('sorts recent activity by instant and puts malformed timestamps last', () => {
+    const latest = project({
+      id: 'latest',
+      name: 'Latest',
+      lastWorkedAt: '2026-07-15T10:00:00-05:00',
+    });
+    const earlier = project({
+      id: 'earlier',
+      name: 'Earlier',
+      lastWorkedAt: '2026-07-15T14:30:00Z',
+    });
+    const malformed = project({
+      id: 'malformed',
+      name: 'Malformed',
+      lastWorkedAt: 'not-a-timestamp',
+    });
+
+    expect([malformed, earlier, latest].sort((a, b) => compareProjects(a, b, 'recent'))).toEqual([
+      latest,
+      earlier,
+      malformed,
+    ]);
+  });
 });
