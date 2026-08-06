@@ -43,6 +43,17 @@ describe('scheduleReminder', () => {
     );
     expect(mocks.reminders.put).not.toHaveBeenCalled();
   });
+
+  it('normalizes trigger times before indexing reminders', async () => {
+    await scheduleReminder('task-1', ' 2026-08-02T09:00:00-05:00 ');
+
+    expect(mocks.reminders.put).toHaveBeenCalledWith({
+      id: 'reminder-test',
+      taskId: 'task-1',
+      triggerAt: '2026-08-02T14:00:00.000Z',
+      delivered: false,
+    });
+  });
 });
 
 describe('checkAndFireDueReminders', () => {

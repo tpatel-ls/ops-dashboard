@@ -29,7 +29,8 @@ export async function ensureServiceWorker(): Promise<ServiceWorkerRegistration |
 }
 
 export async function scheduleReminder(taskId: string, triggerAt: string): Promise<Reminder> {
-  if (!triggerAt.trim() || !Number.isFinite(Date.parse(triggerAt))) {
+  const timestamp = Date.parse(triggerAt.trim());
+  if (!triggerAt.trim() || !Number.isFinite(timestamp)) {
     throw new Error('Reminder time must be a valid date.');
   }
   const db = getDb();
@@ -37,7 +38,12 @@ export async function scheduleReminder(taskId: string, triggerAt: string): Promi
   if (!task || task.deletedAt || task.status === 'done' || task.status === 'archived') {
     throw new Error('Task is not available for reminders.');
   }
-  const reminder: Reminder = { id: newId(), taskId, triggerAt, delivered: false };
+  const reminder: Reminder = {
+    id: newId(),
+    taskId,
+    triggerAt: new Date(timestamp).toISOString(),
+    delivered: false,
+  };
   await db.reminders.put(reminder);
   return reminder;
 }
