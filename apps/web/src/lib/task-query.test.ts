@@ -101,6 +101,16 @@ describe('compareTasksBy', () => {
 
     expect([older, newer].sort((a, b) => compareTasksBy('recent', a, b))).toEqual([newer, older]);
   });
+
+  it('puts malformed update timestamps after valid recent work', () => {
+    const valid = task('valid', { updatedAt: '2026-07-15T09:00:00.000Z' });
+    const malformed = task('malformed', { updatedAt: 'not-a-timestamp', priority: 3 });
+
+    expect([malformed, valid].sort((a, b) => compareTasksBy('recent', a, b))).toEqual([
+      valid,
+      malformed,
+    ]);
+  });
 });
 
 describe('matchesTaskSearch', () => {
