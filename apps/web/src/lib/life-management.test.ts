@@ -286,6 +286,34 @@ describe('life management summary', () => {
     expect(summary.overdue).toBe(0);
   });
 
+  it('treats malformed project activity timestamps as needing attention', () => {
+    const project = {
+      ...meta('malformed-project'),
+      name: 'Imported project',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      lastWorkedAt: 'not-a-timestamp',
+      milestones: [],
+      checklists: [],
+    } satisfies Project;
+
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [project],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.slippingProjects).toBe(1);
+  });
+
   it('ignores malformed dates in the all-time activity count', () => {
     const summary = summarizeLifeManagement({
       tasks: [],
