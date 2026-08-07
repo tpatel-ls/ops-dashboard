@@ -4,6 +4,7 @@ import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { type JournalImageMediaType, validateJournalImage } from '@/lib/server/journal-image';
 import { boundedText, boundedTextList } from '@/lib/server/input';
+import { normalizeJournalExtraction } from '@/lib/server/journal-extraction';
 
 export const runtime = 'nodejs';
 
@@ -129,8 +130,9 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
-    if (!toolUse) return NextResponse.json({ ok: false, reason: 'no-result' });
-    return NextResponse.json({ ok: true, result: toolUse.input });
+    const result = normalizeJournalExtraction(toolUse?.input, routineNames);
+    if (!result) return NextResponse.json({ ok: false, reason: 'no-result' });
+    return NextResponse.json({ ok: true, result });
   } catch (err) {
     console.error('[api/journal/extract] error:', err);
     return NextResponse.json({ ok: false, reason: 'error' });
