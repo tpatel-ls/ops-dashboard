@@ -88,6 +88,9 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
     }
 
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      clearChord();
+    };
   }, []);
 }
