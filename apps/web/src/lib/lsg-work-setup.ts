@@ -1,6 +1,7 @@
 'use client';
 
 import { LSG_LAUNCH_PROJECT_NAMES, importPortfolioProjects } from './import-projects';
+import { readLocalStorage, writeLocalStorage } from './browser-storage';
 
 const GUARD_KEY = 'ops:lsg-work-setup-v2';
 
@@ -10,7 +11,7 @@ export async function syncLsgLaunchPlan() {
 
 export async function ensureLsgWorkSetup(): Promise<void> {
   if (typeof window === 'undefined') return;
-  if (localStorage.getItem(GUARD_KEY) === '1') return;
+  if (readLocalStorage(GUARD_KEY) === '1') return;
   await syncLsgLaunchPlan();
-  localStorage.setItem(GUARD_KEY, '1');
+  writeLocalStorage(GUARD_KEY, '1');
 }
