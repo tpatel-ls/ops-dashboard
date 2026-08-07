@@ -83,6 +83,18 @@ describe('checkAndFireDueReminders', () => {
     expect(mocks.reminders.update).not.toHaveBeenCalled();
   });
 
+  it('uses the Notification API when service workers are unavailable', async () => {
+    vi.stubGlobal('navigator', {});
+
+    await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(1);
+
+    expect(Notification).toHaveBeenCalledWith(
+      'Call customer',
+      expect.objectContaining({ tag: 'ops-reminder-1' }),
+    );
+    expect(mocks.reminders.update).toHaveBeenCalledWith('reminder-1', { delivered: true });
+  });
+
   it('skips reminder checks for an invalid clock value', async () => {
     await expect(checkAndFireDueReminders(new Date('invalid'))).resolves.toBe(0);
     expect(mocks.reminders.where).not.toHaveBeenCalled();
