@@ -4,6 +4,7 @@ import { DEFAULT_ORG_COLOR, DEFAULT_ORG_NAME, getDb } from '@ops-dashboard/core'
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { createOrganization } from './organizations';
 import { patchRecord } from './records';
+import { readLocalStorage, writeLocalStorage } from './browser-storage';
 
 const GUARD_KEY = 'ops:org-setup-v1';
 
@@ -21,7 +22,7 @@ const LSG_PROJECT_NAMES = new Set(['blue text', 'power dialer']);
  */
 export async function ensureOrgSetup(): Promise<void> {
   if (typeof window === 'undefined') return;
-  if (localStorage.getItem(GUARD_KEY) === '1') return;
+  if (readLocalStorage(GUARD_KEY) === '1') return;
 
   const db = getDb();
   const projects = (await db.projects.toArray()).filter((p) => !p.deletedAt);
@@ -29,7 +30,7 @@ export async function ensureOrgSetup(): Promise<void> {
     (p) => !p.orgId && LSG_PROJECT_NAMES.has(p.name.trim().toLowerCase()),
   );
   if (toMigrate.length === 0) {
-    localStorage.setItem(GUARD_KEY, '1');
+    writeLocalStorage(GUARD_KEY, '1');
     return;
   }
 
@@ -55,5 +56,5 @@ export async function ensureOrgSetup(): Promise<void> {
     }
   }
 
-  localStorage.setItem(GUARD_KEY, '1');
+  writeLocalStorage(GUARD_KEY, '1');
 }
