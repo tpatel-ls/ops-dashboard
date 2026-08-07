@@ -13,6 +13,7 @@ import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { normalizeTimezoneOffset } from '@/lib/server/timezone';
 import { boundedText } from '@/lib/server/input';
+import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient, getSingleUserId } from '@/utils/supabase/admin';
 import { SYNC_TABLES, toRow } from '@/lib/sync/mapping';
@@ -40,17 +41,6 @@ Extract:
 - tags: lowercase topic tags.
 - domainHint: a short lowercase life area if obvious (home, work, health, content, personal).
 - reminderText: if the user asks for a reminder/alert, the offset (e.g. "5 minutes before").`;
-
-interface TriageResult {
-  kind: CaptureKind;
-  title: string;
-  notes?: string;
-  dueText?: string;
-  priority?: number;
-  tags?: string[];
-  domainHint?: string;
-  reminderText?: string;
-}
 
 function bearerMatches(req: Request): boolean {
   const secret = process.env.OPS_API_SECRET;
@@ -148,7 +138,7 @@ async function triage(raw: string): Promise<TriageResult | null> {
       messages: [{ role: 'user', content: raw }],
     });
     const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
-    return toolUse ? (toolUse.input as TriageResult) : null;
+    return normalizeTriageResult(toolUse?.input);
   } catch (err) {
     console.error('[api/capture] triage error:', err);
     return null;

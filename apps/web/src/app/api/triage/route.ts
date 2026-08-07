@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { boundedText } from '@/lib/server/input';
+import { normalizeTriageResult } from '@/lib/server/triage-result';
 
 export const runtime = 'nodejs';
 
@@ -76,8 +77,9 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
-    if (!toolUse) return NextResponse.json({ ok: false, reason: 'no-result' });
-    return NextResponse.json({ ok: true, result: toolUse.input });
+    const result = normalizeTriageResult(toolUse?.input);
+    if (!result) return NextResponse.json({ ok: false, reason: 'no-result' });
+    return NextResponse.json({ ok: true, result });
   } catch (err) {
     console.error('[api/triage] error:', err);
     return NextResponse.json({ ok: false, reason: 'error' });
