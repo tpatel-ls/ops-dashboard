@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePageVisibility } from './use-page-visibility';
 
 function readDraft(key: string): string {
@@ -15,6 +15,11 @@ function readDraft(key: string): string {
 export function useLocalDraft(key: string) {
   const visibility = usePageVisibility();
   const [draft, setDraft] = useState(() => readDraft(key));
+  const latestDraft = useRef(draft);
+
+  useEffect(() => {
+    latestDraft.current = draft;
+  }, [draft]);
 
   const saveDraft = useCallback(
     (value: string) => {
@@ -31,6 +36,8 @@ export function useLocalDraft(key: string) {
   useEffect(() => {
     if (visibility === 'hidden') saveDraft(draft);
   }, [draft, saveDraft, visibility]);
+
+  useEffect(() => () => saveDraft(latestDraft.current), [saveDraft]);
 
   return { draft, setDraft, saveDraft };
 }
