@@ -123,4 +123,29 @@ describe('deleteWorkLog', () => {
       lastWorkedAt: '2026-08-01T12:00:00.000Z',
     });
   });
+
+  it('ignores malformed legacy timestamps when restoring project activity', async () => {
+    const latest = {
+      id: 'work-latest',
+      projectId: 'project-1',
+      at: '2026-08-02T12:00:00.000Z',
+    };
+    mocks.getWorkLog.mockResolvedValue(latest);
+    mocks.getProject.mockResolvedValue({
+      id: 'project-1',
+      status: 'active',
+      lastWorkedAt: latest.at,
+    });
+    mocks.listProjectWorkLogs.mockResolvedValue([
+      latest,
+      { id: 'work-invalid', projectId: 'project-1', at: 'not-a-date' },
+      { id: 'work-previous', projectId: 'project-1', at: '2026-08-01T12:00:00.000Z' },
+    ]);
+
+    await deleteWorkLog(latest.id);
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
+      lastWorkedAt: '2026-08-01T12:00:00.000Z',
+    });
+  });
 });

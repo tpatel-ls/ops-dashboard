@@ -49,8 +49,9 @@ export async function deleteWorkLog(id: string): Promise<void> {
 
   const remaining = await db.workLogs.where('projectId').equals(existing.projectId).toArray();
   const latest = remaining
-    .filter((log) => log.id !== id && !log.deletedAt)
-    .sort((a, b) => b.at.localeCompare(a.at))[0];
+    .map((log) => ({ log, timestamp: Date.parse(log.at) }))
+    .filter(({ log, timestamp }) => log.id !== id && !log.deletedAt && Number.isFinite(timestamp))
+    .sort((a, b) => b.timestamp - a.timestamp)[0]?.log;
   await patchRecord<Project>('projects', existing.projectId, {
     lastWorkedAt: latest?.at,
   });
