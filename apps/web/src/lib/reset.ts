@@ -29,6 +29,9 @@ const TABLES: SyncTable[] = [
  *  demo-data reset and the Settings "Clear all data" action. */
 export async function wipeLocalData(): Promise<void> {
   const db = getDb();
-  await Promise.all(TABLES.map((t) => db.table(t).clear()));
-  await db.syncOps.clear();
+  const contentTables = TABLES.map((table) => db.table(table));
+  await db.transaction('rw', [...contentTables, db.syncOps], async () => {
+    await Promise.all(contentTables.map((table) => table.clear()));
+    await db.syncOps.clear();
+  });
 }
