@@ -71,7 +71,10 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
       continue;
     }
     try {
-      const reg = await navigator.serviceWorker.getRegistration('/');
+      const reg =
+        'serviceWorker' in navigator
+          ? await navigator.serviceWorker.getRegistration('/')
+          : undefined;
       const opts: NotificationOptions = {
         body: task.notes ?? 'Reminder',
         tag: `ops-${r.id}`,
