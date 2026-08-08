@@ -65,6 +65,25 @@ describe('compareTasks', () => {
 
     expect(tasks.sort(compareTasks).map((item) => item.title)).toEqual(['Alpha', 'Beta', 'Zulu']);
   });
+
+  it('sorts predictably when imported numeric fields are malformed', () => {
+    const tasks = [
+      task('invalid-order', { order: Number.NaN }),
+      task('valid-order', { order: 2 }),
+      task('invalid-priority', {
+        priority: Number.POSITIVE_INFINITY as Task['priority'],
+        order: 1,
+      }),
+      task('urgent', { priority: 3, order: 3 }),
+    ];
+
+    expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual([
+      'urgent',
+      'invalid-priority',
+      'valid-order',
+      'invalid-order',
+    ]);
+  });
 });
 
 describe('compareTasksBy', () => {
