@@ -41,6 +41,10 @@ export async function patchRecord<T extends SyncMeta>(
   for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId', 'deletedAt']) {
     delete mutablePatch[key];
   }
+  const changed = Object.entries(mutablePatch).some(
+    ([key, value]) => !Object.is((existing as T & Record<string, unknown>)[key], value),
+  );
+  if (!changed) return existing;
   const merged = {
     ...existing,
     ...mutablePatch,
