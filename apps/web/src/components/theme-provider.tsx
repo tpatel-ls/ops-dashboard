@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
+import { readLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
@@ -23,8 +24,7 @@ const STORAGE_KEY = 'ops.theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark';
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = readLocalStorage(STORAGE_KEY);
   if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
   return 'dark';
 }
@@ -51,20 +51,14 @@ function applyResolved(resolved: ResolvedTheme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(readStoredTheme);
-  const systemDark = useSyncExternalStore(
-    subscribePrefersDark,
-    getSystemDark,
-    () => true,
-  );
+  const systemDark = useSyncExternalStore(subscribePrefersDark, getSystemDark, () => true);
 
   const resolved: ResolvedTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
   applyResolved(resolved);
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEY, t);
-    }
+    writeLocalStorage(STORAGE_KEY, t);
   }, []);
 
   const value = useMemo<ThemeContextValue>(
