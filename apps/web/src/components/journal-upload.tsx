@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Camera,
   Check,
@@ -56,13 +56,27 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
   const [saving, setSaving] = useState(false);
   const [manualBody, setManualBody] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
+
+  function clearImagePreview() {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = null;
+    setImagePreviewUrl(null);
+  }
+
+  useEffect(
+    () => () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    },
+    [],
+  );
 
   function reset() {
     setMode('idle');
     setStage('input');
     setText('');
     setImageBase64(null);
-    setImagePreviewUrl(null);
+    clearImagePreview();
     setResult(null);
     setError(null);
     setSaving(false);
@@ -73,7 +87,10 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setMediaType(file.type || 'image/jpeg');
-    setImagePreviewUrl(URL.createObjectURL(file));
+    clearImagePreview();
+    const previewUrl = URL.createObjectURL(file);
+    previewUrlRef.current = previewUrl;
+    setImagePreviewUrl(previewUrl);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
@@ -465,7 +482,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
                 type="button"
                 onClick={() => {
                   setImageBase64(null);
-                  setImagePreviewUrl(null);
+                  clearImagePreview();
                   if (fileRef.current) fileRef.current.value = '';
                 }}
                 className="absolute right-2 top-2 inline-flex size-6 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
