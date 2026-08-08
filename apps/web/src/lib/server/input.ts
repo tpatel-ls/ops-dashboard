@@ -17,9 +17,13 @@ export function boundedTextList(value: unknown, maxItems: number, maxItemLength:
   if (!Array.isArray(value)) return [];
   const itemLimit = Number.isFinite(maxItems) ? Math.max(0, Math.floor(maxItems)) : 0;
   const result: string[] = [];
+  const seen = new Set<string>();
   for (let index = 0; index < value.length && result.length < itemLimit; index += 1) {
     const text = boundedText(value[index], maxItemLength);
-    if (text) result.push(text);
+    if (text && !seen.has(text)) {
+      seen.add(text);
+      result.push(text);
+    }
   }
   return result;
 }

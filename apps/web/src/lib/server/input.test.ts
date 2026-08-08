@@ -37,6 +37,10 @@ describe('boundedTextList', () => {
 
     expect(boundedTextList(values, 1, 10)).toEqual(['alpha']);
   });
+
+  it('deduplicates normalized items without consuming the item limit', () => {
+    expect(boundedTextList([' alpha ', 'alpha', 'bravo'], 2, 10)).toEqual(['alpha', 'bravo']);
+  });
 });
 
 describe('dateOnlyText', () => {
