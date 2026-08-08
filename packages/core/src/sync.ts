@@ -50,8 +50,16 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
   if (!local) return remote;
   if (local.version > remote.version) return local;
   if (remote.version > local.version) return remote;
-  if (remote.updatedAt > local.updatedAt) return remote;
-  if (local.updatedAt > remote.updatedAt) return local;
+  const localUpdatedAt = Date.parse(local.updatedAt);
+  const remoteUpdatedAt = Date.parse(remote.updatedAt);
+  const localTimestampValid = Number.isFinite(localUpdatedAt);
+  const remoteTimestampValid = Number.isFinite(remoteUpdatedAt);
+  if (remoteTimestampValid && !localTimestampValid) return remote;
+  if (localTimestampValid && !remoteTimestampValid) return local;
+  if (remoteTimestampValid && localTimestampValid) {
+    if (remoteUpdatedAt > localUpdatedAt) return remote;
+    if (localUpdatedAt > remoteUpdatedAt) return local;
+  }
 
   // Equal version/timestamp conflicts must converge regardless of which copy is
   // considered local. Preserve deletions first, then use the stable device ID.
