@@ -5,6 +5,16 @@ function taskDate(task: Task): string | null {
   return localDay(task.scheduledFor) ?? localDay(task.dueAt) ?? localDay(task.startAt) ?? null;
 }
 
+function taskPriority(task: Task): number {
+  return Number.isFinite(task.priority) && task.priority >= 0 && task.priority <= 3
+    ? task.priority
+    : 0;
+}
+
+function taskOrder(task: Task): number | undefined {
+  return Number.isFinite(task.order) ? task.order : undefined;
+}
+
 export function compareTasks(a: Task, b: Task): number {
   const aDate = taskDate(a);
   const bDate = taskDate(b);
@@ -15,11 +25,17 @@ export function compareTasks(a: Task, b: Task): number {
     if (dateOrder !== 0) return dateOrder;
   }
 
-  const priorityOrder = b.priority - a.priority;
+  const priorityOrder = taskPriority(b) - taskPriority(a);
   if (priorityOrder !== 0) return priorityOrder;
 
-  const itemOrder = a.order - b.order;
-  if (itemOrder !== 0) return itemOrder;
+  const aOrder = taskOrder(a);
+  const bOrder = taskOrder(b);
+  if (aOrder !== undefined && bOrder === undefined) return -1;
+  if (aOrder === undefined && bOrder !== undefined) return 1;
+  if (aOrder !== undefined && bOrder !== undefined) {
+    const itemOrder = aOrder - bOrder;
+    if (itemOrder !== 0) return itemOrder;
+  }
 
   return a.title.localeCompare(b.title);
 }
@@ -43,7 +59,7 @@ export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
     }
   }
   if (sort === 'priority') {
-    const priorityOrder = b.priority - a.priority;
+    const priorityOrder = taskPriority(b) - taskPriority(a);
     if (priorityOrder !== 0) return priorityOrder;
   }
   return compareTasks(a, b);
