@@ -13,12 +13,9 @@ export interface OpsExport {
 }
 
 function isRecordWithId(value: unknown): boolean {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { id?: unknown }).id === 'string' &&
-    Boolean((value as { id: string }).id)
-  );
+  if (typeof value !== 'object' || value === null) return false;
+  const id = (value as { id?: unknown }).id;
+  return typeof id === 'string' && Boolean(id) && id === id.trim();
 }
 
 function hasUniqueIds(records: unknown[]): boolean {
