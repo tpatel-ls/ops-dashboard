@@ -13,18 +13,25 @@ export interface PushoverResult {
   reason?: string;
 }
 
+function bounded(value: string, limit: number): string {
+  return Array.from(value.trim()).slice(0, limit).join('');
+}
+
 export async function sendPushover(msg: PushoverMessage): Promise<PushoverResult> {
   const token = process.env.PUSHOVER_TOKEN;
   const user = process.env.PUSHOVER_USER;
   if (!token || !user) return { ok: false, reason: 'not-configured' };
-  const message = msg.message.trim();
+  const message = bounded(msg.message, 1024);
   if (!message) return { ok: false, reason: 'empty-message' };
 
-  const body = new URLSearchParams({ token, user, message: message.slice(0, 1024) });
-  if (msg.title?.trim()) body.set('title', msg.title.trim().slice(0, 250));
+  const body = new URLSearchParams({ token, user, message });
+  const title = msg.title ? bounded(msg.title, 250) : '';
+  if (title) body.set('title', title);
   if (msg.priority !== undefined) body.set('priority', String(msg.priority));
-  if (msg.url) body.set('url', msg.url);
-  if (msg.urlTitle) body.set('url_title', msg.urlTitle);
+  const url = msg.url ? bounded(msg.url, 512) : '';
+  const urlTitle = msg.urlTitle ? bounded(msg.urlTitle, 100) : '';
+  if (url) body.set('url', url);
+  if (urlTitle) body.set('url_title', urlTitle);
 
   try {
     const res = await fetch('https://api.pushover.net/1/messages.json', {
