@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '@ops-dashboard/core';
+import type { Settings } from '@ops-dashboard/core';
 import { normalizeSettings } from './settings';
 
 describe('normalizeSettings', () => {
@@ -54,5 +55,29 @@ describe('normalizeSettings', () => {
     expect(
       normalizeSettings({ workdayStart: '07:30', workdayEnd: '19:15', dailyReviewAt: '18:45' }),
     ).toMatchObject({ workdayStart: '07:30', workdayEnd: '19:15', dailyReviewAt: '18:45' });
+  });
+
+  it('repairs malformed choices and boolean preferences', () => {
+    expect(
+      normalizeSettings({
+        weekStartsOn: 4 as Settings['weekStartsOn'],
+        theme: 'neon' as Settings['theme'],
+        defaultView: 'missing' as Settings['defaultView'],
+        syncEnabled: 'yes' as unknown as boolean,
+        leftyMode: 1 as unknown as boolean,
+        aiEnabled: null as unknown as boolean,
+        captureAutoReminder: 'false' as unknown as boolean,
+        slippingDays: Number.NaN,
+      }),
+    ).toMatchObject({
+      weekStartsOn: DEFAULT_SETTINGS.weekStartsOn,
+      theme: DEFAULT_SETTINGS.theme,
+      defaultView: DEFAULT_SETTINGS.defaultView,
+      syncEnabled: DEFAULT_SETTINGS.syncEnabled,
+      leftyMode: DEFAULT_SETTINGS.leftyMode,
+      aiEnabled: DEFAULT_SETTINGS.aiEnabled,
+      captureAutoReminder: DEFAULT_SETTINGS.captureAutoReminder,
+      slippingDays: DEFAULT_SETTINGS.slippingDays,
+    });
   });
 });
