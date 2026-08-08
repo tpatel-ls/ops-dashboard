@@ -28,7 +28,14 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { addTask, addTaskToProject, setTaskStatus, softDeleteTask, updateTask } from './tasks';
+import {
+  addTask,
+  addTaskToProject,
+  projectRecurringReminders,
+  setTaskStatus,
+  softDeleteTask,
+  updateTask,
+} from './tasks';
 
 describe('addTask', () => {
   beforeEach(() => {
@@ -220,5 +227,24 @@ describe('softDeleteTask', () => {
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+});
+
+describe('projectRecurringReminders', () => {
+  it('drops shifted reminders that overflow the JavaScript date range', () => {
+    const previous = {
+      scheduledFor: '2026-08-01',
+      reminders: [
+        {
+          id: 'reminder-old',
+          taskId: 'task-old',
+          triggerAt: '+275760-09-12T00:00:00.000Z',
+          delivered: false,
+        },
+      ],
+    } as Task;
+    const projected = { scheduledFor: '2026-08-03' } as Task;
+
+    expect(projectRecurringReminders(previous, projected, 'task-new')).toEqual([]);
   });
 });

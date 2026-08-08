@@ -126,12 +126,14 @@ export function projectRecurringReminders(
   return previous.reminders.flatMap((reminder) => {
     const trigger = Date.parse(reminder.triggerAt);
     if (!Number.isFinite(trigger)) return [];
+    const shiftedTrigger = new Date(trigger + shift);
+    if (!Number.isFinite(shiftedTrigger.getTime())) return [];
     return [
       {
         ...reminder,
         id: newId(),
         taskId,
-        triggerAt: new Date(trigger + shift).toISOString(),
+        triggerAt: shiftedTrigger.toISOString(),
         delivered: false,
       },
     ];
