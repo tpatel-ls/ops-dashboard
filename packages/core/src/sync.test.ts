@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from './types';
-import { pickWinner } from './sync';
+import { bumpVersion, pickWinner } from './sync';
 
 function task(deviceId: string, patch: Partial<Task> = {}): Task {
   return {
@@ -51,5 +51,23 @@ describe('pickWinner', () => {
 
     expect(pickWinner(alpha, bravo)).toBe(bravo);
     expect(pickWinner(bravo, alpha)).toBe(bravo);
+  });
+
+  it('prefers a valid version over corrupted sync metadata', () => {
+    const valid = task('device-a');
+    const malformed = task('device-z', { version: Number.NaN });
+
+    expect(pickWinner(malformed, valid)).toBe(valid);
+    expect(pickWinner(valid, malformed)).toBe(valid);
+  });
+});
+
+describe('bumpVersion', () => {
+  it('repairs malformed versions instead of propagating NaN', () => {
+    expect(bumpVersion(task('device-a', { version: Number.NaN })).version).toBe(1);
+  });
+
+  it('normalizes fractional versions before incrementing', () => {
+    expect(bumpVersion(task('device-a', { version: 4.8 })).version).toBe(5);
   });
 });

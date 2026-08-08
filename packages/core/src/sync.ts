@@ -46,10 +46,20 @@ export type Syncable =
   | Book
   | FoodLog;
 
+function validVersion(value: number): number | undefined {
+  return Number.isFinite(value) && value >= 0 ? Math.floor(value) : undefined;
+}
+
 export function pickWinner<T extends Syncable>(local: T | undefined, remote: T): T {
   if (!local) return remote;
-  if (local.version > remote.version) return local;
-  if (remote.version > local.version) return remote;
+  const localVersion = validVersion(local.version);
+  const remoteVersion = validVersion(remote.version);
+  if (remoteVersion !== undefined && localVersion === undefined) return remote;
+  if (localVersion !== undefined && remoteVersion === undefined) return local;
+  if (localVersion !== undefined && remoteVersion !== undefined) {
+    if (localVersion > remoteVersion) return local;
+    if (remoteVersion > localVersion) return remote;
+  }
   const localUpdatedAt = Date.parse(local.updatedAt);
   const remoteUpdatedAt = Date.parse(remote.updatedAt);
   const localTimestampValid = Number.isFinite(localUpdatedAt);
@@ -70,7 +80,11 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
 }
 
 export function bumpVersion<T extends Syncable>(rec: T): T {
-  return { ...rec, version: rec.version + 1, updatedAt: new Date().toISOString() };
+  return {
+    ...rec,
+    version: (validVersion(rec.version) ?? 0) + 1,
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export function isTombstone<T extends Syncable>(rec: T): boolean {
