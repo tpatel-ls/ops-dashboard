@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readLocalStorage, writeLocalStorage } from './browser-storage';
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from './browser-storage';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -26,5 +26,17 @@ describe('browser storage helpers', () => {
     });
 
     expect(writeLocalStorage('sync-cursor', '{}')).toBe(false);
+  });
+
+  it('reports blocked storage removals without throwing', () => {
+    vi.stubGlobal('window', {
+      localStorage: {
+        removeItem: () => {
+          throw new DOMException('blocked');
+        },
+      },
+    });
+
+    expect(removeLocalStorage('recent-project')).toBe(false);
   });
 });

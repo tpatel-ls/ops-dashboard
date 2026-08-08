@@ -11,6 +11,7 @@ import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { useVoiceInput } from '@/lib/use-voice-input';
 import { useOrgStore } from '@/lib/org-store';
 import { LAST_TASK_DESTINATION_KEY } from '@/lib/task-capture';
+import { readLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 import {
   destinationOrgId,
   projectsForDestination,
@@ -41,7 +42,7 @@ export function QuickAdd() {
   const ctx = useOrgStore((state) => state.ctx);
   const storedDestination = useSyncExternalStore(
     emptySubscribe,
-    () => window.localStorage.getItem(LAST_TASK_DESTINATION_KEY),
+    () => readLocalStorage(LAST_TASK_DESTINATION_KEY),
     () => null,
   );
 
@@ -167,7 +168,7 @@ export function QuickAdd() {
           value={destination}
           onChange={(event) => {
             const nextDestination = event.target.value;
-            window.localStorage.setItem(LAST_TASK_DESTINATION_KEY, nextDestination);
+            writeLocalStorage(LAST_TASK_DESTINATION_KEY, nextDestination);
             setDestinationOverride({ ctx, value: nextDestination });
             setProject(null);
           }}

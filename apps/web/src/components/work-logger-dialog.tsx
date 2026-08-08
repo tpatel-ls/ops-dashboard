@@ -42,6 +42,7 @@ import {
   validWorkMinutes,
   type WorkDestination,
 } from '@/lib/work-logger';
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 
 const MODE_META: Array<{
   id: WorkLoggerMode;
@@ -54,17 +55,15 @@ const MODE_META: Array<{
 ];
 
 function readLastDestination(): WorkDestination | null {
-  if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(LAST_TASK_DESTINATION_KEY);
+  return readLocalStorage(LAST_TASK_DESTINATION_KEY);
 }
 
 function readLastProjectId(): string | null {
-  if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(LAST_TASK_PROJECT_KEY);
+  return readLocalStorage(LAST_TASK_PROJECT_KEY);
 }
 
 function rememberDestination(destination: WorkDestination): void {
-  window.localStorage.setItem(LAST_TASK_DESTINATION_KEY, destination);
+  writeLocalStorage(LAST_TASK_DESTINATION_KEY, destination);
 }
 
 function localDate(offsetDays = 0): string {
@@ -315,9 +314,9 @@ function WorkLoggerPanel({
         });
         rememberDestination(destination);
         if (selectedProject) {
-          window.localStorage.setItem(LAST_TASK_PROJECT_KEY, selectedProject.id);
+          writeLocalStorage(LAST_TASK_PROJECT_KEY, selectedProject.id);
         } else {
-          window.localStorage.removeItem(LAST_TASK_PROJECT_KEY);
+          removeLocalStorage(LAST_TASK_PROJECT_KEY);
         }
       } else if (mode === 'project') {
         await createProject(projectName.trim(), {
