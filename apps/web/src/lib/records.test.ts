@@ -57,6 +57,17 @@ describe('patchRecord', () => {
       expect.objectContaining({ recordId: 'task-1', payload: result }),
     );
   });
+
+  it('does not write or enqueue a patch that changes nothing', async () => {
+    const result = await patchRecord<Task>('tasks', 'task-1', {
+      title: 'Original',
+      version: 99,
+    });
+
+    expect(result).toMatchObject({ title: 'Original', version: 4 });
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
 });
 
 describe('softDeleteRecord', () => {
