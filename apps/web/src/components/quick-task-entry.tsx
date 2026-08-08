@@ -26,6 +26,7 @@ import {
   type WorkDestination,
 } from '@/lib/work-logger';
 import { isActiveProject } from '@/lib/project-query';
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 
 const QUICK_SCHEDULES: Array<{ value: Exclude<TaskSchedule, 'date'>; label: string }> = [
   { value: 'inbox', label: 'Inbox' },
@@ -87,7 +88,7 @@ export function QuickTaskEntry({
     const contextKey = fixedProject ? `project:${fixedProject.id}` : ctx;
     if (initializedContextRef.current === contextKey) return;
 
-    const storedDestination = window.localStorage.getItem(LAST_TASK_DESTINATION_KEY);
+    const storedDestination = readLocalStorage(LAST_TASK_DESTINATION_KEY);
     const nextDestination = fixedProject
       ? destinationForProject(fixedProject)
       : resolveWorkDestination(
@@ -98,7 +99,7 @@ export function QuickTaskEntry({
     const recentProject = fixedProject ?? resolveRecentProject(
       data.projects,
       nextDestination,
-      window.localStorage.getItem(LAST_TASK_PROJECT_KEY),
+      readLocalStorage(LAST_TASK_PROJECT_KEY),
     );
 
     setDestination(nextDestination);
@@ -119,7 +120,7 @@ export function QuickTaskEntry({
     const recentProject = resolveRecentProject(
       data?.projects ?? [],
       nextDestination,
-      window.localStorage.getItem(LAST_TASK_PROJECT_KEY),
+      readLocalStorage(LAST_TASK_PROJECT_KEY),
     );
     setProjectId(recentProject?.id ?? '');
     setError(null);
@@ -150,11 +151,11 @@ export function QuickTaskEntry({
         input,
         taskCaptureOverrides(destination, selectedProject, scheduledFor(), priority),
       );
-      window.localStorage.setItem(LAST_TASK_DESTINATION_KEY, destination);
+      writeLocalStorage(LAST_TASK_DESTINATION_KEY, destination);
       if (selectedProject) {
-        window.localStorage.setItem(LAST_TASK_PROJECT_KEY, selectedProject.id);
+        writeLocalStorage(LAST_TASK_PROJECT_KEY, selectedProject.id);
       } else {
-        window.localStorage.removeItem(LAST_TASK_PROJECT_KEY);
+        removeLocalStorage(LAST_TASK_PROJECT_KEY);
       }
       setTitle('');
       setStatus(`Added to ${destinationLabel}. ${syncSaveMessage(syncState, syncPending + 1)}`);
