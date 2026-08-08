@@ -90,6 +90,22 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects blank or padded record IDs', () => {
+    const base = {
+      version: 1 as const,
+      exportedAt: '2026-07-30T12:00:00.000Z',
+      projects: [],
+      whiteboards: [],
+    };
+
+    expect(() => validateOpsExport({ ...base, tasks: [{ id: '   ' }] })).toThrow(
+      'Invalid export tasks',
+    );
+    expect(() => validateOpsExport({ ...base, tasks: [{ id: ' task-1 ' }] })).toThrow(
+      'Invalid export tasks',
+    );
+  });
+
   it('rejects duplicate IDs before bulk import can overwrite records', () => {
     const duplicate = task('Duplicate task');
     expect(() =>
