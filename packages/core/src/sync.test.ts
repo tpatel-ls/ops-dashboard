@@ -36,4 +36,20 @@ describe('pickWinner', () => {
     expect(pickWinner(live, deleted)).toBe(deleted);
     expect(pickWinner(deleted, live)).toBe(deleted);
   });
+
+  it('prefers a valid timestamp over malformed sync metadata', () => {
+    const valid = task('device-a');
+    const malformed = task('device-z', { updatedAt: 'not-a-timestamp' });
+
+    expect(pickWinner(malformed, valid)).toBe(valid);
+    expect(pickWinner(valid, malformed)).toBe(valid);
+  });
+
+  it('still converges by device when both timestamps are malformed', () => {
+    const alpha = task('device-a', { updatedAt: 'invalid-alpha' });
+    const bravo = task('device-b', { updatedAt: 'invalid-bravo' });
+
+    expect(pickWinner(alpha, bravo)).toBe(bravo);
+    expect(pickWinner(bravo, alpha)).toBe(bravo);
+  });
 });
