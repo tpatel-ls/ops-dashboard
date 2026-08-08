@@ -32,6 +32,13 @@ export function validateOpsExport(value: unknown): OpsExport {
   }
   const payload = value as Partial<OpsExport>;
   if (payload.version !== 1) throw new Error('Unsupported export version');
+  if (
+    typeof payload.exportedAt !== 'string' ||
+    !payload.exportedAt ||
+    !Number.isFinite(Date.parse(payload.exportedAt))
+  ) {
+    throw new Error('Invalid export timestamp');
+  }
 
   for (const key of ['tasks', 'projects', 'whiteboards'] as const) {
     const records = payload[key];
@@ -99,7 +106,8 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
   }
   for (const day of Object.keys(grouped).sort()) {
     const list = grouped[day]!;
-    const label = day === 'unscheduled' ? 'Unscheduled' : format(parseISO(`${day}T00:00:00`), 'EEEE, MMMM d');
+    const label =
+      day === 'unscheduled' ? 'Unscheduled' : format(parseISO(`${day}T00:00:00`), 'EEEE, MMMM d');
     lines.push(`## ${label}`, '');
     for (const t of list) {
       const box = t.status === 'done' ? '[x]' : '[ ]';

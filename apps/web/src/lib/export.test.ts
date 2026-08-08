@@ -59,6 +59,15 @@ describe('tasksToMarkdown', () => {
 });
 
 describe('validateOpsExport', () => {
+  it('rejects missing or malformed export timestamps', () => {
+    const base = { version: 1, tasks: [], projects: [], whiteboards: [] };
+
+    expect(() => validateOpsExport(base)).toThrow('Invalid export timestamp');
+    expect(() => validateOpsExport({ ...base, exportedAt: 'not-a-timestamp' })).toThrow(
+      'Invalid export timestamp',
+    );
+  });
+
   it('rejects missing record collections before opening the database', () => {
     expect(() =>
       validateOpsExport({
