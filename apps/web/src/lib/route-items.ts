@@ -9,6 +9,7 @@ import type {
   Priority,
   Project,
   Routine,
+  RoutineCheck,
   Task,
 } from '@ops-dashboard/core';
 import { createCapture, dismissCapture, setCaptureRoute } from './captures';
@@ -226,7 +227,12 @@ async function routeHabit(
   routine: Routine,
 ): Promise<RoutedResult> {
   const date = todayISO();
-  await toggleRoutineCheck(routine.id, date, true, 'capture');
+  const existing = await getDb()
+    .routineChecks.where('[routineId+date]')
+    .equals([routine.id, date])
+    .first();
+  const changed = routineCaptureNeedsChange(existing);
+  if (changed) await toggleRoutineCheck(routine.id, date, true, 'capture');
   await setCaptureRoute(captureId, { type: 'habit', id: routine.id }, 'habit', title);
   return {
     captureId,
@@ -236,10 +242,14 @@ async function routeHabit(
     recordId: routine.id,
     detail: routine.name,
     undo: async () => {
-      await toggleRoutineCheck(routine.id, date, false, 'capture');
+      if (changed) await toggleRoutineCheck(routine.id, date, false, 'capture');
       await dismissCapture(captureId);
     },
   };
+}
+
+export function routineCaptureNeedsChange(check: Pick<RoutineCheck, 'done'> | undefined): boolean {
+  return !check?.done;
 }
 
 async function routeJournal(

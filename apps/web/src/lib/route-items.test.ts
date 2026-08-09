@@ -5,6 +5,7 @@ import {
   journalEntrySource,
   normalizeCaptureKind,
   normalizeCaptureTags,
+  routineCaptureNeedsChange,
 } from './route-items';
 
 describe('acceptedBrainDumpItems', () => {
@@ -58,6 +59,14 @@ describe('journalEntrySource', () => {
     expect(journalEntrySource('watch')).toBe('voice');
     expect(journalEntrySource('text')).toBe('text');
     expect(journalEntrySource('notepad')).toBe('text');
+  });
+});
+
+describe('routineCaptureNeedsChange', () => {
+  it('preserves a routine completion that predates the capture', () => {
+    expect(routineCaptureNeedsChange({ done: true })).toBe(false);
+    expect(routineCaptureNeedsChange({ done: false })).toBe(true);
+    expect(routineCaptureNeedsChange(undefined)).toBe(true);
   });
 });
 
