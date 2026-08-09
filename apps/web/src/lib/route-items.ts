@@ -372,11 +372,18 @@ function clampPriority(p: number | undefined): Priority {
 
 export function normalizeCaptureTags(tags: string[] | undefined): string[] {
   if (!Array.isArray(tags)) return [];
-  const normalized = tags
-    .filter((tag): tag is string => typeof tag === 'string')
-    .map((tag) => tag.trim().toLocaleLowerCase())
-    .filter(Boolean);
-  return Array.from(new Set(normalized));
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+  for (const value of tags) {
+    if (normalized.length >= 20) break;
+    if (typeof value !== 'string') continue;
+    const tag = Array.from(value.trim().toLocaleLowerCase()).slice(0, 64).join('');
+    if (tag && !seen.has(tag)) {
+      seen.add(tag);
+      normalized.push(tag);
+    }
+  }
+  return normalized;
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
