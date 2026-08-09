@@ -74,6 +74,18 @@ describe('buildWorkDashboard', () => {
     expect(result.today.map((item) => item.id)).toEqual(['local-due']);
   });
 
+  it('falls back from malformed scheduled days to valid task timestamps', () => {
+    const result = buildWorkDashboard(
+      [task('recover-date', { scheduledFor: 'not-a-day', dueAt: '2026-07-16T19:00:00.000Z' })],
+      [],
+      'all',
+      '2026-07-16',
+    );
+
+    expect(result.today.map((item) => item.id)).toEqual(['recover-date']);
+    expect(result.counts.overdue).toBe(0);
+  });
+
   it('excludes completed, archived, deleted, and out-of-context tasks', () => {
     const result = buildWorkDashboard(
       [
