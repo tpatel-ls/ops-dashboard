@@ -12,7 +12,7 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { createRoutine, toggleRoutineCheck } from './routines';
+import { addDaysISO, createRoutine, toggleRoutineCheck } from './routines';
 
 describe('createRoutine', () => {
   beforeEach(() => {
@@ -66,6 +66,14 @@ describe('toggleRoutineCheck', () => {
   it.each(['2026-02-30', 'not-a-date'])('rejects an invalid check date: %s', async (date) => {
     await expect(toggleRoutineCheck('routine-1', date, true)).rejects.toThrow(
       'Routine check date must be a valid calendar day',
+    );
+  });
+});
+
+describe('addDaysISO', () => {
+  it('rejects date calculations outside the JavaScript date range', () => {
+    expect(() => addDaysISO('2026-08-09', Number.MAX_SAFE_INTEGER)).toThrow(
+      'Routine date calculation is out of range',
     );
   });
 });
