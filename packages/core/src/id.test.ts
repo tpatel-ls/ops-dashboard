@@ -46,4 +46,16 @@ describe('getDeviceId', () => {
 
     expect(getDeviceId()).toHaveLength(26);
   });
+
+  it.each(['   ', 'x'.repeat(129)])('repairs a malformed stored device ID', async (stored) => {
+    const setItem = vi.fn();
+    vi.stubGlobal('window', {
+      localStorage: { getItem: () => stored, setItem },
+    });
+    const { getDeviceId } = await import('./id');
+
+    const repaired = getDeviceId();
+    expect(repaired).toHaveLength(26);
+    expect(setItem).toHaveBeenCalledWith('ops.deviceId', repaired);
+  });
 });
