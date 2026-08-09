@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   acceptedBrainDumpItems,
+  fallbackCaptureLines,
   journalEntrySource,
   normalizeCaptureKind,
   normalizeCaptureTags,
@@ -21,6 +22,15 @@ describe('acceptedBrainDumpItems', () => {
     }));
 
     expect(acceptedBrainDumpItems(true, { ok: true, items })).toHaveLength(100);
+  });
+});
+
+describe('fallbackCaptureLines', () => {
+  it('bounds offline record creation while ignoring empty lines', () => {
+    const text = Array.from({ length: 105 }, (_, index) => `Task ${index}\n\n`).join('');
+
+    expect(fallbackCaptureLines(text)).toHaveLength(100);
+    expect(fallbackCaptureLines('  First  \r\n\r\n Second ')).toEqual(['First', 'Second']);
   });
 });
 
