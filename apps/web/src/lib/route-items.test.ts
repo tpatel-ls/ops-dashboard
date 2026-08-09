@@ -41,6 +41,15 @@ describe('normalizeCaptureTags', () => {
       'customer',
     ]);
   });
+
+  it('bounds untrusted tag counts and Unicode-safe lengths', () => {
+    const tags = Array.from({ length: 25 }, (_, index) => `${index}-${'x'.repeat(70)}😀`);
+    const result = normalizeCaptureTags(tags);
+
+    expect(result).toHaveLength(20);
+    expect(result.every((tag) => Array.from(tag).length === 64)).toBe(true);
+    expect(result.some((tag) => tag.includes('\ud83d'))).toBe(false);
+  });
 });
 
 describe('journalEntrySource', () => {
