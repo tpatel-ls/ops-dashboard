@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { journalEntrySource, normalizeCaptureKind, normalizeCaptureTags } from './route-items';
+import {
+  acceptedBrainDumpItems,
+  journalEntrySource,
+  normalizeCaptureKind,
+  normalizeCaptureTags,
+} from './route-items';
+
+describe('acceptedBrainDumpItems', () => {
+  it('rejects payloads returned with an unsuccessful HTTP status', () => {
+    const items = [{ kind: 'task', title: 'Do not route this response' }];
+
+    expect(acceptedBrainDumpItems(false, { ok: true, items })).toBeNull();
+    expect(acceptedBrainDumpItems(true, { ok: true, items })).toBe(items);
+  });
+});
 
 describe('normalizeCaptureTags', () => {
   it('trims, normalizes, and deduplicates untrusted AI tags', () => {

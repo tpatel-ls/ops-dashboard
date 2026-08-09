@@ -101,7 +101,7 @@ export async function processBrainDump(
       }),
     });
     const json = (await res.json()) as { ok?: boolean; items?: RoutedItemDraft[] };
-    if (json.ok && Array.isArray(json.items) && json.items.length > 0) drafts = json.items;
+    drafts = acceptedBrainDumpItems(res.ok, json);
   } catch {
     /* network error / offline -> fallback below */
   }
@@ -119,6 +119,15 @@ export async function processBrainDump(
     }
   }
   return results.length > 0 ? results : fallbackToTasks(text, source);
+}
+
+export function acceptedBrainDumpItems(
+  responseOk: boolean,
+  value: { ok?: boolean; items?: RoutedItemDraft[] },
+): RoutedItemDraft[] | null {
+  return responseOk && value.ok && Array.isArray(value.items) && value.items.length > 0
+    ? value.items
+    : null;
 }
 
 async function routeItem(draft: RoutedItemDraft, ctx: RouteContext): Promise<RoutedResult> {
