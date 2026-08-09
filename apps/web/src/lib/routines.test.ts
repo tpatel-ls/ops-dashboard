@@ -12,7 +12,7 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { createRoutine } from './routines';
+import { createRoutine, toggleRoutineCheck } from './routines';
 
 describe('createRoutine', () => {
   beforeEach(() => {
@@ -58,6 +58,14 @@ describe('createRoutine', () => {
     });
     expect(() => createRoutine({ name: 'Reset', specificTime: '25:00' })).toThrow(
       'Routine time must use 24-hour HH:mm format',
+    );
+  });
+});
+
+describe('toggleRoutineCheck', () => {
+  it.each(['2026-02-30', 'not-a-date'])('rejects an invalid check date: %s', async (date) => {
+    await expect(toggleRoutineCheck('routine-1', date, true)).rejects.toThrow(
+      'Routine check date must be a valid calendar day',
     );
   });
 });

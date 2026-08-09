@@ -96,6 +96,9 @@ export async function toggleRoutineCheck(
   done: boolean,
   source: 'manual' | 'journal' | 'capture' = 'manual',
 ): Promise<void> {
+  if (localDay(date) !== date) {
+    throw new Error('Routine check date must be a valid calendar day.');
+  }
   const db = getDb();
   const existing = await db.routineChecks
     .where('[routineId+date]')
