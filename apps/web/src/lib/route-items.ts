@@ -55,6 +55,8 @@ export interface RoutedResult {
   undo: () => Promise<void>;
 }
 
+const MAX_ROUTED_ITEMS = 100;
+
 interface RouteContext {
   projects: Project[];
   routines: Routine[];
@@ -126,7 +128,7 @@ export function acceptedBrainDumpItems(
   value: { ok?: boolean; items?: RoutedItemDraft[] },
 ): RoutedItemDraft[] | null {
   return responseOk && value.ok && Array.isArray(value.items) && value.items.length > 0
-    ? value.items
+    ? value.items.slice(0, MAX_ROUTED_ITEMS)
     : null;
 }
 
