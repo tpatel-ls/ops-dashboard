@@ -1,6 +1,6 @@
 'use client';
 
-import { computeFoodTotals } from '@ops-dashboard/core';
+import { computeFoodTotals, localDay } from '@ops-dashboard/core';
 import type { CaptureSource, FoodItem, FoodLog, MealType } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { todayISO } from './routines';
@@ -21,11 +21,13 @@ export interface CreateFoodLogInput {
 export function createFoodLog(input: CreateFoodLogInput): Promise<FoodLog> {
   const description = input.description.trim();
   if (!description) throw new Error('Food description is required.');
+  const date = input.date ?? todayISO();
+  assertFoodDate(date);
 
   return putRecord(
     'foodLogs',
     newRecord<FoodLog>({
-      date: input.date ?? todayISO(),
+      date,
       mealType: input.mealType ?? 'snack',
       description,
       items: input.items,
@@ -36,8 +38,13 @@ export function createFoodLog(input: CreateFoodLogInput): Promise<FoodLog> {
 }
 
 export function updateFoodLog(id: string, patch: Partial<FoodLog>) {
+  if (patch.date !== undefined) assertFoodDate(patch.date);
   const next = patch.items ? { ...patch, ...computeFoodTotals(patch.items) } : patch;
   return patchRecord<FoodLog>('foodLogs', id, next);
+}
+
+function assertFoodDate(date: string): void {
+  if (localDay(date) !== date) throw new Error('Food log date must be valid.');
 }
 
 export const deleteFoodLog = (id: string) => softDeleteRecord<FoodLog>('foodLogs', id);
