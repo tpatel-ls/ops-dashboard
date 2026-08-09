@@ -145,6 +145,23 @@ describe('updateTask', () => {
     expect(mocks.put.mock.calls[0]?.[0]).not.toHaveProperty('deletedAt');
     expect(mocks.enqueueOp).toHaveBeenCalledWith(expect.objectContaining({ recordId: 'task-1' }));
   });
+
+  it('normalizes titles and rejects malformed editable fields', async () => {
+    await updateTask('task-1', { title: '  Updated title  ' });
+    expect(mocks.put).toHaveBeenCalledWith(expect.objectContaining({ title: 'Updated title' }));
+
+    for (const patch of [
+      { title: '   ' },
+      { scheduledFor: '2026-02-30' },
+      { dueAt: 'not-a-date' },
+      { estimateMinutes: -1 },
+      { actualMinutes: 1.5 },
+    ] satisfies Partial<Task>[]) {
+      mocks.put.mockClear();
+      await expect(updateTask('task-1', patch)).rejects.toThrow();
+      expect(mocks.put).not.toHaveBeenCalled();
+    }
+  });
 });
 
 describe('setTaskStatus', () => {
