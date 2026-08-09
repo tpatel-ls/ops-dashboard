@@ -318,10 +318,7 @@ async function routeQuote(
 
 /** AI unreachable: every non-empty line becomes a task; NL parsing still works. */
 async function fallbackToTasks(text: string, source: CaptureSource): Promise<RoutedResult[]> {
-  const lines = text
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
+  const lines = fallbackCaptureLines(text);
   const results: RoutedResult[] = [];
   for (const line of lines) {
     const cap = await createCapture(line, source);
@@ -341,6 +338,14 @@ async function fallbackToTasks(text: string, source: CaptureSource): Promise<Rou
     });
   }
   return results;
+}
+
+export function fallbackCaptureLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .slice(0, MAX_ROUTED_ITEMS);
 }
 
 const KNOWN_KINDS: CaptureKind[] = [
