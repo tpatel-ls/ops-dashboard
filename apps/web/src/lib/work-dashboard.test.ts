@@ -142,6 +142,15 @@ describe('buildWorkDashboard', () => {
     expect(result.counts.activeProjects).toBe(2);
   });
 
+  it('sorts valid project deadlines before malformed stored dates', () => {
+    const valid = project('valid', { name: 'Zulu', dueDate: '2026-07-20' });
+    const malformed = project('malformed', { name: 'Alpha', dueDate: 'not-a-date' });
+
+    const result = buildWorkDashboard([], [malformed, valid], 'all', '2026-07-16');
+
+    expect(result.projects.map((summary) => summary.project.id)).toEqual(['valid', 'malformed']);
+  });
+
   it('limits dashboard collections while keeping deterministic order', () => {
     const tasks = Array.from({ length: 12 }, (_, index) =>
       task(`task-${index}`, {
