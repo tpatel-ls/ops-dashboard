@@ -9,7 +9,7 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { updateFoodLog } from './food-logs';
+import { createFoodLog, updateFoodLog } from './food-logs';
 
 describe('updateFoodLog', () => {
   beforeEach(() => mocks.patchRecord.mockReset());
@@ -28,5 +28,15 @@ describe('updateFoodLog', () => {
       totalProtein: 12,
       totalCarbs: 15,
     });
+  });
+
+  it('rejects impossible calendar dates before persistence', async () => {
+    expect(() => updateFoodLog('meal-1', { date: '2026-02-30' })).toThrow(
+      'Food log date must be valid',
+    );
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+    expect(() => createFoodLog({ date: 'not-a-date', description: 'Lunch', items: [] })).toThrow(
+      'Food log date must be valid',
+    );
   });
 });
