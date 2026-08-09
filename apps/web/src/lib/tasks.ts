@@ -3,6 +3,7 @@
 import {
   getDb,
   getDeviceId,
+  localDay,
   newId,
   parseQuickAdd,
   projectNextTask,
@@ -53,10 +54,32 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
 }
 
 export async function updateTask(id: string, patch: Partial<Task>): Promise<void> {
+  const mutablePatch = { ...patch };
+  if (mutablePatch.title !== undefined) {
+    mutablePatch.title = mutablePatch.title.trim();
+    if (!mutablePatch.title) throw new Error('Task title is required.');
+  }
+  if (
+    mutablePatch.scheduledFor !== undefined &&
+    localDay(mutablePatch.scheduledFor) !== mutablePatch.scheduledFor
+  ) {
+    throw new Error('Task schedule must be a valid calendar day.');
+  }
+  for (const key of ['startAt', 'endAt', 'dueAt'] as const) {
+    const value = mutablePatch[key];
+    if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
+      throw new Error(`Task ${key} must be a valid date.`);
+    }
+  }
+  for (const key of ['estimateMinutes', 'actualMinutes'] as const) {
+    const value = mutablePatch[key];
+    if (value !== undefined && (!Number.isInteger(value) || value < 0)) {
+      throw new Error(`Task ${key} must be a non-negative integer.`);
+    }
+  }
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
-  const mutablePatch = { ...patch };
   for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId', 'deletedAt'] as const) {
     delete mutablePatch[key];
   }
