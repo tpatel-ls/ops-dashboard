@@ -11,7 +11,16 @@ describe('acceptedBrainDumpItems', () => {
     const items = [{ kind: 'task', title: 'Do not route this response' }];
 
     expect(acceptedBrainDumpItems(false, { ok: true, items })).toBeNull();
-    expect(acceptedBrainDumpItems(true, { ok: true, items })).toBe(items);
+    expect(acceptedBrainDumpItems(true, { ok: true, items })).toEqual(items);
+  });
+
+  it('bounds the number of records one AI response can create', () => {
+    const items = Array.from({ length: 101 }, (_, index) => ({
+      kind: 'task',
+      title: `Task ${index}`,
+    }));
+
+    expect(acceptedBrainDumpItems(true, { ok: true, items })).toHaveLength(100);
   });
 });
 
