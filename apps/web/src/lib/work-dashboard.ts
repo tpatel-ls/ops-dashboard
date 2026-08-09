@@ -29,8 +29,8 @@ function taskDate(task: Task): string | undefined {
 }
 
 function projectOrder(a: WorkProjectSummary, b: WorkProjectSummary): number {
-  const aDue = a.project.dueDate;
-  const bDue = b.project.dueDate;
+  const aDue = localDay(a.project.dueDate);
+  const bDue = localDay(b.project.dueDate);
   if (aDue && !bDue) return -1;
   if (!aDue && bDue) return 1;
   if (aDue && bDue) {
