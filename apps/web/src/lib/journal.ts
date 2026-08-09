@@ -1,5 +1,6 @@
 'use client';
 
+import { localDay } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { todayISO } from './routines';
@@ -15,12 +16,15 @@ export function createJournalEntry(input: {
 }): Promise<JournalEntry> {
   const body = input.body.trim();
   if (!body) throw new Error('Journal entry body is required.');
+  const date = input.date ?? todayISO();
+  if (localDay(date) !== date) throw new Error('Journal entry date must be valid.');
+  const title = input.title?.trim();
 
   return putRecord(
     'journalEntries',
     newRecord<JournalEntry>({
-      date: input.date ?? todayISO(),
-      ...(input.title ? { title: input.title } : {}),
+      date,
+      ...(title ? { title } : {}),
       body,
       mediaUrls: input.mediaUrls ?? [],
       ...(input.mood ? { mood: input.mood } : {}),

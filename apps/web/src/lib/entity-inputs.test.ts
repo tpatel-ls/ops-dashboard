@@ -209,6 +209,20 @@ describe('createJournalEntry', () => {
     expect(() => createJournalEntry({ body: '   ' })).toThrow('Journal entry body is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
+
+  it('normalizes titles and rejects impossible journal dates', async () => {
+    await createJournalEntry({ date: '2026-08-09', title: '  Daily review  ', body: 'Done.' });
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'journalEntries',
+      expect.objectContaining({ date: '2026-08-09', title: 'Daily review' }),
+    );
+
+    mocks.putRecord.mockClear();
+    expect(() => createJournalEntry({ date: '2026-02-30', body: 'Impossible day' })).toThrow(
+      'Journal entry date must be valid',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
 });
 
 describe('createFoodLog', () => {
