@@ -37,6 +37,9 @@ export function addDaysISO(iso: string, days: number): string {
   const [y, m, d] = iso.split('-').map(Number);
   const date = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
   date.setDate(date.getDate() + days);
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error('Routine date calculation is out of range.');
+  }
   return formatLocalDate(date);
 }
 
