@@ -5,12 +5,18 @@ export function newId(): string {
 }
 
 const DEVICE_KEY = 'ops.deviceId';
+const MAX_DEVICE_ID_LENGTH = 128;
 let fallbackDeviceId: string | undefined;
+
+function storedDeviceId(value: string | null): string | undefined {
+  if (!value || value !== value.trim() || value.length > MAX_DEVICE_ID_LENGTH) return undefined;
+  return value;
+}
 
 export function getDeviceId(): string {
   if (typeof window === 'undefined') return 'server';
   try {
-    const existing = window.localStorage.getItem(DEVICE_KEY);
+    const existing = storedDeviceId(window.localStorage.getItem(DEVICE_KEY));
     if (existing) return existing;
   } catch {
     return (fallbackDeviceId ??= ulid());
