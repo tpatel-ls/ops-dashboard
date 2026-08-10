@@ -65,6 +65,10 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
     .toArray();
   let fired = 0;
   for (const r of due) {
+    if (!r.triggerAt.trim() || !Number.isFinite(Date.parse(r.triggerAt))) {
+      await db.reminders.delete(r.id);
+      continue;
+    }
     const task = await db.tasks.get(r.taskId);
     if (!task || task.deletedAt || task.status === 'done' || task.status === 'archived') {
       await db.reminders.delete(r.id);
