@@ -53,6 +53,14 @@ describe('pickWinner', () => {
     expect(pickWinner(bravo, alpha)).toBe(bravo);
   });
 
+  it('converges when different records share the same device metadata', () => {
+    const alpha = task('device-a', { title: 'Alpha' });
+    const bravo = task('device-a', { title: 'Bravo' });
+
+    expect(pickWinner(alpha, bravo)).toBe(bravo);
+    expect(pickWinner(bravo, alpha)).toBe(bravo);
+  });
+
   it('prefers a valid version over corrupted sync metadata', () => {
     const valid = task('device-a');
     const malformed = task('device-z', { version: Number.NaN });

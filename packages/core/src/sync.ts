@@ -50,6 +50,16 @@ function validVersion(value: number): number | undefined {
   return Number.isFinite(value) && value >= 0 ? Math.floor(value) : undefined;
 }
 
+function canonicalSyncValue(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? '';
+  if (Array.isArray(value)) return `[${value.map(canonicalSyncValue).join(',')}]`;
+  return `{${Object.entries(value)
+    .filter(([, entry]) => entry !== undefined)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, entry]) => `${JSON.stringify(key)}:${canonicalSyncValue(entry)}`)
+    .join(',')}}`;
+}
+
 export function pickWinner<T extends Syncable>(local: T | undefined, remote: T): T {
   if (!local) return remote;
   const localVersion = validVersion(local.version);
@@ -76,7 +86,14 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
   if (Boolean(remote.deletedAt) !== Boolean(local.deletedAt)) {
     return remote.deletedAt ? remote : local;
   }
-  return remote.deviceId > local.deviceId ? remote : local;
+  if (remote.deviceId !== local.deviceId) {
+    return remote.deviceId > local.deviceId ? remote : local;
+  }
+
+  // A restored backup or duplicated device ID can produce two different
+  // records with identical metadata. Use the record content as a final stable
+  // tie-break so both peers still select the same copy.
+  return canonicalSyncValue(remote) > canonicalSyncValue(local) ? remote : local;
 }
 
 export function bumpVersion<T extends Syncable>(rec: T): T {
