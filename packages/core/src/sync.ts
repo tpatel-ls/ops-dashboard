@@ -14,6 +14,7 @@ import type {
   Quote,
   Routine,
   RoutineCheck,
+  SyncMeta,
   Task,
   Whiteboard,
   WorkLog,
@@ -96,7 +97,7 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
   return canonicalSyncValue(remote) > canonicalSyncValue(local) ? remote : local;
 }
 
-export function bumpVersion<T extends Syncable>(rec: T): T {
+export function bumpVersion<T extends SyncMeta>(rec: T): T {
   return {
     ...rec,
     version: (validVersion(rec.version) ?? 0) + 1,

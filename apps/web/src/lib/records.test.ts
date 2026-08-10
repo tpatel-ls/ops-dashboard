@@ -68,6 +68,22 @@ describe('patchRecord', () => {
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
+
+  it('repairs a malformed version when updating a local record', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      title: 'Original',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: 'invalid',
+      version: Number.NaN,
+      deviceId: 'device-original',
+    });
+
+    const result = await patchRecord<Task>('tasks', 'task-1', { title: 'Updated' });
+
+    expect(result?.version).toBe(1);
+    expect(Number.isFinite(Date.parse(result?.updatedAt ?? ''))).toBe(true);
+  });
 });
 
 describe('softDeleteRecord', () => {
@@ -87,5 +103,23 @@ describe('softDeleteRecord', () => {
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+
+  it('repairs a malformed version when creating a tombstone', async () => {
+    mocks.put.mockReset();
+    mocks.enqueueOp.mockReset();
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: 'invalid',
+      version: Number.POSITIVE_INFINITY,
+      deviceId: 'device-original',
+    });
+
+    await softDeleteRecord<Task>('tasks', 'task-1');
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 1, deletedAt: expect.any(String) }),
+    );
   });
 });
