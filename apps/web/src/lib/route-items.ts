@@ -171,7 +171,7 @@ async function routeTask(
   const dueText = draft.dueText?.trim();
   const input = dueText ? `${title} ${dueText}` : title;
   const overrides: Partial<Task> = {
-    priority: clampPriority(draft.priority),
+    priority: normalizeCapturePriority(draft.priority),
     tags: normalizeCaptureTags(draft.tags),
     ...(draft.notes?.trim() ? { notes: draft.notes.trim() } : {}),
   };
@@ -375,8 +375,8 @@ export function normalizeCaptureKind(kind: string | undefined): CaptureKind {
   return KNOWN_KINDS.includes(normalized as CaptureKind) ? (normalized as CaptureKind) : 'task';
 }
 
-function clampPriority(p: number | undefined): Priority {
-  if (typeof p !== 'number' || Number.isNaN(p)) return 0;
+export function normalizeCapturePriority(p: number | undefined): Priority {
+  if (typeof p !== 'number' || !Number.isFinite(p)) return 0;
   return Math.min(3, Math.max(0, Math.round(p))) as Priority;
 }
 
