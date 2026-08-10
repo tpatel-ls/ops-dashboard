@@ -29,11 +29,11 @@ export async function POST(req: Request): Promise<Response> {
     /* ignore malformed body */
   }
   if (!file) return NextResponse.json({ ok: false, reason: 'no-file' }, { status: 400 });
-  const fileError = transcriptionFileError(file.size);
+  const fileError = transcriptionFileError(file.size, file.type);
   if (fileError) {
     return NextResponse.json(
       { ok: false, reason: fileError },
-      { status: fileError === 'too-large' ? 413 : 400 },
+      { status: fileError === 'too-large' ? 413 : fileError === 'unsupported-type' ? 415 : 400 },
     );
   }
 
