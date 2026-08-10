@@ -4,6 +4,7 @@ import {
   fallbackCaptureLines,
   journalEntrySource,
   normalizeCaptureKind,
+  normalizeCapturePriority,
   normalizeCaptureTags,
   routineCaptureNeedsChange,
 } from './route-items';
@@ -76,5 +77,19 @@ describe('normalizeCaptureKind', () => {
     expect(normalizeCaptureKind('FOOD')).toBe('food');
     expect(normalizeCaptureKind('unknown')).toBe('task');
     expect(normalizeCaptureKind(undefined)).toBe('task');
+  });
+});
+
+describe('normalizeCapturePriority', () => {
+  it('rejects non-finite AI values instead of promoting them to urgent', () => {
+    expect(normalizeCapturePriority(Number.POSITIVE_INFINITY)).toBe(0);
+    expect(normalizeCapturePriority(Number.NEGATIVE_INFINITY)).toBe(0);
+    expect(normalizeCapturePriority(Number.NaN)).toBe(0);
+  });
+
+  it('rounds and clamps finite AI values to supported priorities', () => {
+    expect(normalizeCapturePriority(1.6)).toBe(2);
+    expect(normalizeCapturePriority(-4)).toBe(0);
+    expect(normalizeCapturePriority(8)).toBe(3);
   });
 });
