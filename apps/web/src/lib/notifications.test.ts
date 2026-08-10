@@ -110,6 +110,25 @@ describe('checkAndFireDueReminders', () => {
     expect(mocks.reminders.delete).toHaveBeenCalledWith('reminder-1');
   });
 
+  it('removes malformed due reminders without firing them', async () => {
+    mocks.reminders.where.mockReturnValue({
+      belowOrEqual: () => ({
+        filter: () => ({
+          toArray: async () => [
+            { id: 'reminder-invalid', taskId: 'task-1', triggerAt: 'not-a-date' },
+          ],
+        }),
+      }),
+    });
+    vi.stubGlobal('navigator', {});
+
+    await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(0);
+
+    expect(mocks.reminders.delete).toHaveBeenCalledWith('reminder-invalid');
+    expect(mocks.tasks.get).not.toHaveBeenCalled();
+    expect(Notification).not.toHaveBeenCalled();
+  });
+
   it('removes a due reminder for a deleted task', async () => {
     mocks.tasks.get.mockResolvedValue({
       id: 'task-1',
