@@ -46,4 +46,16 @@ describe('computeFoodTotals', () => {
       ]),
     ).toEqual({ totalCalories: 100, totalProtein: 5 });
   });
+
+  it('keeps totals finite when corrupted estimates overflow', () => {
+    expect(
+      computeFoodTotals([
+        { name: 'first', calories: Number.MAX_VALUE, protein: Number.MAX_VALUE },
+        { name: 'second', calories: Number.MAX_VALUE, protein: Number.MAX_VALUE },
+      ]),
+    ).toEqual({
+      totalCalories: Number.MAX_SAFE_INTEGER,
+      totalProtein: Number.MAX_SAFE_INTEGER,
+    });
+  });
 });
