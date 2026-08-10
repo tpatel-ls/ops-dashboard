@@ -1,20 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { safeNextPath } from '@/lib/auth-navigation';
 import { DEV_AUTH_COOKIE, DEV_AUTH_VALUE, isDevAuthAvailable } from '@/lib/dev-auth';
-
-function safeNext(value: string | null): string {
-  return value && value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\')
-    ? value
-    : '/dashboard';
-}
 
 export function GET(request: NextRequest) {
   if (!isDevAuthAvailable(request.nextUrl.hostname)) {
     return NextResponse.json({ ok: false, reason: 'not-found' }, { status: 404 });
   }
 
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = safeNext(request.nextUrl.searchParams.get('next'));
-  redirectUrl.search = '';
+  const redirectUrl = new URL(safeNextPath(request.nextUrl.searchParams.get('next')), request.url);
 
   const response = NextResponse.redirect(redirectUrl, { status: 303 });
   response.cookies.set(DEV_AUTH_COOKIE, DEV_AUTH_VALUE, {

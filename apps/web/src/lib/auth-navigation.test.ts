@@ -18,4 +18,11 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/\\example.com')).toBe('/dashboard');
     expect(safeNextPath('https://example.com')).toBe('/dashboard');
   });
+
+  it('rejects authentication routes that would loop after sign-in', () => {
+    expect(safeNextPath('/login')).toBe('/dashboard');
+    expect(safeNextPath('/LOGIN?error=invalid')).toBe('/dashboard');
+    expect(safeNextPath('/auth/dev-login')).toBe('/dashboard');
+    expect(safeNextPath('/auth/signout')).toBe('/dashboard');
+  });
 });
