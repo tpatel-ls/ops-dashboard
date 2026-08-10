@@ -16,6 +16,25 @@ export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanva
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPenAt = useRef(0);
   const saveTimer = useRef<number | null>(null);
+  const pendingSnapshot = useRef<TLStoreSnapshot | null>(null);
+  const stopListening = useRef<(() => void) | null>(null);
+  const onSnapshotRef = useRef(onSnapshot);
+
+  useEffect(() => {
+    onSnapshotRef.current = onSnapshot;
+  }, [onSnapshot]);
+
+  useEffect(
+    () => () => {
+      stopListening.current?.();
+      stopListening.current = null;
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+      if (pendingSnapshot.current) onSnapshotRef.current(pendingSnapshot.current);
+      pendingSnapshot.current = null;
+    },
+    [],
+  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -49,18 +68,22 @@ export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanva
           /* ignore corrupt snapshot */
         }
       }
-      const off = editor.store.listen(
+      stopListening.current?.();
+      stopListening.current = editor.store.listen(
         () => {
+          pendingSnapshot.current = editor.store.getStoreSnapshot();
           if (saveTimer.current) window.clearTimeout(saveTimer.current);
           saveTimer.current = window.setTimeout(() => {
-            onSnapshot(editor.store.getStoreSnapshot());
+            const snapshot = pendingSnapshot.current;
+            pendingSnapshot.current = null;
+            saveTimer.current = null;
+            if (snapshot) onSnapshotRef.current(snapshot);
           }, 600);
         },
         { source: 'user', scope: 'document' },
       );
-      return () => off();
     },
-    [initialDocument, onSnapshot],
+    [initialDocument],
   );
 
   return (
