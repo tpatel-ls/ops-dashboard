@@ -11,7 +11,7 @@ export async function logWork(
   note?: string,
   at?: string,
 ): Promise<WorkLog> {
-  if (!Number.isInteger(minutes) || minutes <= 0) {
+  if (!Number.isSafeInteger(minutes) || minutes <= 0) {
     throw new Error('Work log minutes must be a positive integer.');
   }
   if (at !== undefined && (!at.trim() || !Number.isFinite(Date.parse(at)))) {
