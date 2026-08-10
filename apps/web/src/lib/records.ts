@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, getDeviceId, newId } from '@ops-dashboard/core';
+import { bumpVersion, getDb, getDeviceId, newId } from '@ops-dashboard/core';
 import type { SyncMeta, SyncTable } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
@@ -45,12 +45,10 @@ export async function patchRecord<T extends SyncMeta>(
     ([key, value]) => !Object.is((existing as T & Record<string, unknown>)[key], value),
   );
   if (!changed) return existing;
-  const merged = {
+  const merged = bumpVersion({
     ...existing,
     ...mutablePatch,
-    updatedAt: new Date().toISOString(),
-    version: existing.version + 1,
-  } as T;
+  } as T);
   await t.put(merged);
   await enqueueOp({ table, recordId: id, op: 'put', payload: merged });
   return merged;
@@ -63,8 +61,7 @@ export async function softDeleteRecord<T extends SyncMeta>(
   const t = getDb().table<T>(table);
   const existing = await t.get(id);
   if (!existing || existing.deletedAt) return;
-  const now = new Date().toISOString();
-  const tomb = { ...existing, deletedAt: now, updatedAt: now, version: existing.version + 1 } as T;
+  const tomb = bumpVersion({ ...existing, deletedAt: new Date().toISOString() } as T);
   await t.put(tomb);
   await enqueueOp({ table, recordId: id, op: 'delete', payload: tomb });
 }
