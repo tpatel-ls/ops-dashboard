@@ -57,6 +57,9 @@ export interface RoutedResult {
 }
 
 const MAX_ROUTED_ITEMS = 100;
+const MAX_FOOD_ITEMS = 100;
+const MAX_FOOD_TEXT_LENGTH = 200;
+const MAX_NUTRITION_ESTIMATE = 1_000_000;
 
 interface RouteContext {
   projects: Project[];
@@ -199,7 +202,7 @@ async function routeFood(
   draft: RoutedItemDraft,
   source: CaptureSource,
 ): Promise<RoutedResult> {
-  const items = (draft.food?.items ?? []).map(toFoodItem).filter((i): i is FoodItem => i !== null);
+  const items = normalizeCaptureFoodItems(draft.food?.items);
   const log = await createFoodLog({
     description: title,
     items,
@@ -399,22 +402,40 @@ export function normalizeCaptureTags(tags: string[] | undefined): string[] {
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 
 function toMealType(v: string | undefined): MealType {
-  return MEAL_TYPES.includes(v as MealType) ? (v as MealType) : 'snack';
+  const normalized = v?.trim().toLowerCase();
+  return MEAL_TYPES.includes(normalized as MealType) ? (normalized as MealType) : 'snack';
 }
 
 type DraftFoodItem = NonNullable<NonNullable<RoutedItemDraft['food']>['items']>[number];
 
+export function normalizeCaptureFoodItems(value: unknown): FoodItem[] {
+  if (!Array.isArray(value)) return [];
+  const items: FoodItem[] = [];
+  for (const raw of value) {
+    if (items.length >= MAX_FOOD_ITEMS) break;
+    const item = toFoodItem(raw as DraftFoodItem);
+    if (item) items.push(item);
+  }
+  return items;
+}
+
+function boundedFoodText(value: unknown): string {
+  return typeof value === 'string'
+    ? Array.from(value.trim()).slice(0, MAX_FOOD_TEXT_LENGTH).join('')
+    : '';
+}
+
 function toFoodItem(raw: DraftFoodItem): FoodItem | null {
-  const name = typeof raw?.name === 'string' ? raw.name.trim() : '';
+  const name = boundedFoodText(raw?.name);
   if (!name) return null;
-  const quantity = typeof raw.quantity === 'string' ? raw.quantity.trim() : '';
-  const protein = roundMacro(raw.protein);
-  const carbs = roundMacro(raw.carbs);
-  const fat = roundMacro(raw.fat);
+  const quantity = boundedFoodText(raw?.quantity);
+  const protein = roundMacro(raw?.protein);
+  const carbs = roundMacro(raw?.carbs);
+  const fat = roundMacro(raw?.fat);
   return {
     name,
     ...(quantity ? { quantity } : {}),
-    calories: roundMacro(raw.calories) ?? 0,
+    calories: roundMacro(raw?.calories) ?? 0,
     ...(protein !== undefined ? { protein } : {}),
     ...(carbs !== undefined ? { carbs } : {}),
     ...(fat !== undefined ? { fat } : {}),
@@ -422,5 +443,7 @@ function toFoodItem(raw: DraftFoodItem): FoodItem | null {
 }
 
 function roundMacro(v: unknown): number | undefined {
-  return typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.round(v)) : undefined;
+  return typeof v === 'number' && Number.isFinite(v)
+    ? Math.min(MAX_NUTRITION_ESTIMATE, Math.max(0, Math.round(v)))
+    : undefined;
 }
