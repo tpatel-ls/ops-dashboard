@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   MAX_TRANSCRIPTION_BYTES,
+  MAX_TRANSCRIPTION_TEXT_LENGTH,
   transcriptionFileError,
   transcriptionText,
 } from './transcription';
@@ -12,9 +13,21 @@ describe('transcription boundaries', () => {
     expect(transcriptionFileError(MAX_TRANSCRIPTION_BYTES)).toBeUndefined();
   });
 
+  it('rejects unsupported media types while allowing codec parameters', () => {
+    expect(transcriptionFileError(100, 'text/plain')).toBe('unsupported-type');
+    expect(transcriptionFileError(100, 'audio/webm;codecs=opus')).toBeUndefined();
+    expect(transcriptionFileError(100, 'audio/mpeg')).toBeUndefined();
+  });
+
   it('accepts only nonempty text results', () => {
     expect(transcriptionText('  spoken note  ')).toBe('spoken note');
     expect(transcriptionText('   ')).toBeUndefined();
     expect(transcriptionText({ text: 'wrong shape' })).toBeUndefined();
+  });
+
+  it('bounds unexpectedly large upstream transcripts', () => {
+    expect(transcriptionText('a'.repeat(MAX_TRANSCRIPTION_TEXT_LENGTH + 1))).toHaveLength(
+      MAX_TRANSCRIPTION_TEXT_LENGTH,
+    );
   });
 });
