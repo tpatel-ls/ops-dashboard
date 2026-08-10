@@ -4,6 +4,7 @@ import {
   fallbackCaptureLines,
   journalEntrySource,
   normalizeCaptureKind,
+  normalizeCaptureFoodItems,
   normalizeCapturePriority,
   normalizeCaptureTags,
   routineCaptureNeedsChange,
@@ -91,5 +92,29 @@ describe('normalizeCapturePriority', () => {
     expect(normalizeCapturePriority(1.6)).toBe(2);
     expect(normalizeCapturePriority(-4)).toBe(0);
     expect(normalizeCapturePriority(8)).toBe(3);
+  });
+});
+
+describe('normalizeCaptureFoodItems', () => {
+  it('bounds AI meal sizes, text fields, and nutrition estimates', () => {
+    const items = Array.from({ length: 105 }, (_, index) => ({
+      name: `Food ${index} ${'x'.repeat(220)}`,
+      quantity: 'y'.repeat(220),
+      calories: Number.MAX_VALUE,
+      protein: -4,
+    }));
+
+    const result = normalizeCaptureFoodItems(items);
+
+    expect(result).toHaveLength(100);
+    expect(Array.from(result[0]!.name)).toHaveLength(200);
+    expect(Array.from(result[0]!.quantity ?? '')).toHaveLength(200);
+    expect(result[0]).toMatchObject({ calories: 1_000_000, protein: 0 });
+  });
+
+  it('ignores malformed AI meal entries', () => {
+    expect(normalizeCaptureFoodItems([null, 42, { name: '  ' }, { name: ' Eggs ' }])).toEqual([
+      { name: 'Eggs', calories: 0 },
+    ]);
   });
 });
