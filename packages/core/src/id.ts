@@ -9,7 +9,14 @@ const MAX_DEVICE_ID_LENGTH = 128;
 let fallbackDeviceId: string | undefined;
 
 function storedDeviceId(value: string | null): string | undefined {
-  if (!value || value !== value.trim() || value.length > MAX_DEVICE_ID_LENGTH) return undefined;
+  if (
+    !value ||
+    value !== value.trim() ||
+    value.length > MAX_DEVICE_ID_LENGTH ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  ) {
+    return undefined;
+  }
   return value;
 }
 
