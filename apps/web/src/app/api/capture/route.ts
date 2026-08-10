@@ -215,9 +215,11 @@ export async function POST(req: Request): Promise<Response> {
     ...(result?.title ? { aiSummary: result.title } : {}),
     aiKind,
   };
+  const routedTitle =
+    'title' in routedRecord ? routedRecord.title : routedRecord.body.split('\n', 1)[0]?.trim();
   const notification: AppNotification = {
     ...meta(deviceId),
-    title: `Captured: ${result?.title ?? routedRecord.id}`,
+    title: `Captured: ${result?.title ?? routedTitle ?? routedRecord.id}`,
     kind: 'capture',
     refType: routeType,
     refId: routedRecord.id,
