@@ -1,6 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { tasksToMarkdown, validateOpsExport } from './export';
+import { releaseDownloadUrl, tasksToMarkdown, validateOpsExport } from './export';
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});
 
 function task(title: string, scheduledFor?: string): Task {
   return {
@@ -129,5 +134,20 @@ describe('validateOpsExport', () => {
     };
 
     expect(validateOpsExport(payload)).toBe(payload);
+  });
+});
+
+describe('releaseDownloadUrl', () => {
+  it('keeps blob URLs alive until the browser starts the download', () => {
+    vi.useFakeTimers();
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal('window', globalThis);
+    vi.stubGlobal('URL', { revokeObjectURL });
+
+    releaseDownloadUrl('blob:download');
+
+    expect(revokeObjectURL).not.toHaveBeenCalled();
+    vi.runAllTimers();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:download');
   });
 });
