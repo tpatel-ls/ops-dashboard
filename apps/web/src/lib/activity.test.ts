@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { aggregateActivity, normalizeActivityDays } from './activity';
+import {
+  aggregateActivity,
+  normalizeActivityDays,
+  workLogActivityContribution,
+} from './activity';
 
 describe('aggregateActivity', () => {
   it('normalizes invalid and negative scores to an empty day', () => {
@@ -42,4 +46,18 @@ describe('normalizeActivityDays', () => {
     expect(normalizeActivityDays(Number.NaN)).toBe(365);
     expect(normalizeActivityDays(Number.POSITIVE_INFINITY)).toBe(365);
   });
+});
+
+describe('workLogActivityContribution', () => {
+  it('scores valid work durations', () => {
+    expect(workLogActivityContribution(30)).toBe(0.5);
+    expect(workLogActivityContribution(90)).toBe(1.5);
+  });
+
+  it.each([0, -30, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
+    'ignores malformed legacy duration %s',
+    (minutes) => {
+      expect(workLogActivityContribution(minutes)).toBe(0);
+    },
+  );
 });

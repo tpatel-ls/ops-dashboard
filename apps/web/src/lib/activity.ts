@@ -22,6 +22,12 @@ export function normalizeActivityDays(days: number): number {
   return Math.min(MAX_ACTIVITY_DAYS, Math.max(1, Math.floor(days)));
 }
 
+export function workLogActivityContribution(minutes: number): number {
+  return Number.isSafeInteger(minutes) && minutes > 0
+    ? (minutes / 30) * WEIGHTS.workPer30Min
+    : 0;
+}
+
 /** Convert any ISO/Date to a local YYYY-MM-DD string. */
 function toLocalDate(ts: string | Date): string {
   const d = typeof ts === 'string' ? new Date(ts) : ts;
@@ -116,7 +122,7 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   // WorkLogs within the window
   const worklogs = await db.workLogs.filter((w) => !w.deletedAt && w.at >= startISO).toArray();
   for (const w of worklogs) {
-    const contribution = (w.minutes / 30) * WEIGHTS.workPer30Min;
+    const contribution = workLogActivityContribution(w.minutes);
     add(toLocalDate(w.at), contribution);
   }
 
