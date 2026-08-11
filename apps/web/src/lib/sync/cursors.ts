@@ -6,7 +6,11 @@ export function parseSyncCursors(raw: string | null): Record<string, string> {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
     return Object.fromEntries(
-      Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+      Object.entries(parsed).flatMap(([table, value]): Array<[string, string]> => {
+        if (typeof value !== 'string') return [];
+        const timestamp = Date.parse(value);
+        return Number.isFinite(timestamp) ? [[table, new Date(timestamp).toISOString()]] : [];
+      }),
     );
   } catch {
     return {};
