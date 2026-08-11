@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextRecordedAttempt } from './outbox';
+import { nextRecordedAttempt, outboundRecordPayload } from './outbox';
 
 describe('nextRecordedAttempt', () => {
   it('increments retry metadata without passing the display cap', () => {
@@ -13,5 +13,16 @@ describe('nextRecordedAttempt', () => {
     expect(nextRecordedAttempt(Number.NaN, 12)).toBe(1);
     expect(nextRecordedAttempt(4, Number.NaN)).toBe(0);
     expect(nextRecordedAttempt(4, -1)).toBe(0);
+  });
+});
+
+describe('outboundRecordPayload', () => {
+  it('accepts records and rejects payloads that cannot become database rows', () => {
+    const record = { id: 'task-1', title: 'Call supplier' };
+
+    expect(outboundRecordPayload(record)).toBe(record);
+    expect(outboundRecordPayload(null)).toBeUndefined();
+    expect(outboundRecordPayload(['task-1'])).toBeUndefined();
+    expect(outboundRecordPayload('task-1')).toBeUndefined();
   });
 });
