@@ -3,6 +3,7 @@ import {
   acceptedBrainDumpItems,
   fallbackCaptureLines,
   journalEntrySource,
+  normalizeBrainDumpItem,
   normalizeCaptureKind,
   normalizeCaptureFoodItems,
   normalizeCapturePriority,
@@ -25,6 +26,30 @@ describe('acceptedBrainDumpItems', () => {
     }));
 
     expect(acceptedBrainDumpItems(true, { ok: true, items })).toHaveLength(100);
+  });
+
+  it('rejects malformed response shapes and unusable items', () => {
+    expect(acceptedBrainDumpItems(true, null)).toBeNull();
+    expect(acceptedBrainDumpItems(true, { ok: true, items: [null, { title: '   ' }] })).toBeNull();
+  });
+});
+
+describe('normalizeBrainDumpItem', () => {
+  it('bounds untrusted AI text without splitting Unicode characters', () => {
+    const item = normalizeBrainDumpItem({
+      title: `  ${'x'.repeat(499)}😀extra  `,
+      notes: 'n'.repeat(2_100),
+      dueText: 'd'.repeat(250),
+      projectName: 'p'.repeat(250),
+      routineName: 'r'.repeat(250),
+    });
+
+    expect(Array.from(item?.title ?? '')).toHaveLength(500);
+    expect(item?.title.endsWith('😀')).toBe(true);
+    expect(Array.from(item?.notes ?? '')).toHaveLength(2_000);
+    expect(Array.from(item?.dueText ?? '')).toHaveLength(200);
+    expect(Array.from(item?.projectName ?? '')).toHaveLength(200);
+    expect(Array.from(item?.routineName ?? '')).toHaveLength(200);
   });
 });
 
