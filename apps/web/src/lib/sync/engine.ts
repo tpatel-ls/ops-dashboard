@@ -13,7 +13,7 @@ import {
   toRow,
   type DexieTableName,
 } from './mapping';
-import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
+import { createSyncCursorCache, overlappedCursor, SYNC_EPOCH } from './cursors';
 import { shouldAcceptRemote } from './conflicts';
 import { visitPullPages } from './pagination';
 import { nextRecordedAttempt } from './outbox';
@@ -40,6 +40,7 @@ let safetyTimer: number | null = null;
 let kickTimer: number | null = null;
 let draining = false;
 let authSub: { unsubscribe: () => void } | null = null;
+const cursorCache = createSyncCursorCache();
 
 function db() {
   return getDb();
@@ -126,11 +127,11 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
 // ---- Pull (Supabase -> local) ---------------------------------------------
 
 function readCursors(): Record<string, string> {
-  return parseSyncCursors(readLocalStorage(CURSORS_KEY));
+  return cursorCache.read(readLocalStorage(CURSORS_KEY));
 }
 
 function writeCursors(cursors: Record<string, string>): void {
-  writeLocalStorage(CURSORS_KEY, JSON.stringify(cursors));
+  writeLocalStorage(CURSORS_KEY, cursorCache.store(cursors));
 }
 
 /**
