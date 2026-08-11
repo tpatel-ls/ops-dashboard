@@ -19,6 +19,17 @@ describe('parseSyncCursors', () => {
       ),
     ).toEqual({ tasks: '2026-07-15T12:00:00.000Z' });
   });
+
+  it('drops invalid timestamps and canonicalizes valid cursor instants', () => {
+    expect(
+      parseSyncCursors(
+        JSON.stringify({
+          tasks: 'not-a-date',
+          projects: '2026-07-15T07:00:00-05:00',
+        }),
+      ),
+    ).toEqual({ projects: '2026-07-15T12:00:00.000Z' });
+  });
 });
 
 describe('overlappedCursor', () => {
