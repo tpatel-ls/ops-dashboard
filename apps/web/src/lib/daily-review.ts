@@ -7,11 +7,15 @@ export function taskCompletedOn(task: Task, day: string): boolean {
 
 export function taskNeedsRollForward(task: Task, day: string): boolean {
   if (task.deletedAt || task.status === 'done' || task.status === 'archived') return false;
+  const scheduledDay = localDay(task.scheduledFor);
   const dueDay = localDay(task.dueAt);
-  return Boolean((task.scheduledFor && task.scheduledFor <= day) || (dueDay && dueDay <= day));
+  return Boolean((scheduledDay && scheduledDay <= day) || (dueDay && dueDay <= day));
 }
 
 export function rollForwardPatch(task: Task, currentDay: string, targetDay: string): Partial<Task> {
+  if (localDay(currentDay) !== currentDay || localDay(targetDay) !== targetDay) {
+    throw new Error('Review dates must be valid calendar days.');
+  }
   const patch: Partial<Task> = { scheduledFor: targetDay };
   const dueDay = localDay(task.dueAt);
   if (!task.dueAt || !dueDay || dueDay > currentDay) return patch;
