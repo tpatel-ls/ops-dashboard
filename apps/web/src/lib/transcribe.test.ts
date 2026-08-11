@@ -22,4 +22,12 @@ describe('transcribeBlob', () => {
     await expect(transcribeBlob(oversized)).resolves.toBeNull();
     expect(fetch).not.toHaveBeenCalled();
   });
+
+  it('does not upload a blob with a non-audio media type', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(transcribeBlob(new Blob(['image'], { type: 'image/png' }))).resolves.toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });
