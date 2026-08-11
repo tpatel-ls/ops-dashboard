@@ -60,6 +60,13 @@ describe('fallbackCaptureLines', () => {
     expect(fallbackCaptureLines(text)).toHaveLength(100);
     expect(fallbackCaptureLines('  First  \r\n\r\n Second ')).toEqual(['First', 'Second']);
   });
+
+  it('bounds each offline task title without splitting Unicode characters', () => {
+    const [line] = fallbackCaptureLines(`${'x'.repeat(499)}😀overflow`);
+
+    expect(Array.from(line ?? '')).toHaveLength(500);
+    expect(line?.endsWith('😀')).toBe(true);
+  });
 });
 
 describe('normalizeCaptureTags', () => {
