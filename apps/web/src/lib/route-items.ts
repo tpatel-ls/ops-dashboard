@@ -43,6 +43,8 @@ export interface RoutedItemDraft {
   };
 }
 
+export type NormalizedRoutedItemDraft = RoutedItemDraft & { title: string };
+
 export interface RoutedResult {
   captureId: string;
   kind: CaptureKind;
@@ -57,6 +59,10 @@ export interface RoutedResult {
 }
 
 const MAX_ROUTED_ITEMS = 100;
+const MAX_ROUTED_TITLE_LENGTH = 500;
+const MAX_ROUTED_NOTES_LENGTH = 2_000;
+const MAX_ROUTED_DATE_TEXT_LENGTH = 200;
+const MAX_ROUTED_NAME_LENGTH = 200;
 const MAX_FOOD_ITEMS = 100;
 const MAX_FOOD_TEXT_LENGTH = 200;
 const MAX_NUTRITION_ESTIMATE = 1_000_000;
@@ -129,11 +135,47 @@ export async function processBrainDump(
 
 export function acceptedBrainDumpItems(
   responseOk: boolean,
-  value: { ok?: boolean; items?: RoutedItemDraft[] },
+  value: unknown,
 ): RoutedItemDraft[] | null {
-  return responseOk && value.ok && Array.isArray(value.items) && value.items.length > 0
-    ? value.items.slice(0, MAX_ROUTED_ITEMS)
-    : null;
+  if (!responseOk || !value || typeof value !== 'object') return null;
+  const payload = value as { ok?: unknown; items?: unknown };
+  if (payload.ok !== true || !Array.isArray(payload.items)) return null;
+  const items = payload.items
+    .slice(0, MAX_ROUTED_ITEMS)
+    .map(normalizeBrainDumpItem)
+    .filter((item): item is NormalizedRoutedItemDraft => Boolean(item));
+  return items.length > 0 ? items : null;
+}
+
+function boundedDraftText(value: unknown, limit: number): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const text = Array.from(value.trim()).slice(0, limit).join('');
+  return text || undefined;
+}
+
+export function normalizeBrainDumpItem(value: unknown): NormalizedRoutedItemDraft | null {
+  if (!value || typeof value !== 'object') return null;
+  const input = value as Record<string, unknown>;
+  const title = boundedDraftText(input.title, MAX_ROUTED_TITLE_LENGTH);
+  if (!title) return null;
+  const kind = boundedDraftText(input.kind, 20);
+  const notes = boundedDraftText(input.notes, MAX_ROUTED_NOTES_LENGTH);
+  const dueText = boundedDraftText(input.dueText, MAX_ROUTED_DATE_TEXT_LENGTH);
+  const projectName = boundedDraftText(input.projectName, MAX_ROUTED_NAME_LENGTH);
+  const routineName = boundedDraftText(input.routineName, MAX_ROUTED_NAME_LENGTH);
+  return {
+    title,
+    ...(kind ? { kind } : {}),
+    ...(notes ? { notes } : {}),
+    ...(dueText ? { dueText } : {}),
+    ...(typeof input.priority === 'number' ? { priority: input.priority } : {}),
+    ...(Array.isArray(input.tags) ? { tags: input.tags as string[] } : {}),
+    ...(projectName ? { projectName } : {}),
+    ...(routineName ? { routineName } : {}),
+    ...(input.food && typeof input.food === 'object'
+      ? { food: input.food as RoutedItemDraft['food'] }
+      : {}),
+  };
 }
 
 async function routeItem(draft: RoutedItemDraft, ctx: RouteContext): Promise<RoutedResult> {
