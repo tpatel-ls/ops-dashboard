@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Task } from '@ops-dashboard/core';
+import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 import { releaseDownloadUrl, tasksToMarkdown, validateOpsExport } from './export';
 
 afterEach(() => {
@@ -22,6 +22,35 @@ function task(title: string, scheduledFor?: string): Task {
     version: 1,
     deviceId: 'test',
     ...(scheduledFor ? { scheduledFor } : {}),
+  };
+}
+
+function project(name: string): Project {
+  return {
+    id: name,
+    name,
+    color: '#123456',
+    kind: 'project',
+    status: 'active',
+    milestones: [],
+    checklists: [],
+    createdAt: '2026-07-28T00:00:00.000Z',
+    updatedAt: '2026-07-28T00:00:00.000Z',
+    version: 1,
+    deviceId: 'test',
+  };
+}
+
+function whiteboard(name: string): Whiteboard {
+  return {
+    id: name,
+    name,
+    document: null,
+    linkedTaskIds: [],
+    createdAt: '2026-07-28T00:00:00.000Z',
+    updatedAt: '2026-07-28T00:00:00.000Z',
+    version: 1,
+    deviceId: 'test',
   };
 }
 
@@ -124,13 +153,62 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects malformed task fields and nested collections', () => {
+    const invalid = { ...task('Invalid task'), tags: [42] };
+
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [invalid],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
+  it('rejects malformed project and whiteboard structures', () => {
+    const base = {
+      version: 1 as const,
+      exportedAt: '2026-07-30T12:00:00.000Z',
+      tasks: [],
+    };
+
+    expect(() =>
+      validateOpsExport({
+        ...base,
+        projects: [{ ...project('Invalid project'), milestones: [null] }],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export projects');
+    expect(() =>
+      validateOpsExport({
+        ...base,
+        projects: [],
+        whiteboards: [{ ...whiteboard('Invalid board'), linkedTaskIds: [42] }],
+      }),
+    ).toThrow('Invalid export whiteboards');
+  });
+
+  it('rejects malformed sync metadata on imported records', () => {
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [{ ...task('Invalid version'), version: Number.NaN }],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
   it('accepts a structurally valid version one export', () => {
     const payload = {
       version: 1 as const,
       exportedAt: '2026-07-30T12:00:00.000Z',
       tasks: [task('Valid task')],
-      projects: [],
-      whiteboards: [],
+      projects: [project('Valid project')],
+      whiteboards: [whiteboard('Valid board')],
     };
 
     expect(validateOpsExport(payload)).toBe(payload);

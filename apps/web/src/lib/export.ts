@@ -18,6 +18,122 @@ function isRecordWithId(value: unknown): boolean {
   return typeof id === 'string' && Boolean(id) && id === id.trim();
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isUsableString(value: unknown): value is string {
+  return typeof value === 'string' && Boolean(value.trim()) && value === value.trim();
+}
+
+function isTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && Boolean(value) && Number.isFinite(Date.parse(value));
+}
+
+function hasValidSyncMetadata(value: Record<string, unknown>): boolean {
+  return (
+    isRecordWithId(value) &&
+    isTimestamp(value.createdAt) &&
+    isTimestamp(value.updatedAt) &&
+    Number.isSafeInteger(value.version) &&
+    (value.version as number) >= 0 &&
+    isUsableString(value.deviceId) &&
+    (value.deletedAt === undefined || isTimestamp(value.deletedAt))
+  );
+}
+
+function isStringList(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isChecklistItem(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isUsableString(value.id) &&
+    typeof value.text === 'string' &&
+    typeof value.done === 'boolean'
+  );
+}
+
+function isReminder(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isUsableString(value.id) &&
+    isUsableString(value.taskId) &&
+    isTimestamp(value.triggerAt) &&
+    typeof value.delivered === 'boolean' &&
+    (value.offsetMinutes === undefined || Number.isFinite(value.offsetMinutes))
+  );
+}
+
+const TASK_STATUSES = new Set(['backlog', 'todo', 'doing', 'blocked', 'done', 'archived']);
+
+function isTaskRecord(value: unknown): boolean {
+  if (!isRecord(value) || !hasValidSyncMetadata(value)) return false;
+  return (
+    isUsableString(value.title) &&
+    typeof value.status === 'string' &&
+    TASK_STATUSES.has(value.status) &&
+    Number.isInteger(value.priority) &&
+    (value.priority as number) >= 0 &&
+    (value.priority as number) <= 3 &&
+    Number.isFinite(value.order) &&
+    isStringList(value.tags) &&
+    Array.isArray(value.reminders) &&
+    value.reminders.every(isReminder) &&
+    Array.isArray(value.checklist) &&
+    value.checklist.every(isChecklistItem)
+  );
+}
+
+const PROJECT_KINDS = new Set(['project', 'area', 'retainer']);
+const PROJECT_STATUSES = new Set(['active', 'paused', 'done', 'archived']);
+
+function isMilestone(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isUsableString(value.id) &&
+    isUsableString(value.title) &&
+    typeof value.done === 'boolean' &&
+    (value.dueAt === undefined || isTimestamp(value.dueAt))
+  );
+}
+
+function isNamedChecklist(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isUsableString(value.id) &&
+    isUsableString(value.name) &&
+    Array.isArray(value.items) &&
+    value.items.every(isChecklistItem)
+  );
+}
+
+function isProjectRecord(value: unknown): boolean {
+  if (!isRecord(value) || !hasValidSyncMetadata(value)) return false;
+  return (
+    isUsableString(value.name) &&
+    typeof value.color === 'string' &&
+    typeof value.kind === 'string' &&
+    PROJECT_KINDS.has(value.kind) &&
+    typeof value.status === 'string' &&
+    PROJECT_STATUSES.has(value.status) &&
+    Array.isArray(value.milestones) &&
+    value.milestones.every(isMilestone) &&
+    Array.isArray(value.checklists) &&
+    value.checklists.every(isNamedChecklist)
+  );
+}
+
+function isWhiteboardRecord(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    hasValidSyncMetadata(value) &&
+    isUsableString(value.name) &&
+    isStringList(value.linkedTaskIds)
+  );
+}
+
 function hasUniqueIds(records: unknown[]): boolean {
   const ids = records.map((record) => (record as { id: string }).id);
   return new Set(ids).size === ids.length;
@@ -37,9 +153,14 @@ export function validateOpsExport(value: unknown): OpsExport {
     throw new Error('Invalid export timestamp');
   }
 
+  const validators = {
+    tasks: isTaskRecord,
+    projects: isProjectRecord,
+    whiteboards: isWhiteboardRecord,
+  } as const;
   for (const key of ['tasks', 'projects', 'whiteboards'] as const) {
     const records = payload[key];
-    if (!Array.isArray(records) || !records.every(isRecordWithId) || !hasUniqueIds(records)) {
+    if (!Array.isArray(records) || !records.every(validators[key]) || !hasUniqueIds(records)) {
       throw new Error(`Invalid export ${key}`);
     }
   }
