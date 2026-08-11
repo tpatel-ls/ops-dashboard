@@ -1,37 +1,58 @@
 # Ops Dashboard
 
-Local-first task and whiteboard app. Web first, Android wrapper later.
-
-## Status
-
-M0 scaffold landed. See `docs/architecture.md` for the layout and
-`claude_code_prompt.md` (the spec on the user's desktop) for the full plan.
+Ops Dashboard is a local-first personal operations app for tasks, projects,
+routines, captures, journals, food logs, people, notes, books, quotes, and
+whiteboards. The web app is a Next.js PWA with optional Supabase sync and
+server-side AI features.
 
 ## Workspace
 
+```text
+apps/web              Next.js 16 App Router, React 19, Tailwind v4
+packages/core         shared types, Dexie schema, dates, recurrence, parsing
+packages/ui           shared class-name utilities
+packages/whiteboard   tldraw canvas wrapper
+packages/tsconfig     shared TypeScript configurations
+supabase/             SQL migrations and seed data
+docs/                 architecture, sync, deployment, and device guides
 ```
-plank/
-  apps/web              Next.js 16 App Router, React 19, Tailwind v4
-  packages/core         types, Dexie schema, ULID, quick-add parser
-  packages/ui           shared cn helper, design tokens
-  packages/whiteboard   pen pointer helpers, palm rejection
-  packages/tsconfig     shared TypeScript configs
-  supabase/             SQL migrations and seed (M6)
-  docs/                 architecture, sync, pen input, shortcuts
-```
+
+## Requirements
+
+- Node.js 20 or newer
+- pnpm 10 or newer
 
 ## Getting started
 
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
 ```
-pnpm install
-pnpm dev            # runs apps/web on http://localhost:3000
-pnpm test           # vitest across packages
-pnpm typecheck
+
+The development server runs at `http://localhost:3000`.
+
+## Validation
+
+Run the same checks used by CI:
+
+```sh
 pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
 ```
 
-## Notes
+The optional end-to-end command requires a Playwright configuration and test
+suite, which are not currently present in this repository.
 
-- The spec named Next.js 15. `create-next-app@latest` ships Next.js 16 today
-  with the same App Router. Holding on 16 unless you want to pin back.
-- No em-dashes anywhere. No n8n. TS strict everywhere.
+## Configuration
+
+The app works without a backend in local-first mode. Supabase authentication
+and sync, Anthropic-backed AI routes, transcription, and Pushover notifications
+are optional. See `docs/ops-dashboard/deploy.md` and the other guides under
+`docs/ops-dashboard/` for their environment variables and setup steps.
+
+## Architecture
+
+See `docs/architecture.md` for the workspace layout and `docs/sync.md` for the
+current synchronization model.

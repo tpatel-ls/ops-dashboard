@@ -1,47 +1,62 @@
 # Sync
 
-Sync is opt-in per device. It is disabled at install. The user enables it from
-Settings, which prompts a Supabase magic link login.
+Sync is optional and disabled by default. When enabled, the browser keeps the
+local Dexie database as the immediate source of truth and uses Supabase to move
+changes between signed-in devices.
 
-## Per record metadata
+## Record metadata
 
-Every syncable row carries:
+Each synchronized record includes:
 
-- `version` (monotonic integer, bumped on every local write)
-- `deviceId` (ULID per browser profile, see `@ops-dashboard/core/id`)
-- `updatedAt` (ISO 8601 with timezone)
-- `deletedAt` (soft delete, hard delete after 30 days)
+- `version`: a non-negative logical version incremented on local mutations
+- `deviceId`: a stable identifier for the browser profile
+- `updatedAt`: an ISO timestamp for ordering equal versions
+- `deletedAt`: an optional soft-delete timestamp
 
-## Local mutations
+## Local mutations and outbox
 
-Mutations always write to Dexie first. If `settings.syncEnabled` is true, the
-lib layer also appends a `SyncOp` row (`{ table, recordId, op, payload }`).
-The worker drains the queue on its next tick.
+Mutation helpers write the record to Dexie, then coalesce an operation into the
+`syncOps` outbox when sync is enabled. The sync engine drains operations in
+creation order. A failed table is deferred for the rest of that drain so other
+tables can continue, and failed operations remain queued for a later retry.
 
-## Worker loop
+Deletes are synchronized as tombstones rather than hard deletes.
 
-```
-loop:
-  pull changes since lastPulledAt
-  apply with last write wins per field, using max(version, updatedAt)
-  push pending SyncOps in order
-  set lastPulledAt to server now
-  wait 30 s or until a Dexie change triggers a wake
-```
+## Startup and recurring cycles
+
+On startup, the engine:
+
+1. Verifies Supabase configuration and the current session.
+2. Backfills existing local records once per signed-in user.
+3. Pulls every synchronized table from its saved cursor.
+4. Opens Supabase Realtime subscriptions.
+5. Drains the local outbox.
+
+After startup, an online event, a local mutation, or the 20-second safety timer
+starts a cycle. Each cycle pushes the outbox first and then performs a catch-up
+pull. Pulls are paginated and keep a separate cursor for every table. A two-minute
+overlap protects against modest clock skew and makes replayed rows harmless.
 
 ## Conflict resolution
 
-- Tasks and projects: last write wins per field, keyed on `(version, updatedAt)`.
-- Whiteboard documents: opaque blobs. Last write wins on the whole document.
-  When a conflict is detected (concurrent edits on two devices), the older
-  side is kept as `whiteboards/<id>/conflict-<timestamp>` and the user is
-  notified.
-- Soft deletes always win over a stale put.
+Records use whole-record last-write-wins resolution:
 
-## Failure modes
+1. A valid higher `version` wins.
+2. At equal versions, a valid later `updatedAt` wins.
+3. At an exact metadata tie, a tombstone wins over a live record.
+4. Remaining ties use `deviceId`, then canonical record content, so every device
+   makes the same choice.
 
-- Network down: ops stay queued. UI keeps working.
-- Auth expired: surface a non-blocking banner, pause the worker.
-- Schema mismatch: refuse to push. Force a version bump migration first.
-- Clock skew: the worker writes a Lamport-style logical clock that increments
-  on every push, so two writes on the same wall clock still order.
+The Postgres sync guard rejects older updates. Incoming Realtime and catch-up
+rows use the same client-side winner selection before writing to Dexie.
+
+## Storage and failure behavior
+
+- Network or provider failure leaves operations queued and reports an offline or
+  error state without blocking local work.
+- Missing authentication reports a signed-out state and restarts sync after sign-in.
+- Browser storage failures fall back safely, but persistent cursor and backfill
+  markers normally use local storage.
+- A per-table pull cursor advances only after every page for that table succeeds.
+- Stopping or restarting sync invalidates in-flight startup work before new
+  listeners, timers, or channels are installed.
