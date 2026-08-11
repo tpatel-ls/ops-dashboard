@@ -16,7 +16,7 @@ import {
 import { createSyncCursorCache, overlappedCursor, SYNC_EPOCH } from './cursors';
 import { shouldAcceptRemote } from './conflicts';
 import { visitPullPages } from './pagination';
-import { nextRecordedAttempt } from './outbox';
+import { nextRecordedAttempt, outboundRecordPayload } from './outbox';
 import { createSingleFlightQueue } from './single-flight';
 import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
@@ -97,7 +97,13 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
         }
         if (failedTables.has(op.table)) continue;
         const dbTable = SYNC_TABLES[op.table];
-        const row = toRow(op.payload as Record<string, unknown>, userId);
+        const payload = outboundRecordPayload(op.payload);
+        if (!payload) {
+          await db().syncOps.delete(op.id);
+          progressed = true;
+          continue;
+        }
+        const row = toRow(payload, userId);
         // Both 'put' and 'delete' upsert the record; a delete is a tombstone
         // (deletedAt set). The DB version-guard trigger prevents clobbering a
         // newer remote, so a stale push is a harmless no-op.
