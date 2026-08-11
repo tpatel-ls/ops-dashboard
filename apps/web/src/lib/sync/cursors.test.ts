@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
+import { createSyncCursorCache, overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
 
 describe('parseSyncCursors', () => {
   it('returns an empty map for missing, malformed, or array storage', () => {
@@ -32,11 +32,32 @@ describe('parseSyncCursors', () => {
   });
 });
 
+describe('createSyncCursorCache', () => {
+  it('retains cursor progress when browser storage is unavailable', () => {
+    const cache = createSyncCursorCache();
+    const cursors = { tasks: '2026-07-15T12:00:00.000Z' };
+
+    cache.store(cursors);
+
+    expect(cache.read(null)).toEqual(cursors);
+  });
+
+  it('keeps the newest cursor from memory or persistent storage', () => {
+    const cache = createSyncCursorCache();
+    cache.store({ tasks: '2026-07-15T12:00:00.000Z' });
+
+    expect(
+      cache.read(JSON.stringify({ tasks: '2026-07-15T11:00:00.000Z', projects: '2026-07-16' })),
+    ).toEqual({
+      tasks: '2026-07-15T12:00:00.000Z',
+      projects: '2026-07-16T00:00:00.000Z',
+    });
+  });
+});
+
 describe('overlappedCursor', () => {
   it('subtracts the overlap from a valid cursor', () => {
-    expect(overlappedCursor('2026-07-15T12:00:00.000Z', 120_000)).toBe(
-      '2026-07-15T11:58:00.000Z',
-    );
+    expect(overlappedCursor('2026-07-15T12:00:00.000Z', 120_000)).toBe('2026-07-15T11:58:00.000Z');
   });
 
   it('keeps the epoch and recovers malformed timestamps', () => {
