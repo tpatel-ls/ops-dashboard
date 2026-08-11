@@ -163,6 +163,8 @@ describe('updateTask', () => {
       { estimateMinutes: -1 },
       { actualMinutes: 1.5 },
       { order: Number.NaN },
+      { status: 'missing' as Task['status'] },
+      { priority: 4 as Task['priority'] },
     ] satisfies Partial<Task>[]) {
       mocks.put.mockClear();
       await expect(updateTask('task-1', patch)).rejects.toThrow();
@@ -172,6 +174,15 @@ describe('updateTask', () => {
 });
 
 describe('setTaskStatus', () => {
+  it('rejects an unsupported runtime status before reading the task', async () => {
+    vi.clearAllMocks();
+
+    await expect(setTaskStatus('task-1', 'missing' as Task['status'])).rejects.toThrow(
+      'Task status must be valid',
+    );
+    expect(mocks.get).not.toHaveBeenCalled();
+  });
+
   it('does not duplicate work when the task already has that status', async () => {
     vi.clearAllMocks();
     mocks.get.mockResolvedValue({

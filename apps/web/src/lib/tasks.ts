@@ -9,8 +9,23 @@ import {
   projectNextTask,
   quickAddToTask,
 } from '@ops-dashboard/core';
-import type { ChecklistItem, Project, Reminder, Task } from '@ops-dashboard/core';
+import type { ChecklistItem, Project, Reminder, Task, TaskStatus } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
+
+const TASK_STATUSES = new Set<TaskStatus>([
+  'backlog',
+  'todo',
+  'doing',
+  'blocked',
+  'done',
+  'archived',
+]);
+
+function assertTaskStatus(value: unknown): asserts value is TaskStatus {
+  if (typeof value !== 'string' || !TASK_STATUSES.has(value as TaskStatus)) {
+    throw new Error('Task status must be valid.');
+  }
+}
 
 function nextTaskOrder(previous: number | undefined): number {
   if (typeof previous !== 'number' || !Number.isFinite(previous)) return 1;
@@ -86,6 +101,15 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
   if (mutablePatch.order !== undefined && !Number.isFinite(mutablePatch.order)) {
     throw new Error('Task order must be finite.');
   }
+  if (mutablePatch.status !== undefined) assertTaskStatus(mutablePatch.status);
+  if (
+    mutablePatch.priority !== undefined &&
+    (!Number.isInteger(mutablePatch.priority) ||
+      mutablePatch.priority < 0 ||
+      mutablePatch.priority > 3)
+  ) {
+    throw new Error('Task priority must be an integer from 0 to 3.');
+  }
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
@@ -103,6 +127,7 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
 }
 
 export async function setTaskStatus(id: string, status: Task['status']): Promise<void> {
+  assertTaskStatus(status);
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
