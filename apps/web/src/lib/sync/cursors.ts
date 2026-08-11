@@ -1,5 +1,10 @@
 export const SYNC_EPOCH = '1970-01-01T00:00:00Z';
 
+export interface SyncCursorCache {
+  read: (raw: string | null) => Record<string, string>;
+  store: (cursors: Record<string, string>) => string;
+}
+
 export function parseSyncCursors(raw: string | null): Record<string, string> {
   if (!raw) return {};
   try {
@@ -15,6 +20,23 @@ export function parseSyncCursors(raw: string | null): Record<string, string> {
   } catch {
     return {};
   }
+}
+
+export function createSyncCursorCache(): SyncCursorCache {
+  let cached: Record<string, string> = {};
+  return {
+    read(raw) {
+      const stored = parseSyncCursors(raw);
+      for (const [table, cursor] of Object.entries(stored)) {
+        if (!cached[table] || cursor > cached[table]) cached[table] = cursor;
+      }
+      return { ...cached };
+    },
+    store(cursors) {
+      cached = { ...cursors };
+      return JSON.stringify(cursors);
+    },
+  };
 }
 
 export function overlappedCursor(cursor: string, overlapMs: number): string {
