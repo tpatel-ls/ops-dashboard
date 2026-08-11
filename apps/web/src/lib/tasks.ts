@@ -12,6 +12,12 @@ import {
 import type { ChecklistItem, Project, Reminder, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
+function nextTaskOrder(previous: number | undefined): number {
+  if (typeof previous !== 'number' || !Number.isFinite(previous)) return 1;
+  const next = previous + 1;
+  return Number.isFinite(next) ? next : 1;
+}
+
 /** Add a task straight into a project, inheriting its domain and org lane. */
 export function addTaskToProject(
   input: string,
@@ -31,7 +37,7 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
   if (!parsed.title.trim()) throw new Error('Task title is required.');
   const db = getDb();
   const last = await db.tasks.orderBy('order').last();
-  const order = (last?.order ?? 0) + 1;
+  const order = nextTaskOrder(last?.order);
   const mutableOverrides = { ...overrides };
   for (const key of [
     'id',
@@ -77,6 +83,9 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
       throw new Error(`Task ${key} must be a non-negative integer.`);
     }
   }
+  if (mutablePatch.order !== undefined && !Number.isFinite(mutablePatch.order)) {
+    throw new Error('Task order must be finite.');
+  }
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
@@ -119,7 +128,7 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
         ...projected,
         id: newTaskId,
         reminders,
-        order: (last?.order ?? 0) + 1,
+        order: nextTaskOrder(last?.order),
         deviceId: getDeviceId(),
       };
       await db.tasks.put(newTask);
