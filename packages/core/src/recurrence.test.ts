@@ -158,6 +158,51 @@ describe('projectNextTask', () => {
 
     expect(projectNextTask(task)).toBeNull();
   });
+
+  it('stops malformed occurrence counts instead of creating an endless chain', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Broken count',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1, count: Number.NaN },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    expect(projectNextTask(task)).toBeNull();
+  });
+
+  it('drops a recurring end time that overflows the supported date range', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Extreme duration',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      startAt: '-271821-04-21T00:00:00.000Z',
+      endAt: '+275760-09-12T00:00:00.000Z',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    expect(projectNextTask(task)).toMatchObject({ scheduledFor: '2026-08-02' });
+    expect(projectNextTask(task)?.endAt).toBeUndefined();
+  });
 });
 
 describe('shouldGenerateNext', () => {
@@ -172,5 +217,12 @@ describe('shouldGenerateNext', () => {
     const rule = { freq: 'daily', interval: 1, endsOn: '2026-02-30' } as const;
 
     expect(shouldGenerateNext(rule, 1, new Date(2026, 1, 28, 9))).toBe(false);
+  });
+
+  it('rejects invalid occurrence dates and counters', () => {
+    const rule = { freq: 'daily', interval: 1, count: 3 } as const;
+
+    expect(shouldGenerateNext(rule, 1, new Date('invalid'))).toBe(false);
+    expect(shouldGenerateNext(rule, Number.NaN, new Date(2026, 1, 28, 9))).toBe(false);
   });
 });

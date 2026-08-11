@@ -38,13 +38,21 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
 }
 
 export function shouldGenerateNext(rule: RecurrenceRule, count: number, next: Date): boolean {
+  if (!isValid(next)) return false;
   if (rule.endsOn) {
     // endsOn is a local calendar day, so a timed occurrence later on that day
     // is still eligible.
     if (localDay(rule.endsOn) !== rule.endsOn || isoDay(next) > rule.endsOn) return false;
   }
-  if (rule.count !== undefined && count >= rule.count) return false;
+  if (rule.count !== undefined) {
+    if (!Number.isSafeInteger(rule.count) || rule.count <= 0) return false;
+    if (!Number.isSafeInteger(count) || count < 0 || count >= rule.count) return false;
+  }
   return true;
+}
+
+function validIso(value: Date): string | undefined {
+  return isValid(value) ? value.toISOString() : undefined;
 }
 
 export function projectNextTask(task: Task, now: Date = new Date()): Task | null {
@@ -77,11 +85,9 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
       startAtSource.getMilliseconds(),
     );
   }
-  const startAt = startAtSource ? nextStart.toISOString() : undefined;
-  const endAt =
-    startAt && offsetMs > 0
-      ? new Date(parseISO(startAt).getTime() + offsetMs).toISOString()
-      : undefined;
+  const startAt = startAtSource ? validIso(nextStart) : undefined;
+  const nextEnd = startAt && offsetMs > 0 ? new Date(parseISO(startAt).getTime() + offsetMs) : null;
+  const endAt = nextEnd ? validIso(nextEnd) : undefined;
   const parsedDueAt = task.dueAt ? parseISO(task.dueAt) : undefined;
   const dueAtSource = parsedDueAt && isValid(parsedDueAt) ? parsedDueAt : undefined;
   const nextDue = new Date(next);
@@ -93,7 +99,7 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
       dueAtSource.getMilliseconds(),
     );
   }
-  const dueAt = dueAtSource ? nextDue.toISOString() : undefined;
+  const dueAt = dueAtSource ? validIso(nextDue) : undefined;
   const nowIso = now.toISOString();
   const recurrence =
     task.recurrence.count === undefined
