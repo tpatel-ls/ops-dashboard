@@ -398,8 +398,8 @@ async function fallbackToTasks(text: string, source: CaptureSource): Promise<Rou
 export function fallbackCaptureLines(text: string): string[] {
   return text
     .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean)
+    .map((line) => boundedDraftText(line, MAX_ROUTED_TITLE_LENGTH))
+    .filter((line): line is string => Boolean(line))
     .slice(0, MAX_ROUTED_ITEMS);
 }
 
