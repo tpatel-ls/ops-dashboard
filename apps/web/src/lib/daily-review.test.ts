@@ -41,6 +41,10 @@ describe('daily review task dates', () => {
     expect(taskNeedsRollForward(task({ dueAt: 'not-a-date' }), '2026-08-03')).toBe(false);
   });
 
+  it('ignores malformed scheduled calendar days', () => {
+    expect(taskNeedsRollForward(task({ scheduledFor: '2026-00-10' }), '2026-08-03')).toBe(false);
+  });
+
   it('moves an overdue deadline while preserving its local time', () => {
     const originalTimezone = process.env.TZ;
     process.env.TZ = 'America/Chicago';
@@ -71,5 +75,14 @@ describe('daily review task dates', () => {
         '2026-08-04',
       ),
     ).toEqual({ scheduledFor: '2026-08-04' });
+  });
+
+  it('rejects malformed review dates before creating a patch', () => {
+    expect(() => rollForwardPatch(task({}), '2026-02-30', '2026-08-04')).toThrow(
+      'Review dates must be valid calendar days',
+    );
+    expect(() => rollForwardPatch(task({}), '2026-08-03', '2026-13-01')).toThrow(
+      'Review dates must be valid calendar days',
+    );
   });
 });
