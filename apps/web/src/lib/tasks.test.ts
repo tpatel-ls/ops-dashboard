@@ -69,6 +69,12 @@ describe('addTask', () => {
     expect(task.deletedAt).toBeUndefined();
     expect(task.createdAt).not.toBe('2000-01-01T00:00:00.000Z');
   });
+
+  it('recovers when the last stored task has a malformed order', async () => {
+    mocks.last.mockResolvedValue({ order: Number.POSITIVE_INFINITY });
+
+    await expect(addTask('Ordered task')).resolves.toMatchObject({ order: 1 });
+  });
 });
 
 describe('addTaskToProject', () => {
@@ -156,6 +162,7 @@ describe('updateTask', () => {
       { dueAt: 'not-a-date' },
       { estimateMinutes: -1 },
       { actualMinutes: 1.5 },
+      { order: Number.NaN },
     ] satisfies Partial<Task>[]) {
       mocks.put.mockClear();
       await expect(updateTask('task-1', patch)).rejects.toThrow();
