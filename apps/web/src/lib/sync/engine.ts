@@ -17,6 +17,7 @@ import { createSyncCursorCache, overlappedCursor, SYNC_EPOCH } from './cursors';
 import { shouldAcceptRemote } from './conflicts';
 import { visitPullPages } from './pagination';
 import { nextRecordedAttempt } from './outbox';
+import { createSingleFlightQueue } from './single-flight';
 import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
 const CURSORS_KEY = 'ops.sync.cursors'; // JSON map: dbTable -> max updated_at pulled
@@ -245,7 +246,7 @@ function scheduleKick(): void {
 }
 
 /** One push+pull pass using a fresh authenticated client. */
-async function cycle(): Promise<void> {
+async function runCycle(): Promise<void> {
   const myGen = generation;
   const supabase = createClient();
   if (!supabase) return;
@@ -267,6 +268,12 @@ async function cycle(): Promise<void> {
   }
 }
 
+const cycleQueue = createSingleFlightQueue(runCycle);
+
+function cycle(): Promise<void> {
+  return cycleQueue.run();
+}
+
 function onKickEvent(): void {
   scheduleKick();
 }
@@ -276,6 +283,7 @@ function onOnline(): void {
 
 /** Tear down every installed resource. Idempotent. */
 async function teardown(): Promise<void> {
+  cycleQueue.clearPending();
   if (typeof window !== 'undefined') {
     window.removeEventListener('ops:sync-kick', onKickEvent);
     window.removeEventListener('online', onOnline);
