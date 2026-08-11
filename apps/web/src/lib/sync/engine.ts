@@ -155,6 +155,7 @@ async function pull(supabase: SupabaseClient): Promise<void> {
           .select('*')
           .gte('updated_at', since)
           .order('updated_at', { ascending: true })
+          .order('id', { ascending: true })
           .range(from, to);
         return error || !data ? null : (data as Array<Record<string, unknown>>);
       },
