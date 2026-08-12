@@ -173,4 +173,11 @@ describe('renameProject', () => {
     expect(mocks.get).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
   });
+
+  it('does not sync a rename that changes only surrounding whitespace', async () => {
+    await renameProject('project-test', '  Old name  ');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
 });
