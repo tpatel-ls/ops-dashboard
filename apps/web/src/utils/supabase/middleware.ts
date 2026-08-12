@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { DEV_AUTH_COOKIE, DEV_AUTH_VALUE, isDevAuthAvailable } from '@/lib/dev-auth';
-import { DEFAULT_AUTH_DESTINATION } from '@/lib/auth-navigation';
+import { DEFAULT_AUTH_DESTINATION, requestedAuthPath } from '@/lib/auth-navigation';
 
 /**
  * Refreshes the Supabase session cookie on every matched request and gates page
@@ -32,8 +32,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // Not configured → local-first, no auth gate.
   if (!url || !key) return NextResponse.next({ request });
@@ -64,7 +63,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   if (!claims && !isApi && !isPublic) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
-    redirectUrl.searchParams.set('next', pathname);
+    redirectUrl.searchParams.set('next', requestedAuthPath(pathname, request.nextUrl.search));
     return NextResponse.redirect(redirectUrl);
   }
 
