@@ -4,12 +4,14 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import { readLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
+import { themePreference } from '@/lib/theme';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
@@ -24,9 +26,7 @@ const STORAGE_KEY = 'ops.theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): Theme {
-  const stored = readLocalStorage(STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-  return 'dark';
+  return themePreference(readLocalStorage(STORAGE_KEY));
 }
 
 function subscribePrefersDark(callback: () => void): () => void {
@@ -54,7 +54,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemDark = useSyncExternalStore(subscribePrefersDark, getSystemDark, () => true);
 
   const resolved: ResolvedTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
-  applyResolved(resolved);
+  useEffect(() => applyResolved(resolved), [resolved]);
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
