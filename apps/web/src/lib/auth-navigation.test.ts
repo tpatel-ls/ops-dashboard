@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_AUTH_DESTINATION, safeNextPath } from './auth-navigation';
+import { DEFAULT_AUTH_DESTINATION, requestedAuthPath, safeNextPath } from './auth-navigation';
 
 describe('safeNextPath', () => {
   it('defaults sign-in to the work dashboard', () => {
@@ -24,5 +24,17 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/LOGIN?error=invalid')).toBe('/dashboard');
     expect(safeNextPath('/auth/dev-login')).toBe('/dashboard');
     expect(safeNextPath('/auth/signout')).toBe('/dashboard');
+  });
+});
+
+describe('requestedAuthPath', () => {
+  it('preserves the original query through sign-in', () => {
+    expect(requestedAuthPath('/tasks', '?status=blocked&sort=due')).toBe(
+      '/tasks?status=blocked&sort=due',
+    );
+  });
+
+  it('ignores text that is not a URL query', () => {
+    expect(requestedAuthPath('/tasks', 'https://example.com')).toBe('/tasks');
   });
 });
