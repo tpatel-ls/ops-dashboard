@@ -2,6 +2,7 @@
 import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
 import { Serwist } from 'serwist';
+import { notificationTarget } from '@/lib/notification-target';
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -36,8 +37,8 @@ serwist.addEventListeners();
 // Focus/navigate the app when a notification is tapped.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const data = (event.notification.data as { taskId?: string } | undefined) || {};
-  const url = data.taskId ? `/today?task=${data.taskId}` : '/today';
+  const data = event.notification.data as { taskId?: unknown } | undefined;
+  const url = notificationTarget(data?.taskId);
   event.waitUntil(
     self.clients.matchAll({ type: 'window' }).then((clients) => {
       for (const client of clients) {
