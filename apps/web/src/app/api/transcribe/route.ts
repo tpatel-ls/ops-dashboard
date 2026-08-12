@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { requestAllowed } from '@/lib/server/guard';
-import { transcriptionFileError, transcriptionText } from '@/lib/server/transcription';
+import {
+  TRANSCRIPTION_REQUEST_TIMEOUT_MS,
+  transcriptionFileError,
+  transcriptionText,
+} from '@/lib/server/transcription';
 
 export const runtime = 'nodejs';
 
@@ -48,6 +52,7 @@ export async function POST(req: Request): Promise<Response> {
       method: 'POST',
       headers: key ? { Authorization: `Bearer ${key}` } : undefined,
       body: upstream,
+      signal: AbortSignal.timeout(TRANSCRIPTION_REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) {
       console.error('[api/transcribe] upstream', res.status);

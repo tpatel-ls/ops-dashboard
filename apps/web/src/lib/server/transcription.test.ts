@@ -2,11 +2,16 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_TRANSCRIPTION_BYTES,
   MAX_TRANSCRIPTION_TEXT_LENGTH,
+  TRANSCRIPTION_REQUEST_TIMEOUT_MS,
   transcriptionFileError,
   transcriptionText,
 } from './transcription';
 
 describe('transcription boundaries', () => {
+  it('keeps the upstream request deadline below the platform limit', () => {
+    expect(TRANSCRIPTION_REQUEST_TIMEOUT_MS).toBe(60_000);
+  });
+
   it('rejects empty and oversized audio', () => {
     expect(transcriptionFileError(0)).toBe('empty-file');
     expect(transcriptionFileError(MAX_TRANSCRIPTION_BYTES + 1)).toBe('too-large');
