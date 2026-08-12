@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { sendPushover } from './pushover';
+import { PUSHOVER_TIMEOUT_MS, sendPushover } from './pushover';
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -61,5 +61,17 @@ describe('sendPushover', () => {
     const body = fetch.mock.calls[0]?.[1]?.body as URLSearchParams;
     expect(Array.from(body.get('message') ?? '')).toHaveLength(1024);
     expect(body.get('message')).toMatch(/😀$/);
+  });
+
+  it('sets a deadline on provider requests', async () => {
+    vi.stubEnv('PUSHOVER_TOKEN', 'token');
+    vi.stubEnv('PUSHOVER_USER', 'user');
+    const timeout = vi.spyOn(AbortSignal, 'timeout');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+
+    await sendPushover({ message: 'Alert' });
+
+    expect(timeout).toHaveBeenCalledWith(PUSHOVER_TIMEOUT_MS);
+    timeout.mockRestore();
   });
 });
