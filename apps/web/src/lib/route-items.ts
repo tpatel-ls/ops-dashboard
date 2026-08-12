@@ -19,6 +19,7 @@ import { createNote, deleteNote } from './notes';
 import { createQuote, deleteQuote } from './quotes';
 import { todayISO, toggleRoutineCheck } from './routines';
 import { addTask, addTaskToProject, softDeleteTask } from './tasks';
+import { fetchWithTimeout } from './fetch-timeout';
 
 /** One parsed item from /api/braindump. Treated as untrusted wire data. */
 export interface RoutedItemDraft {
@@ -100,7 +101,7 @@ export async function processBrainDump(
 
   let drafts: RoutedItemDraft[] | null = null;
   try {
-    const res = await fetch('/api/braindump', {
+    const res = await fetchWithTimeout('/api/braindump', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({

@@ -16,6 +16,7 @@ import { getDb } from '@ops-dashboard/core';
 import { createJournalEntry } from '@/lib/journal';
 import { toggleRoutineCheck, todayISO } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
+import { fetchWithTimeout } from '@/lib/fetch-timeout';
 
 type Mode = 'idle' | 'text' | 'photo';
 type Stage = 'input' | 'processing' | 'confirm' | 'done' | 'manual-fallback';
@@ -111,7 +112,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       const activeRoutines = allRoutines.filter((r) => !r.deletedAt && !r.archivedAt);
       const routineNames = activeRoutines.map((r) => r.name);
 
-      const resp = await fetch('/api/journal/extract', {
+      const resp = await fetchWithTimeout('/api/journal/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -123,8 +124,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       });
 
       const data = (await resp.json()) as
-        | { ok: true; result: ExtractResult }
-        | { ok: false; reason: string };
+        { ok: true; result: ExtractResult } | { ok: false; reason: string };
 
       if (!data.ok) {
         if ((data as { ok: false; reason: string }).reason === 'no-key') {
@@ -164,9 +164,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       // mark each detected habit
       const today = todayISO();
       for (const name of result.habitsDone) {
-        const routine = activeRoutines.find(
-          (r) => r.name.toLowerCase() === name.toLowerCase(),
-        );
+        const routine = activeRoutines.find((r) => r.name.toLowerCase() === name.toLowerCase());
         if (routine) {
           await toggleRoutineCheck(routine.id, today, true, 'journal');
         }
@@ -200,12 +198,12 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
   if (stage === 'done') {
     return (
       <div className="surface flex flex-col items-center gap-3 px-6 py-8 text-center">
-        <CheckCircle2 className="size-8 text-success" />
+        <CheckCircle2 className="text-success size-8" />
         <p className="text-sm font-medium">Entry saved.</p>
         <button
           type="button"
           onClick={reset}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+          className="bg-primary text-primary-foreground rounded-md px-3 py-1.5 text-xs font-medium"
         >
           Add another
         </button>
@@ -219,13 +217,13 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       <div className="surface flex flex-col gap-4 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
+            <Sparkles className="text-primary size-4" />
             <span className="text-sm font-medium">AI extracted - review before saving</span>
           </div>
           <button
             type="button"
             onClick={reset}
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md"
             aria-label="Discard"
           >
             <X className="size-4" />
@@ -233,20 +231,18 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         </div>
 
         {/* Summary */}
-        <div className="rounded-[10px] bg-primary-soft px-3 py-2 text-sm text-foreground">
+        <div className="bg-primary-soft text-foreground rounded-[10px] px-3 py-2 text-sm">
           {result.summary}
         </div>
 
         {/* Body */}
         <div>
-          <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
             Body
           </div>
           <textarea
             value={result.body}
-            onChange={(e) =>
-              setResult((prev) => (prev ? { ...prev, body: e.target.value } : prev))
-            }
+            onChange={(e) => setResult((prev) => (prev ? { ...prev, body: e.target.value } : prev))}
             rows={5}
             className="input resize-none"
           />
@@ -255,7 +251,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         {/* Mood + Tags */}
         <div className="flex flex-wrap gap-4">
           <div>
-            <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
               Mood
             </div>
             <div className="flex gap-1">
@@ -277,14 +273,14 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             </div>
           </div>
           <div>
-            <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
               Tags
             </div>
             <div className="flex flex-wrap gap-1">
               {result.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-accent px-2 py-0.5 text-[10px] text-accent-foreground"
+                  className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
                 >
                   #{tag}
                 </span>
@@ -296,33 +292,33 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         {/* Habits detected */}
         {result.habitsDone.length > 0 && (
           <div>
-            <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
               Habits detected
             </div>
             <div className="flex flex-wrap gap-1.5">
               {result.habitsDone.map((h) => (
                 <span
                   key={h}
-                  className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-[11px] text-success"
+                  className="bg-success/15 text-success inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px]"
                 >
                   <Check className="size-3" strokeWidth={3} />
                   {h}
                 </span>
               ))}
             </div>
-            <p className="mt-1 text-[11px] text-subtle-foreground">
+            <p className="text-subtle-foreground mt-1 text-[11px]">
               These routines will be marked done for today.
             </p>
           </div>
         )}
 
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {error && <p className="text-destructive text-xs">{error}</p>}
 
         <div className="flex justify-end gap-2">
           <button
             type="button"
             onClick={reset}
-            className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-xs"
           >
             Discard
           </button>
@@ -330,7 +326,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             type="button"
             onClick={handleConfirm}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-60"
+            className="bg-primary text-primary-foreground inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium disabled:opacity-60"
           >
             {saving && <Loader2 className="size-3 animate-spin" />}
             Save entry
@@ -345,11 +341,11 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
     return (
       <div className="surface flex flex-col gap-4 p-4">
         <div className="flex items-center gap-2">
-          <FileText className="size-4 text-muted-foreground" />
+          <FileText className="text-muted-foreground size-4" />
           <span className="text-sm font-medium">Write your entry</span>
         </div>
         {error && (
-          <p className="rounded-[10px] bg-warning/10 px-3 py-2 text-xs text-warning">{error}</p>
+          <p className="bg-warning/10 text-warning rounded-[10px] px-3 py-2 text-xs">{error}</p>
         )}
         <textarea
           value={manualBody}
@@ -363,7 +359,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
           <button
             type="button"
             onClick={reset}
-            className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-xs"
           >
             Cancel
           </button>
@@ -371,7 +367,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             type="button"
             onClick={handleManualSave}
             disabled={saving || !manualBody.trim()}
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-60"
+            className="bg-primary text-primary-foreground inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium disabled:opacity-60"
           >
             {saving && <Loader2 className="size-3 animate-spin" />}
             Save entry
@@ -385,8 +381,8 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
   if (stage === 'processing') {
     return (
       <div className="surface flex flex-col items-center gap-3 px-6 py-8 text-center">
-        <Loader2 className="size-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Analysing your entry…</p>
+        <Loader2 className="text-primary size-6 animate-spin" />
+        <p className="text-muted-foreground text-sm">Analysing your entry…</p>
       </div>
     );
   }
@@ -399,7 +395,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
           type="button"
           onClick={() => setMode('text')}
           className={cn(
-            'flex flex-1 items-center justify-center gap-2 rounded-[10px] border border-border px-3 py-3 text-sm transition-colors',
+            'border-border flex flex-1 items-center justify-center gap-2 rounded-[10px] border px-3 py-3 text-sm transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
@@ -413,7 +409,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             setTimeout(() => fileRef.current?.click(), 50);
           }}
           className={cn(
-            'flex flex-1 items-center justify-center gap-2 rounded-[10px] border border-border px-3 py-3 text-sm transition-colors',
+            'border-border flex flex-1 items-center justify-center gap-2 rounded-[10px] border px-3 py-3 text-sm transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
@@ -431,18 +427,18 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         <div className="flex items-center gap-2 text-sm font-medium">
           {mode === 'text' ? (
             <>
-              <FileText className="size-4 text-primary" /> Paste journal text
+              <FileText className="text-primary size-4" /> Paste journal text
             </>
           ) : (
             <>
-              <Camera className="size-4 text-primary" /> Upload a photo
+              <Camera className="text-primary size-4" /> Upload a photo
             </>
           )}
         </div>
         <button
           type="button"
           onClick={reset}
-          className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md"
           aria-label="Cancel"
         >
           <X className="size-4" />
@@ -485,7 +481,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
                   clearImagePreview();
                   if (fileRef.current) fileRef.current.value = '';
                 }}
-                className="absolute right-2 top-2 inline-flex size-6 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
+                className="bg-background/80 absolute top-2 right-2 inline-flex size-6 items-center justify-center rounded-full backdrop-blur-sm"
                 aria-label="Remove image"
               >
                 <X className="size-3.5" />
@@ -495,7 +491,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="flex w-full flex-col items-center gap-2 rounded-[10px] border border-dashed border-border px-4 py-8 text-sm text-muted-foreground hover:border-primary hover:text-primary"
+              className="border-border text-muted-foreground hover:border-primary hover:text-primary flex w-full flex-col items-center gap-2 rounded-[10px] border border-dashed px-4 py-8 text-sm"
             >
               <Upload className="size-5" />
               Tap to choose a photo
@@ -513,14 +509,14 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         </div>
       )}
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-xs">{error}</p>}
 
       <div className="flex justify-end">
         <button
           type="button"
           onClick={handleSubmit}
           disabled={mode === 'text' ? !text.trim() : !imageBase64}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          className="bg-primary text-primary-foreground inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
         >
           <Sparkles className="size-3.5" />
           Analyse with AI

@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb } from '@ops-dashboard/core';
+import { fetchWithTimeout } from '@/lib/fetch-timeout';
 import { ViewShell } from '@/components/view-shell';
 import { ChatPanel } from '@/components/chat-panel';
 import type { ChatMessage } from '@/components/chat-panel';
@@ -59,20 +60,17 @@ export default function AskPage() {
     setLoading(true);
 
     // Build context from Dexie data
-    const context = data
-      ? buildWorkContext(data)
-      : '(No local data available yet.)';
+    const context = data ? buildWorkContext(data) : '(No local data available yet.)';
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetchWithTimeout('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question, context }),
       });
 
       const json = (await res.json()) as
-        | { ok: true; answer: string }
-        | { ok: false; reason: string };
+        { ok: true; answer: string } | { ok: false; reason: string };
 
       if (!json.ok) {
         if (json.reason === 'no-key') {
@@ -106,9 +104,7 @@ export default function AskPage() {
       } else {
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === placeholderId
-              ? { ...m, loading: false, text: json.answer }
-              : m,
+            m.id === placeholderId ? { ...m, loading: false, text: json.answer } : m,
           ),
         );
       }

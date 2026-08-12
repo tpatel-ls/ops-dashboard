@@ -1,5 +1,7 @@
 'use client';
 
+import { fetchWithTimeout } from './fetch-timeout';
+
 /** True when a server-side Whisper endpoint is configured for this build. */
 export const whisperEnabled = process.env.NEXT_PUBLIC_TRANSCRIBE_ENABLED === '1';
 export const MAX_TRANSCRIBE_BYTES = 25 * 1024 * 1024;
@@ -43,7 +45,7 @@ export async function transcribeBlob(blob: Blob): Promise<string | null> {
   const form = new FormData();
   form.append('file', blob, `audio.${ext}`);
   try {
-    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    const res = await fetchWithTimeout('/api/transcribe', { method: 'POST', body: form });
     const json = (await res.json().catch(() => null)) as { ok?: boolean; text?: string } | null;
     if (json?.ok && typeof json.text === 'string' && json.text.trim()) return json.text.trim();
     return null;
