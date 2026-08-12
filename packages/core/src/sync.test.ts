@@ -68,6 +68,17 @@ describe('pickWinner', () => {
     expect(pickWinner(malformed, valid)).toBe(valid);
     expect(pickWinner(valid, malformed)).toBe(valid);
   });
+
+  it.each([4.8, Number.MAX_SAFE_INTEGER + 1])(
+    'does not let an unsafe version outrank a valid record: %s',
+    (version) => {
+      const valid = task('device-a');
+      const malformed = task('device-z', { version });
+
+      expect(pickWinner(malformed, valid)).toBe(valid);
+      expect(pickWinner(valid, malformed)).toBe(valid);
+    },
+  );
 });
 
 describe('bumpVersion', () => {
@@ -75,7 +86,13 @@ describe('bumpVersion', () => {
     expect(bumpVersion(task('device-a', { version: Number.NaN })).version).toBe(1);
   });
 
-  it('normalizes fractional versions before incrementing', () => {
-    expect(bumpVersion(task('device-a', { version: 4.8 })).version).toBe(5);
+  it('repairs fractional versions before incrementing', () => {
+    expect(bumpVersion(task('device-a', { version: 4.8 })).version).toBe(1);
+  });
+
+  it('keeps versions safe when the counter reaches its maximum', () => {
+    expect(bumpVersion(task('device-a', { version: Number.MAX_SAFE_INTEGER })).version).toBe(
+      Number.MAX_SAFE_INTEGER,
+    );
   });
 });
