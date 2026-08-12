@@ -54,4 +54,17 @@ describe('whiteboard names', () => {
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
+
+  it('does not sync a rename that changes only surrounding whitespace', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'whiteboard-test',
+      name: 'Launch map',
+      version: 1,
+    });
+
+    await renameWhiteboard('whiteboard-test', '  Launch map  ');
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
 });

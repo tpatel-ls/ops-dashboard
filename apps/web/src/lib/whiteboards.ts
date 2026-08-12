@@ -43,6 +43,7 @@ export async function renameWhiteboard(id: string, name: string): Promise<void> 
   const db = getDb();
   const existing = await db.whiteboards.get(id);
   if (!existing || existing.deletedAt) return;
+  if (existing.name === normalizedName) return;
   const next: Whiteboard = {
     ...existing,
     name: normalizedName,
