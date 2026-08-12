@@ -94,8 +94,10 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
   // --- Whisper path: record audio -> /api/transcribe ---
   async function startRecording() {
     setError(null);
+    let acquiredStream: MediaStream | null = null;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      acquiredStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = acquiredStream;
       const mime = pickAudioMime();
       const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
       chunksRef.current = [];
@@ -122,11 +124,13 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
       };
       recorderRef.current = recorder;
       recorder.start();
+      acquiredStream = null;
       setListening(true);
       stopTimerRef.current = window.setTimeout(() => {
         if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
       }, MAX_RECORD_MS);
     } catch {
+      acquiredStream?.getTracks().forEach((track) => track.stop());
       setListening(false);
       setError('Microphone access was not available.');
     }

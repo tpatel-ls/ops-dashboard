@@ -60,6 +60,29 @@ describe('useVoiceInput', () => {
     });
   });
 
+  it('releases microphone tracks when recorder setup fails', async () => {
+    const stopTrack = vi.fn();
+    setMediaDevices(
+      vi.fn().mockResolvedValue({
+        getTracks: () => [{ stop: stopTrack }],
+      }),
+    );
+    vi.stubGlobal(
+      'MediaRecorder',
+      class {
+        constructor() {
+          throw new Error('unsupported recorder options');
+        }
+      },
+    );
+    const { result } = renderHook(() => useVoiceInput({ onTranscript: vi.fn() }));
+
+    act(() => result.current.toggle());
+
+    await waitFor(() => expect(result.current.error).toBe('Microphone access was not available.'));
+    expect(stopTrack).toHaveBeenCalledOnce();
+  });
+
   it('reports when Whisper cannot produce a transcript', async () => {
     const stopTrack = vi.fn();
     setMediaDevices(
