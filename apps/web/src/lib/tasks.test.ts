@@ -186,6 +186,18 @@ describe('updateTask', () => {
       expect(mocks.put).not.toHaveBeenCalled();
     }
   });
+
+  it('does not write or enqueue an update that changes nothing', async () => {
+    await updateTask('task-1', {
+      title: ' Original ',
+      status: 'todo',
+      priority: 0,
+      notes: undefined,
+    });
+
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
 });
 
 describe('setTaskStatus', () => {

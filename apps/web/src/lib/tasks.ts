@@ -116,6 +116,10 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
   for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId', 'deletedAt'] as const) {
     delete mutablePatch[key];
   }
+  const changed = Object.entries(mutablePatch).some(
+    ([key, value]) => !Object.is((existing as Task & Record<string, unknown>)[key], value),
+  );
+  if (!changed) return;
   const merged: Task = {
     ...existing,
     ...mutablePatch,
