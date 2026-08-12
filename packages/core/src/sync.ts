@@ -48,7 +48,7 @@ export type Syncable =
   | FoodLog;
 
 function validVersion(value: number): number | undefined {
-  return Number.isFinite(value) && value >= 0 ? Math.floor(value) : undefined;
+  return Number.isSafeInteger(value) && value >= 0 ? value : undefined;
 }
 
 function canonicalSyncValue(value: unknown): string {
@@ -98,9 +98,10 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
 }
 
 export function bumpVersion<T extends SyncMeta>(rec: T): T {
+  const current = validVersion(rec.version);
   return {
     ...rec,
-    version: (validVersion(rec.version) ?? 0) + 1,
+    version: current === Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : (current ?? 0) + 1,
     updatedAt: new Date().toISOString(),
   };
 }
