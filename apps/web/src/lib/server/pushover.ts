@@ -13,6 +13,8 @@ export interface PushoverResult {
   reason?: string;
 }
 
+export const PUSHOVER_TIMEOUT_MS = 10_000;
+
 function bounded(value: string, limit: number): string {
   return Array.from(value.trim()).slice(0, limit).join('');
 }
@@ -37,6 +39,7 @@ export async function sendPushover(msg: PushoverMessage): Promise<PushoverResult
     const res = await fetch('https://api.pushover.net/1/messages.json', {
       method: 'POST',
       body,
+      signal: AbortSignal.timeout(PUSHOVER_TIMEOUT_MS),
     });
     if (!res.ok) return { ok: false, reason: `http-${res.status}` };
     return { ok: true };
