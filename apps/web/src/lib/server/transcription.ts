@@ -1,5 +1,6 @@
 export const MAX_TRANSCRIPTION_BYTES = 25 * 1024 * 1024;
 export const MAX_TRANSCRIPTION_TEXT_LENGTH = 100_000;
+export const TRANSCRIPTION_REQUEST_TIMEOUT_MS = 60_000;
 
 const AUDIO_TYPES = new Set([
   'audio/flac',
