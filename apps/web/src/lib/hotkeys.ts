@@ -20,7 +20,10 @@ function isTypingTarget(e: KeyboardEvent): boolean {
 }
 
 export function matchesHotkey(combo: string, e: KeyboardEvent): boolean {
-  const parts = combo.toLowerCase().split('+').map((p) => p.trim());
+  const parts = combo
+    .toLowerCase()
+    .split('+')
+    .map((p) => p.trim());
   const key = parts.pop()!;
   const wantMod = parts.includes('mod');
   const wantMeta = parts.includes('cmd');
@@ -56,6 +59,7 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
     function onKey(e: KeyboardEvent) {
       const list = ref.current;
       const inField = isTypingTarget(e);
+      const unmodified = !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
       for (const hk of list) {
         if (hk.when && !hk.when()) continue;
         const combo = hk.combo.toLowerCase();
@@ -63,13 +67,13 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
         if (isChord) {
           if (inField) continue;
           const [first, second] = combo.split(' then ').map((s) => s.trim());
-          if (chordKey === first && e.key.toLowerCase() === second) {
+          if (chordKey === first && unmodified && e.key.toLowerCase() === second) {
             e.preventDefault();
             hk.handler(e);
             clearChord();
             return;
           }
-          if (chordKey === null && e.key.toLowerCase() === first && !e.metaKey && !e.ctrlKey) {
+          if (chordKey === null && unmodified && e.key.toLowerCase() === first) {
             chordKey = first ?? null;
             chordTimer = window.setTimeout(clearChord, 1200);
             return;
