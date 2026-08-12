@@ -33,6 +33,34 @@ function nextTaskOrder(previous: number | undefined): number {
   return Number.isFinite(next) ? next : 1;
 }
 
+function assertTaskFields(patch: Partial<Task>): void {
+  if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {
+    throw new Error('Task schedule must be a valid calendar day.');
+  }
+  for (const key of ['startAt', 'endAt', 'dueAt'] as const) {
+    const value = patch[key];
+    if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
+      throw new Error(`Task ${key} must be a valid date.`);
+    }
+  }
+  for (const key of ['estimateMinutes', 'actualMinutes'] as const) {
+    const value = patch[key];
+    if (value !== undefined && (!Number.isInteger(value) || value < 0)) {
+      throw new Error(`Task ${key} must be a non-negative integer.`);
+    }
+  }
+  if (patch.order !== undefined && !Number.isFinite(patch.order)) {
+    throw new Error('Task order must be finite.');
+  }
+  if (patch.status !== undefined) assertTaskStatus(patch.status);
+  if (
+    patch.priority !== undefined &&
+    (!Number.isInteger(patch.priority) || patch.priority < 0 || patch.priority > 3)
+  ) {
+    throw new Error('Task priority must be an integer from 0 to 3.');
+  }
+}
+
 /** Add a task straight into a project, inheriting its domain and org lane. */
 export function addTaskToProject(
   input: string,
@@ -50,9 +78,6 @@ export function addTaskToProject(
 export async function addTask(input: string, overrides: Partial<Task> = {}): Promise<Task> {
   const parsed = parseQuickAdd(input);
   if (!parsed.title.trim()) throw new Error('Task title is required.');
-  const db = getDb();
-  const last = await db.tasks.orderBy('order').last();
-  const order = nextTaskOrder(last?.order);
   const mutableOverrides = { ...overrides };
   for (const key of [
     'id',
@@ -65,6 +90,10 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
   ] as const) {
     delete mutableOverrides[key];
   }
+  assertTaskFields(mutableOverrides);
+  const db = getDb();
+  const last = await db.tasks.orderBy('order').last();
+  const order = nextTaskOrder(last?.order);
   const task: Task = {
     ...quickAddToTask(parsed, { id: newId(), deviceId: getDeviceId(), order }),
     ...mutableOverrides,
@@ -80,36 +109,7 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
     mutablePatch.title = mutablePatch.title.trim();
     if (!mutablePatch.title) throw new Error('Task title is required.');
   }
-  if (
-    mutablePatch.scheduledFor !== undefined &&
-    localDay(mutablePatch.scheduledFor) !== mutablePatch.scheduledFor
-  ) {
-    throw new Error('Task schedule must be a valid calendar day.');
-  }
-  for (const key of ['startAt', 'endAt', 'dueAt'] as const) {
-    const value = mutablePatch[key];
-    if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
-      throw new Error(`Task ${key} must be a valid date.`);
-    }
-  }
-  for (const key of ['estimateMinutes', 'actualMinutes'] as const) {
-    const value = mutablePatch[key];
-    if (value !== undefined && (!Number.isInteger(value) || value < 0)) {
-      throw new Error(`Task ${key} must be a non-negative integer.`);
-    }
-  }
-  if (mutablePatch.order !== undefined && !Number.isFinite(mutablePatch.order)) {
-    throw new Error('Task order must be finite.');
-  }
-  if (mutablePatch.status !== undefined) assertTaskStatus(mutablePatch.status);
-  if (
-    mutablePatch.priority !== undefined &&
-    (!Number.isInteger(mutablePatch.priority) ||
-      mutablePatch.priority < 0 ||
-      mutablePatch.priority > 3)
-  ) {
-    throw new Error('Task priority must be an integer from 0 to 3.');
-  }
+  assertTaskFields(mutablePatch);
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
