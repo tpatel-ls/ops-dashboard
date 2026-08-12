@@ -14,6 +14,18 @@ export const MODELS = {
   chat: process.env.OPS_CHAT_MODEL || 'claude-opus-4-8',
 } as const;
 
+export const AI_REQUEST_TIMEOUT_MS = 45_000;
+export const AI_MAX_RETRIES = 1;
+
+export function anthropicClientOptions(apiKey: string, baseURL?: string) {
+  return {
+    apiKey,
+    timeout: AI_REQUEST_TIMEOUT_MS,
+    maxRetries: AI_MAX_RETRIES,
+    ...(baseURL ? { baseURL } : {}),
+  };
+}
+
 let _client: Anthropic | null | undefined;
 
 export function getAnthropic(): Anthropic | null {
@@ -21,6 +33,6 @@ export function getAnthropic(): Anthropic | null {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   // Optional gateway/proxy (e.g. a self-hosted Anthropic-compatible endpoint).
   const baseURL = process.env.ANTHROPIC_BASE_URL;
-  _client = apiKey ? new Anthropic({ apiKey, ...(baseURL ? { baseURL } : {}) }) : null;
+  _client = apiKey ? new Anthropic(anthropicClientOptions(apiKey, baseURL)) : null;
   return _client;
 }
