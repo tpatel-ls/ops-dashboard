@@ -15,3 +15,8 @@ export function safeNextPath(raw: string | null | undefined): string {
   }
   return raw;
 }
+
+export function requestedAuthPath(pathname: string, search: string): string {
+  const query = search.startsWith('?') ? search : '';
+  return safeNextPath(`${pathname}${query}`);
+}
