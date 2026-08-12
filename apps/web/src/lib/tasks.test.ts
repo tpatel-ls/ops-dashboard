@@ -75,6 +75,21 @@ describe('addTask', () => {
 
     await expect(addTask('Ordered task')).resolves.toMatchObject({ order: 1 });
   });
+
+  it('rejects malformed creation overrides before opening the database', async () => {
+    for (const overrides of [
+      { scheduledFor: '2026-02-30' },
+      { dueAt: 'not-a-date' },
+      { estimateMinutes: -1 },
+      { order: Number.NaN },
+      { status: 'missing' as Task['status'] },
+      { priority: 9 as Task['priority'] },
+    ] satisfies Partial<Task>[]) {
+      mocks.last.mockClear();
+      await expect(addTask('Invalid task', overrides)).rejects.toThrow();
+      expect(mocks.last).not.toHaveBeenCalled();
+    }
+  });
 });
 
 describe('addTaskToProject', () => {
