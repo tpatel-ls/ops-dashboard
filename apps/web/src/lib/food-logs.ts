@@ -7,6 +7,61 @@ import { todayISO } from './routines';
 
 export { computeFoodTotals };
 
+const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
+const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
+
+function normalizeFoodItems(items: FoodItem[]): FoodItem[] {
+  return items.map((item) => {
+    const name = item.name.trim();
+    if (!name) throw new Error('Food item name is required.');
+    for (const [label, value] of [
+      ['calories', item.calories],
+      ['protein', item.protein],
+      ['carbs', item.carbs],
+      ['fat', item.fat],
+    ] as const) {
+      if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
+        throw new Error(`Food item ${label} must be a non-negative number.`);
+      }
+    }
+    const quantity = item.quantity?.trim();
+    const normalized = { ...item, name };
+    if (quantity) normalized.quantity = quantity;
+    else delete normalized.quantity;
+    return normalized;
+  });
+}
+
+function normalizeFoodPatch(patch: Partial<FoodLog>): Partial<FoodLog> {
+  const normalized = { ...patch };
+  if (Object.hasOwn(normalized, 'description')) {
+    if (typeof normalized.description !== 'string') {
+      throw new Error('Food description is required.');
+    }
+    normalized.description = normalized.description.trim();
+    if (!normalized.description) throw new Error('Food description is required.');
+  }
+  if (Object.hasOwn(normalized, 'date')) {
+    if (typeof normalized.date !== 'string') throw new Error('Food log date must be valid.');
+    assertFoodDate(normalized.date);
+  }
+  if (Object.hasOwn(normalized, 'mealType') && !MEAL_TYPES.has(normalized.mealType!)) {
+    throw new Error('Meal type must be valid.');
+  }
+  if (normalized.source !== undefined && !CAPTURE_SOURCES.has(normalized.source)) {
+    throw new Error('Food log source must be valid.');
+  }
+  for (const key of ['totalCalories', 'totalProtein', 'totalCarbs', 'totalFat'] as const) {
+    delete normalized[key];
+  }
+  if (Object.hasOwn(normalized, 'items')) {
+    if (!normalized.items) throw new Error('Food items must be valid.');
+    normalized.items = normalizeFoodItems(normalized.items);
+    Object.assign(normalized, computeFoodTotals(normalized.items));
+  }
+  return normalized;
+}
+
 export interface CreateFoodLogInput {
   /** What the user actually said/typed. */
   description: string;
@@ -19,28 +74,29 @@ export interface CreateFoodLogInput {
 
 /** Create a food log; totals are always derived from the items. */
 export function createFoodLog(input: CreateFoodLogInput): Promise<FoodLog> {
-  const description = input.description.trim();
-  if (!description) throw new Error('Food description is required.');
-  const date = input.date ?? todayISO();
-  assertFoodDate(date);
+  const fields = normalizeFoodPatch({
+    description: input.description,
+    items: input.items,
+    mealType: input.mealType ?? 'snack',
+    date: input.date ?? todayISO(),
+    source: input.source,
+  });
 
   return putRecord(
     'foodLogs',
     newRecord<FoodLog>({
-      date,
-      mealType: input.mealType ?? 'snack',
-      description,
-      items: input.items,
-      ...computeFoodTotals(input.items),
-      ...(input.source ? { source: input.source } : {}),
+      date: fields.date!,
+      mealType: fields.mealType!,
+      description: fields.description!,
+      items: fields.items!,
+      ...computeFoodTotals(fields.items!),
+      ...(fields.source ? { source: fields.source } : {}),
     }),
   );
 }
 
 export function updateFoodLog(id: string, patch: Partial<FoodLog>) {
-  if (patch.date !== undefined) assertFoodDate(patch.date);
-  const next = patch.items ? { ...patch, ...computeFoodTotals(patch.items) } : patch;
-  return patchRecord<FoodLog>('foodLogs', id, next);
+  return patchRecord<FoodLog>('foodLogs', id, normalizeFoodPatch(patch));
 }
 
 function assertFoodDate(date: string): void {
