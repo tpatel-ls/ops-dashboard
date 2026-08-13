@@ -13,6 +13,24 @@ const ORG_COLORS = [
   'oklch(0.68 0.18 350)',
 ];
 
+function normalizeOrganizationPatch(patch: Partial<Organization>): Partial<Organization> {
+  const normalized = { ...patch };
+  if (Object.hasOwn(normalized, 'name')) {
+    if (typeof normalized.name !== 'string') throw new Error('Organization name is required.');
+    normalized.name = normalized.name.trim();
+    if (!normalized.name) throw new Error('Organization name is required.');
+  }
+  if (Object.hasOwn(normalized, 'color')) {
+    if (typeof normalized.color !== 'string') throw new Error('Organization color is required.');
+    normalized.color = normalized.color.trim();
+    if (!normalized.color) throw new Error('Organization color is required.');
+  }
+  if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
+    throw new Error('Organization order must be finite.');
+  }
+  return normalized;
+}
+
 export function nextOrgColor(existingCount: number): string {
   return ORG_COLORS[existingCount % ORG_COLORS.length] ?? ORG_COLORS[0]!;
 }
@@ -27,8 +45,14 @@ export async function createOrganization(input: {
    */
   id?: string;
 }): Promise<Organization> {
-  const name = input.name.trim();
-  if (!name) throw new Error('Organization name is required.');
+  const fields = normalizeOrganizationPatch({
+    name: input.name,
+    color: input.color ?? ORG_COLORS[0]!,
+    order: input.order ?? Date.now(),
+  });
+  const name = fields.name!;
+  const id = input.id?.trim();
+  if (input.id !== undefined && !id) throw new Error('Organization id is required.');
 
   const normalizedName = name.toLocaleLowerCase();
   const organizations = await getDb().organizations.toArray();
@@ -39,20 +63,20 @@ export async function createOrganization(input: {
       organization.name.trim().toLocaleLowerCase() === normalizedName,
   );
   if (duplicate) {
-    if (input.id && duplicate.id === input.id) return duplicate;
+    if (id && duplicate.id === id) return duplicate;
     throw new Error('Organization already exists.');
   }
 
   const rec = newRecord<Organization>({
     name,
-    color: input.color ?? ORG_COLORS[0]!,
-    order: input.order ?? Date.now(),
+    color: fields.color!,
+    order: fields.order!,
   });
-  return putRecord('organizations', input.id ? { ...rec, id: input.id } : rec);
+  return putRecord('organizations', id ? { ...rec, id } : rec);
 }
 
 export const updateOrganization = (id: string, patch: Partial<Organization>) =>
-  patchRecord<Organization>('organizations', id, patch);
+  patchRecord<Organization>('organizations', id, normalizeOrganizationPatch(patch));
 
 export const archiveOrganization = (id: string) =>
   patchRecord<Organization>('organizations', id, { archivedAt: new Date().toISOString() });

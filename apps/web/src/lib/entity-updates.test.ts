@@ -18,6 +18,7 @@ import { createNote, updateNote } from './notes';
 import { createQuote, updateQuote } from './quotes';
 import { createPerson, updatePerson } from './people';
 import { createDomain, updateDomain } from './domains';
+import { updateOrganization } from './organizations';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -257,11 +258,56 @@ describe('domain inputs', () => {
       order: 4,
     });
 
-    expect(() => updateDomain('domain-1', { color: '   ' })).toThrow(
-      'Domain color is required',
-    );
+    expect(() => updateDomain('domain-1', { color: '   ' })).toThrow('Domain color is required');
     expect(() => updateDomain('domain-1', { order: Number.NaN })).toThrow(
       'Domain order must be finite',
+    );
+  });
+});
+
+describe('organization inputs', () => {
+  it('validates and normalizes organization edits', async () => {
+    await updateOrganization('org-1', { name: '  Acme  ', color: '  #123  ', order: 2 });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('organizations', 'org-1', {
+      name: 'Acme',
+      color: '#123',
+      order: 2,
+    });
+
+    expect(() => updateOrganization('org-1', { name: '   ' })).toThrow(
+      'Organization name is required',
+    );
+    expect(() => updateOrganization('org-1', { order: Number.POSITIVE_INFINITY })).toThrow(
+      'Organization order must be finite',
+    );
+  });
+});
+
+describe('required update fields', () => {
+  it('rejects undefined values for required entity fields', () => {
+    expect(() => updateBook('book-1', { title: undefined } as never)).toThrow(
+      'Book title is required',
+    );
+    expect(() => updateContent('content-1', { type: undefined } as never)).toThrow(
+      'Content type must be valid',
+    );
+    expect(() => updateJournalEntry('journal-1', { date: undefined } as never)).toThrow(
+      'Journal entry date must be valid',
+    );
+    expect(() => updateNote('note-1', { body: undefined } as never)).toThrow(
+      'Note body must be valid',
+    );
+    expect(() => updateQuote('quote-1', { text: undefined } as never)).toThrow(
+      'Quote text is required',
+    );
+    expect(() => updatePerson('person-1', { name: undefined } as never)).toThrow(
+      'Person name is required',
+    );
+    expect(() => updateDomain('domain-1', { color: undefined } as never)).toThrow(
+      'Domain color is required',
+    );
+    expect(() => updateOrganization('org-1', { order: undefined } as never)).toThrow(
+      'Organization order must be finite',
     );
   });
 });

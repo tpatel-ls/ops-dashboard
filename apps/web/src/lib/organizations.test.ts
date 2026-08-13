@@ -14,9 +14,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
-  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>(
-    '@ops-dashboard/core',
-  );
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
     getDb: () => ({ organizations: { toArray: mocks.toArray } }),
@@ -70,5 +68,15 @@ describe('createOrganization', () => {
     const organization = await createOrganization({ name: 'Former Client' });
 
     expect(organization.name).toBe('Former Client');
+  });
+
+  it('validates deterministic ids and ordering values', async () => {
+    await expect(createOrganization({ id: '   ', name: 'Acme' })).rejects.toThrow(
+      'Organization id is required',
+    );
+    await expect(createOrganization({ name: 'Acme', order: Number.NaN })).rejects.toThrow(
+      'Organization order must be finite',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
