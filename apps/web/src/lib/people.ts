@@ -4,6 +4,44 @@ import { localDay, newId } from '@ops-dashboard/core';
 import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
+  const normalized = { ...patch };
+  if (Object.hasOwn(normalized, 'name')) {
+    if (typeof normalized.name !== 'string') throw new Error('Person name is required.');
+    normalized.name = normalized.name.trim();
+    if (!normalized.name) throw new Error('Person name is required.');
+  }
+  for (const key of ['relationship', 'avatarUrl', 'domainId'] as const) {
+    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  }
+  if (Object.hasOwn(normalized, 'tags')) {
+    if (!normalized.tags) throw new Error('Person tags must be valid.');
+    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
+  }
+  if (Object.hasOwn(normalized, 'facts')) {
+    if (!normalized.facts) throw new Error('Person facts must be valid.');
+    normalized.facts = normalized.facts.map((fact) => {
+      const id = fact.id.trim();
+      const label = fact.label.trim();
+      const value = fact.value.trim();
+      if (!id || !label || !value) throw new Error('Person facts must be valid.');
+      return { ...fact, id, label, value };
+    });
+  }
+  if (Object.hasOwn(normalized, 'interactions')) {
+    if (!normalized.interactions) throw new Error('Person interactions must be valid.');
+    normalized.interactions = normalized.interactions.map((interaction) => {
+      const id = interaction.id.trim();
+      const note = interaction.note.trim();
+      if (!id || !note || localDay(interaction.date) === undefined) {
+        throw new Error('Person interactions must be valid.');
+      }
+      return { ...interaction, id, note };
+    });
+  }
+  return normalized;
+}
+
 export function matchesPersonSearch(person: Person, query: string): boolean {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return true;
@@ -20,15 +58,18 @@ export function createPerson(input: {
   relationship?: string;
   domainId?: string;
 }): Promise<Person> {
-  const name = input.name.trim();
-  if (!name) throw new Error('Person name is required.');
+  const fields = normalizePersonPatch({
+    name: input.name,
+    relationship: input.relationship,
+    domainId: input.domainId,
+  });
 
   return putRecord(
     'people',
     newRecord<Person>({
-      name,
-      ...(input.relationship ? { relationship: input.relationship } : {}),
-      ...(input.domainId ? { domainId: input.domainId } : {}),
+      name: fields.name!,
+      ...(fields.relationship ? { relationship: fields.relationship } : {}),
+      ...(fields.domainId ? { domainId: fields.domainId } : {}),
       facts: [],
       interactions: [],
       tags: [],
@@ -37,7 +78,7 @@ export function createPerson(input: {
 }
 
 export const updatePerson = (id: string, patch: Partial<Person>) =>
-  patchRecord<Person>('people', id, patch);
+  patchRecord<Person>('people', id, normalizePersonPatch(patch));
 
 export const deletePerson = (id: string) => softDeleteRecord<Person>('people', id);
 

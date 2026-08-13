@@ -16,6 +16,7 @@ import { pushNotification } from './feed';
 import { createJournalEntry, updateJournalEntry } from './journal';
 import { createNote, updateNote } from './notes';
 import { createQuote, updateQuote } from './quotes';
+import { createPerson, updatePerson } from './people';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -199,5 +200,33 @@ describe('quote inputs', () => {
     expect(() =>
       updateQuote('quote-1', { thoughts: [{ id: '', text: 'Idea', at: 'not-a-date' }] }),
     ).toThrow('Quote thoughts must be valid');
+  });
+});
+
+describe('person inputs', () => {
+  it('normalizes optional creation fields', async () => {
+    await expect(
+      createPerson({ name: '  Alex Morgan  ', relationship: '  colleague  ' }),
+    ).resolves.toMatchObject({ name: 'Alex Morgan', relationship: 'colleague' });
+  });
+
+  it('validates and normalizes person edits', async () => {
+    await updatePerson('person-1', {
+      name: '  Alex Morgan  ',
+      relationship: '   ',
+      tags: [' work ', 'work'],
+    });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('people', 'person-1', {
+      name: 'Alex Morgan',
+      relationship: undefined,
+      tags: ['work'],
+    });
+
+    expect(() => updatePerson('person-1', { name: '   ' })).toThrow('Person name is required');
+    expect(() =>
+      updatePerson('person-1', {
+        interactions: [{ id: 'interaction-1', date: 'invalid', note: 'Call' }],
+      }),
+    ).toThrow('Person interactions must be valid');
   });
 });
