@@ -3,21 +3,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   newRecord: vi.fn((fields: Record<string, unknown>) => fields),
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
+  patchRecord: vi.fn(),
 }));
 
 vi.mock('./records', () => ({
   newRecord: mocks.newRecord,
   putRecord: mocks.putRecord,
-  patchRecord: vi.fn(),
+  patchRecord: mocks.patchRecord,
   softDeleteRecord: vi.fn(),
 }));
 
-import { addDaysISO, createRoutine, toggleRoutineCheck } from './routines';
+import { addDaysISO, createRoutine, toggleRoutineCheck, updateRoutine } from './routines';
 
 describe('createRoutine', () => {
   beforeEach(() => {
     mocks.newRecord.mockClear();
     mocks.putRecord.mockClear();
+    mocks.patchRecord.mockClear();
   });
 
   it.each([0, -2, 1.5])('rejects an invalid duration: %s', (durationDays) => {
@@ -58,6 +60,31 @@ describe('createRoutine', () => {
     });
     expect(() => createRoutine({ name: 'Reset', specificTime: '25:00' })).toThrow(
       'Routine time must use 24-hour HH:mm format',
+    );
+  });
+});
+
+describe('updateRoutine', () => {
+  it('validates and normalizes editable fields', async () => {
+    await updateRoutine('routine-1', {
+      name: '  Morning reset  ',
+      description: '   ',
+      specificTime: ' 08:05 ',
+    });
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('routines', 'routine-1', {
+      name: 'Morning reset',
+      description: undefined,
+      specificTime: '08:05',
+    });
+    expect(() => updateRoutine('routine-1', { startDate: '2026-02-30' })).toThrow(
+      'Routine start date must be a valid calendar day',
+    );
+    expect(() => updateRoutine('routine-1', { kind: 'temporary' as never })).toThrow(
+      'Routine kind must be valid',
+    );
+    expect(() => updateRoutine('routine-1', { startDate: undefined } as never)).toThrow(
+      'Routine start date must be a valid calendar day',
     );
   });
 });
