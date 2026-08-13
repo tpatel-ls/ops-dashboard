@@ -4,6 +4,59 @@ import { getDb, localDay } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+const TIMES_OF_DAY = new Set<TimeOfDay>(['morning', 'afternoon', 'evening', 'anytime']);
+const ROUTINE_KINDS = new Set<RoutineKind>(['ongoing', 'fixed']);
+
+function normalizeRoutinePatch(patch: Partial<Routine>): Partial<Routine> {
+  const normalized = { ...patch };
+  if (Object.hasOwn(normalized, 'name')) {
+    if (typeof normalized.name !== 'string') throw new Error('Routine name is required.');
+    normalized.name = normalized.name.trim();
+    if (!normalized.name) throw new Error('Routine name is required.');
+  }
+  if (normalized.specificTime !== undefined) {
+    normalized.specificTime = normalized.specificTime.trim() || undefined;
+    if (normalized.specificTime && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(normalized.specificTime)) {
+      throw new Error('Routine time must use 24-hour HH:mm format.');
+    }
+  }
+  if (
+    normalized.durationDays !== undefined &&
+    (!Number.isInteger(normalized.durationDays) || normalized.durationDays <= 0)
+  ) {
+    throw new Error('Routine duration must be a positive whole number of days.');
+  }
+  for (const key of ['startDate', 'endDate'] as const) {
+    const value = normalized[key];
+    if (
+      Object.hasOwn(normalized, key) &&
+      (key === 'startDate'
+        ? typeof value !== 'string' || localDay(value) !== value
+        : value !== undefined && localDay(value) !== value)
+    ) {
+      throw new Error(
+        `Routine ${key === 'startDate' ? 'start date' : 'end date'} must be a valid calendar day.`,
+      );
+    }
+  }
+  if (Object.hasOwn(normalized, 'timeOfDay') && !TIMES_OF_DAY.has(normalized.timeOfDay!)) {
+    throw new Error('Routine time of day must be valid.');
+  }
+  if (Object.hasOwn(normalized, 'kind') && !ROUTINE_KINDS.has(normalized.kind!)) {
+    throw new Error('Routine kind must be valid.');
+  }
+  if (Object.hasOwn(normalized, 'notify') && typeof normalized.notify !== 'boolean') {
+    throw new Error('Routine notification preference must be boolean.');
+  }
+  if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
+    throw new Error('Routine order must be finite.');
+  }
+  for (const key of ['description', 'domainId', 'color'] as const) {
+    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  }
+  return normalized;
+}
+
 export interface CreateRoutineInput {
   name: string;
   description?: string;
@@ -44,48 +97,46 @@ export function addDaysISO(iso: string, days: number): string {
 }
 
 export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
-  const name = input.name.trim();
-  if (!name) throw new Error('Routine name is required.');
-  const specificTime = input.specificTime?.trim();
-  if (specificTime && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(specificTime)) {
-    throw new Error('Routine time must use 24-hour HH:mm format.');
-  }
-  if (
-    input.durationDays !== undefined &&
-    (!Number.isInteger(input.durationDays) || input.durationDays <= 0)
-  ) {
-    throw new Error('Routine duration must be a positive whole number of days.');
-  }
   const startDate = input.startDate ?? todayISO();
-  if (localDay(startDate) !== startDate) {
-    throw new Error('Routine start date must be a valid calendar day.');
-  }
-  const kind = input.kind ?? 'ongoing';
+  const fields = normalizeRoutinePatch({
+    name: input.name,
+    description: input.description,
+    timeOfDay: input.timeOfDay ?? 'anytime',
+    specificTime: input.specificTime,
+    notify: input.notify ?? false,
+    domainId: input.domainId,
+    kind: input.kind ?? 'ongoing',
+    durationDays: input.durationDays,
+    startDate,
+    color: input.color,
+    order: input.order ?? Date.now(),
+  });
+  const kind = fields.kind!;
   const endDate =
-    kind === 'fixed' && input.durationDays
-      ? addDaysISO(startDate, input.durationDays - 1)
+    kind === 'fixed' && fields.durationDays
+      ? addDaysISO(fields.startDate!, fields.durationDays - 1)
       : undefined;
   return putRecord(
     'routines',
     newRecord<Routine>({
-      name,
-      ...(input.description ? { description: input.description } : {}),
-      timeOfDay: input.timeOfDay ?? 'anytime',
-      ...(specificTime ? { specificTime } : {}),
-      notify: input.notify ?? false,
-      ...(input.domainId ? { domainId: input.domainId } : {}),
+      name: fields.name!,
+      ...(fields.description ? { description: fields.description } : {}),
+      timeOfDay: fields.timeOfDay!,
+      ...(fields.specificTime ? { specificTime: fields.specificTime } : {}),
+      notify: fields.notify!,
+      ...(fields.domainId ? { domainId: fields.domainId } : {}),
       kind,
-      ...(input.durationDays ? { durationDays: input.durationDays } : {}),
-      startDate,
+      ...(fields.durationDays ? { durationDays: fields.durationDays } : {}),
+      startDate: fields.startDate!,
       ...(endDate ? { endDate } : {}),
-      ...(input.color ? { color: input.color } : {}),
-      order: input.order ?? Date.now(),
+      ...(fields.color ? { color: fields.color } : {}),
+      order: fields.order!,
     }),
   );
 }
 
 export const updateRoutine = (id: string, patch: Partial<Routine>) =>
-  patchRecord<Routine>('routines', id, patch);
+  patchRecord<Routine>('routines', id, normalizeRoutinePatch(patch));
 
 export const archiveRoutine = (id: string) =>
   patchRecord<Routine>('routines', id, { archivedAt: new Date().toISOString() });
