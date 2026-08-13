@@ -3,6 +3,27 @@
 import type { Domain, Project, Task } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+function normalizeDomainPatch(patch: Partial<Domain>): Partial<Domain> {
+  const normalized = { ...patch };
+  if (Object.hasOwn(normalized, 'name')) {
+    if (typeof normalized.name !== 'string') throw new Error('Domain name is required.');
+    normalized.name = normalized.name.trim();
+    if (!normalized.name) throw new Error('Domain name is required.');
+  }
+  if (Object.hasOwn(normalized, 'color')) {
+    if (typeof normalized.color !== 'string') throw new Error('Domain color is required.');
+    normalized.color = normalized.color.trim();
+    if (!normalized.color) throw new Error('Domain color is required.');
+  }
+  if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
+    throw new Error('Domain order must be finite.');
+  }
+  for (const key of ['icon', 'description'] as const) {
+    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  }
+  return normalized;
+}
+
 export function countDomainWork(
   domainId: string,
   projects: Project[],
@@ -43,23 +64,28 @@ export function createDomain(input: {
   description?: string;
   order?: number;
 }): Promise<Domain> {
-  const name = input.name.trim();
-  if (!name) throw new Error('Domain name is required.');
+  const fields = normalizeDomainPatch({
+    name: input.name,
+    color: input.color,
+    icon: input.icon,
+    description: input.description,
+    order: input.order ?? Date.now(),
+  });
 
   return putRecord(
     'domains',
     newRecord<Domain>({
-      name,
-      color: input.color,
-      ...(input.icon ? { icon: input.icon } : {}),
-      ...(input.description ? { description: input.description } : {}),
-      order: input.order ?? Date.now(),
+      name: fields.name!,
+      color: fields.color!,
+      ...(fields.icon ? { icon: fields.icon } : {}),
+      ...(fields.description ? { description: fields.description } : {}),
+      order: fields.order!,
     }),
   );
 }
 
 export const updateDomain = (id: string, patch: Partial<Domain>) =>
-  patchRecord<Domain>('domains', id, patch);
+  patchRecord<Domain>('domains', id, normalizeDomainPatch(patch));
 
 export const archiveDomain = (id: string) =>
   patchRecord<Domain>('domains', id, { archivedAt: new Date().toISOString() });

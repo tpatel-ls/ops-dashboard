@@ -17,6 +17,7 @@ import { createJournalEntry, updateJournalEntry } from './journal';
 import { createNote, updateNote } from './notes';
 import { createQuote, updateQuote } from './quotes';
 import { createPerson, updatePerson } from './people';
+import { createDomain, updateDomain } from './domains';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -228,5 +229,39 @@ describe('person inputs', () => {
         interactions: [{ id: 'interaction-1', date: 'invalid', note: 'Call' }],
       }),
     ).toThrow('Person interactions must be valid');
+  });
+});
+
+describe('domain inputs', () => {
+  it('normalizes optional creation fields', async () => {
+    await expect(
+      createDomain({
+        name: '  Health  ',
+        color: '  #0a6  ',
+        icon: '  heart  ',
+        description: '  Wellbeing  ',
+      }),
+    ).resolves.toMatchObject({
+      name: 'Health',
+      color: '#0a6',
+      icon: 'heart',
+      description: 'Wellbeing',
+    });
+  });
+
+  it('validates and normalizes domain edits', async () => {
+    await updateDomain('domain-1', { name: '  Health  ', description: '   ', order: 4 });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('domains', 'domain-1', {
+      name: 'Health',
+      description: undefined,
+      order: 4,
+    });
+
+    expect(() => updateDomain('domain-1', { color: '   ' })).toThrow(
+      'Domain color is required',
+    );
+    expect(() => updateDomain('domain-1', { order: Number.NaN })).toThrow(
+      'Domain order must be finite',
+    );
   });
 });
