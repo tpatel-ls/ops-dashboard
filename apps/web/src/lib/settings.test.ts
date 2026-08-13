@@ -80,4 +80,11 @@ describe('normalizeSettings', () => {
       slippingDays: DEFAULT_SETTINGS.slippingDays,
     });
   });
+
+  it('repairs malformed update timestamps', () => {
+    const normalized = normalizeSettings({ updatedAt: 'not-a-timestamp' });
+
+    expect(Number.isFinite(Date.parse(normalized.updatedAt))).toBe(true);
+    expect(normalized.updatedAt).not.toBe('not-a-timestamp');
+  });
 });
