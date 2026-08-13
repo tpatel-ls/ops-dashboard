@@ -12,6 +12,7 @@ vi.mock('./records', () => ({
 import { createBook, updateBook } from './books';
 import { createContent, updateContent } from './content';
 import { createCapture, setCaptureRoute } from './captures';
+import { pushNotification } from './feed';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -89,5 +90,24 @@ describe('capture inputs', () => {
     expect(() =>
       setCaptureRoute('capture-1', { type: 'task', id: 'task-1' }, 'unknown' as never),
     ).toThrow('Capture kind must be valid');
+  });
+});
+
+describe('notification inputs', () => {
+  it('normalizes reference metadata', async () => {
+    await expect(
+      pushNotification({
+        title: 'Saved',
+        kind: 'capture',
+        refType: '  task  ',
+        refId: '  task-1  ',
+      }),
+    ).resolves.toMatchObject({ refType: 'task', refId: 'task-1' });
+  });
+
+  it('rejects unknown notification kinds', () => {
+    expect(() => pushNotification({ title: 'Saved', kind: 'email' as never })).toThrow(
+      'Notification kind must be valid',
+    );
   });
 });
