@@ -11,6 +11,7 @@ vi.mock('./records', () => ({
 
 import { createBook, updateBook } from './books';
 import { createContent, updateContent } from './content';
+import { createCapture, setCaptureRoute } from './captures';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -63,5 +64,30 @@ describe('content inputs', () => {
     expect(() => updateContent('content-1', { status: 'missing' as never })).toThrow(
       'Content status must be valid',
     );
+  });
+});
+
+describe('capture inputs', () => {
+  it('rejects unknown capture sources', () => {
+    expect(() => createCapture('Call Alex', 'email' as never)).toThrow(
+      'Capture source must be valid',
+    );
+  });
+
+  it('validates and normalizes routed capture metadata', async () => {
+    await setCaptureRoute('capture-1', { type: 'task', id: '  task-1  ' }, 'task', '  Call Alex  ');
+    expect(mocks.patchRecord).toHaveBeenCalledWith('captures', 'capture-1', {
+      status: 'triaged',
+      routedTo: { type: 'task', id: 'task-1' },
+      aiKind: 'task',
+      aiSummary: 'Call Alex',
+    });
+
+    expect(() => setCaptureRoute('capture-1', { type: 'task', id: '   ' })).toThrow(
+      'Capture route must be valid',
+    );
+    expect(() =>
+      setCaptureRoute('capture-1', { type: 'task', id: 'task-1' }, 'unknown' as never),
+    ).toThrow('Capture kind must be valid');
   });
 });
