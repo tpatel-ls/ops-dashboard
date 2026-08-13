@@ -91,6 +91,24 @@ describe('createProject', () => {
     );
   });
 
+  it('normalizes optional project fields', async () => {
+    const project = await createProject('Launch', {
+      color: '  #123  ',
+      orgId: '  org-a  ',
+      domainId: '  domain-a  ',
+      description: '  Release plan  ',
+      dueDate: ' 2026-08-01 ',
+    });
+
+    expect(project).toMatchObject({
+      color: '#123',
+      orgId: 'org-a',
+      domainId: 'domain-a',
+      description: 'Release plan',
+      dueDate: '2026-08-01',
+    });
+  });
+
   it('trims project names before writing', async () => {
     const project = await createProject('  Launch plan  ');
 
@@ -111,6 +129,17 @@ describe('createProject', () => {
     expect(mocks.count).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed project kinds and colors before writing', async () => {
+    await expect(createProject('Launch', { kind: 'campaign' as never })).rejects.toThrow(
+      'Project kind must be valid',
+    );
+    await expect(createProject('Launch', { color: '   ' })).rejects.toThrow(
+      'Project color is required',
+    );
+    expect(mocks.count).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
   });
 
   it('does not rename a deleted project', async () => {

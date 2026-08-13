@@ -22,6 +22,29 @@ const DEFAULT_COLORS = [
   'oklch(0.68 0.18 350)',
 ];
 
+const PROJECT_KINDS = new Set<ProjectKind>(['project', 'area', 'retainer']);
+
+function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptions {
+  const normalized = { ...opts };
+  if (normalized.kind !== undefined && !PROJECT_KINDS.has(normalized.kind)) {
+    throw new Error('Project kind must be valid.');
+  }
+  if (normalized.color !== undefined) {
+    normalized.color = normalized.color.trim();
+    if (!normalized.color) throw new Error('Project color is required.');
+  }
+  for (const key of ['domainId', 'orgId', 'description'] as const) {
+    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  }
+  if (normalized.dueDate !== undefined) {
+    normalized.dueDate = normalized.dueDate.trim();
+    if (localDay(normalized.dueDate) !== normalized.dueDate) {
+      throw new Error('Project due date must be a valid calendar date.');
+    }
+  }
+  return normalized;
+}
+
 export interface ProjectTaskProgress {
   open: number;
   done: number;
@@ -49,9 +72,7 @@ export async function createProject(
 ): Promise<Project> {
   const normalizedName = name.trim();
   if (!normalizedName) throw new Error('Project name is required.');
-  if (opts.dueDate !== undefined && localDay(opts.dueDate) !== opts.dueDate) {
-    throw new Error('Project due date must be a valid calendar date.');
-  }
+  const fields = normalizeProjectOptions(opts);
 
   const db = getDb();
   const count = await db.projects.count();
@@ -59,13 +80,13 @@ export async function createProject(
   const project: Project = {
     id: newId(),
     name: normalizedName,
-    color: opts.color ?? DEFAULT_COLORS[count % DEFAULT_COLORS.length] ?? DEFAULT_COLORS[0]!,
-    kind: opts.kind ?? 'project',
+    color: fields.color ?? DEFAULT_COLORS[count % DEFAULT_COLORS.length] ?? DEFAULT_COLORS[0]!,
+    kind: fields.kind ?? 'project',
     status: 'active',
-    ...(opts.domainId ? { domainId: opts.domainId } : {}),
-    ...(opts.orgId ? { orgId: opts.orgId } : {}),
-    ...(opts.description ? { description: opts.description } : {}),
-    ...(opts.dueDate ? { dueDate: opts.dueDate } : {}),
+    ...(fields.domainId ? { domainId: fields.domainId } : {}),
+    ...(fields.orgId ? { orgId: fields.orgId } : {}),
+    ...(fields.description ? { description: fields.description } : {}),
+    ...(fields.dueDate ? { dueDate: fields.dueDate } : {}),
     milestones: [],
     checklists: [],
     createdAt: now,
