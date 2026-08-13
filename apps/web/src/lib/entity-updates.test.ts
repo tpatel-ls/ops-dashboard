@@ -13,6 +13,7 @@ import { createBook, updateBook } from './books';
 import { createContent, updateContent } from './content';
 import { createCapture, setCaptureRoute } from './captures';
 import { pushNotification } from './feed';
+import { createJournalEntry, updateJournalEntry } from './journal';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -108,6 +109,39 @@ describe('notification inputs', () => {
   it('rejects unknown notification kinds', () => {
     expect(() => pushNotification({ title: 'Saved', kind: 'email' as never })).toThrow(
       'Notification kind must be valid',
+    );
+  });
+});
+
+describe('journal inputs', () => {
+  it('normalizes collection fields on creation', async () => {
+    await expect(
+      createJournalEntry({
+        body: '  Good day  ',
+        mood: '  calm  ',
+        mediaUrls: [' image.jpg ', ' '],
+        tags: [' work ', 'work'],
+      }),
+    ).resolves.toMatchObject({
+      body: 'Good day',
+      mood: 'calm',
+      mediaUrls: ['image.jpg'],
+      tags: ['work'],
+    });
+  });
+
+  it('validates journal updates before persistence', async () => {
+    await updateJournalEntry('journal-1', { title: '  Daily review  ', tags: [' done ', 'done'] });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('journalEntries', 'journal-1', {
+      title: 'Daily review',
+      tags: ['done'],
+    });
+
+    expect(() => updateJournalEntry('journal-1', { body: '   ' })).toThrow(
+      'Journal entry body is required',
+    );
+    expect(() => updateJournalEntry('journal-1', { date: '2026-02-30' })).toThrow(
+      'Journal entry date must be valid',
     );
   });
 });
