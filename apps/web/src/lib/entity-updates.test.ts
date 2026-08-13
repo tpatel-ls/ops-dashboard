@@ -15,6 +15,7 @@ import { createCapture, setCaptureRoute } from './captures';
 import { pushNotification } from './feed';
 import { createJournalEntry, updateJournalEntry } from './journal';
 import { createNote, updateNote } from './notes';
+import { createQuote, updateQuote } from './quotes';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -174,5 +175,29 @@ describe('note inputs', () => {
     expect(() => updateNote('note-1', { title: '   ', body: '   ' })).toThrow(
       'Note content is required',
     );
+  });
+});
+
+describe('quote inputs', () => {
+  it('normalizes optional creation fields', async () => {
+    await expect(
+      createQuote({ text: '  Stay curious.  ', author: '  A. Person  ', tags: [' idea ', 'idea'] }),
+    ).resolves.toMatchObject({ text: 'Stay curious.', author: 'A. Person', tags: ['idea'] });
+  });
+
+  it('validates and normalizes quote edits', async () => {
+    await updateQuote('quote-1', { text: '  Stay curious.  ', source: '   ' });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('quotes', 'quote-1', {
+      text: 'Stay curious.',
+      source: undefined,
+    });
+
+    expect(() => updateQuote('quote-1', { text: '   ' })).toThrow('Quote text is required');
+    expect(() => updateQuote('quote-1', { sourceType: 'video' as never })).toThrow(
+      'Quote source type must be valid',
+    );
+    expect(() =>
+      updateQuote('quote-1', { thoughts: [{ id: '', text: 'Idea', at: 'not-a-date' }] }),
+    ).toThrow('Quote thoughts must be valid');
   });
 });
