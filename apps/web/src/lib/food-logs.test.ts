@@ -39,4 +39,39 @@ describe('updateFoodLog', () => {
       'Food log date must be valid',
     );
   });
+
+  it('normalizes items and rejects malformed nutrition values', async () => {
+    await updateFoodLog('meal-1', {
+      items: [{ name: '  Eggs  ', quantity: '  two  ', calories: 140 }],
+    });
+    expect(mocks.patchRecord).toHaveBeenCalledWith(
+      'foodLogs',
+      'meal-1',
+      expect.objectContaining({
+        items: [{ name: 'Eggs', quantity: 'two', calories: 140 }],
+        totalCalories: 140,
+      }),
+    );
+
+    expect(() =>
+      updateFoodLog('meal-1', { items: [{ name: 'Eggs', calories: Number.NaN }] }),
+    ).toThrow('Food item calories must be a non-negative number');
+  });
+
+  it('does not accept direct edits to derived totals', async () => {
+    await updateFoodLog('meal-1', { totalCalories: 999, description: '  Lunch  ' });
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('foodLogs', 'meal-1', {
+      description: 'Lunch',
+    });
+  });
+
+  it('rejects attempts to clear required log fields', () => {
+    expect(() => updateFoodLog('meal-1', { items: undefined } as never)).toThrow(
+      'Food items must be valid',
+    );
+    expect(() => updateFoodLog('meal-1', { date: undefined } as never)).toThrow(
+      'Food log date must be valid',
+    );
+  });
 });
