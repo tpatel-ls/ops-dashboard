@@ -14,6 +14,7 @@ import { createContent, updateContent } from './content';
 import { createCapture, setCaptureRoute } from './captures';
 import { pushNotification } from './feed';
 import { createJournalEntry, updateJournalEntry } from './journal';
+import { createNote, updateNote } from './notes';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -142,6 +143,36 @@ describe('journal inputs', () => {
     );
     expect(() => updateJournalEntry('journal-1', { date: '2026-02-30' })).toThrow(
       'Journal entry date must be valid',
+    );
+  });
+});
+
+describe('note inputs', () => {
+  it('normalizes optional creation fields', async () => {
+    await expect(
+      createNote({
+        title: '  Launch  ',
+        body: '  Confirm owner.  ',
+        source: '  meeting  ',
+        tags: [' work ', 'work'],
+      }),
+    ).resolves.toMatchObject({
+      title: 'Launch',
+      body: 'Confirm owner.',
+      source: 'meeting',
+      tags: ['work'],
+    });
+  });
+
+  it('normalizes edits and rejects an explicitly empty note', async () => {
+    await updateNote('note-1', { title: '  Launch  ', body: '  Confirm owner.  ' });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('notes', 'note-1', {
+      title: 'Launch',
+      body: 'Confirm owner.',
+    });
+
+    expect(() => updateNote('note-1', { title: '   ', body: '   ' })).toThrow(
+      'Note content is required',
     );
   });
 });
