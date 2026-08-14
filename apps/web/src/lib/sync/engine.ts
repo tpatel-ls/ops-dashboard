@@ -47,23 +47,22 @@ function db() {
   return getDb();
 }
 
-async function getLocalRow(table: DexieTableName, id: string): Promise<Syncable | undefined> {
-  return (await db().table(table).get(id)) as Syncable | undefined;
-}
-
-async function putLocalRow(table: DexieTableName, rec: Syncable): Promise<void> {
-  // Direct Dexie write - NOT through the mutation helpers - so inbound merges
-  // never re-enqueue an outbound op (which would loop).
-  await db().table(table).put(rec);
-}
-
 /** Apply a remote row locally only when it is strictly newer (skips echoes). */
 async function mergeInbound(table: DexieTableName, row: Record<string, unknown>): Promise<void> {
   const rec = fromRow(row);
   if (!rec?.id) return;
-  const local = await getLocalRow(table, rec.id);
-  if (!shouldAcceptRemote(local, rec)) return;
-  await putLocalRow(table, rec);
+  const database = db();
+  const localTable = database.table(table);
+  // Realtime callbacks can overlap for the same record. Keep the winner check
+  // and direct Dexie write in one transaction so an older callback cannot
+  // overwrite a newer callback after both read the same local version.
+  await database.transaction('rw', localTable, async () => {
+    const local = (await localTable.get(rec.id)) as Syncable | undefined;
+    if (!shouldAcceptRemote(local, rec)) return;
+    // Direct write, not a mutation helper, so inbound merges never enqueue an
+    // outbound operation and loop back to the server.
+    await localTable.put(rec);
+  });
 }
 
 async function updatePending(): Promise<void> {
