@@ -23,4 +23,21 @@ describe('useInstallPrompt', () => {
     expect(result.current.canPrompt).toBe(false);
     await expect(result.current.prompt()).resolves.toBe('unavailable');
   });
+
+  it('contains browser prompt failures and retires the stale event', async () => {
+    const event = new Event('beforeinstallprompt');
+    Object.assign(event, {
+      prompt: vi.fn().mockRejectedValue(new DOMException('blocked', 'NotAllowedError')),
+      userChoice: Promise.resolve({ outcome: 'dismissed', platform: 'web' }),
+    });
+    const { result } = renderHook(() => useInstallPrompt());
+
+    act(() => window.dispatchEvent(event));
+    await waitFor(() => expect(result.current.canPrompt).toBe(true));
+
+    await act(async () => {
+      await expect(result.current.prompt()).resolves.toBe('failed');
+    });
+    expect(result.current.canPrompt).toBe(false);
+  });
 });

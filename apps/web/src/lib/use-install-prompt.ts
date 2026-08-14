@@ -35,12 +35,16 @@ export function useInstallPrompt() {
     // A captured install event may only be prompted once. Clear it before the
     // async browser prompt so a dismissal or failure cannot expose a stale CTA.
     setEvent(null);
-    await event.prompt();
-    const choice = await event.userChoice;
-    if (choice.outcome === 'accepted') {
-      setInstalled(true);
+    try {
+      await event.prompt();
+      const choice = await event.userChoice;
+      if (choice.outcome === 'accepted') {
+        setInstalled(true);
+      }
+      return choice.outcome;
+    } catch {
+      return 'failed' as const;
     }
-    return choice.outcome;
   }, [event]);
 
   return {
