@@ -29,7 +29,7 @@ Extract:
 - reminderText: if the user asks for a reminder/alert, the offset (e.g. "5 minutes before").`;
 
 export async function POST(req: Request): Promise<Response> {
-  if (!requestAllowed(req)) {
+  if (!(await requestAllowed(req))) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 

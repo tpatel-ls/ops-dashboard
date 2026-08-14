@@ -40,7 +40,7 @@ function cleanNames(value: unknown): string[] {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  if (!requestAllowed(req)) {
+  if (!(await requestAllowed(req))) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 

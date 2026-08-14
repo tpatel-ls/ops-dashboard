@@ -9,7 +9,7 @@ const MAX_MESSAGE = 1024;
 const MAX_TITLE = 250;
 
 export async function POST(req: Request): Promise<Response> {
-  if (!requestAllowed(req)) {
+  if (!(await requestAllowed(req))) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 
