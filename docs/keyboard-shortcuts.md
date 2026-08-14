@@ -1,32 +1,38 @@
 # Keyboard shortcuts
 
-Press `?` anywhere to open this list as an overlay (lands in M1).
+Press `?` outside a text field to open the in-app shortcut reference.
 
 ## Global
 
-- `Cmd K` open search
-- `g then i` open quick add
-- `Cmd Enter` save the active form
+- `Cmd/Ctrl K` open the command palette
+- `Q` focus task capture, or open task capture when no composer is visible
+- `g then a` open task capture
+- `f` open focus mode
 - `Esc` close the active overlay
 
 ## Navigation
 
-- `g then t` Today
-- `g then w` Week
-- `g then m` Month
+- `g then h` Dashboard
+- `g then t` Tasks
+- `g then p` Projects
 - `g then c` Calendar
 - `g then k` Kanban
-- `g then b` Whiteboards
-- `g then n` Inbox
+- `g then i` Inbox
+- `g then l` Power Dialer
+- `g then n` Notepad
+- `g then s` Settings
 
 ## Task list
 
-- `j` and `k` move selection
-- `x` toggle done
-- `e` edit title
-- `1` to `4` set priority
-- `t` then a date snippet (today, tomorrow, mon, etc.) reschedule
-- `#` add a tag inline
+- `/` focus task search
+
+## Capture syntax
+
+- `#tag` add a tag
+- `!!` set priority 2
+- `!!!` set priority 3
+- `tomorrow 3pm` add a natural-language schedule
+- `Cmd/Ctrl Enter` save from supported capture forms
 
 ## Whiteboard
 
