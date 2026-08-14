@@ -24,7 +24,7 @@ Call extract_journal exactly once. Extract:
 - habitsDone: from the provided routineNames list, return only those habits/routines that the entry clearly indicates were completed today. Match case-insensitively. Return exact names as provided.`;
 
 export async function POST(req: Request): Promise<Response> {
-  if (!requestAllowed(req)) {
+  if (!(await requestAllowed(req))) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 

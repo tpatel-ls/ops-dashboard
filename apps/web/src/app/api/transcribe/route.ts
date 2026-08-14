@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
  * endpoint isn't set, so the client can fall back to on-device Web Speech.
  */
 export async function POST(req: Request): Promise<Response> {
-  if (!requestAllowed(req)) {
+  if (!(await requestAllowed(req))) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 

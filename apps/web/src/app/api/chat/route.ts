@@ -13,7 +13,7 @@ const CHAT_SYSTEM = `You are the project intelligence assistant inside Taskify. 
 Answer using ONLY the information provided in the CONTEXT block below. Be concise and direct. If the context does not contain enough information to answer, say so honestly. Do not invent data. Format your response in plain text - no markdown headers, keep lists minimal.`;
 
 export async function POST(req: Request): Promise<Response> {
-  if (!requestAllowed(req)) {
+  if (!(await requestAllowed(req))) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 
