@@ -30,11 +30,12 @@ export function createAdminClient(): SupabaseClient | null {
 let _cachedUserId: string | null = null;
 
 export async function getSingleUserId(admin: SupabaseClient): Promise<string | null> {
-  if (process.env.OPS_USER_ID) return process.env.OPS_USER_ID;
+  const configuredUserId = process.env.OPS_USER_ID?.trim();
+  if (configuredUserId) return configuredUserId;
   if (_cachedUserId) return _cachedUserId;
-  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
-  const first = data?.users?.[0];
-  if (error || !first) return null;
+  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 2 });
+  if (error || data?.users?.length !== 1) return null;
+  const first = data.users[0]!;
   _cachedUserId = first.id;
   return _cachedUserId;
 }
