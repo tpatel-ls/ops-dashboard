@@ -48,4 +48,17 @@ describe('fetchWithTimeout', () => {
     expect(fetch.mock.calls[0]?.[1]?.signal).not.toBe(caller.signal);
     expect(fetch.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
   });
+
+  it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 2_147_483_648])(
+    'rejects an unsupported timeout before starting a request: %s',
+    async (timeoutMs) => {
+      const fetch = vi.fn();
+      vi.stubGlobal('fetch', fetch);
+
+      await expect(fetchWithTimeout('/api/test', {}, timeoutMs)).rejects.toThrow(
+        'Request timeout must be a positive supported integer',
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
 });
