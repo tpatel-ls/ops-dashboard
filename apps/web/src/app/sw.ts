@@ -40,10 +40,10 @@ self.addEventListener('notificationclick', (event) => {
   const data = event.notification.data as { taskId?: unknown } | undefined;
   const url = notificationTarget(data?.taskId);
   event.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((clients) => {
+    self.clients.matchAll({ type: 'window' }).then(async (clients) => {
       for (const client of clients) {
         if ('focus' in client) {
-          void client.navigate(url).catch(() => {});
+          await client.navigate(url).catch(() => null);
           return client.focus();
         }
       }
