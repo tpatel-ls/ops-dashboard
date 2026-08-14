@@ -227,15 +227,16 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     const routedTable = routeType === 'journal' ? SYNC_TABLES.journalEntries : SYNC_TABLES.tasks;
-    const [r1, r2, r3] = await Promise.all([
-      supabase.from(routedTable).upsert(toRow(routedRecord, userId)),
+    const routedWrite = await supabase.from(routedTable).upsert(toRow(routedRecord, userId));
+    if (routedWrite.error) throw routedWrite.error;
+
+    // The routed record is the durable result. Keep its audit trail and feed
+    // notification best-effort so an auxiliary table outage cannot report a
+    // failed capture after the task or journal entry was already persisted.
+    await Promise.allSettled([
       supabase.from(SYNC_TABLES.captures).upsert(toRow(capture, userId)),
       supabase.from(SYNC_TABLES.notifications).upsert(toRow(notification, userId)),
     ]);
-    if (r1.error) throw r1.error;
-    // Capture + notification are best-effort; the routed record is what matters.
-    void r2;
-    void r3;
   } catch (err) {
     console.error('[api/capture] persist error:', err);
     return NextResponse.json({ ok: false, reason: 'persist-failed' }, { status: 502 });
