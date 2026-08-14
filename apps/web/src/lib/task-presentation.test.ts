@@ -27,4 +27,10 @@ describe('taskDateLabel', () => {
   ] as const)('presents %s for done=%s', (date, done, expected) => {
     expect(taskDateLabel(date, today, done)).toBe(expected);
   });
+
+  it('does not derive labels from malformed calendar inputs', () => {
+    expect(taskDateLabel('2026-07-24 trailing', today, false)).toBe('2026-07-24 trailing');
+    expect(taskDateLabel('2026-02-30', today, false)).toBe('2026-02-30');
+    expect(taskDateLabel('2026-07-24', 'not-a-day', false)).toBe('Jul 24');
+  });
 });

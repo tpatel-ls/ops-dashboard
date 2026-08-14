@@ -1,4 +1,5 @@
-import { differenceInCalendarDays, format, isValid, parseISO } from 'date-fns';
+import { localDay } from '@ops-dashboard/core';
+import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 
 export function taskResultSummary(count: number, filtered: boolean): string {
   if (count === 0) return filtered ? 'No matching tasks' : 'No tasks';
@@ -7,15 +8,15 @@ export function taskResultSummary(count: number, filtered: boolean): string {
 }
 
 export function taskDateLabel(date: string, today: string, done: boolean): string {
-  const day = date.slice(0, 10);
-  const parsed = parseISO(day);
-  if (!isValid(parsed)) return date;
+  if (localDay(date) !== date) return date;
+  const parsed = parseISO(date);
+  const calendarLabel = format(parsed, 'MMM d');
+  if (localDay(today) !== today) return calendarLabel;
 
   const offset = differenceInCalendarDays(parsed, parseISO(today));
   if (offset === 0) return 'Today';
   if (offset === 1) return 'Tomorrow';
   if (!done && offset === -1) return 'Yesterday';
 
-  const calendarLabel = format(parsed, 'MMM d');
   return !done && offset < -1 ? `Overdue · ${calendarLabel}` : calendarLabel;
 }
