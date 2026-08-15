@@ -19,11 +19,24 @@ vi.mock('@ops-dashboard/core', async () => {
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
 import {
+  availableWhiteboard,
   createWhiteboard,
   renameWhiteboard,
   saveWhiteboard,
   softDeleteWhiteboard,
 } from './whiteboards';
+
+describe('availableWhiteboard', () => {
+  it('maps missing and deleted boards to a resolved not-found state', () => {
+    expect(availableWhiteboard(undefined)).toBeNull();
+    expect(
+      availableWhiteboard({
+        id: 'deleted',
+        deletedAt: '2026-08-01T12:00:00.000Z',
+      } as never),
+    ).toBeNull();
+  });
+});
 
 describe('whiteboard names', () => {
   beforeEach(() => {
