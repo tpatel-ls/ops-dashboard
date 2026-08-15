@@ -3,16 +3,16 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import Link from 'next/link';
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { createWhiteboard, softDeleteWhiteboard } from '@/lib/whiteboards';
+import { compareWhiteboardUpdates, whiteboardUpdatedLabel } from '@/lib/whiteboard-presentation';
 
 export function WhiteboardList() {
   const [name, setName] = useState('');
   const boards = useLiveQuery(async () => {
     const all = await getDb().whiteboards.toArray();
-    return all.filter((w) => !w.deletedAt).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    return all.filter((w) => !w.deletedAt).sort(compareWhiteboardUpdates);
   });
 
   return (
@@ -27,31 +27,35 @@ export function WhiteboardList() {
         }}
         className="surface flex min-w-0 items-center gap-2 px-3 py-2"
       >
-        <Plus className="size-4 text-primary" aria-hidden />
+        <Plus className="text-primary size-4" aria-hidden />
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="New whiteboard"
           aria-label="Whiteboard name"
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+          className="placeholder:text-subtle-foreground min-w-0 flex-1 bg-transparent text-sm outline-none"
         />
         <button
           type="submit"
           disabled={!name.trim()}
-          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium disabled:opacity-50"
         >
           Create
         </button>
       </form>
 
       {boards === undefined ? (
-        <div className="grid gap-2 sm:grid-cols-2" aria-busy="true" aria-label="Loading whiteboards">
+        <div
+          className="grid gap-2 sm:grid-cols-2"
+          aria-busy="true"
+          aria-label="Loading whiteboards"
+        >
           <div className="surface-flat h-36 animate-pulse" />
           <div className="surface-flat h-36 animate-pulse" />
         </div>
       ) : boards.length === 0 ? (
-        <div className="surface flex h-40 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Pencil className="size-5 text-primary" aria-hidden />
+        <div className="surface text-muted-foreground flex h-40 flex-col items-center justify-center gap-2 text-sm">
+          <Pencil className="text-primary size-5" aria-hidden />
           No whiteboards yet. Create one above.
         </div>
       ) : (
@@ -60,20 +64,20 @@ export function WhiteboardList() {
             <li key={b.id} className="surface dot-grid relative h-36 overflow-hidden">
               <Link
                 href={`/whiteboards/${b.id}`}
-                className="flex h-full flex-col justify-between p-3 pr-12 transition-colors hover:bg-accent/30"
+                className="hover:bg-accent/30 flex h-full flex-col justify-between p-3 pr-12 transition-colors"
               >
                 <div className="flex min-w-0 items-center gap-2 text-xs">
-                  <Pencil className="size-3.5 text-primary" aria-hidden />
-                  <span className="truncate font-medium text-foreground">{b.name}</span>
+                  <Pencil className="text-primary size-3.5" aria-hidden />
+                  <span className="text-foreground truncate font-medium">{b.name}</span>
                 </div>
-                <div className="font-mono text-[10px] text-subtle-foreground">
-                  Updated {format(new Date(b.updatedAt), 'MMM d, HH:mm')}
+                <div className="text-subtle-foreground font-mono text-[10px]">
+                  {whiteboardUpdatedLabel(b.updatedAt)}
                 </div>
               </Link>
               <button
                 type="button"
                 onClick={() => void softDeleteWhiteboard(b.id)}
-                className="absolute right-2 top-2 inline-flex size-9 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive"
+                className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-md"
                 aria-label={`Delete ${b.name}`}
               >
                 <Trash2 className="size-4" aria-hidden />
