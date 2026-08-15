@@ -18,3 +18,20 @@ export function trailingSingleFlight(action: () => Promise<void>): () => Promise
     return running;
   };
 }
+
+export function latestSingleFlight<T>(action: (value: T) => Promise<void>) {
+  let latest: T;
+  let pending = false;
+  const run = trailingSingleFlight(async () => {
+    if (!pending) return;
+    const value = latest;
+    pending = false;
+    await action(value);
+  });
+
+  return (value: T): Promise<void> => {
+    latest = value;
+    pending = true;
+    return run();
+  };
+}
