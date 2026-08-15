@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const reminders = {
@@ -16,7 +16,27 @@ vi.mock('@ops-dashboard/core', () => ({
   newId: () => 'reminder-test',
 }));
 
-import { checkAndFireDueReminders, scheduleReminder } from './notifications';
+import {
+  checkAndFireDueReminders,
+  requestNotifications,
+  scheduleReminder,
+} from './notifications';
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe('requestNotifications', () => {
+  it('keeps the current permission when the browser rejects the prompt', async () => {
+    const NotificationMock = vi.fn();
+    Object.assign(NotificationMock, {
+      permission: 'default',
+      requestPermission: vi.fn().mockRejectedValue(new DOMException('blocked')),
+    });
+    vi.stubGlobal('window', { Notification: NotificationMock });
+    vi.stubGlobal('Notification', NotificationMock);
+
+    await expect(requestNotifications()).resolves.toBe('default');
+  });
+});
 
 describe('scheduleReminder', () => {
   beforeEach(() => {
