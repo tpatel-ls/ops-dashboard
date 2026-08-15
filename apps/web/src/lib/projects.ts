@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, getDeviceId, localDay, newId } from '@ops-dashboard/core';
+import { bumpVersion, getDb, getDeviceId, localDay, newId } from '@ops-dashboard/core';
 import type { Project, ProjectKind, Task } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
@@ -107,12 +107,10 @@ export async function renameProject(id: string, name: string): Promise<void> {
   const existing = await db.projects.get(id);
   if (!existing || existing.deletedAt) return;
   if (existing.name === normalizedName) return;
-  const next: Project = {
+  const next = bumpVersion<Project>({
     ...existing,
     name: normalizedName,
-    updatedAt: new Date().toISOString(),
-    version: existing.version + 1,
-  };
+  });
   await db.projects.put(next);
   await enqueueOp({ table: 'projects', recordId: id, op: 'put', payload: next });
 }
@@ -122,12 +120,10 @@ export async function archiveProject(id: string): Promise<void> {
   const existing = await db.projects.get(id);
   if (!existing || existing.deletedAt || existing.archivedAt) return;
   const now = new Date().toISOString();
-  const next: Project = {
+  const next = bumpVersion<Project>({
     ...existing,
     archivedAt: now,
-    updatedAt: now,
-    version: existing.version + 1,
-  };
+  });
   await db.projects.put(next);
   await enqueueOp({ table: 'projects', recordId: id, op: 'put', payload: next });
 }
