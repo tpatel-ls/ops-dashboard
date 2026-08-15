@@ -39,4 +39,12 @@ describe('healthRequestAuthorized', () => {
 
     expect(healthRequestAuthorized(request())).toBe(true);
   });
+
+  it('ignores blank configuration and trims configured secrets', () => {
+    vi.stubEnv('CRON_SECRET', '   ');
+    vi.stubEnv('OPS_API_SECRET', '  ops-secret  ');
+
+    expect(healthRequestAuthorized(request('ops-secret'))).toBe(true);
+    expect(healthRequestAuthorized(request())).toBe(false);
+  });
 });
