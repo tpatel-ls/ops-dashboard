@@ -4,6 +4,10 @@ import { bumpVersion, getDb, getDeviceId, newId } from '@ops-dashboard/core';
 import type { Whiteboard } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
+export function availableWhiteboard(board: Whiteboard | undefined): Whiteboard | null {
+  return board && !board.deletedAt ? board : null;
+}
+
 export async function createWhiteboard(name: string): Promise<Whiteboard> {
   const normalizedName = name.trim();
   if (!normalizedName) throw new Error('Whiteboard name is required.');
