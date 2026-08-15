@@ -31,11 +31,21 @@ vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 import {
   addTask,
   addTaskToProject,
+  availableTask,
   projectRecurringReminders,
   setTaskStatus,
   softDeleteTask,
   updateTask,
 } from './tasks';
+
+describe('availableTask', () => {
+  it('maps missing and deleted tasks to a resolved not-found state', () => {
+    expect(availableTask(undefined)).toBeNull();
+    expect(
+      availableTask({ id: 'deleted', deletedAt: '2026-08-01T12:00:00.000Z' } as never),
+    ).toBeNull();
+  });
+});
 
 describe('addTask', () => {
   beforeEach(() => {
