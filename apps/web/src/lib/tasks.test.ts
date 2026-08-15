@@ -235,6 +235,30 @@ describe('setTaskStatus', () => {
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
 
+  it('repairs a malformed version while changing status', async () => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      title: 'Imported task',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 1,
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: 'not-a-date',
+      version: Number.NaN,
+      deviceId: 'device-original',
+    } satisfies Task);
+
+    await setTaskStatus('task-1', 'doing');
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'doing', version: 1 }),
+    );
+  });
+
   it('moves reminders onto the next recurring task', async () => {
     vi.clearAllMocks();
     mocks.get.mockResolvedValue({

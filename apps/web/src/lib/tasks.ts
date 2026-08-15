@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  bumpVersion,
   getDb,
   getDeviceId,
   localDay,
@@ -120,12 +121,10 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
     ([key, value]) => !Object.is((existing as Task & Record<string, unknown>)[key], value),
   );
   if (!changed) return;
-  const merged: Task = {
+  const merged = bumpVersion<Task>({
     ...existing,
     ...mutablePatch,
-    updatedAt: new Date().toISOString(),
-    version: existing.version + 1,
-  };
+  });
   await db.tasks.put(merged);
   await enqueueOp({ table: 'tasks', recordId: id, op: 'put', payload: merged });
 }
@@ -137,13 +136,11 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
   if (!existing || existing.deletedAt) return;
   if (existing.status === status) return;
   const now = new Date().toISOString();
-  const next: Task = {
+  const next = bumpVersion<Task>({
     ...existing,
     status,
-    updatedAt: now,
-    version: existing.version + 1,
     ...(status === 'done' ? { completedAt: now } : { completedAt: undefined }),
-  };
+  });
   await db.tasks.put(next);
   await enqueueOp({ table: 'tasks', recordId: id, op: 'put', payload: next });
 
@@ -206,12 +203,10 @@ export async function softDeleteTask(id: string): Promise<void> {
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
   const now = new Date().toISOString();
-  const tomb: Task = {
+  const tomb = bumpVersion<Task>({
     ...existing,
     deletedAt: now,
-    updatedAt: now,
-    version: existing.version + 1,
-  };
+  });
   await db.tasks.put(tomb);
   await enqueueOp({ table: 'tasks', recordId: id, op: 'delete', payload: tomb });
 }
