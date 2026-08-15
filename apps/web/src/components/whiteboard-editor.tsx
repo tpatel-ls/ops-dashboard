@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo } from 'react';
 import { getDb } from '@ops-dashboard/core';
-import { saveWhiteboard } from '@/lib/whiteboards';
+import { availableWhiteboard, saveWhiteboard } from '@/lib/whiteboards';
 import { latestSingleFlight } from '@/lib/trailing-single-flight';
 
 const OpsCanvas = dynamic(() => import('@ops-dashboard/whiteboard').then((m) => m.OpsCanvas), {
@@ -17,7 +17,10 @@ const OpsCanvas = dynamic(() => import('@ops-dashboard/whiteboard').then((m) => 
 });
 
 export function WhiteboardEditor({ id }: { id: string }) {
-  const board = useLiveQuery(async () => getDb().whiteboards.get(id), [id]);
+  const board = useLiveQuery(
+    async () => availableWhiteboard(await getDb().whiteboards.get(id)),
+    [id],
+  );
   const saveSnapshot = useMemo(
     () => latestSingleFlight((document: unknown) => saveWhiteboard(id, document)),
     [id],
