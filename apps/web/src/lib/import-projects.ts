@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  DEFAULT_ORG_COLOR,
-  DEFAULT_ORG_NAME,
-  getDb,
-  isoDay,
-  newId,
-} from '@ops-dashboard/core';
+import { DEFAULT_ORG_COLOR, DEFAULT_ORG_NAME, getDb, isoDay, newId } from '@ops-dashboard/core';
 import type {
   ChecklistItem,
   NamedChecklist,
@@ -93,7 +87,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         startHour: 10,
         durationMinutes: 90,
         estimateMinutes: 180,
-        notes: 'Make the core blue-bubble delivery path rock solid. Use Apple Messages for Business where available, with compliant SMS fallback.',
+        notes:
+          'Make the core blue-bubble delivery path rock solid. Use Apple Messages for Business where available, with compliant SMS fallback.',
       },
       {
         title: 'Local identity and area presence with fallback',
@@ -114,7 +109,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 2,
         dueOffset: 6,
         estimateMinutes: 90,
-        notes: 'Sender, brand language, contact card identity, and account naming must feel owned by the client.',
+        notes:
+          'Sender, brand language, contact card identity, and account naming must feel owned by the client.',
       },
       {
         title: 'RAG needs to be strong',
@@ -124,7 +120,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 3,
         dueOffset: 8,
         estimateMinutes: 180,
-        notes: 'Retrieval has to be reliable so replies always pull the right context, offer, objections, and customer history.',
+        notes:
+          'Retrieval has to be reliable so replies always pull the right context, offer, objections, and customer history.',
       },
       {
         title: 'Scripting tight',
@@ -134,7 +131,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 4,
         dueOffset: 9,
         estimateMinutes: 120,
-        notes: 'Conversation scripts dialed in and consistent for first touch, no-answer, objection, handoff, and close.',
+        notes:
+          'Conversation scripts dialed in and consistent for first touch, no-answer, objection, handoff, and close.',
       },
       {
         title: 'Sequencing engine for multi-touch follow-up',
@@ -144,7 +142,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 5,
         dueOffset: 10,
         estimateMinutes: 150,
-        notes: 'Multi-step message and follow-up sequencing across SMS, Apple Messages for Business, and callback tasks.',
+        notes:
+          'Multi-step message and follow-up sequencing across SMS, Apple Messages for Business, and callback tasks.',
       },
       {
         title: 'Inbound AI transfer solid',
@@ -156,7 +155,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         startHour: 13,
         durationMinutes: 60,
         estimateMinutes: 180,
-        notes: 'Capture inbound intent and move the conversation to a human without losing transcript, lead record, or current script.',
+        notes:
+          'Capture inbound intent and move the conversation to a human without losing transcript, lead record, or current script.',
       },
       {
         title: 'Capture can take the call and hand off',
@@ -166,7 +166,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 7,
         dueOffset: 13,
         estimateMinutes: 150,
-        notes: 'A captured inbound call should have context, ownership, and a clean transfer path to a rep or AI voice agent.',
+        notes:
+          'A captured inbound call should have context, ownership, and a clean transfer path to a rep or AI voice agent.',
       },
       {
         title: 'Better dashboard visuals',
@@ -176,7 +177,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 8,
         dueOffset: 14,
         estimateMinutes: 120,
-        notes: 'Improve the visuals on the dashboard so the LSG launch pipeline reads like a live command surface.',
+        notes:
+          'Improve the visuals on the dashboard so the LSG launch pipeline reads like a live command surface.',
       },
       {
         title: 'Scheduling with a calendar view',
@@ -186,7 +188,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 9,
         dueOffset: 15,
         estimateMinutes: 120,
-        notes: 'Improve the scheduling component. Add a calendar view that shows all future touches, calls, callbacks, and launches.',
+        notes:
+          'Improve the scheduling component. Add a calendar view that shows all future touches, calls, callbacks, and launches.',
       },
       {
         title: 'Dialing interface with RingCentral and NICE',
@@ -196,7 +199,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 10,
         dueOffset: 16,
         estimateMinutes: 180,
-        notes: 'Connect the Blue Text workflow to the same phone-system interface needed by the Power Dialer.',
+        notes:
+          'Connect the Blue Text workflow to the same phone-system interface needed by the Power Dialer.',
       },
       {
         title: 'Apple integration path for blue messaging',
@@ -206,7 +210,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 11,
         dueOffset: 18,
         estimateMinutes: 180,
-        notes: 'Use Apple Messages for Business or an approved messaging service provider path. Avoid private iMessage automation.',
+        notes:
+          'Use Apple Messages for Business or an approved messaging service provider path. Avoid private iMessage automation.',
       },
     ],
   },
@@ -325,7 +330,8 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
         scheduleOffset: 10,
         dueOffset: 17,
         estimateMinutes: 240,
-        notes: 'Every call result, recording, transcript, and note lands in the CRM automatically. Zero manual data entry.',
+        notes:
+          'Every call result, recording, transcript, and note lands in the CRM automatically. Zero manual data entry.',
       },
       {
         title: 'Manager live dashboard',
@@ -413,6 +419,13 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
 /** Names used by the dashboard to decide whether the "Load my projects" CTA is needed. */
 export const PORTFOLIO_PROJECT_NAMES = PORTFOLIO_PROJECTS.map((p) => p.name);
 
+export function portfolioNeedsDefaultOrganization(names: string[]): boolean {
+  const wantedNames = new Set(names.map(recordKey));
+  return PORTFOLIO_PROJECTS.some(
+    (project) => wantedNames.has(recordKey(project.name)) && project.domain === 'LSG',
+  );
+}
+
 export interface ImportResult {
   projectsCreated: number;
   tasksCreated: number;
@@ -463,13 +476,11 @@ function checklistFromSeed(seed: { name: string; items: string[] }): NamedCheckl
   return {
     id: newId(),
     name: seed.name,
-    items: seed.items.map(
-      (text): ChecklistItem => ({
-        id: newId(),
-        text,
-        done: false,
-      }),
-    ),
+    items: seed.items.map((text): ChecklistItem => ({
+      id: newId(),
+      text,
+      done: false,
+    })),
   };
 }
 
@@ -508,7 +519,9 @@ function mergeProjectStructure(project: Project, def: SeedProject): Partial<Proj
  * wholesale: missing tasks, schedule metadata, org lane, milestones, and
  * checklists are added without overwriting user completion state.
  */
-export async function importPortfolioProjects(names = PORTFOLIO_PROJECT_NAMES): Promise<ImportResult> {
+export async function importPortfolioProjects(
+  names = PORTFOLIO_PROJECT_NAMES,
+): Promise<ImportResult> {
   const db = getDb();
   const wantedNames = new Set(names.map(recordKey));
 
@@ -538,21 +551,25 @@ export async function importPortfolioProjects(names = PORTFOLIO_PROJECT_NAMES): 
     skipped: [],
   };
 
-  const orgs = (await db.organizations.toArray()).filter((o) => !o.deletedAt);
-  const seedOrg =
-    orgs.find((o) => recordKey(o.name) === recordKey(DEFAULT_ORG_NAME)) ??
-    (await createOrganization({
-      id: SEED_ORG_ID,
-      name: DEFAULT_ORG_NAME,
-      color: DEFAULT_ORG_COLOR,
-      order: 1,
-    }));
+  let seedOrgId: string | undefined;
+  if (portfolioNeedsDefaultOrganization(names)) {
+    const orgs = (await db.organizations.toArray()).filter((o) => !o.deletedAt);
+    const seedOrg =
+      orgs.find((o) => recordKey(o.name) === recordKey(DEFAULT_ORG_NAME)) ??
+      (await createOrganization({
+        id: SEED_ORG_ID,
+        name: DEFAULT_ORG_NAME,
+        color: DEFAULT_ORG_COLOR,
+        order: 1,
+      }));
+    seedOrgId = seedOrg.id;
+  }
 
   for (const def of PORTFOLIO_PROJECTS) {
     if (!wantedNames.has(recordKey(def.name))) continue;
 
     const domainId = await ensureDomain(def.domain);
-    const orgId = def.domain === 'LSG' ? seedOrg.id : undefined;
+    const orgId = def.domain === 'LSG' ? seedOrgId : undefined;
     let project = projectByName.get(recordKey(def.name));
 
     if (!project) {
