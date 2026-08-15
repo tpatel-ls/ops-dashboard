@@ -22,6 +22,10 @@ const TASK_STATUSES = new Set<TaskStatus>([
   'archived',
 ]);
 
+export function availableTask(task: Task | undefined): Task | null {
+  return task && !task.deletedAt ? task : null;
+}
+
 function assertTaskStatus(value: unknown): asserts value is TaskStatus {
   if (typeof value !== 'string' || !TASK_STATUSES.has(value as TaskStatus)) {
     throw new Error('Task status must be valid.');
