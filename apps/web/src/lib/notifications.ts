@@ -13,8 +13,14 @@ export function notificationPermission(): PermissionState {
 
 export async function requestNotifications(): Promise<PermissionState> {
   if (notificationPermission() === 'unsupported') return 'unsupported';
-  const result = await Notification.requestPermission();
-  return result as PermissionState;
+  try {
+    const result = await Notification.requestPermission();
+    return result === 'granted' || result === 'denied' || result === 'default'
+      ? result
+      : notificationPermission();
+  } catch {
+    return notificationPermission();
+  }
 }
 
 export async function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> {
