@@ -18,7 +18,12 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { createWhiteboard, renameWhiteboard, softDeleteWhiteboard } from './whiteboards';
+import {
+  createWhiteboard,
+  renameWhiteboard,
+  saveWhiteboard,
+  softDeleteWhiteboard,
+} from './whiteboards';
 
 describe('whiteboard names', () => {
   beforeEach(() => {
@@ -66,5 +71,23 @@ describe('whiteboard names', () => {
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+
+  it('repairs malformed versions while saving a board', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'whiteboard-test',
+      name: 'Launch map',
+      version: Number.NaN,
+      updatedAt: 'not-a-date',
+    });
+
+    await saveWhiteboard('whiteboard-test', { shapes: [] });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 1, document: { shapes: [] } }),
+    );
+    expect(mocks.enqueueOp).toHaveBeenCalledWith(
+      expect.objectContaining({ recordId: 'whiteboard-test', op: 'put' }),
+    );
   });
 });

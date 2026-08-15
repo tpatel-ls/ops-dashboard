@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, getDeviceId, newId } from '@ops-dashboard/core';
+import { bumpVersion, getDb, getDeviceId, newId } from '@ops-dashboard/core';
 import type { Whiteboard } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
@@ -27,12 +27,10 @@ export async function saveWhiteboard(id: string, document: unknown): Promise<voi
   const db = getDb();
   const existing = await db.whiteboards.get(id);
   if (!existing || existing.deletedAt) return;
-  const next: Whiteboard = {
+  const next = bumpVersion<Whiteboard>({
     ...existing,
     document,
-    updatedAt: new Date().toISOString(),
-    version: existing.version + 1,
-  };
+  });
   await db.whiteboards.put(next);
   await enqueueOp({ table: 'whiteboards', recordId: id, op: 'put', payload: next });
 }
@@ -44,12 +42,10 @@ export async function renameWhiteboard(id: string, name: string): Promise<void> 
   const existing = await db.whiteboards.get(id);
   if (!existing || existing.deletedAt) return;
   if (existing.name === normalizedName) return;
-  const next: Whiteboard = {
+  const next = bumpVersion<Whiteboard>({
     ...existing,
     name: normalizedName,
-    updatedAt: new Date().toISOString(),
-    version: existing.version + 1,
-  };
+  });
   await db.whiteboards.put(next);
   await enqueueOp({ table: 'whiteboards', recordId: id, op: 'put', payload: next });
 }
@@ -59,12 +55,10 @@ export async function softDeleteWhiteboard(id: string): Promise<void> {
   const existing = await db.whiteboards.get(id);
   if (!existing || existing.deletedAt) return;
   const now = new Date().toISOString();
-  const tomb: Whiteboard = {
+  const tomb = bumpVersion<Whiteboard>({
     ...existing,
     deletedAt: now,
-    updatedAt: now,
-    version: existing.version + 1,
-  };
+  });
   await db.whiteboards.put(tomb);
   await enqueueOp({ table: 'whiteboards', recordId: id, op: 'delete', payload: tomb });
 }
