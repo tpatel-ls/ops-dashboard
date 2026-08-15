@@ -1,9 +1,9 @@
 import { timingSafeEqual } from 'node:crypto';
 
 export function healthRequestAuthorized(req: Request): boolean {
-  const expectedSecrets = [process.env.CRON_SECRET, process.env.OPS_API_SECRET].filter(
-    (secret): secret is string => Boolean(secret),
-  );
+  const expectedSecrets = [process.env.CRON_SECRET, process.env.OPS_API_SECRET]
+    .map((secret) => secret?.trim())
+    .filter((secret): secret is string => Boolean(secret));
   if (expectedSecrets.length === 0) return true;
 
   const match = /^Bearer ([^\s]+)$/i.exec(req.headers.get('authorization') ?? '');
