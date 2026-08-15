@@ -199,4 +199,25 @@ describe('briefing helpers', () => {
       staleDomains: 1,
     });
   });
+
+  it('ignores malformed scheduled calendar days', () => {
+    const tasks = ['2026-07-02', '2026-02-30', '2026-07-02 ignore this'].map(
+      (scheduledFor, index) =>
+        ({
+          ...meta(`scheduled-${index}`),
+          title: `Scheduled ${index}`,
+          status: 'todo',
+          priority: 0,
+          tags: [],
+          order: index,
+          reminders: [],
+          checklist: [],
+          scheduledFor,
+        }) satisfies Task,
+    );
+
+    expect(
+      summarizeBriefing({ tasks, today: '2026-07-03', routingIssues: 0, staleDomains: 0 }),
+    ).toMatchObject({ todayTotal: 0, overdue: 1 });
+  });
 });

@@ -151,19 +151,19 @@ export function summarizeBriefing(input: {
 }): BriefingSummary {
   const today = input.today ?? todayIso();
   const live = input.tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
-  const todays = live.filter(
-    (task) =>
-      task.scheduledFor === today ||
-      Boolean(localDay(task.dueAt) && localDay(task.dueAt)! <= today) ||
-      localDay(task.startAt) === today,
-  );
+  const todays = live.filter((task) => {
+    const scheduled = localDay(task.scheduledFor);
+    const due = localDay(task.dueAt);
+    return scheduled === today || Boolean(due && due <= today) || localDay(task.startAt) === today;
+  });
   const doneToday = todays.filter((task) => task.status === 'done').length;
-  const overdue = live.filter(
-    (task) =>
-      task.status !== 'done' &&
-      ((localDay(task.dueAt) && localDay(task.dueAt)! < today) ||
-        (task.scheduledFor && task.scheduledFor < today)),
-  ).length;
+  const overdue = live.filter((task) => {
+    const due = localDay(task.dueAt);
+    const scheduled = localDay(task.scheduledFor);
+    return (
+      task.status !== 'done' && Boolean((due && due < today) || (scheduled && scheduled < today))
+    );
+  }).length;
 
   return {
     todayTotal: todays.length,
