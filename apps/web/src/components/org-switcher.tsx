@@ -7,7 +7,7 @@ import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext, Organization } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { taskLane } from '@/lib/org-lanes';
-import { useOrgStore } from '@/lib/org-store';
+import { resolveOrgContext, useOrgStore } from '@/lib/org-store';
 
 const emptySubscribe = () => () => {};
 
@@ -59,6 +59,15 @@ export function OrgSwitcher() {
     }
     return counts;
   }, []);
+
+  useEffect(() => {
+    if (!orgs) return;
+    const resolved = resolveOrgContext(
+      ctx,
+      orgs.map((organization) => organization.id),
+    );
+    if (resolved !== ctx) setCtx(resolved);
+  }, [ctx, orgs, setCtx]);
 
   useEffect(() => {
     if (!open) return;
