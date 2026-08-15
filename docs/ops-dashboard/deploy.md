@@ -2,7 +2,7 @@
 
 Everything here is the **account/key** work that can't be done from code alone.
 The app, auth, realtime sync, capture webhook, PWA, and cron are already built and
-build-green on `feat/ops-dashboard`. Follow these in order.
+validated on `main`. Follow these in order.
 
 ---
 
@@ -21,13 +21,13 @@ build-green on `feat/ops-dashboard`. Follow these in order.
 # from repo root
 npx supabase login                       # interactive (you run this: `! npx supabase login`)
 npx supabase link --project-ref <ref>    # <ref> is in your project URL
-npx supabase db push                     # applies migrations 0001 → 0004
+npx supabase db push                     # applies migrations 0001 through 0008
 npx supabase gen types typescript --linked > apps/web/src/lib/database.types.ts
 ```
 
-`db push` applies: base tables (0001), Ops entities (0002), Library (0003), and
-**0004_sync** - which adds the version-guard trigger and puts all 16 tables in the
-`supabase_realtime` publication. Realtime works immediately after.
+`db push` applies the base, operations, library, sync, organizations, food log,
+deterministic conflict, and integer-range migrations. The resulting 18 synchronized
+tables are added to the `supabase_realtime` publication.
 
 ## 3. Create your single user (no public signup)
 
@@ -39,18 +39,16 @@ npx supabase gen types typescript --linked > apps/web/src/lib/database.types.ts
 
 ## 4. Local `.env.local` (test before deploying)
 
-Copy `apps/web/.env.local.example` → `apps/web/.env.local` and fill:
+Copy the checked-in template and fill only the features you use:
 
+```sh
+cp apps/web/.env.local.example apps/web/.env.local
 ```
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-SUPABASE_SECRET_KEY=sb_secret_...
-ANTHROPIC_API_KEY=...            # optional but enables smart triage/journal/chat
-OPS_API_SECRET=<random string>   # for the watch webhook + cron
-OPS_USER_ID=<your user uuid>     # optional
-GROQ_API_KEY=...                 # optional, better voice
-PUSHOVER_TOKEN=... PUSHOVER_USER=...   # optional, phone→watch push
-```
+
+The template documents Supabase, Anthropic, watch and cron authentication,
+OpenAI-compatible transcription, model overrides, and Pushover settings. Keep
+`NEXT_PUBLIC_TRANSCRIBE_ENABLED=0` unless the matching server transcription
+variables are configured.
 
 Then `pnpm dev`, open http://localhost:3000 → redirected to `/login` → sign in →
 Settings → enable **Sync** → status should read **Live**.
@@ -73,6 +71,7 @@ vercel --prod                    # or via the dashboard
 ## 6. Point Supabase Auth at the Vercel domain
 
 **Authentication → URL Configuration**:
+
 - **Site URL:** `https://<your-app>.vercel.app`
 - **Redirect URLs:** add `https://<your-app>.vercel.app/**`
 
@@ -87,11 +86,12 @@ vercel --prod                    # or via the dashboard
 
 ## Keys I need from you to finish the live wiring
 
-| Key | For | Required? |
-|-----|-----|-----------|
-| `NEXT_PUBLIC_SUPABASE_URL` / `…PUBLISHABLE_KEY` / `SUPABASE_SECRET_KEY` | sync + auth + webhook | **yes** |
-| `vercel login` + `npx supabase login` | apply schema + deploy | **yes** |
-| `ANTHROPIC_API_KEY` | smart triage / journal OCR / chat | recommended |
-| `OPS_API_SECRET` (+ `CRON_SECRET`) | watch webhook + cron auth | recommended |
-| `OPS_USER_ID` | watch attribution shortcut | optional |
-| `GROQ_API_KEY`, `PUSHOVER_TOKEN`/`USER` | better voice, push to watch | optional |
+| Key                                                                                               | For                               | Required?   |
+| ------------------------------------------------------------------------------------------------- | --------------------------------- | ----------- |
+| `NEXT_PUBLIC_SUPABASE_URL` / `…PUBLISHABLE_KEY` / `SUPABASE_SECRET_KEY`                           | sync + auth + webhook             | **yes**     |
+| `vercel login` + `npx supabase login`                                                             | apply schema + deploy             | **yes**     |
+| `ANTHROPIC_API_KEY`                                                                               | smart triage / journal OCR / chat | recommended |
+| `OPS_API_SECRET` (+ `CRON_SECRET`)                                                                | watch webhook + cron auth         | recommended |
+| `OPS_USER_ID`                                                                                     | watch attribution shortcut        | optional    |
+| `NEXT_PUBLIC_TRANSCRIBE_ENABLED`, `TRANSCRIBE_BASE_URL`, `TRANSCRIBE_API_KEY`, `TRANSCRIBE_MODEL` | voice transcription               | optional    |
+| `PUSHOVER_TOKEN` / `PUSHOVER_USER`                                                                | push to phone and watch           | optional    |
