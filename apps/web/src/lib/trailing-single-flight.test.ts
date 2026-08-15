@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { trailingSingleFlight } from './trailing-single-flight';
+import { latestSingleFlight, trailingSingleFlight } from './trailing-single-flight';
 
 describe('trailingSingleFlight', () => {
   it('coalesces overlaps into one trailing pass', async () => {
@@ -23,5 +23,31 @@ describe('trailingSingleFlight', () => {
     release?.();
     await expect(first).resolves.toBeUndefined();
     await expect(overlap).resolves.toBeUndefined();
+  });
+});
+
+describe('latestSingleFlight', () => {
+  it('serializes work and keeps only the newest overlapping value', async () => {
+    const releases: Array<() => void> = [];
+    const action = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releases.push(resolve);
+        }),
+    );
+    const run = latestSingleFlight(action);
+
+    const first = run('first');
+    run('second');
+    run('latest');
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(action).toHaveBeenLastCalledWith('first');
+
+    releases.shift()?.();
+    await vi.waitFor(() => expect(action).toHaveBeenCalledTimes(2));
+    expect(action).toHaveBeenLastCalledWith('latest');
+
+    releases.shift()?.();
+    await expect(first).resolves.toBeUndefined();
   });
 });
