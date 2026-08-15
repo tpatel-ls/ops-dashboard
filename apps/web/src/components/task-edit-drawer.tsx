@@ -2,12 +2,29 @@
 
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Bell, CalendarClock, Check, Hash, Link2, Plus, RefreshCw, Star, Trash2, X } from 'lucide-react';
+import {
+  Bell,
+  CalendarClock,
+  Check,
+  Hash,
+  Link2,
+  Plus,
+  RefreshCw,
+  Star,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { addDays, format } from 'date-fns';
 import { getDb, newId, todayIso } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { setChecklist, setTaskStatus, softDeleteTask, updateTask } from '@/lib/tasks';
+import {
+  availableTask,
+  setChecklist,
+  setTaskStatus,
+  softDeleteTask,
+  updateTask,
+} from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { cn } from '@ops-dashboard/ui';
 
@@ -23,7 +40,10 @@ const RECURRENCE_OPTIONS = [
 export function TaskEditDrawer() {
   const id = useAppStore((s) => s.editTaskId);
   const close = useAppStore((s) => s.closeEdit);
-  const task = useLiveQuery(async () => (id ? getDb().tasks.get(id) : undefined), [id]);
+  const task = useLiveQuery(
+    async () => (id ? availableTask(await getDb().tasks.get(id)) : null),
+    [id],
+  );
 
   if (!id) return null;
 
@@ -38,30 +58,37 @@ export function TaskEditDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Edit task"
-        className="surface scrollbar-thin pointer-events-auto relative h-full w-full max-w-md overflow-y-auto rounded-none border-y-0 border-r-0 lg:border-l lg:shadow-2xl"
+        className="surface pointer-events-auto relative h-full w-full max-w-md scrollbar-thin overflow-y-auto rounded-none border-y-0 border-r-0 lg:border-l lg:shadow-2xl"
       >
-        <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-2 border-b border-hairline bg-card/95 px-4 backdrop-blur sm:px-5">
-          <div className="text-xs font-semibold uppercase text-subtle-foreground">
-            Edit task
-          </div>
+        <header className="border-hairline bg-card/95 sticky top-0 z-10 flex min-h-14 items-center justify-between gap-2 border-b px-4 backdrop-blur sm:px-5">
+          <div className="text-subtle-foreground text-xs font-semibold uppercase">Edit task</div>
           <div className="flex items-center gap-1">
             {task && task.status !== 'done' ? (
               <button
                 type="button"
                 onClick={() => setTaskStatus(task.id, 'done')}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-success hover:bg-success/10 sm:min-h-9"
+                className="text-success hover:bg-success/10 inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium sm:min-h-9"
               >
                 <Check className="size-3.5" aria-hidden />
                 Complete
               </button>
             ) : null}
-            <button type="button" onClick={close} className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground sm:size-9" aria-label="Close">
+            <button
+              type="button"
+              onClick={close}
+              className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-11 items-center justify-center rounded-md sm:size-9"
+              aria-label="Close"
+            >
               <X className="size-4" />
             </button>
           </div>
         </header>
-        {task ? <DrawerBody key={task.id} task={task} onClose={close} /> : (
-          <div className="p-6 text-sm text-muted-foreground">Loading...</div>
+        {task === undefined ? (
+          <div className="text-muted-foreground p-6 text-sm">Loading...</div>
+        ) : task ? (
+          <DrawerBody key={task.id} task={task} onClose={close} />
+        ) : (
+          <div className="text-muted-foreground p-6 text-sm">Task not found.</div>
         )}
       </div>
     </div>
@@ -70,13 +97,19 @@ export function TaskEditDrawer() {
 
 function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const projects = useLiveQuery(async () =>
-    getDb().projects.filter((p) => !p.deletedAt && !p.archivedAt).toArray()
+    getDb()
+      .projects.filter((p) => !p.deletedAt && !p.archivedAt)
+      .toArray(),
   );
   const domains = useLiveQuery(async () =>
-    getDb().domains.filter((d) => !d.deletedAt && !d.archivedAt).toArray()
+    getDb()
+      .domains.filter((d) => !d.deletedAt && !d.archivedAt)
+      .toArray(),
   );
   const contentItems = useLiveQuery(async () =>
-    getDb().content.filter((c) => !c.deletedAt).toArray()
+    getDb()
+      .content.filter((c) => !c.deletedAt)
+      .toArray(),
   );
 
   const [draftTitle, setDraftTitle] = useState(task.title);
@@ -89,7 +122,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
   return (
     <>
-      {(
+      {
         <div className="space-y-5 p-4 sm:space-y-6 sm:p-5">
           {/* Title + notes */}
           <div>
@@ -97,7 +130,9 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <input
                 value={draftTitle}
                 onChange={(e) => setDraftTitle(e.target.value)}
-                onBlur={() => draftTitle !== task.title && updateTask(task.id, { title: draftTitle })}
+                onBlur={() =>
+                  draftTitle !== task.title && updateTask(task.id, { title: draftTitle })
+                }
                 className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
                 placeholder="Untitled"
               />
@@ -113,17 +148,16 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     : 'text-subtle-foreground hover:text-foreground',
                 )}
               >
-                <Star
-                  className="size-4"
-                  fill={task.starred ? 'currentColor' : 'none'}
-                />
+                <Star className="size-4" fill={task.starred ? 'currentColor' : 'none'} />
               </button>
             </div>
             <textarea
               value={draftNotes}
               onChange={(e) => setDraftNotes(e.target.value)}
-              onBlur={() => draftNotes !== (task.notes ?? '') && updateTask(task.id, { notes: draftNotes })}
-              className="mt-2 w-full resize-none bg-transparent text-sm text-muted-foreground outline-none"
+              onBlur={() =>
+                draftNotes !== (task.notes ?? '') && updateTask(task.id, { notes: draftNotes })
+              }
+              className="text-muted-foreground mt-2 w-full resize-none bg-transparent text-sm outline-none"
               rows={3}
               placeholder="Notes (markdown)"
             />
@@ -170,7 +204,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           </Section>
 
           <Section title="Schedule" icon={<CalendarClock className="size-3.5" />}>
-            <div className="mb-2 flex flex-wrap gap-1.5" role="group" aria-label="Quick schedule task">
+            <div
+              className="mb-2 flex flex-wrap gap-1.5"
+              role="group"
+              aria-label="Quick schedule task"
+            >
               {[
                 { label: 'Today', value: format(new Date(), 'yyyy-MM-dd') },
                 { label: 'Tomorrow', value: format(addDays(new Date(), 1), 'yyyy-MM-dd') },
@@ -279,9 +317,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           <Section title="Domain">
             <select
               value={task.domainId ?? ''}
-              onChange={(e) =>
-                updateTask(task.id, { domainId: e.target.value || undefined })
-              }
+              onChange={(e) => updateTask(task.id, { domainId: e.target.value || undefined })}
               className="input w-full"
             >
               <option value="">No domain</option>
@@ -323,9 +359,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           <Section title="Content" icon={<Link2 className="size-3.5" />}>
             <select
               value={task.contentId ?? ''}
-              onChange={(e) =>
-                updateTask(task.id, { contentId: e.target.value || undefined })
-              }
+              onChange={(e) => updateTask(task.id, { contentId: e.target.value || undefined })}
               className="input w-full"
             >
               <option value="">No content link</option>
@@ -343,14 +377,15 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <button
                   key={t}
                   type="button"
-                  onClick={() =>
-                    updateTask(task.id, { tags: task.tags.filter((x) => x !== t) })
-                  }
+                  onClick={() => updateTask(task.id, { tags: task.tags.filter((x) => x !== t) })}
                   aria-label={`Remove tag ${t}`}
-                  className="group inline-flex min-h-8 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-accent-foreground hover:bg-destructive/10 hover:text-destructive"
+                  className="group bg-accent text-accent-foreground hover:bg-destructive/10 hover:text-destructive inline-flex min-h-8 items-center gap-1 rounded-full px-2 py-0.5 text-[11px]"
                 >
                   #{t}
-                  <X className="size-2.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100" aria-hidden />
+                  <X
+                    className="size-2.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    aria-hidden
+                  />
                 </button>
               ))}
               <input
@@ -368,7 +403,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 }}
                 placeholder="add tag"
                 aria-label="Add tag"
-                className="min-h-9 min-w-24 bg-transparent text-xs outline-none placeholder:text-subtle-foreground"
+                className="placeholder:text-subtle-foreground min-h-9 min-w-24 bg-transparent text-xs outline-none"
               />
             </div>
           </Section>
@@ -378,9 +413,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               {task.reminders.map((r) => (
                 <div
                   key={r.id}
-                  className="flex items-center justify-between rounded-md border border-hairline bg-input px-2.5 py-1.5 text-xs"
+                  className="border-hairline bg-input flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs"
                 >
-                  <span className="font-mono">{format(new Date(r.triggerAt), 'EEE d MMM HH:mm')}</span>
+                  <span className="font-mono">
+                    {format(new Date(r.triggerAt), 'EEE d MMM HH:mm')}
+                  </span>
                   <button
                     type="button"
                     onClick={async () => {
@@ -456,13 +493,13 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               softDeleteTask(task.id);
               onClose();
             }}
-            className="inline-flex items-center gap-2 text-xs text-destructive hover:underline"
+            className="text-destructive inline-flex items-center gap-2 text-xs hover:underline"
           >
             <Trash2 className="size-3.5" />
             Delete task
           </button>
         </div>
-      )}
+      }
     </>
   );
 }
@@ -478,7 +515,7 @@ function Section({
 }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+      <div className="text-subtle-foreground mb-1.5 flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase">
         {icon}
         {title}
       </div>
@@ -489,7 +526,7 @@ function Section({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-[10px] text-subtle-foreground">
+    <label className="text-subtle-foreground flex flex-col gap-1 text-[10px]">
       {label}
       {children}
     </label>
@@ -502,9 +539,7 @@ function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
       <button
         type="button"
         onClick={() => {
-          const next = task.checklist.map((c) =>
-            c.id === item.id ? { ...c, done: !c.done } : c,
-          );
+          const next = task.checklist.map((c) => (c.id === item.id ? { ...c, done: !c.done } : c));
           setChecklist(task.id, next);
         }}
         className={cn(
@@ -515,12 +550,7 @@ function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
       >
         {item.done ? <Check className="size-3.5" aria-hidden /> : null}
       </button>
-      <span
-        className={cn(
-          'flex-1 text-sm',
-          item.done && 'text-muted-foreground line-through',
-        )}
-      >
+      <span className={cn('flex-1 text-sm', item.done && 'text-muted-foreground line-through')}>
         {item.text}
       </span>
       <button
@@ -529,7 +559,7 @@ function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
           const next = task.checklist.filter((c) => c.id !== item.id);
           setChecklist(task.id, next);
         }}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive"
+        className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive inline-flex size-9 shrink-0 items-center justify-center rounded-md"
         aria-label={`Remove ${item.text}`}
       >
         <X className="size-3" />
