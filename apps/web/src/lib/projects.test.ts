@@ -197,6 +197,21 @@ describe('renameProject', () => {
     expect(mocks.put).toHaveBeenCalledWith(expect.objectContaining({ name: 'New name' }));
   });
 
+  it('repairs a malformed version while renaming', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'project-test',
+      name: 'Old name',
+      version: Number.POSITIVE_INFINITY,
+      updatedAt: 'not-a-date',
+    });
+
+    await renameProject('project-test', 'New name');
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'New name', version: 1 }),
+    );
+  });
+
   it('rejects blank project names before writing', async () => {
     await expect(renameProject('project-test', '   ')).rejects.toThrow('Project name is required');
     expect(mocks.get).not.toHaveBeenCalled();
