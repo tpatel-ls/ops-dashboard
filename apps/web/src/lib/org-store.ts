@@ -9,6 +9,11 @@ interface OrgStore {
   setCtx: (ctx: OrgContext) => void;
 }
 
+export function resolveOrgContext(ctx: OrgContext, activeOrgIds: readonly string[]): OrgContext {
+  if (ctx === 'all' || ctx === 'personal') return ctx;
+  return activeOrgIds.includes(ctx) ? ctx : 'all';
+}
+
 /**
  * The active org lens over the work views (Dashboard, Projects, Tasks,
  * Kanban, Calendar). Per-device by design: persisted in localStorage, never
