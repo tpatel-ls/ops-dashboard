@@ -33,6 +33,8 @@ export function validateJournalImage(
   mediaType: string,
   maxBytes = MAX_JOURNAL_IMAGE_BYTES,
 ): JournalImageValidation {
+  const byteLimit =
+    Number.isSafeInteger(maxBytes) && maxBytes >= 0 ? maxBytes : MAX_JOURNAL_IMAGE_BYTES;
   const data = imageBase64.trim();
   if (!data || data.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(data)) {
     return { ok: false, reason: 'invalid-image' };
@@ -43,7 +45,7 @@ export function validateJournalImage(
 
   const padding = data.endsWith('==') ? 2 : data.endsWith('=') ? 1 : 0;
   const decodedBytes = (data.length / 4) * 3 - padding;
-  if (decodedBytes > maxBytes) return { ok: false, reason: 'image-too-large' };
+  if (decodedBytes > byteLimit) return { ok: false, reason: 'image-too-large' };
   if (!matchesImageSignature(data, mediaType as JournalImageMediaType)) {
     return { ok: false, reason: 'invalid-image' };
   }
