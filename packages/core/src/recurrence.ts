@@ -34,7 +34,7 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
     if (firstAllowed === undefined) return addWeeks(from, interval);
     return addDays(from, interval * 7 - from.getDay() + firstAllowed);
   }
-  return from;
+  return new Date(Number.NaN);
 }
 
 export function shouldGenerateNext(rule: RecurrenceRule, count: number, next: Date): boolean {
