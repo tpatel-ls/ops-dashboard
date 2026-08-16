@@ -1,6 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
 import { newId, parseQuickAdd, quickAddToTask } from '@ops-dashboard/core';
 import type {
   Capture,
@@ -10,7 +9,7 @@ import type {
   AppNotification,
 } from '@ops-dashboard/core';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
-import { requestAllowed } from '@/lib/server/guard';
+import { bearerSecretMatches, requestAllowed } from '@/lib/server/guard';
 import { normalizeTimezoneOffset } from '@/lib/server/timezone';
 import { boundedText } from '@/lib/server/input';
 import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
@@ -43,12 +42,7 @@ Extract:
 - reminderText: if the user asks for a reminder/alert, the offset (e.g. "5 minutes before").`;
 
 function bearerMatches(req: Request): boolean {
-  const secret = process.env.OPS_API_SECRET;
-  if (!secret) return false;
-  const provided = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  const a = Buffer.from(provided);
-  const b = Buffer.from(secret);
-  return a.length === b.length && timingSafeEqual(a, b);
+  return bearerSecretMatches(req.headers.get('authorization'), process.env.OPS_API_SECRET);
 }
 
 /** Resolve the persistence target: admin client (watch bearer) or session client (in-app). */

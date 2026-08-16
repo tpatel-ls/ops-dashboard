@@ -1,6 +1,19 @@
 import { timingSafeEqual } from 'node:crypto';
 import { createClient } from '@/utils/supabase/server';
 
+export function bearerSecretMatches(
+  authorization: string | null,
+  configuredSecret: string | undefined,
+): boolean {
+  const secret = configuredSecret?.trim();
+  if (!secret) return false;
+  const match = /^Bearer ([^\s]+)$/i.exec(authorization ?? '');
+  const provided = match?.[1] ?? '';
+  const a = Buffer.from(provided);
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 /**
  * Lightweight authorization for the API routes of this single-user, local-first
  * app. Layered:
@@ -15,13 +28,7 @@ import { createClient } from '@/utils/supabase/server';
  */
 export async function requestAllowed(req: Request): Promise<boolean> {
   const secret = process.env.OPS_API_SECRET?.trim();
-  if (secret) {
-    const match = /^Bearer ([^\s]+)$/i.exec(req.headers.get('authorization') ?? '');
-    const provided = match?.[1] ?? '';
-    const a = Buffer.from(provided);
-    const b = Buffer.from(secret);
-    if (a.length === b.length && timingSafeEqual(a, b)) return true;
-  }
+  if (bearerSecretMatches(req.headers.get('authorization'), secret)) return true;
   const site = req.headers.get('sec-fetch-site');
   const browserRequest = site === 'same-origin' || site === 'none';
   const localDevelopmentRequest = !secret && process.env.NODE_ENV !== 'production';

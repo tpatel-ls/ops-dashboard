@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({ createClient: vi.fn() }));
 
 vi.mock('@/utils/supabase/server', () => ({ createClient: mocks.createClient }));
 
-import { requestAllowed } from './guard';
+import { bearerSecretMatches, requestAllowed } from './guard';
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -53,5 +53,13 @@ describe('requestAllowed', () => {
     });
 
     await expect(requestAllowed(browserRequest)).resolves.toBe(true);
+  });
+});
+
+describe('bearerSecretMatches', () => {
+  it('normalizes configured secrets for downstream authorization decisions', () => {
+    expect(bearerSecretMatches('Bearer ops-secret', '  ops-secret  ')).toBe(true);
+    expect(bearerSecretMatches('ops-secret', 'ops-secret')).toBe(false);
+    expect(bearerSecretMatches('Bearer anything', '   ')).toBe(false);
   });
 });
