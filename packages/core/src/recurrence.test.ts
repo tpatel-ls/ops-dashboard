@@ -52,6 +52,12 @@ describe('nextOccurrence', () => {
 
     expect(nextOccurrence(rule, anchor).getDay()).toBe(3);
   });
+
+  it('rejects unsupported frequencies from malformed synced data', () => {
+    const rule = { freq: 'hourly', interval: 1 } as unknown as RecurrenceRule;
+
+    expect(nextOccurrence(rule, new Date('2026-04-26')).getTime()).toBeNaN();
+  });
 });
 
 describe('projectNextTask', () => {
@@ -176,6 +182,27 @@ describe('projectNextTask', () => {
       version: 1,
       deviceId: 'test',
     } satisfies Task;
+
+    expect(projectNextTask(task)).toBeNull();
+  });
+
+  it('does not duplicate a task with an unsupported recurrence frequency', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Broken frequency',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'hourly', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } as unknown as Task;
 
     expect(projectNextTask(task)).toBeNull();
   });
