@@ -3,11 +3,19 @@ import {
   MAX_TRANSCRIPTION_BYTES,
   MAX_TRANSCRIPTION_TEXT_LENGTH,
   TRANSCRIPTION_REQUEST_TIMEOUT_MS,
+  transcriptionEndpoint,
   transcriptionFileError,
   transcriptionText,
 } from './transcription';
 
 describe('transcription boundaries', () => {
+  it('normalizes the configured upstream endpoint', () => {
+    expect(transcriptionEndpoint(' https://speech.example.test/// ')).toBe(
+      'https://speech.example.test/audio/transcriptions',
+    );
+    expect(transcriptionEndpoint('   ')).toBeUndefined();
+  });
+
   it('keeps the upstream request deadline below the platform limit', () => {
     expect(TRANSCRIPTION_REQUEST_TIMEOUT_MS).toBe(60_000);
   });
