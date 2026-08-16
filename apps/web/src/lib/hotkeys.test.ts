@@ -24,14 +24,15 @@ describe('matchesHotkey', () => {
   it('supports the platform-neutral mod modifier', () => {
     expect(matchesHotkey('mod+k', keyboardEvent('k', { metaKey: true }))).toBe(true);
     expect(matchesHotkey('mod+k', keyboardEvent('k', { ctrlKey: true }))).toBe(true);
+    expect(matchesHotkey('mod+k', keyboardEvent('k', { metaKey: true, ctrlKey: true }))).toBe(
+      false,
+    );
   });
 
   it('rejects unspecified shift and alt modifiers', () => {
     expect(matchesHotkey('mod+k', keyboardEvent('k', { metaKey: true, shiftKey: true }))).toBe(
       false,
     );
-    expect(matchesHotkey('mod+k', keyboardEvent('k', { ctrlKey: true, altKey: true }))).toBe(
-      false,
-    );
+    expect(matchesHotkey('mod+k', keyboardEvent('k', { ctrlKey: true, altKey: true }))).toBe(false);
   });
 });

@@ -31,6 +31,7 @@ export function matchesHotkey(combo: string, e: KeyboardEvent): boolean {
   const wantShift = parts.includes('shift');
   const wantAlt = parts.includes('alt');
   if (wantMod && !(e.metaKey || e.ctrlKey)) return false;
+  if (wantMod && !wantMeta && !wantCtrl && e.metaKey && e.ctrlKey) return false;
   if (wantMeta !== e.metaKey && !wantMod) return false;
   if (wantCtrl !== e.ctrlKey && !wantMod) return false;
   if (wantShift !== e.shiftKey) return false;
