@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requestAllowed } from '@/lib/server/guard';
 import {
   TRANSCRIPTION_REQUEST_TIMEOUT_MS,
+  transcriptionEndpoint,
   transcriptionFileError,
   transcriptionText,
 } from '@/lib/server/transcription';
@@ -19,10 +20,10 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
   }
 
-  const base = process.env.TRANSCRIBE_BASE_URL;
-  const key = process.env.TRANSCRIBE_API_KEY;
-  const model = process.env.TRANSCRIBE_MODEL || 'whisper-1';
-  if (!base) return NextResponse.json({ ok: false, reason: 'not-configured' });
+  const endpoint = transcriptionEndpoint(process.env.TRANSCRIBE_BASE_URL);
+  const key = process.env.TRANSCRIBE_API_KEY?.trim();
+  const model = process.env.TRANSCRIBE_MODEL?.trim() || 'whisper-1';
+  if (!endpoint) return NextResponse.json({ ok: false, reason: 'not-configured' });
 
   let file: Blob | null = null;
   try {
@@ -48,7 +49,7 @@ export async function POST(req: Request): Promise<Response> {
   upstream.append('response_format', 'json');
 
   try {
-    const res = await fetch(`${base.replace(/\/$/, '')}/audio/transcriptions`, {
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: key ? { Authorization: `Bearer ${key}` } : undefined,
       body: upstream,
