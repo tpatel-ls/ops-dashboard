@@ -77,11 +77,11 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       dexie:
-        specifier: ^4.4.4
-        version: 4.4.4
+        specifier: ^4.4.5
+        version: 4.4.5
       dexie-react-hooks:
         specifier: ^1.1.7
-        version: 1.1.7(@types/react@19.2.18)(dexie@4.4.4)(react@19.2.8)
+        version: 1.1.7(@types/react@19.2.18)(dexie@4.4.5)(react@19.2.8)
       framer-motion:
         specifier: ^11.15.0
         version: 11.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -186,8 +186,8 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       dexie:
-        specifier: ^4.4.4
-        version: 4.4.4
+        specifier: ^4.4.5
+        version: 4.4.5
       ulid:
         specifier: ^2.3.0
         version: 2.4.0
@@ -2558,8 +2558,8 @@ packages:
       dexie: ^3.2 || ^4.0.1-alpha
       react: '>=16'
 
-  dexie@4.4.4:
-    resolution: {integrity: sha512-jIwsYI8Os2hgnqc6O49YwFDKGc5v5QjGx0wPVp543ip1F53VFAKMLthV2pQosQcVTv3eAskTWYspOx195PM0FQ==}
+  dexie@4.4.5:
+    resolution: {integrity: sha512-wWCHdihT3dmlUSuNhn5mMZDWSpG0suxjAni7YjjiZdzabZcKmy3uNZGZ7AeYYXBoLbpSXX35fikPLkPC44Osiw==}
 
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
@@ -6689,13 +6689,13 @@ snapshots:
 
   detect-node-es@1.1.0: {}
 
-  dexie-react-hooks@1.1.7(@types/react@19.2.18)(dexie@4.4.4)(react@19.2.8):
+  dexie-react-hooks@1.1.7(@types/react@19.2.18)(dexie@4.4.5)(react@19.2.8):
     dependencies:
       '@types/react': 19.2.18
-      dexie: 4.4.4
+      dexie: 4.4.5
       react: 19.2.8
 
-  dexie@4.4.4: {}
+  dexie@4.4.5: {}
 
   doctrine@2.1.0:
     dependencies:

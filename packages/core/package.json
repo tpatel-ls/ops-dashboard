@@ -22,7 +22,7 @@
     "@supabase/supabase-js": "^2.112.3",
     "chrono-node": "^2.10.1",
     "date-fns": "^4.4.0",
-    "dexie": "^4.4.4",
+    "dexie": "^4.4.5",
     "ulid": "^2.3.0"
   },
   "devDependencies": {
