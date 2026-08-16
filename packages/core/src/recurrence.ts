@@ -55,16 +55,25 @@ function validIso(value: Date): string | undefined {
   return isValid(value) ? value.toISOString() : undefined;
 }
 
+function recurrenceAnchor(task: Task, fallback: Date): Date | undefined {
+  if (task.scheduledFor && localDay(task.scheduledFor) === task.scheduledFor) {
+    return parseISO(`${task.scheduledFor}T00:00:00`);
+  }
+  if (task.startAt) {
+    const start = parseISO(task.startAt);
+    if (isValid(start)) return start;
+  }
+  if (task.dueAt) {
+    const due = parseISO(task.dueAt);
+    if (isValid(due)) return due;
+  }
+  return task.scheduledFor || task.startAt || task.dueAt ? undefined : fallback;
+}
+
 export function projectNextTask(task: Task, now: Date = new Date()): Task | null {
   if (!task.recurrence) return null;
-  const anchor = task.scheduledFor
-    ? parseISO(`${task.scheduledFor}T00:00:00`)
-    : task.startAt
-      ? parseISO(task.startAt)
-      : task.dueAt
-        ? parseISO(task.dueAt)
-        : now;
-  if (!isValid(anchor) || !isValid(now)) return null;
+  const anchor = recurrenceAnchor(task, now);
+  if (!anchor || !isValid(now)) return null;
   const next = nextOccurrence(task.recurrence, anchor);
   if (!isValid(next)) return null;
   if (!shouldGenerateNext(task.recurrence, 1, next)) return null;
