@@ -9,6 +9,15 @@ type ShareNavigator = Navigator & {
   canShare?: (payload: ShareData) => boolean;
 };
 
+function isAbortError(error: unknown): boolean {
+  return Boolean(
+    error &&
+    typeof error === 'object' &&
+    'name' in error &&
+    (error as { name?: unknown }).name === 'AbortError',
+  );
+}
+
 export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'copied' | 'failed'> {
   if (typeof navigator === 'undefined') return 'failed';
 
@@ -27,7 +36,7 @@ export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'co
   } catch (error) {
     // A cancelled share is intentional. Other native-share failures can still
     // use the clipboard fallback.
-    if (error instanceof DOMException && error.name === 'AbortError') return 'failed';
+    if (isAbortError(error)) return 'failed';
   }
 
   try {
