@@ -7,6 +7,32 @@ afterEach(() => {
 });
 
 describe('sendPushover', () => {
+  it('treats whitespace-only provider credentials as unconfigured', async () => {
+    vi.stubEnv('PUSHOVER_TOKEN', '   ');
+    vi.stubEnv('PUSHOVER_USER', ' user ');
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(sendPushover({ message: 'Alert' })).resolves.toEqual({
+      ok: false,
+      reason: 'not-configured',
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('normalizes provider credentials before sending', async () => {
+    vi.stubEnv('PUSHOVER_TOKEN', ' token ');
+    vi.stubEnv('PUSHOVER_USER', ' user ');
+    const fetch = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetch);
+
+    await sendPushover({ message: 'Alert' });
+
+    const body = fetch.mock.calls[0]?.[1]?.body as URLSearchParams;
+    expect(body.get('token')).toBe('token');
+    expect(body.get('user')).toBe('user');
+  });
+
   it('rejects a blank message before contacting Pushover', async () => {
     vi.stubEnv('PUSHOVER_TOKEN', 'token');
     vi.stubEnv('PUSHOVER_USER', 'user');
