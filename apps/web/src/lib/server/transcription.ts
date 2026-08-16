@@ -14,6 +14,11 @@ const AUDIO_TYPES = new Set([
   'audio/x-wav',
 ]);
 
+export function transcriptionEndpoint(baseURL: string | undefined): string | undefined {
+  const base = baseURL?.trim().replace(/\/+$/, '');
+  return base ? `${base}/audio/transcriptions` : undefined;
+}
+
 export function transcriptionFileError(
   size: number,
   mediaType?: string,
