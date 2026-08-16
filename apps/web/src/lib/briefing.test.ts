@@ -104,6 +104,25 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('uses the default stale window for malformed thresholds', () => {
+    const domain = {
+      ...meta('body', '2026-07-02T12:00:00.000Z'),
+      name: 'Body',
+      color: '#111',
+      order: 1,
+    } satisfies Domain;
+
+    expect(
+      findStaleDomains({
+        domains: [domain],
+        projects: [],
+        tasks: [],
+        now,
+        staleAfterDays: -1,
+      }),
+    ).toEqual([]);
+  });
+
   it('flags captures that are pending or routed to unattached tasks', () => {
     const captures = [
       {
