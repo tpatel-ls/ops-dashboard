@@ -25,4 +25,16 @@ describe('shareOrCopy', () => {
     await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('failed');
     expect(writeText).not.toHaveBeenCalled();
   });
+
+  it('recognizes cancellation errors from non-DOM browser implementations', async () => {
+    const writeText = vi.fn();
+    const cancellation = Object.assign(new Error('cancelled'), { name: 'AbortError' });
+    vi.stubGlobal('navigator', {
+      share: vi.fn().mockRejectedValue(cancellation),
+      clipboard: { writeText },
+    });
+
+    await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('failed');
+    expect(writeText).not.toHaveBeenCalled();
+  });
 });
