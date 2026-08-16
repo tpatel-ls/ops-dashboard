@@ -53,6 +53,20 @@ describe('createSyncCursorCache', () => {
       projects: '2026-07-16T00:00:00.000Z',
     });
   });
+
+  it('does not regress or persist malformed cursor progress', () => {
+    const cache = createSyncCursorCache();
+    cache.store({ tasks: '2026-07-15T12:00:00.000Z' });
+
+    expect(
+      JSON.parse(
+        cache.store({
+          tasks: '2026-07-15T11:00:00.000Z',
+          projects: 'not-a-date',
+        }),
+      ),
+    ).toEqual({ tasks: '2026-07-15T12:00:00.000Z' });
+  });
 });
 
 describe('overlappedCursor', () => {
