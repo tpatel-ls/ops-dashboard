@@ -12,8 +12,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 let _admin: SupabaseClient | null = null;
 
 export function createAdminClient(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secret = process.env.SUPABASE_SECRET_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const secret = process.env.SUPABASE_SECRET_KEY?.trim();
   if (!url || !secret) return null;
   if (_admin) return _admin;
   _admin = createSupabaseClient(url, secret, {
