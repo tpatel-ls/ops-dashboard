@@ -18,7 +18,7 @@ export function transcriptionFileError(
   size: number,
   mediaType?: string,
 ): 'empty-file' | 'too-large' | 'unsupported-type' | undefined {
-  if (size === 0) return 'empty-file';
+  if (!Number.isSafeInteger(size) || size <= 0) return 'empty-file';
   if (size > MAX_TRANSCRIPTION_BYTES) return 'too-large';
   if (mediaType && !AUDIO_TYPES.has(mediaType.split(';', 1)[0]!.trim().toLowerCase())) {
     return 'unsupported-type';

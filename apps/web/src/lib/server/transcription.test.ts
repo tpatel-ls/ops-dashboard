@@ -14,6 +14,9 @@ describe('transcription boundaries', () => {
 
   it('rejects empty and oversized audio', () => {
     expect(transcriptionFileError(0)).toBe('empty-file');
+    expect(transcriptionFileError(-1)).toBe('empty-file');
+    expect(transcriptionFileError(Number.NaN)).toBe('empty-file');
+    expect(transcriptionFileError(1.5)).toBe('empty-file');
     expect(transcriptionFileError(MAX_TRANSCRIPTION_BYTES + 1)).toBe('too-large');
     expect(transcriptionFileError(MAX_TRANSCRIPTION_BYTES)).toBeUndefined();
   });
