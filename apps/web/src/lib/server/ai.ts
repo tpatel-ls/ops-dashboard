@@ -18,11 +18,12 @@ export const AI_REQUEST_TIMEOUT_MS = 45_000;
 export const AI_MAX_RETRIES = 1;
 
 export function anthropicClientOptions(apiKey: string, baseURL?: string) {
+  const normalizedBaseURL = baseURL?.trim();
   return {
-    apiKey,
+    apiKey: apiKey.trim(),
     timeout: AI_REQUEST_TIMEOUT_MS,
     maxRetries: AI_MAX_RETRIES,
-    ...(baseURL ? { baseURL } : {}),
+    ...(normalizedBaseURL ? { baseURL: normalizedBaseURL } : {}),
   };
 }
 
@@ -30,9 +31,9 @@ let _client: Anthropic | null | undefined;
 
 export function getAnthropic(): Anthropic | null {
   if (_client !== undefined) return _client;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   // Optional gateway/proxy (e.g. a self-hosted Anthropic-compatible endpoint).
-  const baseURL = process.env.ANTHROPIC_BASE_URL;
+  const baseURL = process.env.ANTHROPIC_BASE_URL?.trim();
   _client = apiKey ? new Anthropic(anthropicClientOptions(apiKey, baseURL)) : null;
   return _client;
 }
