@@ -13,8 +13,13 @@ describe('anthropicClientOptions', () => {
   });
 
   it('keeps the optional compatible endpoint', () => {
-    expect(anthropicClientOptions('key', 'https://ai.example.test')).toMatchObject({
+    expect(anthropicClientOptions(' key ', ' https://ai.example.test ')).toMatchObject({
+      apiKey: 'key',
       baseURL: 'https://ai.example.test',
     });
+  });
+
+  it('omits blank compatible endpoints', () => {
+    expect(anthropicClientOptions('key', '   ')).not.toHaveProperty('baseURL');
   });
 });
