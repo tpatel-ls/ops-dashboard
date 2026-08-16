@@ -165,6 +165,31 @@ describe('projectNextTask', () => {
     expect(projectNextTask(task)).toBeNull();
   });
 
+  it('uses a valid timed anchor when a synced schedule is malformed', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Timed fallback',
+      status: 'done',
+      priority: 0,
+      scheduledFor: 'not-a-date',
+      startAt: '2026-08-01T09:00:00.000Z',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    expect(projectNextTask(task, new Date('2026-08-01T12:00:00.000Z'))).toMatchObject({
+      scheduledFor: '2026-08-02',
+      startAt: '2026-08-02T09:00:00.000Z',
+    });
+  });
+
   it('stops malformed occurrence counts instead of creating an endless chain', () => {
     const task = {
       id: 'task-1',
