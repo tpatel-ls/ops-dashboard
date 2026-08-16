@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 vi.mock('server-only', () => ({}));
 
-import { getSingleUserId } from './admin';
+import { createAdminClient, getSingleUserId } from './admin';
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -27,5 +27,14 @@ describe('getSingleUserId', () => {
 
     await expect(getSingleUserId(admin)).resolves.toBeNull();
     expect(listUsers).toHaveBeenCalledWith({ page: 1, perPage: 2 });
+  });
+});
+
+describe('createAdminClient', () => {
+  it('treats blank deployment credentials as unconfigured', () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '   ');
+    vi.stubEnv('SUPABASE_SECRET_KEY', ' secret ');
+
+    expect(createAdminClient()).toBeNull();
   });
 });
