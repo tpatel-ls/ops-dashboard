@@ -35,7 +35,11 @@ export function findStaleDomains(input: {
   staleAfterDays?: number;
 }): StaleDomain[] {
   const now = input.now ?? new Date();
-  const staleAfterDays = input.staleAfterDays ?? 7;
+  const requestedStaleDays = input.staleAfterDays ?? 7;
+  const staleAfterDays =
+    Number.isFinite(requestedStaleDays) && requestedStaleDays >= 0
+      ? Math.min(3650, Math.floor(requestedStaleDays))
+      : 7;
   const nowMs = now.getTime();
   const deletedOrArchived = (d: Domain) => Boolean(d.deletedAt || d.archivedAt);
 
