@@ -23,7 +23,7 @@ export function parseSyncCursors(raw: string | null): Record<string, string> {
 }
 
 export function createSyncCursorCache(): SyncCursorCache {
-  let cached: Record<string, string> = {};
+  const cached: Record<string, string> = {};
   return {
     read(raw) {
       const stored = parseSyncCursors(raw);
@@ -33,8 +33,11 @@ export function createSyncCursorCache(): SyncCursorCache {
       return { ...cached };
     },
     store(cursors) {
-      cached = { ...cursors };
-      return JSON.stringify(cursors);
+      const normalized = parseSyncCursors(JSON.stringify(cursors));
+      for (const [table, cursor] of Object.entries(normalized)) {
+        if (!cached[table] || cursor > cached[table]) cached[table] = cursor;
+      }
+      return JSON.stringify(cached);
     },
   };
 }
