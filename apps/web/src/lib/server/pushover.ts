@@ -20,8 +20,8 @@ function bounded(value: string, limit: number): string {
 }
 
 export async function sendPushover(msg: PushoverMessage): Promise<PushoverResult> {
-  const token = process.env.PUSHOVER_TOKEN;
-  const user = process.env.PUSHOVER_USER;
+  const token = process.env.PUSHOVER_TOKEN?.trim();
+  const user = process.env.PUSHOVER_USER?.trim();
   if (!token || !user) return { ok: false, reason: 'not-configured' };
   const message = bounded(msg.message, 1024);
   if (!message) return { ok: false, reason: 'empty-message' };
