@@ -13,4 +13,9 @@ describe('notificationTarget', () => {
   it.each([undefined, null, '', 42])('uses Today for invalid task data: %s', (taskId) => {
     expect(notificationTarget(taskId)).toBe('/today');
   });
+
+  it('bounds malformed notification identifiers', () => {
+    expect(notificationTarget('x'.repeat(129))).toBe('/today');
+    expect(notificationTarget('task-1\nredirect')).toBe('/today');
+  });
 });
