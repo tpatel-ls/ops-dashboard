@@ -15,6 +15,22 @@ const CONTENT_STATUSES = new Set<ContentStatus>([
   'done',
 ]);
 
+function normalizeChecklist(value: unknown): Content['checklist'] {
+  if (!Array.isArray(value)) throw new Error('Content checklist must be valid.');
+  const seen = new Set<string>();
+  return value.map((item) => {
+    if (!item || typeof item !== 'object') throw new Error('Content checklist must be valid.');
+    const { id, text, done } = item as Record<string, unknown>;
+    const normalizedId = typeof id === 'string' ? id.trim() : '';
+    const normalizedText = typeof text === 'string' ? text.trim() : '';
+    if (!normalizedId || !normalizedText || typeof done !== 'boolean' || seen.has(normalizedId)) {
+      throw new Error('Content checklist must be valid.');
+    }
+    seen.add(normalizedId);
+    return { id: normalizedId, text: normalizedText, done };
+  });
+}
+
 function normalizeContentPatch(patch: Partial<Content>): Partial<Content> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'title')) {
@@ -37,8 +53,8 @@ function normalizeContentPatch(patch: Partial<Content>): Partial<Content> {
   if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
     throw new Error('Content order must be finite.');
   }
-  if (Object.hasOwn(normalized, 'checklist') && !normalized.checklist) {
-    throw new Error('Content checklist must be valid.');
+  if (Object.hasOwn(normalized, 'checklist')) {
+    normalized.checklist = normalizeChecklist(normalized.checklist);
   }
   for (const key of ['channel', 'domainId', 'url', 'outline'] as const) {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
