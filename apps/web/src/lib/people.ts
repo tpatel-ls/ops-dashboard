@@ -76,6 +76,7 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
     person.relationship,
     ...person.tags,
     ...person.facts.flatMap((fact) => [fact.label, fact.value]),
+    ...person.interactions.map((interaction) => interaction.note),
   ].some((value) => value?.toLowerCase().includes(normalized));
 }
 

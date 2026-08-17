@@ -7,6 +7,9 @@ const person = {
   relationship: 'Product lead',
   tags: ['LSG', 'Dialer'],
   facts: [{ id: 'fact-1', label: 'Timezone', value: 'Pacific' }],
+  interactions: [
+    { id: 'interaction-1', date: '2026-08-16', note: 'Discussed enterprise onboarding' },
+  ],
 } as Person;
 
 describe('matchesPersonSearch', () => {
@@ -15,6 +18,7 @@ describe('matchesPersonSearch', () => {
     expect(matchesPersonSearch(person, 'PRODUCT')).toBe(true);
     expect(matchesPersonSearch(person, 'dialer')).toBe(true);
     expect(matchesPersonSearch(person, 'pacific')).toBe(true);
+    expect(matchesPersonSearch(person, 'onboarding')).toBe(true);
   });
 
   it('keeps every person for an empty query', () => {
