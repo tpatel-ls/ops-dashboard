@@ -30,11 +30,17 @@ describe('book inputs', () => {
   });
 
   it('validates and normalizes updates before persistence', async () => {
-    await updateBook('book-1', { title: '  Deep Work  ', author: '   ', rating: 5 });
+    await updateBook('book-1', {
+      title: '  Deep Work  ',
+      author: '   ',
+      rating: 5,
+      tags: [' focus ', 'focus'],
+    });
     expect(mocks.patchRecord).toHaveBeenCalledWith('books', 'book-1', {
       title: 'Deep Work',
       author: undefined,
       rating: 5,
+      tags: ['focus'],
     });
 
     expect(() => updateBook('book-1', { rating: 6 })).toThrow(

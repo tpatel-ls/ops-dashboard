@@ -32,7 +32,7 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
   }
   if (Object.hasOwn(normalized, 'tags')) {
     if (!normalized.tags) throw new Error('Book tags must be valid.');
-    normalized.tags = normalized.tags.map((tag) => tag.trim()).filter(Boolean);
+    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
   }
   return normalized;
 }
