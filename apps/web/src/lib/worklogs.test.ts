@@ -84,7 +84,12 @@ describe('logWork', () => {
   });
 
   it('writes a valid log and stamps the project', async () => {
-    const log = await logWork('project-1', 30, 'Moved launch forward', '2026-07-15T12:00:00.000Z');
+    const log = await logWork(
+      'project-1',
+      30,
+      '  Moved launch forward  ',
+      '2026-07-15T12:00:00.000Z',
+    );
 
     expect(log).toMatchObject({
       projectId: 'project-1',
@@ -98,6 +103,12 @@ describe('logWork', () => {
     expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
       lastWorkedAt: '2026-07-15T12:00:00.000Z',
     });
+  });
+
+  it('omits notes that contain only whitespace', async () => {
+    const log = await logWork('project-1', 30, '   ', '2026-07-15T12:00:00.000Z');
+
+    expect(log).not.toHaveProperty('note');
   });
 });
 
