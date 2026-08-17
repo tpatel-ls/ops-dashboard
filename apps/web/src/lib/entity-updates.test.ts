@@ -148,7 +148,7 @@ describe('journal inputs', () => {
       createJournalEntry({
         body: '  Good day  ',
         mood: '  calm  ',
-        mediaUrls: [' image.jpg ', ' '],
+        mediaUrls: [' image.jpg ', ' ', 'image.jpg'],
         tags: [' work ', 'work'],
       }),
     ).resolves.toMatchObject({
