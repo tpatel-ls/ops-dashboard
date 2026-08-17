@@ -72,6 +72,24 @@ describe('content inputs', () => {
       'Content status must be valid',
     );
   });
+
+  it('normalizes checklist items and rejects duplicate identifiers', async () => {
+    await updateContent('content-1', {
+      checklist: [{ id: ' item-1 ', text: ' Draft copy ', done: false }],
+    });
+    expect(mocks.patchRecord).toHaveBeenCalledWith('content', 'content-1', {
+      checklist: [{ id: 'item-1', text: 'Draft copy', done: false }],
+    });
+
+    expect(() =>
+      updateContent('content-1', {
+        checklist: [
+          { id: 'item-1', text: 'Draft', done: false },
+          { id: 'item-1', text: 'Review', done: true },
+        ],
+      }),
+    ).toThrow('Content checklist must be valid');
+  });
 });
 
 describe('capture inputs', () => {
