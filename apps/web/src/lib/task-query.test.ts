@@ -165,12 +165,13 @@ describe('matchesTaskTag', () => {
   const taggedTask = task('tagged', { tags: ['Dialer', 'FollowUp'] });
 
   it('matches a selected tag without case sensitivity', () => {
-    expect(matchesTaskTag(taggedTask, 'dialer')).toBe(true);
+    expect(matchesTaskTag(taggedTask, '  dialer  ')).toBe(true);
     expect(matchesTaskTag(taggedTask, 'FOLLOWUP')).toBe(true);
     expect(matchesTaskTag(taggedTask, 'finance')).toBe(false);
   });
 
   it('keeps every task when no tag is selected', () => {
     expect(matchesTaskTag(taggedTask, null)).toBe(true);
+    expect(matchesTaskTag(taggedTask, '   ')).toBe(true);
   });
 });
