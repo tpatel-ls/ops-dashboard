@@ -86,6 +86,23 @@ describe('buildWorkDashboard', () => {
     expect(result.counts.overdue).toBe(0);
   });
 
+  it('uses the earliest task commitment when dates disagree', () => {
+    const result = buildWorkDashboard(
+      [
+        task('due-first', {
+          scheduledFor: '2026-07-20',
+          dueAt: '2026-07-15T19:00:00.000Z',
+        }),
+      ],
+      [],
+      'all',
+      '2026-07-16',
+    );
+
+    expect(result.overdue.map((item) => item.id)).toEqual(['due-first']);
+    expect(result.upcoming).toEqual([]);
+  });
+
   it('excludes completed, archived, deleted, and out-of-context tasks', () => {
     const result = buildWorkDashboard(
       [
