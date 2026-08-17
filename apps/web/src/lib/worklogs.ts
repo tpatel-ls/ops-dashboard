@@ -30,7 +30,7 @@ export async function logWork(
     throw new Error('Project is not available for progress logging.');
   }
 
-  const ts = at ?? new Date().toISOString();
+  const ts = at ? new Date(Date.parse(at)).toISOString() : new Date().toISOString();
   const rec = await putRecord(
     'workLogs',
     newRecord<WorkLog>({
