@@ -226,6 +226,17 @@ describe('quote inputs', () => {
     expect(() =>
       updateQuote('quote-1', { thoughts: [{ id: '', text: 'Idea', at: 'not-a-date' }] }),
     ).toThrow('Quote thoughts must be valid');
+    expect(() => updateQuote('quote-1', { thoughts: [null] as never })).toThrow(
+      'Quote thoughts must be valid',
+    );
+    expect(() =>
+      updateQuote('quote-1', {
+        thoughts: [
+          { id: 'thought-1', text: 'First', at: '2026-08-17T12:00:00.000Z' },
+          { id: ' thought-1 ', text: 'Second', at: '2026-08-17T13:00:00.000Z' },
+        ],
+      }),
+    ).toThrow('Quote thoughts must be valid');
   });
 });
 
