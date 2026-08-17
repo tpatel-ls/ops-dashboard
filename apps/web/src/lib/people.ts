@@ -19,23 +19,49 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
     normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
   }
   if (Object.hasOwn(normalized, 'facts')) {
-    if (!normalized.facts) throw new Error('Person facts must be valid.');
+    if (!Array.isArray(normalized.facts)) throw new Error('Person facts must be valid.');
+    const seen = new Set<string>();
     normalized.facts = normalized.facts.map((fact) => {
+      if (
+        !fact ||
+        typeof fact !== 'object' ||
+        typeof fact.id !== 'string' ||
+        typeof fact.label !== 'string' ||
+        typeof fact.value !== 'string'
+      ) {
+        throw new Error('Person facts must be valid.');
+      }
       const id = fact.id.trim();
       const label = fact.label.trim();
       const value = fact.value.trim();
-      if (!id || !label || !value) throw new Error('Person facts must be valid.');
+      if (!id || !label || !value || seen.has(id)) {
+        throw new Error('Person facts must be valid.');
+      }
+      seen.add(id);
       return { ...fact, id, label, value };
     });
   }
   if (Object.hasOwn(normalized, 'interactions')) {
-    if (!normalized.interactions) throw new Error('Person interactions must be valid.');
+    if (!Array.isArray(normalized.interactions)) {
+      throw new Error('Person interactions must be valid.');
+    }
+    const seen = new Set<string>();
     normalized.interactions = normalized.interactions.map((interaction) => {
-      const id = interaction.id.trim();
-      const note = interaction.note.trim();
-      if (!id || !note || localDay(interaction.date) === undefined) {
+      if (
+        !interaction ||
+        typeof interaction !== 'object' ||
+        typeof interaction.id !== 'string' ||
+        typeof interaction.note !== 'string' ||
+        typeof interaction.date !== 'string'
+      ) {
         throw new Error('Person interactions must be valid.');
       }
+      const id = interaction.id.trim();
+      const note = interaction.note.trim();
+      if (!id || !note || localDay(interaction.date) === undefined || seen.has(id)) {
+        throw new Error('Person interactions must be valid.');
+      }
+      seen.add(id);
       return { ...interaction, id, note };
     });
   }
