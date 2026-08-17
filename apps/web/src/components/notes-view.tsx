@@ -136,6 +136,7 @@ function NoteCard({ note }: { note: Note }) {
           <button
             type="button"
             onClick={handleFlag}
+            aria-label={note.flaggedForReview ? 'Unflag note for review' : 'Flag note for review'}
             title={note.flaggedForReview ? 'Unflag for review' : 'Flag for review'}
             className={cn(
               'inline-flex size-9 items-center justify-center rounded-md transition-colors',
@@ -150,6 +151,7 @@ function NoteCard({ note }: { note: Note }) {
             type="button"
             onClick={handleDelete}
             onBlur={() => setConfirming(false)}
+            aria-label={confirming ? 'Confirm deleting note' : 'Delete note'}
             title={confirming ? 'Click again to confirm' : 'Delete note'}
             className={cn(
               'inline-flex size-9 items-center justify-center rounded-md transition-colors',
