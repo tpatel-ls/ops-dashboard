@@ -265,6 +265,22 @@ describe('person inputs', () => {
         interactions: [{ id: 'interaction-1', date: 'invalid', note: 'Call' }],
       }),
     ).toThrow('Person interactions must be valid');
+    expect(() =>
+      updatePerson('person-1', {
+        facts: [
+          { id: 'fact-1', label: 'Timezone', value: 'Central' },
+          { id: ' fact-1 ', label: 'Office', value: 'Chicago' },
+        ],
+      }),
+    ).toThrow('Person facts must be valid');
+    expect(() =>
+      updatePerson('person-1', {
+        interactions: [
+          { id: 'interaction-1', date: '2026-08-16', note: 'Call' },
+          { id: 'interaction-1', date: '2026-08-17', note: 'Email' },
+        ],
+      }),
+    ).toThrow('Person interactions must be valid');
   });
 });
 
