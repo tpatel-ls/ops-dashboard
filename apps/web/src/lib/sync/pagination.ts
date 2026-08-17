@@ -8,7 +8,7 @@ export async function visitPullPages<T>(
   visit: (row: T) => Promise<void>,
   pageSize: number,
 ): Promise<boolean> {
-  if (!Number.isInteger(pageSize) || pageSize <= 0) {
+  if (!Number.isSafeInteger(pageSize) || pageSize <= 0) {
     throw new RangeError('Sync page size must be a positive integer.');
   }
   let from = 0;
