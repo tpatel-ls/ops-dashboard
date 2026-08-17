@@ -26,7 +26,9 @@ function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEnt
   if (normalized.mood !== undefined) normalized.mood = normalized.mood.trim() || undefined;
   if (Object.hasOwn(normalized, 'mediaUrls')) {
     if (!normalized.mediaUrls) throw new Error('Journal entry media must be valid.');
-    normalized.mediaUrls = normalized.mediaUrls.map((url) => url.trim()).filter(Boolean);
+    normalized.mediaUrls = [
+      ...new Set(normalized.mediaUrls.map((url) => url.trim()).filter(Boolean)),
+    ];
   }
   if (Object.hasOwn(normalized, 'tags')) {
     if (!normalized.tags) throw new Error('Journal entry tags must be valid.');
