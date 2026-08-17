@@ -30,13 +30,25 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
     normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
   }
   if (Object.hasOwn(normalized, 'thoughts')) {
-    if (!normalized.thoughts) throw new Error('Quote thoughts must be valid.');
+    if (!Array.isArray(normalized.thoughts)) throw new Error('Quote thoughts must be valid.');
+    const seen = new Set<string>();
     normalized.thoughts = normalized.thoughts.map((thought) => {
-      const text = thought.text.trim();
-      if (!thought.id.trim() || !text || !Number.isFinite(Date.parse(thought.at))) {
+      if (
+        !thought ||
+        typeof thought !== 'object' ||
+        typeof thought.id !== 'string' ||
+        typeof thought.text !== 'string' ||
+        typeof thought.at !== 'string'
+      ) {
         throw new Error('Quote thoughts must be valid.');
       }
-      return { ...thought, id: thought.id.trim(), text };
+      const text = thought.text.trim();
+      const id = thought.id.trim();
+      if (!id || !text || !Number.isFinite(Date.parse(thought.at)) || seen.has(id)) {
+        throw new Error('Quote thoughts must be valid.');
+      }
+      seen.add(id);
+      return { ...thought, id, text };
     });
   }
   return normalized;
