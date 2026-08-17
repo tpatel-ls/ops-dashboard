@@ -17,6 +17,7 @@ export async function logWork(
   if (at !== undefined && (!at.trim() || !Number.isFinite(Date.parse(at)))) {
     throw new Error('Work log time must be a valid date.');
   }
+  const normalizedNote = note?.trim();
 
   const project = await getDb().projects.get(projectId);
   if (
@@ -32,7 +33,12 @@ export async function logWork(
   const ts = at ?? new Date().toISOString();
   const rec = await putRecord(
     'workLogs',
-    newRecord<WorkLog>({ projectId, minutes, ...(note ? { note } : {}), at: ts }),
+    newRecord<WorkLog>({
+      projectId,
+      minutes,
+      ...(normalizedNote ? { note: normalizedNote } : {}),
+      at: ts,
+    }),
   );
   await patchRecord<Project>('projects', projectId, { lastWorkedAt: ts });
   return rec;
