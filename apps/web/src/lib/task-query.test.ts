@@ -144,6 +144,17 @@ describe('matchesTaskSearch', () => {
     expect(matchesTaskSearch(launchTask, 'blue text', 'Blue Text')).toBe(true);
   });
 
+  it('matches task notes and tags', () => {
+    const detailed = task('follow-up', {
+      title: 'Contact customer',
+      notes: 'Confirm the renewal timeline',
+      tags: ['Retention'],
+    });
+
+    expect(matchesTaskSearch(detailed, 'renewal')).toBe(true);
+    expect(matchesTaskSearch(detailed, 'retention')).toBe(true);
+  });
+
   it('keeps every task for an empty query and rejects unrelated text', () => {
     expect(matchesTaskSearch(launchTask, '   ')).toBe(true);
     expect(matchesTaskSearch(launchTask, 'billing')).toBe(false);
