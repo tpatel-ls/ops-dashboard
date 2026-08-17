@@ -25,7 +25,10 @@ export interface WorkDashboardModel {
 }
 
 function taskDate(task: Task): string | undefined {
-  return localDay(task.scheduledFor) ?? localDay(task.dueAt) ?? localDay(task.startAt);
+  const dates = [task.scheduledFor, task.dueAt, task.startAt]
+    .map((value) => localDay(value))
+    .filter((value): value is string => Boolean(value));
+  return dates.sort()[0];
 }
 
 function projectOrder(a: WorkProjectSummary, b: WorkProjectSummary): number {
