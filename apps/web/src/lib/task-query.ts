@@ -75,6 +75,7 @@ export function matchesTaskSearch(task: Task, query: string, projectName?: strin
 
 export function matchesTaskTag(task: Task, selectedTag: string | null): boolean {
   if (!selectedTag) return true;
-  const normalized = selectedTag.toLocaleLowerCase();
+  const normalized = selectedTag.trim().toLocaleLowerCase();
+  if (!normalized) return true;
   return task.tags.some((tag) => tag.toLocaleLowerCase() === normalized);
 }
