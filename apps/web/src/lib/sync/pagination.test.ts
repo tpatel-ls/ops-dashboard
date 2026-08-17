@@ -29,12 +29,15 @@ describe('visitPullPages', () => {
     ).resolves.toBe(false);
   });
 
-  it.each([0, -1, 1.5, Number.NaN])('rejects an invalid page size: %s', async (pageSize) => {
-    const fetchPage = vi.fn(async () => []);
+  it.each([0, -1, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
+    'rejects an invalid page size: %s',
+    async (pageSize) => {
+      const fetchPage = vi.fn(async () => []);
 
-    await expect(visitPullPages(fetchPage, async () => {}, pageSize)).rejects.toThrow(
-      'Sync page size must be a positive integer',
-    );
-    expect(fetchPage).not.toHaveBeenCalled();
-  });
+      await expect(visitPullPages(fetchPage, async () => {}, pageSize)).rejects.toThrow(
+        'Sync page size must be a positive integer',
+      );
+      expect(fetchPage).not.toHaveBeenCalled();
+    },
+  );
 });
