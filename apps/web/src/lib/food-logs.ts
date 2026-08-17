@@ -10,22 +10,31 @@ export { computeFoodTotals };
 const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
 const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
 
-function normalizeFoodItems(items: FoodItem[]): FoodItem[] {
+function normalizeFoodItems(items: unknown): FoodItem[] {
+  if (!Array.isArray(items)) throw new Error('Food items must be valid.');
   return items.map((item) => {
-    const name = item.name.trim();
+    if (!item || typeof item !== 'object') throw new Error('Food items must be valid.');
+    const candidate = item as Partial<FoodItem>;
+    if (typeof candidate.name !== 'string') throw new Error('Food items must be valid.');
+    if (candidate.quantity !== undefined && typeof candidate.quantity !== 'string') {
+      throw new Error('Food items must be valid.');
+    }
+    const name = candidate.name.trim();
     if (!name) throw new Error('Food item name is required.');
+    if (!Number.isFinite(candidate.calories) || (candidate.calories ?? -1) < 0) {
+      throw new Error('Food item calories must be a non-negative number.');
+    }
     for (const [label, value] of [
-      ['calories', item.calories],
-      ['protein', item.protein],
-      ['carbs', item.carbs],
-      ['fat', item.fat],
+      ['protein', candidate.protein],
+      ['carbs', candidate.carbs],
+      ['fat', candidate.fat],
     ] as const) {
       if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
         throw new Error(`Food item ${label} must be a non-negative number.`);
       }
     }
-    const quantity = item.quantity?.trim();
-    const normalized = { ...item, name };
+    const quantity = candidate.quantity?.trim();
+    const normalized = { ...candidate, name } as FoodItem;
     if (quantity) normalized.quantity = quantity;
     else delete normalized.quantity;
     return normalized;
