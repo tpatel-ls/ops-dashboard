@@ -15,4 +15,19 @@ describe('useLocalDraft', () => {
 
     expect(window.localStorage.getItem('draft-key')).toBe('Finish incident review');
   });
+
+  it('loads the matching draft when the storage key changes', () => {
+    window.localStorage.setItem('draft-a', 'First draft');
+    window.localStorage.setItem('draft-b', 'Second draft');
+    const { result, rerender } = renderHook(
+      ({ draftKey }) => useLocalDraft(draftKey),
+      { initialProps: { draftKey: 'draft-a' } },
+    );
+
+    expect(result.current.draft).toBe('First draft');
+    rerender({ draftKey: 'draft-b' });
+
+    expect(result.current.draft).toBe('Second draft');
+    expect(window.localStorage.getItem('draft-a')).toBe('First draft');
+  });
 });
