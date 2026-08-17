@@ -110,6 +110,15 @@ describe('logWork', () => {
 
     expect(log).not.toHaveProperty('note');
   });
+
+  it('stores supplied timestamps in canonical UTC form', async () => {
+    const log = await logWork('project-1', 30, undefined, '2026-07-15T07:00:00-05:00');
+
+    expect(log.at).toBe('2026-07-15T12:00:00.000Z');
+    expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
+      lastWorkedAt: '2026-07-15T12:00:00.000Z',
+    });
+  });
 });
 
 describe('deleteWorkLog', () => {
