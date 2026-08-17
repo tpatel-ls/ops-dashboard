@@ -14,12 +14,18 @@ function readDraft(key: string): string {
 
 export function useLocalDraft(key: string) {
   const visibility = usePageVisibility();
-  const [draft, setDraft] = useState(() => readDraft(key));
+  const [drafts, setDrafts] = useState<Record<string, string>>(() => ({ [key]: readDraft(key) }));
+  const draft = Object.hasOwn(drafts, key) ? (drafts[key] ?? '') : readDraft(key);
   const latestDraft = useRef(draft);
 
   useEffect(() => {
     latestDraft.current = draft;
   }, [draft]);
+
+  const setDraft = useCallback(
+    (value: string) => setDrafts((current) => ({ ...current, [key]: value })),
+    [key],
+  );
 
   const saveDraft = useCallback(
     (value: string) => {
