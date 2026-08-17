@@ -74,4 +74,21 @@ describe('updateFoodLog', () => {
       'Food log date must be valid',
     );
   });
+
+  it('rejects malformed item collections with a stable validation error', () => {
+    expect(() => updateFoodLog('meal-1', { items: {} as never })).toThrow(
+      'Food items must be valid',
+    );
+    expect(() => updateFoodLog('meal-1', { items: [null] as never })).toThrow(
+      'Food items must be valid',
+    );
+    expect(() => updateFoodLog('meal-1', { items: [{ name: 'Eggs' }] as never })).toThrow(
+      'Food item calories must be a non-negative number',
+    );
+    expect(() =>
+      updateFoodLog('meal-1', {
+        items: [{ name: 'Eggs', quantity: 2, calories: 140 }] as never,
+      }),
+    ).toThrow('Food items must be valid');
+  });
 });
