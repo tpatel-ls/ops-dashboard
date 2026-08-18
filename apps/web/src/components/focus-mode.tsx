@@ -6,7 +6,11 @@ import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { elapsedSessionMinutes, elapsedSessionMs } from '@/lib/focus-timer';
+import {
+  accumulatedFocusMinutes,
+  elapsedSessionMinutes,
+  elapsedSessionMs,
+} from '@/lib/focus-timer';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { cn } from '@ops-dashboard/ui';
 
@@ -40,22 +44,28 @@ export function FocusMode() {
   const startedRef = useRef<number | null>(null);
   const elapsedRef = useRef(0);
 
-  const completePhase = useCallback(async () => {
-    if (phase === 'focus' && activeId && startedRef.current) {
-      const elapsed = elapsedSessionMinutes(
-        elapsedSessionMs(elapsedRef.current, startedRef.current, Date.now()),
-      );
-      const task = await getDb().tasks.get(activeId);
-      if (task && elapsed > 0) {
-        await updateTask(activeId, {
-          actualMinutes: (task.actualMinutes ?? 0) + elapsed,
-        });
-      }
-    }
+  const recordFocusTime = useCallback(async () => {
+    const elapsedMs = elapsedSessionMs(elapsedRef.current, startedRef.current, Date.now());
+    const elapsed = elapsedSessionMinutes(elapsedMs);
     startedRef.current = null;
     elapsedRef.current = 0;
+    if (!activeId || elapsed === 0) return;
+    const task = await getDb().tasks.get(activeId);
+    if (task) {
+      await updateTask(activeId, {
+        actualMinutes: accumulatedFocusMinutes(task.actualMinutes, elapsedMs),
+      });
+    }
+  }, [activeId]);
+
+  const completePhase = useCallback(async () => {
+    if (phase === 'focus') await recordFocusTime();
+    else {
+      startedRef.current = null;
+      elapsedRef.current = 0;
+    }
     setPhase((p) => (p === 'focus' ? 'break' : 'focus'));
-  }, [phase, activeId]);
+  }, [phase, recordFocusTime]);
 
   const completeRef = useRef<() => void>(() => {});
   useEffect(() => {
@@ -120,6 +130,19 @@ export function FocusMode() {
     startedRef.current = null;
     elapsedRef.current = 0;
     setSecondsLeft((phase === 'focus' ? focusMin : breakMin) * 60);
+  }
+
+  async function endSession() {
+    setRunning(false);
+    if (phase === 'focus') await recordFocusTime();
+    else {
+      startedRef.current = null;
+      elapsedRef.current = 0;
+    }
+    setPhase('focus');
+    setActiveId(null);
+    setSecondsLeft(focusMin * 60);
+    close();
   }
 
   const total = (phase === 'focus' ? focusMin : breakMin) * 60;
@@ -218,15 +241,7 @@ export function FocusMode() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              setRunning(false);
-              setPhase('focus');
-              setActiveId(null);
-              startedRef.current = null;
-              elapsedRef.current = 0;
-              setSecondsLeft(focusMin * 60);
-              close();
-            }}
+            onClick={() => void endSession()}
             className="bg-card text-muted-foreground hover:text-foreground inline-flex h-11 items-center gap-2 rounded-md border px-3 text-sm"
           >
             <Square className="size-4" /> End
