@@ -95,6 +95,18 @@ describe('toggleRoutineCheck', () => {
       'Routine check date must be a valid calendar day',
     );
   });
+
+  it('rejects malformed runtime metadata before opening the database', async () => {
+    await expect(toggleRoutineCheck('   ', '2026-08-18', true)).rejects.toThrow(
+      'Routine check target must be valid',
+    );
+    await expect(toggleRoutineCheck('routine-1', '2026-08-18', 'yes' as never)).rejects.toThrow(
+      'Routine check state must be boolean',
+    );
+    await expect(
+      toggleRoutineCheck('routine-1', '2026-08-18', true, 'sync' as never),
+    ).rejects.toThrow('Routine check source must be valid');
+  });
 });
 
 describe('addDaysISO', () => {

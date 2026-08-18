@@ -6,6 +6,11 @@ import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 const TIMES_OF_DAY = new Set<TimeOfDay>(['morning', 'afternoon', 'evening', 'anytime']);
 const ROUTINE_KINDS = new Set<RoutineKind>(['ongoing', 'fixed']);
+const ROUTINE_CHECK_SOURCES = new Set<NonNullable<RoutineCheck['source']>>([
+  'manual',
+  'journal',
+  'capture',
+]);
 
 function normalizeRoutinePatch(patch: Partial<Routine>): Partial<Routine> {
   const normalized = { ...patch };
@@ -150,13 +155,21 @@ export async function toggleRoutineCheck(
   done: boolean,
   source: 'manual' | 'journal' | 'capture' = 'manual',
 ): Promise<void> {
+  if (typeof routineId !== 'string' || !routineId.trim()) {
+    throw new Error('Routine check target must be valid.');
+  }
   if (localDay(date) !== date) {
     throw new Error('Routine check date must be a valid calendar day.');
   }
+  if (typeof done !== 'boolean') throw new Error('Routine check state must be boolean.');
+  if (!ROUTINE_CHECK_SOURCES.has(source)) {
+    throw new Error('Routine check source must be valid.');
+  }
+  const normalizedRoutineId = routineId.trim();
   const db = getDb();
   const existing = await db.routineChecks
     .where('[routineId+date]')
-    .equals([routineId, date])
+    .equals([normalizedRoutineId, date])
     .first();
   const completedAt = done ? new Date().toISOString() : undefined;
   if (existing) {
@@ -169,7 +182,7 @@ export async function toggleRoutineCheck(
     await putRecord(
       'routineChecks',
       newRecord<RoutineCheck>({
-        routineId,
+        routineId: normalizedRoutineId,
         date,
         done,
         ...(completedAt ? { completedAt } : {}),
