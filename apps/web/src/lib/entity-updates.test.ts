@@ -2,6 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ patchRecord: vi.fn() }));
 
+vi.mock('@ops-dashboard/core', async () => {
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
+  return {
+    ...actual,
+    getDb: () => ({ organizations: { toArray: async () => [] } }),
+  };
+});
+
 vi.mock('./records', () => ({
   newRecord: vi.fn((value: object) => value),
   putRecord: vi.fn(async (_table: string, value: object) => value),
