@@ -32,12 +32,21 @@ export const setCaptureRoute = (
   aiKind?: CaptureKind,
   aiSummary?: string,
 ) => {
-  const routeId = routedTo.id.trim();
-  if (!CAPTURE_KINDS.has(routedTo.type) || !routeId) {
+  if (
+    !routedTo ||
+    typeof routedTo !== 'object' ||
+    !CAPTURE_KINDS.has(routedTo.type) ||
+    typeof routedTo.id !== 'string'
+  ) {
     throw new Error('Capture route must be valid.');
   }
+  const routeId = routedTo.id.trim();
+  if (!routeId) throw new Error('Capture route must be valid.');
   if (aiKind !== undefined && !CAPTURE_KINDS.has(aiKind)) {
     throw new Error('Capture kind must be valid.');
+  }
+  if (aiSummary !== undefined && typeof aiSummary !== 'string') {
+    throw new Error('Capture summary must be valid.');
   }
   const summary = aiSummary?.trim();
   return patchRecord<Capture>('captures', id, {
