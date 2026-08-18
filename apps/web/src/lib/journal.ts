@@ -4,6 +4,7 @@ import { localDay } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { todayISO } from './routines';
+import { normalizeStringList } from './string-list';
 
 const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', 'text', 'upload']);
 
@@ -25,14 +26,13 @@ function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEnt
   if (normalized.title !== undefined) normalized.title = normalized.title.trim() || undefined;
   if (normalized.mood !== undefined) normalized.mood = normalized.mood.trim() || undefined;
   if (Object.hasOwn(normalized, 'mediaUrls')) {
-    if (!normalized.mediaUrls) throw new Error('Journal entry media must be valid.');
-    normalized.mediaUrls = [
-      ...new Set(normalized.mediaUrls.map((url) => url.trim()).filter(Boolean)),
-    ];
+    normalized.mediaUrls = normalizeStringList(
+      normalized.mediaUrls,
+      'Journal entry media must be valid.',
+    );
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    if (!normalized.tags) throw new Error('Journal entry tags must be valid.');
-    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
+    normalized.tags = normalizeStringList(normalized.tags, 'Journal entry tags must be valid.');
   }
   return normalized;
 }

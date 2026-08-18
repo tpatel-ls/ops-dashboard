@@ -3,6 +3,7 @@
 import { localDay, newId } from '@ops-dashboard/core';
 import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { normalizeStringList } from './string-list';
 
 function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
   const normalized = { ...patch };
@@ -15,8 +16,7 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    if (!normalized.tags) throw new Error('Person tags must be valid.');
-    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
+    normalized.tags = normalizeStringList(normalized.tags, 'Person tags must be valid.');
   }
   if (Object.hasOwn(normalized, 'facts')) {
     if (!Array.isArray(normalized.facts)) throw new Error('Person facts must be valid.');

@@ -2,6 +2,7 @@
 
 import type { Book, BookStatus } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { normalizeStringList } from './string-list';
 
 const BOOK_STATUSES = new Set<BookStatus>(['want', 'reading', 'finished', 'abandoned']);
 
@@ -31,8 +32,7 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    if (!normalized.tags) throw new Error('Book tags must be valid.');
-    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
+    normalized.tags = normalizeStringList(normalized.tags, 'Book tags must be valid.');
   }
   return normalized;
 }
