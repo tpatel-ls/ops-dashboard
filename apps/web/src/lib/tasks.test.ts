@@ -242,6 +242,45 @@ describe('updateTask', () => {
       expect(mocks.put).not.toHaveBeenCalled();
     }
   });
+
+  it('normalizes supported recurrence rules', async () => {
+    await updateTask('task-1', {
+      recurrence: {
+        freq: 'weekly',
+        interval: 2,
+        byDay: ['MO', 'FR', 'MO'],
+        endsOn: '2026-12-31',
+        count: 8,
+      },
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recurrence: {
+          freq: 'weekly',
+          interval: 2,
+          byDay: ['MO', 'FR'],
+          endsOn: '2026-12-31',
+          count: 8,
+        },
+      }),
+    );
+  });
+
+  it('rejects malformed recurrence rules', async () => {
+    for (const recurrence of [
+      null,
+      { freq: 'hourly', interval: 1 },
+      { freq: 'daily', interval: 0 },
+      { freq: 'weekly', interval: 1, byDay: ['XX'] },
+      { freq: 'monthly', interval: 1, endsOn: '2026-02-30' },
+      { freq: 'yearly', interval: 1, count: 0 },
+    ]) {
+      mocks.put.mockClear();
+      await expect(updateTask('task-1', { recurrence } as never)).rejects.toThrow();
+      expect(mocks.put).not.toHaveBeenCalled();
+    }
+  });
 });
 
 describe('setTaskStatus', () => {
