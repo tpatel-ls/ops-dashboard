@@ -125,9 +125,50 @@ function normalizeTaskRecurrence(patch: Partial<Task>): void {
   };
 }
 
+function normalizeTaskReminders(patch: Partial<Task>): void {
+  if (!Object.hasOwn(patch, 'reminders')) return;
+  if (!Array.isArray(patch.reminders)) throw new Error('Task reminders must be valid.');
+  const seen = new Set<string>();
+  patch.reminders = patch.reminders.map((reminder) => {
+    if (
+      !reminder ||
+      typeof reminder !== 'object' ||
+      typeof reminder.id !== 'string' ||
+      typeof reminder.taskId !== 'string' ||
+      typeof reminder.triggerAt !== 'string' ||
+      typeof reminder.delivered !== 'boolean'
+    ) {
+      throw new Error('Task reminders must be valid.');
+    }
+    const id = reminder.id.trim();
+    const taskId = reminder.taskId.trim();
+    const timestamp = Date.parse(reminder.triggerAt);
+    if (!id || !taskId || !Number.isFinite(timestamp) || seen.has(id)) {
+      throw new Error('Task reminders must be valid.');
+    }
+    if (
+      reminder.offsetMinutes !== undefined &&
+      !Number.isSafeInteger(reminder.offsetMinutes)
+    ) {
+      throw new Error('Task reminder offset must be an integer.');
+    }
+    seen.add(id);
+    return {
+      id,
+      taskId,
+      triggerAt: new Date(timestamp).toISOString(),
+      delivered: reminder.delivered,
+      ...(reminder.offsetMinutes !== undefined
+        ? { offsetMinutes: reminder.offsetMinutes }
+        : {}),
+    };
+  });
+}
+
 function assertTaskFields(patch: Partial<Task>): void {
   normalizeTaskCollections(patch);
   normalizeTaskRecurrence(patch);
+  normalizeTaskReminders(patch);
   if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {
     throw new Error('Task schedule must be a valid calendar day.');
   }
