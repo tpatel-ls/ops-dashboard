@@ -77,6 +77,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const stopTimerRef = useRef<number | null>(null);
+  const startingRef = useRef(false);
   const onTranscriptRef = useRef(onTranscript);
 
   useEffect(() => {
@@ -93,6 +94,8 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
 
   // --- Whisper path: record audio -> /api/transcribe ---
   async function startRecording() {
+    if (startingRef.current) return;
+    startingRef.current = true;
     setError(null);
     let acquiredStream: MediaStream | null = null;
     try {
@@ -133,6 +136,8 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
       acquiredStream?.getTracks().forEach((track) => track.stop());
       setListening(false);
       setError('Microphone access was not available.');
+    } finally {
+      startingRef.current = false;
     }
   }
 
