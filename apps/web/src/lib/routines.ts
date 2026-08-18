@@ -117,9 +117,13 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
     order: input.order ?? Date.now(),
   });
   const kind = fields.kind!;
+  if (kind === 'fixed' && fields.durationDays === undefined) {
+    throw new Error('Fixed routines require a duration.');
+  }
+  const durationDays = kind === 'fixed' ? fields.durationDays : undefined;
   const endDate =
-    kind === 'fixed' && fields.durationDays
-      ? addDaysISO(fields.startDate!, fields.durationDays - 1)
+    kind === 'fixed' && durationDays
+      ? addDaysISO(fields.startDate!, durationDays - 1)
       : undefined;
   return putRecord(
     'routines',
@@ -131,7 +135,7 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
       notify: fields.notify!,
       ...(fields.domainId ? { domainId: fields.domainId } : {}),
       kind,
-      ...(fields.durationDays ? { durationDays: fields.durationDays } : {}),
+      ...(durationDays ? { durationDays } : {}),
       startDate: fields.startDate!,
       ...(endDate ? { endDate } : {}),
       ...(fields.color ? { color: fields.color } : {}),
@@ -140,8 +144,30 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
   );
 }
 
-export const updateRoutine = (id: string, patch: Partial<Routine>) =>
-  patchRecord<Routine>('routines', id, normalizeRoutinePatch(patch));
+export function updateRoutine(id: string, patch: Partial<Routine>) {
+  const fields = normalizeRoutinePatch(patch);
+  const changesSchedule = ['kind', 'startDate', 'durationDays', 'endDate'].some((key) =>
+    Object.hasOwn(fields, key),
+  );
+  if (!changesSchedule) return patchRecord<Routine>('routines', id, fields);
+
+  return updateRoutineSchedule(id, fields);
+}
+
+async function updateRoutineSchedule(id: string, fields: Partial<Routine>) {
+  const existing = await getDb().routines.get(id);
+  if (!existing || existing.deletedAt) return null;
+  const kind = fields.kind ?? existing.kind;
+  const startDate = fields.startDate ?? existing.startDate;
+  const durationDays = fields.durationDays ?? existing.durationDays;
+  if (kind === 'fixed' && durationDays === undefined) {
+    throw new Error('Fixed routines require a duration.');
+  }
+  fields.durationDays = kind === 'fixed' ? durationDays : undefined;
+  fields.endDate =
+    kind === 'fixed' && durationDays ? addDaysISO(startDate, durationDays - 1) : undefined;
+  return patchRecord<Routine>('routines', id, fields);
+}
 
 export const archiveRoutine = (id: string) =>
   patchRecord<Routine>('routines', id, { archivedAt: new Date().toISOString() });

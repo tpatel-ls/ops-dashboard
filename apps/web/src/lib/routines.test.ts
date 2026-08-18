@@ -4,7 +4,16 @@ const mocks = vi.hoisted(() => ({
   newRecord: vi.fn((fields: Record<string, unknown>) => fields),
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
   patchRecord: vi.fn(),
+  getRoutine: vi.fn(),
 }));
+
+vi.mock('@ops-dashboard/core', async () => {
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
+  return {
+    ...actual,
+    getDb: () => ({ routines: { get: mocks.getRoutine } }),
+  };
+});
 
 vi.mock('./records', () => ({
   newRecord: mocks.newRecord,
@@ -20,6 +29,13 @@ describe('createRoutine', () => {
     mocks.newRecord.mockClear();
     mocks.putRecord.mockClear();
     mocks.patchRecord.mockClear();
+    mocks.getRoutine.mockReset().mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      kind: 'fixed',
+      durationDays: 30,
+      startDate: '2026-08-01',
+    });
   });
 
   it.each([0, -2, 1.5])('rejects an invalid duration: %s', (durationDays) => {
@@ -47,6 +63,15 @@ describe('createRoutine', () => {
     expect(routine).toMatchObject({ startDate: '2026-07-31', endDate: '2026-08-01' });
   });
 
+  it('requires durations only for fixed routines', async () => {
+    expect(() => createRoutine({ name: 'Reset', kind: 'fixed' })).toThrow(
+      'Fixed routines require a duration',
+    );
+    await expect(
+      createRoutine({ name: 'Daily reset', kind: 'ongoing', durationDays: 30 }),
+    ).resolves.not.toHaveProperty('durationDays');
+  });
+
   it.each(['2026-02-30', 'not-a-date'])('rejects an invalid start date: %s', (startDate) => {
     expect(() => createRoutine({ name: 'Reset', startDate })).toThrow(
       'Routine start date must be a valid calendar day',
@@ -65,6 +90,16 @@ describe('createRoutine', () => {
 });
 
 describe('updateRoutine', () => {
+  beforeEach(() => {
+    mocks.getRoutine.mockReset().mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      kind: 'fixed',
+      durationDays: 30,
+      startDate: '2026-08-01',
+    });
+  });
+
   it('validates and normalizes editable fields', async () => {
     await updateRoutine('routine-1', {
       name: '  Morning reset  ',
@@ -85,6 +120,26 @@ describe('updateRoutine', () => {
     );
     expect(() => updateRoutine('routine-1', { startDate: undefined } as never)).toThrow(
       'Routine start date must be a valid calendar day',
+    );
+  });
+
+  it('keeps derived fixed-routine dates consistent', async () => {
+    await updateRoutine('routine-1', { startDate: '2026-08-10', durationDays: 3 });
+    expect(mocks.patchRecord).toHaveBeenCalledWith(
+      'routines',
+      'routine-1',
+      expect.objectContaining({
+        startDate: '2026-08-10',
+        durationDays: 3,
+        endDate: '2026-08-12',
+      }),
+    );
+
+    await updateRoutine('routine-1', { kind: 'ongoing' });
+    expect(mocks.patchRecord).toHaveBeenLastCalledWith(
+      'routines',
+      'routine-1',
+      expect.objectContaining({ kind: 'ongoing', durationDays: undefined, endDate: undefined }),
     );
   });
 });
