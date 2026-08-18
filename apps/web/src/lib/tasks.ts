@@ -12,6 +12,7 @@ import {
 } from '@ops-dashboard/core';
 import type { ChecklistItem, Project, Reminder, Task, TaskStatus } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
+import { normalizeStringList } from './string-list';
 
 const TASK_STATUSES = new Set<TaskStatus>([
   'backlog',
@@ -38,7 +39,34 @@ function nextTaskOrder(previous: number | undefined): number {
   return Number.isFinite(next) ? next : 1;
 }
 
+function normalizeTaskCollections(patch: Partial<Task>): void {
+  if (Object.hasOwn(patch, 'tags')) {
+    patch.tags = normalizeStringList(patch.tags, 'Task tags must be valid.');
+  }
+  if (Object.hasOwn(patch, 'checklist')) {
+    if (!Array.isArray(patch.checklist)) throw new Error('Task checklist must be valid.');
+    const seen = new Set<string>();
+    patch.checklist = patch.checklist.map((item) => {
+      if (
+        !item ||
+        typeof item !== 'object' ||
+        typeof item.id !== 'string' ||
+        typeof item.text !== 'string' ||
+        typeof item.done !== 'boolean'
+      ) {
+        throw new Error('Task checklist must be valid.');
+      }
+      const id = item.id.trim();
+      const text = item.text.trim();
+      if (!id || !text || seen.has(id)) throw new Error('Task checklist must be valid.');
+      seen.add(id);
+      return { id, text, done: item.done };
+    });
+  }
+}
+
 function assertTaskFields(patch: Partial<Task>): void {
+  normalizeTaskCollections(patch);
   if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {
     throw new Error('Task schedule must be a valid calendar day.');
   }
@@ -111,6 +139,7 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
 export async function updateTask(id: string, patch: Partial<Task>): Promise<void> {
   const mutablePatch = { ...patch };
   if (mutablePatch.title !== undefined) {
+    if (typeof mutablePatch.title !== 'string') throw new Error('Task title is required.');
     mutablePatch.title = mutablePatch.title.trim();
     if (!mutablePatch.title) throw new Error('Task title is required.');
   }
