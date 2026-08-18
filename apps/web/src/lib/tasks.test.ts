@@ -281,6 +281,60 @@ describe('updateTask', () => {
       expect(mocks.put).not.toHaveBeenCalled();
     }
   });
+
+  it('normalizes task reminder metadata', async () => {
+    await updateTask('task-1', {
+      reminders: [
+        {
+          id: ' reminder-1 ',
+          taskId: ' task-1 ',
+          triggerAt: '2026-08-18T09:00:00-05:00',
+          delivered: false,
+          offsetMinutes: 15,
+        },
+      ],
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reminders: [
+          {
+            id: 'reminder-1',
+            taskId: 'task-1',
+            triggerAt: '2026-08-18T14:00:00.000Z',
+            delivered: false,
+            offsetMinutes: 15,
+          },
+        ],
+      }),
+    );
+  });
+
+  it('rejects malformed task reminders', async () => {
+    for (const reminders of [
+      null,
+      [null],
+      [{ id: '', taskId: 'task-1', triggerAt: '2026-08-18T14:00:00Z', delivered: false }],
+      [{ id: 'r1', taskId: 'task-1', triggerAt: 'invalid', delivered: false }],
+      [
+        {
+          id: 'r1',
+          taskId: 'task-1',
+          triggerAt: '2026-08-18T14:00:00Z',
+          delivered: false,
+          offsetMinutes: 1.5,
+        },
+      ],
+      [
+        { id: 'r1', taskId: 'task-1', triggerAt: '2026-08-18T14:00:00Z', delivered: false },
+        { id: ' r1 ', taskId: 'task-1', triggerAt: '2026-08-18T15:00:00Z', delivered: true },
+      ],
+    ]) {
+      mocks.put.mockClear();
+      await expect(updateTask('task-1', { reminders } as never)).rejects.toThrow();
+      expect(mocks.put).not.toHaveBeenCalled();
+    }
+  });
 });
 
 describe('setTaskStatus', () => {
