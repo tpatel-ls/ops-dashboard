@@ -10,7 +10,14 @@ import {
   projectNextTask,
   quickAddToTask,
 } from '@ops-dashboard/core';
-import type { ChecklistItem, Project, Reminder, Task, TaskStatus } from '@ops-dashboard/core';
+import type {
+  ChecklistItem,
+  Project,
+  RecurrenceRule,
+  Reminder,
+  Task,
+  TaskStatus,
+} from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 import { normalizeStringList } from './string-list';
 
@@ -21,6 +28,21 @@ const TASK_STATUSES = new Set<TaskStatus>([
   'blocked',
   'done',
   'archived',
+]);
+const RECURRENCE_FREQUENCIES = new Set<RecurrenceRule['freq']>([
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly',
+]);
+const RECURRENCE_DAYS = new Set<NonNullable<RecurrenceRule['byDay']>[number]>([
+  'MO',
+  'TU',
+  'WE',
+  'TH',
+  'FR',
+  'SA',
+  'SU',
 ]);
 
 export function availableTask(task: Task | undefined): Task | null {
@@ -65,8 +87,47 @@ function normalizeTaskCollections(patch: Partial<Task>): void {
   }
 }
 
+function normalizeTaskRecurrence(patch: Partial<Task>): void {
+  if (!Object.hasOwn(patch, 'recurrence') || patch.recurrence === undefined) return;
+  const value = patch.recurrence;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Task recurrence must be valid.');
+  }
+  if (
+    !RECURRENCE_FREQUENCIES.has(value.freq) ||
+    !Number.isSafeInteger(value.interval) ||
+    value.interval < 1
+  ) {
+    throw new Error('Task recurrence must be valid.');
+  }
+  let byDay: RecurrenceRule['byDay'];
+  if (value.byDay !== undefined) {
+    if (!Array.isArray(value.byDay) || value.byDay.some((day) => !RECURRENCE_DAYS.has(day))) {
+      throw new Error('Task recurrence must be valid.');
+    }
+    byDay = [...new Set(value.byDay)];
+  }
+  if (value.endsOn !== undefined && localDay(value.endsOn) !== value.endsOn) {
+    throw new Error('Task recurrence end date must be valid.');
+  }
+  if (
+    value.count !== undefined &&
+    (!Number.isSafeInteger(value.count) || value.count < 1)
+  ) {
+    throw new Error('Task recurrence count must be a positive integer.');
+  }
+  patch.recurrence = {
+    freq: value.freq,
+    interval: value.interval,
+    ...(byDay !== undefined ? { byDay } : {}),
+    ...(value.endsOn !== undefined ? { endsOn: value.endsOn } : {}),
+    ...(value.count !== undefined ? { count: value.count } : {}),
+  };
+}
+
 function assertTaskFields(patch: Partial<Task>): void {
   normalizeTaskCollections(patch);
+  normalizeTaskRecurrence(patch);
   if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {
     throw new Error('Task schedule must be a valid calendar day.');
   }
