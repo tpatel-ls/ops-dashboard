@@ -179,9 +179,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@supabase/supabase-js':
-        specifier: ^2.112.3
-        version: 2.112.3
       chrono-node:
         specifier: ^2.10.1
         version: 2.10.1
