@@ -94,6 +94,8 @@ describe('addTask', () => {
       { order: Number.NaN },
       { status: 'missing' as Task['status'] },
       { priority: 9 as Task['priority'] },
+      { tags: [42] as never },
+      { checklist: [{ id: '', text: 'Step', done: false }] },
     ] satisfies Partial<Task>[]) {
       mocks.last.mockClear();
       await expect(addTask('Invalid task', overrides)).rejects.toThrow();
@@ -207,6 +209,38 @@ describe('updateTask', () => {
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+
+  it('normalizes task tags and checklist items', async () => {
+    await updateTask('task-1', {
+      tags: [' launch ', 'launch', ' '],
+      checklist: [{ id: ' step-1 ', text: ' Confirm owner ', done: false }],
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tags: ['launch'],
+        checklist: [{ id: 'step-1', text: 'Confirm owner', done: false }],
+      }),
+    );
+  });
+
+  it('rejects malformed task collections', async () => {
+    for (const patch of [
+      { tags: [null] as never },
+      { checklist: [null] as never },
+      { checklist: [{ id: 'step-1', text: '   ', done: false }] },
+      {
+        checklist: [
+          { id: 'step-1', text: 'First', done: false },
+          { id: ' step-1 ', text: 'Second', done: true },
+        ],
+      },
+    ] satisfies Partial<Task>[]) {
+      mocks.put.mockClear();
+      await expect(updateTask('task-1', patch)).rejects.toThrow();
+      expect(mocks.put).not.toHaveBeenCalled();
+    }
   });
 });
 
