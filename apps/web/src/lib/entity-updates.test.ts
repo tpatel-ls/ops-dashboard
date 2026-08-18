@@ -361,4 +361,25 @@ describe('required update fields', () => {
       'Organization order must be finite',
     );
   });
+
+  it('rejects malformed string collections', () => {
+    expect(() => updateBook('book-1', { tags: [42] as never })).toThrow(
+      'Book tags must be valid',
+    );
+    expect(() => updateJournalEntry('journal-1', { mediaUrls: [null] as never })).toThrow(
+      'Journal entry media must be valid',
+    );
+    expect(() => updateJournalEntry('journal-1', { tags: [{}] as never })).toThrow(
+      'Journal entry tags must be valid',
+    );
+    expect(() => updateNote('note-1', { tags: [false] as never })).toThrow(
+      'Note tags must be valid',
+    );
+    expect(() => updateQuote('quote-1', { tags: [1] as never })).toThrow(
+      'Quote tags must be valid',
+    );
+    expect(() => updatePerson('person-1', { tags: [undefined] as never })).toThrow(
+      'Person tags must be valid',
+    );
+  });
 });

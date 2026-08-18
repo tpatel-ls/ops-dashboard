@@ -2,6 +2,7 @@
 
 import type { Note } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { normalizeStringList } from './string-list';
 
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   const normalized = { ...patch };
@@ -17,8 +18,7 @@ function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    if (!normalized.tags) throw new Error('Note tags must be valid.');
-    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
+    normalized.tags = normalizeStringList(normalized.tags, 'Note tags must be valid.');
   }
   return normalized;
 }

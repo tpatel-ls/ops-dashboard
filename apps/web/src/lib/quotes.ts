@@ -3,6 +3,7 @@
 import { newId } from '@ops-dashboard/core';
 import type { Quote, QuoteSourceType, Thought } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { normalizeStringList } from './string-list';
 
 const QUOTE_SOURCE_TYPES = new Set<QuoteSourceType>([
   'book',
@@ -26,8 +27,7 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    if (!normalized.tags) throw new Error('Quote tags must be valid.');
-    normalized.tags = [...new Set(normalized.tags.map((tag) => tag.trim()).filter(Boolean))];
+    normalized.tags = normalizeStringList(normalized.tags, 'Quote tags must be valid.');
   }
   if (Object.hasOwn(normalized, 'thoughts')) {
     if (!Array.isArray(normalized.thoughts)) throw new Error('Quote thoughts must be valid.');
