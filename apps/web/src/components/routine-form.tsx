@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Plus, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
@@ -13,6 +13,7 @@ interface RoutineFormProps {
 }
 
 export function RoutineForm({ onCreated }: RoutineFormProps) {
+  const formId = useId();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('anytime');
@@ -59,7 +60,7 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity"
+        className="bg-primary text-primary-foreground inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-90"
       >
         <Plus className="size-3.5" aria-hidden />
         New Routine
@@ -70,13 +71,13 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
   return (
     <div className="surface p-4 md:p-5">
       <div className="mb-4 flex items-center justify-between">
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           New Routine
         </div>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground hover:text-foreground inline-flex size-6 items-center justify-center rounded-md transition-colors"
           aria-label="Close"
         >
           <X className="size-3.5" />
@@ -86,10 +87,14 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
       <form onSubmit={handleSubmit} className="grid gap-3">
         {/* Name */}
         <div>
-          <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <label
+            htmlFor={`${formId}-name`}
+            className="text-subtle-foreground mb-1 block font-mono text-[10px] tracking-[0.18em] uppercase"
+          >
             Name
           </label>
           <input
+            id={`${formId}-name`}
             className="input"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -102,10 +107,14 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
         {/* Time of day + kind row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <label
+              htmlFor={`${formId}-time-of-day`}
+              className="text-subtle-foreground mb-1 block font-mono text-[10px] tracking-[0.18em] uppercase"
+            >
               Time of Day
             </label>
             <select
+              id={`${formId}-time-of-day`}
               className="input"
               value={timeOfDay}
               onChange={(e) => setTimeOfDay(e.target.value as TimeOfDay)}
@@ -118,10 +127,14 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
           </div>
 
           <div>
-            <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <label
+              htmlFor={`${formId}-kind`}
+              className="text-subtle-foreground mb-1 block font-mono text-[10px] tracking-[0.18em] uppercase"
+            >
               Kind
             </label>
             <select
+              id={`${formId}-kind`}
               className="input"
               value={kind}
               onChange={(e) => setKind(e.target.value as 'ongoing' | 'fixed')}
@@ -135,10 +148,14 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
         {/* Duration (only for fixed) */}
         {kind === 'fixed' && (
           <div>
-            <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <label
+              htmlFor={`${formId}-duration`}
+              className="text-subtle-foreground mb-1 block font-mono text-[10px] tracking-[0.18em] uppercase"
+            >
               Duration (days)
             </label>
             <input
+              id={`${formId}-duration`}
               className="input"
               type="number"
               min={1}
@@ -152,10 +169,14 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
 
         {/* Domain */}
         <div>
-          <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <label
+            htmlFor={`${formId}-domain`}
+            className="text-subtle-foreground mb-1 block font-mono text-[10px] tracking-[0.18em] uppercase"
+          >
             Domain
           </label>
           <select
+            id={`${formId}-domain`}
             className="input"
             value={domainId}
             onChange={(e) => setDomainId(e.target.value)}
@@ -163,7 +184,8 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
             <option value="">No domain</option>
             {domains?.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.icon ? `${d.icon} ` : ''}{d.name}
+                {d.icon ? `${d.icon} ` : ''}
+                {d.name}
               </option>
             ))}
           </select>
@@ -188,7 +210,7 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
               )}
             />
           </button>
-          <span className="text-sm text-foreground">Enable reminders</span>
+          <span className="text-foreground text-sm">Enable reminders</span>
         </label>
 
         {/* Submit */}
@@ -196,14 +218,14 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-xs transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting || !name.trim()}
-            className="rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="bg-primary text-primary-foreground rounded-md px-4 py-1.5 text-xs font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? 'Creating…' : 'Create Routine'}
           </button>
