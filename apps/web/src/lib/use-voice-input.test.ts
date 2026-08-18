@@ -49,6 +49,25 @@ afterEach(() => {
 });
 
 describe('useVoiceInput', () => {
+  it('coalesces rapid microphone starts while access is pending', async () => {
+    const stopTrack = vi.fn();
+    const getUserMedia = vi.fn().mockResolvedValue({
+      getTracks: () => [{ stop: stopTrack }],
+    });
+    setMediaDevices(getUserMedia);
+    const { result } = renderHook(() => useVoiceInput({ onTranscript: vi.fn() }));
+
+    act(() => {
+      result.current.toggle();
+      result.current.toggle();
+    });
+
+    expect(getUserMedia).toHaveBeenCalledOnce();
+    await waitFor(() => expect(result.current.listening).toBe(true));
+    act(() => result.current.toggle());
+    await waitFor(() => expect(stopTrack).toHaveBeenCalledOnce());
+  });
+
   it('reports when microphone access is unavailable', async () => {
     setMediaDevices(vi.fn().mockRejectedValue(new Error('denied')));
     const { result } = renderHook(() => useVoiceInput({ onTranscript: vi.fn() }));
