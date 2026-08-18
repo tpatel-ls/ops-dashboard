@@ -120,6 +120,15 @@ describe('capture inputs', () => {
     expect(() =>
       setCaptureRoute('capture-1', { type: 'task', id: 'task-1' }, 'unknown' as never),
     ).toThrow('Capture kind must be valid');
+    expect(() => setCaptureRoute('capture-1', null as never)).toThrow(
+      'Capture route must be valid',
+    );
+    expect(() => setCaptureRoute('capture-1', { type: 'task', id: 42 } as never)).toThrow(
+      'Capture route must be valid',
+    );
+    expect(() =>
+      setCaptureRoute('capture-1', { type: 'task', id: 'task-1' }, 'task', 42 as never),
+    ).toThrow('Capture summary must be valid');
   });
 });
 
