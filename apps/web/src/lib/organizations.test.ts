@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
     deviceId: 'device-test',
   })),
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
+  patchRecord: vi.fn(),
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
@@ -24,17 +25,18 @@ vi.mock('@ops-dashboard/core', async () => {
 vi.mock('./records', () => ({
   newRecord: mocks.newRecord,
   putRecord: mocks.putRecord,
-  patchRecord: vi.fn(),
+  patchRecord: mocks.patchRecord,
   softDeleteRecord: vi.fn(),
 }));
 
-import { createOrganization } from './organizations';
+import { createOrganization, updateOrganization } from './organizations';
 
 describe('createOrganization', () => {
   beforeEach(() => {
     mocks.toArray.mockReset().mockResolvedValue([]);
     mocks.newRecord.mockClear();
     mocks.putRecord.mockClear();
+    mocks.patchRecord.mockClear();
   });
 
   it('trims the organization name before writing', async () => {
@@ -78,5 +80,28 @@ describe('createOrganization', () => {
       'Organization order must be finite',
     );
     expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe('updateOrganization', () => {
+  beforeEach(() => {
+    mocks.toArray.mockReset().mockResolvedValue([
+      { id: 'org-1', name: 'Acme', order: 1 },
+      { id: 'org-2', name: 'Globex', order: 2 },
+    ]);
+    mocks.patchRecord.mockClear();
+  });
+
+  it('rejects a rename that duplicates another active organization', async () => {
+    await expect(updateOrganization('org-1', { name: '  GLOBEX  ' })).rejects.toThrow(
+      'Organization already exists',
+    );
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+  });
+
+  it('allows retaining the current normalized organization name', async () => {
+    await updateOrganization('org-1', { name: '  Acme  ' });
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('organizations', 'org-1', { name: 'Acme' });
   });
 });

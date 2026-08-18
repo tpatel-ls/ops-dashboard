@@ -75,8 +75,26 @@ export async function createOrganization(input: {
   return putRecord('organizations', id ? { ...rec, id } : rec);
 }
 
-export const updateOrganization = (id: string, patch: Partial<Organization>) =>
-  patchRecord<Organization>('organizations', id, normalizeOrganizationPatch(patch));
+export function updateOrganization(id: string, patch: Partial<Organization>) {
+  const fields = normalizeOrganizationPatch(patch);
+  if (fields.name === undefined) return patchRecord<Organization>('organizations', id, fields);
+  return updateOrganizationName(id, fields);
+}
+
+async function updateOrganizationName(id: string, fields: Partial<Organization>) {
+  const normalizedName = fields.name!.toLocaleLowerCase();
+  const organizations = await getDb().organizations.toArray();
+  const duplicate = organizations.some(
+    (organization) =>
+      organization.id !== id &&
+      !organization.deletedAt &&
+      !organization.archivedAt &&
+      typeof organization.name === 'string' &&
+      organization.name.trim().toLocaleLowerCase() === normalizedName,
+  );
+  if (duplicate) throw new Error('Organization already exists.');
+  return patchRecord<Organization>('organizations', id, fields);
+}
 
 export const archiveOrganization = (id: string) =>
   patchRecord<Organization>('organizations', id, { archivedAt: new Date().toISOString() });
