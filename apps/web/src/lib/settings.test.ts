@@ -87,4 +87,12 @@ describe('normalizeSettings', () => {
     expect(Number.isFinite(Date.parse(normalized.updatedAt))).toBe(true);
     expect(normalized.updatedAt).not.toBe('not-a-timestamp');
   });
+
+  it('keeps valid timezones and removes invalid or unknown persisted fields', () => {
+    expect(
+      normalizeSettings({ timezone: ' America/Chicago ', legacyFlag: true } as never),
+    ).toMatchObject({ timezone: 'America/Chicago' });
+    expect(normalizeSettings({ timezone: 'Not/AZone' })).not.toHaveProperty('timezone');
+    expect(normalizeSettings({ legacyFlag: true } as never)).not.toHaveProperty('legacyFlag');
+  });
 });
