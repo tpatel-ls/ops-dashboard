@@ -3,6 +3,8 @@ type BadgeNavigator = Navigator & {
   clearAppBadge?: () => Promise<void>;
 };
 
+const MAX_BADGE_COUNT = 4_294_967_295;
+
 function badgeNavigator(): BadgeNavigator | null {
   if (typeof navigator === 'undefined') return null;
   return navigator as BadgeNavigator;
@@ -18,7 +20,9 @@ export async function updateAppBadge(count: number): Promise<boolean> {
   if (!nav?.setAppBadge || !nav.clearAppBadge) return false;
 
   try {
-    const badgeCount = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+    const badgeCount = Number.isFinite(count)
+      ? Math.min(MAX_BADGE_COUNT, Math.max(0, Math.floor(count)))
+      : 0;
     if (badgeCount > 0) await nav.setAppBadge(badgeCount);
     else await nav.clearAppBadge();
     return true;
