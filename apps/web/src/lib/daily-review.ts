@@ -2,10 +2,11 @@ import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 
 export function taskCompletedOn(task: Task, day: string): boolean {
-  return !task.deletedAt && localDay(task.completedAt) === day;
+  return localDay(day) === day && !task.deletedAt && localDay(task.completedAt) === day;
 }
 
 export function taskNeedsRollForward(task: Task, day: string): boolean {
+  if (localDay(day) !== day) return false;
   if (task.deletedAt || task.status === 'done' || task.status === 'archived') return false;
   const scheduledDay = localDay(task.scheduledFor);
   const dueDay = localDay(task.dueAt);
