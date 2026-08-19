@@ -22,6 +22,17 @@ describe('updateAppBadge', () => {
     expect(setAppBadge).toHaveBeenCalledWith(3);
   });
 
+  it('keeps oversized counts within the browser badge range', async () => {
+    const setAppBadge = vi.fn(async () => undefined);
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: { setAppBadge, clearAppBadge: vi.fn(async () => undefined) },
+    });
+
+    await expect(updateAppBadge(Number.MAX_VALUE)).resolves.toBe(true);
+    expect(setAppBadge).toHaveBeenCalledWith(4_294_967_295);
+  });
+
   it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 0])(
     'clears invalid or non-positive badge count %s',
     async (count) => {
