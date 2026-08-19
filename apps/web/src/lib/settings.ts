@@ -44,12 +44,24 @@ function clockTime(value: unknown, fallback: string): string {
   return hours <= 23 && minutes <= 59 ? value : fallback;
 }
 
+function timeZone(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !value.trim()) return undefined;
+  const candidate = value.trim();
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format();
+    return candidate;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Fill settings added after the first schema and repair invalid timer values. */
 export function normalizeSettings(value?: Partial<Settings> | null): Settings {
+  const normalizedTimeZone = timeZone(value?.timezone);
   return {
-    ...DEFAULT_SETTINGS,
-    ...value,
     id: 'singleton',
+    workdayStart: clockTime(value?.workdayStart, DEFAULT_SETTINGS.workdayStart),
+    workdayEnd: clockTime(value?.workdayEnd, DEFAULT_SETTINGS.workdayEnd),
     weekStartsOn:
       value?.weekStartsOn === 0 || value?.weekStartsOn === 1
         ? value.weekStartsOn
@@ -58,9 +70,6 @@ export function normalizeSettings(value?: Partial<Settings> | null): Settings {
     syncEnabled: booleanSetting(value?.syncEnabled, DEFAULT_SETTINGS.syncEnabled),
     defaultView: listedSetting(value?.defaultView, DEFAULT_VIEWS, DEFAULT_SETTINGS.defaultView),
     leftyMode: booleanSetting(value?.leftyMode, DEFAULT_SETTINGS.leftyMode),
-    workdayStart: clockTime(value?.workdayStart, DEFAULT_SETTINGS.workdayStart),
-    workdayEnd: clockTime(value?.workdayEnd, DEFAULT_SETTINGS.workdayEnd),
-    dailyReviewAt: clockTime(value?.dailyReviewAt, DEFAULT_SETTINGS.dailyReviewAt),
     pomodoroFocusMinutes: boundedMinutes(
       value?.pomodoroFocusMinutes,
       DEFAULT_SETTINGS.pomodoroFocusMinutes,
@@ -73,6 +82,8 @@ export function normalizeSettings(value?: Partial<Settings> | null): Settings {
       1,
       30,
     ),
+    dailyReviewAt: clockTime(value?.dailyReviewAt, DEFAULT_SETTINGS.dailyReviewAt),
+    ...(normalizedTimeZone ? { timezone: normalizedTimeZone } : {}),
     aiEnabled: booleanSetting(value?.aiEnabled, DEFAULT_SETTINGS.aiEnabled),
     captureAutoReminder: booleanSetting(
       value?.captureAutoReminder,
