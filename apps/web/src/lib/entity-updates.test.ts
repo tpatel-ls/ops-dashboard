@@ -6,7 +6,10 @@ vi.mock('@ops-dashboard/core', async () => {
   const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
-    getDb: () => ({ organizations: { toArray: async () => [] } }),
+    getDb: () => ({
+      organizations: { toArray: async () => [] },
+      notes: { get: async () => ({ id: 'note-1', body: '' }) },
+    }),
   };
 });
 
@@ -217,6 +220,9 @@ describe('note inputs', () => {
     });
 
     expect(() => updateNote('note-1', { title: '   ', body: '   ' })).toThrow(
+      'Note content is required',
+    );
+    await expect(updateNote('note-1', { body: '   ' })).rejects.toThrow(
       'Note content is required',
     );
   });

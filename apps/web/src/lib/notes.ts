@@ -1,5 +1,6 @@
 'use client';
 
+import { getDb } from '@ops-dashboard/core';
 import type { Note } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
@@ -51,7 +52,22 @@ export function createNote(input: {
   );
 }
 
-export const updateNote = (id: string, patch: Partial<Note>) =>
-  patchRecord<Note>('notes', id, normalizeNotePatch(patch));
+export function updateNote(id: string, patch: Partial<Note>) {
+  const fields = normalizeNotePatch(patch);
+  const changesTitle = Object.hasOwn(fields, 'title');
+  const changesBody = Object.hasOwn(fields, 'body');
+  if (!changesTitle && !changesBody) return patchRecord<Note>('notes', id, fields);
+  if (changesTitle && changesBody) return patchRecord<Note>('notes', id, fields);
+  return updateNoteContent(id, fields);
+}
+
+async function updateNoteContent(id: string, fields: Partial<Note>) {
+  const existing = await getDb().notes.get(id);
+  if (!existing || existing.deletedAt) return null;
+  const title = Object.hasOwn(fields, 'title') ? fields.title : existing.title;
+  const body = Object.hasOwn(fields, 'body') ? fields.body : existing.body;
+  if (!title && !body) throw new Error('Note content is required.');
+  return patchRecord<Note>('notes', id, fields);
+}
 
 export const deleteNote = (id: string) => softDeleteRecord<Note>('notes', id);
