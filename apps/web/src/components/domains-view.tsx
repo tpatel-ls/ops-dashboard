@@ -78,6 +78,7 @@ function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Domain name"
+        aria-label="Domain name"
         className="input"
         autoFocus
       />
@@ -85,6 +86,7 @@ function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description (optional)"
+        aria-label="Domain description"
         rows={2}
         className="input resize-none"
       />

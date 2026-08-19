@@ -162,6 +162,7 @@ function CreateProjectForm({
             setError(null);
           }}
           placeholder="Name the outcome"
+          aria-label="Project name"
           className="input text-foreground min-h-10"
           autoFocus
         />

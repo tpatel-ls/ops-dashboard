@@ -65,6 +65,7 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
       <textarea
         className="input min-h-[90px] resize-y"
         placeholder="Quote text…"
+        aria-label="Quote text"
         required
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -73,12 +74,14 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
         <input
           className="input"
           placeholder="Author (optional)"
+          aria-label="Quote author"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
         />
         <input
           className="input"
           placeholder="Source title (optional)"
+          aria-label="Quote source"
           value={source}
           onChange={(e) => setSource(e.target.value)}
         />
@@ -99,6 +102,7 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
         <input
           className="input"
           placeholder="Tags - comma separated (optional)"
+          aria-label="Quote tags"
           value={tagsRaw}
           onChange={(e) => setTagsRaw(e.target.value)}
         />
@@ -154,6 +158,7 @@ function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
         autoFocus
         className="input flex-1"
         placeholder="Add a thought…"
+        aria-label="Quote thought"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
