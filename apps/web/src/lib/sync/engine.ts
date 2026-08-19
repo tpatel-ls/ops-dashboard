@@ -13,7 +13,12 @@ import {
   toRow,
   type DexieTableName,
 } from './mapping';
-import { createSyncCursorCache, overlappedCursor, SYNC_EPOCH } from './cursors';
+import {
+  advanceSyncCursor,
+  createSyncCursorCache,
+  overlappedCursor,
+  SYNC_EPOCH,
+} from './cursors';
 import { shouldAcceptRemote } from './conflicts';
 import { visitPullPages } from './pagination';
 import { nextRecordedAttempt, outboundRecordPayload } from './outbox';
@@ -168,8 +173,7 @@ async function pull(supabase: SupabaseClient): Promise<void> {
       },
       async (row) => {
         await mergeInbound(table, row);
-        const ts = row.updated_at;
-        if (typeof ts === 'string' && ts > maxSeen) maxSeen = ts;
+        maxSeen = advanceSyncCursor(maxSeen, row.updated_at);
       },
       PULL_PAGE_SIZE,
     );
