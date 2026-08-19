@@ -56,6 +56,10 @@ export async function createOrganization(input: {
 
   const normalizedName = name.toLocaleLowerCase();
   const organizations = await getDb().organizations.toArray();
+  const idMatch = id ? organizations.find((organization) => organization.id === id) : undefined;
+  if (idMatch && idMatch.name.trim().toLocaleLowerCase() !== normalizedName) {
+    throw new Error('Organization id already exists.');
+  }
   const duplicate = organizations.find(
     (organization) =>
       !organization.deletedAt &&
