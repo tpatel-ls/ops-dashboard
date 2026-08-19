@@ -15,8 +15,18 @@ const AUDIO_TYPES = new Set([
 ]);
 
 export function transcriptionEndpoint(baseURL: string | undefined): string | undefined {
-  const base = baseURL?.trim().replace(/\/+$/, '');
-  return base ? `${base}/audio/transcriptions` : undefined;
+  const base = baseURL?.trim();
+  if (!base) return undefined;
+  try {
+    const url = new URL(base);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+      return undefined;
+    }
+    url.pathname = `${url.pathname.replace(/\/+$/, '')}/audio/transcriptions`;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
 }
 
 export function transcriptionFileError(
