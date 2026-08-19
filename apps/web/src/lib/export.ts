@@ -1,7 +1,7 @@
 'use client';
 
 import { format, isValid, parseISO } from 'date-fns';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, localDay } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 
 export interface OpsExport {
@@ -43,7 +43,48 @@ function hasValidSyncMetadata(value: Record<string, unknown>): boolean {
 }
 
 function isStringList(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+  return (
+    Array.isArray(value) &&
+    value.every(isUsableString) &&
+    new Set(value).size === value.length
+  );
+}
+
+function isOptionalUsableString(value: unknown): boolean {
+  return value === undefined || isUsableString(value);
+}
+
+function isOptionalTimestamp(value: unknown): boolean {
+  return value === undefined || isTimestamp(value);
+}
+
+function isOptionalCalendarDay(value: unknown): boolean {
+  return value === undefined || (typeof value === 'string' && localDay(value) === value);
+}
+
+function isOptionalNonNegativeInteger(value: unknown): boolean {
+  return value === undefined || (Number.isSafeInteger(value) && (value as number) >= 0);
+}
+
+const RECURRENCE_FREQUENCIES = new Set(['daily', 'weekly', 'monthly', 'yearly']);
+const RECURRENCE_DAYS = new Set(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
+
+function isRecurrence(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.freq === 'string' &&
+    RECURRENCE_FREQUENCIES.has(value.freq) &&
+    Number.isSafeInteger(value.interval) &&
+    (value.interval as number) >= 1 &&
+    (value.byDay === undefined ||
+      (Array.isArray(value.byDay) &&
+        value.byDay.every((day) => typeof day === 'string' && RECURRENCE_DAYS.has(day)) &&
+        new Set(value.byDay).size === value.byDay.length)) &&
+    isOptionalCalendarDay(value.endsOn) &&
+    (value.count === undefined ||
+      (Number.isSafeInteger(value.count) && (value.count as number) >= 1))
+  );
 }
 
 function isChecklistItem(value: unknown): boolean {
@@ -79,10 +120,27 @@ function isTaskRecord(value: unknown): boolean {
     (value.priority as number) <= 3 &&
     Number.isFinite(value.order) &&
     isStringList(value.tags) &&
+    isOptionalUsableString(value.notes) &&
+    isOptionalCalendarDay(value.scheduledFor) &&
+    isOptionalTimestamp(value.dueAt) &&
+    isOptionalTimestamp(value.startAt) &&
+    isOptionalTimestamp(value.endAt) &&
+    isOptionalTimestamp(value.completedAt) &&
+    isOptionalNonNegativeInteger(value.estimateMinutes) &&
+    isOptionalNonNegativeInteger(value.actualMinutes) &&
+    isOptionalUsableString(value.projectId) &&
+    isOptionalUsableString(value.orgId) &&
+    isOptionalUsableString(value.domainId) &&
+    isOptionalUsableString(value.contentId) &&
+    isOptionalUsableString(value.parentId) &&
+    (value.starred === undefined || typeof value.starred === 'boolean') &&
+    isRecurrence(value.recurrence) &&
     Array.isArray(value.reminders) &&
     value.reminders.every(isReminder) &&
+    hasUniqueIds(value.reminders) &&
     Array.isArray(value.checklist) &&
-    value.checklist.every(isChecklistItem)
+    value.checklist.every(isChecklistItem) &&
+    hasUniqueIds(value.checklist)
   );
 }
 
@@ -118,10 +176,24 @@ function isProjectRecord(value: unknown): boolean {
     PROJECT_KINDS.has(value.kind) &&
     typeof value.status === 'string' &&
     PROJECT_STATUSES.has(value.status) &&
+    isOptionalUsableString(value.icon) &&
+    isOptionalUsableString(value.orgId) &&
+    isOptionalUsableString(value.domainId) &&
+    isOptionalUsableString(value.description) &&
+    isOptionalCalendarDay(value.startDate) &&
+    isOptionalCalendarDay(value.dueDate) &&
+    isOptionalTimestamp(value.lastWorkedAt) &&
+    isOptionalTimestamp(value.archivedAt) &&
+    (value.retainerResetDay === undefined ||
+      (Number.isSafeInteger(value.retainerResetDay) &&
+        (value.retainerResetDay as number) >= 1 &&
+        (value.retainerResetDay as number) <= 28)) &&
     Array.isArray(value.milestones) &&
     value.milestones.every(isMilestone) &&
+    hasUniqueIds(value.milestones) &&
     Array.isArray(value.checklists) &&
-    value.checklists.every(isNamedChecklist)
+    value.checklists.every(isNamedChecklist) &&
+    hasUniqueIds(value.checklists)
   );
 }
 
