@@ -22,10 +22,14 @@ export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'co
   if (typeof navigator === 'undefined') return 'failed';
 
   const nav = navigator as ShareNavigator;
+  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+  const sharedText = typeof payload.text === 'string' ? payload.text.trim() : '';
+  const url = typeof payload.url === 'string' ? payload.url.trim() : '';
+  if (!title && !sharedText && !url) return 'failed';
   const data: ShareData = {
-    title: payload.title,
-    text: payload.text,
-    url: payload.url,
+    ...(title ? { title } : {}),
+    ...(sharedText ? { text: sharedText } : {}),
+    ...(url ? { url } : {}),
   };
 
   try {
@@ -41,7 +45,7 @@ export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'co
 
   try {
     await nav.clipboard?.writeText(
-      [payload.title, payload.text, payload.url].filter(Boolean).join('\n'),
+      [title, sharedText, url].filter(Boolean).join('\n'),
     );
     return nav.clipboard ? 'copied' : 'failed';
   } catch {
