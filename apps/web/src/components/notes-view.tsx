@@ -51,12 +51,14 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
       <input
         className="input"
         placeholder="Title (optional)"
+        aria-label="Note title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <textarea
         className="input min-h-[100px] resize-y"
         placeholder="Note body…"
+        aria-label="Note body"
         required
         value={body}
         onChange={(e) => setBody(e.target.value)}
@@ -64,12 +66,14 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
       <input
         className="input"
         placeholder="Source (optional)"
+        aria-label="Note source"
         value={source}
         onChange={(e) => setSource(e.target.value)}
       />
       <input
         className="input"
         placeholder="Tags - comma separated (optional)"
+        aria-label="Note tags"
         value={tagsRaw}
         onChange={(e) => setTagsRaw(e.target.value)}
       />

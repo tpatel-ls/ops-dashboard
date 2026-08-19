@@ -310,6 +310,7 @@ export function QuickTaskEntry({
                 Date
                 <input
                   type="date"
+                  aria-label="Custom task date"
                   value={scheduledDate}
                   onChange={(event) => setScheduledDate(event.target.value)}
                   className="input min-h-11"

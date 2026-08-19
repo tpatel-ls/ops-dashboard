@@ -70,6 +70,7 @@ function FactsSection({ person }: { person: Person }) {
           <input
             className="input"
             placeholder="Label (e.g. Birthday)"
+            aria-label="Fact label"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             autoFocus
@@ -80,6 +81,7 @@ function FactsSection({ person }: { person: Person }) {
           <input
             className="input"
             placeholder="Value (e.g. March 15)"
+            aria-label="Fact value"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
@@ -200,6 +202,7 @@ function InteractionsSection({ person }: { person: Person }) {
           <textarea
             className="input resize-none"
             placeholder="What happened or was discussed?"
+            aria-label="Interaction notes"
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -209,6 +212,7 @@ function InteractionsSection({ person }: { person: Person }) {
             type="date"
             className="input"
             placeholder="Date (defaults to today)"
+            aria-label="Interaction date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
@@ -310,6 +314,7 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
           <span className="w-24 shrink-0 text-xs text-muted-foreground">Name</span>
           <input
             className="input flex-1"
+            aria-label="Person name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={saveName}

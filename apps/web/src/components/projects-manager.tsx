@@ -30,6 +30,7 @@ export function ProjectsManager() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="New project"
+          aria-label="New project name"
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
         />
         <button
@@ -58,6 +59,7 @@ export function ProjectsManager() {
               />
               <input
                 defaultValue={p.name}
+                aria-label={`Rename project ${p.name}`}
                 onBlur={(e) => {
                   if (e.target.value !== p.name) renameProject(p.id, e.target.value);
                 }}

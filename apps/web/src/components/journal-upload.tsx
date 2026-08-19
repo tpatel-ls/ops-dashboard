@@ -245,6 +245,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             onChange={(e) => setResult((prev) => (prev ? { ...prev, body: e.target.value } : prev))}
             rows={5}
             className="input resize-none"
+            aria-label="Extracted journal body"
           />
         </div>
 
@@ -351,6 +352,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
           value={manualBody}
           onChange={(e) => setManualBody(e.target.value)}
           placeholder="What happened today? Reflections, wins, struggles…"
+          aria-label="Journal entry"
           rows={6}
           className="input resize-none"
           autoFocus
@@ -450,6 +452,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Paste or type your journal entry here - raw notes, voice transcript, anything…"
+          aria-label="Journal text to analyze"
           rows={7}
           className="input resize-none"
           autoFocus
@@ -465,6 +468,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             capture="environment"
             className="sr-only"
             onChange={handleFileChange}
+            aria-label="Journal image"
           />
           {imagePreviewUrl ? (
             <div className="relative overflow-hidden rounded-[10px]">
@@ -502,6 +506,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Optional: add any context or notes to go along with the photo…"
+              aria-label="Journal image context"
               rows={3}
               className="input mt-3 resize-none"
             />

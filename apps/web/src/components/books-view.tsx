@@ -56,6 +56,7 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
       <input
         className="input"
         placeholder="Title"
+        aria-label="Book title"
         required
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -64,6 +65,7 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
         <input
           className="input"
           placeholder="Author (optional)"
+          aria-label="Book author"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
         />

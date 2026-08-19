@@ -131,6 +131,7 @@ function MilestonesSection({ project }: { project: Project }) {
           <input
             className="input"
             placeholder="Milestone title"
+            aria-label="Milestone title"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             autoFocus
@@ -143,6 +144,7 @@ function MilestonesSection({ project }: { project: Project }) {
             type="date"
             className="input"
             placeholder="Due date (optional)"
+            aria-label="Milestone due date"
             value={newDue}
             onChange={(e) => setNewDue(e.target.value)}
           />
@@ -258,6 +260,7 @@ function ChecklistsSection({ project }: { project: Project }) {
           <input
             className="input flex-1"
             placeholder="Checklist name"
+            aria-label="Checklist name"
             value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
             autoFocus
@@ -372,6 +375,7 @@ function ChecklistGroup({
               <input
                 className="input flex-1"
                 placeholder="Item text"
+                aria-label={`New item for ${checklist.name}`}
                 value={itemText}
                 onChange={(e) => setItemText(e.target.value)}
                 autoFocus
@@ -471,6 +475,7 @@ function LinkedTasksSection({ project }: { project: Project }) {
           value={adding}
           onChange={(e) => setAdding(e.target.value)}
           placeholder="Add a task... (try: call Bryan tomorrow 2pm !!)"
+          aria-label={`Add task to ${project.name}`}
           disabled={saving}
           className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-subtle-foreground"
         />
@@ -701,6 +706,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
           <span className="w-20 text-xs text-muted-foreground">Due</span>
           <input
             type="date"
+            aria-label="Project due date"
             value={project.dueDate ?? ''}
             onChange={(e) => set('dueDate', e.target.value || undefined)}
             className="input flex-1"

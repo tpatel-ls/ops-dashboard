@@ -53,6 +53,7 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Full name"
+        aria-label="Person name"
         className="input"
         autoFocus
         onKeyDown={(e) => {
@@ -63,6 +64,7 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
         value={relationship}
         onChange={(e) => setRelationship(e.target.value)}
         placeholder="Relationship (e.g. colleague, mentor, friend)"
+        aria-label="Relationship"
         className="input"
       />
       <div className="flex justify-end gap-2">
@@ -224,6 +226,7 @@ export function PeopleView() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search people"
+              aria-label="Search people"
               className="input h-10 w-full pl-9"
             />
           </label>
