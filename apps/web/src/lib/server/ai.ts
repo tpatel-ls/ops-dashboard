@@ -17,8 +17,22 @@ export const MODELS = {
 export const AI_REQUEST_TIMEOUT_MS = 45_000;
 export const AI_MAX_RETRIES = 1;
 
+function compatibleBaseURL(value: string | undefined): string | undefined {
+  const baseURL = value?.trim();
+  if (!baseURL) return undefined;
+  try {
+    const url = new URL(baseURL);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+      return undefined;
+    }
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return undefined;
+  }
+}
+
 export function anthropicClientOptions(apiKey: string, baseURL?: string) {
-  const normalizedBaseURL = baseURL?.trim();
+  const normalizedBaseURL = compatibleBaseURL(baseURL);
   return {
     apiKey: apiKey.trim(),
     timeout: AI_REQUEST_TIMEOUT_MS,
