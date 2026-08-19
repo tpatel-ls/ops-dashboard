@@ -40,10 +40,11 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm test:e2e
 ```
 
-The optional end-to-end command requires a Playwright configuration and test
-suite, which are not currently present in this repository.
+Install the Chromium runtime once with `pnpm --filter @ops-dashboard/web exec
+playwright install chromium` before running the end-to-end smoke suite locally.
 
 ## Configuration
 
