@@ -49,3 +49,12 @@ export function overlappedCursor(cursor: string, overlapMs: number): string {
   const safeOverlapMs = Number.isFinite(overlapMs) ? Math.max(0, overlapMs) : 0;
   return new Date(Math.max(Date.parse(SYNC_EPOCH), timestamp - safeOverlapMs)).toISOString();
 }
+
+export function advanceSyncCursor(current: string, candidate: unknown): string {
+  if (typeof candidate !== 'string') return current;
+  const currentTimestamp = Date.parse(current);
+  const candidateTimestamp = Date.parse(candidate);
+  if (!Number.isFinite(candidateTimestamp)) return current;
+  if (Number.isFinite(currentTimestamp) && candidateTimestamp <= currentTimestamp) return current;
+  return new Date(candidateTimestamp).toISOString();
+}
