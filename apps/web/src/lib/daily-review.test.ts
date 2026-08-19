@@ -45,6 +45,14 @@ describe('daily review task dates', () => {
     expect(taskNeedsRollForward(task({ scheduledFor: '2026-00-10' }), '2026-08-03')).toBe(false);
   });
 
+  it('does not classify tasks against a malformed review day', () => {
+    const completed = task({ completedAt: '2026-08-03T12:00:00.000Z' });
+    const scheduled = task({ scheduledFor: '2026-08-03' });
+
+    expect(taskCompletedOn(completed, '2026-99-99')).toBe(false);
+    expect(taskNeedsRollForward(scheduled, 'not-a-day')).toBe(false);
+  });
+
   it('moves an overdue deadline while preserving its local time', () => {
     const originalTimezone = process.env.TZ;
     process.env.TZ = 'America/Chicago';
