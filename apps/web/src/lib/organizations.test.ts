@@ -81,6 +81,15 @@ describe('createOrganization', () => {
     );
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
+
+  it('does not overwrite a different organization with a deterministic id', async () => {
+    mocks.toArray.mockResolvedValue([{ id: 'seed-org', name: 'Existing Org', order: 1 }]);
+
+    await expect(
+      createOrganization({ id: 'seed-org', name: 'Replacement Org' }),
+    ).rejects.toThrow('Organization id already exists');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
 });
 
 describe('updateOrganization', () => {
