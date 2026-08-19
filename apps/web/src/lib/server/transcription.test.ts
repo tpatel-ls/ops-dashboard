@@ -16,6 +16,12 @@ describe('transcription boundaries', () => {
     expect(transcriptionEndpoint('   ')).toBeUndefined();
   });
 
+  it('rejects malformed or unsafe upstream endpoints', () => {
+    expect(transcriptionEndpoint('speech.example.test')).toBeUndefined();
+    expect(transcriptionEndpoint('file:///tmp/transcriptions')).toBeUndefined();
+    expect(transcriptionEndpoint('https://user:secret@speech.example.test')).toBeUndefined();
+  });
+
   it('keeps the upstream request deadline below the platform limit', () => {
     expect(TRANSCRIPTION_REQUEST_TIMEOUT_MS).toBe(60_000);
   });
