@@ -233,6 +233,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <Field label="Date">
                 <input
                   type="date"
+                  aria-label="Task scheduled date"
                   value={task.scheduledFor ?? ''}
                   onChange={(e) =>
                     updateTask(task.id, {
@@ -436,6 +437,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <div className="flex items-center gap-2">
                 <input
                   type="datetime-local"
+                  aria-label="Reminder date and time"
                   value={reminderDraft}
                   onChange={(e) => setReminderDraft(e.target.value)}
                   className="input flex-1"

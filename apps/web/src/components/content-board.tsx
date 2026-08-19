@@ -141,6 +141,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
+        aria-label="Content title"
       />
 
       {/* row: type + status */}
@@ -186,6 +187,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
             placeholder="YouTube, Blog…"
+            aria-label="Content channel"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -216,6 +218,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://…"
+          aria-label="Content URL"
         />
       </div>
 
@@ -227,6 +230,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
         <input
           className="input text-xs"
           type="date"
+          aria-label="Content publish date"
           value={publishDate}
           onChange={(e) => setPublishDate(e.target.value)}
         />
@@ -243,6 +247,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           value={outline}
           onChange={(e) => setOutline(e.target.value)}
           placeholder="## Intro&#10;- point one&#10;- point two"
+          aria-label="Content outline"
         />
       </div>
 
