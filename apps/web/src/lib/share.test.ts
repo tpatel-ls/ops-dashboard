@@ -15,6 +15,20 @@ describe('shareOrCopy', () => {
     expect(writeText).toHaveBeenCalledWith('Task\nFollow up');
   });
 
+  it('normalizes clipboard text and rejects an empty payload', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+
+    await expect(
+      shareOrCopy({ title: ' Task ', text: ' Follow up ', url: ' https://example.test ' }),
+    ).resolves.toBe('copied');
+    expect(writeText).toHaveBeenCalledWith('Task\nFollow up\nhttps://example.test');
+
+    writeText.mockClear();
+    await expect(shareOrCopy({ title: ' ', text: ' ' })).resolves.toBe('failed');
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
   it('does not copy after the user cancels the share sheet', async () => {
     const writeText = vi.fn();
     vi.stubGlobal('navigator', {
