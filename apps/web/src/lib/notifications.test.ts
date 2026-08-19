@@ -17,6 +17,7 @@ vi.mock('@ops-dashboard/core', () => ({
 }));
 
 import {
+  attachTaskReminder,
   checkAndFireDueReminders,
   requestNotifications,
   scheduleReminder,
@@ -65,7 +66,7 @@ describe('scheduleReminder', () => {
   });
 
   it('normalizes trigger times before indexing reminders', async () => {
-    await scheduleReminder('task-1', ' 2026-08-02T09:00:00-05:00 ');
+    await scheduleReminder(' task-1 ', ' 2026-08-02T09:00:00-05:00 ');
 
     expect(mocks.reminders.put).toHaveBeenCalledWith({
       id: 'reminder-test',
@@ -73,6 +74,31 @@ describe('scheduleReminder', () => {
       triggerAt: '2026-08-02T14:00:00.000Z',
       delivered: false,
     });
+  });
+});
+
+describe('attachTaskReminder', () => {
+  it('normalizes embedded reminder metadata', () => {
+    expect(
+      attachTaskReminder(
+        { id: ' task-1 ', status: 'todo' } as never,
+        ' 2026-08-02T09:00:00-05:00 ',
+      ),
+    ).toEqual({
+      id: 'reminder-test',
+      taskId: 'task-1',
+      triggerAt: '2026-08-02T14:00:00.000Z',
+      delivered: false,
+    });
+  });
+
+  it('rejects malformed or unavailable reminder targets', () => {
+    expect(() => attachTaskReminder({ id: '', status: 'todo' } as never, '2026-08-02')).toThrow(
+      'Reminder task is required',
+    );
+    expect(() =>
+      attachTaskReminder({ id: 'task-1', status: 'done' } as never, '2026-08-02'),
+    ).toThrow('Task is not available for reminders');
   });
 });
 
