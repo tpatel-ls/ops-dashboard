@@ -20,6 +20,16 @@ export function pushNotification(input: {
   refType?: string;
   refId?: string;
 }): Promise<AppNotification> {
+  if (typeof input.title !== 'string') throw new Error('Notification title is required.');
+  if (input.body !== undefined && typeof input.body !== 'string') {
+    throw new Error('Notification body must be valid.');
+  }
+  if (input.refType !== undefined && typeof input.refType !== 'string') {
+    throw new Error('Notification reference must be valid.');
+  }
+  if (input.refId !== undefined && typeof input.refId !== 'string') {
+    throw new Error('Notification reference must be valid.');
+  }
   const title = input.title.trim();
   const body = input.body?.trim();
   if (!title) throw new Error('Notification title is required.');
@@ -28,6 +38,9 @@ export function pushNotification(input: {
   }
   const refType = input.refType?.trim();
   const refId = input.refId?.trim();
+  if (Boolean(refType) !== Boolean(refId)) {
+    throw new Error('Notification reference must include a type and id.');
+  }
 
   return putRecord(
     'notifications',

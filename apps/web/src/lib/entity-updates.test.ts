@@ -160,6 +160,15 @@ describe('notification inputs', () => {
       'Notification kind must be valid',
     );
   });
+
+  it('rejects incomplete or malformed notification references', () => {
+    expect(() =>
+      pushNotification({ title: 'Saved', kind: 'capture', refType: 'task' }),
+    ).toThrow('Notification reference must include a type and id');
+    expect(() =>
+      pushNotification({ title: 'Saved', kind: 'capture', refId: 42 as never }),
+    ).toThrow('Notification reference must be valid');
+  });
 });
 
 describe('journal inputs', () => {
