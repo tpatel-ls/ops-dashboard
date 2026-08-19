@@ -22,4 +22,12 @@ describe('anthropicClientOptions', () => {
   it('omits blank compatible endpoints', () => {
     expect(anthropicClientOptions('key', '   ')).not.toHaveProperty('baseURL');
   });
+
+  it('omits malformed or credential-bearing compatible endpoints', () => {
+    expect(anthropicClientOptions('key', 'localhost:8787')).not.toHaveProperty('baseURL');
+    expect(anthropicClientOptions('key', 'file:///tmp/gateway')).not.toHaveProperty('baseURL');
+    expect(anthropicClientOptions('key', 'https://user:secret@ai.example.test')).not.toHaveProperty(
+      'baseURL',
+    );
+  });
 });
