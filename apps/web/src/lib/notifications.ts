@@ -34,20 +34,26 @@ export async function ensureServiceWorker(): Promise<ServiceWorkerRegistration |
   }
 }
 
-export async function scheduleReminder(taskId: string, triggerAt: string): Promise<Reminder> {
+function reminderFields(taskId: string, triggerAt: string): Pick<Reminder, 'taskId' | 'triggerAt'> {
+  const normalizedTaskId = taskId.trim();
   const timestamp = Date.parse(triggerAt.trim());
+  if (!normalizedTaskId) throw new Error('Reminder task is required.');
   if (!triggerAt.trim() || !Number.isFinite(timestamp)) {
     throw new Error('Reminder time must be a valid date.');
   }
+  return { taskId: normalizedTaskId, triggerAt: new Date(timestamp).toISOString() };
+}
+
+export async function scheduleReminder(taskId: string, triggerAt: string): Promise<Reminder> {
+  const fields = reminderFields(taskId, triggerAt);
   const db = getDb();
-  const task = await db.tasks.get(taskId);
+  const task = await db.tasks.get(fields.taskId);
   if (!task || task.deletedAt || task.status === 'done' || task.status === 'archived') {
     throw new Error('Task is not available for reminders.');
   }
   const reminder: Reminder = {
     id: newId(),
-    taskId,
-    triggerAt: new Date(timestamp).toISOString(),
+    ...fields,
     delivered: false,
   };
   await db.reminders.put(reminder);
@@ -102,5 +108,8 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
 }
 
 export function attachTaskReminder(task: Task, triggerAt: string): Reminder {
-  return { id: newId(), taskId: task.id, triggerAt, delivered: false };
+  if (task.deletedAt || task.status === 'done' || task.status === 'archived') {
+    throw new Error('Task is not available for reminders.');
+  }
+  return { id: newId(), ...reminderFields(task.id, triggerAt), delivered: false };
 }
