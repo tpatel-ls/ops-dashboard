@@ -2,6 +2,7 @@
 
 import { bumpVersion, getDb, getDeviceId, localDay, newId } from '@ops-dashboard/core';
 import type { Project, ProjectKind, Task } from '@ops-dashboard/core';
+import { patchRecord } from './records';
 import { enqueueOp } from './sync-queue';
 
 export interface CreateProjectOptions {
@@ -23,6 +24,7 @@ const DEFAULT_COLORS = [
 ];
 
 const PROJECT_KINDS = new Set<ProjectKind>(['project', 'area', 'retainer']);
+const PROJECT_STATUSES = new Set<Project['status']>(['active', 'paused', 'done', 'archived']);
 
 function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptions {
   const normalized = { ...opts };
@@ -41,6 +43,51 @@ function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptio
     if (localDay(normalized.dueDate) !== normalized.dueDate) {
       throw new Error('Project due date must be a valid calendar date.');
     }
+  }
+  return normalized;
+}
+
+function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
+  const normalized = { ...patch };
+  if (Object.hasOwn(normalized, 'name')) {
+    if (typeof normalized.name !== 'string' || !normalized.name.trim()) {
+      throw new Error('Project name is required.');
+    }
+    normalized.name = normalized.name.trim();
+  }
+  if (normalized.kind !== undefined && !PROJECT_KINDS.has(normalized.kind)) {
+    throw new Error('Project kind must be valid.');
+  }
+  if (normalized.status !== undefined && !PROJECT_STATUSES.has(normalized.status)) {
+    throw new Error('Project status must be valid.');
+  }
+  if (Object.hasOwn(normalized, 'color')) {
+    if (typeof normalized.color !== 'string' || !normalized.color.trim()) {
+      throw new Error('Project color is required.');
+    }
+    normalized.color = normalized.color.trim();
+  }
+  for (const key of ['icon', 'domainId', 'orgId', 'description'] as const) {
+    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  }
+  for (const key of ['startDate', 'dueDate'] as const) {
+    if (normalized[key] !== undefined && localDay(normalized[key]) !== normalized[key]) {
+      throw new Error(`Project ${key} must be a valid calendar date.`);
+    }
+  }
+  if (
+    normalized.lastWorkedAt !== undefined &&
+    (!normalized.lastWorkedAt.trim() || !Number.isFinite(Date.parse(normalized.lastWorkedAt)))
+  ) {
+    throw new Error('Project last worked time must be valid.');
+  }
+  if (
+    normalized.retainerResetDay !== undefined &&
+    (!Number.isInteger(normalized.retainerResetDay) ||
+      normalized.retainerResetDay < 1 ||
+      normalized.retainerResetDay > 28)
+  ) {
+    throw new Error('Project retainer reset day must be from 1 to 28.');
   }
   return normalized;
 }
@@ -113,6 +160,10 @@ export async function renameProject(id: string, name: string): Promise<void> {
   });
   await db.projects.put(next);
   await enqueueOp({ table: 'projects', recordId: id, op: 'put', payload: next });
+}
+
+export function updateProject(id: string, patch: Partial<Project>) {
+  return patchRecord<Project>('projects', id, normalizeProjectPatch(patch));
 }
 
 export async function archiveProject(id: string): Promise<void> {

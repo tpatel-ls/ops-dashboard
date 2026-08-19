@@ -12,7 +12,10 @@ vi.mock('@ops-dashboard/core', async () => {
   const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
-    getDb: () => ({ projects: { count: mocks.count, get: mocks.get, put: mocks.put } }),
+    getDb: () => ({
+      projects: { count: mocks.count, get: mocks.get, put: mocks.put },
+      table: () => ({ get: mocks.get, put: mocks.put }),
+    }),
     getDeviceId: () => 'device-test',
     newId: () => 'project-test',
   };
@@ -20,7 +23,13 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { archiveProject, createProject, projectTaskProgress, renameProject } from './projects';
+import {
+  archiveProject,
+  createProject,
+  projectTaskProgress,
+  renameProject,
+  updateProject,
+} from './projects';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -223,5 +232,52 @@ describe('renameProject', () => {
 
     expect(mocks.put).not.toHaveBeenCalled();
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
+  });
+});
+
+describe('updateProject', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue({
+      id: 'project-test',
+      name: 'Launch',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      milestones: [],
+      checklists: [],
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'device-test',
+    });
+  });
+
+  it('normalizes project detail edits', async () => {
+    await updateProject('project-test', {
+      name: '  Launch plan  ',
+      description: '  Release scope  ',
+      dueDate: '2026-08-20',
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Launch plan',
+        description: 'Release scope',
+        dueDate: '2026-08-20',
+      }),
+    );
+  });
+
+  it('rejects invalid project detail values', () => {
+    expect(() => updateProject('project-test', { status: 'missing' as never })).toThrow(
+      'Project status must be valid',
+    );
+    expect(() => updateProject('project-test', { dueDate: '2026-02-30' })).toThrow(
+      'Project dueDate must be a valid calendar date',
+    );
+    expect(() => updateProject('project-test', { retainerResetDay: 31 })).toThrow(
+      'Project retainer reset day must be from 1 to 28',
+    );
   });
 });

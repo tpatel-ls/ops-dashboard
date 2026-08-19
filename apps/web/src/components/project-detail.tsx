@@ -23,7 +23,7 @@ import type {
   ProjectStatus,
   Task,
 } from '@ops-dashboard/core';
-import { patchRecord } from '@/lib/records';
+import { updateProject } from '@/lib/projects';
 import { logWork } from '@/lib/worklogs';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
 import { useActiveOrgs } from '@/components/org-switcher';
@@ -72,7 +72,7 @@ function MilestonesSection({ project }: { project: Project }) {
       done: false,
       ...(newDue ? { dueAt: newDue } : {}),
     };
-    await patchRecord<Project>('projects', project.id, {
+    await updateProject(project.id, {
       milestones: [...milestones, milestone],
     });
     setNewTitle('');
@@ -82,7 +82,7 @@ function MilestonesSection({ project }: { project: Project }) {
 
   async function toggleMilestone(id: string) {
     const updated = milestones.map((m) => (m.id === id ? { ...m, done: !m.done } : m));
-    await patchRecord<Project>('projects', project.id, { milestones: updated });
+    await updateProject(project.id, { milestones: updated });
   }
 
   return (
@@ -212,7 +212,7 @@ function ChecklistsSection({ project }: { project: Project }) {
     const name = newListName.trim();
     if (!name) return;
     const list: NamedChecklist = { id: newId(), name, items: [] };
-    await patchRecord<Project>('projects', project.id, { checklists: [...checklists, list] });
+    await updateProject(project.id, { checklists: [...checklists, list] });
     setNewListName('');
     setAddingList(false);
     setExpandedList(list.id);
@@ -223,7 +223,7 @@ function ChecklistsSection({ project }: { project: Project }) {
     const updated = checklists.map((cl) =>
       cl.id === listId ? { ...cl, items: [...cl.items, item] } : cl,
     );
-    await patchRecord<Project>('projects', project.id, { checklists: updated });
+    await updateProject(project.id, { checklists: updated });
   }
 
   async function toggleItem(listId: string, itemId: string) {
@@ -232,7 +232,7 @@ function ChecklistsSection({ project }: { project: Project }) {
         ? { ...cl, items: cl.items.map((it) => (it.id === itemId ? { ...it, done: !it.done } : it)) }
         : cl,
     );
-    await patchRecord<Project>('projects', project.id, { checklists: updated });
+    await updateProject(project.id, { checklists: updated });
   }
 
   return (
@@ -623,14 +623,14 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
   const orgs = useActiveOrgs();
 
   async function set<K extends keyof Project>(key: K, value: Project[K]) {
-    await patchRecord<Project>('projects', project.id, { [key]: value } as Partial<Project>);
+    await updateProject(project.id, { [key]: value } as Partial<Project>);
   }
 
   async function setOrg(orgId: string) {
     // Clears travel as SQL null: the sync mapper drops absent keys, so an
     // undefined would leave the previous lane on other devices.
     const value = (orgId || null) as unknown as Project['orgId'];
-    await patchRecord<Project>('projects', project.id, { orgId: value });
+    await updateProject(project.id, { orgId: value });
     // orgId is denormalized onto tasks; cascade so lists/calendar move too.
     const tasks = await getDb().tasks.where('projectId').equals(project.id).toArray();
     for (const t of tasks) {
