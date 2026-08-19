@@ -167,6 +167,39 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects malformed optional task scheduling and recurrence fields', () => {
+    const base = {
+      version: 1 as const,
+      exportedAt: '2026-07-30T12:00:00.000Z',
+      projects: [],
+      whiteboards: [],
+    };
+
+    expect(() =>
+      validateOpsExport({ ...base, tasks: [{ ...task('Bad day'), scheduledFor: '2026-02-30' }] }),
+    ).toThrow('Invalid export tasks');
+    expect(() =>
+      validateOpsExport({
+        ...base,
+        tasks: [
+          { ...task('Bad recurrence'), recurrence: { freq: 'weekly', interval: 0 } },
+        ],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
+  it('rejects malformed optional project planning fields', () => {
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [],
+        projects: [{ ...project('Bad project'), dueDate: '2026-02-30' }],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export projects');
+  });
+
   it('rejects malformed project and whiteboard structures', () => {
     const base = {
       version: 1 as const,
