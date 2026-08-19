@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createSyncCursorCache, overlappedCursor, parseSyncCursors, SYNC_EPOCH } from './cursors';
+import {
+  advanceSyncCursor,
+  createSyncCursorCache,
+  overlappedCursor,
+  parseSyncCursors,
+  SYNC_EPOCH,
+} from './cursors';
 
 describe('parseSyncCursors', () => {
   it('returns an empty map for missing, malformed, or array storage', () => {
@@ -83,5 +89,20 @@ describe('overlappedCursor', () => {
     const cursor = '2026-07-15T12:00:00.000Z';
     expect(overlappedCursor(cursor, -120_000)).toBe(cursor);
     expect(overlappedCursor(cursor, Number.NaN)).toBe(cursor);
+  });
+});
+
+describe('advanceSyncCursor', () => {
+  it('compares instants instead of timestamp string formatting', () => {
+    expect(
+      advanceSyncCursor('2026-07-15T12:00:00.000Z', '2026-07-15T08:01:00-04:00'),
+    ).toBe('2026-07-15T12:01:00.000Z');
+  });
+
+  it('does not regress for older or malformed candidates', () => {
+    const current = '2026-07-15T12:00:00.000Z';
+    expect(advanceSyncCursor(current, '2026-07-15T11:59:00.000Z')).toBe(current);
+    expect(advanceSyncCursor(current, 'not-a-date')).toBe(current);
+    expect(advanceSyncCursor(current, null)).toBe(current);
   });
 });
