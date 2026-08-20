@@ -89,6 +89,40 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
   ) {
     throw new Error('Project retainer reset day must be from 1 to 28.');
   }
+  if (Object.hasOwn(normalized, 'milestones')) {
+    if (!Array.isArray(normalized.milestones)) {
+      throw new Error('Project milestones must be valid.');
+    }
+    const seen = new Set<string>();
+    normalized.milestones = normalized.milestones.map((milestone) => {
+      if (
+        !milestone ||
+        typeof milestone !== 'object' ||
+        typeof milestone.id !== 'string' ||
+        typeof milestone.title !== 'string' ||
+        typeof milestone.done !== 'boolean'
+      ) {
+        throw new Error('Project milestones must be valid.');
+      }
+      const id = milestone.id.trim();
+      const title = milestone.title.trim();
+      if (
+        !id ||
+        !title ||
+        seen.has(id) ||
+        (milestone.dueAt !== undefined && localDay(milestone.dueAt) !== milestone.dueAt)
+      ) {
+        throw new Error('Project milestones must be valid.');
+      }
+      seen.add(id);
+      return {
+        id,
+        title,
+        done: milestone.done,
+        ...(milestone.dueAt ? { dueAt: milestone.dueAt } : {}),
+      };
+    });
+  }
   return normalized;
 }
 

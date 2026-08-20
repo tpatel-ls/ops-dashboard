@@ -280,4 +280,34 @@ describe('updateProject', () => {
       'Project retainer reset day must be from 1 to 28',
     );
   });
+
+  it('normalizes milestone edits before persistence', async () => {
+    await updateProject('project-test', {
+      milestones: [
+        { id: ' milestone-1 ', title: ' Ship launch ', done: false, dueAt: '2026-08-20' },
+      ],
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        milestones: [{ id: 'milestone-1', title: 'Ship launch', done: false, dueAt: '2026-08-20' }],
+      }),
+    );
+  });
+
+  it('rejects malformed milestones and duplicate identifiers', () => {
+    expect(() =>
+      updateProject('project-test', {
+        milestones: [{ id: 'milestone-1', title: 'Ship', done: false, dueAt: '2026-02-30' }],
+      }),
+    ).toThrow('Project milestones must be valid');
+    expect(() =>
+      updateProject('project-test', {
+        milestones: [
+          { id: 'milestone-1', title: 'Ship', done: false },
+          { id: ' milestone-1 ', title: 'Review', done: true },
+        ],
+      }),
+    ).toThrow('Project milestones must be valid');
+  });
 });
