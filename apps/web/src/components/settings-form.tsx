@@ -310,15 +310,17 @@ export function SettingsForm() {
             accept="application/json"
             className="hidden"
             onChange={async (e) => {
-              const file = e.target.files?.[0];
+              const input = e.currentTarget;
+              const file = input.files?.[0];
               if (!file) return;
               try {
                 const text = await file.text();
                 const parsed: unknown = JSON.parse(text);
                 await importAll(parsed);
-                e.target.value = '';
               } catch (err) {
                 alert(`Import failed: ${(err as Error).message}`);
+              } finally {
+                input.value = '';
               }
             }}
           />
