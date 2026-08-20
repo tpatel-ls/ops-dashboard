@@ -46,6 +46,7 @@ export async function transcribeBlob(blob: Blob): Promise<string | null> {
   form.append('file', blob, `audio.${ext}`);
   try {
     const res = await fetchWithTimeout('/api/transcribe', { method: 'POST', body: form });
+    if (!res.ok) return null;
     const json = (await res.json().catch(() => null)) as { ok?: boolean; text?: string } | null;
     if (json?.ok && typeof json.text === 'string' && json.text.trim()) return json.text.trim();
     return null;
