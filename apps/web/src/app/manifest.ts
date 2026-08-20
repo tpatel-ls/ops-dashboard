@@ -19,7 +19,7 @@ export default function manifest(): ShareTargetManifest {
     short_name: 'Taskify',
     description: 'A focused workspace for organizations, projects, tasks, and schedules.',
     id: '/',
-    start_url: '/dashboard',
+    start_url: '/',
     scope: '/',
     display: 'standalone',
     // 'any' so the Tab S10 Ultra can run the landscape two-pane layout.

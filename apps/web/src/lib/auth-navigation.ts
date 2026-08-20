@@ -1,4 +1,4 @@
-export const DEFAULT_AUTH_DESTINATION = '/dashboard';
+export const DEFAULT_AUTH_DESTINATION = '/';
 
 export function safeNextPath(raw: string | null | undefined): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) {

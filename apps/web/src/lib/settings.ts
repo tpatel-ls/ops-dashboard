@@ -4,7 +4,7 @@ import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
 
 const THEMES: Settings['theme'][] = ['light', 'dark', 'system'];
-const DEFAULT_VIEWS: Settings['defaultView'][] = [
+export const DEFAULT_VIEWS: Settings['defaultView'][] = [
   'today',
   'week',
   'month',
@@ -21,6 +21,10 @@ const DEFAULT_VIEWS: Settings['defaultView'][] = [
   'people',
   'domains',
 ];
+
+export function defaultViewPath(view: Settings['defaultView']): string {
+  return view === 'whiteboard' ? '/whiteboards' : `/${view}`;
+}
 
 function booleanSetting(value: unknown, fallback: boolean): boolean {
   return typeof value === 'boolean' ? value : fallback;
