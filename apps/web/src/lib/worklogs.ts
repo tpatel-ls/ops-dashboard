@@ -40,7 +40,10 @@ export async function logWork(
       at: ts,
     }),
   );
-  await patchRecord<Project>('projects', projectId, { lastWorkedAt: ts });
+  const previousTimestamp = project.lastWorkedAt ? Date.parse(project.lastWorkedAt) : Number.NaN;
+  if (!Number.isFinite(previousTimestamp) || Date.parse(ts) > previousTimestamp) {
+    await patchRecord<Project>('projects', projectId, { lastWorkedAt: ts });
+  }
   return rec;
 }
 

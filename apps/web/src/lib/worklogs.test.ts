@@ -119,6 +119,33 @@ describe('logWork', () => {
       lastWorkedAt: '2026-07-15T12:00:00.000Z',
     });
   });
+
+  it('does not move project activity backward for a backdated log', async () => {
+    mocks.getProject.mockResolvedValue({
+      id: 'project-1',
+      status: 'active',
+      lastWorkedAt: '2026-07-20T12:00:00.000Z',
+    });
+
+    await logWork('project-1', 30, undefined, '2026-07-15T12:00:00.000Z');
+
+    expect(mocks.putRecord).toHaveBeenCalled();
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+  });
+
+  it('repairs malformed project activity with a valid log time', async () => {
+    mocks.getProject.mockResolvedValue({
+      id: 'project-1',
+      status: 'active',
+      lastWorkedAt: 'not-a-date',
+    });
+
+    await logWork('project-1', 30, undefined, '2026-07-15T12:00:00.000Z');
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
+      lastWorkedAt: '2026-07-15T12:00:00.000Z',
+    });
+  });
 });
 
 describe('deleteWorkLog', () => {
