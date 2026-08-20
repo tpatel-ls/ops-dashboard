@@ -72,6 +72,19 @@ export function FocusMode() {
     completeRef.current = completePhase;
   }, [completePhase]);
 
+  const endSession = useCallback(async () => {
+    setRunning(false);
+    if (phase === 'focus') await recordFocusTime();
+    else {
+      startedRef.current = null;
+      elapsedRef.current = 0;
+    }
+    setPhase('focus');
+    setActiveId(null);
+    setSecondsLeft(focusMin * 60);
+    close();
+  }, [close, focusMin, phase, recordFocusTime]);
+
   useEffect(() => {
     if (!open) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -99,14 +112,14 @@ export function FocusMode() {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') void endSession();
     }
     window.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [close, open]);
+  }, [endSession, open]);
 
   if (!open) return null;
 
@@ -132,19 +145,6 @@ export function FocusMode() {
     setSecondsLeft((phase === 'focus' ? focusMin : breakMin) * 60);
   }
 
-  async function endSession() {
-    setRunning(false);
-    if (phase === 'focus') await recordFocusTime();
-    else {
-      startedRef.current = null;
-      elapsedRef.current = 0;
-    }
-    setPhase('focus');
-    setActiveId(null);
-    setSecondsLeft(focusMin * 60);
-    close();
-  }
-
   const total = (phase === 'focus' ? focusMin : breakMin) * 60;
   const progress = ((total - secondsLeft) / total) * 100;
   const mm = Math.floor(secondsLeft / 60)
@@ -162,7 +162,7 @@ export function FocusMode() {
     >
       <button
         type="button"
-        onClick={close}
+        onClick={() => void endSession()}
         className="bg-card text-muted-foreground hover:text-foreground fixed top-4 right-4 inline-flex size-11 items-center justify-center rounded-md border"
         aria-label="Exit focus mode"
       >
