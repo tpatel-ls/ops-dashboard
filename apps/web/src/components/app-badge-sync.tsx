@@ -3,13 +3,13 @@
 import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb } from '@ops-dashboard/core';
-import { updateAppBadge } from '@/lib/app-badge';
+import { isPendingBadgeCapture, updateAppBadge } from '@/lib/app-badge';
 
 export function AppBadgeSync() {
   const count = useLiveQuery(async () => {
     const db = getDb();
     const [pendingCaptures, openTasks] = await Promise.all([
-      db.captures.where('status').equals('pending').count(),
+      db.captures.where('status').equals('pending').filter(isPendingBadgeCapture).count(),
       db.tasks
         .filter((task) => !task.deletedAt && task.status !== 'done' && task.status !== 'archived')
         .count(),
