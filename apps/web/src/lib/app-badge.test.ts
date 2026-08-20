@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { updateAppBadge } from './app-badge';
+import { isPendingBadgeCapture, updateAppBadge } from './app-badge';
 
 const originalNavigator = globalThis.navigator;
 
@@ -46,4 +46,14 @@ describe('updateAppBadge', () => {
       expect(clearAppBadge).toHaveBeenCalledOnce();
     },
   );
+});
+
+describe('isPendingBadgeCapture', () => {
+  it('excludes deleted captures from the pending badge count', () => {
+    expect(isPendingBadgeCapture({ status: 'pending' })).toBe(true);
+    expect(
+      isPendingBadgeCapture({ status: 'pending', deletedAt: '2026-08-20T12:00:00.000Z' }),
+    ).toBe(false);
+    expect(isPendingBadgeCapture({ status: 'triaged' })).toBe(false);
+  });
 });

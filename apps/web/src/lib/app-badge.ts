@@ -1,7 +1,13 @@
+import type { Capture } from '@ops-dashboard/core';
+
 type BadgeNavigator = Navigator & {
   setAppBadge?: (contents?: number) => Promise<void>;
   clearAppBadge?: () => Promise<void>;
 };
+
+export function isPendingBadgeCapture(capture: Pick<Capture, 'status' | 'deletedAt'>): boolean {
+  return capture.status === 'pending' && !capture.deletedAt;
+}
 
 const MAX_BADGE_COUNT = 4_294_967_295;
 
