@@ -310,4 +310,50 @@ describe('updateProject', () => {
       }),
     ).toThrow('Project milestones must be valid');
   });
+
+  it('normalizes nested checklist edits before persistence', async () => {
+    await updateProject('project-test', {
+      checklists: [
+        {
+          id: ' list-1 ',
+          name: ' Launch steps ',
+          items: [{ id: ' item-1 ', text: ' Confirm owner ', done: false }],
+        },
+      ],
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        checklists: [
+          {
+            id: 'list-1',
+            name: 'Launch steps',
+            items: [{ id: 'item-1', text: 'Confirm owner', done: false }],
+          },
+        ],
+      }),
+    );
+  });
+
+  it('rejects malformed checklist items and duplicate identifiers', () => {
+    expect(() =>
+      updateProject('project-test', {
+        checklists: [{ id: 'list-1', name: 'Launch', items: [null] }],
+      } as never),
+    ).toThrow('Project checklists must be valid');
+    expect(() =>
+      updateProject('project-test', {
+        checklists: [
+          {
+            id: 'list-1',
+            name: 'Launch',
+            items: [
+              { id: 'item-1', text: 'Draft', done: false },
+              { id: ' item-1 ', text: 'Review', done: true },
+            ],
+          },
+        ],
+      }),
+    ).toThrow('Project checklists must be valid');
+  });
 });
