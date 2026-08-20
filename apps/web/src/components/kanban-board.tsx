@@ -36,7 +36,7 @@ import {
   type SimpleKanbanColumn,
   type SimpleKanbanColumnId,
 } from '@/lib/simple-kanban';
-import { addTask, updateTask } from '@/lib/tasks';
+import { addTask, setTaskStatus } from '@/lib/tasks';
 import { useOrgStore } from '@/lib/org-store';
 
 const PRIORITY_LABEL = ['', '', 'Important', 'Critical'] as const;
@@ -83,7 +83,7 @@ export function KanbanBoard() {
     if (!event.over) return;
     const taskId = String(event.active.id);
     const columnId = String(event.over.id) as SimpleKanbanColumnId;
-    void updateTask(taskId, { status: statusForSimpleKanbanColumn(columnId) });
+    void setTaskStatus(taskId, statusForSimpleKanbanColumn(columnId));
   }
 
   return (
@@ -322,7 +322,7 @@ function KanbanCard({
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
-            void updateTask(task.id, { status: task.status === 'done' ? 'todo' : 'done' });
+            void setTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done');
           }}
           aria-label={
             task.status === 'done' ? `Move ${task.title} to To do` : `Complete ${task.title}`
@@ -439,7 +439,7 @@ function BoardMoveButton({
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => {
         event.stopPropagation();
-        void updateTask(task.id, { status: statusForSimpleKanbanColumn(column) });
+        void setTaskStatus(task.id, statusForSimpleKanbanColumn(column));
       }}
       aria-label={`Move ${task.title} to ${label}`}
       title={`Move to ${label}`}
