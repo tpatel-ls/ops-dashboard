@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_AUTH_DESTINATION, requestedAuthPath, safeNextPath } from './auth-navigation';
 
 describe('safeNextPath', () => {
-  it('defaults sign-in to the work dashboard', () => {
-    expect(DEFAULT_AUTH_DESTINATION).toBe('/dashboard');
-    expect(safeNextPath(undefined)).toBe('/dashboard');
-    expect(safeNextPath('')).toBe('/dashboard');
+  it('defaults sign-in to the configured-view entry point', () => {
+    expect(DEFAULT_AUTH_DESTINATION).toBe('/');
+    expect(safeNextPath(undefined)).toBe('/');
+    expect(safeNextPath('')).toBe('/');
   });
 
   it('keeps safe same-origin application paths', () => {
@@ -14,16 +14,16 @@ describe('safeNextPath', () => {
   });
 
   it('rejects protocol-relative and backslash redirects', () => {
-    expect(safeNextPath('//example.com')).toBe('/dashboard');
-    expect(safeNextPath('/\\example.com')).toBe('/dashboard');
-    expect(safeNextPath('https://example.com')).toBe('/dashboard');
+    expect(safeNextPath('//example.com')).toBe('/');
+    expect(safeNextPath('/\\example.com')).toBe('/');
+    expect(safeNextPath('https://example.com')).toBe('/');
   });
 
   it('rejects authentication routes that would loop after sign-in', () => {
-    expect(safeNextPath('/login')).toBe('/dashboard');
-    expect(safeNextPath('/LOGIN?error=invalid')).toBe('/dashboard');
-    expect(safeNextPath('/auth/dev-login')).toBe('/dashboard');
-    expect(safeNextPath('/auth/signout')).toBe('/dashboard');
+    expect(safeNextPath('/login')).toBe('/');
+    expect(safeNextPath('/LOGIN?error=invalid')).toBe('/');
+    expect(safeNextPath('/auth/dev-login')).toBe('/');
+    expect(safeNextPath('/auth/signout')).toBe('/');
   });
 });
 

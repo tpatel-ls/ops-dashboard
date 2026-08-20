@@ -10,27 +10,11 @@ import {
   requestNotifications,
   type PermissionState,
 } from '@/lib/notifications';
-import {
-  downloadJson,
-  downloadText,
-  exportAll,
-  importAll,
-  tasksToMarkdown,
-} from '@/lib/export';
+import { downloadJson, downloadText, exportAll, importAll, tasksToMarkdown } from '@/lib/export';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
 import { OrganizationsManager } from '@/components/organizations-manager';
-import { getSettings, updateSettings } from '@/lib/settings';
-
-const VIEW_OPTIONS: Settings['defaultView'][] = [
-  'today',
-  'week',
-  'month',
-  'kanban',
-  'whiteboard',
-  'calendar',
-  'inbox',
-];
+import { DEFAULT_VIEWS, getSettings, updateSettings } from '@/lib/settings';
 
 export function SettingsForm() {
   const { theme, setTheme } = useTheme();
@@ -71,13 +55,17 @@ export function SettingsForm() {
   }, []);
 
   if (!settings) {
-    return <div className="h-40 animate-pulse rounded-xl border bg-card/40" aria-hidden />;
+    return <div className="bg-card/40 h-40 animate-pulse rounded-xl border" aria-hidden />;
   }
 
   return (
     <div className="grid w-full items-start gap-4 lg:grid-cols-2">
       <Section title="Appearance" description="Light, dark, or follow the system.">
-        <div role="group" aria-label="Color theme" className="grid grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1">
+        <div
+          role="group"
+          aria-label="Color theme"
+          className="bg-bg-sunken grid grid-cols-3 gap-1 rounded-lg border p-1"
+        >
           {(['light', 'dark', 'system'] as const).map((opt) => (
             <button
               key={opt}
@@ -144,7 +132,7 @@ export function SettingsForm() {
           onChange={(e) => patch({ defaultView: e.target.value as Settings['defaultView'] })}
           className="input max-w-xs capitalize"
         >
-          {VIEW_OPTIONS.map((v) => (
+          {DEFAULT_VIEWS.map((v) => (
             <option key={v} value={v}>
               {v}
             </option>
@@ -224,7 +212,7 @@ export function SettingsForm() {
             <button
               type="button"
               onClick={async () => setPerm(await requestNotifications())}
-              className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground"
+              className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium"
             >
               Request permission
             </button>
@@ -246,7 +234,10 @@ export function SettingsForm() {
         {settings.syncEnabled ? (
           <div className="mt-3 grid gap-3 border-t pt-3">
             {!isSupabaseConfigured() ? (
-              <div role="alert" className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
+              <div
+                role="alert"
+                className="border-warning/30 bg-warning/10 text-warning rounded-md border px-3 py-2 text-xs"
+              >
                 Supabase env vars are not set. Add NEXT_PUBLIC_SUPABASE_URL and
                 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env.local.
               </div>
@@ -255,7 +246,7 @@ export function SettingsForm() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <SyncStatus />
                   {userEmail ? (
-                    <span className="min-w-0 truncate text-xs text-muted-foreground">
+                    <span className="text-muted-foreground min-w-0 truncate text-xs">
                       Signed in as {userEmail}
                     </span>
                   ) : null}
@@ -264,7 +255,7 @@ export function SettingsForm() {
                   <form action="/auth/signout" method="post">
                     <button
                       type="submit"
-                      className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
+                      className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
                     >
                       Sign out
                     </button>
@@ -272,7 +263,7 @@ export function SettingsForm() {
                 ) : (
                   <a
                     href="/login"
-                    className="inline-flex h-10 w-fit items-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground"
+                    className="bg-primary text-primary-foreground inline-flex h-10 w-fit items-center rounded-md px-3 text-xs font-medium"
                   >
                     Sign in to sync
                   </a>
@@ -291,7 +282,7 @@ export function SettingsForm() {
               const data = await exportAll();
               downloadJson(data, `ops-dashboard-${todayIso()}.json`);
             }}
-            className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
+            className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
           >
             Export JSON
           </button>
@@ -302,14 +293,14 @@ export function SettingsForm() {
               const md = tasksToMarkdown(data.tasks, 'Ops Dashboard tasks');
               downloadText(md, `ops-dashboard-${todayIso()}.md`);
             }}
-            className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
+            className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
           >
             Export markdown
           </button>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="h-10 rounded-md border bg-card px-3 text-xs hover:bg-accent"
+            className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
           >
             Import JSON
           </button>
@@ -352,7 +343,7 @@ function Section({
     <section className={cn('surface p-4', wide && 'lg:col-span-2')}>
       <header className="mb-3">
         <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground text-xs">{description}</p>
       </header>
       {children}
     </section>
@@ -361,7 +352,7 @@ function Section({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+    <label className="text-muted-foreground flex flex-col gap-1 text-xs">
       <span>{label}</span>
       {children}
     </label>
@@ -380,10 +371,10 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-start justify-between gap-3 border-t border-border/70 py-3 first:border-t-0">
+    <label className="border-border/70 flex cursor-pointer items-start justify-between gap-3 border-t py-3 first:border-t-0">
       <div>
         <div className="text-sm">{label}</div>
-        <div className="text-xs text-muted-foreground">{description}</div>
+        <div className="text-muted-foreground text-xs">{description}</div>
       </div>
       <span
         className={cn(
@@ -393,7 +384,7 @@ function Toggle({
       >
         <span
           className={cn(
-            'inline-block size-4 rounded-full bg-background transition-transform',
+            'bg-background inline-block size-4 rounded-full transition-transform',
             checked ? 'translate-x-4' : 'translate-x-0.5',
           )}
         />

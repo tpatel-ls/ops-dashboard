@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
-import { normalizeSettings } from './settings';
+import { DEFAULT_VIEWS, defaultViewPath, normalizeSettings } from './settings';
 
 describe('normalizeSettings', () => {
   it('fills settings that were added after an older record was stored', () => {
@@ -94,5 +94,14 @@ describe('normalizeSettings', () => {
     ).toMatchObject({ timezone: 'America/Chicago' });
     expect(normalizeSettings({ timezone: 'Not/AZone' })).not.toHaveProperty('timezone');
     expect(normalizeSettings({ legacyFlag: true } as never)).not.toHaveProperty('legacyFlag');
+  });
+});
+
+describe('defaultViewPath', () => {
+  it('maps every supported default view to an application route', () => {
+    expect(DEFAULT_VIEWS).toHaveLength(15);
+    expect(defaultViewPath('today')).toBe('/today');
+    expect(defaultViewPath('whiteboard')).toBe('/whiteboards');
+    expect(defaultViewPath('people')).toBe('/people');
   });
 });

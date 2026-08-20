@@ -13,7 +13,7 @@ test('serves an installable web manifest', async ({ request }) => {
   expect(response.ok()).toBe(true);
   await expect(response.json()).resolves.toMatchObject({
     name: 'Taskify',
-    start_url: '/dashboard',
+    start_url: '/',
     display: 'standalone',
   });
 });
