@@ -24,6 +24,34 @@ describe('trailingSingleFlight', () => {
     await expect(first).resolves.toBeUndefined();
     await expect(overlap).resolves.toBeUndefined();
   });
+
+  it('runs a queued trailing pass after the active pass fails', async () => {
+    let rejectFirst: ((error: Error) => void) | undefined;
+    const action = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectFirst = reject;
+          }),
+      )
+      .mockResolvedValueOnce(undefined);
+    const run = trailingSingleFlight(action);
+
+    const result = run();
+    run();
+    rejectFirst?.(new Error('temporary failure'));
+
+    await expect(result).resolves.toBeUndefined();
+    expect(action).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects when the final queued pass still fails', async () => {
+    const action = vi.fn().mockRejectedValue(new Error('persistent failure'));
+    const run = trailingSingleFlight(action);
+
+    await expect(run()).rejects.toThrow('persistent failure');
+  });
 });
 
 describe('latestSingleFlight', () => {
@@ -49,5 +77,27 @@ describe('latestSingleFlight', () => {
 
     releases.shift()?.();
     await expect(first).resolves.toBeUndefined();
+  });
+
+  it('persists the latest value after an earlier save fails', async () => {
+    let rejectFirst: ((error: Error) => void) | undefined;
+    const saved: string[] = [];
+    const action = vi.fn(async (value: string) => {
+      if (value === 'first') {
+        await new Promise<void>((_resolve, reject) => {
+          rejectFirst = reject;
+        });
+        return;
+      }
+      saved.push(value);
+    });
+    const run = latestSingleFlight(action);
+
+    const result = run('first');
+    run('latest');
+    rejectFirst?.(new Error('temporary failure'));
+
+    await expect(result).resolves.toBeUndefined();
+    expect(saved).toEqual(['latest']);
   });
 });

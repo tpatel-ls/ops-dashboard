@@ -8,10 +8,20 @@ export function trailingSingleFlight(action: () => Promise<void>): () => Promise
       return running;
     }
     running = (async () => {
+      let finalError: unknown;
+      let failed = false;
       do {
         rerun = false;
-        await action();
+        try {
+          await action();
+          failed = false;
+          finalError = undefined;
+        } catch (error) {
+          failed = true;
+          finalError = error;
+        }
       } while (rerun);
+      if (failed) throw finalError;
     })().finally(() => {
       running = null;
     });
