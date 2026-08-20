@@ -27,4 +27,18 @@ describe('useHotkeys', () => {
 
     expect(handler).not.toHaveBeenCalled();
   });
+
+  it('cancels a chord when an unrelated key intervenes', () => {
+    const handler = vi.fn();
+    renderHook(() => useHotkeys([{ combo: 'g then p', handler }]));
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'g' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'x' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    expect(handler).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'g' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    expect(handler).toHaveBeenCalledOnce();
+  });
 });

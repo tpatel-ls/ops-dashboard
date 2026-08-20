@@ -90,6 +90,7 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
           return;
         }
       }
+      if (chordKey !== null) clearChord();
     }
 
     window.addEventListener('keydown', onKey);
