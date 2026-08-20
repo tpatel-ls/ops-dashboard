@@ -123,6 +123,49 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       };
     });
   }
+  if (Object.hasOwn(normalized, 'checklists')) {
+    if (!Array.isArray(normalized.checklists)) {
+      throw new Error('Project checklists must be valid.');
+    }
+    const seenLists = new Set<string>();
+    normalized.checklists = normalized.checklists.map((checklist) => {
+      if (
+        !checklist ||
+        typeof checklist !== 'object' ||
+        typeof checklist.id !== 'string' ||
+        typeof checklist.name !== 'string' ||
+        !Array.isArray(checklist.items)
+      ) {
+        throw new Error('Project checklists must be valid.');
+      }
+      const id = checklist.id.trim();
+      const name = checklist.name.trim();
+      if (!id || !name || seenLists.has(id)) {
+        throw new Error('Project checklists must be valid.');
+      }
+      seenLists.add(id);
+      const seenItems = new Set<string>();
+      const items = checklist.items.map((item) => {
+        if (
+          !item ||
+          typeof item !== 'object' ||
+          typeof item.id !== 'string' ||
+          typeof item.text !== 'string' ||
+          typeof item.done !== 'boolean'
+        ) {
+          throw new Error('Project checklists must be valid.');
+        }
+        const itemId = item.id.trim();
+        const text = item.text.trim();
+        if (!itemId || !text || seenItems.has(itemId)) {
+          throw new Error('Project checklists must be valid.');
+        }
+        seenItems.add(itemId);
+        return { id: itemId, text, done: item.done };
+      });
+      return { id, name, items };
+    });
+  }
   return normalized;
 }
 
