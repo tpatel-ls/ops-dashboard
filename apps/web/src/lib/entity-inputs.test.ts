@@ -104,6 +104,15 @@ describe('makeInteraction', () => {
     expect(() => makeInteraction('Follow up', '2026-02-30')).toThrow(
       'Interaction date must be valid',
     );
+    expect(() => makeInteraction('Follow up', 'August 5, 2026')).toThrow(
+      'Interaction date must be valid',
+    );
+  });
+
+  it('canonicalizes timestamped interaction dates', () => {
+    expect(makeInteraction('Follow up', '2026-08-05T07:00:00-05:00').date).toBe(
+      '2026-08-05T12:00:00.000Z',
+    );
   });
 });
 

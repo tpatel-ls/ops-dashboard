@@ -5,6 +5,17 @@ import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
 
+function normalizeInteractionDate(value: string): string {
+  if (localDay(value) === value) return value;
+  const datePart = value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(value) || localDay(datePart) !== datePart) {
+    throw new Error('Person interactions must be valid.');
+  }
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) throw new Error('Person interactions must be valid.');
+  return new Date(timestamp).toISOString();
+}
+
 function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'name')) {
@@ -58,11 +69,12 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
       }
       const id = interaction.id.trim();
       const note = interaction.note.trim();
-      if (!id || !note || localDay(interaction.date) === undefined || seen.has(id)) {
+      if (!id || !note || seen.has(id)) {
         throw new Error('Person interactions must be valid.');
       }
+      const date = normalizeInteractionDate(interaction.date);
       seen.add(id);
-      return { ...interaction, id, note };
+      return { id, date, note };
     });
   }
   return normalized;
@@ -121,8 +133,11 @@ export function makeFact(label: string, value: string): PersonFact {
 export function makeInteraction(note: string, date?: string): Interaction {
   const normalizedNote = note.trim();
   if (!normalizedNote) throw new Error('Interaction note is required.');
-  if (date !== undefined && localDay(date) === undefined) {
+  let normalizedDate: string;
+  try {
+    normalizedDate = normalizeInteractionDate(date ?? new Date().toISOString());
+  } catch {
     throw new Error('Interaction date must be valid.');
   }
-  return { id: newId(), date: date ?? new Date().toISOString(), note: normalizedNote };
+  return { id: newId(), date: normalizedDate, note: normalizedNote };
 }

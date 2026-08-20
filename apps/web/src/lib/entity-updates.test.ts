@@ -162,12 +162,12 @@ describe('notification inputs', () => {
   });
 
   it('rejects incomplete or malformed notification references', () => {
-    expect(() =>
-      pushNotification({ title: 'Saved', kind: 'capture', refType: 'task' }),
-    ).toThrow('Notification reference must include a type and id');
-    expect(() =>
-      pushNotification({ title: 'Saved', kind: 'capture', refId: 42 as never }),
-    ).toThrow('Notification reference must be valid');
+    expect(() => pushNotification({ title: 'Saved', kind: 'capture', refType: 'task' })).toThrow(
+      'Notification reference must include a type and id',
+    );
+    expect(() => pushNotification({ title: 'Saved', kind: 'capture', refId: 42 as never })).toThrow(
+      'Notification reference must be valid',
+    );
   });
 });
 
@@ -231,9 +231,7 @@ describe('note inputs', () => {
     expect(() => updateNote('note-1', { title: '   ', body: '   ' })).toThrow(
       'Note content is required',
     );
-    await expect(updateNote('note-1', { body: '   ' })).rejects.toThrow(
-      'Note content is required',
-    );
+    await expect(updateNote('note-1', { body: '   ' })).rejects.toThrow('Note content is required');
   });
 });
 
@@ -295,6 +293,11 @@ describe('person inputs', () => {
     expect(() =>
       updatePerson('person-1', {
         interactions: [{ id: 'interaction-1', date: 'invalid', note: 'Call' }],
+      }),
+    ).toThrow('Person interactions must be valid');
+    expect(() =>
+      updatePerson('person-1', {
+        interactions: [{ id: 'interaction-1', date: 'August 16, 2026', note: 'Call' }],
       }),
     ).toThrow('Person interactions must be valid');
     expect(() =>
@@ -395,9 +398,7 @@ describe('required update fields', () => {
   });
 
   it('rejects malformed string collections', () => {
-    expect(() => updateBook('book-1', { tags: [42] as never })).toThrow(
-      'Book tags must be valid',
-    );
+    expect(() => updateBook('book-1', { tags: [42] as never })).toThrow('Book tags must be valid');
     expect(() => updateJournalEntry('journal-1', { mediaUrls: [null] as never })).toThrow(
       'Journal entry media must be valid',
     );
