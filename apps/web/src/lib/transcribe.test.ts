@@ -30,4 +30,34 @@ describe('transcribeBlob', () => {
     await expect(transcribeBlob(new Blob(['image'], { type: 'image/png' }))).resolves.toBeNull();
     expect(fetch).not.toHaveBeenCalled();
   });
+
+  it('rejects transcript-shaped bodies from unsuccessful responses', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ ok: true, text: 'Do not accept this' }), {
+          status: 502,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    );
+
+    await expect(transcribeBlob(new Blob(['audio'], { type: 'audio/webm' }))).resolves.toBeNull();
+  });
+
+  it('returns a trimmed transcript from a successful response', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ ok: true, text: '  Call the customer  ' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    );
+
+    await expect(transcribeBlob(new Blob(['audio'], { type: 'audio/webm' }))).resolves.toBe(
+      'Call the customer',
+    );
+  });
 });
