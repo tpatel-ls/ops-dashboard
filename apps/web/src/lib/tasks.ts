@@ -177,6 +177,7 @@ function assertTaskFields(patch: Partial<Task>): void {
     if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
       throw new Error(`Task ${key} must be a valid date.`);
     }
+    if (value !== undefined) patch[key] = new Date(Date.parse(value)).toISOString();
   }
   for (const key of ['estimateMinutes', 'actualMinutes'] as const) {
     const value = patch[key];
