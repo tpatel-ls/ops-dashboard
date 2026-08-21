@@ -154,7 +154,7 @@ function isMilestone(value: unknown): boolean {
     isUsableString(value.id) &&
     isUsableString(value.title) &&
     typeof value.done === 'boolean' &&
-    (value.dueAt === undefined || isTimestamp(value.dueAt))
+    isOptionalCalendarDay(value.dueAt)
   );
 }
 

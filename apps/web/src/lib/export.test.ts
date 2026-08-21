@@ -278,6 +278,30 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export projects');
   });
 
+  it('rejects timestamped milestone calendar dates', () => {
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [],
+        projects: [
+          {
+            ...project('Bad milestone'),
+            milestones: [
+              {
+                id: 'milestone-1',
+                title: 'Launch',
+                done: false,
+                dueAt: '2026-08-20T12:00:00.000Z',
+              },
+            ],
+          },
+        ],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export projects');
+  });
+
   it('rejects malformed project and whiteboard structures', () => {
     const base = {
       version: 1 as const,
