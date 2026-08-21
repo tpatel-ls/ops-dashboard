@@ -81,6 +81,9 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
   ) {
     throw new Error('Project last worked time must be valid.');
   }
+  if (normalized.lastWorkedAt !== undefined) {
+    normalized.lastWorkedAt = new Date(Date.parse(normalized.lastWorkedAt)).toISOString();
+  }
   if (
     normalized.retainerResetDay !== undefined &&
     (!Number.isInteger(normalized.retainerResetDay) ||

@@ -269,6 +269,16 @@ describe('updateProject', () => {
     );
   });
 
+  it('canonicalizes project activity timestamps', async () => {
+    await updateProject('project-test', {
+      lastWorkedAt: '2026-08-21T09:00:00-05:00',
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ lastWorkedAt: '2026-08-21T14:00:00.000Z' }),
+    );
+  });
+
   it('rejects invalid project detail values', () => {
     expect(() => updateProject('project-test', { status: 'missing' as never })).toThrow(
       'Project status must be valid',
