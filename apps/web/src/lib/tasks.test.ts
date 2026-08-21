@@ -199,6 +199,22 @@ describe('updateTask', () => {
     }
   });
 
+  it('canonicalizes task planning timestamps', async () => {
+    await updateTask('task-1', {
+      startAt: '2026-08-21T09:00:00-05:00',
+      endAt: '2026-08-21T10:00:00-05:00',
+      dueAt: '2026-08-21T17:00:00-05:00',
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startAt: '2026-08-21T14:00:00.000Z',
+        endAt: '2026-08-21T15:00:00.000Z',
+        dueAt: '2026-08-21T22:00:00.000Z',
+      }),
+    );
+  });
+
   it('does not write or enqueue an update that changes nothing', async () => {
     await updateTask('task-1', {
       title: ' Original ',
