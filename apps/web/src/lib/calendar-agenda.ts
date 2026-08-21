@@ -9,10 +9,15 @@ function validTimestamp(value: string | undefined): number | undefined {
   return Number.isFinite(timestamp) ? timestamp : undefined;
 }
 
+export function calendarInstant(value: string | undefined): Date | undefined {
+  const timestamp = validTimestamp(value);
+  return timestamp === undefined ? undefined : new Date(timestamp);
+}
+
 export function calendarKindOf(
   task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>,
 ): CalendarTaskKind | undefined {
-  if (validTimestamp(task.startAt) !== undefined) return 'time-block';
+  if (calendarInstant(task.startAt)) return 'time-block';
   if (task.scheduledFor && localDay(task.scheduledFor) === task.scheduledFor) return 'scheduled';
   if (validTimestamp(task.dueAt) !== undefined) return 'due';
   return undefined;

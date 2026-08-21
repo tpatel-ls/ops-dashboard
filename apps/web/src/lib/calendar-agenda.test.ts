@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
-import { calendarDateOf, calendarKindOf, compareCalendarTasks } from './calendar-agenda';
+import {
+  calendarDateOf,
+  calendarInstant,
+  calendarKindOf,
+  compareCalendarTasks,
+} from './calendar-agenda';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -58,6 +63,14 @@ describe('calendar agenda', () => {
 
     expect(calendarDateOf(fallback)).toBe('2026-07-20');
     expect(calendarKindOf(fallback)).toBe('scheduled');
+  });
+
+  it('returns dates only for valid calendar instants', () => {
+    expect(calendarInstant('2026-07-20T09:00:00.000Z')?.toISOString()).toBe(
+      '2026-07-20T09:00:00.000Z',
+    );
+    expect(calendarInstant('not-a-date')).toBeUndefined();
+    expect(calendarInstant(undefined)).toBeUndefined();
   });
 
   it('sorts timed work first, followed by priority and title', () => {
