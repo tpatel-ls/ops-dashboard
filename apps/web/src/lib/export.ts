@@ -172,7 +172,7 @@ function isProjectRecord(value: unknown): boolean {
   if (!isRecord(value) || !hasValidSyncMetadata(value)) return false;
   return (
     isUsableString(value.name) &&
-    typeof value.color === 'string' &&
+    isUsableString(value.color) &&
     typeof value.kind === 'string' &&
     PROJECT_KINDS.has(value.kind) &&
     typeof value.status === 'string' &&
