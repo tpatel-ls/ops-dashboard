@@ -2,6 +2,7 @@
 
 import { getDb } from '@ops-dashboard/core';
 import type { AppNotification, NotificationKind } from '@ops-dashboard/core';
+import { formatDistance, isValid, parseISO } from 'date-fns';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 const NOTIFICATION_KINDS = new Set<NotificationKind>([
@@ -11,6 +12,12 @@ const NOTIFICATION_KINDS = new Set<NotificationKind>([
   'review',
   'system',
 ]);
+
+export function notificationAge(createdAt: string, now: Date = new Date()): string {
+  const created = parseISO(createdAt);
+  if (!isValid(created) || !isValid(now)) return 'Recently';
+  return formatDistance(created, now, { addSuffix: true });
+}
 
 /** Append an item to the in-app notification feed (Today / Inbox bell). */
 export function pushNotification(input: {

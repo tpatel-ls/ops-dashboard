@@ -2,9 +2,8 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, Check, CheckCheck } from 'lucide-react';
-import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
-import { markAllNotificationsRead, markNotificationRead } from '@/lib/feed';
+import { markAllNotificationsRead, markNotificationRead, notificationAge } from '@/lib/feed';
 import { cn } from '@ops-dashboard/ui';
 
 const KIND_LABEL: Record<string, string> = {
@@ -75,7 +74,7 @@ export function NotificationsFeed() {
                 <p className="mt-0.5 text-[12px] text-muted-foreground line-clamp-2">{n.body}</p>
               )}
               <p className="mt-0.5 font-mono text-[10px] text-subtle-foreground">
-                {formatDistanceToNow(parseISO(n.createdAt), { addSuffix: true })}
+                {notificationAge(n.createdAt)}
               </p>
             </div>
             <button
