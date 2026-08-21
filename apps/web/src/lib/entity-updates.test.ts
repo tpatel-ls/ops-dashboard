@@ -280,6 +280,28 @@ describe('quote inputs', () => {
       }),
     ).toThrow('Quote thoughts must be valid');
   });
+
+  it('canonicalizes quote thought timestamps', async () => {
+    await updateQuote('quote-1', {
+      thoughts: [
+        {
+          id: 'thought-1',
+          text: 'Apply this idea',
+          at: '2026-08-21T09:00:00-05:00',
+        },
+      ],
+    });
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('quotes', 'quote-1', {
+      thoughts: [
+        {
+          id: 'thought-1',
+          text: 'Apply this idea',
+          at: '2026-08-21T14:00:00.000Z',
+        },
+      ],
+    });
+  });
 });
 
 describe('person inputs', () => {
