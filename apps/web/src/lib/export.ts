@@ -137,6 +137,7 @@ function isTaskRecord(value: unknown): boolean {
     isRecurrence(value.recurrence) &&
     Array.isArray(value.reminders) &&
     value.reminders.every(isReminder) &&
+    value.reminders.every((reminder) => reminder.taskId === value.id) &&
     hasUniqueIds(value.reminders) &&
     Array.isArray(value.checklist) &&
     value.checklist.every(isChecklistItem) &&
