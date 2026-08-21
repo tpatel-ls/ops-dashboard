@@ -302,6 +302,24 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export projects');
   });
 
+  it('rejects duplicate project checklist item IDs', () => {
+    const item = { id: 'item-1', text: 'Review launch', done: false };
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [],
+        projects: [
+          {
+            ...project('Bad checklist'),
+            checklists: [{ id: 'list-1', name: 'Launch', items: [item, { ...item }] }],
+          },
+        ],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export projects');
+  });
+
   it('rejects malformed project and whiteboard structures', () => {
     const base = {
       version: 1 as const,
