@@ -61,6 +61,18 @@ describe('book inputs', () => {
       'Book status must be valid',
     );
   });
+
+  it('canonicalizes book reading timestamps', async () => {
+    await updateBook('book-1', {
+      startedAt: '2026-08-01T09:00:00-05:00',
+      finishedAt: '2026-08-20T18:00:00-05:00',
+    });
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('books', 'book-1', {
+      startedAt: '2026-08-01T14:00:00.000Z',
+      finishedAt: '2026-08-20T23:00:00.000Z',
+    });
+  });
 });
 
 describe('content inputs', () => {

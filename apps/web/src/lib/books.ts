@@ -27,6 +27,7 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
       throw new Error(`Book ${key} must be a valid date.`);
     }
+    if (value !== undefined) normalized[key] = new Date(Date.parse(value)).toISOString();
   }
   for (const key of ['author', 'coverUrl', 'format', 'isbn', 'summary'] as const) {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
