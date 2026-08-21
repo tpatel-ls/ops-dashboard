@@ -103,7 +103,7 @@ function isReminder(value: unknown): boolean {
     isUsableString(value.taskId) &&
     isTimestamp(value.triggerAt) &&
     typeof value.delivered === 'boolean' &&
-    (value.offsetMinutes === undefined || Number.isFinite(value.offsetMinutes))
+    (value.offsetMinutes === undefined || Number.isSafeInteger(value.offsetMinutes))
   );
 }
 
