@@ -91,7 +91,7 @@ function isChecklistItem(value: unknown): boolean {
   return (
     isRecord(value) &&
     isUsableString(value.id) &&
-    typeof value.text === 'string' &&
+    isUsableString(value.text) &&
     typeof value.done === 'boolean'
   );
 }
