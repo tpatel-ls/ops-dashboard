@@ -19,11 +19,23 @@ describe('safeNextPath', () => {
     expect(safeNextPath('https://example.com')).toBe('/');
   });
 
+  it('rejects encoded redirects and malformed escapes', () => {
+    expect(safeNextPath('/%2f%2fevil.example')).toBe('/');
+    expect(safeNextPath('/folder%5c..%5cevil')).toBe('/');
+    expect(safeNextPath('/tasks%')).toBe('/');
+  });
+
+  it('rejects control characters in redirect destinations', () => {
+    expect(safeNextPath('/tasks\nset-cookie: unsafe')).toBe('/');
+    expect(safeNextPath('/tasks%0d%0aunsafe')).toBe('/');
+  });
+
   it('rejects authentication routes that would loop after sign-in', () => {
     expect(safeNextPath('/login')).toBe('/');
     expect(safeNextPath('/LOGIN?error=invalid')).toBe('/');
     expect(safeNextPath('/auth/dev-login')).toBe('/');
     expect(safeNextPath('/auth/signout')).toBe('/');
+    expect(safeNextPath('/auth%2fsignout')).toBe('/');
   });
 });
 
