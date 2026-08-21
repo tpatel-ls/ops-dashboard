@@ -48,7 +48,7 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
         throw new Error('Quote thoughts must be valid.');
       }
       seen.add(id);
-      return { ...thought, id, text };
+      return { ...thought, id, text, at: new Date(Date.parse(thought.at)).toISOString() };
     });
   }
   return normalized;
