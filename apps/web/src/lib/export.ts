@@ -164,7 +164,8 @@ function isNamedChecklist(value: unknown): boolean {
     isUsableString(value.id) &&
     isUsableString(value.name) &&
     Array.isArray(value.items) &&
-    value.items.every(isChecklistItem)
+    value.items.every(isChecklistItem) &&
+    hasUniqueIds(value.items)
   );
 }
 
