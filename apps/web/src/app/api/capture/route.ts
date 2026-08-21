@@ -13,6 +13,7 @@ import { bearerSecretMatches, requestAllowed } from '@/lib/server/guard';
 import { normalizeTimezoneOffset } from '@/lib/server/timezone';
 import { boundedText } from '@/lib/server/input';
 import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
+import { journalEntrySource } from '@/lib/journal-source';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient, getSingleUserId } from '@/utils/supabase/admin';
 import { SYNC_TABLES, toRow } from '@/lib/sync/mapping';
@@ -160,6 +161,7 @@ export async function POST(req: Request): Promise<Response> {
   const target = await resolveTarget(req);
   const watch = bearerMatches(req);
   const deviceId = watch ? 'watch' : 'server';
+  const captureSource = watch ? 'watch' : 'text';
 
   // Build the routed record (task or journal). Falls back to a plain task when AI
   // isn't available, matching the in-app capture fallback.
@@ -175,7 +177,7 @@ export async function POST(req: Request): Promise<Response> {
       body,
       mediaUrls: [],
       tags: result.tags ?? [],
-      source: 'upload',
+      source: journalEntrySource(captureSource),
     } satisfies JournalEntry;
     routeType = 'journal';
   } else {
@@ -203,7 +205,7 @@ export async function POST(req: Request): Promise<Response> {
   const capture: Capture = {
     ...meta(deviceId),
     raw,
-    source: watch ? 'watch' : 'text',
+    source: captureSource,
     status: 'triaged',
     routedTo: { type: routeType, id: routedRecord.id },
     ...(result?.title ? { aiSummary: result.title } : {}),
