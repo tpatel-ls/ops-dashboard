@@ -230,6 +230,30 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects reminders attached to a different task', () => {
+    const invalid = {
+      ...task('Expected task'),
+      reminders: [
+        {
+          id: 'reminder-1',
+          taskId: 'Other task',
+          triggerAt: '2026-07-30T12:00:00.000Z',
+          delivered: false,
+        },
+      ],
+    };
+
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [invalid],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
   it('rejects malformed optional project planning fields', () => {
     expect(() =>
       validateOpsExport({
