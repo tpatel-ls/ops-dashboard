@@ -20,6 +20,9 @@ import { createQuote, deleteQuote } from './quotes';
 import { todayISO, toggleRoutineCheck } from './routines';
 import { addTask, addTaskToProject, softDeleteTask } from './tasks';
 import { fetchWithTimeout } from './fetch-timeout';
+import { journalEntrySource } from './journal-source';
+
+export { journalEntrySource } from './journal-source';
 
 /** One parsed item from /api/braindump. Treated as untrusted wire data. */
 export interface RoutedItemDraft {
@@ -321,10 +324,6 @@ async function routeJournal(
       await dismissCapture(captureId);
     },
   };
-}
-
-export function journalEntrySource(source: CaptureSource): 'voice' | 'text' {
-  return source === 'voice' || source === 'watch' ? 'voice' : 'text';
 }
 
 async function routeNote(
