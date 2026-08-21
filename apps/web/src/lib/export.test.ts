@@ -266,6 +266,18 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export projects');
   });
 
+  it('rejects projects with blank colors', () => {
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [],
+        projects: [{ ...project('Bad color'), color: '   ' }],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export projects');
+  });
+
   it('rejects malformed project and whiteboard structures', () => {
     const base = {
       version: 1 as const,
