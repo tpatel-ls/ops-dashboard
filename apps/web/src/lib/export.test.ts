@@ -167,6 +167,23 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects blank task checklist items', () => {
+    const invalid = {
+      ...task('Invalid checklist'),
+      checklist: [{ id: 'item-1', text: '   ', done: false }],
+    };
+
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [invalid],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
   it('rejects malformed optional task scheduling and recurrence fields', () => {
     const base = {
       version: 1 as const,
