@@ -28,6 +28,17 @@ describe('acceptedBrainDumpItems', () => {
     expect(acceptedBrainDumpItems(true, { ok: true, items })).toHaveLength(100);
   });
 
+  it('applies the response limit after discarding malformed items', () => {
+    const items = [
+      ...Array.from({ length: 100 }, () => ({ title: '   ' })),
+      { kind: 'task', title: 'Keep this valid task' },
+    ];
+
+    expect(acceptedBrainDumpItems(true, { ok: true, items })).toEqual([
+      { kind: 'task', title: 'Keep this valid task' },
+    ]);
+  });
+
   it('rejects malformed response shapes and unusable items', () => {
     expect(acceptedBrainDumpItems(true, null)).toBeNull();
     expect(acceptedBrainDumpItems(true, { ok: true, items: [null, { title: '   ' }] })).toBeNull();

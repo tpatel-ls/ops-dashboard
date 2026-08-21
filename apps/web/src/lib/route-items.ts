@@ -142,9 +142,9 @@ export function acceptedBrainDumpItems(
   const payload = value as { ok?: unknown; items?: unknown };
   if (payload.ok !== true || !Array.isArray(payload.items)) return null;
   const items = payload.items
-    .slice(0, MAX_ROUTED_ITEMS)
     .map(normalizeBrainDumpItem)
-    .filter((item): item is NormalizedRoutedItemDraft => Boolean(item));
+    .filter((item): item is NormalizedRoutedItemDraft => Boolean(item))
+    .slice(0, MAX_ROUTED_ITEMS);
   return items.length > 0 ? items : null;
 }
 
