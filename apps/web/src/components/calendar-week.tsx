@@ -2,14 +2,19 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
-import { addDays, format, parseISO, startOfWeek } from 'date-fns';
+import { addDays, format, startOfWeek } from 'date-fns';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Project, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
-import { calendarDateOf, calendarKindOf, compareCalendarTasks } from '@/lib/calendar-agenda';
+import {
+  calendarDateOf,
+  calendarInstant,
+  calendarKindOf,
+  compareCalendarTasks,
+} from '@/lib/calendar-agenda';
 
 const HOUR_HEIGHT = 48;
 const START_HOUR = 6;
@@ -40,7 +45,7 @@ export function CalendarWeek() {
 
   const lanes = useOrgLanes(projectsMap);
   const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
-  const timedTasks = visibleTasks.filter((task) => task.startAt);
+  const timedTasks = visibleTasks.filter((task) => calendarInstant(task.startAt));
 
   const openEdit = useAppStore((s) => s.openEdit);
   const today = isoDay(new Date());
@@ -183,7 +188,7 @@ function MobileDayAgenda({
       <div className="flex flex-col gap-1.5">
           {blocks.map((task) => {
             const kind = calendarKindOf(task);
-            const start = task.startAt ? parseISO(task.startAt) : null;
+            const start = calendarInstant(task.startAt);
             const color = laneColor(task);
             return (
               <button
@@ -235,8 +240,8 @@ function Hour({
       {days.map((day) => {
         const dayIso = isoDay(day);
         const blocks = tasks.filter((t) => {
-          const start = parseISO(t.startAt!);
-          return isoDay(start) === dayIso && start.getHours() === hour;
+          const start = calendarInstant(t.startAt);
+          return Boolean(start && isoDay(start) === dayIso && start.getHours() === hour);
         });
         return (
           <div
@@ -245,8 +250,8 @@ function Hour({
             style={{ height: HOUR_HEIGHT }}
           >
             {blocks.map((t) => {
-              const start = parseISO(t.startAt!);
-              const end = t.endAt ? parseISO(t.endAt) : null;
+              const start = calendarInstant(t.startAt)!;
+              const end = calendarInstant(t.endAt);
               const minutes = end
                 ? Math.max(15, (end.getTime() - start.getTime()) / 60000)
                 : 30;
