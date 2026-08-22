@@ -404,4 +404,35 @@ describe('life management summary', () => {
     expect(summary.routineTotal).toBe(1);
     expect(summary.attention.find((item) => item.id === 'routines')?.detail).toBe('1 left today');
   });
+
+  it('does not combine alternating routines into one streak', () => {
+    const routine = (id: string): Routine => ({
+      ...meta(id),
+      name: id,
+      timeOfDay: 'anytime',
+      notify: false,
+      kind: 'ongoing',
+      startDate: '2026-07-01',
+      order: 1,
+    });
+    const checks = [
+      { ...meta('check-a'), routineId: 'a', date: '2026-07-06', done: true },
+      { ...meta('check-b'), routineId: 'b', date: '2026-07-05', done: true },
+    ] satisfies RoutineCheck[];
+
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [],
+      domains: [],
+      routines: [routine('a'), routine('b')],
+      routineChecks: checks,
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.identityScore).toBe(18);
+  });
 });

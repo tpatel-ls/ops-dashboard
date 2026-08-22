@@ -108,19 +108,26 @@ function uniqueActiveDays(input: LifeManagementInput, today: string): number {
   return days.size;
 }
 
-function bestRoutineStreak(checks: RoutineCheck[], today: string): number {
-  const doneDates = new Set(
-    checks.filter((check) => !check.deletedAt && check.done).map((check) => check.date),
-  );
-  let streak = 0;
-  let cursor = today;
-
-  while (doneDates.has(cursor)) {
-    streak += 1;
-    cursor = isoDay(addDays(parseISO(cursor), -1));
+function bestRoutineStreak(checks: RoutineCheck[], today: string, routineIds: Set<string>): number {
+  const datesByRoutine = new Map<string, Set<string>>();
+  for (const check of checks) {
+    if (check.deletedAt || !check.done || !routineIds.has(check.routineId)) continue;
+    const dates = datesByRoutine.get(check.routineId) ?? new Set<string>();
+    dates.add(check.date);
+    datesByRoutine.set(check.routineId, dates);
   }
 
-  return streak;
+  let best = 0;
+  for (const doneDates of datesByRoutine.values()) {
+    let streak = 0;
+    let cursor = today;
+    while (doneDates.has(cursor)) {
+      streak += 1;
+      cursor = isoDay(addDays(parseISO(cursor), -1));
+    }
+    best = Math.max(best, streak);
+  }
+  return best;
 }
 
 function buildModule(
@@ -224,7 +231,11 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   ]).size;
 
   const identityInput: IdentityScoreInput = {
-    bestStreak: bestRoutineStreak(input.routineChecks, today),
+    bestStreak: bestRoutineStreak(
+      input.routineChecks,
+      today,
+      new Set(activeRoutines.map((routine) => routine.id)),
+    ),
     weeklyActiveDays,
     activeDays,
     completedCount: completedThisWeek,
