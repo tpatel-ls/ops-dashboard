@@ -28,6 +28,12 @@ export function workLogActivityContribution(minutes: number): number {
     : 0;
 }
 
+export function activityTimestampOnOrAfter(value: unknown, start: Date): boolean {
+  if (typeof value !== 'string' || !Number.isFinite(start.getTime())) return false;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) && timestamp >= start.getTime();
+}
+
 /** Convert any ISO/Date to a local YYYY-MM-DD string. */
 function toLocalDate(ts: string | Date): string {
   const d = typeof ts === 'string' ? new Date(ts) : ts;
@@ -84,7 +90,6 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   start.setDate(start.getDate() - safeDays + 1);
   start.setHours(0, 0, 0, 0);
 
-  const startISO = start.toISOString();
   const scores = new Map<string, number>();
 
   function add(date: string, amount: number) {
@@ -94,7 +99,10 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   // Tasks completed within the window
   const tasks = await db.tasks
     .filter(
-      (t) => !t.deletedAt && t.status === 'done' && !!t.completedAt && t.completedAt >= startISO,
+      (t) =>
+        !t.deletedAt &&
+        t.status === 'done' &&
+        activityTimestampOnOrAfter(t.completedAt, start),
     )
     .toArray();
   for (const t of tasks) {
@@ -120,7 +128,9 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   }
 
   // WorkLogs within the window
-  const worklogs = await db.workLogs.filter((w) => !w.deletedAt && w.at >= startISO).toArray();
+  const worklogs = await db.workLogs
+    .filter((w) => !w.deletedAt && activityTimestampOnOrAfter(w.at, start))
+    .toArray();
   for (const w of worklogs) {
     const contribution = workLogActivityContribution(w.minutes);
     add(toLocalDate(w.at), contribution);

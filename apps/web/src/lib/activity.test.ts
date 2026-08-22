@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  activityTimestampOnOrAfter,
   aggregateActivity,
   normalizeActivityDays,
   workLogActivityContribution,
@@ -60,4 +61,18 @@ describe('workLogActivityContribution', () => {
       expect(workLogActivityContribution(minutes)).toBe(0);
     },
   );
+});
+
+describe('activityTimestampOnOrAfter', () => {
+  const start = new Date('2026-08-01T00:00:00.000Z');
+
+  it('compares offset timestamps by instant instead of source text', () => {
+    expect(activityTimestampOnOrAfter('2026-08-01T01:00:00+14:00', start)).toBe(false);
+    expect(activityTimestampOnOrAfter('2026-07-31T23:30:00-05:00', start)).toBe(true);
+  });
+
+  it('rejects malformed timestamps and invalid range starts', () => {
+    expect(activityTimestampOnOrAfter('not-a-date', start)).toBe(false);
+    expect(activityTimestampOnOrAfter('2026-08-01T12:00:00Z', new Date('invalid'))).toBe(false);
+  });
 });
