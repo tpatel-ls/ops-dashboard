@@ -56,6 +56,19 @@ describe('compareTasks', () => {
     expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['valid', 'invalid']);
   });
 
+  it('sorts by the earliest commitment when task dates disagree', () => {
+    const overdueDue = task('due-first', {
+      scheduledFor: '2026-08-30',
+      dueAt: '2026-08-20T17:00:00.000Z',
+    });
+    const earlierSchedule = task('scheduled', { scheduledFor: '2026-08-25' });
+
+    expect([earlierSchedule, overdueDue].sort(compareTasks).map((item) => item.id)).toEqual([
+      'due-first',
+      'scheduled',
+    ]);
+  });
+
   it('uses order and title as stable tie breakers', () => {
     const tasks = [
       task('z', { title: 'Zulu', order: 2 }),
