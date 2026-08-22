@@ -4,6 +4,8 @@ import { getDb } from '@ops-dashboard/core';
 import type { Project, WorkLog } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+const MAX_WORK_LOG_MINUTES = 24 * 60;
+
 /** Log time against a project and stamp the project's lastWorkedAt (drives slipping). */
 export async function logWork(
   projectId: string,
@@ -11,8 +13,8 @@ export async function logWork(
   note?: string,
   at?: string,
 ): Promise<WorkLog> {
-  if (!Number.isSafeInteger(minutes) || minutes <= 0) {
-    throw new Error('Work log minutes must be a positive integer.');
+  if (!Number.isSafeInteger(minutes) || minutes <= 0 || minutes > MAX_WORK_LOG_MINUTES) {
+    throw new Error('Work log minutes must be a positive integer up to 1440.');
   }
   if (at !== undefined && (!at.trim() || !Number.isFinite(Date.parse(at)))) {
     throw new Error('Work log time must be a valid date.');

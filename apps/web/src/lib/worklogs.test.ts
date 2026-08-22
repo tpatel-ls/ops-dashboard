@@ -51,11 +51,11 @@ describe('logWork', () => {
     mocks.softDeleteRecord.mockReset();
   });
 
-  it.each([0, -5, 1.5, Number.MAX_SAFE_INTEGER + 1])(
+  it.each([0, -5, 1.5, 1441, Number.MAX_SAFE_INTEGER + 1])(
     'rejects invalid minutes before writing: %s',
     async (minutes) => {
       await expect(logWork('project-1', minutes)).rejects.toThrow(
-        'Work log minutes must be a positive integer',
+        'Work log minutes must be a positive integer up to 1440',
       );
       expect(mocks.putRecord).not.toHaveBeenCalled();
     },
