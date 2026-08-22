@@ -2,7 +2,10 @@ import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 
 function taskDate(task: Task): string | null {
-  return localDay(task.scheduledFor) ?? localDay(task.dueAt) ?? localDay(task.startAt) ?? null;
+  const dates = [task.scheduledFor, task.dueAt, task.startAt]
+    .map((value) => localDay(value))
+    .filter((value): value is string => Boolean(value));
+  return dates.sort()[0] ?? null;
 }
 
 function taskPriority(task: Task): number {
