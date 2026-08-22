@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   pending: [] as Array<Record<string, unknown>>,
+  syncEnabled: true,
   put: vi.fn(),
   bulkDelete: vi.fn(),
 }));
@@ -18,7 +19,7 @@ vi.mock('@ops-dashboard/core', () => {
   };
   return {
     getDb: () => ({
-      settings: { get: async () => ({ syncEnabled: true }) },
+      settings: { get: async () => ({ syncEnabled: mocks.syncEnabled }) },
       syncOps,
       transaction: async (_mode: string, _table: unknown, work: () => Promise<void>) => work(),
     }),
@@ -31,8 +32,24 @@ import { enqueueOp } from './sync-queue';
 describe('enqueueOp', () => {
   beforeEach(() => {
     mocks.pending = [];
+    mocks.syncEnabled = true;
     mocks.put.mockReset();
     mocks.bulkDelete.mockReset();
+  });
+
+  it('keeps changes queued while sync is paused', async () => {
+    mocks.syncEnabled = false;
+
+    await enqueueOp({
+      table: 'tasks',
+      recordId: 'task-1',
+      op: 'put',
+      payload: { id: 'task-1', title: 'Offline change' },
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ table: 'tasks', recordId: 'task-1' }),
+    );
   });
 
   it('replaces stale pending writes for the same record', async () => {
