@@ -147,7 +147,15 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
 
   // --- Web Speech path (fallback / when Whisper isn't configured) ---
   function startWebSpeech() {
-    if (!SpeechRecognitionAPI) return;
+    if (!SpeechRecognitionAPI) {
+      setListening(false);
+      setError(
+        whisperEnabled && canRecord && !navigator.onLine
+          ? 'Voice transcription requires a network connection.'
+          : 'Voice input is not supported in this browser.',
+      );
+      return;
+    }
     setError(null);
     const recog = new SpeechRecognitionAPI();
     recog.lang = 'en-US';
