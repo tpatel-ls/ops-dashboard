@@ -16,9 +16,10 @@ Each synchronized record includes:
 ## Local mutations and outbox
 
 Mutation helpers write the record to Dexie, then coalesce an operation into the
-`syncOps` outbox when sync is enabled. The sync engine drains operations in
-creation order. A failed table is deferred for the rest of that drain so other
-tables can continue, and failed operations remain queued for a later retry.
+`syncOps` outbox even while sync is paused. This preserves local edits for the
+next time the device enables sync. The sync engine drains operations in creation
+order. A failed table is deferred for the rest of that drain so other tables can
+continue, and failed operations remain queued for a later retry.
 
 Deletes are synchronized as tombstones rather than hard deletes.
 
