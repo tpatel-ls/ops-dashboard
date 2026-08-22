@@ -23,6 +23,12 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/%2f%2fevil.example')).toBe('/');
     expect(safeNextPath('/folder%5c..%5cevil')).toBe('/');
     expect(safeNextPath('/tasks%')).toBe('/');
+    expect(safeNextPath('/%252f%252fevil.example')).toBe('/');
+    expect(safeNextPath('/auth%252fsignout')).toBe('/');
+  });
+
+  it('rejects unreasonably long redirect destinations', () => {
+    expect(safeNextPath(`/${'a'.repeat(2048)}`)).toBe('/');
   });
 
   it('rejects control characters in redirect destinations', () => {
