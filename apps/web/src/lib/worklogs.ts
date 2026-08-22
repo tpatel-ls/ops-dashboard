@@ -56,7 +56,16 @@ export async function deleteWorkLog(id: string): Promise<void> {
 
   await softDeleteRecord<WorkLog>('workLogs', id);
   const project = await db.projects.get(existing.projectId);
-  if (!project || project.lastWorkedAt !== existing.at) return;
+  const projectActivity = project?.lastWorkedAt ? Date.parse(project.lastWorkedAt) : Number.NaN;
+  const deletedActivity = Date.parse(existing.at);
+  if (
+    !project ||
+    !Number.isFinite(projectActivity) ||
+    !Number.isFinite(deletedActivity) ||
+    projectActivity !== deletedActivity
+  ) {
+    return;
+  }
 
   const remaining = await db.workLogs.where('projectId').equals(existing.projectId).toArray();
   const latest = remaining

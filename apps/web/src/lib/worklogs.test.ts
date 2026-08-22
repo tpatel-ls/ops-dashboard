@@ -198,4 +198,28 @@ describe('deleteWorkLog', () => {
       lastWorkedAt: '2026-08-01T12:00:00.000Z',
     });
   });
+
+  it('restores activity when equivalent timestamps use different offsets', async () => {
+    const latest = {
+      id: 'work-latest',
+      projectId: 'project-1',
+      at: '2026-08-02T07:00:00-05:00',
+    };
+    mocks.getWorkLog.mockResolvedValue(latest);
+    mocks.getProject.mockResolvedValue({
+      id: 'project-1',
+      status: 'active',
+      lastWorkedAt: '2026-08-02T12:00:00.000Z',
+    });
+    mocks.listProjectWorkLogs.mockResolvedValue([
+      latest,
+      { id: 'work-previous', projectId: 'project-1', at: '2026-08-01T12:00:00.000Z' },
+    ]);
+
+    await deleteWorkLog(latest.id);
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
+      lastWorkedAt: '2026-08-01T12:00:00.000Z',
+    });
+  });
 });
