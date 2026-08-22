@@ -15,6 +15,23 @@ const CONTENT_STATUSES = new Set<ContentStatus>([
   'done',
 ]);
 
+function normalizeContentUrl(value: string | undefined): string | undefined {
+  const candidate = value?.trim();
+  if (!candidate) return undefined;
+  try {
+    const url = new URL(candidate, 'https://ops-dashboard.invalid');
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('Content URL must use HTTP or HTTPS.');
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Content URL must use HTTP or HTTPS.') {
+      throw error;
+    }
+    throw new Error('Content URL must be valid.');
+  }
+  return candidate;
+}
+
 function normalizeChecklist(value: unknown): Content['checklist'] {
   if (!Array.isArray(value)) throw new Error('Content checklist must be valid.');
   const seen = new Set<string>();
@@ -56,9 +73,10 @@ function normalizeContentPatch(patch: Partial<Content>): Partial<Content> {
   if (Object.hasOwn(normalized, 'checklist')) {
     normalized.checklist = normalizeChecklist(normalized.checklist);
   }
-  for (const key of ['channel', 'domainId', 'url', 'outline'] as const) {
+  for (const key of ['channel', 'domainId', 'outline'] as const) {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
+  if (normalized.url !== undefined) normalized.url = normalizeContentUrl(normalized.url);
   return normalized;
 }
 
