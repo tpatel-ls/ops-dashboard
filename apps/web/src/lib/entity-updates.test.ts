@@ -100,6 +100,12 @@ describe('content inputs', () => {
     expect(() => updateContent('content-1', { status: 'missing' as never })).toThrow(
       'Content status must be valid',
     );
+    expect(() => updateContent('content-1', { url: 'javascript:alert(1)' })).toThrow(
+      'Content URL must use HTTP or HTTPS',
+    );
+    expect(() => updateContent('content-1', { url: 'data:text/html,unsafe' })).toThrow(
+      'Content URL must use HTTP or HTTPS',
+    );
   });
 
   it('normalizes checklist items and rejects duplicate identifiers', async () => {
