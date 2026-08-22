@@ -61,6 +61,22 @@ describe('pickWinner', () => {
     expect(pickWinner(bravo, alpha)).toBe(bravo);
   });
 
+  it('converges when malformed numeric content would collide in JSON', () => {
+    const invalid = task('device-a', { priority: Number.NaN as never });
+    const nullable = task('device-a', { priority: null as never });
+
+    const winner = pickWinner(invalid, nullable);
+    expect(pickWinner(nullable, invalid)).toBe(winner);
+  });
+
+  it('distinguishes missing array entries from an empty array during conflict ties', () => {
+    const sparse = task('device-a', { tags: [undefined as never] });
+    const empty = task('device-a', { tags: [] });
+
+    const winner = pickWinner(sparse, empty);
+    expect(pickWinner(empty, sparse)).toBe(winner);
+  });
+
   it('prefers a valid version over corrupted sync metadata', () => {
     const valid = task('device-a');
     const malformed = task('device-z', { version: Number.NaN });

@@ -52,11 +52,20 @@ function validVersion(value: number): number | undefined {
 }
 
 function canonicalSyncValue(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? '';
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'number') {
+    if (Number.isNaN(value)) return 'number:NaN';
+    if (value === Number.POSITIVE_INFINITY) return 'number:Infinity';
+    if (value === Number.NEGATIVE_INFINITY) return 'number:-Infinity';
+    if (Object.is(value, -0)) return 'number:-0';
+    return `number:${value}`;
+  }
+  if (typeof value !== 'object') return `${typeof value}:${JSON.stringify(value) ?? String(value)}`;
   if (Array.isArray(value)) return `[${value.map(canonicalSyncValue).join(',')}]`;
   return `{${Object.entries(value)
     .filter(([, entry]) => entry !== undefined)
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
     .map(([key, entry]) => `${JSON.stringify(key)}:${canonicalSyncValue(entry)}`)
     .join(',')}}`;
 }
