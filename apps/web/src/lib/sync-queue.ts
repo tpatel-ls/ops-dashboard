@@ -12,8 +12,6 @@ interface EnqueueArgs {
 
 export async function enqueueOp(args: EnqueueArgs): Promise<void> {
   const db = getDb();
-  const settings = await db.settings.get('singleton');
-  if (!settings?.syncEnabled) return;
   await db.transaction('rw', db.syncOps, async () => {
     const pending = await db.syncOps
       .where('recordId')
