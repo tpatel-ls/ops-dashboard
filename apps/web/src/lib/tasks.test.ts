@@ -192,6 +192,7 @@ describe('updateTask', () => {
       { order: Number.NaN },
       { status: 'missing' as Task['status'] },
       { priority: 4 as Task['priority'] },
+      { starred: 'yes' as never },
     ] satisfies Partial<Task>[]) {
       mocks.put.mockClear();
       await expect(updateTask('task-1', patch)).rejects.toThrow();

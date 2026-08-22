@@ -34,6 +34,9 @@ function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEnt
   if (Object.hasOwn(normalized, 'tags')) {
     normalized.tags = normalizeStringList(normalized.tags, 'Journal entry tags must be valid.');
   }
+  if (normalized.flaggedForReview !== undefined && typeof normalized.flaggedForReview !== 'boolean') {
+    throw new Error('Journal review state must be boolean.');
+  }
   return normalized;
 }
 

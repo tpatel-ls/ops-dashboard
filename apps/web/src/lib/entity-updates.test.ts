@@ -449,4 +449,16 @@ describe('required update fields', () => {
       'Person tags must be valid',
     );
   });
+
+  it('rejects malformed optional boolean flags', () => {
+    expect(() => updateJournalEntry('journal-1', { flaggedForReview: 'yes' as never })).toThrow(
+      'Journal review state must be boolean',
+    );
+    expect(() => updateNote('note-1', { flaggedForReview: 1 as never })).toThrow(
+      'Note review state must be boolean',
+    );
+    expect(() => updateQuote('quote-1', { favorite: 'true' as never })).toThrow(
+      'Quote favorite state must be boolean',
+    );
+  });
 });

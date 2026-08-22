@@ -195,6 +195,9 @@ function assertTaskFields(patch: Partial<Task>): void {
   ) {
     throw new Error('Task priority must be an integer from 0 to 3.');
   }
+  if (patch.starred !== undefined && typeof patch.starred !== 'boolean') {
+    throw new Error('Task starred state must be boolean.');
+  }
 }
 
 /** Add a task straight into a project, inheriting its domain and org lane. */
