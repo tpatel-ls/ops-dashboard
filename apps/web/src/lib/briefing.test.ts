@@ -204,6 +204,7 @@ describe('briefing helpers', () => {
         reminders: [],
         checklist: [],
         scheduledFor: '2026-07-03',
+        completedAt: '2026-07-03T09:00:00.000Z',
       },
     ] satisfies Task[];
 
@@ -217,6 +218,25 @@ describe('briefing helpers', () => {
       routingIssues: 2,
       staleDomains: 1,
     });
+  });
+
+  it('does not carry previously completed overdue work into today', () => {
+    const completed = {
+      ...meta('completed'),
+      title: 'Old completed task',
+      status: 'done',
+      priority: 0,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      dueAt: '2026-06-01T17:00:00.000Z',
+      completedAt: '2026-06-02T17:00:00.000Z',
+    } satisfies Task;
+
+    expect(
+      summarizeBriefing({ tasks: [completed], today: '2026-07-03', routingIssues: 0, staleDomains: 0 }),
+    ).toMatchObject({ todayTotal: 0, doneToday: 0, openToday: 0 });
   });
 
   it('ignores malformed scheduled calendar days', () => {

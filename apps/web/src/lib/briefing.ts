@@ -155,12 +155,15 @@ export function summarizeBriefing(input: {
 }): BriefingSummary {
   const today = input.today ?? todayIso();
   const live = input.tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
-  const todays = live.filter((task) => {
+  const openToday = live.filter((task) => {
+    if (task.status === 'done') return false;
     const scheduled = localDay(task.scheduledFor);
     const due = localDay(task.dueAt);
     return scheduled === today || Boolean(due && due <= today) || localDay(task.startAt) === today;
   });
-  const doneToday = todays.filter((task) => task.status === 'done').length;
+  const doneToday = live.filter(
+    (task) => task.status === 'done' && localDay(task.completedAt) === today,
+  ).length;
   const overdue = live.filter((task) => {
     const due = localDay(task.dueAt);
     const scheduled = localDay(task.scheduledFor);
@@ -170,9 +173,9 @@ export function summarizeBriefing(input: {
   }).length;
 
   return {
-    todayTotal: todays.length,
+    todayTotal: openToday.length + doneToday,
     doneToday,
-    openToday: todays.length - doneToday,
+    openToday: openToday.length,
     overdue,
     routingIssues: input.routingIssues,
     staleDomains: input.staleDomains,
