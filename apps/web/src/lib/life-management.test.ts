@@ -314,6 +314,33 @@ describe('life management summary', () => {
     expect(summary.slippingProjects).toBe(1);
   });
 
+  it('does not mark a newly created project as slipping before work is logged', () => {
+    const project = {
+      ...meta('new-project', '2026-07-06T12:00:00.000Z'),
+      name: 'New project',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      milestones: [],
+      checklists: [],
+    } satisfies Project;
+
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [project],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.slippingProjects).toBe(0);
+  });
+
   it('ignores malformed dates in the all-time activity count', () => {
     const summary = summarizeLifeManagement({
       tasks: [],
