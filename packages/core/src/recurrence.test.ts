@@ -117,6 +117,33 @@ describe('projectNextTask', () => {
     expect(projectedDue.getMinutes()).toBe(30);
   });
 
+  it('preserves a due date offset from the recurring schedule', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Prepare weekly report',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-03',
+      dueAt: new Date(2026, 7, 5, 17).toISOString(),
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'weekly', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-03T12:00:00.000Z',
+      updatedAt: '2026-08-05T22:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    const projected = projectNextTask(task, new Date('2026-08-05T22:00:00.000Z'));
+    const projectedDue = new Date(projected?.dueAt ?? '');
+
+    expect(projected?.scheduledFor).toBe('2026-08-10');
+    expect(projectedDue.getDate()).toBe(12);
+    expect(projectedDue.getHours()).toBe(17);
+  });
+
   it('stops a recurrence chain after its configured count', () => {
     const task = {
       id: 'task-1',

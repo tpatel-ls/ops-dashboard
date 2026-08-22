@@ -1,4 +1,12 @@
-import { addDays, addMonths, addWeeks, addYears, isValid, parseISO } from 'date-fns';
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
+  differenceInCalendarDays,
+  isValid,
+  parseISO,
+} from 'date-fns';
 import type { RecurrenceRule, Task } from './types';
 import { isoDay, localDay } from './dates';
 
@@ -101,6 +109,7 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
   const dueAtSource = parsedDueAt && isValid(parsedDueAt) ? parsedDueAt : undefined;
   const nextDue = new Date(next);
   if (dueAtSource) {
+    nextDue.setDate(nextDue.getDate() + differenceInCalendarDays(dueAtSource, anchor));
     nextDue.setHours(
       dueAtSource.getHours(),
       dueAtSource.getMinutes(),
