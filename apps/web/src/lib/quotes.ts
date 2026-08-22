@@ -51,6 +51,9 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
       return { ...thought, id, text, at: new Date(Date.parse(thought.at)).toISOString() };
     });
   }
+  if (normalized.favorite !== undefined && typeof normalized.favorite !== 'boolean') {
+    throw new Error('Quote favorite state must be boolean.');
+  }
   return normalized;
 }
 
