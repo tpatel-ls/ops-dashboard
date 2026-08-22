@@ -1,9 +1,13 @@
 import type { NextConfig } from 'next';
 import withSerwistInit from '@serwist/next';
+import { SECURITY_HEADERS } from './src/lib/security-headers';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@ops-dashboard/core', '@ops-dashboard/ui', '@ops-dashboard/whiteboard'],
+  async headers() {
+    return [{ source: '/(.*)', headers: [...SECURITY_HEADERS] }];
+  },
 };
 
 const withSerwist = withSerwistInit({
