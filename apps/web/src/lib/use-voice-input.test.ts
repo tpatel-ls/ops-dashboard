@@ -45,6 +45,7 @@ function setMediaDevices(getUserMedia: ReturnType<typeof vi.fn>) {
 
 afterEach(() => {
   transcribeBlobMock.mockReset();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
@@ -76,6 +77,18 @@ describe('useVoiceInput', () => {
 
     await waitFor(() => {
       expect(result.current.error).toBe('Microphone access was not available.');
+    });
+  });
+
+  it('explains when server transcription is unavailable offline', async () => {
+    setMediaDevices(vi.fn());
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    const { result } = renderHook(() => useVoiceInput({ onTranscript: vi.fn() }));
+
+    act(() => result.current.toggle());
+
+    await waitFor(() => {
+      expect(result.current.error).toBe('Voice transcription requires a network connection.');
     });
   });
 
