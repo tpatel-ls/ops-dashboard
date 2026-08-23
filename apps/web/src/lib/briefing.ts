@@ -1,5 +1,6 @@
 import { localDay, todayIso } from '@ops-dashboard/core';
 import type { Capture, Domain, Project, Task } from '@ops-dashboard/core';
+import { differenceInCalendarDays } from 'date-fns';
 
 export interface StaleDomain {
   domainId: string;
@@ -81,7 +82,7 @@ export function findStaleDomains(input: {
 
       const daysIdle = Math.max(
         0,
-        Math.floor((nowMs - new Date(lastTouchedAt).getTime()) / 86_400_000),
+        differenceInCalendarDays(now, new Date(lastTouchedAt)),
       );
       return {
         domainId: domain.id,
