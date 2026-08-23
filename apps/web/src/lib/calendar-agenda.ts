@@ -45,9 +45,13 @@ export function calendarDateOf(
 export function compareCalendarTasks(a: Task, b: Task): number {
   const aStart = validTimestamp(a.startAt);
   const bStart = validTimestamp(b.startAt);
-  if (aStart !== undefined && bStart !== undefined) return aStart - bStart;
+  if (aStart !== undefined && bStart !== undefined) {
+    const startOrder = aStart - bStart;
+    if (startOrder !== 0) return startOrder;
+  }
   if (aStart !== undefined) return -1;
   if (bStart !== undefined) return 1;
   if (a.priority !== b.priority) return b.priority - a.priority;
-  return a.title.localeCompare(b.title);
+  const titleOrder = a.title.localeCompare(b.title);
+  return titleOrder !== 0 ? titleOrder : a.id.localeCompare(b.id);
 }
