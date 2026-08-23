@@ -96,7 +96,7 @@ export function normalizeSettings(value?: Partial<Settings> | null): Settings {
     slippingDays: boundedMinutes(value?.slippingDays, DEFAULT_SETTINGS.slippingDays, 1, 365),
     updatedAt:
       typeof value?.updatedAt === 'string' && Number.isFinite(Date.parse(value.updatedAt))
-        ? value.updatedAt
+        ? new Date(Date.parse(value.updatedAt)).toISOString()
         : new Date().toISOString(),
   };
 }

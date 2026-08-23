@@ -88,6 +88,12 @@ describe('normalizeSettings', () => {
     expect(normalized.updatedAt).not.toBe('not-a-timestamp');
   });
 
+  it('canonicalizes valid update timestamps', () => {
+    expect(normalizeSettings({ updatedAt: '2026-08-23T07:00:00-05:00' }).updatedAt).toBe(
+      '2026-08-23T12:00:00.000Z',
+    );
+  });
+
   it('keeps valid timezones and removes invalid or unknown persisted fields', () => {
     expect(
       normalizeSettings({ timezone: ' America/Chicago ', legacyFlag: true } as never),
