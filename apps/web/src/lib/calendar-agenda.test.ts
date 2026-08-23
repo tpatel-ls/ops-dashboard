@@ -100,4 +100,22 @@ describe('calendar agenda', () => {
       'normal',
     ]);
   });
+
+  it('orders simultaneous time blocks deterministically', () => {
+    const items = [
+      task('bravo', { startAt: '2026-07-20T09:00:00', title: 'Review' }),
+      task('alpha', { startAt: '2026-07-20T09:00:00', title: 'Review' }),
+      task('priority', {
+        startAt: '2026-07-20T09:00:00',
+        priority: 3,
+        title: 'Urgent review',
+      }),
+    ];
+
+    expect(items.sort(compareCalendarTasks).map((item) => item.id)).toEqual([
+      'priority',
+      'alpha',
+      'bravo',
+    ]);
+  });
 });
