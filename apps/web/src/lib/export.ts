@@ -3,6 +3,7 @@
 import { format, isValid, parseISO } from 'date-fns';
 import { getDb, localDay } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
+import { compareTasks } from './task-query';
 
 export interface OpsExport {
   version: 1;
@@ -301,7 +302,7 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
     grouped[k].push(t);
   }
   for (const day of Object.keys(grouped).sort()) {
-    const list = grouped[day]!;
+    const list = grouped[day]!.sort(compareTasks);
     const label =
       day === 'unscheduled' ? 'Unscheduled' : format(parseISO(`${day}T00:00:00`), 'EEEE, MMMM d');
     lines.push(`## ${label}`, '');
