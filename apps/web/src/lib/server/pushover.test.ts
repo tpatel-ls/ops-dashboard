@@ -76,6 +76,48 @@ describe('sendPushover', () => {
     expect(body.get('url_title')).toHaveLength(100);
   });
 
+  it('rejects unsafe or relative provider links', async () => {
+    vi.stubEnv('PUSHOVER_TOKEN', 'token');
+    vi.stubEnv('PUSHOVER_USER', 'user');
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(sendPushover({ message: 'Alert', url: 'javascript:alert(1)' })).resolves.toEqual({
+      ok: false,
+      reason: 'invalid-url',
+    });
+    await expect(sendPushover({ message: 'Alert', url: '/tasks' })).resolves.toEqual({
+      ok: false,
+      reason: 'invalid-url',
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid runtime priority values', async () => {
+    vi.stubEnv('PUSHOVER_TOKEN', 'token');
+    vi.stubEnv('PUSHOVER_USER', 'user');
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(sendPushover({ message: 'Alert', priority: 3 as never })).resolves.toEqual({
+      ok: false,
+      reason: 'invalid-priority',
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('omits a link title when no link is present', async () => {
+    vi.stubEnv('PUSHOVER_TOKEN', 'token');
+    vi.stubEnv('PUSHOVER_USER', 'user');
+    const fetch = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetch);
+
+    await sendPushover({ message: 'Alert', urlTitle: 'Open dashboard' });
+
+    const body = fetch.mock.calls[0]?.[1]?.body as URLSearchParams;
+    expect(body.has('url_title')).toBe(false);
+  });
+
   it('does not split Unicode code points at provider limits', async () => {
     vi.stubEnv('PUSHOVER_TOKEN', 'token');
     vi.stubEnv('PUSHOVER_USER', 'user');
