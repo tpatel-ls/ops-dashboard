@@ -151,7 +151,15 @@ export function findCaptureRoutingIssues(
       }
       return [];
     })
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    .sort((a, b) => {
+      const aTimestamp = Date.parse(a.createdAt);
+      const bTimestamp = Date.parse(b.createdAt);
+      const aValid = Number.isFinite(aTimestamp);
+      const bValid = Number.isFinite(bTimestamp);
+      if (aValid && bValid && aTimestamp !== bTimestamp) return bTimestamp - aTimestamp;
+      if (aValid !== bValid) return aValid ? -1 : 1;
+      return a.captureId.localeCompare(b.captureId);
+    });
 }
 
 export function summarizeBriefing(input: {
