@@ -9,3 +9,7 @@ export function outboundRecordPayload(value: unknown): Record<string, unknown> |
     ? (value as Record<string, unknown>)
     : undefined;
 }
+
+export function canDrainOutboxTable(table: string, failedTables: ReadonlySet<string>): boolean {
+  return !failedTables.has(table);
+}
