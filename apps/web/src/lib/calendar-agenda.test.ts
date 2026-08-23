@@ -51,6 +51,16 @@ describe('calendar agenda', () => {
     expect(calendarDateOf(task('due', { dueAt: timestamp }))).toBe(isoDay(new Date(timestamp)));
   });
 
+  it('preserves date-only deadlines in negative UTC offsets', () => {
+    const originalTimezone = process.env.TZ;
+    process.env.TZ = 'America/Chicago';
+    try {
+      expect(calendarDateOf(task('due', { dueAt: '2026-07-20' }))).toBe('2026-07-20');
+    } finally {
+      process.env.TZ = originalTimezone;
+    }
+  });
+
   it('does not place malformed scheduled days on the calendar', () => {
     expect(calendarDateOf(task('impossible', { scheduledFor: '2026-02-30' }))).toBeUndefined();
     expect(
