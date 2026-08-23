@@ -49,12 +49,18 @@ export function findStaleDomains(input: {
     .map((domain) => {
       const connectedProjectDates = input.projects
         .filter(
-          (project) => !project.deletedAt && !project.archivedAt && project.domainId === domain.id,
+          (project) =>
+            !project.deletedAt &&
+            !project.archivedAt &&
+            project.status !== 'archived' &&
+            project.domainId === domain.id,
         )
         .flatMap((project) => [project.lastWorkedAt, project.updatedAt, project.createdAt])
         .filter(Boolean) as string[];
       const connectedTaskDates = input.tasks
-        .filter((task) => !task.deletedAt && task.domainId === domain.id)
+        .filter(
+          (task) => !task.deletedAt && task.status !== 'archived' && task.domainId === domain.id,
+        )
         .flatMap((task) => [task.completedAt, task.updatedAt, task.createdAt])
         .filter(Boolean) as string[];
       const candidates = [

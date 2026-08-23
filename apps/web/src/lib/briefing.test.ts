@@ -104,6 +104,51 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('does not let archived work keep a domain fresh', () => {
+    const domain = {
+      ...meta('body', '2026-06-01T12:00:00.000Z'),
+      name: 'Body',
+      color: '#111',
+      order: 1,
+    } satisfies Domain;
+    const archivedTask = {
+      ...meta('archived-task', '2026-07-03T12:00:00.000Z'),
+      title: 'Old plan',
+      status: 'archived',
+      priority: 0,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      domainId: domain.id,
+    } satisfies Task;
+    const archivedProject = {
+      ...meta('archived-project', '2026-07-03T12:00:00.000Z'),
+      name: 'Old project',
+      color: '#fff',
+      kind: 'project',
+      status: 'archived',
+      domainId: domain.id,
+      milestones: [],
+      checklists: [],
+    } satisfies Project;
+
+    expect(
+      findStaleDomains({
+        domains: [domain],
+        projects: [archivedProject],
+        tasks: [archivedTask],
+        now,
+        staleAfterDays: 7,
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        domainId: 'body',
+        lastTouchedAt: '2026-06-01T12:00:00.000Z',
+      }),
+    ]);
+  });
+
   it('uses the default stale window for malformed thresholds', () => {
     const domain = {
       ...meta('body', '2026-07-02T12:00:00.000Z'),
