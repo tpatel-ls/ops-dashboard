@@ -257,6 +257,38 @@ describe('life management summary', () => {
     expect(summary.activeDays).toBe(0);
   });
 
+  it('does not count stale completion metadata on open tasks', () => {
+    const openTask = {
+      ...meta('open-task'),
+      title: 'Reopened work',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      completedAt: '2026-07-06T12:00:00.000Z',
+    } satisfies Task;
+
+    const summary = summarizeLifeManagement({
+      tasks: [openTask],
+      projects: [],
+      domains: [],
+      routines: [],
+      routineChecks: [],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.activeDays).toBe(0);
+    expect(summary.modules.find((module) => module.id === 'identity')?.detail).toBe(
+      '0/7 active days',
+    );
+  });
+
   it('does not classify malformed task dates as overdue', () => {
     const malformed = {
       ...meta('malformed-task'),
