@@ -13,15 +13,10 @@ import {
   toRow,
   type DexieTableName,
 } from './mapping';
-import {
-  advanceSyncCursor,
-  createSyncCursorCache,
-  overlappedCursor,
-  SYNC_EPOCH,
-} from './cursors';
+import { advanceSyncCursor, createSyncCursorCache, overlappedCursor, SYNC_EPOCH } from './cursors';
 import { shouldAcceptRemote } from './conflicts';
 import { visitPullPages } from './pagination';
-import { nextRecordedAttempt, outboundRecordPayload } from './outbox';
+import { canDrainOutboxTable, nextRecordedAttempt, outboundRecordPayload } from './outbox';
 import { createSingleFlightQueue } from './single-flight';
 import { readLocalStorage, writeLocalStorage } from '../browser-storage';
 
@@ -88,7 +83,11 @@ async function drainOutbox(supabase: SupabaseClient, userId: string): Promise<vo
     const failedTables = new Set<string>();
     let more = true;
     while (more) {
-      const ops = await db().syncOps.orderBy('createdAt').limit(DRAIN_BATCH).toArray();
+      const ops = await db()
+        .syncOps.orderBy('createdAt')
+        .filter((op) => canDrainOutboxTable(op.table, failedTables))
+        .limit(DRAIN_BATCH)
+        .toArray();
       if (!ops.length) break;
       more = ops.length === DRAIN_BATCH;
       let progressed = false;
