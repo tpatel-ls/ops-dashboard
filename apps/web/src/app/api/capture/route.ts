@@ -11,6 +11,7 @@ import type {
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { bearerSecretMatches, requestAllowed } from '@/lib/server/guard';
 import { normalizeTimezoneOffset } from '@/lib/server/timezone';
+import { captureParserNow } from '@/lib/server/capture-time';
 import { boundedText } from '@/lib/server/input';
 import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
 import { journalEntrySource } from '@/lib/journal-source';
@@ -183,7 +184,11 @@ export async function POST(req: Request): Promise<Response> {
   } else {
     const titleInput =
       result && result.dueText ? `${result.title} ${result.dueText}` : (result?.title ?? raw);
-    const base = quickAddToTask(parseQuickAdd(titleInput), { id: newId(), deviceId, order: 0 });
+    const base = quickAddToTask(parseQuickAdd(titleInput, captureParserNow(tzOffsetMinutes)), {
+      id: newId(),
+      deviceId,
+      order: 0,
+    });
     routedRecord = applyTzOffset(
       {
         ...base,
