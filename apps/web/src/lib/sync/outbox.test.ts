@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextRecordedAttempt, outboundRecordPayload } from './outbox';
+import { canDrainOutboxTable, nextRecordedAttempt, outboundRecordPayload } from './outbox';
 
 describe('nextRecordedAttempt', () => {
   it('increments retry metadata without passing the display cap', () => {
@@ -24,5 +24,14 @@ describe('outboundRecordPayload', () => {
     expect(outboundRecordPayload(null)).toBeUndefined();
     expect(outboundRecordPayload(['task-1'])).toBeUndefined();
     expect(outboundRecordPayload('task-1')).toBeUndefined();
+  });
+});
+
+describe('canDrainOutboxTable', () => {
+  it('keeps healthy tables eligible after another table fails', () => {
+    const failed = new Set(['tasks']);
+
+    expect(canDrainOutboxTable('tasks', failed)).toBe(false);
+    expect(canDrainOutboxTable('projects', failed)).toBe(true);
   });
 });
