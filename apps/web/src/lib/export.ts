@@ -4,6 +4,7 @@ import { format, isValid, parseISO } from 'date-fns';
 import { getDb, localDay } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 import { compareTasks } from './task-query';
+import { enqueueOp } from './sync-queue';
 
 export interface OpsExport {
   version: 1;
@@ -265,6 +266,24 @@ export async function importAll(value: unknown): Promise<void> {
     if (payload.tasks) await db.tasks.bulkPut(payload.tasks);
     if (payload.whiteboards) await db.whiteboards.bulkPut(payload.whiteboards);
   });
+  await Promise.all(
+    (
+      [
+        ['projects', payload.projects],
+        ['tasks', payload.tasks],
+        ['whiteboards', payload.whiteboards],
+      ] as const
+    ).flatMap(([table, records]) =>
+      records.map((record) =>
+        enqueueOp({
+          table,
+          recordId: record.id,
+          op: record.deletedAt ? 'delete' : 'put',
+          payload: record,
+        }),
+      ),
+    ),
+  );
 }
 
 export function releaseDownloadUrl(url: string): void {
