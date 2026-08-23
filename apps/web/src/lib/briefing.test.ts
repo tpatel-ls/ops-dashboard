@@ -240,6 +240,35 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('orders routing issues by instant and puts malformed timestamps last', () => {
+    const captures = [
+      {
+        ...meta('later', '2026-07-03T09:30:00-05:00'),
+        raw: 'Later issue',
+        source: 'text',
+        status: 'pending',
+      },
+      {
+        ...meta('earlier', '2026-07-03T15:00:00+02:00'),
+        raw: 'Earlier issue',
+        source: 'text',
+        status: 'pending',
+      },
+      {
+        ...meta('malformed', 'not-a-date'),
+        raw: 'Malformed issue',
+        source: 'text',
+        status: 'pending',
+      },
+    ] satisfies Capture[];
+
+    expect(findCaptureRoutingIssues(captures, []).map((issue) => issue.captureId)).toEqual([
+      'later',
+      'earlier',
+      'malformed',
+    ]);
+  });
+
   it('summarizes the operating cockpit counts for the briefing header', () => {
     const tasks = [
       {
