@@ -269,6 +269,18 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('falls back from blank AI summaries to captured text', () => {
+    const capture = {
+      ...meta('pending'),
+      raw: '  Renew passport  ',
+      source: 'voice',
+      status: 'pending',
+      aiSummary: '   ',
+    } satisfies Capture;
+
+    expect(findCaptureRoutingIssues([capture], [])[0]?.title).toBe('Renew passport');
+  });
+
   it('summarizes the operating cockpit counts for the briefing header', () => {
     const tasks = [
       {
@@ -334,7 +346,12 @@ describe('briefing helpers', () => {
     } satisfies Task;
 
     expect(
-      summarizeBriefing({ tasks: [completed], today: '2026-07-03', routingIssues: 0, staleDomains: 0 }),
+      summarizeBriefing({
+        tasks: [completed],
+        today: '2026-07-03',
+        routingIssues: 0,
+        staleDomains: 0,
+      }),
     ).toMatchObject({ todayTotal: 0, doneToday: 0, openToday: 0 });
   });
 

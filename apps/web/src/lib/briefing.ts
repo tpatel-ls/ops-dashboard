@@ -86,10 +86,7 @@ export function findStaleDomains(input: {
         };
       }
 
-      const daysIdle = Math.max(
-        0,
-        differenceInCalendarDays(now, new Date(lastTouchedAt)),
-      );
+      const daysIdle = Math.max(0, differenceInCalendarDays(now, new Date(lastTouchedAt)));
       return {
         domainId: domain.id,
         domainName: domain.name,
@@ -112,7 +109,7 @@ export function findCaptureRoutingIssues(
   return captures
     .filter((capture) => !capture.deletedAt && capture.status !== 'dismissed')
     .flatMap((capture): CaptureRoutingIssue[] => {
-      const title = capture.aiSummary || capture.raw;
+      const title = capture.aiSummary?.trim() || capture.raw.trim() || 'Untitled capture';
       if (capture.status === 'pending' || !capture.routedTo) {
         return [
           {
