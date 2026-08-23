@@ -123,6 +123,31 @@ describe('briefing helpers', () => {
     ).toEqual([]);
   });
 
+  it('measures idle calendar days across daylight-saving changes', () => {
+    const originalTimezone = process.env.TZ;
+    process.env.TZ = 'America/Chicago';
+    try {
+      const domain = {
+        ...meta('body', new Date(2026, 2, 8, 0).toISOString()),
+        name: 'Body',
+        color: '#111',
+        order: 1,
+      } satisfies Domain;
+
+      expect(
+        findStaleDomains({
+          domains: [domain],
+          projects: [],
+          tasks: [],
+          now: new Date(2026, 2, 9, 0),
+          staleAfterDays: 0,
+        }),
+      ).toEqual([expect.objectContaining({ domainId: 'body', daysIdle: 1 })]);
+    } finally {
+      process.env.TZ = originalTimezone;
+    }
+  });
+
   it('flags captures that are pending or routed to unattached tasks', () => {
     const captures = [
       {
