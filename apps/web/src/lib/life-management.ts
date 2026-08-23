@@ -93,7 +93,7 @@ function uniqueActiveDays(input: LifeManagementInput, today: string): number {
   };
 
   for (const task of input.tasks) {
-    if (!task.deletedAt) addDay(task.completedAt);
+    if (!task.deletedAt && task.status === 'done') addDay(task.completedAt);
   }
   for (const check of input.routineChecks) {
     if (!check.deletedAt && check.done) addDay(check.date);
@@ -160,6 +160,7 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
       datePart(task.startAt) === today,
   );
   const completedThisWeek = liveTasks.filter((task) => {
+    if (task.status !== 'done') return false;
     const completed = datePart(task.completedAt);
     return completed && isRecentPastDay(completed, today, 6);
   }).length;
@@ -218,6 +219,7 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   const activeDays = uniqueActiveDays(input, today);
   const weeklyActiveDays = new Set([
     ...liveTasks
+      .filter((task) => task.status === 'done')
       .map((task) => datePart(task.completedAt))
       .filter((date): date is string => Boolean(date))
       .filter((date) => isRecentPastDay(date, today, 6)),
