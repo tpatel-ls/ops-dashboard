@@ -35,6 +35,7 @@ export function calendarDateOf(
     if (scheduled) return scheduled;
   }
   if (task.dueAt) {
+    if (localDay(task.dueAt) === task.dueAt) return task.dueAt;
     const due = new Date(task.dueAt);
     return Number.isFinite(due.getTime()) ? isoDay(due) : undefined;
   }
