@@ -45,9 +45,7 @@ function hasValidSyncMetadata(value: Record<string, unknown>): boolean {
 
 function isStringList(value: unknown): value is string[] {
   return (
-    Array.isArray(value) &&
-    value.every(isUsableString) &&
-    new Set(value).size === value.length
+    Array.isArray(value) && value.every(isUsableString) && new Set(value).size === value.length
   );
 }
 
@@ -284,7 +282,10 @@ export function downloadJson(data: unknown, filename: string): void {
 }
 
 function markdownInline(value: string): string {
-  return value.replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/([\\`*_[\]{}()#+.!|>])/g, '\\$1');
 }
 
 function markdownTag(value: string): string {
@@ -292,7 +293,7 @@ function markdownTag(value: string): string {
 }
 
 export function tasksToMarkdown(tasks: Task[], heading: string): string {
-  const lines: string[] = [`# ${heading}`, ''];
+  const lines: string[] = [`# ${markdownInline(heading) || 'Tasks'}`, ''];
   const grouped: Record<string, Task[]> = {};
   for (const t of tasks) {
     if (t.deletedAt || t.status === 'archived') continue;
