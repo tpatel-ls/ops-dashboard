@@ -74,8 +74,20 @@ describe('tasksToMarkdown', () => {
 
     const markdown = tasksToMarkdown([multiline], 'Tasks');
 
-    expect(markdown).toContain('- [ ] First line ## Injected heading #work-notes');
+    expect(markdown).toContain('- [ ] First line \\#\\# Injected heading #work-notes');
     expect(markdown).not.toContain('\n## Injected heading');
+  });
+
+  it('escapes markdown formatting in exported user text', () => {
+    const formatted = task('Review **bold** [link](https://example.com)');
+    formatted.tags = ['ops*team'];
+
+    const markdown = tasksToMarkdown([formatted], 'Tasks #1');
+
+    expect(markdown).toContain('# Tasks \\#1');
+    expect(markdown).toContain(
+      '- [ ] Review \\*\\*bold\\*\\* \\[link\\]\\(https://example\\.com\\) #ops\\*team',
+    );
   });
 
   it('omits deleted and archived tasks from readable exports', () => {
@@ -212,9 +224,7 @@ describe('validateOpsExport', () => {
     expect(() =>
       validateOpsExport({
         ...base,
-        tasks: [
-          { ...task('Bad recurrence'), recurrence: { freq: 'weekly', interval: 0 } },
-        ],
+        tasks: [{ ...task('Bad recurrence'), recurrence: { freq: 'weekly', interval: 0 } }],
       }),
     ).toThrow('Invalid export tasks');
   });
