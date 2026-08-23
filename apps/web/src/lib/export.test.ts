@@ -90,6 +90,20 @@ describe('tasksToMarkdown', () => {
     expect(markdown).not.toContain('Deleted task');
     expect(markdown).not.toContain('Archived task');
   });
+
+  it('orders each day by priority and task order', () => {
+    const normal = task('Normal', '2026-07-28');
+    normal.order = 2;
+    const first = task('First', '2026-07-28');
+    first.order = 1;
+    const urgent = task('Urgent', '2026-07-28');
+    urgent.priority = 3;
+
+    const markdown = tasksToMarkdown([normal, urgent, first], 'Tasks');
+
+    expect(markdown.indexOf('Urgent')).toBeLessThan(markdown.indexOf('First'));
+    expect(markdown.indexOf('First')).toBeLessThan(markdown.indexOf('Normal'));
+  });
 });
 
 describe('validateOpsExport', () => {
