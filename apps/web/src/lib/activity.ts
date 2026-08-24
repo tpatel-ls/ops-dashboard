@@ -34,6 +34,21 @@ export function activityTimestampOnOrAfter(value: unknown, start: Date): boolean
   return Number.isFinite(timestamp) && timestamp >= start.getTime();
 }
 
+export function activityTimestampWithin(value: unknown, start: Date, end: Date): boolean {
+  if (typeof value !== 'string') return false;
+  const timestamp = Date.parse(value);
+  const startTimestamp = start.getTime();
+  const endTimestamp = end.getTime();
+  return (
+    Number.isFinite(timestamp) &&
+    Number.isFinite(startTimestamp) &&
+    Number.isFinite(endTimestamp) &&
+    startTimestamp <= endTimestamp &&
+    timestamp >= startTimestamp &&
+    timestamp <= endTimestamp
+  );
+}
+
 /** Convert any ISO/Date to a local YYYY-MM-DD string. */
 function toLocalDate(ts: string | Date): string {
   const d = typeof ts === 'string' ? new Date(ts) : ts;
