@@ -14,6 +14,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import {
+  compareInteractionRecency,
   deletePerson,
   makeFact,
   makeInteraction,
@@ -152,9 +153,7 @@ function InteractionsSection({ person }: { person: Person }) {
   const [note, setNote] = useState('');
   const [date, setDate] = useState('');
 
-  const sorted = [...person.interactions].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
+  const sorted = [...person.interactions].sort(compareInteractionRecency);
 
   async function addInteraction() {
     const n = note.trim();
