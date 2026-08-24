@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Person } from '@ops-dashboard/core';
-import { latestInteraction, matchesPersonSearch } from './people';
+import { compareInteractionRecency, latestInteraction, matchesPersonSearch } from './people';
 
 const person = {
   name: 'Avery Morgan',
@@ -40,5 +40,21 @@ describe('latestInteraction', () => {
 
     expect(latest?.id).toBe('later');
     expect(latestInteraction([{ id: 'invalid', date: 'bad', note: 'Bad' }])).toBeNull();
+  });
+});
+
+describe('compareInteractionRecency', () => {
+  it('orders valid interactions newest first and malformed dates last', () => {
+    const interactions = [
+      { id: 'invalid', date: 'not-a-date', note: 'Invalid' },
+      { id: 'earlier', date: '2026-08-24T14:00:00Z', note: 'Earlier' },
+      { id: 'later', date: '2026-08-24T09:30:00-05:00', note: 'Later' },
+    ];
+
+    expect(interactions.sort(compareInteractionRecency).map((item) => item.id)).toEqual([
+      'later',
+      'earlier',
+      'invalid',
+    ]);
   });
 });
