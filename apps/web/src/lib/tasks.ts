@@ -181,7 +181,7 @@ function assertTaskFields(patch: Partial<Task>): void {
   }
   for (const key of ['estimateMinutes', 'actualMinutes'] as const) {
     const value = patch[key];
-    if (value !== undefined && (!Number.isInteger(value) || value < 0)) {
+    if (value !== undefined && (!Number.isSafeInteger(value) || value < 0)) {
       throw new Error(`Task ${key} must be a non-negative integer.`);
     }
   }
