@@ -189,6 +189,7 @@ describe('updateTask', () => {
       { dueAt: 'not-a-date' },
       { estimateMinutes: -1 },
       { actualMinutes: 1.5 },
+      { estimateMinutes: Number.MAX_SAFE_INTEGER + 1 },
       { order: Number.NaN },
       { status: 'missing' as Task['status'] },
       { priority: 4 as Task['priority'] },
