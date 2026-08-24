@@ -6,6 +6,7 @@ import { format, parseISO } from 'date-fns';
 import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Task, Priority } from '@ops-dashboard/core';
 import { setTaskStatus } from '@/lib/tasks';
+import { taskNeedsAttentionBy } from '@/lib/task-dates';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
 
@@ -34,9 +35,7 @@ export function TaskList({ filter = 'all' }: TaskListProps) {
     all = all.filter((t) => !t.deletedAt && t.status !== 'archived');
     if (filter === 'today') {
       const today = todayIso();
-      all = all.filter(
-        (t) => t.scheduledFor === today || (t.dueAt && t.dueAt.slice(0, 10) <= today),
-      );
+      all = all.filter((task) => taskNeedsAttentionBy(task, today));
     } else if (filter === 'inbox') {
       all = all.filter((t) => !t.scheduledFor && !t.dueAt && !t.startAt);
     }
