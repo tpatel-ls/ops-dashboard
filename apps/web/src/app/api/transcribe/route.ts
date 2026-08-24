@@ -23,7 +23,12 @@ export async function POST(req: Request): Promise<Response> {
   const endpoint = transcriptionEndpoint(process.env.TRANSCRIBE_BASE_URL);
   const key = process.env.TRANSCRIBE_API_KEY?.trim();
   const model = process.env.TRANSCRIBE_MODEL?.trim() || 'whisper-1';
-  if (!endpoint) return NextResponse.json({ ok: false, reason: 'not-configured' });
+  if (!endpoint) {
+    return NextResponse.json(
+      { ok: false, reason: 'not-configured' },
+      { status: 503 },
+    );
+  }
 
   let file: Blob | null = null;
   try {
