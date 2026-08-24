@@ -13,7 +13,7 @@ import {
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
-import { createPerson, matchesPersonSearch } from '@/lib/people';
+import { createPerson, latestInteraction, matchesPersonSearch } from '@/lib/people';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
 
@@ -97,12 +97,7 @@ interface PersonCardProps {
 
 function PersonCard({ person, domain, onClick }: PersonCardProps) {
   const factCount = person.facts.length;
-  const lastInteraction =
-    person.interactions.length > 0
-      ? person.interactions.reduce((latest, i) =>
-          new Date(i.date) > new Date(latest.date) ? i : latest,
-        )
-      : null;
+  const lastInteraction = latestInteraction(person.interactions);
 
   const initials = person.name
     .split(' ')
