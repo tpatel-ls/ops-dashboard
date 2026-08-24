@@ -20,7 +20,7 @@ import {
 import { getDb } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
-import { deleteFoodLog, updateFoodLog } from '@/lib/food-logs';
+import { compareFoodLogCreation, deleteFoodLog, updateFoodLog } from '@/lib/food-logs';
 import { processBrainDump } from '@/lib/route-items';
 import { addDaysISO, todayISO } from '@/lib/routines';
 import { useVoiceInput } from '@/lib/use-voice-input';
@@ -43,7 +43,7 @@ export function FoodView() {
       const rows = await getDb().foodLogs.where('date').equals(day).toArray();
       return rows
         .filter((r) => !r.deletedAt)
-        .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
+        .sort(compareFoodLogCreation);
     },
     [day],
   );

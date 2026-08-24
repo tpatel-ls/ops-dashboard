@@ -9,7 +9,23 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { createFoodLog, updateFoodLog } from './food-logs';
+import { compareFoodLogCreation, createFoodLog, updateFoodLog } from './food-logs';
+
+describe('compareFoodLogCreation', () => {
+  it('orders offset timestamps by instant and corrupted timestamps last', () => {
+    const logs = [
+      { id: 'invalid', createdAt: 'invalid' },
+      { id: 'later', createdAt: '2026-08-24T09:30:00-05:00' },
+      { id: 'earlier', createdAt: '2026-08-24T14:00:00Z' },
+    ];
+
+    expect(logs.sort(compareFoodLogCreation).map((log) => log.id)).toEqual([
+      'earlier',
+      'later',
+      'invalid',
+    ]);
+  });
+});
 
 describe('updateFoodLog', () => {
   beforeEach(() => mocks.patchRecord.mockReset());
