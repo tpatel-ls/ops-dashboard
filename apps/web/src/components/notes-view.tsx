@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Flag, Plus, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Note } from '@ops-dashboard/core';
-import { createNote, updateNote, deleteNote } from '@/lib/notes';
+import { compareNoteRecency, createNote, updateNote, deleteNote } from '@/lib/notes';
 import { cn } from '@ops-dashboard/ui';
 
 /* ─── Create Form ──────────────────────────────────────────────── */
@@ -201,9 +201,7 @@ export function NotesView() {
   const notes = useLiveQuery(async () => {
     const db = getDb();
     const all = await db.notes.toArray();
-    return all
-      .filter((n) => !n.deletedAt)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return all.filter((n) => !n.deletedAt).sort(compareNoteRecency);
   });
 
   if (notes === undefined) {
