@@ -5,7 +5,7 @@ import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } 
 import { getDb, isoDay } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
-import { loadActivity } from '@/lib/activity';
+import { activityTimestampWithin, loadActivity } from '@/lib/activity';
 import { computeStreak, todayISO } from '@/lib/routines';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
 import { shareOrCopy } from '@/lib/share';
@@ -106,16 +106,14 @@ export default function HabitsPage() {
       .toArray();
 
     // Tasks completed this week
-    const weekStartISO = new Date(`${weekStart}T00:00:00`).toISOString();
-    const todayEndISO = new Date(`${today}T23:59:59`).toISOString();
+    const weekStartInstant = new Date(`${weekStart}T00:00:00`);
+    const todayEndInstant = new Date(`${today}T23:59:59.999`);
     const completedTasks = await db.tasks
       .filter(
         (t) =>
           !t.deletedAt &&
           t.status === 'done' &&
-          !!t.completedAt &&
-          t.completedAt >= weekStartISO &&
-          t.completedAt <= todayEndISO,
+          activityTimestampWithin(t.completedAt, weekStartInstant, todayEndInstant),
       )
       .toArray();
 

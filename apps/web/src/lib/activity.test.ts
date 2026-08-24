@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   activityTimestampOnOrAfter,
+  activityTimestampWithin,
   aggregateActivity,
   normalizeActivityDays,
   workLogActivityContribution,
@@ -33,6 +34,22 @@ describe('aggregateActivity', () => {
     );
 
     expect(result).toEqual([{ date: '2026-07-29', count: 2.5, level: 1 }]);
+  });
+});
+
+describe('activityTimestampWithin', () => {
+  const start = new Date('2026-08-17T05:00:00.000Z');
+  const end = new Date('2026-08-25T04:59:59.999Z');
+
+  it('compares offset timestamps by instant within an inclusive range', () => {
+    expect(activityTimestampWithin('2026-08-16T23:30:00-05:00', start, end)).toBe(false);
+    expect(activityTimestampWithin('2026-08-24T23:30:00-05:00', start, end)).toBe(true);
+  });
+
+  it('rejects malformed timestamps and ranges', () => {
+    expect(activityTimestampWithin('not-a-date', start, end)).toBe(false);
+    expect(activityTimestampWithin('2026-08-20T12:00:00Z', end, start)).toBe(false);
+    expect(activityTimestampWithin('2026-08-20T12:00:00Z', new Date('invalid'), end)).toBe(false);
   });
 });
 
