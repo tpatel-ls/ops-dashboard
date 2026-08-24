@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, ChevronDown, ChevronUp, Plus, Star, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Book, BookStatus, Quote } from '@ops-dashboard/core';
-import { createBook, updateBook, deleteBook } from '@/lib/books';
+import { compareBookRecency, createBook, updateBook, deleteBook } from '@/lib/books';
 import { cn } from '@ops-dashboard/ui';
 
 /* ─── Constants ────────────────────────────────────────────────── */
@@ -322,9 +322,7 @@ export function BooksView() {
       db.books.toArray(),
       db.quotes.toArray(),
     ]);
-    const books = allBooks
-      .filter((b) => !b.deletedAt)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const books = allBooks.filter((b) => !b.deletedAt).sort(compareBookRecency);
     const quotes = allQuotes.filter((q) => !q.deletedAt);
     return { books, quotes };
   });

@@ -6,6 +6,21 @@ import { normalizeStringList } from './string-list';
 
 const BOOK_STATUSES = new Set<BookStatus>(['want', 'reading', 'finished', 'abandoned']);
 
+export function compareBookRecency(
+  left: Pick<Book, 'id' | 'createdAt'>,
+  right: Pick<Book, 'id' | 'createdAt'>,
+): number {
+  const leftTimestamp = Date.parse(left.createdAt);
+  const rightTimestamp = Date.parse(right.createdAt);
+  const leftValid = Number.isFinite(leftTimestamp);
+  const rightValid = Number.isFinite(rightTimestamp);
+  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
+    return rightTimestamp - leftTimestamp;
+  }
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'title')) {
