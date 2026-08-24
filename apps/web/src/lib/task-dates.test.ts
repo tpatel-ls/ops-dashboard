@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
 import {
   summarizeTodayTasks,
+  summarizeOpenTasks,
+  compareTasksByCommitment,
   taskCommitmentDay,
   taskIsOverdue,
   taskNeedsAttentionBy,
@@ -35,6 +37,55 @@ describe('task calendar dates', () => {
     expect(taskNeedsAttentionBy(task, '2026-08-24')).toBe(false);
     expect(taskNeedsAttentionBy({}, '2026-99-99')).toBe(false);
     expect(taskIsOverdue(task, '2026-08-24')).toBe(false);
+  });
+});
+
+describe('open task dates', () => {
+  const task = (id: string, patch: Partial<Task>): Task =>
+    ({
+      id,
+      title: id,
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 0,
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+      ...patch,
+    }) as Task;
+
+  it('sorts by the earliest valid commitment then priority', () => {
+    const items = [
+      task('undated', {}),
+      task('later', { scheduledFor: '2026-08-26' }),
+      task('urgent', { dueAt: '2026-08-25T12:00:00Z', priority: 3 }),
+      task('normal', { scheduledFor: '2026-08-25' }),
+    ];
+
+    expect(items.sort(compareTasksByCommitment).map((item) => item.id)).toEqual([
+      'urgent',
+      'normal',
+      'later',
+      'undated',
+    ]);
+  });
+
+  it('summarizes open work using normalized dates', () => {
+    const items = [
+      task('overdue', { dueAt: '2026-08-23T12:00:00Z' }),
+      task('today', { scheduledFor: '2026-08-24', priority: 2 }),
+      task('invalid', { dueAt: 'not-a-date', priority: 3 }),
+    ];
+
+    expect(summarizeOpenTasks(items, '2026-08-24')).toEqual({
+      overdue: 1,
+      today: 1,
+      high: 2,
+    });
   });
 });
 

@@ -5,11 +5,17 @@ import { Check, ChevronDown, ChevronRight, Star } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
-import type { Task, Priority } from '@ops-dashboard/core';
+import type { Priority } from '@ops-dashboard/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { todayISO } from '@/lib/routines';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
+import {
+  compareTasksByCommitment,
+  summarizeOpenTasks,
+  taskCommitmentDay,
+  taskIsOverdue,
+} from '@/lib/task-dates';
 
 const PRIORITY_COLOR: Record<Priority, string> = {
   0: 'transparent',
@@ -24,13 +30,6 @@ const PRIORITY_LABEL: Record<Priority, string> = {
   2: 'P2',
   3: 'P3',
 };
-
-function sortKey(t: Task): string {
-  const date = t.scheduledFor ?? (t.dueAt ? t.dueAt.slice(0, 10) : null);
-  const dateStr = date ?? '9999-99-99';
-  const pri = String(9 - t.priority); // higher priority first → lower sort string
-  return `${dateStr}__${pri}`;
-}
 
 export function OpenTasks() {
   const [collapsed, setCollapsed] = useState(false);
@@ -50,7 +49,7 @@ export function OpenTasks() {
           t.status !== 'done' &&
           t.status !== 'archived',
       )
-      .sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+      .sort(compareTasksByCommitment);
     return {
       tasks,
       projects: Object.fromEntries(allProjects.filter((p) => !p.deletedAt).map((p) => [p.id, p])),
@@ -62,17 +61,7 @@ export function OpenTasks() {
   const summary =
     tasks === undefined
       ? null
-      : {
-          overdue: tasks.filter(
-            (task) =>
-              (task.scheduledFor && task.scheduledFor < today) ||
-              (task.dueAt && task.dueAt.slice(0, 10) < today),
-          ).length,
-          today: tasks.filter(
-            (task) => task.scheduledFor === today || task.dueAt?.slice(0, 10) === today,
-          ).length,
-          high: tasks.filter((task) => task.priority >= 2).length,
-        };
+      : summarizeOpenTasks(tasks, today);
 
   return (
     <section>
@@ -135,9 +124,8 @@ export function OpenTasks() {
                   : project?.domainId
                     ? domains[project.domainId]
                     : null;
-                const isOverdue =
-                  (task.scheduledFor && task.scheduledFor < today) ||
-                  (task.dueAt && task.dueAt.slice(0, 10) < today);
+                const commitmentDay = taskCommitmentDay(task);
+                const isOverdue = taskIsOverdue(task, today);
 
                 return (
                   <li
@@ -187,16 +175,14 @@ export function OpenTasks() {
                       </div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                         {/* due/scheduled chip */}
-                        {(task.scheduledFor || task.dueAt) && (
+                        {commitmentDay && (
                           <span
                             className={cn(
                               'font-mono text-[10px]',
                               isOverdue ? 'text-destructive' : 'text-subtle-foreground',
                             )}
                           >
-                            {task.scheduledFor
-                              ? format(parseISO(`${task.scheduledFor}T00:00:00`), 'EEE d MMM')
-                              : format(parseISO(task.dueAt!), 'EEE d MMM')}
+                            {format(parseISO(`${commitmentDay}T00:00:00`), 'EEE d MMM')}
                           </span>
                         )}
                         {/* project / domain chip */}
