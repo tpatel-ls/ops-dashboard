@@ -5,6 +5,21 @@ import type { Note } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
 
+export function compareNoteRecency(
+  left: Pick<Note, 'id' | 'createdAt'>,
+  right: Pick<Note, 'id' | 'createdAt'>,
+): number {
+  const leftTimestamp = Date.parse(left.createdAt);
+  const rightTimestamp = Date.parse(right.createdAt);
+  const leftValid = Number.isFinite(leftTimestamp);
+  const rightValid = Number.isFinite(rightTimestamp);
+  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
+    return rightTimestamp - leftTimestamp;
+  }
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   const normalized = { ...patch };
   if (normalized.title !== undefined) normalized.title = normalized.title.trim() || undefined;
