@@ -1,0 +1,33 @@
+import { describe, expect, it } from 'vitest';
+import { taskCommitmentDay, taskIsOverdue, taskNeedsAttentionBy } from './task-dates';
+
+describe('task calendar dates', () => {
+  it('uses the browser-local day for timestamped deadlines', () => {
+    const originalTimezone = process.env.TZ;
+    process.env.TZ = 'America/Chicago';
+    try {
+      const task = { dueAt: '2026-08-25T01:00:00.000Z' };
+
+      expect(taskCommitmentDay(task)).toBe('2026-08-24');
+      expect(taskNeedsAttentionBy(task, '2026-08-24')).toBe(true);
+      expect(taskIsOverdue(task, '2026-08-25')).toBe(true);
+    } finally {
+      process.env.TZ = originalTimezone;
+    }
+  });
+
+  it('uses the earlier of a schedule and deadline', () => {
+    expect(
+      taskCommitmentDay({ scheduledFor: '2026-08-27', dueAt: '2026-08-26T12:00:00.000Z' }),
+    ).toBe('2026-08-26');
+  });
+
+  it('ignores malformed task and comparison dates', () => {
+    const task = { scheduledFor: '2026-02-30', dueAt: 'not-a-date' };
+
+    expect(taskCommitmentDay(task)).toBeUndefined();
+    expect(taskNeedsAttentionBy(task, '2026-08-24')).toBe(false);
+    expect(taskNeedsAttentionBy({}, '2026-99-99')).toBe(false);
+    expect(taskIsOverdue(task, '2026-08-24')).toBe(false);
+  });
+});
