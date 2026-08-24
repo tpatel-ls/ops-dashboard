@@ -15,6 +15,12 @@ describe('focus timer elapsed time', () => {
     expect(elapsedSessionMinutes(Number.NaN)).toBe(0);
   });
 
+  it('caps corrupted or overflowing elapsed durations', () => {
+    expect(elapsedSessionMs(Number.MAX_VALUE, null, 0)).toBe(Number.MAX_SAFE_INTEGER);
+    expect(elapsedSessionMs(Number.MAX_SAFE_INTEGER, 0, 1)).toBe(Number.MAX_SAFE_INTEGER);
+    expect(elapsedSessionMs(0, -Number.MAX_VALUE, Number.MAX_VALUE)).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
   it('adds an ended partial session to prior task time', () => {
     expect(accumulatedFocusMinutes(12, 4 * 60_000)).toBe(16);
     expect(accumulatedFocusMinutes(Number.NaN, 60_000)).toBe(1);
