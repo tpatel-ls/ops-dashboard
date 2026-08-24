@@ -19,6 +19,21 @@ export function notificationAge(createdAt: string, now: Date = new Date()): stri
   return formatDistance(created, now, { addSuffix: true });
 }
 
+export function compareNotificationRecency(
+  left: Pick<AppNotification, 'id' | 'createdAt'>,
+  right: Pick<AppNotification, 'id' | 'createdAt'>,
+): number {
+  const leftTimestamp = Date.parse(left.createdAt);
+  const rightTimestamp = Date.parse(right.createdAt);
+  const leftValid = Number.isFinite(leftTimestamp);
+  const rightValid = Number.isFinite(rightTimestamp);
+  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
+    return rightTimestamp - leftTimestamp;
+  }
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 /** Append an item to the in-app notification feed (Today / Inbox bell). */
 export function pushNotification(input: {
   title: string;
