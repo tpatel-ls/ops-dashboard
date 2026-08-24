@@ -92,6 +92,23 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
   ].some((value) => value?.toLowerCase().includes(normalized));
 }
 
+export function latestInteraction(interactions: Interaction[]): Interaction | null {
+  let latest: Interaction | null = null;
+  let latestTimestamp = Number.NEGATIVE_INFINITY;
+  for (const interaction of interactions) {
+    const timestamp = Date.parse(interaction.date);
+    if (!Number.isFinite(timestamp)) continue;
+    if (
+      timestamp > latestTimestamp ||
+      (timestamp === latestTimestamp && latest && interaction.id < latest.id)
+    ) {
+      latest = interaction;
+      latestTimestamp = timestamp;
+    }
+  }
+  return latest;
+}
+
 export function createPerson(input: {
   name: string;
   relationship?: string;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Person } from '@ops-dashboard/core';
-import { matchesPersonSearch } from './people';
+import { latestInteraction, matchesPersonSearch } from './people';
 
 const person = {
   name: 'Avery Morgan',
@@ -27,5 +27,18 @@ describe('matchesPersonSearch', () => {
 
   it('rejects unrelated queries', () => {
     expect(matchesPersonSearch(person, 'finance')).toBe(false);
+  });
+});
+
+describe('latestInteraction', () => {
+  it('compares offset timestamps by instant and ignores malformed dates', () => {
+    const latest = latestInteraction([
+      { id: 'invalid', date: 'not-a-date', note: 'Invalid' },
+      { id: 'earlier', date: '2026-08-24T14:00:00Z', note: 'Earlier' },
+      { id: 'later', date: '2026-08-24T09:30:00-05:00', note: 'Later' },
+    ]);
+
+    expect(latest?.id).toBe('later');
+    expect(latestInteraction([{ id: 'invalid', date: 'bad', note: 'Bad' }])).toBeNull();
   });
 });
