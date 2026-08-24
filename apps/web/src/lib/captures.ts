@@ -16,6 +16,21 @@ const CAPTURE_KINDS = new Set<CaptureKind>([
   'habit',
 ]);
 
+export function compareCaptureRecency(
+  left: Pick<Capture, 'id' | 'createdAt'>,
+  right: Pick<Capture, 'id' | 'createdAt'>,
+): number {
+  const leftTimestamp = Date.parse(left.createdAt);
+  const rightTimestamp = Date.parse(right.createdAt);
+  const leftValid = Number.isFinite(leftTimestamp);
+  const rightValid = Number.isFinite(rightTimestamp);
+  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
+    return rightTimestamp - leftTimestamp;
+  }
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 export function createCapture(raw: string, source: CaptureSource = 'text'): Promise<Capture> {
   const normalizedRaw = raw.trim();
   if (!normalizedRaw) throw new Error('Capture text is required.');

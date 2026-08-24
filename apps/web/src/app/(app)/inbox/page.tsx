@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Capture, CaptureKind } from '@ops-dashboard/core';
-import { dismissCapture, deleteCapture } from '@/lib/captures';
+import { compareCaptureRecency, dismissCapture, deleteCapture } from '@/lib/captures';
 import { ViewShell } from '@/components/view-shell';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -171,7 +171,7 @@ export default function InboxPage() {
     const all = await db.captures.toArray();
     return all
       .filter((c) => !c.deletedAt)
-      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      .sort(compareCaptureRecency);
   });
 
   const pending = captures?.filter((c) => c.status === 'pending').length ?? 0;
