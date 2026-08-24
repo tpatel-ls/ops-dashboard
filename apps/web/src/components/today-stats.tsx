@@ -3,26 +3,15 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Flame, ListTodo, Target } from 'lucide-react';
 import { getDb, todayIso } from '@ops-dashboard/core';
+import { summarizeTodayTasks } from '@/lib/task-dates';
 
 export function TodayStats() {
   const stats = useLiveQuery(async () => {
     const today = todayIso();
     const all = await getDb().tasks.toArray();
-    const live = all.filter((t) => !t.deletedAt && t.status !== 'archived');
-    const todays = live.filter(
-      (t) => t.scheduledFor === today || (t.dueAt && t.dueAt.slice(0, 10) <= today),
-    );
-    const done = todays.filter((t) => t.status === 'done').length;
-    const overdue = live.filter(
-      (t) =>
-        t.status !== 'done' &&
-        ((t.dueAt && t.dueAt.slice(0, 10) < today) ||
-          (t.scheduledFor && t.scheduledFor < today)),
-    ).length;
+    const summary = summarizeTodayTasks(all, today);
     return {
-      total: todays.length,
-      done,
-      overdue,
+      ...summary,
       streak: 0,
     };
   });
