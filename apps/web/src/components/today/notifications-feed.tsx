@@ -3,7 +3,12 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
-import { markAllNotificationsRead, markNotificationRead, notificationAge } from '@/lib/feed';
+import {
+  compareNotificationRecency,
+  markAllNotificationsRead,
+  markNotificationRead,
+  notificationAge,
+} from '@/lib/feed';
 import { cn } from '@ops-dashboard/ui';
 
 const KIND_LABEL: Record<string, string> = {
@@ -19,7 +24,7 @@ export function NotificationsFeed() {
     const all = await getDb().notifications.toArray();
     return all
       .filter((n) => !n.deletedAt && !n.readAt)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .sort(compareNotificationRecency)
       .slice(0, 5);
   });
 
