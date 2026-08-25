@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeJournalExtraction } from './journal-extraction';
+import { journalExtractionSystem, normalizeJournalExtraction } from './journal-extraction';
 
 describe('normalizeJournalExtraction', () => {
   it('rejects incomplete model results', () => {
@@ -25,5 +25,14 @@ describe('normalizeJournalExtraction', () => {
       tags: ['health', 'planning'],
       habitsDone: ['Morning Walk'],
     });
+  });
+});
+
+describe('journalExtractionSystem', () => {
+  it('keeps extraction rules and routine names in the system instruction', () => {
+    const prompt = journalExtractionSystem(['Morning Walk', 'Read']);
+
+    expect(prompt).toContain('Call extract_journal exactly once');
+    expect(prompt).toContain(JSON.stringify(['Morning Walk', 'Read']));
   });
 });
