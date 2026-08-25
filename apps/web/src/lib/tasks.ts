@@ -110,10 +110,7 @@ function normalizeTaskRecurrence(patch: Partial<Task>): void {
   if (value.endsOn !== undefined && localDay(value.endsOn) !== value.endsOn) {
     throw new Error('Task recurrence end date must be valid.');
   }
-  if (
-    value.count !== undefined &&
-    (!Number.isSafeInteger(value.count) || value.count < 1)
-  ) {
+  if (value.count !== undefined && (!Number.isSafeInteger(value.count) || value.count < 1)) {
     throw new Error('Task recurrence count must be a positive integer.');
   }
   patch.recurrence = {
@@ -125,7 +122,7 @@ function normalizeTaskRecurrence(patch: Partial<Task>): void {
   };
 }
 
-function normalizeTaskReminders(patch: Partial<Task>): void {
+function normalizeTaskReminders(patch: Partial<Task>, ownerTaskId: string): void {
   if (!Object.hasOwn(patch, 'reminders')) return;
   if (!Array.isArray(patch.reminders)) throw new Error('Task reminders must be valid.');
   const seen = new Set<string>();
@@ -141,34 +138,28 @@ function normalizeTaskReminders(patch: Partial<Task>): void {
       throw new Error('Task reminders must be valid.');
     }
     const id = reminder.id.trim();
-    const taskId = reminder.taskId.trim();
     const timestamp = Date.parse(reminder.triggerAt);
-    if (!id || !taskId || !Number.isFinite(timestamp) || seen.has(id)) {
+    if (!id || !Number.isFinite(timestamp) || seen.has(id)) {
       throw new Error('Task reminders must be valid.');
     }
-    if (
-      reminder.offsetMinutes !== undefined &&
-      !Number.isSafeInteger(reminder.offsetMinutes)
-    ) {
+    if (reminder.offsetMinutes !== undefined && !Number.isSafeInteger(reminder.offsetMinutes)) {
       throw new Error('Task reminder offset must be an integer.');
     }
     seen.add(id);
     return {
       id,
-      taskId,
+      taskId: ownerTaskId,
       triggerAt: new Date(timestamp).toISOString(),
       delivered: reminder.delivered,
-      ...(reminder.offsetMinutes !== undefined
-        ? { offsetMinutes: reminder.offsetMinutes }
-        : {}),
+      ...(reminder.offsetMinutes !== undefined ? { offsetMinutes: reminder.offsetMinutes } : {}),
     };
   });
 }
 
-function assertTaskFields(patch: Partial<Task>): void {
+function assertTaskFields(patch: Partial<Task>, ownerTaskId: string): void {
   normalizeTaskCollections(patch);
   normalizeTaskRecurrence(patch);
-  normalizeTaskReminders(patch);
+  normalizeTaskReminders(patch, ownerTaskId);
   if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {
     throw new Error('Task schedule must be a valid calendar day.');
   }
@@ -229,12 +220,13 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
   ] as const) {
     delete mutableOverrides[key];
   }
-  assertTaskFields(mutableOverrides);
+  const id = newId();
+  assertTaskFields(mutableOverrides, id);
   const db = getDb();
   const last = await db.tasks.orderBy('order').last();
   const order = nextTaskOrder(last?.order);
   const task: Task = {
-    ...quickAddToTask(parsed, { id: newId(), deviceId: getDeviceId(), order }),
+    ...quickAddToTask(parsed, { id, deviceId: getDeviceId(), order }),
     ...mutableOverrides,
   };
   await db.tasks.put(task);
@@ -249,7 +241,7 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
     mutablePatch.title = mutablePatch.title.trim();
     if (!mutablePatch.title) throw new Error('Task title is required.');
   }
-  assertTaskFields(mutablePatch);
+  assertTaskFields(mutablePatch, id);
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
