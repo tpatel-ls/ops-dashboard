@@ -134,7 +134,11 @@ export async function processBrainDump(
       console.error('[route-items] failed to route an item:', err);
     }
   }
-  return results.length > 0 ? results : fallbackToTasks(text, source);
+  // A valid AI response means the network path worked. If every individual
+  // persistence attempt failed, do not replay the entire input through the
+  // offline fallback: an item may have been written before a later routing
+  // step failed, and replaying it can create duplicates.
+  return results;
 }
 
 export function acceptedBrainDumpItems(
