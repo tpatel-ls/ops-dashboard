@@ -43,14 +43,14 @@ const snakeToCamel = (k: string): string => k.replace(/_([a-z0-9])/g, (_, c: str
 /**
  * Local record -> DB row. SHALLOW key transform only: jsonb columns (reminders,
  * checklist, milestones, routedTo, …) keep their camelCase inner keys, which the
- * app reads back verbatim. Recursing would corrupt them. Drops `undefined`
- * (JSON would anyway) and injects the owning user_id.
+ * app reads back verbatim. Recursing would corrupt them. Explicit `undefined`
+ * values become null so clearing an optional local field also clears the
+ * existing database column. Absent keys remain absent.
  */
 export function toRow(rec: object, userId: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(rec)) {
-    if (v === undefined) continue;
-    out[camelToSnake(k)] = v;
+    out[camelToSnake(k)] = v === undefined ? null : v;
   }
   out.user_id = userId;
   return out;
