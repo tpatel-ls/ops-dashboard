@@ -206,7 +206,7 @@ export function OpenTasks() {
                       type="button"
                       onClick={() => updateTask(task.id, { starred: true })}
                       className={cn(
-                        'inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-70 transition-all sm:opacity-0 sm:group-hover:opacity-100',
+                        'inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-70 transition-all sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
                         'hover:text-primary',
                       )}
                       aria-label={`Add ${task.title} to daily mission`}

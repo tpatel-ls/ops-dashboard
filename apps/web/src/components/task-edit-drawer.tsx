@@ -384,7 +384,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 >
                   #{t}
                   <X
-                    className="size-2.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    className="size-2.5 opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
                     aria-hidden
                   />
                 </button>
