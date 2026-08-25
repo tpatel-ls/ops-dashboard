@@ -2,6 +2,23 @@ import { boundedText, boundedTextList } from './input';
 
 const MOODS = new Set(['great', 'good', 'neutral', 'low', 'rough']);
 
+const EXTRACT_INSTRUCTION = `You are a journal analysis assistant for a personal life-OS app.
+
+The user has provided a journal entry (text and/or a photo of a handwritten page or daily summary).
+
+Call extract_journal exactly once. Extract:
+- summary: a single concise sentence capturing the essence of the entry.
+- body: the cleaned, readable journal text (fix OCR artifacts, remove noise, preserve the user's voice).
+- mood: one of "great" | "good" | "neutral" | "low" | "rough" - infer from tone.
+- tags: up to 6 lowercase topic tags relevant to the content.
+- habitsDone: from the provided routineNames list, return only those habits/routines that the entry clearly indicates were completed today. Match case-insensitively. Return exact names as provided.`;
+
+export function journalExtractionSystem(routineNames: string[]): string {
+  return routineNames.length > 0
+    ? `${EXTRACT_INSTRUCTION}\n\nActive routine names for habitsDone matching: ${JSON.stringify(routineNames)}`
+    : EXTRACT_INSTRUCTION;
+}
+
 export interface JournalExtraction {
   summary: string;
   body: string;
