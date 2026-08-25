@@ -38,4 +38,44 @@ describe('buildWorkContext', () => {
     expect(context).toContain('Make blue texting airtight');
     expect(context).not.toContain('Finished task');
   });
+
+  it('does not expose unavailable relationship names through open tasks', () => {
+    const context = buildWorkContext({
+      tasks: [
+        {
+          ...tasks[0]!,
+          projectId: 'project-deleted',
+          orgId: 'org-deleted',
+          domainId: 'domain-archived',
+        },
+      ],
+      projects: [
+        {
+          ...projects[0]!,
+          id: 'project-deleted',
+          name: 'Deleted project secret',
+          deletedAt: '2026-08-25T12:00:00.000Z',
+        },
+      ],
+      domains: [
+        {
+          ...domains[0]!,
+          id: 'domain-archived',
+          name: 'Archived domain secret',
+          archivedAt: '2026-08-25T12:00:00.000Z',
+        },
+      ],
+      organizations: [
+        {
+          ...organizations[0]!,
+          id: 'org-deleted',
+          name: 'Deleted organization secret',
+          deletedAt: '2026-08-25T12:00:00.000Z',
+        },
+      ],
+    });
+
+    expect(context).toContain('Make blue texting airtight');
+    expect(context).not.toContain('secret');
+  });
 });
