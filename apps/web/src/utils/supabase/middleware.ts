@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { DEV_AUTH_COOKIE, DEV_AUTH_VALUE, isDevAuthAvailable } from '@/lib/dev-auth';
 import { DEFAULT_AUTH_DESTINATION, requestedAuthPath } from '@/lib/auth-navigation';
+import { supabasePublicConfig } from './config';
 
 /**
  * Refreshes the Supabase session cookie on every matched request and gates page
@@ -30,16 +31,18 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     return NextResponse.next({ request });
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const config = supabasePublicConfig(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
 
-  // Not configured → local-first, no auth gate.
-  if (!url || !key) return NextResponse.next({ request });
+  // Not configured: local-first, no auth gate.
+  if (!config) return NextResponse.next({ request });
 
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(config.url, config.key, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
