@@ -245,7 +245,7 @@ function BookCard({ book, quotes }: BookCardProps) {
             onBlur={() => setConfirming(false)}
             title={confirming ? 'Click again to confirm' : 'Delete book'}
             className={cn(
-              'inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-hover:opacity-100',
+              'inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
               confirming
                 ? 'bg-destructive text-destructive-foreground'
                 : 'text-muted-foreground hover:text-destructive',

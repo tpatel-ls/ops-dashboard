@@ -136,7 +136,7 @@ function NoteCard({ note }: { note: Note }) {
             </p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-1 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+        <div className="flex shrink-0 items-center gap-1 sm:opacity-0 sm:transition-opacity sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
           <button
             type="button"
             onClick={handleFlag}
