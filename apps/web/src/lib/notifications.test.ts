@@ -189,4 +189,27 @@ describe('checkAndFireDueReminders', () => {
     await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(0);
     expect(mocks.reminders.delete).toHaveBeenCalledWith('reminder-1');
   });
+
+  it('shares one delivery pass across overlapping checks', async () => {
+    let release: ((value: unknown[]) => void) | undefined;
+    mocks.reminders.where.mockReturnValue({
+      belowOrEqual: () => ({
+        filter: () => ({
+          toArray: () =>
+            new Promise<unknown[]>((resolve) => {
+              release = resolve;
+            }),
+        }),
+      }),
+    });
+    vi.stubGlobal('navigator', {});
+
+    const first = checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'));
+    const overlap = checkAndFireDueReminders(new Date('2026-07-29T13:01:00.000Z'));
+
+    expect(overlap).toBe(first);
+    expect(mocks.reminders.where).toHaveBeenCalledOnce();
+    release?.([]);
+    await expect(first).resolves.toBe(0);
+  });
 });
