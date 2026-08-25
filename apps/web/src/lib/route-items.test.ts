@@ -82,9 +82,10 @@ describe('fallbackCaptureLines', () => {
 
 describe('normalizeCaptureTags', () => {
   it('trims, normalizes, and deduplicates untrusted AI tags', () => {
-    expect(normalizeCaptureTags([' Launch ', 'launch', '', 'CUSTOMER'])).toEqual([
+    expect(normalizeCaptureTags([' Launch ', 'launch', '', 'CUSTOMER', 'IDENTITY'])).toEqual([
       'launch',
       'customer',
+      'identity',
     ]);
   });
 
