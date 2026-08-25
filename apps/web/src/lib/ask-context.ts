@@ -13,14 +13,24 @@ export function buildWorkContext({
   domains: Domain[];
   organizations: Organization[];
 }): string {
-  const projectMap = new Map(projects.map((project) => [project.id, project]));
-  const domainMap = new Map(domains.map((domain) => [domain.id, domain]));
-  const organizationMap = new Map(organizations.map((organization) => [organization.id, organization]));
   const lines: string[] = [];
 
   const activeOrganizations = organizations.filter(
     (organization) => !organization.deletedAt && !organization.archivedAt,
   );
+  const activeDomains = domains.filter((domain) => !domain.deletedAt && !domain.archivedAt);
+  const activeProjects = projects.filter(
+    (project) =>
+      !project.deletedAt &&
+      !project.archivedAt &&
+      (project.status === 'active' || project.status === 'paused'),
+  );
+  const projectMap = new Map(activeProjects.map((project) => [project.id, project]));
+  const domainMap = new Map(activeDomains.map((domain) => [domain.id, domain]));
+  const organizationMap = new Map(
+    activeOrganizations.map((organization) => [organization.id, organization]),
+  );
+
   if (activeOrganizations.length > 0) {
     lines.push('=== ORGANIZATIONS ===');
     for (const organization of activeOrganizations) {
@@ -29,12 +39,6 @@ export function buildWorkContext({
     lines.push('');
   }
 
-  const activeProjects = projects.filter(
-    (project) =>
-      !project.deletedAt &&
-      !project.archivedAt &&
-      (project.status === 'active' || project.status === 'paused'),
-  );
   if (activeProjects.length > 0) {
     lines.push('=== PROJECTS ===');
     for (const project of activeProjects) {
@@ -51,8 +55,7 @@ export function buildWorkContext({
   }
 
   const openTasks = tasks.filter(
-    (task) =>
-      !task.deletedAt && task.status !== 'done' && task.status !== 'archived',
+    (task) => !task.deletedAt && task.status !== 'done' && task.status !== 'archived',
   );
   if (openTasks.length > 0) {
     lines.push('=== OPEN TASKS ===');
