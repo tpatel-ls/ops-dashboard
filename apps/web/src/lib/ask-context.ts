@@ -1,6 +1,12 @@
 import type { Domain, Organization, Project, Task } from '@ops-dashboard/core';
 
 const MAX_CONTEXT = 50_000;
+const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
+
+function contextText(value: string, maxLength?: number): string {
+  const normalized = value.replace(CONTROL_CHARACTERS, ' ').replace(/\s+/g, ' ').trim();
+  return maxLength === undefined ? normalized : Array.from(normalized).slice(0, maxLength).join('');
+}
 
 export function buildWorkContext({
   tasks,
@@ -34,7 +40,7 @@ export function buildWorkContext({
   if (activeOrganizations.length > 0) {
     lines.push('=== ORGANIZATIONS ===');
     for (const organization of activeOrganizations) {
-      lines.push(`- ${organization.name}`);
+      lines.push(`- ${contextText(organization.name)}`);
     }
     lines.push('');
   }
@@ -44,11 +50,11 @@ export function buildWorkContext({
     for (const project of activeProjects) {
       const organization = project.orgId ? organizationMap.get(project.orgId) : undefined;
       const domain = project.domainId ? domainMap.get(project.domainId) : undefined;
-      const parts = [`[${project.kind}/${project.status}]`, project.name];
-      if (organization) parts.push(`organization:${organization.name}`);
-      if (domain) parts.push(`domain:${domain.name}`);
+      const parts = [`[${project.kind}/${project.status}]`, contextText(project.name)];
+      if (organization) parts.push(`organization:${contextText(organization.name)}`);
+      if (domain) parts.push(`domain:${contextText(domain.name)}`);
       if (project.dueDate) parts.push(`due:${project.dueDate}`);
-      if (project.description) parts.push(`description:${project.description.slice(0, 120)}`);
+      if (project.description) parts.push(`description:${contextText(project.description, 120)}`);
       lines.push(`- ${parts.join(' | ')}`);
     }
     lines.push('');
@@ -71,14 +77,15 @@ export function buildWorkContext({
         : project?.domainId
           ? domainMap.get(project.domainId)
           : undefined;
-      const parts = [`[${task.status.toUpperCase()}]`, task.title];
+      const parts = [`[${task.status.toUpperCase()}]`, contextText(task.title)];
       if (task.dueAt) parts.push(`due:${task.dueAt.slice(0, 10)}`);
       if (task.scheduledFor) parts.push(`scheduled:${task.scheduledFor}`);
       if (task.priority > 0) parts.push(`priority:${task.priority}`);
-      if (organization) parts.push(`organization:${organization.name}`);
-      if (project) parts.push(`project:${project.name}`);
-      if (domain) parts.push(`domain:${domain.name}`);
-      if (task.tags.length > 0) parts.push(`tags:${task.tags.join(',')}`);
+      if (organization) parts.push(`organization:${contextText(organization.name)}`);
+      if (project) parts.push(`project:${contextText(project.name)}`);
+      if (domain) parts.push(`domain:${contextText(domain.name)}`);
+      if (task.tags.length > 0)
+        parts.push(`tags:${task.tags.map((tag) => contextText(tag)).join(',')}`);
       lines.push(`- ${parts.join(' | ')}`);
     }
   }
