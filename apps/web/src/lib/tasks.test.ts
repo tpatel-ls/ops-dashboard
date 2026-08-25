@@ -328,6 +328,25 @@ describe('updateTask', () => {
     );
   });
 
+  it('reattaches reminder metadata to the task being updated', async () => {
+    await updateTask('task-1', {
+      reminders: [
+        {
+          id: 'reminder-1',
+          taskId: 'different-task',
+          triggerAt: '2026-08-18T14:00:00.000Z',
+          delivered: false,
+        },
+      ],
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reminders: [expect.objectContaining({ taskId: 'task-1' })],
+      }),
+    );
+  });
+
   it('rejects malformed task reminders', async () => {
     for (const reminders of [
       null,
