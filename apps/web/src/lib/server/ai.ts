@@ -41,13 +41,25 @@ export function anthropicClientOptions(apiKey: string, baseURL?: string) {
   };
 }
 
+export function anthropicClientConfiguration(
+  apiKeyValue: string | undefined,
+  baseURLValue?: string,
+): ReturnType<typeof anthropicClientOptions> | null {
+  const apiKey = apiKeyValue?.trim();
+  if (!apiKey) return null;
+  const requestedBaseURL = baseURLValue?.trim();
+  if (requestedBaseURL && !compatibleBaseURL(requestedBaseURL)) return null;
+  return anthropicClientOptions(apiKey, requestedBaseURL);
+}
+
 let _client: Anthropic | null | undefined;
 
 export function getAnthropic(): Anthropic | null {
   if (_client !== undefined) return _client;
-  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
-  // Optional gateway/proxy (e.g. a self-hosted Anthropic-compatible endpoint).
-  const baseURL = process.env.ANTHROPIC_BASE_URL?.trim();
-  _client = apiKey ? new Anthropic(anthropicClientOptions(apiKey, baseURL)) : null;
+  const configuration = anthropicClientConfiguration(
+    process.env.ANTHROPIC_API_KEY,
+    process.env.ANTHROPIC_BASE_URL,
+  );
+  _client = configuration ? new Anthropic(configuration) : null;
   return _client;
 }

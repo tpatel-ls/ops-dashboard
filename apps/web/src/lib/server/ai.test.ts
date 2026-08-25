@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { AI_MAX_RETRIES, AI_REQUEST_TIMEOUT_MS, anthropicClientOptions } from './ai';
+import {
+  AI_MAX_RETRIES,
+  AI_REQUEST_TIMEOUT_MS,
+  anthropicClientConfiguration,
+  anthropicClientOptions,
+} from './ai';
 
 describe('anthropicClientOptions', () => {
   it('bounds AI request time and retry amplification', () => {
@@ -29,5 +34,19 @@ describe('anthropicClientOptions', () => {
     expect(anthropicClientOptions('key', 'https://user:secret@ai.example.test')).not.toHaveProperty(
       'baseURL',
     );
+  });
+
+  it('fails closed when a configured gateway endpoint is invalid', () => {
+    expect(anthropicClientConfiguration('key', 'gateway.internal')).toBeNull();
+    expect(anthropicClientConfiguration('key', 'file:///tmp/gateway')).toBeNull();
+    expect(anthropicClientConfiguration('key', 'https://user:secret@ai.example.test')).toBeNull();
+  });
+
+  it('keeps direct Anthropic access when no gateway is requested', () => {
+    expect(anthropicClientConfiguration(' key ', '   ')).toEqual({
+      apiKey: 'key',
+      timeout: AI_REQUEST_TIMEOUT_MS,
+      maxRetries: AI_MAX_RETRIES,
+    });
   });
 });
