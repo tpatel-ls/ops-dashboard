@@ -54,17 +54,17 @@ export async function createOrganization(input: {
   const id = input.id?.trim();
   if (input.id !== undefined && !id) throw new Error('Organization id is required.');
 
-  const normalizedName = name.toLocaleLowerCase();
+  const normalizedName = name.toLowerCase();
   const organizations = await getDb().organizations.toArray();
   const idMatch = id ? organizations.find((organization) => organization.id === id) : undefined;
-  if (idMatch && idMatch.name.trim().toLocaleLowerCase() !== normalizedName) {
+  if (idMatch && idMatch.name.trim().toLowerCase() !== normalizedName) {
     throw new Error('Organization id already exists.');
   }
   const duplicate = organizations.find(
     (organization) =>
       !organization.deletedAt &&
       !organization.archivedAt &&
-      organization.name.trim().toLocaleLowerCase() === normalizedName,
+      organization.name.trim().toLowerCase() === normalizedName,
   );
   if (duplicate) {
     if (id && duplicate.id === id) return duplicate;
@@ -86,7 +86,7 @@ export function updateOrganization(id: string, patch: Partial<Organization>) {
 }
 
 async function updateOrganizationName(id: string, fields: Partial<Organization>) {
-  const normalizedName = fields.name!.toLocaleLowerCase();
+  const normalizedName = fields.name!.toLowerCase();
   const organizations = await getDb().organizations.toArray();
   const duplicate = organizations.some(
     (organization) =>
@@ -94,7 +94,7 @@ async function updateOrganizationName(id: string, fields: Partial<Organization>)
       !organization.deletedAt &&
       !organization.archivedAt &&
       typeof organization.name === 'string' &&
-      organization.name.trim().toLocaleLowerCase() === normalizedName,
+      organization.name.trim().toLowerCase() === normalizedName,
   );
   if (duplicate) throw new Error('Organization already exists.');
   return patchRecord<Organization>('organizations', id, fields);

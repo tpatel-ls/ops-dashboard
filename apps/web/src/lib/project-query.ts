@@ -12,11 +12,11 @@ export function isActiveProject(project: Project): boolean {
 }
 
 export function matchesProjectSearch(project: Project, query: string): boolean {
-  const needle = query.trim().toLocaleLowerCase();
+  const needle = query.trim().toLowerCase();
   if (!needle) return true;
   return [project.name, project.description]
     .filter((value): value is string => Boolean(value))
-    .some((value) => value.toLocaleLowerCase().includes(needle));
+    .some((value) => value.toLowerCase().includes(needle));
 }
 
 function compareOptionalDates(a?: string, b?: string, descending = false): number {

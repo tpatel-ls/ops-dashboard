@@ -420,7 +420,7 @@ const KNOWN_KINDS: CaptureKind[] = [
 ];
 
 export function normalizeCaptureKind(kind: string | undefined): CaptureKind {
-  const normalized = kind?.trim().toLocaleLowerCase();
+  const normalized = kind?.trim().toLowerCase();
   return KNOWN_KINDS.includes(normalized as CaptureKind) ? (normalized as CaptureKind) : 'task';
 }
 
@@ -436,7 +436,7 @@ export function normalizeCaptureTags(tags: string[] | undefined): string[] {
   for (const value of tags) {
     if (normalized.length >= 20) break;
     if (typeof value !== 'string') continue;
-    const tag = Array.from(value.trim().toLocaleLowerCase()).slice(0, 64).join('');
+    const tag = Array.from(value.trim().toLowerCase()).slice(0, 64).join('');
     if (tag && !seen.has(tag)) {
       seen.add(tag);
       normalized.push(tag);
