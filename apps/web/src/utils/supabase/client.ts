@@ -2,6 +2,7 @@
 
 import { createBrowserClient } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabasePublicConfig } from './config';
 
 /**
  * Browser Supabase client (2026 @supabase/ssr pattern). Uses the publishable
@@ -12,23 +13,22 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  */
 let _client: SupabaseClient | null = null;
 
-function publishableKey(): string | undefined {
-  return (
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    // Back-compat with the legacy anon key if a publishable key isn't set yet.
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+function configuredPublicClient() {
+  return supabasePublicConfig(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 }
 
 export function createClient(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = publishableKey();
-  if (!url || !key) return null;
+  const config = configuredPublicClient();
+  if (!config) return null;
   if (_client) return _client;
-  _client = createBrowserClient(url, key);
+  _client = createBrowserClient(config.url, config.key);
   return _client;
 }
 
 export function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && publishableKey());
+  return configuredPublicClient() !== null;
 }
