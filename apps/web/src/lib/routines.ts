@@ -122,9 +122,7 @@ export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
   }
   const durationDays = kind === 'fixed' ? fields.durationDays : undefined;
   const endDate =
-    kind === 'fixed' && durationDays
-      ? addDaysISO(fields.startDate!, durationDays - 1)
-      : undefined;
+    kind === 'fixed' && durationDays ? addDaysISO(fields.startDate!, durationDays - 1) : undefined;
   return putRecord(
     'routines',
     newRecord<Routine>({
@@ -193,6 +191,10 @@ export async function toggleRoutineCheck(
   }
   const normalizedRoutineId = routineId.trim();
   const db = getDb();
+  const routine = await db.routines.get(normalizedRoutineId);
+  if (!routine || routine.deletedAt || routine.archivedAt) {
+    throw new Error('Routine is not available for check-ins.');
+  }
   const existing = await db.routineChecks
     .where('[routineId+date]')
     .equals([normalizedRoutineId, date])
