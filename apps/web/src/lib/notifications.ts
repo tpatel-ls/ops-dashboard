@@ -64,7 +64,9 @@ export async function cancelReminder(reminderId: string): Promise<void> {
   await getDb().reminders.delete(reminderId);
 }
 
-export async function checkAndFireDueReminders(now: Date = new Date()): Promise<number> {
+let dueReminderRun: Promise<number> | null = null;
+
+async function fireDueReminders(now: Date): Promise<number> {
   if (notificationPermission() !== 'granted') return 0;
   if (!Number.isFinite(now.getTime())) return 0;
   const db = getDb();
@@ -105,6 +107,15 @@ export async function checkAndFireDueReminders(now: Date = new Date()): Promise<
     }
   }
   return fired;
+}
+
+export function checkAndFireDueReminders(now: Date = new Date()): Promise<number> {
+  if (dueReminderRun) return dueReminderRun;
+  const run = fireDueReminders(now).finally(() => {
+    if (dueReminderRun === run) dueReminderRun = null;
+  });
+  dueReminderRun = run;
+  return run;
 }
 
 export function attachTaskReminder(task: Task, triggerAt: string): Reminder {
