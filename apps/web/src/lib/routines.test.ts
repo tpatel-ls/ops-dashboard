@@ -5,13 +5,22 @@ const mocks = vi.hoisted(() => ({
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
   patchRecord: vi.fn(),
   getRoutine: vi.fn(),
+  getRoutineCheck: vi.fn(),
+  findRoutineCheck: vi.fn(),
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
   const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   return {
     ...actual,
-    getDb: () => ({ routines: { get: mocks.getRoutine } }),
+    getDb: () => ({
+      routines: { get: mocks.getRoutine },
+      routineChecks: {
+        where: mocks.findRoutineCheck.mockReturnValue({
+          equals: () => ({ first: mocks.getRoutineCheck }),
+        }),
+      },
+    }),
   };
 });
 
@@ -145,6 +154,13 @@ describe('updateRoutine', () => {
 });
 
 describe('toggleRoutineCheck', () => {
+  beforeEach(() => {
+    mocks.getRoutine.mockReset().mockResolvedValue({ id: 'routine-1', name: 'Reset' });
+    mocks.getRoutineCheck.mockReset().mockResolvedValue(undefined);
+    mocks.findRoutineCheck.mockClear();
+    mocks.putRecord.mockClear();
+  });
+
   it.each(['2026-02-30', 'not-a-date'])('rejects an invalid check date: %s', async (date) => {
     await expect(toggleRoutineCheck('routine-1', date, true)).rejects.toThrow(
       'Routine check date must be a valid calendar day',
@@ -161,6 +177,20 @@ describe('toggleRoutineCheck', () => {
     await expect(
       toggleRoutineCheck('routine-1', '2026-08-18', true, 'sync' as never),
     ).rejects.toThrow('Routine check source must be valid');
+  });
+
+  it.each([
+    undefined,
+    { deletedAt: '2026-08-25T12:00:00.000Z' },
+    { archivedAt: '2026-08-25T12:00:00.000Z' },
+  ])('rejects unavailable routine targets', async (routine) => {
+    mocks.getRoutine.mockResolvedValue(routine);
+
+    await expect(toggleRoutineCheck('routine-1', '2026-08-25', true)).rejects.toThrow(
+      'Routine is not available for check-ins',
+    );
+    expect(mocks.findRoutineCheck).not.toHaveBeenCalled();
+    expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
 
