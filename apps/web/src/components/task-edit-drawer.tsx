@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Bell,
@@ -40,10 +40,27 @@ const RECURRENCE_OPTIONS = [
 export function TaskEditDrawer() {
   const id = useAppStore((s) => s.editTaskId);
   const close = useAppStore((s) => s.closeEdit);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const task = useLiveQuery(
     async () => (id ? availableTask(await getDb().tasks.get(id)) : null),
     [id],
   );
+
+  useEffect(() => {
+    if (!id) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
+    };
+  }, [close, id]);
 
   if (!id) return null;
 
@@ -74,6 +91,7 @@ export function TaskEditDrawer() {
               </button>
             ) : null}
             <button
+              ref={closeButtonRef}
               type="button"
               onClick={close}
               className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-11 items-center justify-center rounded-md sm:size-9"
