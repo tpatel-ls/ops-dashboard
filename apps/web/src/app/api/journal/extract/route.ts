@@ -4,24 +4,16 @@ import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { type JournalImageMediaType, validateJournalImage } from '@/lib/server/journal-image';
 import { boundedText, boundedTextList } from '@/lib/server/input';
-import { normalizeJournalExtraction } from '@/lib/server/journal-extraction';
+import {
+  journalExtractionSystem,
+  normalizeJournalExtraction,
+} from '@/lib/server/journal-extraction';
 
 export const runtime = 'nodejs';
 
 const MAX_TEXT = 8000;
 const MAX_ROUTINE_NAMES = 100;
 const MAX_ROUTINE_NAME_LENGTH = 200;
-
-const EXTRACT_INSTRUCTION = `You are a journal analysis assistant for a personal life-OS app.
-
-The user has provided a journal entry (text and/or a photo of a handwritten page or daily summary).
-
-Call extract_journal exactly once. Extract:
-- summary: a single concise sentence capturing the essence of the entry.
-- body: the cleaned, readable journal text (fix OCR artifacts, remove noise, preserve the user's voice).
-- mood: one of "great" | "good" | "neutral" | "low" | "rough" - infer from tone.
-- tags: up to 6 lowercase topic tags relevant to the content.
-- habitsDone: from the provided routineNames list, return only those habits/routines that the entry clearly indicates were completed today. Match case-insensitively. Return exact names as provided.`;
 
 export async function POST(req: Request): Promise<Response> {
   if (!(await requestAllowed(req))) {
@@ -66,10 +58,7 @@ export async function POST(req: Request): Promise<Response> {
   const client = getAnthropic();
   if (!client) return NextResponse.json({ ok: false, reason: 'no-key' });
 
-  const instruction =
-    routineNames.length > 0
-      ? `${EXTRACT_INSTRUCTION}\n\nActive routine names for habitsDone matching: ${JSON.stringify(routineNames)}\n\n${text || '(see image)'}`
-      : `${EXTRACT_INSTRUCTION}\n\n${text || '(see image)'}`;
+  const entryText = text || '(see image)';
 
   const userContent: Anthropic.MessageParam['content'] = imageBase64
     ? [
@@ -81,14 +70,15 @@ export async function POST(req: Request): Promise<Response> {
             data: imageBase64,
           },
         },
-        { type: 'text', text: instruction },
+        { type: 'text', text: entryText },
       ]
-    : instruction;
+    : entryText;
 
   try {
     const resp = await client.messages.create({
       model: MODELS.vision,
       max_tokens: 1024,
+      system: journalExtractionSystem(routineNames),
       tool_choice: { type: 'tool', name: 'extract_journal' },
       tools: [
         {
