@@ -172,7 +172,7 @@ function DomainCard({ domain }: { domain: Domain }) {
         </div>
       </div>
       {!domain.archivedAt ? (
-        <div className="flex items-center gap-1 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+        <div className="flex items-center gap-1 sm:opacity-0 sm:transition-opacity sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
           <button
             type="button"
             onClick={() => setEditing(true)}

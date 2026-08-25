@@ -233,7 +233,7 @@ function AgendaTaskRow({
       >
         <span className="size-[18px] rounded-full border border-current" aria-hidden />
         <Check
-          className="absolute size-3 opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute size-3 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
           aria-hidden
         />
       </button>

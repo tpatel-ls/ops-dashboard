@@ -397,7 +397,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
       <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 font-mono text-[10px] tabular-nums text-primary">
         {log.totalCalories} kcal
       </span>
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
         <select
           value={log.mealType}
           onChange={(e) => void updateFoodLog(log.id, { mealType: e.target.value as MealType })}

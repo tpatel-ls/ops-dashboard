@@ -314,7 +314,7 @@ function FeedRow({
           onClick={onUndo}
           title="Undo"
           aria-label={`Undo ${result.title}`}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground opacity-70 transition-opacity hover:bg-bg-sunken hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground opacity-70 transition-opacity hover:bg-bg-sunken hover:text-foreground sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
         >
           <RotateCcw className="size-4" aria-hidden />
         </button>

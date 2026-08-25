@@ -137,7 +137,7 @@ function FactRow({ fact, onRemove }: { fact: PersonFact; onRemove: () => void })
       <button
         type="button"
         onClick={onRemove}
-        className="inline-flex size-6 items-center justify-center rounded opacity-0 text-muted-foreground transition-opacity hover:text-destructive group-hover:opacity-100"
+        className="inline-flex size-6 items-center justify-center rounded text-muted-foreground opacity-100 transition-opacity hover:text-destructive sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
         aria-label="Remove fact"
       >
         <X className="size-3.5" />
@@ -274,7 +274,7 @@ function InteractionRow({
       <button
         type="button"
         onClick={onRemove}
-        className="inline-flex size-6 shrink-0 items-center justify-center rounded opacity-0 text-muted-foreground transition-opacity hover:text-destructive group-hover:opacity-100"
+        className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-100 transition-opacity hover:text-destructive sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
         aria-label="Remove interaction"
       >
         <X className="size-3.5" />

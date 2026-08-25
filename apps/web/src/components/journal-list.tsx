@@ -108,7 +108,7 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
           onClick={() => deleteJournalEntry(entry.id)}
           className={cn(
             'inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors',
-            'opacity-0 group-hover:opacity-100 hover:text-destructive',
+            'opacity-100 hover:text-destructive sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
           )}
           aria-label="Delete entry"
         >

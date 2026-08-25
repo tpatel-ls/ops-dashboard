@@ -275,7 +275,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
                   <button
                     type="button"
                     onClick={() => handleDeleteThought(thought.id)}
-                    className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded text-subtle-foreground opacity-0 transition-colors group-hover/thought:opacity-100 hover:text-destructive"
+                    className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded text-subtle-foreground opacity-100 transition-colors hover:text-destructive sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100"
                     title="Remove thought"
                   >
                     <Trash2 className="size-3" />
@@ -311,7 +311,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
           {hasThoughts && !thoughtsExpanded ? 'See thoughts' : 'Add thought'}
         </button>
 
-        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
           <button
             type="button"
             onClick={handleFavorite}

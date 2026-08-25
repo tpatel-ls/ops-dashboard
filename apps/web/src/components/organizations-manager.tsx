@@ -131,7 +131,7 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
         type="button"
         onClick={() => setEditing(true)}
         aria-label={`Rename ${org.name}`}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
       >
         <Pencil className="size-3.5" aria-hidden />
       </button>
@@ -139,7 +139,7 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
         type="button"
         onClick={() => void archiveOrganization(org.id)}
         aria-label={`Archive ${org.name}`}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
       >
         <Archive className="size-3.5" aria-hidden />
       </button>

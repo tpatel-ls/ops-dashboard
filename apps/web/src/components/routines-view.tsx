@@ -152,7 +152,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
       </div>
 
       {/* Actions (visible on hover) */}
-      <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
         <button
           type="button"
           onClick={handleArchive}
