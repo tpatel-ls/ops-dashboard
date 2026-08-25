@@ -4,9 +4,16 @@ import {
   AI_REQUEST_TIMEOUT_MS,
   anthropicClientConfiguration,
   anthropicClientOptions,
+  configuredModel,
 } from './ai';
 
 describe('anthropicClientOptions', () => {
+  it('normalizes model overrides and falls back for blank values', () => {
+    expect(configuredModel(' custom-model ', 'default-model')).toBe('custom-model');
+    expect(configuredModel('   ', 'default-model')).toBe('default-model');
+    expect(configuredModel(undefined, 'default-model')).toBe('default-model');
+  });
+
   it('bounds AI request time and retry amplification', () => {
     expect(anthropicClientOptions('key')).toEqual({
       apiKey: 'key',

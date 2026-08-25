@@ -5,13 +5,17 @@ import Anthropic from '@anthropic-ai/sdk';
  * ANTHROPIC_API_KEY is absent (getAnthropic returns null).
  */
 
+export function configuredModel(value: string | undefined, fallback: string): string {
+  return value?.trim() || fallback;
+}
+
 export const MODELS = {
   // Fast classification in the capture hot path.
-  triage: process.env.OPS_TRIAGE_MODEL || 'claude-haiku-4-5',
+  triage: configuredModel(process.env.OPS_TRIAGE_MODEL, 'claude-haiku-4-5'),
   // Vision + reasoning for journal photo extraction.
-  vision: process.env.OPS_VISION_MODEL || 'claude-sonnet-4-6',
+  vision: configuredModel(process.env.OPS_VISION_MODEL, 'claude-sonnet-4-6'),
   // Chat-with-your-data (highest capability).
-  chat: process.env.OPS_CHAT_MODEL || 'claude-opus-4-8',
+  chat: configuredModel(process.env.OPS_CHAT_MODEL, 'claude-opus-4-8'),
 } as const;
 
 export const AI_REQUEST_TIMEOUT_MS = 45_000;
