@@ -7,7 +7,7 @@ import { CheckCircle2, ListChecks, MoonStar, X } from 'lucide-react';
 import { getDb, isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { rollForwardPatch, taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
+import { rollForwardTasks, taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
 import { updateTask } from '@/lib/tasks';
 
 export function DailyReviewDialog() {
@@ -30,6 +30,7 @@ function DailyReview({ onClose }: { onClose: () => void }) {
     return { completedToday, slipped };
   });
   const [rolling, setRolling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -60,14 +61,18 @@ function DailyReview({ onClose }: { onClose: () => void }) {
   }
 
   async function rollForward() {
-    if (!summary?.slipped) return;
+    if (!summary?.slipped || rolling) return;
     setRolling(true);
-    const tomorrow = isoDay(addDays(new Date(), 1));
-    for (const t of summary.slipped) {
-      await updateTask(t.id, rollForwardPatch(t, today, tomorrow));
+    setError(null);
+    try {
+      const tomorrow = isoDay(addDays(new Date(), 1));
+      await rollForwardTasks(summary.slipped, today, tomorrow, updateTask);
+      onClose();
+    } catch {
+      setError('Could not roll every task forward. Review your tasks and try again.');
+    } finally {
+      setRolling(false);
     }
-    setRolling(false);
-    onClose();
   }
 
   return (
@@ -142,6 +147,11 @@ function DailyReview({ onClose }: { onClose: () => void }) {
           )}
         </div>
         <footer className="border-hairline flex items-center justify-end gap-2 border-t px-5 py-3">
+          {error ? (
+            <p role="alert" className="text-destructive mr-auto text-xs">
+              {error}
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={onClose}
