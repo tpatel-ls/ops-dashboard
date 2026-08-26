@@ -58,7 +58,9 @@ describe('updateFoodLog', () => {
 
   it('normalizes items and rejects malformed nutrition values', async () => {
     await updateFoodLog('meal-1', {
-      items: [{ name: '  Eggs  ', quantity: '  two  ', calories: 140 }],
+      items: [
+        { name: '  Eggs  ', quantity: '  two  ', calories: 140, injected: 'discard' } as never,
+      ],
     });
     expect(mocks.patchRecord).toHaveBeenCalledWith(
       'foodLogs',
@@ -72,6 +74,21 @@ describe('updateFoodLog', () => {
     expect(() =>
       updateFoodLog('meal-1', { items: [{ name: 'Eggs', calories: Number.NaN }] }),
     ).toThrow('Food item calories must be a non-negative number');
+    expect(() =>
+      updateFoodLog('meal-1', { items: [{ name: 'Eggs', calories: 1_000_001 }] }),
+    ).toThrow('Food item calories must be a non-negative number');
+  });
+
+  it('bounds the number of items in a meal payload', () => {
+    const items = Array.from({ length: 101 }, (_, index) => ({
+      name: `Item ${index}`,
+      calories: 1,
+    }));
+
+    expect(() => updateFoodLog('meal-1', { items })).toThrow(
+      'Food items must contain at most 100 entries',
+    );
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
   });
 
   it('does not accept direct edits to derived totals', async () => {
