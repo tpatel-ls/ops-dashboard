@@ -121,6 +121,7 @@ function bestRoutineStreak(checks: RoutineCheck[], today: string, routineIds: Se
   for (const doneDates of datesByRoutine.values()) {
     let streak = 0;
     let cursor = today;
+    if (!doneDates.has(cursor)) cursor = isoDay(addDays(parseISO(cursor), -1));
     while (doneDates.has(cursor)) {
       streak += 1;
       cursor = isoDay(addDays(parseISO(cursor), -1));
