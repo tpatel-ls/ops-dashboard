@@ -13,6 +13,21 @@ const QUOTE_SOURCE_TYPES = new Set<QuoteSourceType>([
   'other',
 ]);
 
+export function compareQuoteRecency(
+  left: Pick<Quote, 'id' | 'createdAt'>,
+  right: Pick<Quote, 'id' | 'createdAt'>,
+): number {
+  const leftTimestamp = Date.parse(left.createdAt);
+  const rightTimestamp = Date.parse(right.createdAt);
+  const leftValid = Number.isFinite(leftTimestamp);
+  const rightValid = Number.isFinite(rightTimestamp);
+  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
+    return rightTimestamp - leftTimestamp;
+  }
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'text')) {
