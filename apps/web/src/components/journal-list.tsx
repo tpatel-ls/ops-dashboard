@@ -5,7 +5,7 @@ import { format, parseISO } from 'date-fns';
 import { BookOpen, Trash2, Upload } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
-import { deleteJournalEntry } from '@/lib/journal';
+import { compareJournalEntries, deleteJournalEntry } from '@/lib/journal';
 import { cn } from '@ops-dashboard/ui';
 
 const MOOD_GLYPH: Record<string, { symbol: string; label: string; color: string }> = {
@@ -20,13 +20,7 @@ export function JournalList() {
   const entries = useLiveQuery(async () => {
     const db = getDb();
     const all = await db.journalEntries.toArray();
-    return all
-      .filter((e) => !e.deletedAt)
-      .sort((a, b) => {
-        // sort by date desc, then by createdAt desc within same date
-        if (b.date !== a.date) return b.date.localeCompare(a.date);
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
+    return all.filter((e) => !e.deletedAt).sort(compareJournalEntries);
   });
 
   if (entries === undefined) {
