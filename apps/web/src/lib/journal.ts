@@ -8,6 +8,26 @@ import { normalizeStringList } from './string-list';
 
 const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', 'text', 'upload']);
 
+export function compareJournalEntries(
+  left: Pick<JournalEntry, 'id' | 'date' | 'createdAt'>,
+  right: Pick<JournalEntry, 'id' | 'date' | 'createdAt'>,
+): number {
+  const leftDate = localDay(left.date) === left.date ? left.date : undefined;
+  const rightDate = localDay(right.date) === right.date ? right.date : undefined;
+  if (leftDate && rightDate && leftDate !== rightDate) return rightDate.localeCompare(leftDate);
+  if (Boolean(leftDate) !== Boolean(rightDate)) return leftDate ? -1 : 1;
+
+  const leftCreated = Date.parse(left.createdAt);
+  const rightCreated = Date.parse(right.createdAt);
+  const leftCreatedValid = Number.isFinite(leftCreated);
+  const rightCreatedValid = Number.isFinite(rightCreated);
+  if (leftCreatedValid && rightCreatedValid && leftCreated !== rightCreated) {
+    return rightCreated - leftCreated;
+  }
+  if (leftCreatedValid !== rightCreatedValid) return leftCreatedValid ? -1 : 1;
+  return left.id.localeCompare(right.id);
+}
+
 function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEntry> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'body')) {
