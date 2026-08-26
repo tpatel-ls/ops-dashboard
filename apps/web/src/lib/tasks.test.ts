@@ -194,11 +194,29 @@ describe('updateTask', () => {
       { status: 'missing' as Task['status'] },
       { priority: 4 as Task['priority'] },
       { starred: 'yes' as never },
+      { notes: 42 as never },
+      { projectId: 42 as never },
     ] satisfies Partial<Task>[]) {
       mocks.put.mockClear();
       await expect(updateTask('task-1', patch)).rejects.toThrow();
       expect(mocks.put).not.toHaveBeenCalled();
     }
+  });
+
+  it('normalizes optional notes and relationship identifiers', async () => {
+    await updateTask('task-1', {
+      notes: '  Confirm the owner  ',
+      projectId: '  project-1  ',
+      orgId: '   ',
+    });
+
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notes: 'Confirm the owner',
+        projectId: 'project-1',
+        orgId: undefined,
+      }),
+    );
   });
 
   it('canonicalizes task planning timestamps', async () => {
