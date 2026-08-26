@@ -4,10 +4,10 @@ import { compareWhiteboardUpdates, whiteboardUpdatedLabel } from './whiteboard-p
 describe('whiteboard presentation', () => {
   it('sorts valid update times first and malformed records by name', () => {
     const records = [
-      { name: 'Zulu', updatedAt: 'invalid' },
-      { name: 'Recent', updatedAt: '2026-08-02T12:00:00.000Z' },
-      { name: 'Alpha', updatedAt: 'also-invalid' },
-      { name: 'Older', updatedAt: '2026-08-01T12:00:00.000Z' },
+      { id: 'zulu', name: 'Zulu', updatedAt: 'invalid' },
+      { id: 'recent', name: 'Recent', updatedAt: '2026-08-02T12:00:00.000Z' },
+      { id: 'alpha', name: 'Alpha', updatedAt: 'also-invalid' },
+      { id: 'older', name: 'Older', updatedAt: '2026-08-01T12:00:00.000Z' },
     ];
 
     expect(records.sort(compareWhiteboardUpdates).map((record) => record.name)).toEqual([
@@ -15,6 +15,21 @@ describe('whiteboard presentation', () => {
       'Older',
       'Alpha',
       'Zulu',
+    ]);
+  });
+
+  it('breaks equal update timestamps by name and id', () => {
+    const updatedAt = '2026-08-02T12:00:00.000Z';
+    const records = [
+      { id: 'bravo', name: 'Shared', updatedAt },
+      { id: 'zulu', name: 'Zulu', updatedAt },
+      { id: 'alpha', name: 'Shared', updatedAt },
+    ];
+
+    expect(records.sort(compareWhiteboardUpdates).map((record) => record.id)).toEqual([
+      'alpha',
+      'bravo',
+      'zulu',
     ]);
   });
 
