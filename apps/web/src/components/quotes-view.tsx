@@ -5,7 +5,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { ChevronDown, ChevronUp, MessageSquarePlus, Plus, Star, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Quote, QuoteSourceType } from '@ops-dashboard/core';
-import { createQuote, updateQuote, deleteQuote, makeThought } from '@/lib/quotes';
+import {
+  compareQuoteRecency,
+  createQuote,
+  updateQuote,
+  deleteQuote,
+  makeThought,
+} from '@/lib/quotes';
 import { cn } from '@ops-dashboard/ui';
 
 /* ─── Constants ────────────────────────────────────────────────── */
@@ -362,7 +368,7 @@ export function QuotesView() {
         // Favorites first, then newest
         if (a.favorite && !b.favorite) return -1;
         if (!a.favorite && b.favorite) return 1;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return compareQuoteRecency(a, b);
       });
   });
 
