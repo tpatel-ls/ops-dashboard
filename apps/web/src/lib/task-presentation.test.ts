@@ -1,5 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { taskDateLabel, taskResultSummary } from './task-presentation';
+import { taskDateLabel, taskPlanningTimestamp, taskResultSummary } from './task-presentation';
+
+describe('taskPlanningTimestamp', () => {
+  it('uses the first valid planning instant', () => {
+    expect(
+      taskPlanningTimestamp({
+        startAt: 'not-a-date',
+        dueAt: '2026-08-26T14:00:00.000Z',
+        scheduledFor: '2026-08-27',
+      }),
+    ).toBe(Date.parse('2026-08-26T14:00:00.000Z'));
+  });
+
+  it('ignores tasks without valid planning dates', () => {
+    expect(
+      taskPlanningTimestamp({ startAt: 'invalid', scheduledFor: '2026-02-30' }),
+    ).toBeUndefined();
+  });
+});
 
 describe('taskResultSummary', () => {
   it.each([
