@@ -44,6 +44,7 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
 export function HelpOverlay() {
   const open = useAppStore((s) => s.helpOpen);
   const close = useAppStore((s) => s.closeHelp);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -55,7 +56,27 @@ export function HelpOverlay() {
     const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener('keydown', onKeyDown);
@@ -76,6 +97,7 @@ export function HelpOverlay() {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="keyboard-help-title"
