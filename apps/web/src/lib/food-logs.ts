@@ -24,9 +24,13 @@ export function compareFoodLogCreation(
 
 const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
 const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
+const MAX_FOOD_ITEMS = 100;
+const MAX_NUTRITION_ESTIMATE = 1_000_000;
 
 function normalizeFoodItems(items: unknown): FoodItem[] {
   if (!Array.isArray(items)) throw new Error('Food items must be valid.');
+  if (items.length > MAX_FOOD_ITEMS)
+    throw new Error('Food items must contain at most 100 entries.');
   return items.map((item) => {
     if (!item || typeof item !== 'object') throw new Error('Food items must be valid.');
     const candidate = item as Partial<FoodItem>;
@@ -36,7 +40,11 @@ function normalizeFoodItems(items: unknown): FoodItem[] {
     }
     const name = candidate.name.trim();
     if (!name) throw new Error('Food item name is required.');
-    if (!Number.isFinite(candidate.calories) || (candidate.calories ?? -1) < 0) {
+    if (
+      !Number.isFinite(candidate.calories) ||
+      (candidate.calories ?? -1) < 0 ||
+      candidate.calories! > MAX_NUTRITION_ESTIMATE
+    ) {
       throw new Error('Food item calories must be a non-negative number.');
     }
     for (const [label, value] of [
@@ -44,15 +52,22 @@ function normalizeFoodItems(items: unknown): FoodItem[] {
       ['carbs', candidate.carbs],
       ['fat', candidate.fat],
     ] as const) {
-      if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
+      if (
+        value !== undefined &&
+        (!Number.isFinite(value) || value < 0 || value > MAX_NUTRITION_ESTIMATE)
+      ) {
         throw new Error(`Food item ${label} must be a non-negative number.`);
       }
     }
     const quantity = candidate.quantity?.trim();
-    const normalized = { ...candidate, name } as FoodItem;
-    if (quantity) normalized.quantity = quantity;
-    else delete normalized.quantity;
-    return normalized;
+    return {
+      name,
+      ...(quantity ? { quantity } : {}),
+      calories: candidate.calories!,
+      ...(candidate.protein !== undefined ? { protein: candidate.protein } : {}),
+      ...(candidate.carbs !== undefined ? { carbs: candidate.carbs } : {}),
+      ...(candidate.fat !== undefined ? { fat: candidate.fat } : {}),
+    };
   });
 }
 
