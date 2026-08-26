@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
   patchRecord: vi.fn(),
   getRoutine: vi.fn(),
-  getRoutineCheck: vi.fn(),
+  listRoutineChecks: vi.fn(),
   findRoutineCheck: vi.fn(),
 }));
 
@@ -17,7 +17,7 @@ vi.mock('@ops-dashboard/core', async () => {
       routines: { get: mocks.getRoutine },
       routineChecks: {
         where: mocks.findRoutineCheck.mockReturnValue({
-          equals: () => ({ first: mocks.getRoutineCheck }),
+          equals: () => ({ toArray: mocks.listRoutineChecks }),
         }),
       },
     }),
@@ -156,9 +156,10 @@ describe('updateRoutine', () => {
 describe('toggleRoutineCheck', () => {
   beforeEach(() => {
     mocks.getRoutine.mockReset().mockResolvedValue({ id: 'routine-1', name: 'Reset' });
-    mocks.getRoutineCheck.mockReset().mockResolvedValue(undefined);
+    mocks.listRoutineChecks.mockReset().mockResolvedValue([]);
     mocks.findRoutineCheck.mockClear();
     mocks.putRecord.mockClear();
+    mocks.patchRecord.mockClear();
   });
 
   it.each(['2026-02-30', 'not-a-date'])('rejects an invalid check date: %s', async (date) => {
@@ -191,6 +192,26 @@ describe('toggleRoutineCheck', () => {
     );
     expect(mocks.findRoutineCheck).not.toHaveBeenCalled();
     expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
+  it('creates a live check when only a deleted check matches the day', async () => {
+    mocks.listRoutineChecks.mockResolvedValue([
+      {
+        id: 'deleted-check',
+        routineId: 'routine-1',
+        date: '2026-08-25',
+        done: true,
+        deletedAt: '2026-08-25T12:00:00.000Z',
+      },
+    ]);
+
+    await toggleRoutineCheck('routine-1', '2026-08-25', true);
+
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'routineChecks',
+      expect.objectContaining({ routineId: 'routine-1', date: '2026-08-25', done: true }),
+    );
   });
 });
 
