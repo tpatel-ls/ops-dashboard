@@ -102,6 +102,17 @@ describe('addTask', () => {
       expect(mocks.last).not.toHaveBeenCalled();
     }
   });
+
+  it('rejects a time block that ends before it starts', async () => {
+    await expect(
+      addTask('Invalid block', {
+        startAt: '2026-08-21T15:00:00.000Z',
+        endAt: '2026-08-21T14:00:00.000Z',
+      }),
+    ).rejects.toThrow('Task end time must be after its start time');
+    expect(mocks.last).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
 });
 
 describe('addTaskToProject', () => {
@@ -233,6 +244,29 @@ describe('updateTask', () => {
         dueAt: '2026-08-21T22:00:00.000Z',
       }),
     );
+  });
+
+  it('validates time block edits against the stored start time', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'task-1',
+      title: 'Original',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 1,
+      startAt: '2026-08-21T15:00:00.000Z',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-02T12:00:00.000Z',
+      version: 4,
+      deviceId: 'device-original',
+    } satisfies Task);
+
+    await expect(updateTask('task-1', { endAt: '2026-08-21T14:00:00.000Z' })).rejects.toThrow(
+      'Task end time must be after its start time',
+    );
+    expect(mocks.put).not.toHaveBeenCalled();
   });
 
   it('does not write or enqueue an update that changes nothing', async () => {
