@@ -31,6 +31,7 @@ import {
   type ManagementModule,
   type ManagementTone,
 } from '@/lib/life-management';
+import { taskPlanningTimestamp } from '@/lib/task-presentation';
 
 const TONE_CLASS: Record<ManagementTone, string> = {
   success: 'border-success/35 bg-success/10 text-success',
@@ -67,11 +68,6 @@ function scoreLabel(score: number): string {
   return 'needs command';
 }
 
-function taskSortTime(task: Task): number {
-  const raw = task.startAt ?? task.dueAt ?? task.scheduledFor;
-  return raw ? new Date(raw).getTime() : Number.MAX_SAFE_INTEGER;
-}
-
 export function LifeCommandCenter() {
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   const launch = useLiveQuery(async () => {
@@ -89,8 +85,8 @@ export function LifeCommandCenter() {
     const open = launchTasks.filter((task) => task.status !== 'done');
     const urgent = open.filter((task) => task.priority >= 3).length;
     const scheduled = open
-      .filter((task) => task.scheduledFor || task.startAt || task.dueAt)
-      .sort((a, b) => taskSortTime(a) - taskSortTime(b));
+      .filter((task) => taskPlanningTimestamp(task) !== undefined)
+      .sort((a, b) => taskPlanningTimestamp(a)! - taskPlanningTimestamp(b)!);
     return {
       projects: launchProjects.length,
       open: open.length,
