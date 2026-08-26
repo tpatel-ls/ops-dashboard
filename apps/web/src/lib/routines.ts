@@ -195,10 +195,11 @@ export async function toggleRoutineCheck(
   if (!routine || routine.deletedAt || routine.archivedAt) {
     throw new Error('Routine is not available for check-ins.');
   }
-  const existing = await db.routineChecks
+  const matchingChecks = await db.routineChecks
     .where('[routineId+date]')
     .equals([normalizedRoutineId, date])
-    .first();
+    .toArray();
+  const existing = matchingChecks.find((check) => !check.deletedAt);
   const completedAt = done ? new Date().toISOString() : undefined;
   if (existing) {
     await patchRecord<RoutineCheck>('routineChecks', existing.id, {
