@@ -15,10 +15,20 @@ export function createSingleFlightQueue(task: () => Promise<void>): SingleFlight
         return running;
       }
       running = (async () => {
+        let finalError: unknown;
+        let failed = false;
         do {
           pending = false;
-          await task();
+          try {
+            await task();
+            failed = false;
+            finalError = undefined;
+          } catch (error) {
+            failed = true;
+            finalError = error;
+          }
         } while (pending);
+        if (failed) throw finalError;
       })().finally(() => {
         running = null;
       });

@@ -43,4 +43,33 @@ describe('createSingleFlightQueue', () => {
 
     expect(task).toHaveBeenCalledTimes(1);
   });
+
+  it('runs a queued pass after a temporary failure', async () => {
+    let rejectFirst: ((error: Error) => void) | undefined;
+    const task = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectFirst = reject;
+          }),
+      )
+      .mockResolvedValueOnce(undefined);
+    const queue = createSingleFlightQueue(task);
+
+    const result = queue.run();
+    queue.run();
+    rejectFirst?.(new Error('temporary sync failure'));
+
+    await expect(result).resolves.toBeUndefined();
+    expect(task).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects when the final queued pass fails', async () => {
+    const queue = createSingleFlightQueue(
+      vi.fn().mockRejectedValue(new Error('persistent sync failure')),
+    );
+
+    await expect(queue.run()).rejects.toThrow('persistent sync failure');
+  });
 });
