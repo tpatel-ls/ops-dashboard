@@ -72,7 +72,7 @@ describe('workLogActivityContribution', () => {
     expect(workLogActivityContribution(90)).toBe(1.5);
   });
 
-  it.each([0, -30, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
+  it.each([0, -30, 1.5, 1441, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
     'ignores malformed legacy duration %s',
     (minutes) => {
       expect(workLogActivityContribution(minutes)).toBe(0);

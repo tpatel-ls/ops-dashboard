@@ -16,6 +16,7 @@ const WEIGHTS = {
 
 const DEFAULT_ACTIVITY_DAYS = 365;
 const MAX_ACTIVITY_DAYS = 3660;
+const MAX_WORK_LOG_MINUTES = 24 * 60;
 
 export function normalizeActivityDays(days: number): number {
   if (!Number.isFinite(days)) return DEFAULT_ACTIVITY_DAYS;
@@ -23,7 +24,7 @@ export function normalizeActivityDays(days: number): number {
 }
 
 export function workLogActivityContribution(minutes: number): number {
-  return Number.isSafeInteger(minutes) && minutes > 0
+  return Number.isSafeInteger(minutes) && minutes > 0 && minutes <= MAX_WORK_LOG_MINUTES
     ? (minutes / 30) * WEIGHTS.workPer30Min
     : 0;
 }
