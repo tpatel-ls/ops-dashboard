@@ -202,6 +202,15 @@ function assertTaskFields(patch: Partial<Task>, ownerTaskId: string): void {
   }
 }
 
+function assertTaskTimeRange(task: Pick<Task, 'startAt' | 'endAt'>): void {
+  if (!task.startAt || !task.endAt) return;
+  const start = Date.parse(task.startAt);
+  const end = Date.parse(task.endAt);
+  if (Number.isFinite(start) && Number.isFinite(end) && end <= start) {
+    throw new Error('Task end time must be after its start time.');
+  }
+}
+
 /** Add a task straight into a project, inheriting its domain and org lane. */
 export function addTaskToProject(
   input: string,
@@ -233,6 +242,7 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
   }
   const id = newId();
   assertTaskFields(mutableOverrides, id);
+  assertTaskTimeRange({ ...parsed, ...mutableOverrides });
   const db = getDb();
   const last = await db.tasks.orderBy('order').last();
   const order = nextTaskOrder(last?.order);
@@ -256,6 +266,9 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
   const db = getDb();
   const existing = await db.tasks.get(id);
   if (!existing || existing.deletedAt) return;
+  if (Object.hasOwn(mutablePatch, 'startAt') || Object.hasOwn(mutablePatch, 'endAt')) {
+    assertTaskTimeRange({ ...existing, ...mutablePatch });
+  }
   for (const key of ['id', 'createdAt', 'updatedAt', 'version', 'deviceId', 'deletedAt'] as const) {
     delete mutablePatch[key];
   }
