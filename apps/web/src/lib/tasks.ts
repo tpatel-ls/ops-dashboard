@@ -160,6 +160,17 @@ function assertTaskFields(patch: Partial<Task>, ownerTaskId: string): void {
   normalizeTaskCollections(patch);
   normalizeTaskRecurrence(patch);
   normalizeTaskReminders(patch, ownerTaskId);
+  if (patch.notes !== undefined) {
+    if (typeof patch.notes !== 'string') throw new Error('Task notes must be valid.');
+    patch.notes = patch.notes.trim() || undefined;
+  }
+  for (const key of ['projectId', 'orgId', 'domainId', 'contentId', 'parentId'] as const) {
+    const value = patch[key];
+    if (value !== undefined) {
+      if (typeof value !== 'string') throw new Error('Task references must be valid.');
+      patch[key] = value.trim() || undefined;
+    }
+  }
   if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {
     throw new Error('Task schedule must be a valid calendar day.');
   }
