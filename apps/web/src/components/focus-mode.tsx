@@ -41,6 +41,9 @@ export function FocusMode() {
   const [secondsLeft, setSecondsLeft] = useState(focusMin * 60);
   const [running, setRunning] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const exitButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const startedRef = useRef<number | null>(null);
   const elapsedRef = useRef(0);
 
@@ -109,15 +112,39 @@ export function FocusMode() {
 
   useEffect(() => {
     if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const focusFrame = window.requestAnimationFrame(() => exitButtonRef.current?.focus());
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') void endSession();
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        void endSession();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
     window.addEventListener('keydown', onKeyDown);
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
     };
   }, [endSession, open]);
 
@@ -155,12 +182,14 @@ export function FocusMode() {
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex overflow-y-auto bg-black/80 p-4 backdrop-blur"
       role="dialog"
       aria-modal="true"
       aria-label="Focus mode"
     >
       <button
+        ref={exitButtonRef}
         type="button"
         onClick={() => void endSession()}
         className="bg-card text-muted-foreground hover:text-foreground fixed top-4 right-4 inline-flex size-11 items-center justify-center rounded-md border"
