@@ -289,6 +289,42 @@ describe('life management summary', () => {
     );
   });
 
+  it('keeps an active routine streak before today is completed', () => {
+    const routine = {
+      ...meta('routine'),
+      name: 'Read',
+      timeOfDay: 'evening',
+      notify: false,
+      kind: 'ongoing',
+      startDate: '2026-07-01',
+      order: 1,
+    } satisfies Routine;
+    const routineChecks = ['2026-07-03', '2026-07-04', '2026-07-05'].map(
+      (date, index) =>
+        ({
+          ...meta(`check-${index}`),
+          routineId: routine.id,
+          date,
+          done: true,
+        }) satisfies RoutineCheck,
+    );
+
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [],
+      domains: [],
+      routines: [routine],
+      routineChecks,
+      captures: [],
+      journalEntries: [],
+      foodLogs: [],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.identityScore).toBe(32);
+  });
+
   it('does not classify malformed task dates as overdue', () => {
     const malformed = {
       ...meta('malformed-task'),
