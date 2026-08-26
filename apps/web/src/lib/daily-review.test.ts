@@ -1,6 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { rollForwardPatch, taskCompletedOn, taskNeedsRollForward } from './daily-review';
+import {
+  rollForwardPatch,
+  rollForwardTasks,
+  taskCompletedOn,
+  taskNeedsRollForward,
+} from './daily-review';
 
 function task(patch: Partial<Task>): Task {
   return {
@@ -91,6 +96,29 @@ describe('daily review task dates', () => {
     );
     expect(() => rollForwardPatch(task({}), '2026-08-03', '2026-13-01')).toThrow(
       'Review dates must be valid calendar days',
+    );
+  });
+});
+
+describe('rollForwardTasks', () => {
+  it('applies a review patch to each selected task', async () => {
+    const update = vi.fn().mockResolvedValue(undefined);
+    const tasks = [
+      task({ id: 'task-1', scheduledFor: '2026-08-03' }),
+      task({ id: 'task-2', dueAt: '2026-08-03T17:00:00.000Z' }),
+    ];
+
+    await rollForwardTasks(tasks, '2026-08-03', '2026-08-04', update);
+
+    expect(update).toHaveBeenCalledTimes(2);
+    expect(update).toHaveBeenCalledWith('task-1', { scheduledFor: '2026-08-04' });
+  });
+
+  it('reports persistence failures to the caller', async () => {
+    const update = vi.fn().mockRejectedValue(new Error('storage unavailable'));
+
+    await expect(rollForwardTasks([task({})], '2026-08-03', '2026-08-04', update)).rejects.toThrow(
+      'storage unavailable',
     );
   });
 });
