@@ -27,3 +27,14 @@ export function rollForwardPatch(task: Task, currentDay: string, targetDay: stri
   patch.dueAt = due.toISOString();
   return patch;
 }
+
+export async function rollForwardTasks(
+  tasks: Task[],
+  currentDay: string,
+  targetDay: string,
+  update: (id: string, patch: Partial<Task>) => Promise<unknown>,
+): Promise<void> {
+  for (const task of tasks) {
+    await update(task.id, rollForwardPatch(task, currentDay, targetDay));
+  }
+}
