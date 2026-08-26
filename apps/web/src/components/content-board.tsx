@@ -309,6 +309,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
         aria-expanded={isOpen}
         onClick={onToggle}
         onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             onToggle();
