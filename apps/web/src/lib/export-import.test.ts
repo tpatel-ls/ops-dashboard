@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   bulkPutProjects: vi.fn(),
   bulkPutWhiteboards: vi.fn(),
   enqueueOp: vi.fn(),
+  transactionTables: [] as unknown[],
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
@@ -12,13 +13,16 @@ vi.mock('@ops-dashboard/core', async () => {
   const tasks = { bulkPut: mocks.bulkPutTasks };
   const projects = { bulkPut: mocks.bulkPutProjects };
   const whiteboards = { bulkPut: mocks.bulkPutWhiteboards };
+  const syncOps = {};
   return {
     ...actual,
     getDb: () => ({
       tasks,
       projects,
       whiteboards,
+      syncOps,
       transaction: async (_mode: string, ...args: unknown[]) => {
+        mocks.transactionTables = args.slice(0, -1);
         const work = args.at(-1) as () => Promise<void>;
         await work();
       },
@@ -83,5 +87,6 @@ describe('importAll', () => {
       op: 'put',
       payload: task,
     });
+    expect(mocks.transactionTables).toHaveLength(4);
   });
 });
