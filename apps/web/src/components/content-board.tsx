@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Content, ContentType, ContentStatus, Domain } from '@ops-dashboard/core';
-import { createContent, updateContent, deleteContent } from '@/lib/content';
+import { compareContentOrder, createContent, updateContent, deleteContent } from '@/lib/content';
 import { cn } from '@ops-dashboard/ui';
 
 // ── constants ────────────────────────────────────────────────────────────────
@@ -592,7 +592,7 @@ export function ContentBoard() {
 
   const items = useLiveQuery(async () => {
     const all = await getDb().content.toArray();
-    return all.filter((c) => !c.deletedAt).sort((a, b) => a.order - b.order);
+    return all.filter((c) => !c.deletedAt).sort(compareContentOrder);
   }, []);
 
   const domains = useLiveQuery(async () => {
