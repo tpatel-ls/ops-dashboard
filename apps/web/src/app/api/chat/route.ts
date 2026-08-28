@@ -44,8 +44,11 @@ export async function POST(req: Request): Promise<Response> {
       ],
     });
 
-    const textBlock = resp.content.find((b) => b.type === 'text');
-    const answer = textBlock && textBlock.type === 'text' ? textBlock.text : '';
+    const answer = resp.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('\n')
+      .trim();
     if (!answer) return NextResponse.json({ ok: false, reason: 'no-result' });
 
     return NextResponse.json({ ok: true, answer });
