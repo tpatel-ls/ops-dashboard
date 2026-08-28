@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MAX_TRANSCRIBE_BYTES, transcribeBlob } from './transcribe';
+import { MAX_TRANSCRIBE_BYTES, transcribeBlob, transcriptionFilename } from './transcribe';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -59,5 +59,17 @@ describe('transcribeBlob', () => {
     await expect(transcribeBlob(new Blob(['audio'], { type: 'audio/webm' }))).resolves.toBe(
       'Call the customer',
     );
+  });
+
+  it.each([
+    ['audio/flac', 'audio.flac'],
+    ['audio/m4a', 'audio.m4a'],
+    ['audio/mp4', 'audio.mp4'],
+    ['audio/mpeg', 'audio.mp3'],
+    ['audio/ogg; codecs=opus', 'audio.ogg'],
+    ['audio/x-wav', 'audio.wav'],
+    ['audio/webm', 'audio.webm'],
+  ])('uses a filename matching %s uploads', (mediaType, expected) => {
+    expect(transcriptionFilename(mediaType)).toBe(expected);
   });
 });
