@@ -78,6 +78,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
   const chunksRef = useRef<Blob[]>([]);
   const stopTimerRef = useRef<number | null>(null);
   const startingRef = useRef(false);
+  const mountedRef = useRef(true);
   const onTranscriptRef = useRef(onTranscript);
 
   useEffect(() => {
@@ -85,7 +86,9 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
   }, [onTranscript]);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       recogRef.current?.abort();
       if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
       if (stopTimerRef.current !== null) window.clearTimeout(stopTimerRef.current);
@@ -101,6 +104,10 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
     try {
       acquiredStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const stream = acquiredStream;
+      if (!mountedRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const mime = pickAudioMime();
       const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
       chunksRef.current = [];
@@ -113,6 +120,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
           window.clearTimeout(stopTimerRef.current);
           stopTimerRef.current = null;
         }
+        if (!mountedRef.current) return;
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
         setListening(false);
         if (blob.size === 0) {
@@ -121,6 +129,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
         }
         setTranscribing(true);
         const text = await transcribeBlob(blob);
+        if (!mountedRef.current) return;
         setTranscribing(false);
         if (text) onTranscriptRef.current(text);
         else setError('I could not transcribe that recording. Try again or type the task.');
@@ -134,8 +143,10 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
       }, MAX_RECORD_MS);
     } catch {
       acquiredStream?.getTracks().forEach((track) => track.stop());
-      setListening(false);
-      setError('Microphone access was not available.');
+      if (mountedRef.current) {
+        setListening(false);
+        setError('Microphone access was not available.');
+      }
     } finally {
       startingRef.current = false;
     }
@@ -162,6 +173,7 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
     recog.continuous = false;
     recog.interimResults = false;
     recog.onresult = (event: SpeechRecognitionEventLike) => {
+      if (!mountedRef.current) return;
       const transcript = event.results[0]?.[0]?.transcript ?? '';
       if (transcript.trim()) {
         setListening(false);
@@ -169,10 +181,13 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
       }
     };
     recog.onerror = () => {
+      if (!mountedRef.current) return;
       setListening(false);
       setError('Voice input stopped. Try again or type the task.');
     };
-    recog.onend = () => setListening(false);
+    recog.onend = () => {
+      if (mountedRef.current) setListening(false);
+    };
     recogRef.current = recog;
     recog.start();
     setListening(true);

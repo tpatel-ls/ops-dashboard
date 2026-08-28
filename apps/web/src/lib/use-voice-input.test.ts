@@ -115,6 +115,29 @@ describe('useVoiceInput', () => {
     expect(stopTrack).toHaveBeenCalledOnce();
   });
 
+  it('releases microphone access that resolves after unmount', async () => {
+    const stopTrack = vi.fn();
+    let resolveStream: ((stream: { getTracks: () => Array<{ stop: () => void }> }) => void) | undefined;
+    setMediaDevices(
+      vi.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveStream = resolve;
+          }),
+      ),
+    );
+    const { result, unmount } = renderHook(() => useVoiceInput({ onTranscript: vi.fn() }));
+
+    act(() => result.current.toggle());
+    unmount();
+    await act(async () => {
+      resolveStream?.({ getTracks: () => [{ stop: stopTrack }] });
+      await Promise.resolve();
+    });
+
+    expect(stopTrack).toHaveBeenCalledOnce();
+  });
+
   it('reports when Whisper cannot produce a transcript', async () => {
     const stopTrack = vi.fn();
     setMediaDevices(
