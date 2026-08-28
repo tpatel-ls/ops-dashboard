@@ -268,29 +268,29 @@ export async function exportAll(): Promise<OpsExport> {
 export async function importAll(value: unknown): Promise<void> {
   const payload = validateOpsExport(value);
   const db = getDb();
-  await db.transaction('rw', db.tasks, db.projects, db.whiteboards, async () => {
+  await db.transaction('rw', db.tasks, db.projects, db.whiteboards, db.syncOps, async () => {
     if (payload.projects) await db.projects.bulkPut(payload.projects);
     if (payload.tasks) await db.tasks.bulkPut(payload.tasks);
     if (payload.whiteboards) await db.whiteboards.bulkPut(payload.whiteboards);
-  });
-  await Promise.all(
-    (
-      [
-        ['projects', payload.projects],
-        ['tasks', payload.tasks],
-        ['whiteboards', payload.whiteboards],
-      ] as const
-    ).flatMap(([table, records]) =>
-      records.map((record) =>
-        enqueueOp({
-          table,
-          recordId: record.id,
-          op: record.deletedAt ? 'delete' : 'put',
-          payload: record,
-        }),
+    await Promise.all(
+      (
+        [
+          ['projects', payload.projects],
+          ['tasks', payload.tasks],
+          ['whiteboards', payload.whiteboards],
+        ] as const
+      ).flatMap(([table, records]) =>
+        records.map((record) =>
+          enqueueOp({
+            table,
+            recordId: record.id,
+            op: record.deletedAt ? 'delete' : 'put',
+            payload: record,
+          }),
+        ),
       ),
-    ),
-  );
+    );
+  });
 }
 
 export function releaseDownloadUrl(url: string): void {
