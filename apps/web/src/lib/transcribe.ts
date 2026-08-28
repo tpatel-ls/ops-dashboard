@@ -22,6 +22,25 @@ function supportedAudioType(mediaType: string): boolean {
   return TRANSCRIBE_AUDIO_TYPES.has(mediaType.split(';', 1)[0]!.trim().toLowerCase());
 }
 
+export function transcriptionFilename(mediaType: string): string {
+  const normalized = mediaType.split(';', 1)[0]!.trim().toLowerCase();
+  const extension =
+    normalized === 'audio/flac'
+      ? 'flac'
+      : normalized === 'audio/m4a' || normalized === 'audio/x-m4a'
+        ? 'm4a'
+        : normalized === 'audio/mp4'
+          ? 'mp4'
+          : normalized === 'audio/mpeg'
+            ? 'mp3'
+            : normalized === 'audio/ogg'
+              ? 'ogg'
+              : normalized === 'audio/wav' || normalized === 'audio/x-wav'
+                ? 'wav'
+                : 'webm';
+  return `audio.${extension}`;
+}
+
 /** Best audio mime type this browser can record for upload. */
 export function pickAudioMime(): string {
   if (typeof MediaRecorder === 'undefined') return '';
@@ -35,15 +54,8 @@ export async function transcribeBlob(blob: Blob): Promise<string | null> {
     return null;
   }
 
-  const ext = blob.type.includes('mp4')
-    ? 'mp4'
-    : blob.type.includes('ogg')
-      ? 'ogg'
-      : blob.type.includes('wav')
-        ? 'wav'
-        : 'webm';
   const form = new FormData();
-  form.append('file', blob, `audio.${ext}`);
+  form.append('file', blob, transcriptionFilename(blob.type));
   try {
     const res = await fetchWithTimeout('/api/transcribe', { method: 'POST', body: form });
     if (!res.ok) return null;
