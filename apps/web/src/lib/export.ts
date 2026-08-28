@@ -204,6 +204,7 @@ function isWhiteboardRecord(value: unknown): boolean {
     isRecord(value) &&
     hasValidSyncMetadata(value) &&
     isUsableString(value.name) &&
+    Object.hasOwn(value, 'document') &&
     isStringList(value.linkedTaskIds)
   );
 }
