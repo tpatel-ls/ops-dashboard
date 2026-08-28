@@ -95,21 +95,28 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
   const [outline, setOutline] = useState(item.outline ?? '');
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function save() {
     setSaving(true);
-    await updateContent(item.id, {
-      title: title.trim() || item.title,
-      type,
-      status,
-      channel: channel.trim() || undefined,
-      url: url.trim() || undefined,
-      publishDate: publishDate || undefined,
-      domainId: domainId || undefined,
-      outline: outline.trim() || undefined,
-    });
-    setSaving(false);
-    onClose();
+    setError(null);
+    try {
+      await updateContent(item.id, {
+        title: title.trim() || item.title,
+        type,
+        status,
+        channel: channel.trim() || undefined,
+        url: url.trim() || undefined,
+        publishDate: publishDate || undefined,
+        domainId: domainId || undefined,
+        outline: outline.trim() || undefined,
+      });
+      onClose();
+    } catch {
+      setError('Could not save this item. Your edits are still here.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDelete() {
@@ -252,6 +259,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
       </div>
 
       {/* actions */}
+      {error ? (
+        <p role="alert" className="text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
@@ -380,15 +392,22 @@ function QuickAdd({ onAdd }: QuickAddProps) {
   const [title, setTitle] = useState('');
   const [type, setType] = useState<ContentType>('article');
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const text = title.trim();
     if (!text) return;
     setBusy(true);
-    await onAdd(text, type);
-    setTitle('');
-    setBusy(false);
+    setError(null);
+    try {
+      await onAdd(text, type);
+      setTitle('');
+    } catch {
+      setError('Could not add this item. Your title is still here.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -418,6 +437,11 @@ function QuickAdd({ onAdd }: QuickAddProps) {
       >
         Add
       </button>
+      {error ? (
+        <p role="alert" className="basis-full text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }
