@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Video,
@@ -85,6 +85,7 @@ interface EditorProps {
 }
 
 function ContentEditor({ item, domains, onClose }: EditorProps) {
+  const fieldId = useId();
   const [title, setTitle] = useState(item.title);
   const [type, setType] = useState<ContentType>(item.type);
   const [status, setStatus] = useState<ContentStatus>(item.status);
@@ -143,7 +144,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
       </div>
 
       {/* title */}
+      <label htmlFor={`${fieldId}-title`} className="sr-only">
+        Content title
+      </label>
       <input
+        id={`${fieldId}-title`}
         className="input text-sm font-medium"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -154,10 +159,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
       {/* row: type + status */}
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
-          <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label htmlFor={`${fieldId}-type`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
             Type
           </label>
           <select
+            id={`${fieldId}-type`}
             className="input text-xs"
             value={type}
             onChange={(e) => setType(e.target.value as ContentType)}
@@ -168,10 +174,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label htmlFor={`${fieldId}-status`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
             Status
           </label>
           <select
+            id={`${fieldId}-status`}
             className="input text-xs"
             value={status}
             onChange={(e) => setStatus(e.target.value as ContentStatus)}
@@ -186,10 +193,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
       {/* row: channel + domain */}
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
-          <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label htmlFor={`${fieldId}-channel`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
             Channel
           </label>
           <input
+            id={`${fieldId}-channel`}
             className="input text-xs"
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
@@ -198,10 +206,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label htmlFor={`${fieldId}-domain`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
             Domain
           </label>
           <select
+            id={`${fieldId}-domain`}
             className="input text-xs"
             value={domainId}
             onChange={(e) => setDomainId(e.target.value)}
@@ -216,10 +225,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* url */}
       <div className="flex flex-col gap-1">
-        <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <label htmlFor={`${fieldId}-url`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
           URL
         </label>
         <input
+          id={`${fieldId}-url`}
           className="input text-xs"
           type="url"
           value={url}
@@ -231,10 +241,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* publish date */}
       <div className="flex flex-col gap-1">
-        <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <label htmlFor={`${fieldId}-publish-date`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
           Publish date
         </label>
         <input
+          id={`${fieldId}-publish-date`}
           className="input text-xs"
           type="date"
           aria-label="Content publish date"
@@ -245,10 +256,11 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* outline */}
       <div className="flex flex-col gap-1">
-        <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <label htmlFor={`${fieldId}-outline`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
           Outline (markdown)
         </label>
         <textarea
+          id={`${fieldId}-outline`}
           className="input resize-none font-mono text-xs leading-relaxed"
           rows={6}
           value={outline}
