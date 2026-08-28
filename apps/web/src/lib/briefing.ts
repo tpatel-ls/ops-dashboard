@@ -43,6 +43,17 @@ export function findStaleDomains(input: {
       : 7;
   const nowMs = now.getTime();
   const deletedOrArchived = (d: Domain) => Boolean(d.deletedAt || d.archivedAt);
+  const projectDomainById = new Map(
+    input.projects
+      .filter(
+        (project) =>
+          !project.deletedAt &&
+          !project.archivedAt &&
+          project.status !== 'archived' &&
+          project.domainId,
+      )
+      .map((project) => [project.id, project.domainId!]),
+  );
 
   return input.domains
     .filter((domain) => !deletedOrArchived(domain))
@@ -59,7 +70,11 @@ export function findStaleDomains(input: {
         .filter(Boolean) as string[];
       const connectedTaskDates = input.tasks
         .filter(
-          (task) => !task.deletedAt && task.status !== 'archived' && task.domainId === domain.id,
+          (task) =>
+            !task.deletedAt &&
+            task.status !== 'archived' &&
+            (task.domainId ?? (task.projectId ? projectDomainById.get(task.projectId) : undefined)) ===
+              domain.id,
         )
         .flatMap((task) => [task.completedAt, task.updatedAt, task.createdAt])
         .filter(Boolean) as string[];
