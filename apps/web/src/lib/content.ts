@@ -19,12 +19,28 @@ function normalizeContentUrl(value: string | undefined): string | undefined {
   const candidate = value?.trim();
   if (!candidate) return undefined;
   try {
+    const internalPath =
+      candidate.startsWith('/') &&
+      !candidate.startsWith('//') &&
+      !candidate.includes('\\') &&
+      !/[\u0000-\u001f\u007f]/.test(candidate);
+    const absoluteWebUrl = /^https?:\/\//i.test(candidate);
+    if (!internalPath && !absoluteWebUrl) {
+      if (/^[a-z][a-z0-9+.-]*:/i.test(candidate)) {
+        throw new Error('Content URL must use HTTP or HTTPS without credentials.');
+      }
+      throw new Error('Content URL must be valid.');
+    }
     const url = new URL(candidate, 'https://ops-dashboard.invalid');
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-      throw new Error('Content URL must use HTTP or HTTPS.');
+    if (
+      (url.protocol !== 'http:' && url.protocol !== 'https:') ||
+      url.username ||
+      url.password
+    ) {
+      throw new Error('Content URL must use HTTP or HTTPS without credentials.');
     }
   } catch (error) {
-    if (error instanceof Error && error.message === 'Content URL must use HTTP or HTTPS.') {
+    if (error instanceof Error && error.message.startsWith('Content URL must')) {
       throw error;
     }
     throw new Error('Content URL must be valid.');
