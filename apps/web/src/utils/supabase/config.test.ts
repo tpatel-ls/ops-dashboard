@@ -20,4 +20,13 @@ describe('supabasePublicConfig', () => {
     expect(supabasePublicConfig('   ', 'publishable')).toBeNull();
     expect(supabasePublicConfig('https://db.example.test', '   ', '   ')).toBeNull();
   });
+
+  it.each([
+    '/relative',
+    'not-a-url',
+    'javascript:alert(1)',
+    'https://user:secret@db.example.test',
+  ])('rejects unsafe deployment URL %s', (url) => {
+    expect(supabasePublicConfig(url, 'publishable')).toBeNull();
+  });
 });
