@@ -24,7 +24,9 @@ function safeLink(value: string | undefined): string | undefined {
   const candidate = bounded(value, 512);
   try {
     const url = new URL(candidate);
-    return url.protocol === 'http:' || url.protocol === 'https:' ? candidate : undefined;
+    return (url.protocol === 'http:' || url.protocol === 'https:') && !url.username && !url.password
+      ? candidate
+      : undefined;
   } catch {
     return undefined;
   }

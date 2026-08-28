@@ -90,6 +90,12 @@ describe('sendPushover', () => {
       ok: false,
       reason: 'invalid-url',
     });
+    await expect(
+      sendPushover({ message: 'Alert', url: 'https://user:secret@example.test/tasks' }),
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'invalid-url',
+    });
     expect(fetch).not.toHaveBeenCalled();
   });
 
