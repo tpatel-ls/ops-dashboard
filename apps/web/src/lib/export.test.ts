@@ -367,6 +367,20 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export whiteboards');
   });
 
+  it('rejects whiteboards without a saved document', () => {
+    const { document: _document, ...missingDocument } = whiteboard('Incomplete board');
+
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [],
+        projects: [],
+        whiteboards: [missingDocument],
+      }),
+    ).toThrow('Invalid export whiteboards');
+  });
+
   it('rejects malformed sync metadata on imported records', () => {
     expect(() =>
       validateOpsExport({
