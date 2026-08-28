@@ -168,29 +168,35 @@ export function useVoiceInput({ onTranscript }: UseVoiceInputOptions): VoiceInpu
       return;
     }
     setError(null);
-    const recog = new SpeechRecognitionAPI();
-    recog.lang = 'en-US';
-    recog.continuous = false;
-    recog.interimResults = false;
-    recog.onresult = (event: SpeechRecognitionEventLike) => {
-      if (!mountedRef.current) return;
-      const transcript = event.results[0]?.[0]?.transcript ?? '';
-      if (transcript.trim()) {
+    try {
+      const recog = new SpeechRecognitionAPI();
+      recog.lang = 'en-US';
+      recog.continuous = false;
+      recog.interimResults = false;
+      recog.onresult = (event: SpeechRecognitionEventLike) => {
+        if (!mountedRef.current) return;
+        const transcript = event.results[0]?.[0]?.transcript ?? '';
+        if (transcript.trim()) {
+          setListening(false);
+          onTranscriptRef.current(transcript.trim());
+        }
+      };
+      recog.onerror = () => {
+        if (!mountedRef.current) return;
         setListening(false);
-        onTranscriptRef.current(transcript.trim());
-      }
-    };
-    recog.onerror = () => {
-      if (!mountedRef.current) return;
+        setError('Voice input stopped. Try again or type the task.');
+      };
+      recog.onend = () => {
+        if (mountedRef.current) setListening(false);
+      };
+      recogRef.current = recog;
+      recog.start();
+      setListening(true);
+    } catch {
+      recogRef.current = null;
       setListening(false);
-      setError('Voice input stopped. Try again or type the task.');
-    };
-    recog.onend = () => {
-      if (mountedRef.current) setListening(false);
-    };
-    recogRef.current = recog;
-    recog.start();
-    setListening(true);
+      setError('Voice input could not start. Check microphone access and try again.');
+    }
   }
 
   const canRecord =
