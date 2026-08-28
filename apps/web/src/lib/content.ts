@@ -15,6 +15,18 @@ const CONTENT_STATUSES = new Set<ContentStatus>([
   'done',
 ]);
 
+export function compareContentOrder(
+  left: Pick<Content, 'id' | 'title' | 'order'>,
+  right: Pick<Content, 'id' | 'title' | 'order'>,
+): number {
+  const leftValid = Number.isFinite(left.order);
+  const rightValid = Number.isFinite(right.order);
+  if (leftValid && rightValid && left.order !== right.order) return left.order - right.order;
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  const titleOrder = left.title.localeCompare(right.title);
+  return titleOrder !== 0 ? titleOrder : left.id.localeCompare(right.id);
+}
+
 function normalizeContentUrl(value: string | undefined): string | undefined {
   const candidate = value?.trim();
   if (!candidate) return undefined;
