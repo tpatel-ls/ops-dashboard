@@ -20,7 +20,7 @@ vi.mock('./records', async () => {
   };
 });
 
-import { createContent } from './content';
+import { compareContentOrder, createContent } from './content';
 
 describe('content links', () => {
   beforeEach(() => mocks.putRecord.mockClear());
@@ -44,4 +44,25 @@ describe('content links', () => {
       expect(mocks.putRecord).not.toHaveBeenCalled();
     },
   );
+});
+
+describe('compareContentOrder', () => {
+  it('uses title and id ties for stable pipeline ordering', () => {
+    const items = [
+      { id: 'z', title: 'Beta', order: 1 },
+      { id: 'b', title: 'Alpha', order: 1 },
+      { id: 'a', title: 'Alpha', order: 1 },
+    ];
+
+    expect(items.sort(compareContentOrder).map((item) => item.id)).toEqual(['a', 'b', 'z']);
+  });
+
+  it('puts malformed synced order values after valid items', () => {
+    const items = [
+      { id: 'invalid', title: 'Alpha', order: Number.NaN },
+      { id: 'valid', title: 'Zulu', order: 2 },
+    ];
+
+    expect(items.sort(compareContentOrder).map((item) => item.id)).toEqual(['valid', 'invalid']);
+  });
 });
