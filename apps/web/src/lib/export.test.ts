@@ -229,6 +229,24 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export tasks');
   });
 
+  it('rejects inverted task time blocks', () => {
+    const invalid = {
+      ...task('Backwards meeting'),
+      startAt: '2026-08-20T14:00:00.000Z',
+      endAt: '2026-08-20T13:00:00.000Z',
+    };
+
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [invalid],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export tasks');
+  });
+
   it('rejects fractional reminder offsets', () => {
     const invalid = {
       ...task('Bad reminder'),
@@ -368,7 +386,8 @@ describe('validateOpsExport', () => {
   });
 
   it('rejects whiteboards without a saved document', () => {
-    const { document: _document, ...missingDocument } = whiteboard('Incomplete board');
+    const missingDocument: Partial<Whiteboard> = { ...whiteboard('Incomplete board') };
+    delete missingDocument.document;
 
     expect(() =>
       validateOpsExport({
