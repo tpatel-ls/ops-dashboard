@@ -28,7 +28,10 @@ export function taskIsOverdue(task: TaskDates, day: string): boolean {
 
 export function summarizeTodayTasks(tasks: Task[], day: string) {
   const live = tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
-  const today = live.filter((task) => taskNeedsAttentionBy(task, day));
+  const today = live.filter((task) => {
+    if (task.status !== 'done') return taskNeedsAttentionBy(task, day);
+    return localDay(task.completedAt) === day || taskCommitmentDay(task) === day;
+  });
   return {
     total: today.length,
     done: today.filter((task) => task.status === 'done').length,
