@@ -149,6 +149,46 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('inherits domain activity from a task project for legacy records', () => {
+    const domain = {
+      ...meta('craft', '2026-06-01T12:00:00.000Z'),
+      name: 'Craft',
+      color: '#222',
+      order: 1,
+    } satisfies Domain;
+    const project = {
+      ...meta('site', '2026-06-01T12:00:00.000Z'),
+      name: 'Portfolio',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      domainId: domain.id,
+      milestones: [],
+      checklists: [],
+    } satisfies Project;
+    const task = {
+      ...meta('legacy-task', '2026-07-02T12:00:00.000Z'),
+      title: 'Ship portfolio',
+      status: 'todo',
+      priority: 1,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      projectId: project.id,
+    } satisfies Task;
+
+    expect(
+      findStaleDomains({
+        domains: [domain],
+        projects: [project],
+        tasks: [task],
+        now,
+        staleAfterDays: 7,
+      }),
+    ).toEqual([]);
+  });
+
   it('uses the default stale window for malformed thresholds', () => {
     const domain = {
       ...meta('body', '2026-07-02T12:00:00.000Z'),
