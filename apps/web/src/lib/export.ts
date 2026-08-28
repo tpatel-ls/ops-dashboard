@@ -66,6 +66,11 @@ function isOptionalNonNegativeInteger(value: unknown): boolean {
   return value === undefined || (Number.isSafeInteger(value) && (value as number) >= 0);
 }
 
+function hasValidTaskTimeRange(value: Record<string, unknown>): boolean {
+  if (value.startAt === undefined || value.endAt === undefined) return true;
+  return Date.parse(value.endAt as string) > Date.parse(value.startAt as string);
+}
+
 const RECURRENCE_FREQUENCIES = new Set(['daily', 'weekly', 'monthly', 'yearly']);
 const RECURRENCE_DAYS = new Set(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
 
@@ -125,6 +130,7 @@ function isTaskRecord(value: unknown): boolean {
     isOptionalTimestamp(value.dueAt) &&
     isOptionalTimestamp(value.startAt) &&
     isOptionalTimestamp(value.endAt) &&
+    hasValidTaskTimeRange(value) &&
     isOptionalTimestamp(value.completedAt) &&
     isOptionalNonNegativeInteger(value.estimateMinutes) &&
     isOptionalNonNegativeInteger(value.actualMinutes) &&
