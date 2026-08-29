@@ -1,5 +1,6 @@
 import { getDb } from '@ops-dashboard/core';
 import type { RoutineCheck } from '@ops-dashboard/core';
+import { differenceInCalendarDays } from 'date-fns';
 
 export interface ActivityDay {
   date: string; // YYYY-MM-DD
@@ -77,6 +78,16 @@ export function aggregateActivity(
   start: Date,
   end: Date,
 ): ActivityDay[] {
+  if (
+    !Number.isFinite(start.getTime()) ||
+    !Number.isFinite(end.getTime()) ||
+    start > end
+  ) {
+    throw new Error('Activity range must be valid.');
+  }
+  if (differenceInCalendarDays(end, start) + 1 > MAX_ACTIVITY_DAYS) {
+    throw new Error(`Activity range must contain at most ${MAX_ACTIVITY_DAYS} days.`);
+  }
   const result: ActivityDay[] = [];
   const cursor = new Date(start);
   cursor.setHours(0, 0, 0, 0);
