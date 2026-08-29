@@ -44,6 +44,16 @@ const RECURRENCE_DAYS = new Set<NonNullable<RecurrenceRule['byDay']>[number]>([
   'SA',
   'SU',
 ]);
+const MAX_TASK_TITLE_LENGTH = 500;
+
+function normalizedTaskTitle(value: string): string {
+  const title = value.trim();
+  if (!title) throw new Error('Task title is required.');
+  if (Array.from(title).length > MAX_TASK_TITLE_LENGTH) {
+    throw new Error('Task title must contain at most 500 characters.');
+  }
+  return title;
+}
 
 export function availableTask(task: Task | undefined): Task | null {
   return task && !task.deletedAt ? task : null;
@@ -227,7 +237,7 @@ export function addTaskToProject(
 
 export async function addTask(input: string, overrides: Partial<Task> = {}): Promise<Task> {
   const parsed = parseQuickAdd(input);
-  if (!parsed.title.trim()) throw new Error('Task title is required.');
+  parsed.title = normalizedTaskTitle(parsed.title);
   const mutableOverrides = { ...overrides };
   for (const key of [
     'id',
@@ -259,8 +269,7 @@ export async function updateTask(id: string, patch: Partial<Task>): Promise<void
   const mutablePatch = { ...patch };
   if (mutablePatch.title !== undefined) {
     if (typeof mutablePatch.title !== 'string') throw new Error('Task title is required.');
-    mutablePatch.title = mutablePatch.title.trim();
-    if (!mutablePatch.title) throw new Error('Task title is required.');
+    mutablePatch.title = normalizedTaskTitle(mutablePatch.title);
   }
   assertTaskFields(mutablePatch, id);
   const db = getDb();
