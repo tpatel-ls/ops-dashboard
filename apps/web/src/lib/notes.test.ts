@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareNoteRecency } from './notes';
+import { compareNoteRecency, updateNote } from './notes';
 
 describe('compareNoteRecency', () => {
   it('orders notes by creation instant and places malformed metadata last', () => {
@@ -14,5 +14,13 @@ describe('compareNoteRecency', () => {
       'earlier',
       'invalid',
     ]);
+  });
+});
+
+describe('updateNote', () => {
+  it('rejects an atomic update that clears both note fields', () => {
+    expect(() => updateNote('note-1', { title: undefined, body: '   ' })).toThrow(
+      'Note content is required',
+    );
   });
 });
