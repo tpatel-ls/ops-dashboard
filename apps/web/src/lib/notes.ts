@@ -27,7 +27,12 @@ function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
     if (typeof normalized.body !== 'string') throw new Error('Note body must be valid.');
     normalized.body = normalized.body.trim();
   }
-  if (normalized.title === undefined && normalized.body === '' && patch.title !== undefined) {
+  if (
+    Object.hasOwn(normalized, 'title') &&
+    Object.hasOwn(normalized, 'body') &&
+    !normalized.title &&
+    !normalized.body
+  ) {
     throw new Error('Note content is required.');
   }
   for (const key of ['source', 'imageUrl', 'bookId'] as const) {
