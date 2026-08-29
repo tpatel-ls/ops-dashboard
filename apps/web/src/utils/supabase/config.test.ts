@@ -7,6 +7,10 @@ describe('supabasePublicConfig', () => {
       url: 'https://db.example.test',
       key: 'publishable',
     });
+    expect(supabasePublicConfig('http://127.0.0.1:54321', 'local-key')).toEqual({
+      url: 'http://127.0.0.1:54321',
+      key: 'local-key',
+    });
   });
 
   it('falls back to a normalized legacy anonymous key', () => {
@@ -25,6 +29,7 @@ describe('supabasePublicConfig', () => {
     '/relative',
     'not-a-url',
     'javascript:alert(1)',
+    'http://db.example.test',
     'https://user:secret@db.example.test',
   ])('rejects unsafe deployment URL %s', (url) => {
     expect(supabasePublicConfig(url, 'publishable')).toBeNull();
