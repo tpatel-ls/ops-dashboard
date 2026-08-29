@@ -11,6 +11,8 @@ export function taskLane(
   task: Pick<Task, 'orgId' | 'projectId'>,
   projectMap: Pick<Map<string, Project>, 'get'>,
 ): string | undefined {
-  if (task.orgId) return task.orgId;
-  return task.projectId ? projectMap.get(task.projectId)?.orgId : undefined;
+  const directOrgId = task.orgId?.trim();
+  if (directOrgId) return directOrgId;
+  const projectId = task.projectId?.trim();
+  return projectId ? projectMap.get(projectId)?.orgId?.trim() || undefined : undefined;
 }
