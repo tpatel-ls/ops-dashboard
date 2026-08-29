@@ -26,6 +26,18 @@ describe('aggregateActivity', () => {
     ]);
   });
 
+  it('rejects invalid, inverted, and unbounded ranges', () => {
+    expect(() => aggregateActivity(new Map(), new Date('invalid'), new Date('2026-08-24'))).toThrow(
+      'Activity range must be valid',
+    );
+    expect(() =>
+      aggregateActivity(new Map(), new Date('2026-08-25'), new Date('2026-08-24')),
+    ).toThrow('Activity range must be valid');
+    expect(() =>
+      aggregateActivity(new Map(), new Date('2000-01-01'), new Date('2026-08-24')),
+    ).toThrow('Activity range must contain at most');
+  });
+
   it('preserves valid fractional activity contributions', () => {
     const result = aggregateActivity(
       new Map([['2026-07-29', 2.5]]),
