@@ -8,7 +8,9 @@ export function matchByName<T extends { name: string }>(
   name: string | undefined,
 ): T | undefined {
   if (!name) return undefined;
-  const needle = name.trim().toLowerCase();
+  const canonicalName = (value: string) =>
+    value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
+  const needle = canonicalName(name);
   if (!needle) return undefined;
-  return items.find((item) => item.name.trim().toLowerCase() === needle);
+  return items.find((item) => canonicalName(item.name) === needle);
 }
