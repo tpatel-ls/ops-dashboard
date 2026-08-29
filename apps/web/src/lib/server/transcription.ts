@@ -19,7 +19,12 @@ export function transcriptionEndpoint(baseURL: string | undefined): string | und
   if (!base) return undefined;
   try {
     const url = new URL(base);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    if (
+      (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) ||
+      url.username ||
+      url.password
+    ) {
       return undefined;
     }
     url.pathname = `${url.pathname.replace(/\/+$/, '')}/audio/transcriptions`;

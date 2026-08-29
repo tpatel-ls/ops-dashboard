@@ -13,6 +13,9 @@ describe('transcription boundaries', () => {
     expect(transcriptionEndpoint(' https://speech.example.test/// ')).toBe(
       'https://speech.example.test/audio/transcriptions',
     );
+    expect(transcriptionEndpoint('http://localhost:8000/v1')).toBe(
+      'http://localhost:8000/v1/audio/transcriptions',
+    );
     expect(transcriptionEndpoint('   ')).toBeUndefined();
   });
 
@@ -20,6 +23,7 @@ describe('transcription boundaries', () => {
     expect(transcriptionEndpoint('speech.example.test')).toBeUndefined();
     expect(transcriptionEndpoint('file:///tmp/transcriptions')).toBeUndefined();
     expect(transcriptionEndpoint('https://user:secret@speech.example.test')).toBeUndefined();
+    expect(transcriptionEndpoint('http://speech.example.test')).toBeUndefined();
   });
 
   it('keeps the upstream request deadline below the platform limit', () => {
