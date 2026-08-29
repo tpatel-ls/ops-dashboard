@@ -87,6 +87,25 @@ describe('open task dates', () => {
       high: 2,
     });
   });
+
+  it('excludes completed, archived, and deleted tasks from open summaries', () => {
+    const items = [
+      task('open', { scheduledFor: '2026-08-24', priority: 2 }),
+      task('done', { scheduledFor: '2026-08-24', status: 'done', priority: 3 }),
+      task('archived', { dueAt: '2026-08-23T12:00:00Z', status: 'archived', priority: 3 }),
+      task('deleted', {
+        dueAt: '2026-08-23T12:00:00Z',
+        deletedAt: '2026-08-24T12:00:00Z',
+        priority: 3,
+      }),
+    ];
+
+    expect(summarizeOpenTasks(items, '2026-08-24')).toEqual({
+      overdue: 0,
+      today: 1,
+      high: 1,
+    });
+  });
 });
 
 describe('summarizeTodayTasks', () => {
