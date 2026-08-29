@@ -1,5 +1,6 @@
 'use client';
 
+import { getDb } from '@ops-dashboard/core';
 import type { Book, BookStatus } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
@@ -81,7 +82,33 @@ export function createBook(input: {
   );
 }
 
-export const updateBook = (id: string, patch: Partial<Book>) =>
-  patchRecord<Book>('books', id, normalizeBookPatch(patch));
+function assertReadingTimeline(book: Pick<Book, 'startedAt' | 'finishedAt'>): void {
+  if (
+    book.startedAt &&
+    book.finishedAt &&
+    Date.parse(book.finishedAt) < Date.parse(book.startedAt)
+  ) {
+    throw new Error('Book finish date must not precede its start date.');
+  }
+}
+
+export function updateBook(id: string, patch: Partial<Book>) {
+  const fields = normalizeBookPatch(patch);
+  const changesStart = Object.hasOwn(fields, 'startedAt');
+  const changesFinish = Object.hasOwn(fields, 'finishedAt');
+  if (!changesStart && !changesFinish) return patchRecord<Book>('books', id, fields);
+  if (changesStart && changesFinish) {
+    assertReadingTimeline(fields);
+    return patchRecord<Book>('books', id, fields);
+  }
+  return updateBookTimeline(id, fields);
+}
+
+async function updateBookTimeline(id: string, fields: Partial<Book>) {
+  const existing = await getDb().books.get(id);
+  if (!existing || existing.deletedAt) return null;
+  assertReadingTimeline({ ...existing, ...fields });
+  return patchRecord<Book>('books', id, fields);
+}
 
 export const deleteBook = (id: string) => softDeleteRecord<Book>('books', id);
