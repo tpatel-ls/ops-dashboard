@@ -59,6 +59,14 @@ describe('addTask', () => {
     expect(mocks.put).not.toHaveBeenCalled();
   });
 
+  it('rejects oversized titles before opening the database', async () => {
+    await expect(addTask('x'.repeat(501))).rejects.toThrow(
+      'Task title must contain at most 500 characters',
+    );
+    expect(mocks.last).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('does not let creation overrides replace identity or sync metadata', async () => {
     const task = await addTask('Created task', {
       id: 'wrong-id',
@@ -196,6 +204,7 @@ describe('updateTask', () => {
 
     for (const patch of [
       { title: '   ' },
+      { title: 'x'.repeat(501) },
       { scheduledFor: '2026-02-30' },
       { dueAt: 'not-a-date' },
       { estimateMinutes: -1 },
