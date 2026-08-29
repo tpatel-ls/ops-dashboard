@@ -242,8 +242,25 @@ export async function renameProject(id: string, name: string): Promise<void> {
   await enqueueOp({ table: 'projects', recordId: id, op: 'put', payload: next });
 }
 
+function assertProjectDateRange(project: Pick<Project, 'startDate' | 'dueDate'>): void {
+  if (project.startDate && project.dueDate && project.dueDate < project.startDate) {
+    throw new Error('Project due date must not precede its start date.');
+  }
+}
+
 export function updateProject(id: string, patch: Partial<Project>) {
-  return patchRecord<Project>('projects', id, normalizeProjectPatch(patch));
+  const fields = normalizeProjectPatch(patch);
+  if (!Object.hasOwn(fields, 'startDate') && !Object.hasOwn(fields, 'dueDate')) {
+    return patchRecord<Project>('projects', id, fields);
+  }
+  return updateProjectDates(id, fields);
+}
+
+async function updateProjectDates(id: string, fields: Partial<Project>) {
+  const existing = await getDb().projects.get(id);
+  if (!existing || existing.deletedAt) return null;
+  assertProjectDateRange({ ...existing, ...fields });
+  return patchRecord<Project>('projects', id, fields);
 }
 
 export async function archiveProject(id: string): Promise<void> {

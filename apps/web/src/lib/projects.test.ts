@@ -279,6 +279,28 @@ describe('updateProject', () => {
     );
   });
 
+  it('rejects date edits that precede the stored project start', async () => {
+    mocks.get.mockResolvedValue({
+      id: 'project-test',
+      name: 'Launch',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      startDate: '2026-08-20',
+      milestones: [],
+      checklists: [],
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'device-test',
+    });
+
+    await expect(updateProject('project-test', { dueDate: '2026-08-19' })).rejects.toThrow(
+      'Project due date must not precede its start date',
+    );
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('rejects invalid project detail values', () => {
     expect(() => updateProject('project-test', { status: 'missing' as never })).toThrow(
       'Project status must be valid',
