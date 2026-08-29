@@ -17,6 +17,12 @@ describe('matchByName', () => {
     expect(matchByName(PROJECTS, '  Mini Monet ')).toBe(PROJECTS[2]);
   });
 
+  it('matches canonically equivalent Unicode names', () => {
+    const projects = [{ id: 'project-1', name: 'Caf\u00e9 Launch' }];
+
+    expect(matchByName(projects, 'Cafe\u0301 Launch')?.id).toBe('project-1');
+  });
+
   it('returns undefined when nothing matches', () => {
     expect(matchByName(PROJECTS, 'Email Triage')).toBeUndefined();
   });
