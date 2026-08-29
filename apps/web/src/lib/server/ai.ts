@@ -26,7 +26,12 @@ function compatibleBaseURL(value: string | undefined): string | undefined {
   if (!baseURL) return undefined;
   try {
     const url = new URL(baseURL);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    if (
+      (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) ||
+      url.username ||
+      url.password
+    ) {
       return undefined;
     }
     return url.toString().replace(/\/$/, '');

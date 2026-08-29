@@ -29,6 +29,9 @@ describe('anthropicClientOptions', () => {
       apiKey: 'key',
       baseURL: 'https://ai.example.test',
     });
+    expect(anthropicClientOptions('key', 'http://localhost:8787')).toMatchObject({
+      baseURL: 'http://localhost:8787',
+    });
   });
 
   it('omits blank compatible endpoints', () => {
@@ -47,6 +50,7 @@ describe('anthropicClientOptions', () => {
     expect(anthropicClientConfiguration('key', 'gateway.internal')).toBeNull();
     expect(anthropicClientConfiguration('key', 'file:///tmp/gateway')).toBeNull();
     expect(anthropicClientConfiguration('key', 'https://user:secret@ai.example.test')).toBeNull();
+    expect(anthropicClientConfiguration('key', 'http://ai.example.test')).toBeNull();
   });
 
   it('keeps direct Anthropic access when no gateway is requested', () => {
