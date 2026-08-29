@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { boundedText, boundedTextList, dateOnlyText } from '@/lib/server/input';
+import { normalizeBrainDumpItems } from '@/lib/brain-dump-result';
 
 export const runtime = 'nodejs';
 
@@ -160,8 +161,10 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const toolUse = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use');
-    const items = (toolUse?.input as { items?: unknown } | undefined)?.items;
-    if (!Array.isArray(items) || items.length === 0) {
+    const items = normalizeBrainDumpItems(
+      (toolUse?.input as { items?: unknown } | undefined)?.items,
+    );
+    if (items.length === 0) {
       return NextResponse.json({ ok: false, reason: 'no-result' });
     }
     return NextResponse.json({ ok: true, items });
