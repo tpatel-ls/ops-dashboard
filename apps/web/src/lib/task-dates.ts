@@ -51,9 +51,12 @@ export function compareTasksByCommitment(left: Task, right: Task): number {
 }
 
 export function summarizeOpenTasks(tasks: Task[], day: string) {
+  const open = tasks.filter(
+    (task) => !task.deletedAt && task.status !== 'done' && task.status !== 'archived',
+  );
   return {
-    overdue: tasks.filter((task) => taskIsOverdue(task, day)).length,
-    today: tasks.filter((task) => taskCommitmentDay(task) === day).length,
-    high: tasks.filter((task) => task.priority >= 2).length,
+    overdue: open.filter((task) => taskIsOverdue(task, day)).length,
+    today: open.filter((task) => taskCommitmentDay(task) === day).length,
+    high: open.filter((task) => task.priority >= 2).length,
   };
 }
