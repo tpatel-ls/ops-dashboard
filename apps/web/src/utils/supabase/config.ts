@@ -13,8 +13,9 @@ export function supabasePublicConfig(
   if (!url || !key) return null;
   try {
     const parsed = new URL(url);
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
     if (
-      (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') ||
+      (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) ||
       parsed.username ||
       parsed.password
     ) {
