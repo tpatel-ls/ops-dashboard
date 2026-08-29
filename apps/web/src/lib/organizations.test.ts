@@ -29,7 +29,20 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { createOrganization, updateOrganization } from './organizations';
+import { createOrganization, nextOrgColor, updateOrganization } from './organizations';
+
+describe('nextOrgColor', () => {
+  it('falls back deterministically for malformed record counts', () => {
+    expect(nextOrgColor(Number.NaN)).toBe(nextOrgColor(0));
+    expect(nextOrgColor(-1)).toBe(nextOrgColor(0));
+    expect(nextOrgColor(1.5)).toBe(nextOrgColor(0));
+  });
+
+  it('cycles through the organization palette', () => {
+    expect(nextOrgColor(6)).toBe(nextOrgColor(0));
+    expect(nextOrgColor(7)).toBe(nextOrgColor(1));
+  });
+});
 
 describe('createOrganization', () => {
   beforeEach(() => {
