@@ -32,7 +32,8 @@ function normalizeOrganizationPatch(patch: Partial<Organization>): Partial<Organ
 }
 
 export function nextOrgColor(existingCount: number): string {
-  return ORG_COLORS[existingCount % ORG_COLORS.length] ?? ORG_COLORS[0]!;
+  const safeCount = Number.isSafeInteger(existingCount) && existingCount >= 0 ? existingCount : 0;
+  return ORG_COLORS[safeCount % ORG_COLORS.length] ?? ORG_COLORS[0]!;
 }
 
 export async function createOrganization(input: {
