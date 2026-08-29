@@ -69,6 +69,14 @@ describe('logWork', () => {
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 
+  it('rejects future work timestamps before writing', async () => {
+    await expect(logWork('project-1', 30, undefined, '2999-01-01T00:00:00.000Z')).rejects.toThrow(
+      'Work log time cannot be in the future',
+    );
+    expect(mocks.getProject).not.toHaveBeenCalled();
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
   it('rejects logs for missing projects', async () => {
     mocks.getProject.mockResolvedValue(undefined);
 
