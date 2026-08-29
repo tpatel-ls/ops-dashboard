@@ -16,8 +16,14 @@ export async function logWork(
   if (!Number.isSafeInteger(minutes) || minutes <= 0 || minutes > MAX_WORK_LOG_MINUTES) {
     throw new Error('Work log minutes must be a positive integer up to 1440.');
   }
-  if (at !== undefined && (!at.trim() || !Number.isFinite(Date.parse(at)))) {
-    throw new Error('Work log time must be a valid date.');
+  if (at !== undefined) {
+    const timestamp = Date.parse(at);
+    if (!at.trim() || !Number.isFinite(timestamp)) {
+      throw new Error('Work log time must be a valid date.');
+    }
+    if (timestamp > Date.now()) {
+      throw new Error('Work log time cannot be in the future.');
+    }
   }
   const normalizedNote = note?.trim();
 
