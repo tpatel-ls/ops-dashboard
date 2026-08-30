@@ -1,5 +1,6 @@
 import type { OrgContext, Project } from '@ops-dashboard/core';
 import type { SyncState } from './sync/status';
+import { isActiveProject } from './project-query';
 
 export type WorkDestination = 'personal' | string;
 
@@ -29,7 +30,7 @@ export function projectsForDestination(
   const orgId = destinationOrgId(destination);
   return projects
     .filter((project) => {
-      if (project.deletedAt || project.archivedAt) return false;
+      if (!isActiveProject(project)) return false;
       return orgId ? project.orgId === orgId : !project.orgId;
     })
     .sort((a, b) => a.name.localeCompare(b.name));
