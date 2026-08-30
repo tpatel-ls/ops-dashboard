@@ -31,7 +31,13 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { addDaysISO, createRoutine, toggleRoutineCheck, updateRoutine } from './routines';
+import {
+  addDaysISO,
+  computeStreak,
+  createRoutine,
+  toggleRoutineCheck,
+  updateRoutine,
+} from './routines';
 
 describe('createRoutine', () => {
   beforeEach(() => {
@@ -241,5 +247,18 @@ describe('addDaysISO', () => {
     expect(() => addDaysISO('2026-08-09', Number.MAX_SAFE_INTEGER)).toThrow(
       'Routine date calculation is out of range',
     );
+  });
+});
+
+describe('computeStreak', () => {
+  it('ignores malformed synced checks and rejects an invalid anchor day', () => {
+    const checks = [
+      { id: 'bad', date: 'not-a-date', done: true },
+      { id: 'today', date: '2026-08-20', done: true },
+      { id: 'yesterday', date: '2026-08-19', done: true },
+    ] as never;
+
+    expect(computeStreak(checks, '2026-08-20')).toBe(2);
+    expect(computeStreak(checks, '2026-02-30')).toBe(0);
   });
 });
