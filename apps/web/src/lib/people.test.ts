@@ -28,6 +28,17 @@ describe('matchesPersonSearch', () => {
   it('rejects unrelated queries', () => {
     expect(matchesPersonSearch(person, 'finance')).toBe(false);
   });
+
+  it('matches canonically equivalent Unicode search text', () => {
+    const unicodePerson = {
+      ...person,
+      name: 'Ren\u00e9e Flores',
+      facts: [{ id: 'fact-1', label: 'Company', value: '\uff2c\uff33 Global' }],
+    } as Person;
+
+    expect(matchesPersonSearch(unicodePerson, 'Rene\u0301e')).toBe(true);
+    expect(matchesPersonSearch(unicodePerson, 'LS global')).toBe(true);
+  });
 });
 
 describe('latestInteraction', () => {

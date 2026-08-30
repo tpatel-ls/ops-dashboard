@@ -80,8 +80,12 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
   return normalized;
 }
 
+function personSearchText(value: string): string {
+  return value.normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
 export function matchesPersonSearch(person: Person, query: string): boolean {
-  const normalized = query.trim().toLowerCase();
+  const normalized = personSearchText(query.trim());
   if (!normalized) return true;
   return [
     person.name,
@@ -89,7 +93,7 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
     ...person.tags,
     ...person.facts.flatMap((fact) => [fact.label, fact.value]),
     ...person.interactions.map((interaction) => interaction.note),
-  ].some((value) => value?.toLowerCase().includes(normalized));
+  ].some((value) => value && personSearchText(value).includes(normalized));
 }
 
 export function latestInteraction(interactions: Interaction[]): Interaction | null {
