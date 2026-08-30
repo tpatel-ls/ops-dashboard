@@ -224,10 +224,11 @@ async function routeHabit(
   routine: Routine,
 ): Promise<RoutedResult> {
   const date = todayISO();
-  const existing = await getDb()
+  const matching = await getDb()
     .routineChecks.where('[routineId+date]')
     .equals([routine.id, date])
-    .first();
+    .toArray();
+  const existing = matching.find((check) => !check.deletedAt);
   const changed = routineCaptureNeedsChange(existing);
   if (changed) await toggleRoutineCheck(routine.id, date, true, 'capture');
   await setCaptureRoute(captureId, { type: 'habit', id: routine.id }, 'habit', title);
@@ -245,8 +246,10 @@ async function routeHabit(
   };
 }
 
-export function routineCaptureNeedsChange(check: Pick<RoutineCheck, 'done'> | undefined): boolean {
-  return !check?.done;
+export function routineCaptureNeedsChange(
+  check: Pick<RoutineCheck, 'done' | 'deletedAt'> | undefined,
+): boolean {
+  return !check || Boolean(check.deletedAt) || !check.done;
 }
 
 async function routeJournal(
