@@ -15,6 +15,10 @@ const CAPTURE_KINDS = new Set<CaptureKind>([
   'food',
   'habit',
 ]);
+const MAX_CAPTURE_RAW_LENGTH = 8_000;
+const MAX_CAPTURE_SUMMARY_LENGTH = 500;
+const MAX_CAPTURE_ROUTE_ID_LENGTH = 128;
+const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 
 export function compareCaptureRecency(
   left: Pick<Capture, 'id' | 'createdAt'>,
@@ -34,6 +38,9 @@ export function compareCaptureRecency(
 export function createCapture(raw: string, source: CaptureSource = 'text'): Promise<Capture> {
   const normalizedRaw = raw.trim();
   if (!normalizedRaw) throw new Error('Capture text is required.');
+  if (Array.from(normalizedRaw).length > MAX_CAPTURE_RAW_LENGTH) {
+    throw new Error('Capture text must contain at most 8000 characters.');
+  }
   if (!CAPTURE_SOURCES.has(source)) throw new Error('Capture source must be valid.');
   return putRecord(
     'captures',
@@ -56,7 +63,13 @@ export const setCaptureRoute = (
     throw new Error('Capture route must be valid.');
   }
   const routeId = routedTo.id.trim();
-  if (!routeId) throw new Error('Capture route must be valid.');
+  if (
+    !routeId ||
+    routeId.length > MAX_CAPTURE_ROUTE_ID_LENGTH ||
+    CONTROL_CHARACTERS.test(routeId)
+  ) {
+    throw new Error('Capture route must be valid.');
+  }
   if (aiKind !== undefined && !CAPTURE_KINDS.has(aiKind)) {
     throw new Error('Capture kind must be valid.');
   }
@@ -64,6 +77,9 @@ export const setCaptureRoute = (
     throw new Error('Capture summary must be valid.');
   }
   const summary = aiSummary?.trim();
+  if (summary && Array.from(summary).length > MAX_CAPTURE_SUMMARY_LENGTH) {
+    throw new Error('Capture summary must contain at most 500 characters.');
+  }
   return patchRecord<Capture>('captures', id, {
     status: 'triaged',
     routedTo: { type: routedTo.type, id: routeId },
