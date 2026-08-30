@@ -62,6 +62,45 @@ describe('normalizeBrainDumpItem', () => {
     expect(Array.from(item?.projectName ?? '')).toHaveLength(200);
     expect(Array.from(item?.routineName ?? '')).toHaveLength(200);
   });
+
+  it('sanitizes nested AI fields before they cross the API boundary', () => {
+    const item = normalizeBrainDumpItem({
+      title: 'Breakfast',
+      kind: ' FOOD ',
+      priority: Number.POSITIVE_INFINITY,
+      tags: [' Health ', 42, 'health', 'x'.repeat(70)],
+      food: {
+        mealType: ' BREAKFAST ',
+        items: [
+          null,
+          { name: ' Eggs ', quantity: ' two ', calories: 140.4, protein: -2 },
+          { name: ' ', calories: 20 },
+        ],
+      },
+    });
+
+    expect(item).toEqual({
+      title: 'Breakfast',
+      kind: 'food',
+      tags: ['health', 'x'.repeat(64)],
+      food: {
+        mealType: 'breakfast',
+        items: [{ name: 'Eggs', quantity: 'two', calories: 140, protein: 0 }],
+      },
+    });
+  });
+
+  it('drops unsupported routing metadata instead of forwarding it', () => {
+    expect(
+      normalizeBrainDumpItem({
+        title: 'Safe fallback',
+        kind: 'delete-everything',
+        priority: 1.5,
+        tags: { tag: 'work' },
+        food: [],
+      }),
+    ).toEqual({ title: 'Safe fallback' });
+  });
 });
 
 describe('fallbackCaptureLines', () => {
