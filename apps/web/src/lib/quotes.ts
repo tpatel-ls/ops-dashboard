@@ -42,7 +42,9 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    normalized.tags = normalizeStringList(normalized.tags, 'Quote tags must be valid.');
+    normalized.tags = normalizeStringList(normalized.tags, 'Quote tags must be valid.', {
+      caseInsensitive: true,
+    });
   }
   if (Object.hasOwn(normalized, 'thoughts')) {
     if (!Array.isArray(normalized.thoughts)) throw new Error('Quote thoughts must be valid.');
