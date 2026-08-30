@@ -260,18 +260,20 @@ export function validateOpsExport(value: unknown): OpsExport {
 
 export async function exportAll(): Promise<OpsExport> {
   const db = getDb();
-  const [tasks, projects, whiteboards] = await Promise.all([
-    db.tasks.toArray(),
-    db.projects.toArray(),
-    db.whiteboards.toArray(),
-  ]);
-  return {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    tasks,
-    projects,
-    whiteboards,
-  };
+  return db.transaction('r', db.tasks, db.projects, db.whiteboards, async () => {
+    const [tasks, projects, whiteboards] = await Promise.all([
+      db.tasks.toArray(),
+      db.projects.toArray(),
+      db.whiteboards.toArray(),
+    ]);
+    return {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      tasks,
+      projects,
+      whiteboards,
+    };
+  });
 }
 
 export async function importAll(value: unknown): Promise<void> {
