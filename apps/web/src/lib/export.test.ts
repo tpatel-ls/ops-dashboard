@@ -385,6 +385,28 @@ describe('validateOpsExport', () => {
     ).toThrow('Invalid export whiteboards');
   });
 
+  it('rejects dangling links between exported records', () => {
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [{ ...task('Orphan task'), projectId: 'missing-project' }],
+        projects: [],
+        whiteboards: [],
+      }),
+    ).toThrow('Invalid export references');
+
+    expect(() =>
+      validateOpsExport({
+        version: 1,
+        exportedAt: '2026-07-30T12:00:00.000Z',
+        tasks: [],
+        projects: [],
+        whiteboards: [{ ...whiteboard('Orphan board'), linkedTaskIds: ['missing-task'] }],
+      }),
+    ).toThrow('Invalid export references');
+  });
+
   it('rejects whiteboards without a saved document', () => {
     const missingDocument: Partial<Whiteboard> = { ...whiteboard('Incomplete board') };
     delete missingDocument.document;
