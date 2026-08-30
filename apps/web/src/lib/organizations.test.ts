@@ -75,6 +75,15 @@ describe('createOrganization', () => {
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 
+  it('rejects canonically equivalent Unicode organization names', async () => {
+    mocks.toArray.mockResolvedValue([{ id: 'org-existing', name: 'Caf\u00e9 Group', order: 1 }]);
+
+    await expect(createOrganization({ name: 'Cafe\u0301 Group' })).rejects.toThrow(
+      'Organization already exists',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
   it('allows reusing a name from an archived organization', async () => {
     mocks.toArray.mockResolvedValue([
       { id: 'org-archived', name: 'Former Client', order: 1, archivedAt: '2026-07-01' },
@@ -98,9 +107,9 @@ describe('createOrganization', () => {
   it('does not overwrite a different organization with a deterministic id', async () => {
     mocks.toArray.mockResolvedValue([{ id: 'seed-org', name: 'Existing Org', order: 1 }]);
 
-    await expect(
-      createOrganization({ id: 'seed-org', name: 'Replacement Org' }),
-    ).rejects.toThrow('Organization id already exists');
+    await expect(createOrganization({ id: 'seed-org', name: 'Replacement Org' })).rejects.toThrow(
+      'Organization id already exists',
+    );
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
 });
@@ -116,6 +125,18 @@ describe('updateOrganization', () => {
 
   it('rejects a rename that duplicates another active organization', async () => {
     await expect(updateOrganization('org-1', { name: '  GLOBEX  ' })).rejects.toThrow(
+      'Organization already exists',
+    );
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+  });
+
+  it('rejects canonically equivalent Unicode renames', async () => {
+    mocks.toArray.mockResolvedValue([
+      { id: 'org-1', name: 'Acme', order: 1 },
+      { id: 'org-2', name: 'Caf\u00e9 Group', order: 2 },
+    ]);
+
+    await expect(updateOrganization('org-1', { name: 'Cafe\u0301 Group' })).rejects.toThrow(
       'Organization already exists',
     );
     expect(mocks.patchRecord).not.toHaveBeenCalled();
