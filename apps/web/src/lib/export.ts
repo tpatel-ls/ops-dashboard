@@ -246,6 +246,15 @@ export function validateOpsExport(value: unknown): OpsExport {
     }
   }
 
+  const taskIds = new Set(payload.tasks!.map((task) => task.id));
+  const projectIds = new Set(payload.projects!.map((project) => project.id));
+  if (
+    payload.tasks!.some((task) => task.projectId && !projectIds.has(task.projectId)) ||
+    payload.whiteboards!.some((board) => board.linkedTaskIds.some((taskId) => !taskIds.has(taskId)))
+  ) {
+    throw new Error('Invalid export references');
+  }
+
   return payload as OpsExport;
 }
 
