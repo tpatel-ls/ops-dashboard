@@ -57,6 +57,17 @@ describe('normalizeSettings', () => {
     ).toMatchObject({ workdayStart: '07:30', workdayEnd: '19:15', dailyReviewAt: '18:45' });
   });
 
+  it('repairs workday ranges that end before they start', () => {
+    expect(normalizeSettings({ workdayStart: '18:00', workdayEnd: '09:00' })).toMatchObject({
+      workdayStart: DEFAULT_SETTINGS.workdayStart,
+      workdayEnd: DEFAULT_SETTINGS.workdayEnd,
+    });
+    expect(normalizeSettings({ workdayStart: '09:00', workdayEnd: '09:00' })).toMatchObject({
+      workdayStart: DEFAULT_SETTINGS.workdayStart,
+      workdayEnd: DEFAULT_SETTINGS.workdayEnd,
+    });
+  });
+
   it('repairs malformed choices and boolean preferences', () => {
     expect(
       normalizeSettings({
