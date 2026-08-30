@@ -151,6 +151,9 @@ describe('routineCaptureNeedsChange', () => {
   it('preserves a routine completion that predates the capture', () => {
     expect(routineCaptureNeedsChange({ done: true })).toBe(false);
     expect(routineCaptureNeedsChange({ done: false })).toBe(true);
+    expect(routineCaptureNeedsChange({ done: true, deletedAt: '2026-08-20T12:00:00.000Z' })).toBe(
+      true,
+    );
     expect(routineCaptureNeedsChange(undefined)).toBe(true);
   });
 });
