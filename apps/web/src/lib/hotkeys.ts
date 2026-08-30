@@ -67,6 +67,10 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
         const isChord = combo.includes(' then ');
         if (isChord) {
           if (inField) continue;
+          if (e.repeat) {
+            if (chordKey !== null) return;
+            continue;
+          }
           const [first, second] = combo.split(' then ').map((s) => s.trim());
           if (chordKey === first && unmodified && e.key.toLowerCase() === second) {
             e.preventDefault();
