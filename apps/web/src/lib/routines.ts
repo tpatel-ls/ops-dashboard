@@ -232,7 +232,12 @@ export async function toggleRoutineCheck(
 
 /** Consecutive done-days ending today (or yesterday if today is not done yet). */
 export function computeStreak(checks: RoutineCheck[], today = todayISO()): number {
-  const done = new Set(checks.filter((c) => c.done && !c.deletedAt).map((c) => c.date));
+  if (localDay(today) !== today) return 0;
+  const done = new Set(
+    checks
+      .filter((check) => check.done && !check.deletedAt && localDay(check.date) === check.date)
+      .map((check) => check.date),
+  );
   let streak = 0;
   let cursor = today;
   if (!done.has(cursor)) cursor = addDaysISO(cursor, -1);
