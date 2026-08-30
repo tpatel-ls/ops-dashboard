@@ -127,6 +127,7 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
     ...task,
     id: '',
     status: 'todo',
+    checklist: task.checklist.map((item) => ({ ...item, done: false })),
     scheduledFor: isoDate,
     recurrence,
     createdAt: nowIso,
@@ -134,6 +135,7 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
     version: 1,
   };
   delete projected.completedAt;
+  delete projected.actualMinutes;
   if (startAt) projected.startAt = startAt;
   else delete projected.startAt;
   if (endAt) projected.endAt = endAt;
