@@ -155,7 +155,11 @@ describe('updateRoutine', () => {
 
 describe('toggleRoutineCheck', () => {
   beforeEach(() => {
-    mocks.getRoutine.mockReset().mockResolvedValue({ id: 'routine-1', name: 'Reset' });
+    mocks.getRoutine.mockReset().mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      startDate: '2026-08-01',
+    });
     mocks.listRoutineChecks.mockReset().mockResolvedValue([]);
     mocks.findRoutineCheck.mockClear();
     mocks.putRecord.mockClear();
@@ -192,6 +196,23 @@ describe('toggleRoutineCheck', () => {
     );
     expect(mocks.findRoutineCheck).not.toHaveBeenCalled();
     expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
+  it('rejects check-ins outside the routine schedule', async () => {
+    mocks.getRoutine.mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      startDate: '2026-08-10',
+      endDate: '2026-08-20',
+    });
+
+    await expect(toggleRoutineCheck('routine-1', '2026-08-09', true)).rejects.toThrow(
+      'Routine is not active on this date',
+    );
+    await expect(toggleRoutineCheck('routine-1', '2026-08-21', true)).rejects.toThrow(
+      'Routine is not active on this date',
+    );
+    expect(mocks.findRoutineCheck).not.toHaveBeenCalled();
   });
 
   it('creates a live check when only a deleted check matches the day', async () => {

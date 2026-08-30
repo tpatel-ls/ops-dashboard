@@ -195,6 +195,15 @@ export async function toggleRoutineCheck(
   if (!routine || routine.deletedAt || routine.archivedAt) {
     throw new Error('Routine is not available for check-ins.');
   }
+  const startDate = localDay(routine.startDate);
+  const endDate = routine.endDate ? localDay(routine.endDate) : undefined;
+  if (
+    startDate !== routine.startDate ||
+    date < startDate ||
+    (routine.endDate !== undefined && (endDate !== routine.endDate || date > endDate))
+  ) {
+    throw new Error('Routine is not active on this date.');
+  }
   const matchingChecks = await db.routineChecks
     .where('[routineId+date]')
     .equals([normalizedRoutineId, date])
