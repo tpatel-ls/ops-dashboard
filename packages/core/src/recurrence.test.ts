@@ -171,6 +171,39 @@ describe('projectNextTask', () => {
     expect(projectNextTask(third!, new Date('2026-08-03T13:00:00.000Z'))).toBeNull();
   });
 
+  it('resets occurrence-specific progress on the next task', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Daily close',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      tags: [],
+      order: 1,
+      actualMinutes: 45,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [
+        { id: 'item-1', text: 'Reconcile accounts', done: true },
+        { id: 'item-2', text: 'Send report', done: false },
+      ],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T13:00:00.000Z',
+      completedAt: '2026-08-01T13:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } satisfies Task;
+
+    const projected = projectNextTask(task, new Date('2026-08-01T13:00:00.000Z'));
+
+    expect(projected?.actualMinutes).toBeUndefined();
+    expect(projected?.checklist).toEqual([
+      { id: 'item-1', text: 'Reconcile accounts', done: false },
+      { id: 'item-2', text: 'Send report', done: false },
+    ]);
+    expect(task.checklist[0]?.done).toBe(true);
+  });
+
   it('rejects malformed recurrence anchors without throwing', () => {
     const task = {
       id: 'task-1',
