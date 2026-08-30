@@ -62,10 +62,13 @@ function timeZone(value: unknown): string | undefined {
 /** Fill settings added after the first schema and repair invalid timer values. */
 export function normalizeSettings(value?: Partial<Settings> | null): Settings {
   const normalizedTimeZone = timeZone(value?.timezone);
+  const requestedWorkdayStart = clockTime(value?.workdayStart, DEFAULT_SETTINGS.workdayStart);
+  const requestedWorkdayEnd = clockTime(value?.workdayEnd, DEFAULT_SETTINGS.workdayEnd);
+  const workdayRangeValid = requestedWorkdayStart < requestedWorkdayEnd;
   return {
     id: 'singleton',
-    workdayStart: clockTime(value?.workdayStart, DEFAULT_SETTINGS.workdayStart),
-    workdayEnd: clockTime(value?.workdayEnd, DEFAULT_SETTINGS.workdayEnd),
+    workdayStart: workdayRangeValid ? requestedWorkdayStart : DEFAULT_SETTINGS.workdayStart,
+    workdayEnd: workdayRangeValid ? requestedWorkdayEnd : DEFAULT_SETTINGS.workdayEnd,
     weekStartsOn:
       value?.weekStartsOn === 0 || value?.weekStartsOn === 1
         ? value.weekStartsOn
