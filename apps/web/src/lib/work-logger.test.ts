@@ -56,9 +56,13 @@ describe('destination helpers', () => {
     const personal = project('personal');
     const orgA = project('org-a-project', 'org-a');
     const orgB = project('org-b-project', 'org-b');
+    const completed = project('completed');
     orgA.archivedAt = '2026-07-14T13:00:00.000Z';
+    completed.status = 'done';
 
-    expect(projectsForDestination([personal, orgA, orgB], 'personal')).toEqual([personal]);
+    expect(projectsForDestination([personal, orgA, orgB, completed], 'personal')).toEqual([
+      personal,
+    ]);
     expect(projectsForDestination([personal, orgA, orgB], 'org-a')).toEqual([]);
     expect(projectsForDestination([personal, orgA, orgB], 'org-b')).toEqual([orgB]);
   });
