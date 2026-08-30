@@ -121,6 +121,17 @@ describe('addTask', () => {
     expect(mocks.last).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
   });
+
+  it('rejects recurrence windows that end before the first occurrence', async () => {
+    await expect(
+      addTask('Invalid recurrence', {
+        scheduledFor: '2026-08-20',
+        recurrence: { freq: 'daily', interval: 1, endsOn: '2026-08-19' },
+      }),
+    ).rejects.toThrow('Task recurrence end date cannot precede its first occurrence');
+    expect(mocks.last).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
 });
 
 describe('addTaskToProject', () => {
@@ -221,6 +232,16 @@ describe('updateTask', () => {
       await expect(updateTask('task-1', patch)).rejects.toThrow();
       expect(mocks.put).not.toHaveBeenCalled();
     }
+  });
+
+  it('rejects updates that invert the recurrence window', async () => {
+    await expect(
+      updateTask('task-1', {
+        scheduledFor: '2026-08-20',
+        recurrence: { freq: 'weekly', interval: 1, endsOn: '2026-08-19' },
+      }),
+    ).rejects.toThrow('Task recurrence end date cannot precede its first occurrence');
+    expect(mocks.put).not.toHaveBeenCalled();
   });
 
   it('normalizes optional notes and relationship identifiers', async () => {
