@@ -41,4 +41,16 @@ describe('useHotkeys', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
     expect(handler).toHaveBeenCalledOnce();
   });
+
+  it('does not complete same-key chords from keyboard auto-repeat', () => {
+    const handler = vi.fn();
+    renderHook(() => useHotkeys([{ combo: 'g then g', handler }]));
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'g' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', repeat: true }));
+    expect(handler).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'g' }));
+    expect(handler).toHaveBeenCalledOnce();
+  });
 });
