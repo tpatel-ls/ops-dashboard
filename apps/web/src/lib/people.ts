@@ -27,7 +27,9 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    normalized.tags = normalizeStringList(normalized.tags, 'Person tags must be valid.');
+    normalized.tags = normalizeStringList(normalized.tags, 'Person tags must be valid.', {
+      caseInsensitive: true,
+    });
   }
   if (Object.hasOwn(normalized, 'facts')) {
     if (!Array.isArray(normalized.facts)) throw new Error('Person facts must be valid.');

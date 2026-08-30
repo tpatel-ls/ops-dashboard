@@ -39,9 +39,14 @@ function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    normalized.tags = normalizeStringList(normalized.tags, 'Note tags must be valid.');
+    normalized.tags = normalizeStringList(normalized.tags, 'Note tags must be valid.', {
+      caseInsensitive: true,
+    });
   }
-  if (normalized.flaggedForReview !== undefined && typeof normalized.flaggedForReview !== 'boolean') {
+  if (
+    normalized.flaggedForReview !== undefined &&
+    typeof normalized.flaggedForReview !== 'boolean'
+  ) {
     throw new Error('Note review state must be boolean.');
   }
   return normalized;
