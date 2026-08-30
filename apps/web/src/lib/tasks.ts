@@ -73,7 +73,9 @@ function nextTaskOrder(previous: number | undefined): number {
 
 function normalizeTaskCollections(patch: Partial<Task>): void {
   if (Object.hasOwn(patch, 'tags')) {
-    patch.tags = normalizeStringList(patch.tags, 'Task tags must be valid.');
+    patch.tags = normalizeStringList(patch.tags, 'Task tags must be valid.', {
+      caseInsensitive: true,
+    });
   }
   if (Object.hasOwn(patch, 'checklist')) {
     if (!Array.isArray(patch.checklist)) throw new Error('Task checklist must be valid.');

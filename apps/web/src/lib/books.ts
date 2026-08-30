@@ -49,7 +49,9 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
   }
   if (Object.hasOwn(normalized, 'tags')) {
-    normalized.tags = normalizeStringList(normalized.tags, 'Book tags must be valid.');
+    normalized.tags = normalizeStringList(normalized.tags, 'Book tags must be valid.', {
+      caseInsensitive: true,
+    });
   }
   return normalized;
 }
