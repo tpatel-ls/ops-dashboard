@@ -11,12 +11,16 @@ export function isActiveProject(project: Project): boolean {
   );
 }
 
+function projectSearchText(value: string): string {
+  return value.normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
 export function matchesProjectSearch(project: Project, query: string): boolean {
-  const needle = query.trim().toLowerCase();
+  const needle = projectSearchText(query.trim());
   if (!needle) return true;
   return [project.name, project.description]
     .filter((value): value is string => Boolean(value))
-    .some((value) => value.toLowerCase().includes(needle));
+    .some((value) => projectSearchText(value).includes(needle));
 }
 
 function compareOptionalDates(a?: string, b?: string, descending = false): number {

@@ -45,6 +45,16 @@ describe('matchesProjectSearch', () => {
   it('keeps every project for an empty query', () => {
     expect(matchesProjectSearch(launch, '  ')).toBe(true);
   });
+
+  it('matches canonically equivalent Unicode text', () => {
+    const unicodeProject = project({
+      name: 'Caf\u00e9 Launch',
+      description: 'Coordinate with ＬＳ Global',
+    });
+
+    expect(matchesProjectSearch(unicodeProject, 'Cafe\u0301')).toBe(true);
+    expect(matchesProjectSearch(unicodeProject, 'LS global')).toBe(true);
+  });
 });
 
 describe('compareProjects', () => {
