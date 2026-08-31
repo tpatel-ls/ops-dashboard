@@ -172,6 +172,16 @@ describe('matchesTaskSearch', () => {
     expect(matchesTaskSearch(launchTask, '   ')).toBe(true);
     expect(matchesTaskSearch(launchTask, 'billing')).toBe(false);
   });
+
+  it('matches canonically equivalent Unicode text', () => {
+    const unicodeTask = task('unicode', {
+      title: 'Prepare Caf\u00e9 Review',
+      notes: 'Coordinate with ＬＳ Global',
+    });
+
+    expect(matchesTaskSearch(unicodeTask, 'Cafe\u0301')).toBe(true);
+    expect(matchesTaskSearch(unicodeTask, 'LS global')).toBe(true);
+  });
 });
 
 describe('matchesTaskTag', () => {
@@ -186,5 +196,11 @@ describe('matchesTaskTag', () => {
   it('keeps every task when no tag is selected', () => {
     expect(matchesTaskTag(taggedTask, null)).toBe(true);
     expect(matchesTaskTag(taggedTask, '   ')).toBe(true);
+  });
+
+  it('matches canonically equivalent Unicode tags', () => {
+    const taggedTask = task('unicode-tag', { tags: ['Caf\u00e9'] });
+
+    expect(matchesTaskTag(taggedTask, 'Cafe\u0301')).toBe(true);
   });
 });
