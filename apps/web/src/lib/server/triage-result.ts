@@ -3,6 +3,10 @@ import { boundedText, boundedTextList } from './input';
 
 const KINDS = new Set<CaptureKind>(['task', 'note', 'journal', 'event', 'person', 'quote']);
 
+function triageTag(value: string): string {
+  return value.normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
 export interface TriageResult {
   kind: CaptureKind;
   title: string;
@@ -23,9 +27,7 @@ export function normalizeTriageResult(value: unknown): TriageResult | null {
   const kind = KINDS.has(requestedKind) ? requestedKind : 'task';
   const notes = boundedText(input.notes, 2_000);
   const dueText = boundedText(input.dueText, 200);
-  const tags = Array.from(
-    new Set(boundedTextList(input.tags, 20, 64).map((tag) => tag.toLowerCase())),
-  );
+  const tags = Array.from(new Set(boundedTextList(input.tags, 20, 64).map(triageTag)));
   const domainHint = boundedText(input.domainHint, 100);
   const reminderText = boundedText(input.reminderText, 200);
   const priority =
