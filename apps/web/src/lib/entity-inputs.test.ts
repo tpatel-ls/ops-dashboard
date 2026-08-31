@@ -170,6 +170,12 @@ describe('makeThought', () => {
   it('rejects blank thoughts', () => {
     expect(() => makeThought('   ')).toThrow('Thought text is required');
   });
+
+  it('rejects oversized thoughts', () => {
+    expect(() => makeThought('x'.repeat(2_001))).toThrow(
+      'Thought text must contain at most 2000 characters',
+    );
+  });
 });
 
 describe('createContent', () => {

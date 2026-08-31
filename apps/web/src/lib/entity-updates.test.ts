@@ -331,6 +331,32 @@ describe('quote inputs', () => {
       ],
     });
   });
+
+  it('bounds quote text and nested thoughts', () => {
+    expect(() => createQuote({ text: 'x'.repeat(8_001) })).toThrow(
+      'Quote text must contain at most 8000 characters',
+    );
+    expect(() =>
+      updateQuote('quote-1', {
+        thoughts: Array.from({ length: 101 }, (_, index) => ({
+          id: `thought-${index}`,
+          text: 'Idea',
+          at: '2026-08-17T12:00:00.000Z',
+        })),
+      }),
+    ).toThrow('Quote thoughts must contain at most 100 entries');
+    expect(() =>
+      updateQuote('quote-1', {
+        thoughts: [
+          {
+            id: 'thought-1',
+            text: 'x'.repeat(2_001),
+            at: '2026-08-17T12:00:00.000Z',
+          },
+        ],
+      }),
+    ).toThrow('Quote thoughts must be valid');
+  });
 });
 
 describe('person inputs', () => {
