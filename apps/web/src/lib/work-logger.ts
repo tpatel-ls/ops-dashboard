@@ -33,7 +33,10 @@ export function projectsForDestination(
       if (!isActiveProject(project)) return false;
       return orgId ? project.orgId === orgId : !project.orgId;
     })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => {
+      const nameOrder = a.name.localeCompare(b.name);
+      return nameOrder !== 0 ? nameOrder : a.id.localeCompare(b.id);
+    });
 }
 
 export function syncSaveMessage(state: SyncState, pending: number): string {
