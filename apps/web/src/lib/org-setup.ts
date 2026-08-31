@@ -13,6 +13,18 @@ export const SEED_ORG_ID = 'org-ls-global-group';
 
 const LSG_PROJECT_NAMES = new Set(['blue text', 'power dialer']);
 
+function orgSetupName(value: string): string {
+  return value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
+export function isLsgProjectName(value: string): boolean {
+  return LSG_PROJECT_NAMES.has(orgSetupName(value));
+}
+
+export function isDefaultOrganizationName(value: string): boolean {
+  return orgSetupName(value) === orgSetupName(DEFAULT_ORG_NAME);
+}
+
 /**
  * One-time org setup per device: if this device holds LSG projects that have
  * no org yet, ensure the default org exists and move those projects (and
@@ -26,18 +38,14 @@ export async function ensureOrgSetup(): Promise<void> {
 
   const db = getDb();
   const projects = (await db.projects.toArray()).filter((p) => !p.deletedAt);
-  const toMigrate = projects.filter(
-    (p) => !p.orgId && LSG_PROJECT_NAMES.has(p.name.trim().toLowerCase()),
-  );
+  const toMigrate = projects.filter((p) => !p.orgId && isLsgProjectName(p.name));
   if (toMigrate.length === 0) {
     writeLocalStorage(GUARD_KEY, '1');
     return;
   }
 
   const orgs = (await db.organizations.toArray()).filter((o) => !o.deletedAt);
-  const existing = orgs.find(
-    (o) => o.name.trim().toLowerCase() === DEFAULT_ORG_NAME.toLowerCase(),
-  );
+  const existing = orgs.find((o) => isDefaultOrganizationName(o.name));
   const org: Organization =
     existing ??
     (await createOrganization({
