@@ -406,6 +406,27 @@ describe('person inputs', () => {
       }),
     ).toThrow('Person interactions must be valid');
   });
+
+  it('bounds nested fact and interaction collections', () => {
+    expect(() =>
+      updatePerson('person-1', {
+        facts: Array.from({ length: 101 }, (_, index) => ({
+          id: `fact-${index}`,
+          label: 'Label',
+          value: 'Value',
+        })),
+      }),
+    ).toThrow('Person facts must contain at most 100 entries');
+    expect(() =>
+      updatePerson('person-1', {
+        interactions: Array.from({ length: 501 }, (_, index) => ({
+          id: `interaction-${index}`,
+          date: '2026-08-17',
+          note: 'Follow up',
+        })),
+      }),
+    ).toThrow('Person interactions must contain at most 500 entries');
+  });
 });
 
 describe('domain inputs', () => {
