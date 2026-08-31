@@ -66,6 +66,15 @@ describe('destination helpers', () => {
     expect(projectsForDestination([personal, orgA, orgB], 'org-a')).toEqual([]);
     expect(projectsForDestination([personal, orgA, orgB], 'org-b')).toEqual([orgB]);
   });
+
+  it('orders duplicate project names deterministically', () => {
+    const later = project('z');
+    const earlier = project('a');
+    later.name = 'Same';
+    earlier.name = 'Same';
+
+    expect(projectsForDestination([later, earlier], 'personal')).toEqual([earlier, later]);
+  });
 });
 
 describe('syncSaveMessage', () => {
