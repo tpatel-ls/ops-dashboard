@@ -14,6 +14,9 @@ const CONTENT_STATUSES = new Set<ContentStatus>([
   'published',
   'done',
 ]);
+const MAX_CONTENT_CHECKLIST_ITEMS = 100;
+const MAX_CONTENT_CHECKLIST_ID_LENGTH = 128;
+const MAX_CONTENT_CHECKLIST_TEXT_LENGTH = 500;
 
 export function compareContentOrder(
   left: Pick<Content, 'id' | 'title' | 'order'>,
@@ -44,11 +47,7 @@ function normalizeContentUrl(value: string | undefined): string | undefined {
       throw new Error('Content URL must be valid.');
     }
     const url = new URL(candidate, 'https://ops-dashboard.invalid');
-    if (
-      (url.protocol !== 'http:' && url.protocol !== 'https:') ||
-      url.username ||
-      url.password
-    ) {
+    if ((url.protocol !== 'http:' && url.protocol !== 'https:') || url.username || url.password) {
       throw new Error('Content URL must use HTTP or HTTPS without credentials.');
     }
   } catch (error) {
@@ -62,13 +61,23 @@ function normalizeContentUrl(value: string | undefined): string | undefined {
 
 function normalizeChecklist(value: unknown): Content['checklist'] {
   if (!Array.isArray(value)) throw new Error('Content checklist must be valid.');
+  if (value.length > MAX_CONTENT_CHECKLIST_ITEMS) {
+    throw new Error('Content checklist must contain at most 100 items.');
+  }
   const seen = new Set<string>();
   return value.map((item) => {
     if (!item || typeof item !== 'object') throw new Error('Content checklist must be valid.');
     const { id, text, done } = item as Record<string, unknown>;
     const normalizedId = typeof id === 'string' ? id.trim() : '';
     const normalizedText = typeof text === 'string' ? text.trim() : '';
-    if (!normalizedId || !normalizedText || typeof done !== 'boolean' || seen.has(normalizedId)) {
+    if (
+      !normalizedId ||
+      !normalizedText ||
+      Array.from(normalizedId).length > MAX_CONTENT_CHECKLIST_ID_LENGTH ||
+      Array.from(normalizedText).length > MAX_CONTENT_CHECKLIST_TEXT_LENGTH ||
+      typeof done !== 'boolean' ||
+      seen.has(normalizedId)
+    ) {
       throw new Error('Content checklist must be valid.');
     }
     seen.add(normalizedId);
