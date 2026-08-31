@@ -193,6 +193,23 @@ describe('notification inputs', () => {
       'Notification reference must be valid',
     );
   });
+
+  it('bounds notification text and reference metadata', () => {
+    expect(() => pushNotification({ title: 'x'.repeat(201), kind: 'system' })).toThrow(
+      'Notification title must contain at most 200 characters',
+    );
+    expect(() =>
+      pushNotification({ title: 'Saved', body: 'x'.repeat(2_001), kind: 'system' }),
+    ).toThrow('Notification body must contain at most 2000 characters');
+    expect(() =>
+      pushNotification({
+        title: 'Saved',
+        kind: 'capture',
+        refType: 'task',
+        refId: 'x'.repeat(129),
+      }),
+    ).toThrow('Notification reference must be valid');
+  });
 });
 
 describe('journal inputs', () => {
