@@ -62,6 +62,12 @@ describe('book inputs', () => {
     );
   });
 
+  it('clears a rating when the selected star is toggled off', async () => {
+    await updateBook('book-1', { rating: 0 });
+
+    expect(mocks.patchRecord).toHaveBeenCalledWith('books', 'book-1', { rating: undefined });
+  });
+
   it('canonicalizes book reading timestamps', async () => {
     await updateBook('book-1', {
       startedAt: '2026-08-01T09:00:00-05:00',

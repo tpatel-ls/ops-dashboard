@@ -32,11 +32,14 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
   if (Object.hasOwn(normalized, 'status') && !BOOK_STATUSES.has(normalized.status!)) {
     throw new Error('Book status must be valid.');
   }
-  if (
-    normalized.rating !== undefined &&
-    (!Number.isInteger(normalized.rating) || normalized.rating < 1 || normalized.rating > 5)
-  ) {
-    throw new Error('Book rating must be an integer from 1 to 5.');
+  if (Object.hasOwn(normalized, 'rating')) {
+    if (normalized.rating === 0) normalized.rating = undefined;
+    if (
+      normalized.rating !== undefined &&
+      (!Number.isInteger(normalized.rating) || normalized.rating < 1 || normalized.rating > 5)
+    ) {
+      throw new Error('Book rating must be an integer from 1 to 5.');
+    }
   }
   for (const key of ['startedAt', 'finishedAt'] as const) {
     const value = normalized[key];
