@@ -12,6 +12,14 @@ const NOTIFICATION_KINDS = new Set<NotificationKind>([
   'review',
   'system',
 ]);
+const MAX_NOTIFICATION_TITLE_LENGTH = 200;
+const MAX_NOTIFICATION_BODY_LENGTH = 2_000;
+const MAX_NOTIFICATION_REFERENCE_TYPE_LENGTH = 64;
+const MAX_NOTIFICATION_REFERENCE_ID_LENGTH = 128;
+
+function exceedsCharacters(value: string | undefined, limit: number): boolean {
+  return Boolean(value && Array.from(value).length > limit);
+}
 
 export function notificationAge(createdAt: string, now: Date = new Date()): string {
   const created = parseISO(createdAt);
@@ -60,6 +68,18 @@ export function pushNotification(input: {
   }
   const refType = input.refType?.trim();
   const refId = input.refId?.trim();
+  if (exceedsCharacters(title, MAX_NOTIFICATION_TITLE_LENGTH)) {
+    throw new Error('Notification title must contain at most 200 characters.');
+  }
+  if (exceedsCharacters(body, MAX_NOTIFICATION_BODY_LENGTH)) {
+    throw new Error('Notification body must contain at most 2000 characters.');
+  }
+  if (
+    exceedsCharacters(refType, MAX_NOTIFICATION_REFERENCE_TYPE_LENGTH) ||
+    exceedsCharacters(refId, MAX_NOTIFICATION_REFERENCE_ID_LENGTH)
+  ) {
+    throw new Error('Notification reference must be valid.');
+  }
   if (Boolean(refType) !== Boolean(refId)) {
     throw new Error('Notification reference must include a type and id.');
   }
