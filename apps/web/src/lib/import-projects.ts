@@ -467,9 +467,18 @@ function recordKey(value: string): string {
   return value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
 }
 
-function mergeTags(current: string[], next: string[] | undefined): string[] {
+export function mergeImportedTags(current: string[], next: string[] | undefined): string[] {
   if (!next?.length) return current;
-  return Array.from(new Set([...current, ...next.map((tag) => tag.toLowerCase())]));
+  const merged = [...current];
+  const seen = new Set(current.map(recordKey));
+  for (const tag of next) {
+    const normalized = tag.trim();
+    const key = recordKey(normalized);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    merged.push(normalized.toLocaleLowerCase('en-US'));
+  }
+  return merged;
 }
 
 function checklistFromSeed(seed: { name: string; items: string[] }): NamedChecklist {
@@ -630,7 +639,7 @@ export async function importPortfolioProjects(
       if (project.orgId && !existing.orgId) patch.orgId = project.orgId;
       if (taskDef.notes && !existing.notes) patch.notes = taskDef.notes;
 
-      const tags = mergeTags(existing.tags, taskDef.tags);
+      const tags = mergeImportedTags(existing.tags, taskDef.tags);
       if (tags.length !== existing.tags.length) patch.tags = tags;
 
       for (const key of ['scheduledFor', 'dueAt', 'startAt', 'endAt', 'estimateMinutes'] as const) {
