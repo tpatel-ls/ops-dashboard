@@ -26,6 +26,20 @@ describe('normalizeJournalExtraction', () => {
       habitsDone: ['Morning Walk'],
     });
   });
+
+  it('normalizes Unicode-equivalent tags and routine names', () => {
+    expect(
+      normalizeJournalExtraction(
+        {
+          summary: 'Done',
+          body: 'Completed the caf\u00e9 walk.',
+          tags: ['Caf\u00e9', 'Cafe\u0301'],
+          habitsDone: ['Ｍｏｒｎｉｎｇ Walk'],
+        },
+        ['Morning Walk'],
+      ),
+    ).toMatchObject({ tags: ['café'], habitsDone: ['Morning Walk'] });
+  });
 });
 
 describe('journalExtractionSystem', () => {
