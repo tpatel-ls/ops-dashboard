@@ -2,6 +2,10 @@ import { boundedText, boundedTextList } from './input';
 
 const MOODS = new Set(['great', 'good', 'neutral', 'low', 'rough']);
 
+function extractionLabel(value: string): string {
+  return value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
 const EXTRACT_INSTRUCTION = `You are a journal analysis assistant for a personal life-OS app.
 
 The user has provided a journal entry (text and/or a photo of a handwritten page or daily summary).
@@ -38,16 +42,14 @@ export function normalizeJournalExtraction(
   if (!summary || !body) return null;
   const requestedMood = boundedText(input.mood, 20).toLowerCase();
   const mood = MOODS.has(requestedMood) ? (requestedMood as JournalExtraction['mood']) : 'neutral';
-  const tags = Array.from(
-    new Set(boundedTextList(input.tags, 6, 64).map((tag) => tag.toLowerCase())),
-  );
+  const tags = Array.from(new Set(boundedTextList(input.tags, 6, 64).map(extractionLabel)));
   const routinesByName = new Map(
-    routineNames.map((name) => [name.trim().toLowerCase(), name] as const),
+    routineNames.map((name) => [extractionLabel(name), name] as const),
   );
   const habitsDone = Array.from(
     new Set(
       boundedTextList(input.habitsDone, 100, 200)
-        .map((name) => routinesByName.get(name.toLowerCase()))
+        .map((name) => routinesByName.get(extractionLabel(name)))
         .filter((name): name is string => Boolean(name)),
     ),
   );
