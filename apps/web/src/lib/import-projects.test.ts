@@ -8,4 +8,8 @@ describe('portfolioNeedsDefaultOrganization', () => {
     expect(portfolioNeedsDefaultOrganization(['Mini Monet', 'Email Triage'])).toBe(false);
     expect(portfolioNeedsDefaultOrganization(['Unknown project'])).toBe(false);
   });
+
+  it('recognizes canonically equivalent portfolio names', () => {
+    expect(portfolioNeedsDefaultOrganization(['Ｂｌｕｅ Text'])).toBe(true);
+  });
 });
