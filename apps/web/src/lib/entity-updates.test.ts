@@ -131,6 +131,23 @@ describe('content inputs', () => {
       }),
     ).toThrow('Content checklist must be valid');
   });
+
+  it('bounds content checklist payloads', () => {
+    expect(() =>
+      updateContent('content-1', {
+        checklist: Array.from({ length: 101 }, (_, index) => ({
+          id: `item-${index}`,
+          text: 'Step',
+          done: false,
+        })),
+      }),
+    ).toThrow('Content checklist must contain at most 100 items');
+    expect(() =>
+      updateContent('content-1', {
+        checklist: [{ id: 'item-1', text: 'x'.repeat(501), done: false }],
+      }),
+    ).toThrow('Content checklist must be valid');
+  });
 });
 
 describe('capture inputs', () => {
