@@ -464,7 +464,7 @@ function taskSchedulePatch(def: SeedTask): Partial<Task> {
 }
 
 function recordKey(value: string): string {
-  return value.trim().toLowerCase();
+  return value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
 }
 
 function mergeTags(current: string[], next: string[] | undefined): string[] {
