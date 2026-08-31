@@ -5,6 +5,17 @@ import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
 
+const MAX_PERSON_FACTS = 100;
+const MAX_PERSON_INTERACTIONS = 500;
+const MAX_PERSON_NESTED_ID_LENGTH = 128;
+const MAX_PERSON_FACT_LABEL_LENGTH = 200;
+const MAX_PERSON_FACT_VALUE_LENGTH = 2_000;
+const MAX_PERSON_INTERACTION_NOTE_LENGTH = 4_000;
+
+function withinCharacters(value: string, limit: number): boolean {
+  return Array.from(value).length <= limit;
+}
+
 function normalizeInteractionDate(value: string): string {
   if (localDay(value) === value) return value;
   const datePart = value.slice(0, 10);
@@ -33,6 +44,9 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
   }
   if (Object.hasOwn(normalized, 'facts')) {
     if (!Array.isArray(normalized.facts)) throw new Error('Person facts must be valid.');
+    if (normalized.facts.length > MAX_PERSON_FACTS) {
+      throw new Error('Person facts must contain at most 100 entries.');
+    }
     const seen = new Set<string>();
     normalized.facts = normalized.facts.map((fact) => {
       if (
@@ -47,7 +61,15 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
       const id = fact.id.trim();
       const label = fact.label.trim();
       const value = fact.value.trim();
-      if (!id || !label || !value || seen.has(id)) {
+      if (
+        !id ||
+        !label ||
+        !value ||
+        !withinCharacters(id, MAX_PERSON_NESTED_ID_LENGTH) ||
+        !withinCharacters(label, MAX_PERSON_FACT_LABEL_LENGTH) ||
+        !withinCharacters(value, MAX_PERSON_FACT_VALUE_LENGTH) ||
+        seen.has(id)
+      ) {
         throw new Error('Person facts must be valid.');
       }
       seen.add(id);
@@ -57,6 +79,9 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
   if (Object.hasOwn(normalized, 'interactions')) {
     if (!Array.isArray(normalized.interactions)) {
       throw new Error('Person interactions must be valid.');
+    }
+    if (normalized.interactions.length > MAX_PERSON_INTERACTIONS) {
+      throw new Error('Person interactions must contain at most 500 entries.');
     }
     const seen = new Set<string>();
     normalized.interactions = normalized.interactions.map((interaction) => {
@@ -71,7 +96,13 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
       }
       const id = interaction.id.trim();
       const note = interaction.note.trim();
-      if (!id || !note || seen.has(id)) {
+      if (
+        !id ||
+        !note ||
+        !withinCharacters(id, MAX_PERSON_NESTED_ID_LENGTH) ||
+        !withinCharacters(note, MAX_PERSON_INTERACTION_NOTE_LENGTH) ||
+        seen.has(id)
+      ) {
         throw new Error('Person interactions must be valid.');
       }
       const date = normalizeInteractionDate(interaction.date);
@@ -162,12 +193,21 @@ export function makeFact(label: string, value: string): PersonFact {
   if (!normalizedLabel || !normalizedValue) {
     throw new Error('Fact label and value are required.');
   }
+  if (
+    !withinCharacters(normalizedLabel, MAX_PERSON_FACT_LABEL_LENGTH) ||
+    !withinCharacters(normalizedValue, MAX_PERSON_FACT_VALUE_LENGTH)
+  ) {
+    throw new Error('Fact label or value is too long.');
+  }
   return { id: newId(), label: normalizedLabel, value: normalizedValue };
 }
 
 export function makeInteraction(note: string, date?: string): Interaction {
   const normalizedNote = note.trim();
   if (!normalizedNote) throw new Error('Interaction note is required.');
+  if (!withinCharacters(normalizedNote, MAX_PERSON_INTERACTION_NOTE_LENGTH)) {
+    throw new Error('Interaction note must contain at most 4000 characters.');
+  }
   let normalizedDate: string;
   try {
     normalizedDate = normalizeInteractionDate(date ?? new Date().toISOString());

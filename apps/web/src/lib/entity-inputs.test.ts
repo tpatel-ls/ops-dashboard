@@ -114,6 +114,12 @@ describe('makeInteraction', () => {
       '2026-08-05T12:00:00.000Z',
     );
   });
+
+  it('rejects oversized interaction notes', () => {
+    expect(() => makeInteraction('x'.repeat(4_001))).toThrow(
+      'Interaction note must contain at most 4000 characters',
+    );
+  });
 });
 
 describe('makeFact', () => {
@@ -127,6 +133,13 @@ describe('makeFact', () => {
   it('rejects incomplete facts', () => {
     expect(() => makeFact('   ', 'Central')).toThrow('Fact label and value are required');
     expect(() => makeFact('Timezone', '   ')).toThrow('Fact label and value are required');
+  });
+
+  it('rejects oversized fact fields', () => {
+    expect(() => makeFact('x'.repeat(201), 'Central')).toThrow('Fact label or value is too long');
+    expect(() => makeFact('Timezone', 'x'.repeat(2_001))).toThrow(
+      'Fact label or value is too long',
+    );
   });
 });
 
