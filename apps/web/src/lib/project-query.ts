@@ -5,9 +5,9 @@ export type ProjectSort = 'name' | 'due' | 'recent';
 export function isActiveProject(project: Project): boolean {
   return Boolean(
     !project.deletedAt &&
-      !project.archivedAt &&
-      project.status !== 'done' &&
-      project.status !== 'archived',
+    !project.archivedAt &&
+    project.status !== 'done' &&
+    project.status !== 'archived',
   );
 }
 
@@ -49,5 +49,6 @@ export function compareProjects(a: Project, b: Project, sort: ProjectSort): numb
     const recentOrder = compareRecentTimestamps(a.lastWorkedAt, b.lastWorkedAt);
     if (recentOrder !== 0) return recentOrder;
   }
-  return a.name.localeCompare(b.name);
+  const nameOrder = a.name.localeCompare(b.name);
+  return nameOrder !== 0 ? nameOrder : a.id.localeCompare(b.id);
 }
