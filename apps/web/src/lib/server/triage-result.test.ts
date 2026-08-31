@@ -23,4 +23,14 @@ describe('normalizeTriageResult', () => {
       notes: 'x'.repeat(2_000),
     });
   });
+
+  it('deduplicates canonically equivalent Unicode tags', () => {
+    expect(
+      normalizeTriageResult({
+        kind: 'task',
+        title: 'Plan launch',
+        tags: ['Caf\u00e9', 'Cafe\u0301', 'Ｐｌａｎｎｉｎｇ'],
+      }),
+    ).toMatchObject({ tags: ['café', 'planning'] });
+  });
 });
