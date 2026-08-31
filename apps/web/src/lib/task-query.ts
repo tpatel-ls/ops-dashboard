@@ -44,7 +44,8 @@ export function compareTasks(a: Task, b: Task): number {
     if (itemOrder !== 0) return itemOrder;
   }
 
-  return a.title.localeCompare(b.title);
+  const titleOrder = a.title.localeCompare(b.title);
+  return titleOrder !== 0 ? titleOrder : a.id.localeCompare(b.id);
 }
 
 export type TaskSort = 'default' | 'due' | 'priority' | 'recent';

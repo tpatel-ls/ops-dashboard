@@ -79,6 +79,12 @@ describe('compareTasks', () => {
     expect(tasks.sort(compareTasks).map((item) => item.title)).toEqual(['Alpha', 'Beta', 'Zulu']);
   });
 
+  it('uses ids to break otherwise identical ties', () => {
+    const tasks = [task('z', { title: 'Same', order: 1 }), task('a', { title: 'Same', order: 1 })];
+
+    expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['a', 'z']);
+  });
+
   it('sorts predictably when imported numeric fields are malformed', () => {
     const tasks = [
       task('invalid-order', { order: Number.NaN }),
