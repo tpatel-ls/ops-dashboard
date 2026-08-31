@@ -105,6 +105,15 @@ describe('compareProjects', () => {
     ]);
   });
 
+  it('uses ids to break otherwise identical ties', () => {
+    const projects = [project({ id: 'z', name: 'Same' }), project({ id: 'a', name: 'Same' })];
+
+    expect(projects.sort((a, b) => compareProjects(a, b, 'name')).map((item) => item.id)).toEqual([
+      'a',
+      'z',
+    ]);
+  });
+
   it('sorts recent activity by instant and puts malformed timestamps last', () => {
     const latest = project({
       id: 'latest',
