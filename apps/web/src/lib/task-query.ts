@@ -18,6 +18,10 @@ function taskOrder(task: Task): number | undefined {
   return Number.isFinite(task.order) ? task.order : undefined;
 }
 
+function taskFilterText(value: string): string {
+  return value.normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
 export function compareTasks(a: Task, b: Task): number {
   const aDate = taskDate(a);
   const bDate = taskDate(b);
@@ -69,16 +73,16 @@ export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
 }
 
 export function matchesTaskSearch(task: Task, query: string, projectName?: string): boolean {
-  const needle = query.trim().toLowerCase();
+  const needle = taskFilterText(query.trim());
   if (!needle) return true;
   return [task.title, task.notes, projectName, ...task.tags]
     .filter((value): value is string => Boolean(value))
-    .some((value) => value.toLowerCase().includes(needle));
+    .some((value) => taskFilterText(value).includes(needle));
 }
 
 export function matchesTaskTag(task: Task, selectedTag: string | null): boolean {
   if (!selectedTag) return true;
-  const normalized = selectedTag.trim().toLowerCase();
+  const normalized = taskFilterText(selectedTag.trim());
   if (!normalized) return true;
-  return task.tags.some((tag) => tag.toLowerCase() === normalized);
+  return task.tags.some((tag) => taskFilterText(tag) === normalized);
 }
