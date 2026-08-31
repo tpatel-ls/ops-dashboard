@@ -12,6 +12,10 @@ const QUOTE_SOURCE_TYPES = new Set<QuoteSourceType>([
   'conversation',
   'other',
 ]);
+const MAX_QUOTE_TEXT_LENGTH = 8_000;
+const MAX_QUOTE_THOUGHTS = 100;
+const MAX_QUOTE_THOUGHT_TEXT_LENGTH = 2_000;
+const MAX_QUOTE_THOUGHT_ID_LENGTH = 128;
 
 export function compareQuoteRecency(
   left: Pick<Quote, 'id' | 'createdAt'>,
@@ -34,6 +38,9 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
     if (typeof normalized.text !== 'string') throw new Error('Quote text is required.');
     normalized.text = normalized.text.trim();
     if (!normalized.text) throw new Error('Quote text is required.');
+    if (Array.from(normalized.text).length > MAX_QUOTE_TEXT_LENGTH) {
+      throw new Error('Quote text must contain at most 8000 characters.');
+    }
   }
   if (normalized.sourceType !== undefined && !QUOTE_SOURCE_TYPES.has(normalized.sourceType)) {
     throw new Error('Quote source type must be valid.');
@@ -48,6 +55,9 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
   }
   if (Object.hasOwn(normalized, 'thoughts')) {
     if (!Array.isArray(normalized.thoughts)) throw new Error('Quote thoughts must be valid.');
+    if (normalized.thoughts.length > MAX_QUOTE_THOUGHTS) {
+      throw new Error('Quote thoughts must contain at most 100 entries.');
+    }
     const seen = new Set<string>();
     normalized.thoughts = normalized.thoughts.map((thought) => {
       if (
@@ -61,7 +71,14 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
       }
       const text = thought.text.trim();
       const id = thought.id.trim();
-      if (!id || !text || !Number.isFinite(Date.parse(thought.at)) || seen.has(id)) {
+      if (
+        !id ||
+        !text ||
+        Array.from(id).length > MAX_QUOTE_THOUGHT_ID_LENGTH ||
+        Array.from(text).length > MAX_QUOTE_THOUGHT_TEXT_LENGTH ||
+        !Number.isFinite(Date.parse(thought.at)) ||
+        seen.has(id)
+      ) {
         throw new Error('Quote thoughts must be valid.');
       }
       seen.add(id);
@@ -113,5 +130,8 @@ export const deleteQuote = (id: string) => softDeleteRecord<Quote>('quotes', id)
 export function makeThought(text: string): Thought {
   const normalizedText = text.trim();
   if (!normalizedText) throw new Error('Thought text is required.');
+  if (Array.from(normalizedText).length > MAX_QUOTE_THOUGHT_TEXT_LENGTH) {
+    throw new Error('Thought text must contain at most 2000 characters.');
+  }
   return { id: newId(), text: normalizedText, at: new Date().toISOString() };
 }
