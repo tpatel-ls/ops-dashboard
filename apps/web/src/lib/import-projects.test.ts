@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { portfolioNeedsDefaultOrganization } from './import-projects';
+import { mergeImportedTags, portfolioNeedsDefaultOrganization } from './import-projects';
 
 describe('portfolioNeedsDefaultOrganization', () => {
   it('seeds the work organization only when an LSG project is requested', () => {
@@ -11,5 +11,14 @@ describe('portfolioNeedsDefaultOrganization', () => {
 
   it('recognizes canonically equivalent portfolio names', () => {
     expect(portfolioNeedsDefaultOrganization(['Ｂｌｕｅ Text'])).toBe(true);
+  });
+});
+
+describe('mergeImportedTags', () => {
+  it('deduplicates canonical tag variants and skips blank seed tags', () => {
+    expect(mergeImportedTags(['Caf\u00e9'], [' Cafe\u0301 ', '  ', ' Planning '])).toEqual([
+      'Caf\u00e9',
+      'planning',
+    ]);
   });
 });
