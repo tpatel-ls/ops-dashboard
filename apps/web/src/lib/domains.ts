@@ -3,23 +3,42 @@
 import type { Domain, Project, Task } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+const MAX_DOMAIN_NAME_LENGTH = 200;
+const MAX_DOMAIN_COLOR_LENGTH = 100;
+const MAX_DOMAIN_ICON_LENGTH = 100;
+const MAX_DOMAIN_DESCRIPTION_LENGTH = 4_000;
+
 function normalizeDomainPatch(patch: Partial<Domain>): Partial<Domain> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'name')) {
     if (typeof normalized.name !== 'string') throw new Error('Domain name is required.');
     normalized.name = normalized.name.trim();
     if (!normalized.name) throw new Error('Domain name is required.');
+    if (Array.from(normalized.name).length > MAX_DOMAIN_NAME_LENGTH) {
+      throw new Error('Domain name must contain at most 200 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'color')) {
     if (typeof normalized.color !== 'string') throw new Error('Domain color is required.');
     normalized.color = normalized.color.trim();
     if (!normalized.color) throw new Error('Domain color is required.');
+    if (Array.from(normalized.color).length > MAX_DOMAIN_COLOR_LENGTH) {
+      throw new Error('Domain color must contain at most 100 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
     throw new Error('Domain order must be finite.');
   }
-  for (const key of ['icon', 'description'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['icon', MAX_DOMAIN_ICON_LENGTH],
+    ['description', MAX_DOMAIN_DESCRIPTION_LENGTH],
+  ] as const) {
+    if (normalized[key] !== undefined) {
+      normalized[key] = normalized[key]?.trim() || undefined;
+      if (normalized[key] && Array.from(normalized[key]).length > limit) {
+        throw new Error('Domain metadata must be valid.');
+      }
+    }
   }
   return normalized;
 }

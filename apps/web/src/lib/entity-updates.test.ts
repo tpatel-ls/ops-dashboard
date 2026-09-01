@@ -521,6 +521,18 @@ describe('domain inputs', () => {
       'Domain order must be finite',
     );
   });
+
+  it('bounds domain text and metadata', () => {
+    expect(() => createDomain({ name: 'x'.repeat(201), color: '#0a6' })).toThrow(
+      'Domain name must contain at most 200 characters',
+    );
+    expect(() => updateDomain('domain-1', { color: 'x'.repeat(101) })).toThrow(
+      'Domain color must contain at most 100 characters',
+    );
+    expect(() => updateDomain('domain-1', { description: 'x'.repeat(4_001) })).toThrow(
+      'Domain metadata must be valid',
+    );
+  });
 });
 
 describe('organization inputs', () => {
