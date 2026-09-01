@@ -5,6 +5,7 @@ export type CalendarTaskKind = 'time-block' | 'scheduled' | 'due';
 
 function validTimestamp(value: string | undefined): number | undefined {
   if (!value) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value) && localDay(value) !== value) return undefined;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : undefined;
 }
@@ -35,7 +36,9 @@ export function calendarDateOf(
     if (scheduled) return scheduled;
   }
   if (task.dueAt) {
-    if (localDay(task.dueAt) === task.dueAt) return task.dueAt;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(task.dueAt)) {
+      return localDay(task.dueAt) === task.dueAt ? task.dueAt : undefined;
+    }
     const due = new Date(task.dueAt);
     return Number.isFinite(due.getTime()) ? isoDay(due) : undefined;
   }
