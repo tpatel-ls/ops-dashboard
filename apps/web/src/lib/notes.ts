@@ -5,6 +5,12 @@ import type { Note } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
 
+const MAX_NOTE_TITLE_LENGTH = 500;
+const MAX_NOTE_BODY_LENGTH = 50_000;
+const MAX_NOTE_SOURCE_LENGTH = 200;
+const MAX_NOTE_IMAGE_URL_LENGTH = 2_048;
+const MAX_NOTE_BOOK_ID_LENGTH = 128;
+
 export function compareNoteRecency(
   left: Pick<Note, 'id' | 'createdAt'>,
   right: Pick<Note, 'id' | 'createdAt'>,
@@ -22,10 +28,18 @@ export function compareNoteRecency(
 
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   const normalized = { ...patch };
-  if (normalized.title !== undefined) normalized.title = normalized.title.trim() || undefined;
+  if (normalized.title !== undefined) {
+    normalized.title = normalized.title.trim() || undefined;
+    if (normalized.title && Array.from(normalized.title).length > MAX_NOTE_TITLE_LENGTH) {
+      throw new Error('Note title must contain at most 500 characters.');
+    }
+  }
   if (Object.hasOwn(normalized, 'body')) {
     if (typeof normalized.body !== 'string') throw new Error('Note body must be valid.');
     normalized.body = normalized.body.trim();
+    if (Array.from(normalized.body).length > MAX_NOTE_BODY_LENGTH) {
+      throw new Error('Note body must contain at most 50000 characters.');
+    }
   }
   if (
     Object.hasOwn(normalized, 'title') &&
@@ -35,12 +49,23 @@ function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   ) {
     throw new Error('Note content is required.');
   }
-  for (const key of ['source', 'imageUrl', 'bookId'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['source', MAX_NOTE_SOURCE_LENGTH],
+    ['imageUrl', MAX_NOTE_IMAGE_URL_LENGTH],
+    ['bookId', MAX_NOTE_BOOK_ID_LENGTH],
+  ] as const) {
+    if (normalized[key] !== undefined) {
+      normalized[key] = normalized[key]?.trim() || undefined;
+      if (normalized[key] && Array.from(normalized[key]).length > limit) {
+        throw new Error('Note metadata must be valid.');
+      }
+    }
   }
   if (Object.hasOwn(normalized, 'tags')) {
     normalized.tags = normalizeStringList(normalized.tags, 'Note tags must be valid.', {
       caseInsensitive: true,
+      maxItems: 50,
+      maxItemLength: 64,
     });
   }
   if (
