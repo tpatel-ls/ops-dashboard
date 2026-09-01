@@ -90,6 +90,16 @@ describe('daily review task dates', () => {
     ).toEqual({ scheduledFor: '2026-08-04' });
   });
 
+  it('preserves date-only deadlines while rolling them forward', () => {
+    expect(
+      rollForwardPatch(
+        task({ scheduledFor: '2026-08-03', dueAt: '2026-08-03' }),
+        '2026-08-03',
+        '2026-08-04',
+      ),
+    ).toEqual({ scheduledFor: '2026-08-04', dueAt: '2026-08-04' });
+  });
+
   it('rejects malformed review dates before creating a patch', () => {
     expect(() => rollForwardPatch(task({}), '2026-02-30', '2026-08-04')).toThrow(
       'Review dates must be valid calendar days',
