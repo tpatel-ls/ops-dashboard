@@ -26,6 +26,9 @@ const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
 const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
 const MAX_FOOD_ITEMS = 100;
 const MAX_NUTRITION_ESTIMATE = 1_000_000;
+const MAX_FOOD_DESCRIPTION_LENGTH = 8_000;
+const MAX_FOOD_ITEM_NAME_LENGTH = 500;
+const MAX_FOOD_ITEM_QUANTITY_LENGTH = 200;
 
 function normalizeFoodItems(items: unknown): FoodItem[] {
   if (!Array.isArray(items)) throw new Error('Food items must be valid.');
@@ -40,6 +43,9 @@ function normalizeFoodItems(items: unknown): FoodItem[] {
     }
     const name = candidate.name.trim();
     if (!name) throw new Error('Food item name is required.');
+    if (Array.from(name).length > MAX_FOOD_ITEM_NAME_LENGTH) {
+      throw new Error('Food item name must contain at most 500 characters.');
+    }
     if (
       !Number.isFinite(candidate.calories) ||
       (candidate.calories ?? -1) < 0 ||
@@ -60,6 +66,9 @@ function normalizeFoodItems(items: unknown): FoodItem[] {
       }
     }
     const quantity = candidate.quantity?.trim();
+    if (quantity && Array.from(quantity).length > MAX_FOOD_ITEM_QUANTITY_LENGTH) {
+      throw new Error('Food item quantity must contain at most 200 characters.');
+    }
     return {
       name,
       ...(quantity ? { quantity } : {}),
@@ -79,6 +88,9 @@ function normalizeFoodPatch(patch: Partial<FoodLog>): Partial<FoodLog> {
     }
     normalized.description = normalized.description.trim();
     if (!normalized.description) throw new Error('Food description is required.');
+    if (Array.from(normalized.description).length > MAX_FOOD_DESCRIPTION_LENGTH) {
+      throw new Error('Food description must contain at most 8000 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'date')) {
     if (typeof normalized.date !== 'string') throw new Error('Food log date must be valid.');

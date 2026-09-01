@@ -29,6 +29,7 @@ import { createNote, updateNote } from './notes';
 import { createQuote, updateQuote } from './quotes';
 import { createPerson, updatePerson } from './people';
 import { createDomain, updateDomain } from './domains';
+import { createFoodLog } from './food-logs';
 import { createOrganization, updateOrganization } from './organizations';
 
 beforeEach(() => vi.clearAllMocks());
@@ -565,6 +566,26 @@ describe('organization inputs', () => {
     await expect(createOrganization({ name: 'Acme', id: 'org\nunsafe' })).rejects.toThrow(
       'Organization id must be valid',
     );
+  });
+});
+
+describe('food log inputs', () => {
+  it('bounds descriptions and item text', () => {
+    expect(() => createFoodLog({ description: 'x'.repeat(8_001), items: [] })).toThrow(
+      'Food description must contain at most 8000 characters',
+    );
+    expect(() =>
+      createFoodLog({
+        description: 'Lunch',
+        items: [{ name: 'x'.repeat(501), calories: 100 }],
+      }),
+    ).toThrow('Food item name must contain at most 500 characters');
+    expect(() =>
+      createFoodLog({
+        description: 'Lunch',
+        items: [{ name: 'Soup', quantity: 'x'.repeat(201), calories: 100 }],
+      }),
+    ).toThrow('Food item quantity must contain at most 200 characters');
   });
 });
 
