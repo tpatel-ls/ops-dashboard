@@ -260,6 +260,21 @@ describe('journal inputs', () => {
       'Journal entry date must be valid',
     );
   });
+
+  it('bounds journal text and collection fields', () => {
+    expect(() => createJournalEntry({ body: 'x'.repeat(50_001) })).toThrow(
+      'Journal entry body must contain at most 50000 characters',
+    );
+    expect(() => updateJournalEntry('journal-1', { title: 'x'.repeat(501) })).toThrow(
+      'Journal entry title must contain at most 500 characters',
+    );
+    expect(() => updateJournalEntry('journal-1', { mood: 'x'.repeat(101) })).toThrow(
+      'Journal entry mood must contain at most 100 characters',
+    );
+    expect(() => updateJournalEntry('journal-1', { tags: Array(51).fill('tag') })).toThrow(
+      'Journal entry tags must be valid',
+    );
+  });
 });
 
 describe('note inputs', () => {
