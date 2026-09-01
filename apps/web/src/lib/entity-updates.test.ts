@@ -306,6 +306,21 @@ describe('note inputs', () => {
     );
     await expect(updateNote('note-1', { body: '   ' })).rejects.toThrow('Note content is required');
   });
+
+  it('bounds note text and metadata', () => {
+    expect(() => createNote({ title: 'x'.repeat(501), body: 'Body' })).toThrow(
+      'Note title must contain at most 500 characters',
+    );
+    expect(() => createNote({ body: 'x'.repeat(50_001) })).toThrow(
+      'Note body must contain at most 50000 characters',
+    );
+    expect(() => updateNote('note-1', { imageUrl: 'x'.repeat(2_049) })).toThrow(
+      'Note metadata must be valid',
+    );
+    expect(() => updateNote('note-1', { tags: Array(51).fill('tag') })).toThrow(
+      'Note tags must be valid',
+    );
+  });
 });
 
 describe('quote inputs', () => {
