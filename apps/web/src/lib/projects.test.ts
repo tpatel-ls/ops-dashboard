@@ -131,6 +131,17 @@ describe('createProject', () => {
     expect(mocks.enqueueOp).not.toHaveBeenCalled();
   });
 
+  it('rejects oversized project names and metadata before writing', async () => {
+    await expect(createProject('x'.repeat(501))).rejects.toThrow(
+      'Project name must contain at most 500 characters',
+    );
+    await expect(createProject('Launch', { description: 'x'.repeat(4_001) })).rejects.toThrow(
+      'Project metadata must be valid',
+    );
+    expect(mocks.count).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('rejects impossible due dates before writing', async () => {
     await expect(createProject('Launch', { dueDate: '2026-02-30' })).rejects.toThrow(
       'Project due date must be a valid calendar date',
@@ -383,6 +394,42 @@ describe('updateProject', () => {
               { id: 'item-1', text: 'Draft', done: false },
               { id: ' item-1 ', text: 'Review', done: true },
             ],
+          },
+        ],
+      }),
+    ).toThrow('Project checklists must be valid');
+  });
+
+  it('bounds project milestones and checklists', () => {
+    expect(() =>
+      updateProject('project-test', {
+        milestones: Array.from({ length: 101 }, (_, index) => ({
+          id: `milestone-${index}`,
+          title: 'Step',
+          done: false,
+        })),
+      }),
+    ).toThrow('Project milestones must contain at most 100 entries');
+    expect(() =>
+      updateProject('project-test', {
+        checklists: Array.from({ length: 51 }, (_, index) => ({
+          id: `list-${index}`,
+          name: 'List',
+          items: [],
+        })),
+      }),
+    ).toThrow('Project checklists must contain at most 50 entries');
+    expect(() =>
+      updateProject('project-test', {
+        checklists: [
+          {
+            id: 'list-1',
+            name: 'List',
+            items: Array.from({ length: 101 }, (_, index) => ({
+              id: `item-${index}`,
+              text: 'Step',
+              done: false,
+            })),
           },
         ],
       }),
