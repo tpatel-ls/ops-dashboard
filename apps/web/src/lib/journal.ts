@@ -7,6 +7,9 @@ import { todayISO } from './routines';
 import { normalizeStringList } from './string-list';
 
 const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', 'text', 'upload']);
+const MAX_JOURNAL_BODY_LENGTH = 50_000;
+const MAX_JOURNAL_TITLE_LENGTH = 500;
+const MAX_JOURNAL_MOOD_LENGTH = 100;
 
 export function compareJournalEntries(
   left: Pick<JournalEntry, 'id' | 'date' | 'createdAt'>,
@@ -34,6 +37,9 @@ function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEnt
     if (typeof normalized.body !== 'string') throw new Error('Journal entry body is required.');
     normalized.body = normalized.body.trim();
     if (!normalized.body) throw new Error('Journal entry body is required.');
+    if (Array.from(normalized.body).length > MAX_JOURNAL_BODY_LENGTH) {
+      throw new Error('Journal entry body must contain at most 50000 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'date')) {
     if (typeof normalized.date !== 'string' || localDay(normalized.date) !== normalized.date) {
@@ -43,17 +49,30 @@ function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEnt
   if (normalized.source !== undefined && !JOURNAL_SOURCES.has(normalized.source)) {
     throw new Error('Journal entry source must be valid.');
   }
-  if (normalized.title !== undefined) normalized.title = normalized.title.trim() || undefined;
-  if (normalized.mood !== undefined) normalized.mood = normalized.mood.trim() || undefined;
+  if (normalized.title !== undefined) {
+    normalized.title = normalized.title.trim() || undefined;
+    if (normalized.title && Array.from(normalized.title).length > MAX_JOURNAL_TITLE_LENGTH) {
+      throw new Error('Journal entry title must contain at most 500 characters.');
+    }
+  }
+  if (normalized.mood !== undefined) {
+    normalized.mood = normalized.mood.trim() || undefined;
+    if (normalized.mood && Array.from(normalized.mood).length > MAX_JOURNAL_MOOD_LENGTH) {
+      throw new Error('Journal entry mood must contain at most 100 characters.');
+    }
+  }
   if (Object.hasOwn(normalized, 'mediaUrls')) {
     normalized.mediaUrls = normalizeStringList(
       normalized.mediaUrls,
       'Journal entry media must be valid.',
+      { maxItems: 20, maxItemLength: 2_048 },
     );
   }
   if (Object.hasOwn(normalized, 'tags')) {
     normalized.tags = normalizeStringList(normalized.tags, 'Journal entry tags must be valid.', {
       caseInsensitive: true,
+      maxItems: 50,
+      maxItemLength: 64,
     });
   }
   if (
