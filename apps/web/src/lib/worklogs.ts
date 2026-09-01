@@ -5,6 +5,7 @@ import type { Project, WorkLog } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 const MAX_WORK_LOG_MINUTES = 24 * 60;
+const MAX_WORK_LOG_NOTE_LENGTH = 4_000;
 
 /** Log time against a project and stamp the project's lastWorkedAt (drives slipping). */
 export async function logWork(
@@ -26,6 +27,9 @@ export async function logWork(
     }
   }
   const normalizedNote = note?.trim();
+  if (normalizedNote && Array.from(normalizedNote).length > MAX_WORK_LOG_NOTE_LENGTH) {
+    throw new Error('Work log note must contain at most 4000 characters.');
+  }
 
   const project = await getDb().projects.get(projectId);
   if (
