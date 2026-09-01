@@ -79,6 +79,21 @@ describe('book inputs', () => {
       finishedAt: '2026-08-20T23:00:00.000Z',
     });
   });
+
+  it('bounds book text and metadata', () => {
+    expect(() => createBook({ title: 'x'.repeat(501) })).toThrow(
+      'Book title must contain at most 500 characters',
+    );
+    expect(() => updateBook('book-1', { summary: 'x'.repeat(50_001) })).toThrow(
+      'Book metadata must be valid',
+    );
+    expect(() => updateBook('book-1', { coverUrl: 'x'.repeat(2_049) })).toThrow(
+      'Book metadata must be valid',
+    );
+    expect(() => updateBook('book-1', { tags: Array(51).fill('tag') })).toThrow(
+      'Book tags must be valid',
+    );
+  });
 });
 
 describe('content inputs', () => {
