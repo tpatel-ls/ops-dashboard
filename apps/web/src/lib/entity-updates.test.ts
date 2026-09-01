@@ -29,7 +29,7 @@ import { createNote, updateNote } from './notes';
 import { createQuote, updateQuote } from './quotes';
 import { createPerson, updatePerson } from './people';
 import { createDomain, updateDomain } from './domains';
-import { updateOrganization } from './organizations';
+import { createOrganization, updateOrganization } from './organizations';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -549,6 +549,21 @@ describe('organization inputs', () => {
     );
     expect(() => updateOrganization('org-1', { order: Number.POSITIVE_INFINITY })).toThrow(
       'Organization order must be finite',
+    );
+  });
+
+  it('bounds organization names, colors, and seeded identifiers', async () => {
+    expect(() => updateOrganization('org-1', { name: 'x'.repeat(201) })).toThrow(
+      'Organization name must contain at most 200 characters',
+    );
+    expect(() => updateOrganization('org-1', { color: 'x'.repeat(101) })).toThrow(
+      'Organization color must contain at most 100 characters',
+    );
+    await expect(createOrganization({ name: 'Acme', id: 'x'.repeat(129) })).rejects.toThrow(
+      'Organization id must be valid',
+    );
+    await expect(createOrganization({ name: 'Acme', id: 'org\nunsafe' })).rejects.toThrow(
+      'Organization id must be valid',
     );
   });
 });
