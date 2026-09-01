@@ -12,7 +12,13 @@ export function tasksForTodayRail(tasks: Task[], day: string): Task[] {
     })
     .sort((left, right) => {
       const time = Date.parse(left.startAt!) - Date.parse(right.startAt!);
-      return time || left.order - right.order || left.title.localeCompare(right.title);
+      if (time !== 0) return time;
+      const leftOrder = Number.isFinite(left.order) ? left.order : Number.POSITIVE_INFINITY;
+      const rightOrder = Number.isFinite(right.order) ? right.order : Number.POSITIVE_INFINITY;
+      const order = leftOrder - rightOrder;
+      if (Number.isFinite(order) && order !== 0) return order;
+      const title = left.title.localeCompare(right.title);
+      return title !== 0 ? title : left.id.localeCompare(right.id);
     });
 }
 
