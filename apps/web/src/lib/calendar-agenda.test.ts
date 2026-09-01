@@ -68,6 +68,14 @@ describe('calendar agenda', () => {
     ).toBeUndefined();
   });
 
+  it('does not normalize impossible date-only deadlines onto another day', () => {
+    const impossible = task('impossible-due', { dueAt: '2026-02-30' });
+
+    expect(calendarDateOf(impossible)).toBeUndefined();
+    expect(calendarKindOf(impossible)).toBeUndefined();
+    expect(calendarInstant(impossible.dueAt)).toBeUndefined();
+  });
+
   it('falls back to a valid scheduled day when a time block is malformed', () => {
     const fallback = task('fallback', { startAt: 'not-a-date', scheduledFor: '2026-07-20' });
 
