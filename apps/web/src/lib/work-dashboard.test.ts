@@ -168,6 +168,15 @@ describe('buildWorkDashboard', () => {
     expect(result.projects.map((summary) => summary.project.id)).toEqual(['valid', 'malformed']);
   });
 
+  it('orders projects with equal names deterministically', () => {
+    const later = project('z', { name: 'Shared' });
+    const earlier = project('a', { name: 'Shared' });
+
+    const result = buildWorkDashboard([], [later, earlier], 'all', '2026-07-16');
+
+    expect(result.projects.map((summary) => summary.project.id)).toEqual(['a', 'z']);
+  });
+
   it('limits dashboard collections while keeping deterministic order', () => {
     const tasks = Array.from({ length: 12 }, (_, index) =>
       task(`task-${index}`, {

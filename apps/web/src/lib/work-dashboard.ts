@@ -40,7 +40,8 @@ function projectOrder(a: WorkProjectSummary, b: WorkProjectSummary): number {
     const dueOrder = aDue.localeCompare(bDue);
     if (dueOrder !== 0) return dueOrder;
   }
-  return a.project.name.localeCompare(b.project.name);
+  const nameOrder = a.project.name.localeCompare(b.project.name);
+  return nameOrder !== 0 ? nameOrder : a.project.id.localeCompare(b.project.id);
 }
 
 export function buildWorkDashboard(
