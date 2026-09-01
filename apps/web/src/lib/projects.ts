@@ -25,6 +25,29 @@ const DEFAULT_COLORS = [
 
 const PROJECT_KINDS = new Set<ProjectKind>(['project', 'area', 'retainer']);
 const PROJECT_STATUSES = new Set<Project['status']>(['active', 'paused', 'done', 'archived']);
+const MAX_PROJECT_NAME_LENGTH = 500;
+const MAX_PROJECT_COLOR_LENGTH = 100;
+const MAX_PROJECT_DESCRIPTION_LENGTH = 4_000;
+const MAX_PROJECT_ICON_LENGTH = 100;
+const MAX_PROJECT_REFERENCE_LENGTH = 128;
+const MAX_PROJECT_MILESTONES = 100;
+const MAX_PROJECT_CHECKLISTS = 50;
+const MAX_PROJECT_CHECKLIST_ITEMS = 100;
+const MAX_PROJECT_NESTED_ID_LENGTH = 128;
+const MAX_PROJECT_NESTED_TEXT_LENGTH = 500;
+
+function projectName(value: string): string {
+  const normalized = value.trim();
+  if (!normalized) throw new Error('Project name is required.');
+  if (Array.from(normalized).length > MAX_PROJECT_NAME_LENGTH) {
+    throw new Error('Project name must contain at most 500 characters.');
+  }
+  return normalized;
+}
+
+function withinCharacters(value: string, limit: number): boolean {
+  return Array.from(value).length <= limit;
+}
 
 function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptions {
   const normalized = { ...opts };
@@ -34,9 +57,21 @@ function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptio
   if (normalized.color !== undefined) {
     normalized.color = normalized.color.trim();
     if (!normalized.color) throw new Error('Project color is required.');
+    if (!withinCharacters(normalized.color, MAX_PROJECT_COLOR_LENGTH)) {
+      throw new Error('Project metadata must be valid.');
+    }
   }
-  for (const key of ['domainId', 'orgId', 'description'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['domainId', MAX_PROJECT_REFERENCE_LENGTH],
+    ['orgId', MAX_PROJECT_REFERENCE_LENGTH],
+    ['description', MAX_PROJECT_DESCRIPTION_LENGTH],
+  ] as const) {
+    if (normalized[key] !== undefined) {
+      normalized[key] = normalized[key]?.trim() || undefined;
+      if (normalized[key] && !withinCharacters(normalized[key], limit)) {
+        throw new Error('Project metadata must be valid.');
+      }
+    }
   }
   if (normalized.dueDate !== undefined) {
     normalized.dueDate = normalized.dueDate.trim();
@@ -53,7 +88,7 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
     if (typeof normalized.name !== 'string' || !normalized.name.trim()) {
       throw new Error('Project name is required.');
     }
-    normalized.name = normalized.name.trim();
+    normalized.name = projectName(normalized.name);
   }
   if (normalized.kind !== undefined && !PROJECT_KINDS.has(normalized.kind)) {
     throw new Error('Project kind must be valid.');
@@ -66,9 +101,22 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       throw new Error('Project color is required.');
     }
     normalized.color = normalized.color.trim();
+    if (!withinCharacters(normalized.color, MAX_PROJECT_COLOR_LENGTH)) {
+      throw new Error('Project metadata must be valid.');
+    }
   }
-  for (const key of ['icon', 'domainId', 'orgId', 'description'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['icon', MAX_PROJECT_ICON_LENGTH],
+    ['domainId', MAX_PROJECT_REFERENCE_LENGTH],
+    ['orgId', MAX_PROJECT_REFERENCE_LENGTH],
+    ['description', MAX_PROJECT_DESCRIPTION_LENGTH],
+  ] as const) {
+    if (normalized[key] !== undefined) {
+      normalized[key] = normalized[key]?.trim() || undefined;
+      if (normalized[key] && !withinCharacters(normalized[key], limit)) {
+        throw new Error('Project metadata must be valid.');
+      }
+    }
   }
   for (const key of ['startDate', 'dueDate'] as const) {
     if (normalized[key] !== undefined && localDay(normalized[key]) !== normalized[key]) {
@@ -96,6 +144,9 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
     if (!Array.isArray(normalized.milestones)) {
       throw new Error('Project milestones must be valid.');
     }
+    if (normalized.milestones.length > MAX_PROJECT_MILESTONES) {
+      throw new Error('Project milestones must contain at most 100 entries.');
+    }
     const seen = new Set<string>();
     normalized.milestones = normalized.milestones.map((milestone) => {
       if (
@@ -112,6 +163,8 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       if (
         !id ||
         !title ||
+        !withinCharacters(id, MAX_PROJECT_NESTED_ID_LENGTH) ||
+        !withinCharacters(title, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
         seen.has(id) ||
         (milestone.dueAt !== undefined && localDay(milestone.dueAt) !== milestone.dueAt)
       ) {
@@ -130,6 +183,9 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
     if (!Array.isArray(normalized.checklists)) {
       throw new Error('Project checklists must be valid.');
     }
+    if (normalized.checklists.length > MAX_PROJECT_CHECKLISTS) {
+      throw new Error('Project checklists must contain at most 50 entries.');
+    }
     const seenLists = new Set<string>();
     normalized.checklists = normalized.checklists.map((checklist) => {
       if (
@@ -143,7 +199,14 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       }
       const id = checklist.id.trim();
       const name = checklist.name.trim();
-      if (!id || !name || seenLists.has(id)) {
+      if (
+        !id ||
+        !name ||
+        !withinCharacters(id, MAX_PROJECT_NESTED_ID_LENGTH) ||
+        !withinCharacters(name, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
+        checklist.items.length > MAX_PROJECT_CHECKLIST_ITEMS ||
+        seenLists.has(id)
+      ) {
         throw new Error('Project checklists must be valid.');
       }
       seenLists.add(id);
@@ -160,7 +223,13 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
         }
         const itemId = item.id.trim();
         const text = item.text.trim();
-        if (!itemId || !text || seenItems.has(itemId)) {
+        if (
+          !itemId ||
+          !text ||
+          !withinCharacters(itemId, MAX_PROJECT_NESTED_ID_LENGTH) ||
+          !withinCharacters(text, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
+          seenItems.has(itemId)
+        ) {
           throw new Error('Project checklists must be valid.');
         }
         seenItems.add(itemId);
@@ -197,8 +266,7 @@ export async function createProject(
   name: string,
   opts: CreateProjectOptions = {},
 ): Promise<Project> {
-  const normalizedName = name.trim();
-  if (!normalizedName) throw new Error('Project name is required.');
+  const normalizedName = projectName(name);
   const fields = normalizeProjectOptions(opts);
 
   const db = getDb();
@@ -227,8 +295,7 @@ export async function createProject(
 }
 
 export async function renameProject(id: string, name: string): Promise<void> {
-  const normalizedName = name.trim();
-  if (!normalizedName) throw new Error('Project name is required.');
+  const normalizedName = projectName(name);
 
   const db = getDb();
   const existing = await db.projects.get(id);
