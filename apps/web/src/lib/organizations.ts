@@ -12,6 +12,10 @@ const ORG_COLORS = [
   'oklch(0.7 0.18 30)',
   'oklch(0.68 0.18 350)',
 ];
+const MAX_ORGANIZATION_NAME_LENGTH = 200;
+const MAX_ORGANIZATION_COLOR_LENGTH = 100;
+const MAX_ORGANIZATION_ID_LENGTH = 128;
+const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 
 function organizationNameKey(value: string): string {
   return value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
@@ -23,11 +27,17 @@ function normalizeOrganizationPatch(patch: Partial<Organization>): Partial<Organ
     if (typeof normalized.name !== 'string') throw new Error('Organization name is required.');
     normalized.name = normalized.name.trim();
     if (!normalized.name) throw new Error('Organization name is required.');
+    if (Array.from(normalized.name).length > MAX_ORGANIZATION_NAME_LENGTH) {
+      throw new Error('Organization name must contain at most 200 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'color')) {
     if (typeof normalized.color !== 'string') throw new Error('Organization color is required.');
     normalized.color = normalized.color.trim();
     if (!normalized.color) throw new Error('Organization color is required.');
+    if (Array.from(normalized.color).length > MAX_ORGANIZATION_COLOR_LENGTH) {
+      throw new Error('Organization color must contain at most 100 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
     throw new Error('Organization order must be finite.');
@@ -58,6 +68,9 @@ export async function createOrganization(input: {
   const name = fields.name!;
   const id = input.id?.trim();
   if (input.id !== undefined && !id) throw new Error('Organization id is required.');
+  if (id && (Array.from(id).length > MAX_ORGANIZATION_ID_LENGTH || CONTROL_CHARACTERS.test(id))) {
+    throw new Error('Organization id must be valid.');
+  }
 
   const normalizedName = organizationNameKey(name);
   const organizations = await getDb().organizations.toArray();
