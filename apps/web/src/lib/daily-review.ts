@@ -20,6 +20,10 @@ export function rollForwardPatch(task: Task, currentDay: string, targetDay: stri
   const patch: Partial<Task> = { scheduledFor: targetDay };
   const dueDay = localDay(task.dueAt);
   if (!task.dueAt || !dueDay || dueDay > currentDay) return patch;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(task.dueAt)) {
+    patch.dueAt = targetDay;
+    return patch;
+  }
 
   const due = new Date(task.dueAt);
   const [year, month, day] = targetDay.split('-').map(Number);
