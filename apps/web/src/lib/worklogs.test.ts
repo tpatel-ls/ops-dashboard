@@ -119,6 +119,14 @@ describe('logWork', () => {
     expect(log).not.toHaveProperty('note');
   });
 
+  it('rejects oversized notes before reading or writing storage', async () => {
+    await expect(logWork('project-1', 30, 'x'.repeat(4_001))).rejects.toThrow(
+      'Work log note must contain at most 4000 characters',
+    );
+    expect(mocks.getProject).not.toHaveBeenCalled();
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
   it('stores supplied timestamps in canonical UTC form', async () => {
     const log = await logWork('project-1', 30, undefined, '2026-07-15T07:00:00-05:00');
 
