@@ -1,9 +1,15 @@
 export function normalizeStringList(
   value: unknown,
   errorMessage: string,
-  options: { caseInsensitive?: boolean } = {},
+  options: { caseInsensitive?: boolean; maxItems?: number; maxItemLength?: number } = {},
 ): string[] {
-  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+  const maxItems = options.maxItems ?? 100;
+  const maxItemLength = options.maxItemLength ?? 2_048;
+  if (
+    !Array.isArray(value) ||
+    value.length > maxItems ||
+    value.some((item) => typeof item !== 'string' || Array.from(item.trim()).length > maxItemLength)
+  ) {
     throw new Error(errorMessage);
   }
   const normalized: string[] = [];

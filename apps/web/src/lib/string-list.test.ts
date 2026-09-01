@@ -18,4 +18,18 @@ describe('normalizeStringList', () => {
       '/media/a.jpg',
     ]);
   });
+
+  it('rejects unbounded lists and individual values', () => {
+    expect(() => normalizeStringList(Array(101).fill('tag'), 'invalid')).toThrow('invalid');
+    expect(() => normalizeStringList(['x'.repeat(2_049)], 'invalid')).toThrow('invalid');
+  });
+
+  it('supports narrower limits for specific persistence fields', () => {
+    expect(() => normalizeStringList(['alpha', 'bravo'], 'invalid', { maxItems: 1 })).toThrow(
+      'invalid',
+    );
+    expect(() => normalizeStringList(['alpha'], 'invalid', { maxItemLength: 4 })).toThrow(
+      'invalid',
+    );
+  });
 });
