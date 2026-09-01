@@ -6,6 +6,12 @@ import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
 
 const BOOK_STATUSES = new Set<BookStatus>(['want', 'reading', 'finished', 'abandoned']);
+const MAX_BOOK_TITLE_LENGTH = 500;
+const MAX_BOOK_AUTHOR_LENGTH = 500;
+const MAX_BOOK_COVER_URL_LENGTH = 2_048;
+const MAX_BOOK_FORMAT_LENGTH = 100;
+const MAX_BOOK_ISBN_LENGTH = 64;
+const MAX_BOOK_SUMMARY_LENGTH = 50_000;
 
 export function compareBookRecency(
   left: Pick<Book, 'id' | 'createdAt'>,
@@ -28,6 +34,9 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     if (typeof normalized.title !== 'string') throw new Error('Book title is required.');
     normalized.title = normalized.title.trim();
     if (!normalized.title) throw new Error('Book title is required.');
+    if (Array.from(normalized.title).length > MAX_BOOK_TITLE_LENGTH) {
+      throw new Error('Book title must contain at most 500 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'status') && !BOOK_STATUSES.has(normalized.status!)) {
     throw new Error('Book status must be valid.');
@@ -48,12 +57,25 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     }
     if (value !== undefined) normalized[key] = new Date(Date.parse(value)).toISOString();
   }
-  for (const key of ['author', 'coverUrl', 'format', 'isbn', 'summary'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['author', MAX_BOOK_AUTHOR_LENGTH],
+    ['coverUrl', MAX_BOOK_COVER_URL_LENGTH],
+    ['format', MAX_BOOK_FORMAT_LENGTH],
+    ['isbn', MAX_BOOK_ISBN_LENGTH],
+    ['summary', MAX_BOOK_SUMMARY_LENGTH],
+  ] as const) {
+    if (normalized[key] !== undefined) {
+      normalized[key] = normalized[key]?.trim() || undefined;
+      if (normalized[key] && Array.from(normalized[key]).length > limit) {
+        throw new Error('Book metadata must be valid.');
+      }
+    }
   }
   if (Object.hasOwn(normalized, 'tags')) {
     normalized.tags = normalizeStringList(normalized.tags, 'Book tags must be valid.', {
       caseInsensitive: true,
+      maxItems: 50,
+      maxItemLength: 64,
     });
   }
   return normalized;
