@@ -48,6 +48,17 @@ describe('tasksForTodayRail', () => {
       'later',
     ]);
   });
+
+  it('orders equal and malformed block positions deterministically', () => {
+    const startAt = '2026-08-20T09:00:00-05:00';
+    const later = task('z', startAt, { title: 'Review', order: Number.NaN });
+    const earlier = task('a', startAt, { title: 'Review', order: Number.NaN });
+    const positioned = task('positioned', startAt, { order: 2 });
+
+    expect(
+      tasksForTodayRail([later, earlier, positioned], '2026-08-20').map((item) => item.id),
+    ).toEqual(['positioned', 'a', 'z']);
+  });
 });
 
 describe('validRailEnd', () => {
