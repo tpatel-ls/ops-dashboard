@@ -61,6 +61,19 @@ describe('whiteboard names', () => {
     expect(mocks.put).not.toHaveBeenCalled();
   });
 
+  it('rejects oversized names before creating or renaming', async () => {
+    const oversized = 'x'.repeat(201);
+
+    await expect(createWhiteboard(oversized)).rejects.toThrow(
+      'Whiteboard name must contain at most 200 characters',
+    );
+    await expect(renameWhiteboard('whiteboard-test', oversized)).rejects.toThrow(
+      'Whiteboard name must contain at most 200 characters',
+    );
+    expect(mocks.get).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('does not create another operation for a deleted board', async () => {
     mocks.get.mockResolvedValue({
       id: 'whiteboard-test',

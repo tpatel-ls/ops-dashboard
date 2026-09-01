@@ -4,13 +4,23 @@ import { bumpVersion, getDb, getDeviceId, newId } from '@ops-dashboard/core';
 import type { Whiteboard } from '@ops-dashboard/core';
 import { enqueueOp } from './sync-queue';
 
+const MAX_WHITEBOARD_NAME_LENGTH = 200;
+
+function whiteboardName(name: string): string {
+  const normalized = name.trim();
+  if (!normalized) throw new Error('Whiteboard name is required.');
+  if (Array.from(normalized).length > MAX_WHITEBOARD_NAME_LENGTH) {
+    throw new Error('Whiteboard name must contain at most 200 characters.');
+  }
+  return normalized;
+}
+
 export function availableWhiteboard(board: Whiteboard | undefined): Whiteboard | null {
   return board && !board.deletedAt ? board : null;
 }
 
 export async function createWhiteboard(name: string): Promise<Whiteboard> {
-  const normalizedName = name.trim();
-  if (!normalizedName) throw new Error('Whiteboard name is required.');
+  const normalizedName = whiteboardName(name);
   const now = new Date().toISOString();
   const wb: Whiteboard = {
     id: newId(),
@@ -40,8 +50,7 @@ export async function saveWhiteboard(id: string, document: unknown): Promise<voi
 }
 
 export async function renameWhiteboard(id: string, name: string): Promise<void> {
-  const normalizedName = name.trim();
-  if (!normalizedName) throw new Error('Whiteboard name is required.');
+  const normalizedName = whiteboardName(name);
   const db = getDb();
   const existing = await db.whiteboards.get(id);
   if (!existing || existing.deletedAt) return;
