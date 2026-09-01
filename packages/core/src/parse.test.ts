@@ -31,6 +31,13 @@ describe('parseQuickAdd', () => {
     expect(r.title).toBe('Plan trip');
   });
 
+  it('deduplicates canonically equivalent hashtags', () => {
+    const r = parseQuickAdd('Plan launch #Caf\u00e9 #Cafe\u0301 #ＬＳＧ #LSG', anchor);
+
+    expect(r.tags).toEqual(['caf\u00e9', 'ｌｓｇ']);
+    expect(r.title).toBe('Plan launch');
+  });
+
   it('extracts priority bangs', () => {
     const r = parseQuickAdd('Ship release !!', anchor);
     expect(r.priority).toBe(2);
