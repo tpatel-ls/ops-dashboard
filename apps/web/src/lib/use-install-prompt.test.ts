@@ -40,4 +40,23 @@ describe('useInstallPrompt', () => {
     });
     expect(result.current.canPrompt).toBe(false);
   });
+
+  it('marks the app as installed after an accepted prompt', async () => {
+    const event = new Event('beforeinstallprompt');
+    Object.assign(event, {
+      prompt: vi.fn().mockResolvedValue(undefined),
+      userChoice: Promise.resolve({ outcome: 'accepted', platform: 'web' }),
+    });
+    const { result } = renderHook(() => useInstallPrompt());
+
+    act(() => window.dispatchEvent(event));
+    await waitFor(() => expect(result.current.canPrompt).toBe(true));
+
+    await act(async () => {
+      await expect(result.current.prompt()).resolves.toBe('accepted');
+    });
+
+    expect(result.current.canPrompt).toBe(false);
+    expect(result.current.installed).toBe(true);
+  });
 });
