@@ -128,6 +128,10 @@ describe('normalizeCaptureTags', () => {
     ]);
   });
 
+  it('deduplicates canonically equivalent AI tags', () => {
+    expect(normalizeCaptureTags(['Cafe\u0301', 'CAFÉ', 'ｃａｆｅ\u0301'])).toEqual(['café']);
+  });
+
   it('bounds untrusted tag counts and Unicode-safe lengths', () => {
     const tags = Array.from({ length: 25 }, (_, index) => `${index}-${'x'.repeat(70)}😀`);
     const result = normalizeCaptureTags(tags);
