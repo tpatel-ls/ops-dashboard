@@ -43,6 +43,12 @@ pnpm build
 pnpm test:e2e
 ```
 
+Run focused dependency checks whenever lockfile or workspace dependency changes:
+
+```sh
+pnpm audit:high
+```
+
 Install the Chromium runtime once with `pnpm --filter @ops-dashboard/web exec
 playwright install chromium` before running the end-to-end smoke suite locally.
 
