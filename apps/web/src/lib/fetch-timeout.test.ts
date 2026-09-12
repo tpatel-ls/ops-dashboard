@@ -49,6 +49,27 @@ describe('fetchWithTimeout', () => {
     expect(fetch.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
   });
 
+  it('passes caller abort reason to the internal controller', async () => {
+    const fetch = vi.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            reject(init?.signal?.reason);
+          });
+        }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const caller = new AbortController();
+    const reason = new Error('user canceled');
+
+    const rejection = expect(
+      fetchWithTimeout('/api/reason', { signal: caller.signal }, 200),
+    ).rejects.toMatchObject({ message: 'user canceled' });
+    caller.abort(reason);
+
+    await rejection;
+  });
+
   it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 2_147_483_648])(
     'rejects an unsupported timeout before starting a request: %s',
     async (timeoutMs) => {
