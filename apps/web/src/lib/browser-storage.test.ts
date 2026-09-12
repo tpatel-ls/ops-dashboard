@@ -4,6 +4,14 @@ import { readLocalStorage, removeLocalStorage, writeLocalStorage } from './brows
 afterEach(() => vi.unstubAllGlobals());
 
 describe('browser storage helpers', () => {
+  it('returns safe defaults when window is unavailable', () => {
+    vi.stubGlobal('window', undefined as never);
+
+    expect(readLocalStorage('sync-token')).toBeNull();
+    expect(writeLocalStorage('sync-token', '{}')).toBe(false);
+    expect(removeLocalStorage('sync-token')).toBe(false);
+  });
+
   it('treats blocked storage reads as missing values', () => {
     vi.stubGlobal('window', {
       localStorage: {
