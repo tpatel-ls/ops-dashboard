@@ -30,4 +30,13 @@ describe('useLocalDraft', () => {
     expect(result.current.draft).toBe('Second draft');
     expect(window.localStorage.getItem('draft-a')).toBe('First draft');
   });
+
+  it('clears storage on unmount when draft is whitespace', () => {
+    const { result, unmount } = renderHook(() => useLocalDraft('draft-key'));
+
+    act(() => result.current.setDraft('   '));
+    unmount();
+
+    expect(window.localStorage.getItem('draft-key')).toBe(null);
+  });
 });
