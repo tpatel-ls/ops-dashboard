@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { hapticSuccess, hapticTap } from './haptics';
+import { hapticSuccess, hapticTap, hapticWarning } from './haptics';
 
 const originalNavigator = globalThis.navigator;
 
@@ -33,5 +33,25 @@ describe('haptics', () => {
     });
 
     expect(hapticTap()).toBe(false);
+  });
+
+  it('maps warning patterns to the vibration API', () => {
+    const vibrate = vi.fn(() => true);
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: { vibrate },
+    });
+
+    expect(hapticWarning()).toBe(true);
+    expect(vibrate).toHaveBeenCalledWith([24, 40, 24]);
+  });
+
+  it('returns false when vibration API is missing', () => {
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: {},
+    });
+
+    expect(hapticSuccess()).toBe(false);
   });
 });
