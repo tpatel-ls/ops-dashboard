@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   putRecord: vi.fn(async (_table: string, record: unknown) => record),
+  patchRecord: vi.fn(async (_table: string, _id: string, patch: object) => patch),
 }));
 
 vi.mock('./records', async () => {
@@ -17,10 +18,11 @@ vi.mock('./records', async () => {
       ...fields,
     }),
     putRecord: mocks.putRecord,
+    patchRecord: mocks.patchRecord,
   };
 });
 
-import { compareContentOrder, createContent } from './content';
+import { compareContentOrder, createContent, updateContent } from './content';
 
 describe('content links', () => {
   beforeEach(() => mocks.putRecord.mockClear());
@@ -64,5 +66,22 @@ describe('compareContentOrder', () => {
     ];
 
     expect(items.sort(compareContentOrder).map((item) => item.id)).toEqual(['valid', 'invalid']);
+  });
+});
+
+describe('updateContent', () => {
+  it('rejects a malformed publish date', async () => {
+    expect(() => {
+      updateContent('content-1', { publishDate: '2026-13-40' });
+    }).toThrow('Content publish date must be a valid calendar day.');
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+  });
+
+  it('accepts a valid publish date and forwards normalized patch fields', async () => {
+    await expect(updateContent('content-1', { publishDate: '2026-09-12' })).resolves.toMatchObject(
+      {
+        publishDate: '2026-09-12',
+      },
+    );
   });
 });
