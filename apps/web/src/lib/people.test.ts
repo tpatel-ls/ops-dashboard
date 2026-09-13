@@ -52,6 +52,15 @@ describe('latestInteraction', () => {
     expect(latest?.id).toBe('later');
     expect(latestInteraction([{ id: 'invalid', date: 'bad', note: 'Bad' }])).toBeNull();
   });
+
+  it('selects the lexicographically smallest id when timestamps are equal', () => {
+    expect(
+      latestInteraction([
+        { id: 'zeta', date: '2026-08-24T10:00:00Z', note: 'Later A' },
+        { id: 'alpha', date: '2026-08-24T10:00:00Z', note: 'Later B' },
+      ]),
+    ).toMatchObject({ id: 'alpha' });
+  });
 });
 
 describe('compareInteractionRecency', () => {
