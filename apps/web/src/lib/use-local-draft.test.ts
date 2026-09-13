@@ -4,7 +4,11 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useLocalDraft } from './use-local-draft';
 
-afterEach(() => window.localStorage.clear());
+afterEach(() => {
+  if (window.localStorage?.clear) {
+    window.localStorage.clear();
+  }
+});
 
 describe('useLocalDraft', () => {
   it('persists the latest draft when its owner unmounts', () => {
@@ -38,5 +42,26 @@ describe('useLocalDraft', () => {
     unmount();
 
     expect(window.localStorage.getItem('draft-key')).toBe(null);
+  });
+
+  it('handles blocked local storage without throwing and keeps draft in memory', () => {
+    window.localStorage.setItem('blocked-key', 'existing');
+    window.localStorage = {
+      getItem: () => {
+        throw new DOMException('blocked');
+      },
+      setItem: () => {
+        throw new DOMException('blocked');
+      },
+      removeItem: () => {
+        throw new DOMException('blocked');
+      },
+    } as never;
+
+    const { result, unmount } = renderHook(() => useLocalDraft('blocked-key'));
+
+    act(() => result.current.setDraft('Work in progress'));
+    expect(() => unmount()).not.toThrow();
+    expect(result.current.draft).toBe('Work in progress');
   });
 });
