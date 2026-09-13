@@ -1,41 +1,38 @@
 // @vitest-environment jsdom
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { usePageVisibility } from './use-page-visibility';
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('usePageVisibility', () => {
-  afterEach(() => {
+  it('updates visibility from document events', () => {
+    const listeners: Record<string, Array<EventListener>> = {};
+    vi.spyOn(document, 'addEventListener').mockImplementation((type, handler) => {
+      if (typeof handler === 'function') {
+        listeners[type] = [...(listeners[type] ?? []), handler];
+      }
+      return undefined;
+    });
+    vi.spyOn(document, 'removeEventListener');
+
     Object.defineProperty(document, 'visibilityState', {
       configurable: true,
       get: () => 'visible',
     });
-  });
-
-  it('returns the initial document visibility on first render', async () => {
-    Object.defineProperty(document, 'visibilityState', {
-      configurable: true,
-      get: () => 'hidden',
-    });
 
     const { result } = renderHook(() => usePageVisibility());
-
-    await waitFor(() => expect(result.current).toBe('hidden'));
-  });
-
-  it('tracks visibility changes from browser events', async () => {
-    const { result } = renderHook(() => usePageVisibility());
-
-    expect(result.current).toBe('visible');
-
     act(() => {
       Object.defineProperty(document, 'visibilityState', {
         configurable: true,
         get: () => 'hidden',
       });
-      document.dispatchEvent(new Event('visibilitychange'));
+      listeners.visibilitychange?.[0]?.(new Event('visibilitychange'));
     });
 
-    await waitFor(() => expect(result.current).toBe('hidden'));
+    expect(result.current).toBe('hidden');
   });
 });

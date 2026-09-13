@@ -11,6 +11,8 @@ export function usePageVisibility(): DocumentVisibilityState {
   const [visibility, setVisibility] = useState<DocumentVisibilityState>(currentVisibility);
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+
     function update() {
       setVisibility(document.visibilityState);
     }
