@@ -7,6 +7,10 @@ export function isoDay(d: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+export function toISODate(d: Date): string {
+  return isoDay(d);
+}
+
 /** Resolve a date-only value or timestamp to its browser-local calendar day. */
 export function localDay(value: string | undefined): string | undefined {
   if (!value) return undefined;
