@@ -94,6 +94,12 @@ describe('addTask', () => {
     await expect(addTask('Ordered task')).resolves.toMatchObject({ order: 1 });
   });
 
+  it('normalizes non-integer task order values by resequencing to the start', async () => {
+    mocks.last.mockResolvedValue({ order: 7.5 });
+
+    await expect(addTask('Ordered task')).resolves.toMatchObject({ order: 1 });
+  });
+
   it('rejects malformed creation overrides before opening the database', async () => {
     for (const overrides of [
       { scheduledFor: '2026-02-30' },
