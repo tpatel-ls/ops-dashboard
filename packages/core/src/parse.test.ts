@@ -67,4 +67,20 @@ describe('parseQuickAdd', () => {
     expect(r.priority).toBe(2);
     expect(r.scheduledFor).toBe('2026-04-27');
   });
+
+  it('keeps plain text untouched when no date phrase is present', () => {
+    const r = parseQuickAdd('Plan tomorrowy #focus', anchor);
+
+    expect(r.title).toBe('Plan tomorrowy');
+    expect(r.scheduledFor).toBeUndefined();
+    expect(r.tags).toEqual(['focus']);
+  });
+
+  it('falls back to the original input when only directives are present', () => {
+    const r = parseQuickAdd('!! #urgent');
+
+    expect(r.title).toBe('!! #urgent');
+    expect(r.tags).toEqual(['urgent']);
+    expect(r.priority).toBe(2);
+  });
 });
