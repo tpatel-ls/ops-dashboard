@@ -66,7 +66,7 @@ function assertTaskStatus(value: unknown): asserts value is TaskStatus {
 }
 
 function nextTaskOrder(previous: number | undefined): number {
-  if (!Number.isSafeInteger(previous)) return 1;
+  if (previous === undefined || !Number.isSafeInteger(previous)) return 1;
   const next = previous + 1;
   return Number.isSafeInteger(next) ? next : 1;
 }
