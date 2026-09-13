@@ -383,7 +383,9 @@ export function normalizeCaptureTags(tags: string[] | undefined): string[] {
   for (const value of tags) {
     if (normalized.length >= 20) break;
     if (typeof value !== 'string') continue;
-    const tag = Array.from(value.trim().toLowerCase()).slice(0, 64).join('');
+    const tag = Array.from(value.trim().normalize('NFKC').toLocaleLowerCase('en-US'))
+      .slice(0, 64)
+      .join('');
     if (tag && !seen.has(tag)) {
       seen.add(tag);
       normalized.push(tag);
