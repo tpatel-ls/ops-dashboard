@@ -21,6 +21,7 @@ import {
   checkAndFireDueReminders,
   requestNotifications,
   scheduleReminder,
+  notificationPermission,
 } from './notifications';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -36,6 +37,13 @@ describe('requestNotifications', () => {
     vi.stubGlobal('Notification', NotificationMock);
 
     await expect(requestNotifications()).resolves.toBe('default');
+  });
+
+  it('falls back to unsupported when Notification is unavailable', () => {
+    vi.stubGlobal('window', {});
+
+    expect(notificationPermission()).toBe('unsupported');
+    expect(requestNotifications()).resolves.toBe('unsupported');
   });
 });
 
