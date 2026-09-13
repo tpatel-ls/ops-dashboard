@@ -66,9 +66,9 @@ function assertTaskStatus(value: unknown): asserts value is TaskStatus {
 }
 
 function nextTaskOrder(previous: number | undefined): number {
-  if (typeof previous !== 'number' || !Number.isFinite(previous)) return 1;
+  if (!Number.isSafeInteger(previous)) return 1;
   const next = previous + 1;
-  return Number.isFinite(next) ? next : 1;
+  return Number.isSafeInteger(next) ? next : 1;
 }
 
 function normalizeTaskCollections(patch: Partial<Task>): void {
