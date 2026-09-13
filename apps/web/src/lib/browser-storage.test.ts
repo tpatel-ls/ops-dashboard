@@ -47,4 +47,18 @@ describe('browser storage helpers', () => {
 
     expect(removeLocalStorage('recent-project')).toBe(false);
   });
+
+  it('returns success for supported write and delete operations', () => {
+    const localStorage = {
+      getItem: () => null,
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    };
+    vi.stubGlobal('window', { localStorage });
+
+    expect(writeLocalStorage('key', 'value')).toBe(true);
+    expect(removeLocalStorage('key')).toBe(true);
+    expect(localStorage.setItem).toHaveBeenCalledWith('key', 'value');
+    expect(localStorage.removeItem).toHaveBeenCalledWith('key');
+  });
 });
