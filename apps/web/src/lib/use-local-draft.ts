@@ -1,15 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from './browser-storage';
 import { usePageVisibility } from './use-page-visibility';
 
 function readDraft(key: string): string {
-  if (typeof window === 'undefined') return '';
-  try {
-    return window.localStorage.getItem(key) ?? '';
-  } catch {
-    return '';
-  }
+  return readLocalStorage(key) ?? '';
 }
 
 export function useLocalDraft(key: string) {
@@ -29,11 +25,10 @@ export function useLocalDraft(key: string) {
 
   const saveDraft = useCallback(
     (value: string) => {
-      try {
-        if (value.trim()) window.localStorage.setItem(key, value);
-        else window.localStorage.removeItem(key);
-      } catch {
-        // Storage can be unavailable in private or restricted browser contexts.
+      if (value.trim()) {
+        writeLocalStorage(key, value);
+      } else {
+        removeLocalStorage(key);
       }
     },
     [key],
