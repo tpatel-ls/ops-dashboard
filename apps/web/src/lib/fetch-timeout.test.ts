@@ -82,4 +82,18 @@ describe('fetchWithTimeout', () => {
       expect(fetch).not.toHaveBeenCalled();
     },
   );
+
+  it('skips the fetch when the caller signal is already aborted', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    const caller = new AbortController();
+    const reason = new Error('already aborted');
+    caller.abort(reason);
+
+    await expect(fetchWithTimeout('/api/test', { signal: caller.signal })).rejects.toMatchObject({
+      message: 'already aborted',
+    });
+
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });
