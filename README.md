@@ -22,6 +22,14 @@ docs/                 architecture, sync, deployment, and device guides
 - Node.js 20 or newer
 - pnpm 10 or newer
 
+If your environment does not provide `pnpm` globally, the repo works with
+Corepack-compatible installs:
+
+```sh
+corepack enable
+corepack pnpm --version
+```
+
 ## Getting started
 
 ```sh
@@ -36,11 +44,11 @@ The development server runs at `http://localhost:3000`.
 Run the same checks used by CI:
 
 ```sh
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm test:e2e
+corepack pnpm lint
+corepack pnpm typecheck
+corepack pnpm test
+corepack pnpm build
+corepack pnpm test:e2e
 ```
 
 Run focused dependency checks whenever lockfile or workspace dependency changes:
