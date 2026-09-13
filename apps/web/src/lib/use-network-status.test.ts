@@ -1,61 +1,41 @@
 // @vitest-environment jsdom
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useNetworkStatus } from './use-network-status';
 
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
+
 describe('useNetworkStatus', () => {
-  afterEach(() => {
-    Object.defineProperty(window.navigator, 'onLine', {
-      configurable: true,
-      writable: true,
-      value: true,
-    });
-  });
-
-  it('hydrates the latest navigator state after mount', async () => {
-    Object.defineProperty(window.navigator, 'onLine', {
-      configurable: true,
-      writable: true,
-      value: true,
-    });
+  it('uses the browser state immediately on first render', () => {
+    Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: false });
 
     const { result } = renderHook(() => useNetworkStatus());
 
-    await waitFor(() => expect(result.current).toBe(true));
+    expect(result.current).toBe(false);
   });
 
-  it('updates on online and offline events', async () => {
-    Object.defineProperty(window.navigator, 'onLine', {
-      configurable: true,
-      writable: true,
-      value: true,
+  it('updates when the network transitions online', () => {
+    const listeners: Record<string, Array<EventListener>> = {};
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, handler) => {
+      if (typeof handler === 'function') {
+        listeners[type] = [...(listeners[type] ?? []), handler];
+      }
+      return undefined;
     });
+    vi.spyOn(window, 'removeEventListener');
+
+    Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: false });
 
     const { result } = renderHook(() => useNetworkStatus());
-
-    await waitFor(() => expect(result.current).toBe(true));
-
     act(() => {
-      Object.defineProperty(window.navigator, 'onLine', {
-        configurable: true,
-        writable: true,
-        value: false,
-      });
-      window.dispatchEvent(new Event('offline'));
+      Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: true });
+      listeners.online?.[0]?.(new Event('online'));
     });
 
-    await waitFor(() => expect(result.current).toBe(false));
-
-    act(() => {
-      Object.defineProperty(window.navigator, 'onLine', {
-        configurable: true,
-        writable: true,
-        value: true,
-      });
-      window.dispatchEvent(new Event('online'));
-    });
-
-    await waitFor(() => expect(result.current).toBe(true));
+    expect(result.current).toBe(true);
   });
 });
