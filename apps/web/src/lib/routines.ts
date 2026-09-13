@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, localDay } from '@ops-dashboard/core';
+import { getDb, isoDay, localDay } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
@@ -78,10 +78,7 @@ export interface CreateRoutineInput {
 
 /** Format a Date as a LOCAL YYYY-MM-DD (not UTC). All `date` fields store local. */
 function formatLocalDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  return isoDay(d);
 }
 
 export function todayISO(): string {
