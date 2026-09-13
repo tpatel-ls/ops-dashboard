@@ -52,8 +52,7 @@ function timeZone(value: unknown): string | undefined {
   if (typeof value !== 'string' || !value.trim()) return undefined;
   const candidate = value.trim();
   try {
-    new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format();
-    return candidate;
+    return new Intl.DateTimeFormat('en-US', { timeZone: candidate }).resolvedOptions().timeZone;
   } catch {
     return undefined;
   }

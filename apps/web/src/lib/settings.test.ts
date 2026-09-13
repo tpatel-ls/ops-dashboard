@@ -109,6 +109,9 @@ describe('normalizeSettings', () => {
     expect(
       normalizeSettings({ timezone: ' America/Chicago ', legacyFlag: true } as never),
     ).toMatchObject({ timezone: 'America/Chicago' });
+    expect(normalizeSettings({ timezone: 'america/chicago' } as never)).toMatchObject({
+      timezone: 'America/Chicago',
+    });
     expect(normalizeSettings({ timezone: 'Not/AZone' })).not.toHaveProperty('timezone');
     expect(normalizeSettings({ legacyFlag: true } as never)).not.toHaveProperty('legacyFlag');
   });
