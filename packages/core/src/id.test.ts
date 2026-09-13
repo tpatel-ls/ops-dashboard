@@ -6,6 +6,12 @@ afterEach(() => {
 });
 
 describe('getDeviceId', () => {
+  it('uses a stable server identifier without browser globals', async () => {
+    const { getDeviceId } = await import('./id');
+
+    expect(getDeviceId()).toBe('server');
+  });
+
   it('returns a persisted device ID', async () => {
     const setItem = vi.fn();
     vi.stubGlobal('window', {
