@@ -11,9 +11,13 @@ export async function fetchWithTimeout(
   }
   const controller = new AbortController();
   const callerSignal = init.signal;
+
+  if (callerSignal?.aborted) {
+    return Promise.reject(callerSignal.reason ?? new DOMException('Request canceled', 'AbortError'));
+  }
+
   const abortFromCaller = () => controller.abort(callerSignal?.reason);
-  if (callerSignal?.aborted) abortFromCaller();
-  else callerSignal?.addEventListener('abort', abortFromCaller, { once: true });
+  callerSignal?.addEventListener('abort', abortFromCaller, { once: true });
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetch(input, { ...init, signal: controller.signal });
