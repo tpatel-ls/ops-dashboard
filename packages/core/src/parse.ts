@@ -1,4 +1,5 @@
 import * as chrono from 'chrono-node';
+import { toISODate } from './dates';
 import type { Priority, Task } from './types';
 
 export interface ParsedQuickAdd {
@@ -68,13 +69,6 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
     tags,
     priority,
   };
-}
-
-function toISODate(d: Date): string {
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
 }
 
 export function quickAddToTask(
