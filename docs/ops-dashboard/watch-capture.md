@@ -26,8 +26,8 @@ Expected: `{"ok":true,"result":{...},"record":{...},"kind":"task"}`. Open the ap
 your phone/tablet - the task "buy milk" appears live, dated tomorrow 5pm.
 
 - `tzOffsetMinutes` is the JS `new Date().getTimezoneOffset()` value (e.g. `300`
-  for US Eastern). It makes "5pm" land at 5pm **local**. Omit it and times are
-  interpreted as UTC.
+  for UTC-5 / US Eastern, `-60` for UTC+1). It makes "5pm" land at 5pm
+  **local**. Omit it and times are interpreted as UTC.
 - A `401` means the secret is wrong; `{"ok":false,"reason":"persist-failed"}`
   means the Supabase secret key / user isn't configured on the server.
 
