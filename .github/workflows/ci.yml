@@ -30,7 +30,61 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit:high
       - run: pnpm format:check
+      - run: node --test .github/merge-daily.test.cjs
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+  merge-daily:
+    needs: verify
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.id == 214253472 &&
+      startsWith(github.head_ref, 'automation/daily-improvements-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # No checkout or dependency install: merging needs only GitHub API calls.
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            if (context.eventName !== 'pull_request') return;
+            const tested = context.payload.pull_request;
+            const { data: pr } = await github.rest.pulls.get({
+              ...context.repo, pull_number: tested.number,
+            });
+            const repository = `${context.repo.owner}/${context.repo.repo}`;
+            if (pr.state !== 'open' || pr.draft || pr.user.id !== 214253472 ||
+                pr.head.repo?.full_name !== repository || pr.base.ref !== 'main' ||
+                !/^automation\/daily-improvements-\d{4}-\d{2}-\d{2}$/.test(pr.head.ref)) {
+              core.info('This PR is not an eligible daily batch.');
+              return;
+            }
+            if (pr.head.sha !== tested.head.sha) {
+              core.setFailed('The PR changed after verification; wait for its new CI run.');
+              return;
+            }
+            const { data: main } = await github.rest.repos.getBranch({
+              ...context.repo, branch: 'main',
+            });
+            if (main.commit.sha !== tested.base.sha) {
+              core.setFailed('Main advanced after this run started; update the daily branch and rerun CI.');
+              return;
+            }
+            const { data: result } = await github.rest.pulls.merge({
+              ...context.repo,
+              pull_number: pr.number,
+              sha: tested.head.sha,
+              merge_method: 'rebase',
+            });
+            if (!result.merged) {
+              core.setFailed(result.message);
+              return;
+            }
+            core.info(`Merged daily PR #${pr.number} into main at ${result.sha}.`);
