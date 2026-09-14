@@ -126,4 +126,3 @@
 - [ ] Make the browser verifier accept an installed Chrome executable.
 - [ ] Run full tests, lint, typecheck, build, browser flow, screenshots, and overflow checks.
 - [ ] Commit as `style: finish the cross-device command experience`.
-

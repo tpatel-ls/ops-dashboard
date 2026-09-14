@@ -29,14 +29,14 @@ export function TodayStats() {
         return (
           <div
             key={it.label}
-            className="flex min-w-[86px] items-center gap-2 rounded-[12px] border bg-card/70 px-2.5 py-2 shadow-sm backdrop-blur"
+            className="bg-card/70 flex min-w-[86px] items-center gap-2 rounded-[12px] border px-2.5 py-2 shadow-sm backdrop-blur"
           >
-            <span className="flex size-7 items-center justify-center rounded-[9px] bg-bg-sunken">
+            <span className="bg-bg-sunken flex size-7 items-center justify-center rounded-[9px]">
               <Icon className={`size-3.5 ${it.tone}`} aria-hidden />
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="font-mono text-sm font-semibold tabular-nums">{it.value}</span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 {it.label}
               </span>
             </div>

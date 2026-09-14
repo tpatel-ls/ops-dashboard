@@ -162,10 +162,7 @@ export async function POST(req: Request): Promise<Response> {
   const target = await resolveTarget(req);
   const watch = bearerMatches(req);
   if (watch && !target) {
-    return NextResponse.json(
-      { ok: false, reason: 'persistence-unavailable' },
-      { status: 503 },
-    );
+    return NextResponse.json({ ok: false, reason: 'persistence-unavailable' }, { status: 503 });
   }
   const deviceId = watch ? 'watch' : 'server';
   const captureSource = watch ? 'watch' : 'text';

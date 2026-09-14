@@ -34,18 +34,20 @@ describe('content links', () => {
   });
 
   it('keeps safe dashboard-relative links', async () => {
-    await expect(createContent({ title: 'Launch post', url: '  /launch  ' })).resolves.toMatchObject(
-      { url: '/launch' },
-    );
+    await expect(
+      createContent({ title: 'Launch post', url: '  /launch  ' }),
+    ).resolves.toMatchObject({ url: '/launch' });
   });
 
-  it.each(['relative', '//example.test/path', 'javascript:alert(1)', 'https://user:secret@example.test'])(
-    'rejects unsafe link %s',
-    (url) => {
-      expect(() => createContent({ title: 'Launch post', url })).toThrow('Content URL');
-      expect(mocks.putRecord).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    'relative',
+    '//example.test/path',
+    'javascript:alert(1)',
+    'https://user:secret@example.test',
+  ])('rejects unsafe link %s', (url) => {
+    expect(() => createContent({ title: 'Launch post', url })).toThrow('Content URL');
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
 });
 
 describe('compareContentOrder', () => {
@@ -78,10 +80,8 @@ describe('updateContent', () => {
   });
 
   it('accepts a valid publish date and forwards normalized patch fields', async () => {
-    await expect(updateContent('content-1', { publishDate: '2026-09-12' })).resolves.toMatchObject(
-      {
-        publishDate: '2026-09-12',
-      },
-    );
+    await expect(updateContent('content-1', { publishDate: '2026-09-12' })).resolves.toMatchObject({
+      publishDate: '2026-09-12',
+    });
   });
 });

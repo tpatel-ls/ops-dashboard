@@ -44,9 +44,7 @@ export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'co
   }
 
   try {
-    await nav.clipboard?.writeText(
-      [title, sharedText, url].filter(Boolean).join('\n'),
-    );
+    await nav.clipboard?.writeText([title, sharedText, url].filter(Boolean).join('\n'));
     return nav.clipboard ? 'copied' : 'failed';
   } catch {
     return 'failed';

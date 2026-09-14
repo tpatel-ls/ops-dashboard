@@ -34,8 +34,16 @@ export async function ensureSeed(): Promise<void> {
   await logWork(site.id, 90, 'Wireframes', new Date(Date.now() - 2 * 86400000).toISOString());
 
   await createRoutine({ name: 'Morning workout', timeOfDay: 'morning', domainId: health.id });
-  const vitamins = await createRoutine({ name: 'Take vitamins', timeOfDay: 'morning', domainId: health.id });
-  const read = await createRoutine({ name: 'Read 20 minutes', timeOfDay: 'evening', domainId: personal.id });
+  const vitamins = await createRoutine({
+    name: 'Take vitamins',
+    timeOfDay: 'morning',
+    domainId: health.id,
+  });
+  const read = await createRoutine({
+    name: 'Read 20 minutes',
+    timeOfDay: 'evening',
+    domainId: personal.id,
+  });
   await createRoutine({
     name: 'Run 5K every day',
     timeOfDay: 'morning',

@@ -251,7 +251,7 @@ export function QuickAdd() {
                 </button>
               ) : null}
             </div>
-            <div className="scrollbar-thin max-h-56 overflow-y-auto py-1" role="listbox">
+            <div className="max-h-56 scrollbar-thin overflow-y-auto py-1" role="listbox">
               <button
                 type="button"
                 onClick={() => {

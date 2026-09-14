@@ -18,14 +18,19 @@ export function SyncStatus({ showPending = true }: { showPending?: boolean }) {
   const meta = META[state];
 
   return (
-    <span role="status" aria-live="polite" title={meta.label} className="inline-flex items-center gap-1.5 rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground">
+    <span
+      role="status"
+      aria-live="polite"
+      title={meta.label}
+      className="bg-card text-muted-foreground inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs"
+    >
       <span
         className={state === 'live' ? 'live-dot size-1.5 rounded-full' : 'size-1.5 rounded-full'}
         style={{ background: meta.color }}
       />
       {meta.label}
       {showPending && pending > 0 ? (
-        <span className="rounded bg-bg-sunken px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+        <span className="bg-bg-sunken text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] tabular-nums">
           {pending} queued
         </span>
       ) : null}

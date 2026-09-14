@@ -19,13 +19,7 @@ const PRESET_COLORS = [
   { label: 'Teal', value: 'oklch(0.7 0.18 175)' },
 ];
 
-function ColorPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (c: string) => void;
-}) {
+function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
   return (
     <div className="flex flex-wrap gap-2">
       {PRESET_COLORS.map((c) => (
@@ -36,7 +30,7 @@ function ColorPicker({
           aria-label={`Select ${c.label}`}
           onClick={() => onChange(c.value)}
           className={cn(
-            'size-8 rounded-full transition-all ring-2 ring-offset-2 ring-offset-background',
+            'ring-offset-background size-8 rounded-full ring-2 ring-offset-2 transition-all',
             value === c.value ? 'ring-foreground scale-110' : 'ring-transparent hover:scale-105',
           )}
           style={{ background: c.value }}
@@ -71,7 +65,7 @@ function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="surface flex flex-col gap-3 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
         {initial ? 'Edit domain' : 'New domain'}
       </div>
       <input
@@ -91,21 +85,21 @@ function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
         className="input resize-none"
       />
       <div>
-        <div className="mb-2 text-xs text-muted-foreground">Color</div>
+        <div className="text-muted-foreground mb-2 text-xs">Color</div>
         <ColorPicker value={color} onChange={setColor} />
       </div>
       <div className="flex justify-end gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 rounded-md px-3 text-xs"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium disabled:opacity-50"
         >
           {initial ? 'Save' : 'Create'}
         </button>
@@ -150,17 +144,17 @@ function DomainCard({ domain }: { domain: Domain }) {
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-[14px] font-medium leading-5">{domain.name}</span>
+          <span className="text-[14px] leading-5 font-medium">{domain.name}</span>
           {domain.archivedAt ? (
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+            <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
               archived
             </span>
           ) : null}
         </div>
         {domain.description ? (
-          <p className="mt-0.5 text-xs text-muted-foreground">{domain.description}</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">{domain.description}</p>
         ) : null}
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-subtle-foreground">
+        <div className="text-subtle-foreground mt-2 flex flex-wrap items-center gap-3 text-[11px]">
           <span className="inline-flex items-center gap-1">
             <Boxes className="size-3" aria-hidden />
             {counts?.projects ?? 0} project{counts?.projects !== 1 ? 's' : ''}
@@ -176,7 +170,7 @@ function DomainCard({ domain }: { domain: Domain }) {
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-9 items-center justify-center rounded-md"
             aria-label={`Edit ${domain.name}`}
           >
             <Pencil className="size-3.5" />
@@ -184,7 +178,7 @@ function DomainCard({ domain }: { domain: Domain }) {
           <button
             type="button"
             onClick={() => archiveDomain(domain.id)}
-            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-9 items-center justify-center rounded-md"
             aria-label={`Archive ${domain.name}`}
           >
             <Archive className="size-3.5" />
@@ -210,7 +204,7 @@ export function DomainsView() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {active.length} active domain{active.length !== 1 ? 's' : ''}
         </span>
         <button
@@ -231,7 +225,12 @@ export function DomainsView() {
       {creating ? (
         <DomainForm
           onSave={async (name, color, description) => {
-            await createDomain({ name, color, description: description || undefined, order: Date.now() });
+            await createDomain({
+              name,
+              color,
+              description: description || undefined,
+              order: Date.now(),
+            });
             setCreating(false);
           }}
           onCancel={() => setCreating(false)}
@@ -241,14 +240,21 @@ export function DomainsView() {
       {domains === undefined ? (
         <ul className="flex flex-col gap-1.5">
           {Array.from({ length: 3 }).map((_, i) => (
-            <li key={i} aria-hidden className="surface-flat h-16 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+            <li
+              key={i}
+              aria-hidden
+              className="surface-flat h-16 animate-pulse"
+              style={{ animationDelay: `${i * 80}ms` }}
+            />
           ))}
         </ul>
       ) : active.length === 0 && !creating ? (
         <div className="surface flex h-60 flex-col items-center justify-center gap-2 text-center">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">domains</div>
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
+            domains
+          </div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-          <p className="max-w-md text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-md text-sm">
             Create a work area to group related projects and tasks.
           </p>
         </div>
@@ -267,7 +273,7 @@ export function DomainsView() {
           <button
             type="button"
             onClick={() => setShowArchived((v) => !v)}
-            className="inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-[11px]"
           >
             <ChevronRight
               className={cn('size-3.5 transition-transform', showArchived && 'rotate-90')}

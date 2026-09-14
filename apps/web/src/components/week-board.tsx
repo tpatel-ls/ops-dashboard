@@ -60,34 +60,34 @@ export function WeekBoard() {
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <div className="flex items-center rounded-md border bg-card p-0.5">
-        <button
-          type="button"
-          aria-label="Previous week"
-          onClick={() => setAnchor((d) => addDays(d, -7))}
-          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <ChevronLeft className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setAnchor(new Date())}
-          className="h-10 border-x px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          aria-label="Next week"
-          onClick={() => setAnchor((d) => addDays(d, 7))}
-          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <ChevronRight className="size-4" />
-        </button>
+        <div className="bg-card flex items-center rounded-md border p-0.5">
+          <button
+            type="button"
+            aria-label="Previous week"
+            onClick={() => setAnchor((d) => addDays(d, -7))}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setAnchor(new Date())}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 border-x px-3 text-xs font-medium"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            aria-label="Next week"
+            onClick={() => setAnchor((d) => addDays(d, 7))}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded"
+          >
+            <ChevronRight className="size-4" />
+          </button>
         </div>
         <span
           aria-live="polite"
-          className="flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground"
+          className="text-muted-foreground flex min-w-0 items-center gap-2 text-xs font-medium"
         >
           <CalendarDays className="size-4 shrink-0" aria-hidden />
           <span className="truncate">
@@ -143,32 +143,32 @@ function DayColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'surface-flat scrollbar-thin flex min-h-40 min-w-0 flex-col overflow-y-auto p-2 transition-colors sm:h-full sm:min-h-[200px]',
+        'surface-flat flex min-h-40 min-w-0 scrollbar-thin flex-col overflow-y-auto p-2 transition-colors sm:h-full sm:min-h-[200px]',
         isOver && 'border-primary/50 bg-primary/5',
       )}
     >
       <div className="mb-2 flex items-baseline justify-between px-1">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             {format(day, 'EEE')}
           </div>
           <div
             className={cn(
-              'text-lg font-semibold leading-none tracking-tight',
+              'text-lg leading-none font-semibold tracking-tight',
               isToday && 'text-primary',
             )}
           >
             {format(day, 'd')}
           </div>
         </div>
-        <span className="font-mono text-[10px] text-subtle-foreground">{tasks.length}</span>
+        <span className="text-subtle-foreground font-mono text-[10px]">{tasks.length}</span>
       </div>
       <div className="flex flex-col gap-1">
         {tasks.map((t) => (
           <DraggableCard key={t.id} task={t} projectsMap={projectsMap} laneColor={laneColor(t)} />
         ))}
         {tasks.length === 0 ? (
-          <div className="flex min-h-20 items-center justify-center rounded border border-dashed px-3 text-center text-[11px] text-subtle-foreground">
+          <div className="text-subtle-foreground flex min-h-20 items-center justify-center rounded border border-dashed px-3 text-center text-[11px]">
             No scheduled work
           </div>
         ) : null}
@@ -191,7 +191,9 @@ function DraggableCard({
   });
   const openEdit = useAppStore((s) => s.openEdit);
   const style: React.CSSProperties = {
-    ...(transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 } : {}),
+    ...(transform
+      ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
+      : {}),
   };
 
   const project = task.projectId ? projectsMap.get(task.projectId) : undefined;
@@ -207,7 +209,7 @@ function DraggableCard({
         openEdit(task.id);
       }}
       className={cn(
-        'surface-flat relative min-w-0 cursor-grab touch-none select-none px-2 py-1.5 text-[12px]',
+        'surface-flat relative min-w-0 cursor-grab touch-none px-2 py-1.5 text-[12px] select-none',
         'hover:border-border-strong',
         isDragging && 'cursor-grabbing opacity-80 shadow-lg',
       )}
@@ -225,22 +227,20 @@ function DraggableCard({
         />
         <span className="min-w-0 truncate">{task.title}</span>
       </div>
-      <div className="ml-2 mt-0.5 flex min-w-0 items-center gap-1.5">
+      <div className="mt-0.5 ml-2 flex min-w-0 items-center gap-1.5">
         {task.startAt ? (
-          <span className="font-mono text-[10px] text-subtle-foreground">
+          <span className="text-subtle-foreground font-mono text-[10px]">
             {format(new Date(task.startAt), 'HH:mm')}
           </span>
         ) : null}
         {project ? (
-          <span
-            className="inline-flex min-w-0 items-center gap-1 rounded bg-accent px-1 py-px text-[10px] text-accent-foreground"
-          >
+          <span className="bg-accent text-accent-foreground inline-flex min-w-0 items-center gap-1 rounded px-1 py-px text-[10px]">
             <span
               aria-hidden
               className="size-1.5 rounded-full"
               style={{ background: project.color }}
             />
-            <span className="min-w-0 max-w-[72px] truncate">{project.name}</span>
+            <span className="max-w-[72px] min-w-0 truncate">{project.name}</span>
           </span>
         ) : null}
       </div>

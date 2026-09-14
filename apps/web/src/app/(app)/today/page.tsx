@@ -37,9 +37,9 @@ export default function TodayPage() {
         <button
           type="button"
           onClick={openFocus}
-          className="hairline inline-flex h-10 items-center gap-2 rounded-md border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          className="hairline bg-card text-foreground hover:bg-accent inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs font-medium transition-colors"
         >
-          <Focus className="size-3.5 text-primary" aria-hidden />
+          <Focus className="text-primary size-3.5" aria-hidden />
           Focus mode
         </button>
       }

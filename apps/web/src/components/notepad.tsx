@@ -64,11 +64,7 @@ function destinationLabel(r: RoutedResult): string {
 export function Notepad() {
   const searchParams = useSearchParams();
   const { draft, setDraft, saveDraft } = useLocalDraft('ops:notepad-draft');
-  const sharedValue = [
-    searchParams.get('title'),
-    searchParams.get('text'),
-    searchParams.get('url'),
-  ]
+  const sharedValue = [searchParams.get('title'), searchParams.get('text'), searchParams.get('url')]
     .filter(Boolean)
     .join('\n');
   const [value, setValue] = useState(() => sharedValue || draft);
@@ -78,7 +74,8 @@ export function Notepad() {
 
   const { available, listening, transcribing, toggle } = useVoiceInput({
     // Append instead of auto-submitting: the user may keep talking/typing.
-    onTranscript: (text) => setValue((v) => (v.trim() ? `${v.replace(/\s+$/, '')}\n${text}` : text)),
+    onTranscript: (text) =>
+      setValue((v) => (v.trim() ? `${v.replace(/\s+$/, '')}\n${text}` : text)),
   });
 
   useEffect(() => {
@@ -141,11 +138,11 @@ export function Notepad() {
         <div className="command-surface flex flex-col gap-2 rounded-lg p-3">
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">
             <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-[9px] bg-primary/10 text-primary">
+              <span className="bg-primary/10 text-primary flex size-7 items-center justify-center rounded-[9px]">
                 <NotebookPen className="size-4" aria-hidden />
               </span>
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+                <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                   Work intake
                 </div>
                 <div className="text-sm font-semibold">Capture once. Route the work.</div>
@@ -155,7 +152,7 @@ export function Notepad() {
               {['tasks', 'notes', 'decisions', 'updates'].map((label) => (
                 <span
                   key={label}
-                  className="rounded-md border bg-card/65 px-2 py-0.5 text-[9px] font-medium uppercase text-subtle-foreground"
+                  className="bg-card/65 text-subtle-foreground rounded-md border px-2 py-0.5 text-[9px] font-medium uppercase"
                 >
                   {label}
                 </span>
@@ -179,7 +176,7 @@ export function Notepad() {
               'decision: sequence blue text after no-answer calls\n' +
               'project update: dashboard visuals ready for review'
             }
-            className="input min-h-36 resize-none !bg-transparent !border-0 !p-1 text-sm leading-6 focus:!shadow-none"
+            className="input min-h-36 resize-none !border-0 !bg-transparent !p-1 text-sm leading-6 focus:!shadow-none"
             disabled={pending || transcribing}
             spellCheck={false}
           />
@@ -193,7 +190,7 @@ export function Notepad() {
                   transcribing ? 'Transcribing' : listening ? 'Stop recording' : 'Start dictating'
                 }
                 className={cn(
-                  'flex size-11 shrink-0 items-center justify-center rounded-md border border-border transition-colors',
+                  'border-border flex size-11 shrink-0 items-center justify-center rounded-md border transition-colors',
                   listening
                     ? 'text-destructive animate-pulse'
                     : 'text-subtle-foreground hover:text-foreground',
@@ -208,7 +205,7 @@ export function Notepad() {
                 )}
               </button>
             ) : null}
-            <span className="text-[11px] text-subtle-foreground">
+            <span className="text-subtle-foreground text-[11px]">
               {listening
                 ? 'Listening... speak freely, the transcript lands here.'
                 : transcribing
@@ -216,7 +213,7 @@ export function Notepad() {
                   : 'Every line or thought becomes its own item.'}
             </span>
             <div className="ml-auto flex items-center gap-2.5">
-              <span className="hidden items-center gap-1 text-[11px] text-subtle-foreground sm:flex">
+              <span className="text-subtle-foreground hidden items-center gap-1 text-[11px] sm:flex">
                 <span className="kbd">Ctrl</span>
                 <span className="kbd">Enter</span>
               </span>
@@ -224,7 +221,7 @@ export function Notepad() {
                 type="button"
                 onClick={process}
                 disabled={pending || transcribing || !value.trim()}
-                className="flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="bg-primary text-primary-foreground flex min-h-11 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {pending ? (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden />
@@ -242,12 +239,12 @@ export function Notepad() {
         ) : (
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between px-1">
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 This session
               </span>
               <Link
                 href="/inbox"
-                className="text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground text-[11px] transition-colors"
               >
                 Full trail in Inbox
               </Link>
@@ -257,7 +254,7 @@ export function Notepad() {
                 entry.type === 'notice' ? (
                   <li
                     key={entry.id}
-                    className="flex items-center gap-2.5 rounded-lg border border-warning/40 bg-warning/10 px-4 py-2.5 text-xs text-warning"
+                    className="border-warning/40 bg-warning/10 text-warning flex items-center gap-2.5 rounded-lg border px-4 py-2.5 text-xs"
                   >
                     <CloudOff className="size-4 shrink-0" aria-hidden />
                     <span>{entry.text}</span>
@@ -294,18 +291,15 @@ function FeedRow({
         undone && 'opacity-60',
       )}
     >
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-subtle-foreground">
+      <span className="bg-bg-sunken text-subtle-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
         <Icon className="size-4" aria-hidden />
       </span>
       <span
-        className={cn(
-          'min-w-0 flex-1 truncate text-sm text-foreground',
-          undone && 'line-through',
-        )}
+        className={cn('text-foreground min-w-0 flex-1 truncate text-sm', undone && 'line-through')}
       >
         {result.title}
       </span>
-      <span className="shrink-0 rounded-md bg-bg-sunken px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+      <span className="bg-bg-sunken text-muted-foreground shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium">
         {undone ? 'undone' : destinationLabel(result)}
       </span>
       {!undone ? (
@@ -314,7 +308,7 @@ function FeedRow({
           onClick={onUndo}
           title="Undo"
           aria-label={`Undo ${result.title}`}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground opacity-70 transition-opacity hover:bg-bg-sunken hover:text-foreground sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
+          className="text-subtle-foreground hover:bg-bg-sunken hover:text-foreground flex size-9 shrink-0 items-center justify-center rounded-md opacity-70 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
         >
           <RotateCcw className="size-4" aria-hidden />
         </button>
@@ -326,13 +320,13 @@ function FeedRow({
 function EmptyState() {
   return (
     <div className="surface flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
-      <span className="flex size-9 items-center justify-center rounded-lg bg-bg-sunken text-subtle-foreground">
+      <span className="bg-bg-sunken text-subtle-foreground flex size-9 items-center justify-center rounded-lg">
         <NotebookPen className="size-4" aria-hidden />
       </span>
-      <p className="text-sm font-semibold text-foreground">Ready for work intake</p>
-      <div className="max-w-sm text-xs leading-5 text-muted-foreground">
+      <p className="text-foreground text-sm font-semibold">Ready for work intake</p>
+      <div className="text-muted-foreground max-w-sm text-xs leading-5">
         <p>Type or dictate a batch, then route each line.</p>
-        <p className="mt-2 font-mono text-[11px] text-subtle-foreground">
+        <p className="text-subtle-foreground mt-2 font-mono text-[11px]">
           follow up with the integration owner tomorrow 2pm
           <br />
           decision: prioritize inbound transfer reliability

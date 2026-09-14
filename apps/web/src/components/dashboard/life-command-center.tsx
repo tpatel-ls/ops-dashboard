@@ -97,25 +97,17 @@ export function LifeCommandCenter() {
   });
   const summary = useLiveQuery(async () => {
     const db = getDb();
-    const [
-      tasks,
-      projects,
-      domains,
-      routines,
-      routineChecks,
-      captures,
-      journalEntries,
-      foodLogs,
-    ] = await Promise.all([
-      db.tasks.toArray(),
-      db.projects.toArray(),
-      db.domains.toArray(),
-      db.routines.toArray(),
-      db.routineChecks.toArray(),
-      db.captures.toArray(),
-      db.journalEntries.toArray(),
-      db.foodLogs.toArray(),
-    ]);
+    const [tasks, projects, domains, routines, routineChecks, captures, journalEntries, foodLogs] =
+      await Promise.all([
+        db.tasks.toArray(),
+        db.projects.toArray(),
+        db.domains.toArray(),
+        db.routines.toArray(),
+        db.routineChecks.toArray(),
+        db.captures.toArray(),
+        db.journalEntries.toArray(),
+        db.foodLogs.toArray(),
+      ]);
 
     return summarizeLifeManagement({
       tasks,
@@ -138,9 +130,9 @@ export function LifeCommandCenter() {
         <button
           type="button"
           onClick={() => openWorkLogger('task')}
-          className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          className="hairline bg-card text-foreground hover:bg-accent inline-flex h-9 items-center gap-2 rounded-[10px] border px-3 text-xs font-medium transition-colors"
         >
-          <Plus className="size-3.5 text-primary" aria-hidden />
+          <Plus className="text-primary size-3.5" aria-hidden />
           Capture
         </button>
       }
@@ -157,23 +149,23 @@ export function LifeCommandCenter() {
             <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
               <div className="flex flex-col justify-between gap-5">
                 <div>
-                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-                    <Radar className="size-3.5 text-primary" aria-hidden />
+                  <div className="bg-card/70 text-muted-foreground mb-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs backdrop-blur">
+                    <Radar className="text-primary size-3.5" aria-hidden />
                     Management score
                   </div>
                   <div className="flex items-end gap-2">
-                    <span className="font-mono text-6xl font-semibold leading-none tabular-nums tracking-tight md:text-7xl">
+                    <span className="font-mono text-6xl leading-none font-semibold tracking-tight tabular-nums md:text-7xl">
                       {summary.commandScore}
                     </span>
-                    <span className="pb-2 font-mono text-sm text-subtle-foreground">/100</span>
+                    <span className="text-subtle-foreground pb-2 font-mono text-sm">/100</span>
                   </div>
-                  <div className="mt-2 inline-flex rounded-full border bg-card/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary backdrop-blur">
+                  <div className="bg-card/70 text-primary mt-2 inline-flex rounded-full border px-3 py-1 font-mono text-[10px] tracking-[0.14em] uppercase backdrop-blur">
                     {scoreLabel(summary.commandScore)}
                   </div>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-                    The score is built from open work, project freshness, identity progress,
-                    routine completion, nutrition logging, journal cadence, capture routing,
-                    and domain coverage.
+                  <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
+                    The score is built from open work, project freshness, identity progress, routine
+                    completion, nutrition logging, journal cadence, capture routing, and domain
+                    coverage.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -200,11 +192,11 @@ export function LifeCommandCenter() {
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="text-base font-semibold tracking-tight">Today’s execution</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     The minimum set of signals that keeps the system alive.
                   </p>
                 </div>
-                <span className="rounded-full border bg-bg-sunken px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+                <span className="bg-bg-sunken text-subtle-foreground rounded-full border px-2 py-1 font-mono text-[10px] tracking-[0.14em] uppercase">
                   {summary.today}
                 </span>
               </div>
@@ -243,7 +235,7 @@ export function LifeCommandCenter() {
             <div className="surface p-5">
               <div className="mb-4">
                 <h2 className="text-base font-semibold tracking-tight">Quick launch</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Jump into the system without hunting through pages.
                 </p>
               </div>
@@ -254,18 +246,18 @@ export function LifeCommandCenter() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="group flex items-center gap-3 rounded-[12px] border bg-bg-sunken/60 px-3 py-2.5 transition-colors hover:bg-accent"
+                      className="group bg-bg-sunken/60 hover:bg-accent flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-colors"
                     >
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-card text-primary">
+                      <span className="bg-card text-primary flex size-8 shrink-0 items-center justify-center rounded-[10px]">
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium">{item.label}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
+                        <span className="text-muted-foreground block truncate text-xs">
                           {item.detail}
                         </span>
                       </span>
-                      <ArrowRight className="size-3.5 text-subtle-foreground transition-colors group-hover:text-foreground" />
+                      <ArrowRight className="text-subtle-foreground group-hover:text-foreground size-3.5 transition-colors" />
                     </Link>
                   );
                 })}
@@ -290,12 +282,12 @@ function HeroMetric({
   tone?: ManagementTone;
 }) {
   return (
-    <div className={cn('rounded-[14px] border bg-card/72 p-3 backdrop-blur', TONE_CLASS[tone])}>
-      <div className="font-mono text-2xl font-semibold tabular-nums text-foreground">
+    <div className={cn('bg-card/72 rounded-[14px] border p-3 backdrop-blur', TONE_CLASS[tone])}>
+      <div className="text-foreground font-mono text-2xl font-semibold tabular-nums">
         {value}
-        {suffix ? <span className="ml-1 text-xs text-muted-foreground">{suffix}</span> : null}
+        {suffix ? <span className="text-muted-foreground ml-1 text-xs">{suffix}</span> : null}
       </div>
-      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+      <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.14em] uppercase">
         {label}
       </div>
     </div>
@@ -321,18 +313,20 @@ function LsgLaunchStrip({
       />
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-[14px] border bg-card/80 text-primary backdrop-blur">
+          <span className="bg-card/80 text-primary flex size-11 shrink-0 items-center justify-center rounded-[14px] border backdrop-blur">
             <PhoneCall className="size-5" aria-hidden />
           </span>
           <div className="min-w-0">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+            <div className="text-primary font-mono text-[10px] tracking-[0.18em] uppercase">
               LSG launch
             </div>
             <h2 className="truncate text-lg font-semibold tracking-tight">
               Power Dialer and Blue Text are now live workstreams.
             </h2>
-            <p className="mt-1 truncate text-sm text-muted-foreground">
-              {launch.next ? `Next scheduled: ${launch.next.title}` : 'Sync the launch plan to schedule the next moves.'}
+            <p className="text-muted-foreground mt-1 truncate text-sm">
+              {launch.next
+                ? `Next scheduled: ${launch.next.title}`
+                : 'Sync the launch plan to schedule the next moves.'}
             </p>
           </div>
         </div>
@@ -344,7 +338,7 @@ function LsgLaunchStrip({
         </div>
         <Link
           href="/power-dialer"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-[12px] bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          className="bg-primary text-primary-foreground inline-flex h-10 items-center justify-center gap-2 rounded-[12px] px-4 text-sm font-medium transition-opacity hover:opacity-90"
         >
           Open dialer
           <ArrowRight className="size-4" aria-hidden />
@@ -356,9 +350,9 @@ function LsgLaunchStrip({
 
 function MiniLaunchStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[12px] border bg-card/75 px-2 py-2 text-center backdrop-blur">
+    <div className="bg-card/75 rounded-[12px] border px-2 py-2 text-center backdrop-blur">
       <div className="font-mono text-lg font-semibold tabular-nums">{value}</div>
-      <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-subtle-foreground">
+      <div className="text-subtle-foreground mt-0.5 font-mono text-[9px] tracking-[0.14em] uppercase">
         {label}
       </div>
     </div>
@@ -367,21 +361,21 @@ function MiniLaunchStat({ label, value }: { label: string; value: number }) {
 
 function AttentionPanel({ items }: { items: AttentionItem[] }) {
   return (
-    <div className="rounded-[18px] border bg-card/72 p-4 backdrop-blur">
+    <div className="bg-card/72 rounded-[18px] border p-4 backdrop-blur">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
           <h2 className="text-sm font-semibold tracking-tight">Attention queue</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Work the top item first.</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">Work the top item first.</p>
         </div>
-        <span className="rounded-full border bg-bg-sunken px-2 py-1 font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <span className="bg-bg-sunken text-subtle-foreground rounded-full border px-2 py-1 font-mono text-[10px] tabular-nums">
           {items.length}
         </span>
       </div>
       {items.length === 0 ? (
-        <div className="flex min-h-[168px] flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed bg-bg-sunken/60 p-6 text-center">
-          <CheckCircle2 className="size-5 text-success" aria-hidden />
+        <div className="bg-bg-sunken/60 flex min-h-[168px] flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed p-6 text-center">
+          <CheckCircle2 className="text-success size-5" aria-hidden />
           <p className="text-sm font-medium">No management gaps.</p>
-          <p className="text-xs leading-5 text-muted-foreground">
+          <p className="text-muted-foreground text-xs leading-5">
             Capture what appears next, then keep executing.
           </p>
         </div>
@@ -391,14 +385,16 @@ function AttentionPanel({ items }: { items: AttentionItem[] }) {
             <li key={item.id}>
               <Link
                 href={item.href}
-                className="group flex items-center gap-3 rounded-[12px] border bg-bg-sunken/60 px-3 py-2.5 transition-colors hover:bg-accent"
+                className="group bg-bg-sunken/60 hover:bg-accent flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-colors"
               >
                 <span className={cn('size-2 rounded-full', TONE_CLASS[item.tone])} aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">{item.title}</span>
-                  <span className="block truncate text-xs text-muted-foreground">{item.detail}</span>
+                  <span className="text-muted-foreground block truncate text-xs">
+                    {item.detail}
+                  </span>
                 </span>
-                <ArrowRight className="size-3.5 text-subtle-foreground transition-colors group-hover:text-foreground" />
+                <ArrowRight className="text-subtle-foreground group-hover:text-foreground size-3.5 transition-colors" />
               </Link>
             </li>
           ))}
@@ -413,27 +409,32 @@ function ModuleCard({ module }: { module: ManagementModule }) {
   return (
     <Link
       href={module.href}
-      className="surface group flex min-h-[154px] flex-col justify-between p-4 transition-all hover:-translate-y-0.5 hover:border-border-strong"
+      className="surface group hover:border-border-strong flex min-h-[154px] flex-col justify-between p-4 transition-all hover:-translate-y-0.5"
     >
       <div className="flex items-start justify-between gap-3">
-        <span className={cn('flex size-10 items-center justify-center rounded-[13px] border', TONE_CLASS[module.tone])}>
+        <span
+          className={cn(
+            'flex size-10 items-center justify-center rounded-[13px] border',
+            TONE_CLASS[module.tone],
+          )}
+        >
           <Icon className="size-4" aria-hidden />
         </span>
-        <span className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {module.score}%
         </span>
       </div>
       <div>
-        <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-bg-sunken">
+        <div className="bg-bg-sunken mb-2 h-1.5 overflow-hidden rounded-full">
           <div
-            className="h-full rounded-full bg-primary transition-all"
+            className="bg-primary h-full rounded-full transition-all"
             style={{ width: `${module.score}%` }}
           />
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
             <h3 className="text-sm font-semibold tracking-tight">{module.label}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">{module.detail}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{module.detail}</p>
           </div>
           <span className="shrink-0 font-mono text-lg font-semibold tabular-nums">
             {module.value}
@@ -460,16 +461,21 @@ function ExecutionRow({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-[14px] border bg-bg-sunken/60 p-3 transition-colors hover:bg-accent"
+      className="group bg-bg-sunken/60 hover:bg-accent flex items-center gap-3 rounded-[14px] border p-3 transition-colors"
     >
-      <span className={cn('flex size-9 items-center justify-center rounded-[12px] border font-mono text-sm font-semibold tabular-nums', TONE_CLASS[tone])}>
+      <span
+        className={cn(
+          'flex size-9 items-center justify-center rounded-[12px] border font-mono text-sm font-semibold tabular-nums',
+          TONE_CLASS[tone],
+        )}
+      >
         {value}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{label}</span>
-        <span className="block text-xs text-muted-foreground">{detail}</span>
+        <span className="text-muted-foreground block text-xs">{detail}</span>
       </span>
-      <ArrowRight className="size-3.5 text-subtle-foreground transition-colors group-hover:text-foreground" />
+      <ArrowRight className="text-subtle-foreground group-hover:text-foreground size-3.5 transition-colors" />
     </Link>
   );
 }

@@ -35,7 +35,7 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
           aria-pressed={value === c}
           className={cn(
             'size-8 rounded-full transition-transform hover:scale-105',
-            value === c && 'ring-2 ring-primary ring-offset-2 ring-offset-card',
+            value === c && 'ring-primary ring-offset-card ring-2 ring-offset-2',
           )}
           style={{ background: c }}
         />
@@ -84,14 +84,14 @@ function OrgForm({
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 rounded-md px-3 text-xs"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium disabled:opacity-50"
         >
           {initial ? 'Save' : 'Create'}
         </button>
@@ -124,14 +124,14 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
         style={{ background: org.color }}
       />
       <span className="min-w-0 flex-1 truncate text-sm">{org.name}</span>
-      <span className="hidden font-mono text-[10px] text-subtle-foreground sm:inline">
+      <span className="text-subtle-foreground hidden font-mono text-[10px] sm:inline">
         {projectCount} project{projectCount === 1 ? '' : 's'}
       </span>
       <button
         type="button"
         onClick={() => setEditing(true)}
         aria-label={`Rename ${org.name}`}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
+        className="text-subtle-foreground hover:bg-accent hover:text-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
       >
         <Pencil className="size-3.5" aria-hidden />
       </button>
@@ -139,7 +139,7 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
         type="button"
         onClick={() => void archiveOrganization(org.id)}
         aria-label={`Archive ${org.name}`}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
+        className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
       >
         <Archive className="size-3.5" aria-hidden />
       </button>
@@ -157,10 +157,7 @@ export function OrganizationsManager() {
 
   const data = useLiveQuery(async () => {
     const db = getDb();
-    const [orgs, projects] = await Promise.all([
-      db.organizations.toArray(),
-      db.projects.toArray(),
-    ]);
+    const [orgs, projects] = await Promise.all([db.organizations.toArray(), db.projects.toArray()]);
     const active = orgs
       .filter((o) => !o.deletedAt && !o.archivedAt)
       .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
@@ -178,7 +175,7 @@ export function OrganizationsManager() {
         <OrgRow key={org.id} org={org} projectCount={data?.counts.get(org.id) ?? 0} />
       ))}
       {data && data.active.length === 0 && !creating ? (
-        <p className="flex items-center gap-2 text-xs text-subtle-foreground">
+        <p className="text-subtle-foreground flex items-center gap-2 text-xs">
           <Building2 className="size-3.5" aria-hidden />
           No organizations yet. Add the ones you work for; everything else stays Personal.
         </p>
@@ -198,7 +195,7 @@ export function OrganizationsManager() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="hairline inline-flex h-10 w-fit items-center gap-1.5 rounded-md border bg-card px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="hairline bg-card text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-10 w-fit items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors"
         >
           <Plus className="size-3.5" aria-hidden />
           Add organization

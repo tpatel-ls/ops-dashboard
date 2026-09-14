@@ -65,7 +65,7 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="surface-flat flex flex-col gap-3 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
         New Quote
       </div>
       <textarea
@@ -117,14 +117,14 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !text.trim()}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save Quote'}
         </button>
@@ -174,14 +174,14 @@ function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
       <button
         type="submit"
         disabled={saving || !text.trim()}
-        className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50"
       >
         {saving ? '…' : 'Add'}
       </button>
       <button
         type="button"
         onClick={onDone}
-        className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md transition-colors"
       >
         ×
       </button>
@@ -216,32 +216,30 @@ function QuoteCard({ quote }: { quote: Quote }) {
   const hasThoughts = quote.thoughts.length > 0;
 
   return (
-    <li className="surface-flat group relative flex flex-col gap-2.5 px-4 py-3 transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
+    <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-2.5 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
       {/* Quote text */}
-      <blockquote className="text-sm leading-relaxed text-foreground">
+      <blockquote className="text-foreground text-sm leading-relaxed">
         &ldquo;{quote.text}&rdquo;
       </blockquote>
 
       {/* Attribution row */}
       <div className="flex flex-wrap items-center gap-2">
         {(quote.author || quote.source) && (
-          <span className="font-mono text-[11px] text-muted-foreground">
+          <span className="text-muted-foreground font-mono text-[11px]">
             {quote.author ? `- ${quote.author}` : ''}
             {quote.author && quote.source ? ', ' : ''}
-            {quote.source && (
-              <span className="italic">{quote.source}</span>
-            )}
+            {quote.source && <span className="italic">{quote.source}</span>}
           </span>
         )}
         {quote.sourceType && (
-          <span className="rounded-full bg-accent px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-accent-foreground">
+          <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase">
             {SOURCE_TYPE_LABELS[quote.sourceType]}
           </span>
         )}
         {quote.tags.map((tag) => (
           <span
             key={tag}
-            className="rounded-full bg-accent px-2 py-0.5 text-[10px] text-accent-foreground"
+            className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
           >
             #{tag}
           </span>
@@ -257,13 +255,13 @@ function QuoteCard({ quote }: { quote: Quote }) {
               onClick={() => setThoughtsExpanded((v) => !v)}
               className="flex items-center gap-1.5 text-left"
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 Thoughts ({quote.thoughts.length})
               </span>
               {thoughtsExpanded ? (
-                <ChevronUp className="size-3 text-subtle-foreground" />
+                <ChevronUp className="text-subtle-foreground size-3" />
               ) : (
-                <ChevronDown className="size-3 text-subtle-foreground" />
+                <ChevronDown className="text-subtle-foreground size-3" />
               )}
             </button>
           )}
@@ -275,13 +273,13 @@ function QuoteCard({ quote }: { quote: Quote }) {
                   key={thought.id}
                   className="group/thought flex items-start justify-between gap-2"
                 >
-                  <p className="flex-1 text-[13px] leading-snug text-muted-foreground">
+                  <p className="text-muted-foreground flex-1 text-[13px] leading-snug">
                     {thought.text}
                   </p>
                   <button
                     type="button"
                     onClick={() => handleDeleteThought(thought.id)}
-                    className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded text-subtle-foreground opacity-100 transition-colors hover:text-destructive sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100"
+                    className="text-subtle-foreground hover:text-destructive mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded opacity-100 transition-colors sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100"
                     title="Remove thought"
                   >
                     <Trash2 className="size-3" />
@@ -311,7 +309,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
             setAddingThought((v) => !v);
             if (!thoughtsExpanded && !addingThought) setThoughtsExpanded(true);
           }}
-          className="inline-flex items-center gap-1.5 text-[12px] text-subtle-foreground transition-colors hover:text-primary"
+          className="text-subtle-foreground hover:text-primary inline-flex items-center gap-1.5 text-[12px] transition-colors"
         >
           <MessageSquarePlus className="size-3.5" />
           {hasThoughts && !thoughtsExpanded ? 'See thoughts' : 'Add thought'}
@@ -324,15 +322,10 @@ function QuoteCard({ quote }: { quote: Quote }) {
             title={quote.favorite ? 'Unfavorite' : 'Favorite'}
             className={cn(
               'inline-flex size-7 items-center justify-center rounded-md transition-colors',
-              quote.favorite
-                ? 'text-warning'
-                : 'text-muted-foreground hover:text-warning',
+              quote.favorite ? 'text-warning' : 'text-muted-foreground hover:text-warning',
             )}
           >
-            <Star
-              className="size-3.5"
-              fill={quote.favorite ? 'currentColor' : 'none'}
-            />
+            <Star className="size-3.5" fill={quote.favorite ? 'currentColor' : 'none'} />
           </button>
           <button
             type="button"
@@ -386,7 +379,7 @@ export function QuotesView() {
           type="button"
           onClick={() => setFormOpen(true)}
           className={cn(
-            'flex items-center gap-2 rounded-[14px] border border-dashed border-border px-4 py-4 text-sm text-muted-foreground transition-colors',
+            'border-border text-muted-foreground flex items-center gap-2 rounded-[14px] border border-dashed px-4 py-4 text-sm transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
@@ -398,11 +391,11 @@ export function QuotesView() {
       {/* Empty state */}
       {quotes.length === 0 && !formOpen && (
         <div className="surface flex min-h-52 flex-col items-center justify-center gap-3 p-10 text-center">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Quotes
           </div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-sm text-sm">
             Collect the words that move you. Star favorites and attach your own thoughts to any
             quote.
           </p>

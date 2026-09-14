@@ -78,11 +78,7 @@ export function aggregateActivity(
   start: Date,
   end: Date,
 ): ActivityDay[] {
-  if (
-    !Number.isFinite(start.getTime()) ||
-    !Number.isFinite(end.getTime()) ||
-    start > end
-  ) {
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || start > end) {
     throw new Error('Activity range must be valid.');
   }
   if (differenceInCalendarDays(end, start) + 1 > MAX_ACTIVITY_DAYS) {
@@ -127,9 +123,7 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   const tasks = await db.tasks
     .filter(
       (t) =>
-        !t.deletedAt &&
-        t.status === 'done' &&
-        activityTimestampOnOrAfter(t.completedAt, start),
+        !t.deletedAt && t.status === 'done' && activityTimestampOnOrAfter(t.completedAt, start),
     )
     .toArray();
   for (const t of tasks) {

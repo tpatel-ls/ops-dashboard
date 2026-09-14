@@ -37,21 +37,21 @@ export function NotificationsFeed() {
       className="surface-flat scroll-mt-20"
     >
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5">
-        <Bell className="size-3.5 text-primary" aria-hidden />
+        <Bell className="text-primary size-3.5" aria-hidden />
         <span
           id="notifications-title"
-          className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground"
+          className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase"
         >
           Notifications
         </span>
-        <span className="ml-auto font-mono text-[10px] tabular-nums text-muted-foreground">
+        <span className="text-muted-foreground ml-auto font-mono text-[10px] tabular-nums">
           {notifications === undefined ? 'Loading' : `${notifications.length} unread`}
         </span>
         {notifications && notifications.length > 0 ? (
           <button
             type="button"
             onClick={() => markAllNotificationsRead()}
-            className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground ml-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] transition-colors"
             aria-label="Mark all as read"
           >
             <CheckCheck className="size-3" aria-hidden />
@@ -61,40 +61,40 @@ export function NotificationsFeed() {
       </div>
 
       {notifications && notifications.length > 0 ? (
-        <ul className="flex flex-col divide-y divide-border">
+        <ul className="divide-border flex flex-col divide-y">
           {notifications.map((n) => (
-          <li key={n.id} className="flex items-start gap-3 px-4 py-2.5">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-2">
-                <span className="truncate text-[13px] leading-5">{n.title}</span>
-                <span
-                  className={cn(
-                    'shrink-0 rounded bg-bg-sunken px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground',
-                  )}
-                >
-                  {KIND_LABEL[n.kind] ?? n.kind}
-                </span>
+            <li key={n.id} className="flex items-start gap-3 px-4 py-2.5">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="truncate text-[13px] leading-5">{n.title}</span>
+                  <span
+                    className={cn(
+                      'bg-bg-sunken text-muted-foreground shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] tracking-[0.1em] uppercase',
+                    )}
+                  >
+                    {KIND_LABEL[n.kind] ?? n.kind}
+                  </span>
+                </div>
+                {n.body && (
+                  <p className="text-muted-foreground mt-0.5 line-clamp-2 text-[12px]">{n.body}</p>
+                )}
+                <p className="text-subtle-foreground mt-0.5 font-mono text-[10px]">
+                  {notificationAge(n.createdAt)}
+                </p>
               </div>
-              {n.body && (
-                <p className="mt-0.5 text-[12px] text-muted-foreground line-clamp-2">{n.body}</p>
-              )}
-              <p className="mt-0.5 font-mono text-[10px] text-subtle-foreground">
-                {notificationAge(n.createdAt)}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => markNotificationRead(n.id)}
-              className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              aria-label="Mark as read"
-            >
-              <Check className="size-3.5" aria-hidden />
-            </button>
-          </li>
+              <button
+                type="button"
+                onClick={() => markNotificationRead(n.id)}
+                className="text-muted-foreground hover:bg-accent hover:text-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-colors"
+                aria-label="Mark as read"
+              >
+                <Check className="size-3.5" aria-hidden />
+              </button>
+            </li>
           ))}
         </ul>
       ) : (
-        <p className="px-4 py-5 text-sm text-muted-foreground">
+        <p className="text-muted-foreground px-4 py-5 text-sm">
           {notifications === undefined ? 'Loading notifications.' : 'You are all caught up.'}
         </p>
       )}

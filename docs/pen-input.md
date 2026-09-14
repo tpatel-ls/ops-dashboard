@@ -11,10 +11,10 @@ canvas.addEventListener('pointerdown', (e) => {
   ink.begin({
     x: e.clientX,
     y: e.clientY,
-    pressure: e.pressure,   // 0 to 1
-    tiltX: e.tiltX,         // -90 to 90
+    pressure: e.pressure, // 0 to 1
+    tiltX: e.tiltX, // -90 to 90
     tiltY: e.tiltY,
-    twist: e.twist,         // 0 to 359
+    twist: e.twist, // 0 to 359
   });
 });
 ```

@@ -34,13 +34,14 @@ the app anywhere.
   existing design tokens and `src/lib` data-layer patterns exactly.
 
 ### Current state (do NOT rebuild these)
+
 - P0-P5 **local features are built + browser-verified**: capture + AI triage,
   Today, Tasks, Routines + streaks, Habits heatmap, Projects/Areas/Retainers,
   Content, People CRM, Library (Journal/Notes/Quotes/Books), Domains, chat (`/ask`),
   enriched task edit-drawer, PWA icons + `app/manifest.ts`. Demo seed is removed
   (`lib/reset.ts` one-time wipe); the dashboard starts empty.
 - **Data layer:** every entity has `id, createdAt, updatedAt, version, deviceId,
-  deletedAt`. Mutations go through `apps/web/src/lib/*` (and `lib/records.ts`) which
+deletedAt`. Mutations go through `apps/web/src/lib/*` (and `lib/records.ts`) which
   write Dexie + enqueue a `SyncOp` to the outbox.
 - **Sync is SCAFFOLDED BUT OFF:** `apps/web/src/lib/sync-queue.ts` (outbox),
   `packages/core/src/sync.ts` (`pickWinner` version-then-updatedAt merge,
@@ -61,7 +62,7 @@ the app anywhere.
 
 1. **Backend:** Supabase **free cloud** - Postgres + Auth + **Realtime**.
 2. **Hosting:** **Vercel free** (public HTTPS, reachable by all devices anywhere).
-   *(Tailscale is an optional private-only alternative - skip unless I ask.)*
+   _(Tailscale is an optional private-only alternative - skip unless I ask.)_
 3. **Sync:** bidirectional, **single-user**, **Supabase Realtime** for instant
    cross-device updates. Offline-first: Dexie stays the local cache/source of truth
    offline; the outbox drains when online; inbound merges via `pickWinner`. Soft
@@ -105,10 +106,11 @@ work waiting on them - build the code first, wire keys when I provide them.
 > for UI). Update `STATE.md`.
 
 ### Phase 1 - Supabase project, schema, single-user auth
+
 - Have me create the free Supabase project; capture URL + keys into
   `apps/web/.env.local` (gitignored) and later Vercel env.
 - Install/init CLI as devDep (`npx supabase`); `supabase link`; **`supabase db
-  push`** to apply migrations 0001→0003 to the hosted DB. Generate types:
+push`** to apply migrations 0001→0003 to the hosted DB. Generate types:
   `supabase gen types typescript --linked > apps/web/src/lib/database.types.ts`.
 - Auth: enable email/password, **disable public signups**, create my single user in
   the dashboard. Build `/login` (server action `signInWithPassword`) + `/auth/signout`.
@@ -119,6 +121,7 @@ work waiting on them - build the code first, wire keys when I provide them.
   blocks cross-user rows.
 
 ### Phase 2 - Bidirectional realtime sync engine
+
 - **Column mapping:** write a camelCase(TS)↔snake_case(DB) mapper per table (the DB
   uses snake_case; the app uses camelCase). Centralize it.
 - **Push (outbound):** wire the existing outbox/worker to upsert local `SyncOp`s to
@@ -135,6 +138,7 @@ work waiting on them - build the code first, wire keys when I provide them.
   without reload; edit/delete propagate; works after going offline→online.
 
 ### Phase 3 - Capture persistence + the watch flow
+
 - `/api/capture`: after triage, **persist** the resulting task/journal row to
   Supabase under the user (so realtime propagates it everywhere). Keep it
   secret-gated (`OPS_API_SECRET`) for the watch; also accept an authenticated
@@ -147,6 +151,7 @@ work waiting on them - build the code first, wire keys when I provide them.
   task that shows up live on all signed-in devices.
 
 ### Phase 4 - PWA on the three devices (Serwist + responsive)
+
 - Replace `public/sw.js` with **Serwist** (`@serwist/next`, `app/sw.ts`): precache
   app shell, offline fallback route, keep the notification handlers. Verify install
   only via `next build && next start` or the Vercel build (SW doesn't run in dev).
@@ -159,6 +164,7 @@ work waiting on them - build the code first, wire keys when I provide them.
   Vercel HTTPS URL; works offline (cached shell + Dexie); mic works (HTTPS).
 
 ### Phase 5 - Deploy to Vercel + keep-alive
+
 - `vercel link` + deploy. Set env vars in Vercel (Supabase URL/publishable/secret,
   `ANTHROPIC_API_KEY`, `GROQ_API_KEY`, `PUSHOVER_*`, `OPS_API_SECRET`). Add the
   Vercel domain to Supabase Auth → URL Configuration (Site URL + Redirect URLs).
@@ -167,8 +173,9 @@ work waiting on them - build the code first, wire keys when I provide them.
 - **Acceptance:** the production URL loads on all devices, signed in, syncing live.
 
 ### Phase 6 - AI live + full end-to-end verification
+
 - With `ANTHROPIC_API_KEY` set, verify triage, journal **photo** OCR (`/api/journal/
-  extract`), and chat (`/ask`) actually run.
+extract`), and chat (`/ask`) actually run.
 - Run the full acceptance test (watch → all devices), `pnpm typecheck`, `pnpm build`,
   and a Playwright pass. Update `STATE.md` + commit.
 
@@ -177,6 +184,7 @@ work waiting on them - build the code first, wire keys when I provide them.
 ## Per-device build checklist (must all pass)
 
 **Galaxy S24 Ultra (phone)**
+
 - [ ] PWA installed to home screen (Vercel HTTPS), standalone, safe-area correct.
 - [ ] Capture: text + voice (Web Speech, or Groq if key) + ⌘/quick-add; mic works (HTTPS).
 - [ ] Realtime sync in/out; offline then online drains.
@@ -184,10 +192,12 @@ work waiting on them - build the code first, wire keys when I provide them.
 - [ ] Bottom-nav responsive layout.
 
 **Galaxy Tab S10 Ultra (tablet)**
+
 - [ ] PWA installed; **two-pane** layout at tablet width (sidebar + list + detail).
 - [ ] Realtime sync with phone (create on phone → appears here live).
 
 **Galaxy Watch 7 Ultra (Wear OS)**
+
 - [ ] One-tap shortcut → speak → task is created and appears on phone+tablet live
       (via paired-phone → `/api/capture`). Document the exact recipe (below).
 - [ ] Pushover notifications mirror to the watch (phone-bridged).
@@ -206,7 +216,7 @@ authenticated HTTP call. Provide step-by-step for **both**:
    raw, fall back to option 2.
 2. **Tasker (or HTTP Shortcuts) + Wear Tile/AutoWear**: a watch tile/button →
    Tasker task on the phone → "Get Voice" → HTTP Request `POST
-   https://<vercel-app>/api/capture`, header `Authorization: Bearer <OPS_API_SECRET>`,
+https://<vercel-app>/api/capture`, header `Authorization: Bearer <OPS_API_SECRET>`,
    body `{"raw":"%voice"}`. Include exact field values and a test curl.
 
 Provide a copy-pasteable `curl` so I can verify the endpoint before wiring the watch.

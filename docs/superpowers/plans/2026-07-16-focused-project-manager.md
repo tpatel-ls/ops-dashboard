@@ -24,10 +24,12 @@
 ### Task 1: Task Capture Selection Helpers
 
 **Files:**
+
 - Create: `apps/web/src/lib/task-capture.ts`
 - Create: `apps/web/src/lib/task-capture.test.ts`
 
 **Interfaces:**
+
 - Consumes: `WorkDestination`, `Project`, and `Priority`.
 - Produces: `resolveRecentProject(projects, destination, recentProjectId)`, `taskCaptureOverrides(destination, project, scheduledFor, priority)`, and exported preference keys.
 
@@ -65,8 +67,9 @@ export function resolveRecentProject(
   recentProjectId: string | null,
 ): Project | undefined {
   if (!recentProjectId) return undefined;
-  return projectsForDestination(projects, destination)
-    .find((project) => project.id === recentProjectId);
+  return projectsForDestination(projects, destination).find(
+    (project) => project.id === recentProjectId,
+  );
 }
 ```
 
@@ -88,10 +91,12 @@ git commit -m "feat: add rapid task capture selection"
 ### Task 2: Reusable Rapid Task Entry
 
 **Files:**
+
 - Create: `apps/web/src/components/quick-task-entry.tsx`
 - Modify: `apps/web/src/lib/work-logger.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 helpers, `useOrgStore`, `useSyncStatus`, `addTask`, active organizations, and active projects.
 - Produces: `QuickTaskEntry({ defaultSchedule, project, compact, autoFocus })`.
 
@@ -139,10 +144,12 @@ git commit -m "feat: add rapid task entry"
 ### Task 3: Work Dashboard Query Model
 
 **Files:**
+
 - Create: `apps/web/src/lib/work-dashboard.ts`
 - Create: `apps/web/src/lib/work-dashboard.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Task`, `Project`, `OrgContext`, and a local date string.
 - Produces: `buildWorkDashboard(tasks, projects, ctx, today)` with overdue, today, upcoming, active project summaries, and counts.
 
@@ -176,10 +183,12 @@ git commit -m "feat: add work dashboard model"
 ### Task 4: Replace Life Command with Work Dashboard
 
 **Files:**
+
 - Create: `apps/web/src/components/dashboard/work-dashboard.tsx`
 - Modify: `apps/web/src/app/(app)/dashboard/page.tsx`
 
 **Interfaces:**
+
 - Consumes: `buildWorkDashboard`, `QuickTaskEntry`, `useOrgStore`, `setTaskStatus`, and `openEdit`.
 - Produces: the new `/dashboard` experience.
 
@@ -224,12 +233,14 @@ git commit -m "feat: replace life command with work dashboard"
 ### Task 5: Put Rapid Entry on Tasks and Projects
 
 **Files:**
+
 - Modify: `apps/web/src/components/tasks-view.tsx`
 - Modify: `apps/web/src/components/projects-board.tsx`
 - Modify: `apps/web/src/app/(app)/tasks/page.tsx`
 - Modify: `apps/web/src/app/(app)/projects/page.tsx`
 
 **Interfaces:**
+
 - Consumes: `QuickTaskEntry` and existing `openWorkLogger` project targeting.
 - Produces: immediate entry from Tasks and direct task actions on project cards.
 
@@ -259,6 +270,7 @@ git commit -m "feat: make task entry available everywhere"
 ### Task 6: Focus Desktop and Mobile Navigation
 
 **Files:**
+
 - Modify: `apps/web/src/components/sidebar.tsx`
 - Modify: `apps/web/src/components/mobile-nav.tsx`
 - Modify: `apps/web/src/components/app-shell.tsx`
@@ -267,6 +279,7 @@ git commit -m "feat: make task entry available everywhere"
 - Modify: `apps/web/src/components/top-bar.tsx`
 
 **Interfaces:**
+
 - Produces: Work, Tools, and System navigation groups plus matching keyboard shortcuts.
 
 - [x] **Step 1: Reduce desktop navigation**
@@ -303,10 +316,12 @@ git commit -m "feat: focus navigation on projects and tasks"
 ### Task 7: Simplify the Full Task Dialog
 
 **Files:**
+
 - Modify: `apps/web/src/components/work-logger-dialog.tsx`
 - Modify: `apps/web/src/components/quick-add.tsx`
 
 **Interfaces:**
+
 - Consumes: the shared task preference keys and destination helpers.
 - Produces: task-first dialog layout and predictable quick task creation.
 
@@ -340,10 +355,12 @@ git commit -m "fix: make task capture direct and predictable"
 ### Task 8: Browser Verification and Release Gate
 
 **Files:**
+
 - Modify: `apps/web/scripts/verify-work-logger.mjs`
 - Modify: `docs/superpowers/plans/2026-07-16-focused-project-manager.md`
 
 **Interfaces:**
+
 - Verifies the complete local browser workflow and responsive behavior.
 
 - [x] **Step 1: Add rapid-entry browser coverage**

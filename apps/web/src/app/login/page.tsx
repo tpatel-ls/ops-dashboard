@@ -20,21 +20,21 @@ export default async function LoginPage({
   const next = safeNextPath(rawNext);
 
   return (
-    <div className="flex min-h-[100dvh] w-full items-center justify-center bg-bg-sunken p-4 sm:p-6">
+    <div className="bg-bg-sunken flex min-h-[100dvh] w-full items-center justify-center p-4 sm:p-6">
       <div className="surface w-full max-w-md p-5 sm:p-6">
-        <div className="mb-5 flex items-start gap-3 border-b border-border/70 pb-5">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <div className="border-border/70 mb-5 flex items-start gap-3 border-b pb-5">
+          <span className="bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
             <Grid2X2 className="size-5" aria-hidden />
           </span>
           <div>
             <h1 className="text-xl font-semibold">Taskify</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Sign in to your project workspace.</p>
+            <p className="text-muted-foreground mt-1 text-sm">Sign in to your project workspace.</p>
           </div>
         </div>
 
         <form action={login} className="grid gap-3">
           <input type="hidden" name="next" value={next} />
-          <label className="grid gap-1 text-xs text-muted-foreground">
+          <label className="text-muted-foreground grid gap-1 text-xs">
             <span>Email</span>
             <input
               type="email"
@@ -45,7 +45,7 @@ export default async function LoginPage({
               placeholder="you@example.com"
             />
           </label>
-          <label className="grid gap-1 text-xs text-muted-foreground">
+          <label className="text-muted-foreground grid gap-1 text-xs">
             <span>Password</span>
             <input
               type="password"
@@ -58,21 +58,21 @@ export default async function LoginPage({
           </label>
 
           {message ? (
-            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-xs">
               {message}
             </div>
           ) : null}
 
           <button
             type="submit"
-            className="mt-1 min-h-11 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            className="bg-primary text-primary-foreground mt-1 min-h-11 rounded-md px-3 text-sm font-semibold transition-opacity hover:opacity-90"
           >
             Sign in
           </button>
         </form>
 
-        <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-          <Check className="size-3.5 text-success" aria-hidden />
+        <p className="text-muted-foreground mt-4 flex items-center gap-2 text-xs">
+          <Check className="text-success size-3.5" aria-hidden />
           Approved accounts sync across signed-in devices.
         </p>
 
@@ -80,11 +80,11 @@ export default async function LoginPage({
           <div className="mt-4 border-t pt-4">
             <a
               href={`/auth/dev-login?next=${encodeURIComponent(next)}`}
-              className="flex min-h-11 w-full items-center justify-center rounded-md border bg-bg-sunken px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="bg-bg-sunken text-foreground hover:bg-accent flex min-h-11 w-full items-center justify-center rounded-md border px-3 text-sm font-medium transition-colors"
             >
               Continue locally
             </a>
-            <p className="mt-2 text-[11px] leading-relaxed text-subtle-foreground">
+            <p className="text-subtle-foreground mt-2 text-[11px] leading-relaxed">
               Development only. This bypass never works on production hosts.
             </p>
           </div>

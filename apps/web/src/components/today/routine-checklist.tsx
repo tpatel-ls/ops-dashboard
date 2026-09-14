@@ -59,9 +59,7 @@ export function RoutineChecklist() {
   });
 
   if (!data) {
-    return (
-      <div className="surface h-48 animate-pulse" />
-    );
+    return <div className="surface h-48 animate-pulse" />;
   }
 
   const { grouped, checksByRoutine, todayDone, totalRoutines, doneToday } = data;
@@ -72,20 +70,20 @@ export function RoutineChecklist() {
     <section className="surface flex flex-col">
       <div className="hairline border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Routines
           </span>
-          <span className="font-mono text-[10px] text-muted-foreground">{today}</span>
+          <span className="text-muted-foreground font-mono text-[10px]">{today}</span>
           {hasAny ? (
-            <span className="ml-auto font-mono text-[10px] tabular-nums text-muted-foreground">
+            <span className="text-muted-foreground ml-auto font-mono text-[10px] tabular-nums">
               {doneToday}/{totalRoutines} done
             </span>
           ) : null}
         </div>
         {hasAny ? (
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-bg-sunken">
+          <div className="bg-bg-sunken mt-2 h-1.5 overflow-hidden rounded-full">
             <div
-              className="h-full rounded-full bg-success transition-all"
+              className="bg-success h-full rounded-full transition-all"
               style={{ width: `${completion}%` }}
             />
           </div>
@@ -94,16 +92,16 @@ export function RoutineChecklist() {
 
       {!hasAny ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-1.5 p-8 text-center">
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             routines
           </span>
           <h3 className="text-base font-semibold tracking-tight">A clean slate.</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Set up daily routines to track habits over time.
           </p>
         </div>
       ) : (
-        <div className="scrollbar-thin flex-1 overflow-y-auto px-4 py-3">
+        <div className="flex-1 scrollbar-thin overflow-y-auto px-4 py-3">
           <div className="flex flex-col gap-4">
             {TIME_ORDER.map((tod) => {
               const routines = grouped[tod];
@@ -112,10 +110,10 @@ export function RoutineChecklist() {
               return (
                 <div key={tod}>
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+                    <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
                       {TIME_LABEL[tod]}
                     </span>
-                    <span className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+                    <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
                       {groupDone}/{routines.length}
                     </span>
                   </div>
@@ -137,7 +135,7 @@ export function RoutineChecklist() {
                               'inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
                               checkedToday
                                 ? 'border-primary bg-primary text-primary-foreground'
-                                : 'border-border-strong text-transparent hover:border-primary hover:bg-primary/10',
+                                : 'border-border-strong hover:border-primary hover:bg-primary/10 text-transparent',
                             )}
                             aria-label={checkedToday ? 'Uncheck routine' : 'Check routine'}
                           >
@@ -147,14 +145,15 @@ export function RoutineChecklist() {
                           <span
                             className={cn(
                               'flex-1 text-[13px] leading-5',
-                              checkedToday && 'text-muted-foreground line-through decoration-muted-foreground/40',
+                              checkedToday &&
+                                'text-muted-foreground decoration-muted-foreground/40 line-through',
                             )}
                           >
                             {routine.name}
                           </span>
 
                           {streak > 0 && (
-                            <span className="inline-flex items-center gap-0.5 font-mono text-[10px] tabular-nums text-primary">
+                            <span className="text-primary inline-flex items-center gap-0.5 font-mono text-[10px] tabular-nums">
                               <Flame className="size-3" aria-hidden />
                               {streak}
                             </span>

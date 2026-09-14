@@ -4,8 +4,8 @@ const mocks = vi.hoisted(() => {
   const clearContent = vi.fn();
   const clearSyncOps = vi.fn();
   const syncOps = { clear: clearSyncOps };
-  const transaction = vi.fn(
-    async (_mode: string, _tables: unknown[], work: () => Promise<void>) => work(),
+  const transaction = vi.fn(async (_mode: string, _tables: unknown[], work: () => Promise<void>) =>
+    work(),
   );
   return { clearContent, clearSyncOps, syncOps, transaction };
 });

@@ -122,7 +122,7 @@ export function HelpOverlay() {
             <X className="size-5" aria-hidden />
           </button>
         </header>
-        <div className="scrollbar-thin grid max-h-[calc(92dvh-77px)] gap-4 overflow-y-auto p-5 sm:grid-cols-3">
+        <div className="grid max-h-[calc(92dvh-77px)] scrollbar-thin gap-4 overflow-y-auto p-5 sm:grid-cols-3">
           {SECTIONS.map((s) => (
             <section
               key={s.heading}

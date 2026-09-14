@@ -39,6 +39,7 @@ transcript JSON, and the same call WITHOUT the key returns 401.
   are x86-only, so verify image arch or build/run a path that supports arm64+CUDA.
 
 Run first and record results:
+
 ```bash
 uname -m                      # expect aarch64
 nvidia-smi                    # GPU present + driver/CUDA version
@@ -47,6 +48,7 @@ docker run --rm --gpus all nvcr.io/nvidia/cuda:12.6.2-base-ubuntu24.04 nvidia-sm
 tailscale status              # logged in? which tailnet?
 tailscale funnel status       # is Funnel available on this tailnet/node?
 ```
+
 If GPU-in-Docker fails, install/repair the **NVIDIA Container Toolkit** before
 continuing. If Tailscale isn't logged in, have the user run `sudo tailscale up`.
 
@@ -70,6 +72,7 @@ continuing. If Tailscale isn't logged in, have the user run `sudo tailscale up`.
 Try in this order; each is fine. The wrapper (key proxy + Funnel) is identical.
 
 ### Engine - choose ONE
+
 - **A. `speaches`** (faster-whisper / CTranslate2), OpenAI-compatible out of the
   box. Simplest IF an arm64+CUDA image/build runs here:
   ```bash
@@ -99,6 +102,7 @@ GPU memory in use. If it's on CPU, fix it (wrong image/build) - CPU large-v3 is 
 slow for "all the time" dictation.
 
 ### Auth + public URL (common to all engines)
+
 Generate the key and front the engine with **Caddy** (clean header check), then
 Funnel the Caddy port:
 
@@ -118,6 +122,7 @@ docker run -d --name whisper-auth --network host --restart unless-stopped \
 sudo tailscale funnel --bg 8080
 tailscale funnel status      # note the https://<node>.<tailnet>.ts.net URL
 ```
+
 > If you prefer one tool for both auth + routing, run **LiteLLM** instead of Caddy
 > with `master_key: <KEY>` and a `model_list` entry mapping `whisper-1` ->
 > `openai/<engine-model>` at `api_base: http://127.0.0.1:8000/v1`, then Funnel
@@ -201,9 +206,13 @@ that lets you set a **custom OpenAI base URL + API key + model**:
 - Keep the engine bound to `127.0.0.1` (only Caddy/Funnel is exposed).
 
 ## Definition of done
+
 - `nvidia-smi` shows Whisper on the **GPU**; large-v3(-turbo) loaded.
 - Public HTTPS endpoint transcribes correctly **with** the key, returns **401**
   without it, from **off the tailnet**.
 - Survives a reboot (engine + auth + Funnel come back automatically).
 - The output block above is printed for the user to bring back to the Ops Dashboard.
+
+```
+
 ```

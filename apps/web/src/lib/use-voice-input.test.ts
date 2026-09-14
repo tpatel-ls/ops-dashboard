@@ -117,7 +117,8 @@ describe('useVoiceInput', () => {
 
   it('releases microphone access that resolves after unmount', async () => {
     const stopTrack = vi.fn();
-    let resolveStream: ((stream: { getTracks: () => Array<{ stop: () => void }> }) => void) | undefined;
+    let resolveStream:
+      ((stream: { getTracks: () => Array<{ stop: () => void }> }) => void) | undefined;
     setMediaDevices(
       vi.fn(
         () =>

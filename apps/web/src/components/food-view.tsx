@@ -38,15 +38,10 @@ export function FoodView() {
   const [day, setDay] = useState<string>(() => todayISO());
   const today = todayISO();
 
-  const dayLogs = useLiveQuery(
-    async () => {
-      const rows = await getDb().foodLogs.where('date').equals(day).toArray();
-      return rows
-        .filter((r) => !r.deletedAt)
-        .sort(compareFoodLogCreation);
-    },
-    [day],
-  );
+  const dayLogs = useLiveQuery(async () => {
+    const rows = await getDb().foodLogs.where('date').equals(day).toArray();
+    return rows.filter((r) => !r.deletedAt).sort(compareFoodLogCreation);
+  }, [day]);
 
   const totals = (dayLogs ?? []).reduce(
     (acc, log) => ({
@@ -114,7 +109,7 @@ export function FoodView() {
           <button
             type="button"
             onClick={() => setDay(today)}
-            className="rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+            className="bg-card text-muted-foreground hover:text-foreground rounded-md border px-2.5 py-1 text-xs"
           >
             Today
           </button>
@@ -129,7 +124,7 @@ export function FoodView() {
           <span className="ml-2 text-sm font-semibold tracking-tight">
             {format(parseISO(day), 'EEEE, MMM d')}
             {isToday ? (
-              <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+              <span className="text-primary ml-2 font-mono text-[10px] tracking-[0.14em] uppercase">
                 today
               </span>
             ) : null}
@@ -137,7 +132,7 @@ export function FoodView() {
         </div>
 
         {dayLogs === undefined ? (
-          <div className="surface-flat h-24 animate-pulse rounded-[14px] bg-bg-sunken" />
+          <div className="surface-flat bg-bg-sunken h-24 animate-pulse rounded-[14px]" />
         ) : dayLogs.length === 0 ? (
           <EmptyDay />
         ) : (
@@ -183,12 +178,12 @@ function QuickLog() {
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
       <div className="surface-flat flex items-center gap-2 rounded-[14px] px-4 py-2.5">
-        <Utensils className="size-4 shrink-0 text-subtle-foreground" aria-hidden />
+        <Utensils className="text-subtle-foreground size-4 shrink-0" aria-hidden />
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Log a meal: 2 eggs and toast with butter..."
-          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-subtle-foreground"
+          className="text-foreground placeholder:text-subtle-foreground w-full bg-transparent text-sm outline-none"
           aria-label="Log food"
           disabled={pending || listening || transcribing}
           autoComplete="off"
@@ -221,14 +216,14 @@ function QuickLog() {
         <button
           type="submit"
           disabled={pending || transcribing || !value.trim()}
-          className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {pending ? <Loader2 className="size-3 animate-spin" aria-hidden /> : null}
           Log
         </button>
       </div>
       {notice ? (
-        <div className="flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+        <div className="border-warning/40 bg-warning/10 text-warning flex items-center gap-2 rounded-md border px-3 py-2 text-xs">
           <CloudOff className="size-3.5 shrink-0" aria-hidden />
           <span>{notice}</span>
         </div>
@@ -259,11 +254,11 @@ function StatTile({
         <Icon className="size-4" style={{ color }} aria-hidden />
       </div>
       <div className="min-w-0">
-        <div className="text-[22px] font-semibold leading-none tabular-nums">
+        <div className="text-[22px] leading-none font-semibold tabular-nums">
           {value}
-          <span className="ml-1 text-xs font-normal text-muted-foreground">{unit}</span>
+          <span className="text-muted-foreground ml-1 text-xs font-normal">{unit}</span>
         </div>
-        <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
+        <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.16em] uppercase">
           {label}
         </div>
       </div>
@@ -283,13 +278,10 @@ function WeekTrend({
 }) {
   const days = Array.from({ length: 7 }, (_, i) => addDaysISO(today, i - 6));
 
-  const logs = useLiveQuery(
-    async () => {
-      const rows = await getDb().foodLogs.where('date').anyOf(days).toArray();
-      return rows.filter((r) => !r.deletedAt);
-    },
-    [today],
-  );
+  const logs = useLiveQuery(async () => {
+    const rows = await getDb().foodLogs.where('date').anyOf(days).toArray();
+    return rows.filter((r) => !r.deletedAt);
+  }, [today]);
 
   const byDay = new Map<string, number>(days.map((d) => [d, 0]));
   for (const log of logs ?? []) {
@@ -300,10 +292,10 @@ function WeekTrend({
   return (
     <div className="surface-flat rounded-[14px] px-4 py-3">
       <div className="mb-2 flex items-baseline justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Last 7 days
         </span>
-        <span className="font-mono text-[10px] text-subtle-foreground">kcal / day</span>
+        <span className="text-subtle-foreground font-mono text-[10px]">kcal / day</span>
       </div>
       <div className="flex items-end gap-2">
         {days.map((d) => {
@@ -318,7 +310,7 @@ function WeekTrend({
               title={`${format(parseISO(d), 'EEE, MMM d')}: ${kcal} kcal`}
               className="group flex flex-1 flex-col items-center gap-1"
             >
-              <span className="font-mono text-[9px] tabular-nums text-subtle-foreground opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="text-subtle-foreground font-mono text-[9px] tabular-nums opacity-0 transition-opacity group-hover:opacity-100">
                 {kcal > 0 ? kcal : ''}
               </span>
               <span className="flex h-16 w-full items-end">
@@ -352,10 +344,10 @@ function MealGroup({ meal, logs }: { meal: MealType; logs: FoodLog[] }) {
   return (
     <section>
       <div className="mb-1.5 flex items-baseline justify-between px-1">
-        <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {MEAL_LABEL[meal]}
         </h2>
-        <span className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {kcal} kcal
         </span>
       </div>
@@ -372,13 +364,13 @@ function FoodLogRow({ log }: { log: FoodLog }) {
   return (
     <li className="surface-flat group flex items-start gap-3 rounded-[14px] px-4 py-3">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-foreground">{log.description}</p>
+        <p className="text-foreground text-sm font-medium">{log.description}</p>
         {log.items.length > 0 ? (
           <ul className="mt-1 flex flex-col gap-0.5">
             {log.items.map((item, i) => (
               <li
                 key={`${log.id}-${i}`}
-                className="flex items-baseline gap-1.5 text-xs text-muted-foreground"
+                className="text-muted-foreground flex items-baseline gap-1.5 text-xs"
               >
                 <span className="truncate">
                   {item.name}
@@ -386,7 +378,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
                     <span className="text-subtle-foreground"> ({item.quantity})</span>
                   ) : null}
                 </span>
-                <span className="ml-auto shrink-0 font-mono text-[10px] tabular-nums text-subtle-foreground">
+                <span className="text-subtle-foreground ml-auto shrink-0 font-mono text-[10px] tabular-nums">
                   {item.calories} kcal
                 </span>
               </li>
@@ -394,7 +386,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
           </ul>
         ) : null}
       </div>
-      <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 font-mono text-[10px] tabular-nums text-primary">
+      <span className="bg-primary-soft text-primary shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] tabular-nums">
         {log.totalCalories} kcal
       </span>
       <div className="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
@@ -402,7 +394,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
           value={log.mealType}
           onChange={(e) => void updateFoodLog(log.id, { mealType: e.target.value as MealType })}
           aria-label="Meal type"
-          className="rounded-md border border-border bg-card px-1.5 py-0.5 text-[11px] text-muted-foreground outline-none"
+          className="border-border bg-card text-muted-foreground rounded-md border px-1.5 py-0.5 text-[11px] outline-none"
         >
           {MEAL_ORDER.map((m) => (
             <option key={m} value={m}>
@@ -415,7 +407,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
           title="Delete"
           aria-label={`Delete ${log.description}`}
           onClick={() => void deleteFoodLog(log.id)}
-          className="flex size-7 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive"
+          className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive flex size-7 items-center justify-center rounded-md"
         >
           <Trash2 className="size-4" aria-hidden />
         </button>
@@ -427,11 +419,11 @@ function FoodLogRow({ log }: { log: FoodLog }) {
 function EmptyDay() {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
-      <span className="flex size-12 items-center justify-center rounded-[14px] bg-bg-sunken text-subtle-foreground">
+      <span className="bg-bg-sunken text-subtle-foreground flex size-12 items-center justify-center rounded-[14px]">
         <Utensils className="size-6" aria-hidden />
       </span>
-      <p className="text-sm font-medium text-foreground">Nothing logged this day.</p>
-      <p className="max-w-xs text-xs text-muted-foreground">
+      <p className="text-foreground text-sm font-medium">Nothing logged this day.</p>
+      <p className="text-muted-foreground max-w-xs text-xs">
         Type or dictate what you ate above, or just tell the Notepad. AI estimates calories,
         protein, carbs, and fat.
       </p>
