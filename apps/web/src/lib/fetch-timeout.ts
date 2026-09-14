@@ -1,6 +1,10 @@
 export const API_REQUEST_TIMEOUT_MS = 30_000;
 const MAX_TIMER_DELAY_MS = 2_147_483_647;
 
+function timeoutAbortError(): DOMException {
+  return new DOMException('Request timed out', 'TimeoutError');
+}
+
 export async function fetchWithTimeout(
   input: RequestInfo | URL,
   init: RequestInit = {},
@@ -20,7 +24,7 @@ export async function fetchWithTimeout(
 
   const abortFromCaller = () => controller.abort(callerSignal?.reason);
   callerSignal?.addEventListener('abort', abortFromCaller, { once: true });
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(timeoutAbortError()), timeoutMs);
   try {
     return await fetch(input, { ...init, signal: controller.signal });
   } finally {

@@ -13,14 +13,15 @@ describe('fetchWithTimeout', () => {
       (_input: RequestInfo | URL, init?: RequestInit) =>
         new Promise<Response>((_resolve, reject) => {
           init?.signal?.addEventListener('abort', () =>
-            reject(new DOMException('Aborted', 'AbortError')),
+            reject(init?.signal?.reason ?? new DOMException('Aborted', 'AbortError')),
           );
         }),
     );
     vi.stubGlobal('fetch', fetch);
 
     const rejection = expect(fetchWithTimeout('/api/test', {}, 50)).rejects.toMatchObject({
-      name: 'AbortError',
+      name: 'TimeoutError',
+      message: 'Request timed out',
     });
     await vi.advanceTimersByTimeAsync(50);
 
