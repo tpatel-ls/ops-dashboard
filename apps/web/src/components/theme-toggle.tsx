@@ -16,7 +16,7 @@ export function ThemeToggle() {
     <div
       role="radiogroup"
       aria-label="Theme"
-      className="hairline inline-flex h-9 items-center gap-0.5 rounded-[10px] border bg-card p-0.5"
+      className="hairline bg-card inline-flex h-9 items-center gap-0.5 rounded-[10px] border p-0.5"
     >
       {OPTIONS.map((opt) => {
         const Icon = opt.icon;
@@ -31,9 +31,7 @@ export function ThemeToggle() {
             onClick={() => setTheme(opt.value)}
             className={cn(
               'inline-flex size-7 items-center justify-center rounded-md transition-colors',
-              active
-                ? 'bg-primary/15 text-primary'
-                : 'text-muted-foreground hover:text-foreground',
+              active ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             <Icon className="size-3.5" aria-hidden />

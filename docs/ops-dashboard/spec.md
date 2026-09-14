@@ -15,12 +15,14 @@ tasks, routines/habits, projects, content, people, library, and a "chat with you
 data" layer. Friction of capture is the enemy; the system must get out of the way.
 
 ### Target devices (all Samsung / Android / Wear OS)
+
 - **Galaxy S24 Ultra** (phone) - primary capture surface; PWA installed to home screen.
 - **Galaxy Tab S10 Ultra** (tablet) - two-pane layouts at ≥lg.
 - **Galaxy Watch 7 Ultra** (Wear OS) - capture via API later; notifications via
   Pushover phone→watch bridging (no native watch app needed).
 
 ### Tanay's three deltas vs Jared's build
+
 1. Runs on Samsung/Android/Wear OS (not Apple).
 2. Habits get a **GitHub-style activity heatmap across all activity types**.
 3. **Journal upload** (text or photo) → AI extracts insights and **marks habits**.
@@ -29,14 +31,15 @@ data" layer. Friction of capture is the enemy; the system must get out of the wa
 
 ## 2. Locked decisions (2026-06-07)
 
-| # | Decision | Choice |
-|---|----------|--------|
-| 1 | Scope order | Foundation (P0) → Core (P1) first, then layer the rest |
-| 2 | Hosting | **Local-first dev, host later.** Runs fully on-device (Dexie/IndexedDB); deploy to Supabase + Vercel with minimal change |
-| 3 | Notifications | **Pushover** (server POST to api.pushover.net; reaches watch via phone bridging) |
-| 4 | Watch capture | Design the capture **API** now; phone/tablet/desktop capture in v1; Wear OS path later |
+| #   | Decision      | Choice                                                                                                                   |
+| --- | ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Scope order   | Foundation (P0) → Core (P1) first, then layer the rest                                                                   |
+| 2   | Hosting       | **Local-first dev, host later.** Runs fully on-device (Dexie/IndexedDB); deploy to Supabase + Vercel with minimal change |
+| 3   | Notifications | **Pushover** (server POST to api.pushover.net; reaches watch via phone bridging)                                         |
+| 4   | Watch capture | Design the capture **API** now; phone/tablet/desktop capture in v1; Wear OS path later                                   |
 
 ### Auto-decided defaults (changeable)
+
 - **Foundation:** Build on the recovered **Ops Dashboard** monorepo (Next.js 16 App Router,
   React 19, Tailwind v4, Dexie local-first, Supabase sync, PWA, cmdk palette). This
   matches the recommended stack and runs with zero external accounts.
@@ -55,6 +58,7 @@ data" layer. Friction of capture is the enemy; the system must get out of the wa
 ## 3. Architecture (inherited + extended)
 
 pnpm monorepo:
+
 - `@ops-dashboard/core` - data shapes, Dexie schema, ULID/device-id, NL parser, recurrence,
   sync helpers. Pure TS (runs in tests/browser/worker). **We extend this heavily.**
 - `@ops-dashboard/ui` - `cn` + design tokens.
@@ -85,6 +89,7 @@ tablet `≥lg/xl` persistent sidebar + master-detail. Use `dvh` + `env(safe-area
 Base fields on every entity: `id, createdAt, updatedAt, version, deviceId, deletedAt`.
 
 **Existing (extend):**
+
 - `Task` - add `domainId?`, `contentId?`, `starred?` (Today top-3). Keep status,
   priority, scheduling, tags, projectId, parentId, recurrence, reminders, checklist.
 - `Project` - add `domainId?`, `kind: 'project'|'area'|'retainer'`,
@@ -94,21 +99,22 @@ Base fields on every entity: `id, createdAt, updatedAt, version, deviceId, delet
 - `Settings` - add `pushoverConfigured`, `aiEnabled`, capture defaults, timezone.
 
 **New:**
+
 - `Domain` - `name, color, icon?, description?, order`. Top of the hierarchy.
 - `Milestone` (embedded) - `id, title, done, dueDate?`.
 - `NamedChecklist` (embedded) - `id, name, items: ChecklistItem[]`.
 - `ChecklistTemplate` - `name, kind, items: string[]` (reusable, e.g. new-website).
 - `WorkLog` - `projectId, minutes, note?, at`. Time tracking + feeds heatmap.
 - `Capture` - `raw, source: 'text'|'voice'|'watch'|'journal', status:
-  'pending'|'triaged'|'dismissed', routedTo?: {type,id}, aiSummary?`. Raw inbox item.
+'pending'|'triaged'|'dismissed', routedTo?: {type,id}, aiSummary?`. Raw inbox item.
 - `Routine` (habit) - `name, description?, timeOfDay:
-  'morning'|'afternoon'|'evening'|'anytime', specificTime?, notify, domainId?,
-  kind: 'ongoing'|'fixed', durationDays?, startDate, endDate?, order, archivedAt?`.
+'morning'|'afternoon'|'evening'|'anytime', specificTime?, notify, domainId?,
+kind: 'ongoing'|'fixed', durationDays?, startDate, endDate?, order, archivedAt?`.
 - `RoutineCheck` - `routineId, date (YYYY-MM-DD), done, completedAt?`. Streaks + heatmap.
 - `JournalEntry` - `date, body, mediaUrls[], mood?, tags[], source?`. Needed for upload.
 - `AppNotification` - `title, body?, kind, refId?, readAt?`. In-app feed.
 - `Content` (model now, UI P3) - `title, type, status, channel?, domainId?, url?,
-  outline?, publishDate?, order`.
+outline?, publishDate?, order`.
 - `Person` / `Note` / `Quote` / `Book` / `InventoryItem` (model later, P4-P5).
 
 **Activity aggregation (heatmap):** pure function reads completed tasks
@@ -129,6 +135,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 ## 5. Feature breakdown by phase
 
 ### P0 - Foundation
+
 - Recover Ops Dashboard (done), install, baseline runs.
 - Extend `@ops-dashboard/core` types + Dexie v2 + sync union + lib helpers for every new
   entity (domains, routines, captures, journal, worklogs, content, notifications).
@@ -141,6 +148,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
   (or keep manual SW for now; manifest icons are the must-fix for installability).
 
 ### P1 - Capture + Today + Tasks
+
 - **Capture:** quick-add upgraded to capture-and-triage; voice button
   (MediaRecorder→/api/transcribe, Web Speech fallback); Cmd/Ctrl+K palette capture;
   capture → AI triage → routed record + notification; **Inbox** = recent captures
@@ -155,6 +163,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
   templates, work-log/time tracking, retainer monthly auto-reload.
 
 ### P2 - Habits + Heatmap + Journal (Tanay's emphasis)
+
 - **Routines/Habits:** CRUD, check-off, streaks, ongoing vs fixed (e.g. 30-day),
   archived/completed streaks, per-day bar/summary.
 - **GitHub-style heatmap** across all activity types, with per-type weighting and a
@@ -165,6 +174,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 - **Pushover** reminders + daily summary (client ticker now; server cron at host-time).
 
 ### P3-P5 (outline)
+
 - P3 Content pipeline (kanban) + retainer polish.
 - P4 Library (notes/quotes/journal/books+Kindle highlights) + People CRM + Inventory.
 - P5 Google Calendar, server push cron, global search (fuse.js exists), chat-with-data,
@@ -173,6 +183,7 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 ---
 
 ## 6. Environment variables (all optional; app runs without them)
+
 ```
 ANTHROPIC_API_KEY=      # AI triage, journal extraction, chat
 GROQ_API_KEY=           # voice transcription (whisper-large-v3-turbo)
@@ -185,6 +196,7 @@ SUPABASE_SECRET_KEY=
 ```
 
 ## 7. Key conventions to follow
+
 - New entity → add type, add to Dexie `version(2)`, add `src/lib/<entity>.ts` with
   `add/update/softDelete` that also `enqueueOp`, bump `version`, set `updatedAt`.
 - Use `getDb()`, `newId()` (ULID), `getDeviceId()`, `enqueueOp()` from `@ops-dashboard/core`.
@@ -195,6 +207,7 @@ SUPABASE_SECRET_KEY=
 - Server routes degrade gracefully without keys; never expose secrets client-side.
 
 ## 8. Verification
+
 - `pnpm typecheck`, `pnpm test`, `pnpm build` stay green at each milestone.
 - Smoke-test in browser (dev) for each view; production `build && start` to verify
   PWA installability (SW/precache don't run in `next dev`).

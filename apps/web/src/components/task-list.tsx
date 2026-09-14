@@ -92,7 +92,7 @@ function TaskRow({ task }: { task: Task }) {
           'mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
           done
             ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border-strong text-transparent hover:border-primary hover:bg-primary/10',
+            : 'border-border-strong hover:border-primary hover:bg-primary/10 text-transparent',
         )}
         aria-label={done ? 'Mark as todo' : 'Mark as done'}
       >
@@ -103,21 +103,21 @@ function TaskRow({ task }: { task: Task }) {
           <span
             className={cn(
               'truncate text-[14px] leading-5',
-              done && 'text-muted-foreground line-through decoration-muted-foreground/50',
+              done && 'text-muted-foreground decoration-muted-foreground/50 line-through',
             )}
           >
             {task.title}
           </span>
           {task.priority > 0 ? (
             <span
-              className="rounded font-mono text-[10px] font-semibold leading-none"
+              className="rounded font-mono text-[10px] leading-none font-semibold"
               style={{ color: priorityColor }}
             >
               {PRIORITY_GLYPH[task.priority]}
             </span>
           ) : null}
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-subtle-foreground">
+        <div className="text-subtle-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
           {task.startAt ? (
             <span className="inline-flex items-center gap-1 font-mono">
               <Clock className="size-3" aria-hidden />
@@ -130,13 +130,11 @@ function TaskRow({ task }: { task: Task }) {
               {format(parseISO(`${task.scheduledFor}T00:00:00`), 'EEE d MMM')}
             </span>
           ) : null}
-          {task.estimateMinutes ? (
-            <span className="font-mono">{task.estimateMinutes}m</span>
-          ) : null}
+          {task.estimateMinutes ? <span className="font-mono">{task.estimateMinutes}m</span> : null}
           {task.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-accent px-2 py-0.5 text-[10px] text-accent-foreground"
+              className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
             >
               #{tag}
             </span>
@@ -175,11 +173,11 @@ function EmptyState({ filter }: { filter: 'today' | 'inbox' | 'all' }) {
       : 'Capture an idea above. Schedule it later from any view.';
   return (
     <div className="surface flex h-full min-h-60 flex-col items-center justify-center gap-2 p-10 text-center">
-      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
         {filter}
       </div>
       <h3 className="text-xl font-semibold tracking-tight">{heading}</h3>
-      <p className="max-w-md text-sm text-muted-foreground">{body}</p>
+      <p className="text-muted-foreground max-w-md text-sm">{body}</p>
     </div>
   );
 }

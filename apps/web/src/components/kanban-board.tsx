@@ -98,7 +98,7 @@ export function KanbanBoard() {
         </span>
       </div>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="scrollbar-thin -mx-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-3 pb-3 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+        <div className="-mx-3 flex snap-x snap-mandatory scrollbar-thin gap-3 overflow-x-auto px-3 pb-3 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
           {SIMPLE_KANBAN_COLUMNS.map((column, index) => (
             <KanbanColumn
               key={column.id}
@@ -189,7 +189,7 @@ function KanbanColumn({
         </span>
       </header>
 
-      <div className="scrollbar-thin flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto">
+      <div className="flex min-h-24 flex-1 scrollbar-thin flex-col gap-2 overflow-y-auto">
         {tasks.length > 0 ? (
           tasks.map((task) => (
             <KanbanCard

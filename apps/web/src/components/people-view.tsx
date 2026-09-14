@@ -2,14 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
-import {
-  Calendar,
-  Plus,
-  Search,
-  User,
-  Users,
-  X,
-} from 'lucide-react';
+import { Calendar, Plus, Search, User, Users, X } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
@@ -46,7 +39,7 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="surface flex flex-col gap-3 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
         New person
       </div>
       <input
@@ -71,14 +64,14 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 rounded-md px-3 text-xs"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium disabled:opacity-50"
         >
           Create
         </button>
@@ -109,11 +102,11 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className="surface-flat group w-full cursor-pointer px-4 py-3 text-left transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]"
+      className="surface-flat group hover:border-border-strong w-full cursor-pointer px-4 py-3 text-left transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]"
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[13px] font-semibold text-primary">
+        <div className="bg-primary-soft text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold">
           {person.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -128,9 +121,9 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="text-[14px] font-medium leading-5">{person.name}</span>
+            <span className="text-[14px] leading-5 font-medium">{person.name}</span>
             {person.relationship ? (
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
                 {person.relationship}
               </span>
             ) : null}
@@ -138,20 +131,20 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
 
           {/* Domain chip */}
           {domain ? (
-            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
+            <div className="bg-bg-sunken mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5">
               <span
                 className="size-1.5 rounded-full"
                 style={{ background: domain.color }}
                 aria-hidden
               />
-              <span className="font-mono text-[10px] text-subtle-foreground">{domain.name}</span>
+              <span className="text-subtle-foreground font-mono text-[10px]">{domain.name}</span>
             </div>
           ) : null}
         </div>
       </div>
 
       {/* Footer row */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-subtle-foreground">
+      <div className="text-subtle-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
         {factCount > 0 ? (
           <span className="inline-flex items-center gap-1">
             <User className="size-3" aria-hidden />
@@ -165,7 +158,7 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
             {formatDistanceToNow(parseISO(lastInteraction.date), { addSuffix: true })}
           </span>
         ) : (
-          <span className="text-[11px] text-subtle-foreground">No interactions yet</span>
+          <span className="text-subtle-foreground text-[11px]">No interactions yet</span>
         )}
       </div>
     </button>
@@ -196,13 +189,10 @@ export function PeopleView() {
   });
 
   // Keep selected person live
-  const liveSelectedPerson = useLiveQuery(
-    async () => {
-      if (!selectedPerson) return null;
-      return (await getDb().people.get(selectedPerson.id)) ?? null;
-    },
-    [selectedPerson?.id],
-  );
+  const liveSelectedPerson = useLiveQuery(async () => {
+    if (!selectedPerson) return null;
+    return (await getDb().people.get(selectedPerson.id)) ?? null;
+  }, [selectedPerson?.id]);
 
   const displayPerson = liveSelectedPerson !== undefined ? liveSelectedPerson : selectedPerson;
   const visiblePeople =
@@ -214,7 +204,10 @@ export function PeopleView() {
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative min-w-0 flex-1 sm:max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Search
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+              aria-hidden
+            />
             <span className="sr-only">Search people</span>
             <input
               type="search"
@@ -225,7 +218,7 @@ export function PeopleView() {
               className="input h-10 w-full pl-9"
             />
           </label>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {data ? `${visiblePeople.length} of ${data.peopleWithDomains.length}` : '-'}
           </span>
           <button
@@ -268,28 +261,29 @@ export function PeopleView() {
         ) : data.peopleWithDomains.length === 0 && !creating ? (
           /* Empty state */
           <div className="surface flex h-72 flex-col items-center justify-center gap-3 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-primary-soft">
-              <Users className="size-5 text-primary" aria-hidden />
+            <div className="bg-primary-soft flex size-12 items-center justify-center rounded-full">
+              <Users className="text-primary size-5" aria-hidden />
             </div>
             <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+              <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
                 People
               </div>
               <h3 className="mt-1 text-xl font-semibold tracking-tight">A clean slate.</h3>
-              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Add the people who matter - store facts and log interactions so nothing slips through the cracks.
+              <p className="text-muted-foreground mt-1 max-w-xs text-sm">
+                Add the people who matter - store facts and log interactions so nothing slips
+                through the cracks.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setCreating(true)}
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
+              className="bg-primary text-primary-foreground inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-medium hover:opacity-90"
             >
               <Plus className="size-3.5" /> Add your first person
             </button>
           </div>
         ) : visiblePeople.length === 0 ? (
-          <div className="flex min-h-36 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex min-h-36 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm">
             No people match &quot;{query.trim()}&quot;.
           </div>
         ) : (

@@ -20,9 +20,7 @@ export function clampScore(value: number): number {
 
 export function computeIdentityScore(input: IdentityScoreInput): number {
   return clampScore(
-    input.bestStreak * 3.5 +
-      input.weeklyActiveDays * 7 +
-      Math.min(input.totalPoints, 160) * 0.22,
+    input.bestStreak * 3.5 + input.weeklyActiveDays * 7 + Math.min(input.totalPoints, 160) * 0.22,
   );
 }
 

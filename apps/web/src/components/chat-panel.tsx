@@ -49,36 +49,42 @@ export function ChatPanel({
   return (
     <div className="surface flex h-[min(680px,calc(100dvh-10rem))] min-h-[420px] flex-col overflow-hidden">
       {/* Message list */}
-      <div className="scrollbar-thin flex-1 overflow-y-auto p-3 sm:p-4 md:p-6" role="log" aria-live="polite">
+      <div
+        className="flex-1 scrollbar-thin overflow-y-auto p-3 sm:p-4 md:p-6"
+        role="log"
+        aria-live="polite"
+      >
         {isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-primary-soft">
-              <Bot className="size-5 text-primary" aria-hidden />
+            <div className="bg-primary-soft flex size-12 items-center justify-center rounded-full">
+              <Bot className="text-primary size-5" aria-hidden />
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+            <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
               Ask anything
             </div>
             <h3 className="text-base font-semibold">Project intelligence</h3>
-            <p className="max-w-sm text-sm text-muted-foreground">
+            <p className="text-muted-foreground max-w-sm text-sm">
               Ask about organizations, project status, deadlines, and open tasks.
             </p>
             <div className="grid w-full max-w-sm gap-2 sm:grid-cols-2">
-              {['What is overdue?', 'What should I do next?', 'Summarize LSG work'].map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => {
-                    onInputChange(prompt);
-                    textareaRef.current?.focus();
-                  }}
-                  className="min-h-10 rounded-md border bg-card px-3 py-2 text-left text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                  {prompt}
-                </button>
-              ))}
+              {['What is overdue?', 'What should I do next?', 'Summarize LSG work'].map(
+                (prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => {
+                      onInputChange(prompt);
+                      textareaRef.current?.focus();
+                    }}
+                    className="bg-card text-muted-foreground hover:bg-accent hover:text-foreground min-h-10 rounded-md border px-3 py-2 text-left text-xs"
+                  >
+                    {prompt}
+                  </button>
+                ),
+              )}
             </div>
             {noKey && (
-              <div className="mt-2 flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
+              <div className="border-warning/40 bg-warning/10 text-warning mt-2 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <KeyRound className="size-4 shrink-0" aria-hidden />
                 <span>
                   Add <code className="kbd">ANTHROPIC_API_KEY</code> to{' '}
@@ -92,10 +98,7 @@ export function ChatPanel({
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={cn(
-                  'flex gap-3',
-                  msg.role === 'user' ? 'flex-row-reverse' : 'flex-row',
-                )}
+                className={cn('flex gap-3', msg.role === 'user' ? 'flex-row-reverse' : 'flex-row')}
               >
                 {/* Avatar */}
                 <div
@@ -124,7 +127,7 @@ export function ChatPanel({
                   )}
                 >
                   {msg.loading ? (
-                    <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="text-muted-foreground flex items-center gap-2">
                       <Loader2 className="size-3.5 animate-spin" aria-hidden />
                       Thinking…
                     </span>
@@ -137,7 +140,7 @@ export function ChatPanel({
 
             {/* Inline no-key notice when it surfaces after a send */}
             {noKey && messages.length > 0 && (
-              <div className="flex items-center gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
+              <div className="border-warning/40 bg-warning/10 text-warning flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <KeyRound className="size-4 shrink-0" aria-hidden />
                 <span>
                   Add <code className="kbd">ANTHROPIC_API_KEY</code> to{' '}
@@ -179,7 +182,7 @@ export function ChatPanel({
           className={cn(
             'inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors',
             loading || !input.trim()
-              ? 'cursor-not-allowed bg-muted text-muted-foreground'
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
               : 'bg-primary text-primary-foreground hover:opacity-90',
           )}
         >

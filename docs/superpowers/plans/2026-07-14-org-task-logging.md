@@ -22,10 +22,12 @@
 ### Task 1: Destination rules
 
 **Files:**
+
 - Create: `apps/web/src/lib/work-logger.ts`
 - Test: `apps/web/src/lib/work-logger.test.ts`
 
 **Interfaces:**
+
 - Produces: `WorkDestination`, `resolveWorkDestination`, `destinationOrgId`, `projectsForDestination`, `syncSaveMessage`.
 - Consumes: `OrgContext`, `Project`, and `SyncState` from existing modules.
 
@@ -76,10 +78,12 @@ git commit -m "feat: add organization destination rules"
 ### Task 2: Logger launch state
 
 **Files:**
+
 - Modify: `apps/web/src/lib/app-store.ts`
 - Test: `apps/web/src/lib/app-store.test.ts`
 
 **Interfaces:**
+
 - Produces: `WorkLoggerMode`, `openWorkLogger(mode?, projectId?)`, and `closeWorkLogger()`.
 - Preserves: `openQuickAdd()` and `closeQuickAdd()` as task-mode compatibility aliases.
 
@@ -125,6 +129,7 @@ git commit -m "feat: add universal logger launch state"
 ### Task 3: Three-mode universal logger
 
 **Files:**
+
 - Create: `apps/web/src/components/work-logger-dialog.tsx`
 - Modify: `apps/web/src/components/app-shell.tsx`
 - Delete: `apps/web/src/components/quick-add-dialog.tsx`
@@ -132,6 +137,7 @@ git commit -m "feat: add universal logger launch state"
 - Test: `apps/web/src/lib/projects.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 destination helpers and Task 2 launch state.
 - Produces: Task, Project, and Progress form modes with inline organization creation and sync feedback.
 
@@ -205,10 +211,12 @@ git commit -m "feat: add organization-first work logger"
 ### Task 4: Projects page integration
 
 **Files:**
+
 - Modify: `apps/web/src/components/projects-board.tsx`
 - Create: `apps/web/scripts/verify-work-logger.mjs`
 
 **Interfaces:**
+
 - Consumes: `useActiveOrgs`, `resolveWorkDestination`, and `openWorkLogger`.
 - Produces: organization-aware inline creation, organization labels in All, and progress launch actions.
 
@@ -241,6 +249,7 @@ git commit -m "feat: make projects organization aware"
 ### Task 5: Fast capture and mobile access
 
 **Files:**
+
 - Modify: `apps/web/src/components/quick-add.tsx`
 - Modify: `apps/web/src/components/top-bar.tsx`
 - Modify: `apps/web/src/components/mobile-nav.tsx`
@@ -248,6 +257,7 @@ git commit -m "feat: make projects organization aware"
 - Modify: `apps/web/src/components/dashboard/life-command-center.tsx`
 
 **Interfaces:**
+
 - Consumes: existing organization records, project records, and `openWorkLogger`.
 - Produces: visible organization assignment in desktop capture and direct universal-logger access everywhere else.
 
@@ -275,10 +285,12 @@ git commit -m "feat: expose organization logging on every device"
 ### Task 6: End-to-end verification and release
 
 **Files:**
+
 - Modify: `docs/ops-dashboard/STATE.md`
 - Modify: `docs/superpowers/plans/2026-07-14-org-task-logging.md`
 
 **Interfaces:**
+
 - Verifies the complete browser, local database, Supabase, and deployment path.
 
 - [ ] **Step 1: Run focused and full automated checks**

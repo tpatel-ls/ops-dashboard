@@ -2,16 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState, useRef, useEffect } from 'react';
-import {
-  Check,
-  CheckSquare,
-  ChevronRight,
-  Layers,
-  ListChecks,
-  Plus,
-  Timer,
-  X,
-} from 'lucide-react';
+import { Check, CheckSquare, ChevronRight, Layers, ListChecks, Plus, Timer, X } from 'lucide-react';
 import { getDb, newId } from '@ops-dashboard/core';
 import type {
   ChecklistItem,
@@ -89,21 +80,21 @@ function MilestonesSection({ project }: { project: Project }) {
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="size-3.5 text-muted-foreground" aria-hidden />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <Layers className="text-muted-foreground size-3.5" aria-hidden />
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Milestones
           </span>
         </div>
         <div className="flex items-center gap-2">
           {milestones.length > 0 ? (
-            <span className="font-mono text-[10px] text-muted-foreground">
+            <span className="text-muted-foreground font-mono text-[10px]">
               {done}/{milestones.length} · {pct}%
             </span>
           ) : null}
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-[11px]"
           >
             <Plus className="size-3" /> Add
           </button>
@@ -112,7 +103,7 @@ function MilestonesSection({ project }: { project: Project }) {
 
       {milestones.length > 0 ? (
         <div
-          className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-bg-sunken"
+          className="bg-bg-sunken mb-1 h-1.5 w-full overflow-hidden rounded-full"
           role="progressbar"
           aria-label="Milestone completion"
           aria-valuemin={0}
@@ -120,7 +111,7 @@ function MilestonesSection({ project }: { project: Project }) {
           aria-valuenow={pct}
         >
           <div
-            className="h-full rounded-full bg-primary transition-all"
+            className="bg-primary h-full rounded-full transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -152,7 +143,7 @@ function MilestonesSection({ project }: { project: Project }) {
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="rounded-md px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground rounded-md px-3 py-1 text-xs"
             >
               Cancel
             </button>
@@ -160,7 +151,7 @@ function MilestonesSection({ project }: { project: Project }) {
               type="button"
               onClick={addMilestone}
               disabled={!newTitle.trim()}
-              className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground disabled:opacity-50"
+              className="bg-primary text-primary-foreground rounded-md px-3 py-1 text-xs font-medium disabled:opacity-50"
             >
               Add
             </button>
@@ -169,7 +160,7 @@ function MilestonesSection({ project }: { project: Project }) {
       ) : null}
 
       {milestones.length === 0 && !adding ? (
-        <p className="text-xs text-subtle-foreground">No milestones yet.</p>
+        <p className="text-subtle-foreground text-xs">No milestones yet.</p>
       ) : (
         <ul className="flex flex-col gap-1">
           {milestones.map((m) => (
@@ -181,17 +172,19 @@ function MilestonesSection({ project }: { project: Project }) {
                   'inline-flex size-9 shrink-0 items-center justify-center rounded-md border transition-all',
                   m.done
                     ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border-strong text-transparent hover:border-primary',
+                    : 'border-border-strong hover:border-primary text-transparent',
                 )}
                 aria-label={`${m.done ? 'Mark incomplete' : 'Mark complete'}: ${m.title}`}
               >
                 <Check className="size-2.5" strokeWidth={3} />
               </button>
-              <span className={cn('flex-1 text-sm', m.done && 'text-muted-foreground line-through')}>
+              <span
+                className={cn('flex-1 text-sm', m.done && 'text-muted-foreground line-through')}
+              >
                 {m.title}
               </span>
               {m.dueAt ? (
-                <span className="font-mono text-[10px] text-subtle-foreground">{m.dueAt}</span>
+                <span className="text-subtle-foreground font-mono text-[10px]">{m.dueAt}</span>
               ) : null}
             </li>
           ))}
@@ -231,7 +224,10 @@ function ChecklistsSection({ project }: { project: Project }) {
   async function toggleItem(listId: string, itemId: string) {
     const updated = checklists.map((cl) =>
       cl.id === listId
-        ? { ...cl, items: cl.items.map((it) => (it.id === itemId ? { ...it, done: !it.done } : it)) }
+        ? {
+            ...cl,
+            items: cl.items.map((it) => (it.id === itemId ? { ...it, done: !it.done } : it)),
+          }
         : cl,
     );
     await updateProject(project.id, { checklists: updated });
@@ -241,15 +237,15 @@ function ChecklistsSection({ project }: { project: Project }) {
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ListChecks className="size-3.5 text-muted-foreground" aria-hidden />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <ListChecks className="text-muted-foreground size-3.5" aria-hidden />
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Checklists
           </span>
         </div>
         <button
           type="button"
           onClick={() => setAddingList(true)}
-          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px]"
         >
           <Plus className="size-3" /> Add checklist
         </button>
@@ -273,14 +269,14 @@ function ChecklistsSection({ project }: { project: Project }) {
             type="button"
             onClick={addList}
             disabled={!newListName.trim()}
-            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground disabled:opacity-50"
+            className="bg-primary text-primary-foreground rounded-md px-3 py-1 text-xs font-medium disabled:opacity-50"
           >
             Add
           </button>
           <button
             type="button"
             onClick={() => setAddingList(false)}
-            className="rounded-md px-2 py-1 text-xs text-muted-foreground"
+            className="text-muted-foreground rounded-md px-2 py-1 text-xs"
           >
             <X className="size-3.5" />
           </button>
@@ -288,7 +284,7 @@ function ChecklistsSection({ project }: { project: Project }) {
       ) : null}
 
       {checklists.length === 0 && !addingList ? (
-        <p className="text-xs text-subtle-foreground">No checklists yet.</p>
+        <p className="text-subtle-foreground text-xs">No checklists yet.</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {checklists.map((cl) => (
@@ -331,22 +327,28 @@ function ChecklistGroup({
         onClick={onToggleExpand}
         aria-expanded={expanded}
         aria-controls={`project-checklist-${checklist.id}`}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-bg-sunken"
+        className="hover:bg-bg-sunken flex w-full items-center gap-2 px-3 py-2 text-left"
       >
         <ChevronRight
-          className={cn('size-3.5 text-muted-foreground transition-transform', expanded && 'rotate-90')}
+          className={cn(
+            'text-muted-foreground size-3.5 transition-transform',
+            expanded && 'rotate-90',
+          )}
           aria-hidden
         />
         <span className="flex-1 text-sm font-medium">{checklist.name}</span>
-        <span className="font-mono text-[10px] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px]">
           {done}/{checklist.items.length}
         </span>
       </button>
       {expanded ? (
-        <div id={`project-checklist-${checklist.id}`} className="border-t border-border px-3 pb-2 pt-1">
+        <div
+          id={`project-checklist-${checklist.id}`}
+          className="border-border border-t px-3 pt-1 pb-2"
+        >
           <ul className="flex flex-col gap-1 pb-1">
             {checklist.items.length === 0 ? (
-              <li className="text-xs text-subtle-foreground py-1">Empty checklist.</li>
+              <li className="text-subtle-foreground py-1 text-xs">Empty checklist.</li>
             ) : (
               checklist.items.map((it) => (
                 <li key={it.id} className="flex items-center gap-2">
@@ -357,13 +359,18 @@ function ChecklistGroup({
                       'inline-flex size-4 shrink-0 items-center justify-center rounded border transition-all',
                       it.done
                         ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border-strong text-transparent hover:border-primary',
+                        : 'border-border-strong hover:border-primary text-transparent',
                     )}
                     aria-label={it.done ? 'Uncheck' : 'Check'}
                   >
                     <Check className="size-2.5" strokeWidth={3} />
                   </button>
-                  <span className={cn('flex-1 text-sm', it.done && 'text-muted-foreground line-through')}>
+                  <span
+                    className={cn(
+                      'flex-1 text-sm',
+                      it.done && 'text-muted-foreground line-through',
+                    )}
+                  >
                     {it.text}
                   </span>
                 </li>
@@ -397,7 +404,7 @@ function ChecklistGroup({
                   }
                   setAddingItem(false);
                 }}
-                className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+                className="bg-primary text-primary-foreground rounded-md px-3 py-1 text-xs font-medium"
               >
                 Add
               </button>
@@ -406,7 +413,7 @@ function ChecklistGroup({
             <button
               type="button"
               onClick={() => setAddingItem(true)}
-              className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground mt-1 inline-flex items-center gap-1 text-[11px]"
             >
               <Plus className="size-3" /> Add item
             </button>
@@ -439,50 +446,47 @@ function LinkedTasksSection({ project }: { project: Project }) {
     }
   }
 
-  const tasks = useLiveQuery(
-    async () => {
-      const all = await getDb().tasks.toArray();
-      return all
-        .filter((t) => !t.deletedAt && t.status !== 'archived' && t.projectId === project.id)
-        .sort((a, b) => {
-          if (a.status === 'done' && b.status !== 'done') return 1;
-          if (b.status === 'done' && a.status !== 'done') return -1;
-          return a.order - b.order;
-        });
-    },
-    [project.id],
-  );
+  const tasks = useLiveQuery(async () => {
+    const all = await getDb().tasks.toArray();
+    return all
+      .filter((t) => !t.deletedAt && t.status !== 'archived' && t.projectId === project.id)
+      .sort((a, b) => {
+        if (a.status === 'done' && b.status !== 'done') return 1;
+        if (b.status === 'done' && a.status !== 'done') return -1;
+        return a.order - b.order;
+      });
+  }, [project.id]);
 
   if (!tasks) return null;
 
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <CheckSquare className="size-3.5 text-muted-foreground" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <CheckSquare className="text-muted-foreground size-3.5" aria-hidden />
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Tasks
         </span>
-        <span className="ml-auto font-mono text-[10px] text-subtle-foreground">
+        <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
           {tasks.filter((t) => t.status !== 'done').length} open
         </span>
       </div>
       <form
         onSubmit={submitAdd}
-        className="hairline flex items-center gap-1.5 rounded-md border bg-bg-sunken px-2 py-1.5 focus-within:border-primary/50"
+        className="hairline bg-bg-sunken focus-within:border-primary/50 flex items-center gap-1.5 rounded-md border px-2 py-1.5"
       >
-        <Plus className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+        <Plus className="text-muted-foreground size-3 shrink-0" aria-hidden />
         <input
           value={adding}
           onChange={(e) => setAdding(e.target.value)}
           placeholder="Add a task... (try: call Bryan tomorrow 2pm !!)"
           aria-label={`Add task to ${project.name}`}
           disabled={saving}
-          className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-subtle-foreground"
+          className="text-foreground placeholder:text-subtle-foreground flex-1 bg-transparent text-xs outline-none"
         />
         <span className="kbd hidden sm:inline">Enter</span>
       </form>
       {tasks.length === 0 ? (
-        <p className="text-xs text-subtle-foreground">No tasks linked to this project.</p>
+        <p className="text-subtle-foreground text-xs">No tasks linked to this project.</p>
       ) : (
         <ul className="flex flex-col gap-1">
           {tasks.map((t) => (
@@ -499,7 +503,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
   return (
     <li
       className={cn(
-        'group surface-flat flex items-center gap-2.5 px-3 py-2 transition-all hover:border-border-strong',
+        'group surface-flat hover:border-border-strong flex items-center gap-2.5 px-3 py-2 transition-all',
         done && 'opacity-60',
       )}
     >
@@ -510,7 +514,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
           'inline-flex size-4 shrink-0 items-center justify-center rounded-full border transition-all',
           done
             ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border-strong text-transparent hover:border-primary',
+            : 'border-border-strong hover:border-primary text-transparent',
         )}
         aria-label={`${done ? 'Mark as todo' : 'Mark as done'}: ${task.title}`}
       >
@@ -520,7 +524,10 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
         type="button"
         onClick={onOpen}
         aria-label={`Edit task: ${task.title}`}
-        className={cn('min-w-0 flex-1 truncate text-left text-sm outline-none focus-visible:text-primary', done && 'text-muted-foreground line-through')}
+        className={cn(
+          'focus-visible:text-primary min-w-0 flex-1 truncate text-left text-sm outline-none',
+          done && 'text-muted-foreground line-through',
+        )}
       >
         {task.title}
       </button>
@@ -559,12 +566,12 @@ function LogWorkSection({ project }: { project: Project }) {
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <Timer className="size-3.5 text-muted-foreground" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <Timer className="text-muted-foreground size-3.5" aria-hidden />
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Log work
         </span>
         {totalHours !== undefined ? (
-          <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+          <span className="text-muted-foreground ml-auto font-mono text-[10px]">
             {totalHours}h total
           </span>
         ) : null}
@@ -589,7 +596,9 @@ function LogWorkSection({ project }: { project: Project }) {
           ))}
         </div>
         <div className="flex gap-2">
-          <label htmlFor={`project-${project.id}-minutes`} className="sr-only">Minutes worked</label>
+          <label htmlFor={`project-${project.id}-minutes`} className="sr-only">
+            Minutes worked
+          </label>
           <input
             id={`project-${project.id}-minutes`}
             type="number"
@@ -599,20 +608,24 @@ function LogWorkSection({ project }: { project: Project }) {
             onChange={(e) => setMinutes(e.target.value)}
             className="input w-28"
           />
-          <label htmlFor={`project-${project.id}-note`} className="sr-only">Progress note</label>
+          <label htmlFor={`project-${project.id}-note`} className="sr-only">
+            Progress note
+          </label>
           <input
             id={`project-${project.id}-note`}
             placeholder="Note (optional)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             className="input flex-1"
-            onKeyDown={(e) => { if (e.key === 'Enter') handleLog(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleLog();
+            }}
           />
           <button
             type="button"
             onClick={handleLog}
             disabled={saving || !minutes || parseInt(minutes, 10) <= 0}
-            className="min-h-11 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+            className="bg-primary text-primary-foreground min-h-11 rounded-md px-3 py-1.5 text-xs font-medium disabled:opacity-50"
           >
             Log
           </button>
@@ -649,33 +662,37 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
       <div className="grid gap-2 text-sm">
         {/* Status */}
         <div className="flex items-center gap-2">
-          <span className="w-20 text-xs text-muted-foreground">Status</span>
+          <span className="text-muted-foreground w-20 text-xs">Status</span>
           <select
             value={project.status}
             onChange={(e) => set('status', e.target.value as ProjectStatus)}
             className="input flex-1"
           >
             {Object.entries(STATUS_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+              <option key={v} value={v}>
+                {l}
+              </option>
             ))}
           </select>
         </div>
         {/* Kind */}
         <div className="flex items-center gap-2">
-          <span className="w-20 text-xs text-muted-foreground">Kind</span>
+          <span className="text-muted-foreground w-20 text-xs">Kind</span>
           <select
             value={project.kind}
             onChange={(e) => set('kind', e.target.value as ProjectKind)}
             className="input flex-1"
           >
             {Object.entries(KIND_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+              <option key={v} value={v}>
+                {l}
+              </option>
             ))}
           </select>
         </div>
         {/* Organization */}
         <div className="flex items-center gap-2">
-          <span className="w-20 text-xs text-muted-foreground">Org</span>
+          <span className="text-muted-foreground w-20 text-xs">Org</span>
           <select
             value={project.orgId ?? ''}
             onChange={(e) => void setOrg(e.target.value)}
@@ -683,13 +700,15 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
           >
             <option value="">Personal</option>
             {(orgs ?? []).map((o) => (
-              <option key={o.id} value={o.id}>{o.name}</option>
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
             ))}
           </select>
         </div>
         {/* Domain */}
         <div className="flex items-center gap-2">
-          <span className="w-20 text-xs text-muted-foreground">Domain</span>
+          <span className="text-muted-foreground w-20 text-xs">Domain</span>
           <select
             value={project.domainId ?? ''}
             onChange={(e) => set('domainId', e.target.value || undefined)}
@@ -697,13 +716,15 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
           >
             <option value="">- none -</option>
             {domains.map((d) => (
-              <option key={d.id} value={d.id}>{d.name}</option>
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
             ))}
           </select>
         </div>
         {/* Due date */}
         <div className="flex items-center gap-2">
-          <span className="w-20 text-xs text-muted-foreground">Due</span>
+          <span className="text-muted-foreground w-20 text-xs">Due</span>
           <input
             type="date"
             aria-label="Project due date"
@@ -752,7 +773,7 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-detail-title"
-        className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-border bg-background shadow-2xl"
+        className="border-border bg-background relative z-10 flex h-full w-full max-w-xl flex-col border-l shadow-2xl"
       >
         {/* Header */}
         <div className="hairline flex items-start justify-between border-b px-3 py-3 sm:px-5 sm:py-4">
@@ -762,12 +783,19 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
               style={{ background: project.color }}
             />
             <div>
-              <h2 id="project-detail-title" className="text-[15px] font-semibold leading-tight">{project.name}</h2>
+              <h2 id="project-detail-title" className="text-[15px] leading-tight font-semibold">
+                {project.name}
+              </h2>
               <div className="mt-0.5 flex items-center gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+                <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                   {KIND_LABELS[project.kind]}
                 </span>
-                <span className={cn('rounded-md border px-1.5 py-0.5 text-[10px] font-semibold', STATUS_CLASSES[project.status])}>
+                <span
+                  className={cn(
+                    'rounded-md border px-1.5 py-0.5 text-[10px] font-semibold',
+                    STATUS_CLASSES[project.status],
+                  )}
+                >
                   {STATUS_LABELS[project.status]}
                 </span>
               </div>
@@ -777,7 +805,7 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
             <button
               type="button"
               onClick={() => openWorkLogger('task', project.id)}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-primary hover:bg-primary/10"
+              className="text-primary hover:bg-primary/10 inline-flex min-h-10 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium"
             >
               <Plus className="size-3.5" aria-hidden />
               Add task
@@ -785,7 +813,7 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 shrink-0 items-center justify-center rounded-md"
               aria-label="Close"
             >
               <X className="size-4" />
@@ -794,10 +822,10 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
         </div>
 
         {/* Body */}
-        <div className="scrollbar-thin flex-1 overflow-y-auto p-3 sm:p-5">
+        <div className="flex-1 scrollbar-thin overflow-y-auto p-3 sm:p-5">
           <div className="flex flex-col gap-5 sm:gap-6">
             {project.description ? (
-              <p className="text-sm text-muted-foreground">{project.description}</p>
+              <p className="text-muted-foreground text-sm">{project.description}</p>
             ) : null}
 
             <MetaSection project={project} domains={domains} />

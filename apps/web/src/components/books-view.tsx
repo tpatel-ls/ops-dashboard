@@ -50,7 +50,7 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="surface-flat flex flex-col gap-3 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
         New Book
       </div>
       <input
@@ -85,14 +85,14 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !title.trim()}
-          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Add Book'}
         </button>
@@ -150,23 +150,25 @@ function BookHighlights({ bookId, quotes }: { bookId: string; quotes: Quote[] })
         onClick={() => setExpanded((v) => !v)}
         className="flex items-center gap-1.5 text-left"
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {bookQuotes.length} highlight{bookQuotes.length !== 1 ? 's' : ''}
         </span>
         {expanded ? (
-          <ChevronUp className="size-3 text-subtle-foreground" />
+          <ChevronUp className="text-subtle-foreground size-3" />
         ) : (
-          <ChevronDown className="size-3 text-subtle-foreground" />
+          <ChevronDown className="text-subtle-foreground size-3" />
         )}
       </button>
 
       {expanded && (
         <ul className="mt-2 flex flex-col gap-2">
           {bookQuotes.map((q) => (
-            <li key={q.id} className="rounded-md bg-bg-sunken px-3 py-2">
-              <p className="text-[13px] italic leading-snug text-foreground">&ldquo;{q.text}&rdquo;</p>
+            <li key={q.id} className="bg-bg-sunken rounded-md px-3 py-2">
+              <p className="text-foreground text-[13px] leading-snug italic">
+                &ldquo;{q.text}&rdquo;
+              </p>
               {q.author && (
-                <p className="mt-1 font-mono text-[10px] text-subtle-foreground">- {q.author}</p>
+                <p className="text-subtle-foreground mt-1 font-mono text-[10px]">- {q.author}</p>
               )}
             </li>
           ))}
@@ -210,21 +212,17 @@ function BookCard({ book, quotes }: BookCardProps) {
   }
 
   return (
-    <li className="surface-flat group relative flex gap-3 px-4 py-3 transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
+    <li className="surface-flat group hover:border-border-strong relative flex gap-3 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
       {/* Cover placeholder */}
       <div
-        className="mt-0.5 flex h-16 w-11 shrink-0 flex-col items-center justify-center overflow-hidden rounded-[6px] bg-primary-soft"
+        className="bg-primary-soft mt-0.5 flex h-16 w-11 shrink-0 flex-col items-center justify-center overflow-hidden rounded-[6px]"
         aria-hidden
       >
         {book.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={book.coverUrl}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <img src={book.coverUrl} alt="" className="h-full w-full object-cover" />
         ) : (
-          <BookOpen className="size-4 text-primary" />
+          <BookOpen className="text-primary size-4" />
         )}
       </div>
 
@@ -232,9 +230,9 @@ function BookCard({ book, quotes }: BookCardProps) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-[14px] font-medium leading-snug">{book.title}</p>
+            <p className="truncate text-[14px] leading-snug font-medium">{book.title}</p>
             {book.author && (
-              <p className="mt-0.5 text-[12px] text-muted-foreground">{book.author}</p>
+              <p className="text-muted-foreground mt-0.5 text-[12px]">{book.author}</p>
             )}
           </div>
 
@@ -259,7 +257,7 @@ function BookCard({ book, quotes }: BookCardProps) {
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <StarRating value={book.rating} onChange={handleRating} />
           <select
-            className="h-9 rounded-md border border-border bg-input px-2 font-mono text-[10px] uppercase tracking-[0.12em] text-foreground focus:outline-none"
+            className="border-border bg-input text-foreground h-9 rounded-md border px-2 font-mono text-[10px] tracking-[0.12em] uppercase focus:outline-none"
             value={book.status}
             onChange={(e) => handleStatus(e.target.value as BookStatus)}
           >
@@ -294,11 +292,11 @@ function StatusGroup({ status, books, quotes }: StatusGroupProps) {
   return (
     <section className="grid gap-2">
       <div className="flex items-center gap-3">
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {STATUS_LABELS[status]}
         </div>
         <div className="hairline flex-1 border-t" aria-hidden />
-        <div className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {books.length}
         </div>
       </div>
@@ -318,10 +316,7 @@ export function BooksView() {
 
   const data = useLiveQuery(async () => {
     const db = getDb();
-    const [allBooks, allQuotes] = await Promise.all([
-      db.books.toArray(),
-      db.quotes.toArray(),
-    ]);
+    const [allBooks, allQuotes] = await Promise.all([db.books.toArray(), db.quotes.toArray()]);
     const books = allBooks.filter((b) => !b.deletedAt).sort(compareBookRecency);
     const quotes = allQuotes.filter((q) => !q.deletedAt);
     return { books, quotes };
@@ -351,7 +346,7 @@ export function BooksView() {
           type="button"
           onClick={() => setFormOpen(true)}
           className={cn(
-            'flex min-h-12 items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors',
+            'border-border text-muted-foreground flex min-h-12 items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
@@ -363,11 +358,11 @@ export function BooksView() {
       {/* Empty state */}
       {books.length === 0 && !formOpen && (
         <div className="surface flex min-h-52 flex-col items-center justify-center gap-3 p-10 text-center">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Books
           </div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-sm text-sm">
             Track what you&apos;re reading, rate finished books, and collect highlights alongside
             each one.
           </p>
@@ -378,12 +373,7 @@ export function BooksView() {
       {books.length > 0 && (
         <div className="flex flex-col gap-6">
           {STATUS_ORDER.map((status) => (
-            <StatusGroup
-              key={status}
-              status={status}
-              books={grouped[status]}
-              quotes={quotes}
-            />
+            <StatusGroup key={status} status={status} books={grouped[status]} quotes={quotes} />
           ))}
         </div>
       )}
@@ -399,7 +389,7 @@ function BooksSkeleton() {
       {['Reading', 'Want to Read'].map((label) => (
         <section key={label} className="grid gap-2">
           <div className="flex items-center gap-3">
-            <div className="h-3 w-20 animate-pulse rounded bg-border" />
+            <div className="bg-border h-3 w-20 animate-pulse rounded" />
             <div className="hairline flex-1 border-t" />
           </div>
           <ul className="flex flex-col gap-2">

@@ -27,7 +27,7 @@ export function TagsIndex() {
 
   if (counts.length === 0) {
     return (
-      <div className="surface flex h-40 items-center justify-center text-sm text-muted-foreground">
+      <div className="surface text-muted-foreground flex h-40 items-center justify-center text-sm">
         No tags yet. Add one with #word in any task.
       </div>
     );
@@ -42,41 +42,39 @@ export function TagsIndex() {
             type="button"
             onClick={() => setSelectedTag((current) => (current === tag ? null : tag))}
             aria-pressed={selectedTag === tag}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border bg-card px-3 text-xs transition-colors hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-primary"
+            className="bg-card hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-primary inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-xs transition-colors"
           >
             <span className="text-foreground">#{tag}</span>
-            <span className="font-mono text-[10px] text-subtle-foreground">{count}</span>
+            <span className="text-subtle-foreground font-mono text-[10px]">{count}</span>
           </button>
         ))}
       </div>
-      <div className="surface scrollbar-thin max-h-[60vh] overflow-y-auto p-2">
+      <div className="surface max-h-[60vh] scrollbar-thin overflow-y-auto p-2">
         <ul className="flex flex-col gap-1">
-          {visibleTasks
-            .slice(0, 200)
-            .map((t) => (
-              <li key={t.id}>
-                <button
-                  type="button"
-                  onClick={() => openEdit(t.id)}
-                  className="flex min-h-10 w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
-                >
-                  <span className="truncate">{t.title}</span>
-                  <span className="ml-auto flex max-w-[55%] flex-wrap justify-end gap-1">
-                    {t.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded bg-accent px-1.5 py-0.5 font-mono text-[10px] text-accent-foreground"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </span>
-                </button>
-              </li>
-            ))}
+          {visibleTasks.slice(0, 200).map((t) => (
+            <li key={t.id}>
+              <button
+                type="button"
+                onClick={() => openEdit(t.id)}
+                className="hover:bg-accent flex min-h-10 w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+              >
+                <span className="truncate">{t.title}</span>
+                <span className="ml-auto flex max-w-[55%] flex-wrap justify-end gap-1">
+                  {t.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-accent text-accent-foreground rounded px-1.5 py-0.5 font-mono text-[10px]"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </span>
+              </button>
+            </li>
+          ))}
         </ul>
         {visibleTasks.length === 0 ? (
-          <div className="flex min-h-28 items-center justify-center px-4 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex min-h-28 items-center justify-center px-4 text-center text-sm">
             No tasks use #{selectedTag}.
           </div>
         ) : null}

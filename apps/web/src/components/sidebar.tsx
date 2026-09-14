@@ -63,7 +63,7 @@ export function Sidebar() {
   return (
     <aside
       aria-label="Primary"
-      className="hairline scrollbar-thin bg-bg-rail/82 relative hidden w-[210px] shrink-0 flex-col overflow-y-auto border-r md:flex xl:w-[220px]"
+      className="hairline bg-bg-rail/82 relative hidden w-[210px] shrink-0 scrollbar-thin flex-col overflow-y-auto border-r md:flex xl:w-[220px]"
     >
       <div className="hairline mx-3 flex h-16 items-center gap-2.5 border-b px-1">
         <span

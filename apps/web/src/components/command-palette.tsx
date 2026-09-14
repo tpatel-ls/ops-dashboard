@@ -160,7 +160,7 @@ export function CommandPalette() {
               />
             </div>
           </div>
-          <Command.List className="scrollbar-thin max-h-[calc(100dvh-6rem)] overflow-y-auto p-2 sm:max-h-[60vh]">
+          <Command.List className="max-h-[calc(100dvh-6rem)] scrollbar-thin overflow-y-auto p-2 sm:max-h-[60vh]">
             <Command.Empty className="text-muted-foreground px-3 py-6 text-center text-xs">
               {query.trim()
                 ? 'No existing tasks match. Create this as a new task above.'

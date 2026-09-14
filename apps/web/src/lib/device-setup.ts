@@ -102,7 +102,8 @@ export const DEVICE_SETUPS: DeviceSetup[] = [
     id: 's24-ultra',
     name: 'Galaxy S24 Ultra',
     role: 'Primary capture surface',
-    primaryAction: 'Install the PWA, keep the mic button one thumb away, and use voice/text capture all day.',
+    primaryAction:
+      'Install the PWA, keep the mic button one thumb away, and use voice/text capture all day.',
     installSteps: [
       'Open the deployed app in Chrome.',
       'Tap the browser menu, then Add to home screen or Install app.',
@@ -110,13 +111,16 @@ export const DEVICE_SETUPS: DeviceSetup[] = [
       'Sign in once so Supabase sync can fan out changes to tablet, desktop, and watch-triggered captures.',
     ],
     strengths: ['Fast thumb capture', 'Voice transcription', 'Push notification bridge to watch'],
-    limitations: ['Background sync depends on Android battery/network rules. Open the app if a stale badge appears.'],
+    limitations: [
+      'Background sync depends on Android battery/network rules. Open the app if a stale badge appears.',
+    ],
   },
   {
     id: 'tab-s10-ultra',
     name: 'Galaxy Tab S10 Ultra',
     role: 'Planning and review board',
-    primaryAction: 'Use landscape mode for two-pane work: list on the left, detail/review on the right.',
+    primaryAction:
+      'Use landscape mode for two-pane work: list on the left, detail/review on the right.',
     installSteps: [
       'Open the app in Chrome or Samsung Internet.',
       'Install it to the home screen.',
@@ -124,7 +128,9 @@ export const DEVICE_SETUPS: DeviceSetup[] = [
       'Keep sync enabled so captures from phone/watch appear live.',
     ],
     strengths: ['Large briefing board', 'Project review', 'Calendar and whiteboard work'],
-    limitations: ['Use Chrome if install prompts or service worker updates feel inconsistent in Samsung Internet.'],
+    limitations: [
+      'Use Chrome if install prompts or service worker updates feel inconsistent in Samsung Internet.',
+    ],
   },
   {
     id: 'galaxy-watch',
@@ -155,7 +161,9 @@ export const DEVICE_SETUPS: DeviceSetup[] = [
       'Use Cmd+K for command palette capture and desktop review.',
     ],
     strengths: ['Keyboard capture', 'Deep project editing', 'Weekly reviews'],
-    limitations: ['Safari PWA behavior varies; Chrome is the most predictable target for this app.'],
+    limitations: [
+      'Safari PWA behavior varies; Chrome is the most predictable target for this app.',
+    ],
   },
   {
     id: 'windows',

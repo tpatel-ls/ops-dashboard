@@ -30,10 +30,7 @@ import { ViewShell } from '@/components/view-shell';
 import { ProjectDetail } from '@/components/project-detail';
 import { useOrgStore } from '@/lib/org-store';
 import { addTaskToProject } from '@/lib/tasks';
-import {
-  PORTFOLIO_PROJECT_NAMES,
-  importPortfolioProjects,
-} from '@/lib/import-projects';
+import { PORTFOLIO_PROJECT_NAMES, importPortfolioProjects } from '@/lib/import-projects';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
@@ -107,7 +104,17 @@ interface ProjectStats {
 
 // ─── Small pieces ─────────────────────────────────────────────────────────────────
 
-function ProgressRing({ pct, color, size = 52, stroke = 5 }: { pct: number; color: string; size?: number; stroke?: number }) {
+function ProgressRing({
+  pct,
+  color,
+  size = 52,
+  stroke = 5,
+}: {
+  pct: number;
+  color: string;
+  size?: number;
+  stroke?: number;
+}) {
   const clamped = Math.max(0, Math.min(100, pct));
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
@@ -136,9 +143,9 @@ function ProgressRing({ pct, color, size = 52, stroke = 5 }: { pct: number; colo
           style={{ stroke: color }}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-mono text-[10px] font-medium text-foreground tabular-nums">
+      <span className="text-foreground absolute inset-0 flex items-center justify-center font-mono text-[10px] font-medium tabular-nums">
         {clamped}
-        <span className="ml-px text-subtle-foreground">%</span>
+        <span className="text-subtle-foreground ml-px">%</span>
       </span>
     </div>
   );
@@ -146,10 +153,10 @@ function ProgressRing({ pct, color, size = 52, stroke = 5 }: { pct: number; colo
 
 function StatusBar({ counts, total }: { counts: Record<TaskStatus, number>; total: number }) {
   if (total === 0) {
-    return <div className="h-2 w-full rounded-full bg-bg-sunken" />;
+    return <div className="bg-bg-sunken h-2 w-full rounded-full" />;
   }
   return (
-    <div className="flex h-2 w-full overflow-hidden rounded-full bg-bg-sunken">
+    <div className="bg-bg-sunken flex h-2 w-full overflow-hidden rounded-full">
       {SEGMENTS.map((s) => {
         const n = counts[s.key];
         if (!n) return null;
@@ -172,7 +179,7 @@ function StatusLegend() {
       {SEGMENTS.map((s) => (
         <span
           key={s.key}
-          className="inline-flex items-center gap-1.5 text-[11px] text-subtle-foreground"
+          className="text-subtle-foreground inline-flex items-center gap-1.5 text-[11px]"
         >
           <span className="size-2 rounded-full" style={{ background: s.color }} aria-hidden />
           {s.label}
@@ -202,8 +209,8 @@ function StatTile({
         <Icon className="size-4" style={{ color }} aria-hidden />
       </div>
       <div className="min-w-0">
-        <div className="text-[22px] font-semibold leading-none tabular-nums">{value}</div>
-        <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">
+        <div className="text-[22px] leading-none font-semibold tabular-nums">{value}</div>
+        <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.16em] uppercase">
           {label}
         </div>
       </div>
@@ -213,8 +220,16 @@ function StatTile({
 
 function PriorityDot({ priority }: { priority: number }) {
   const tone =
-    priority >= 3 ? 'var(--destructive)' : priority === 2 ? 'var(--warning)' : priority === 1 ? 'var(--primary)' : 'var(--subtle-foreground)';
-  return <span className="size-1.5 shrink-0 rounded-full" style={{ background: tone }} aria-hidden />;
+    priority >= 3
+      ? 'var(--destructive)'
+      : priority === 2
+        ? 'var(--warning)'
+        : priority === 1
+          ? 'var(--primary)'
+          : 'var(--subtle-foreground)';
+  return (
+    <span className="size-1.5 shrink-0 rounded-full" style={{ background: tone }} aria-hidden />
+  );
 }
 
 // ─── Segmented control ────────────────────────────────────────────────────────────
@@ -229,7 +244,7 @@ function Segmented<T extends string>({
   onChange: (key: T) => void;
 }) {
   return (
-    <div className="hairline inline-flex items-center gap-0.5 rounded-[10px] border bg-card p-0.5">
+    <div className="hairline bg-card inline-flex items-center gap-0.5 rounded-[10px] border p-0.5">
       {options.map((o) => (
         <button
           key={o.key}
@@ -237,7 +252,7 @@ function Segmented<T extends string>({
           onClick={() => onChange(o.key)}
           aria-pressed={value === o.key}
           className={cn(
-            'rounded-[7px] px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+            'focus-visible:ring-primary/50 rounded-[7px] px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
             value === o.key
               ? 'bg-accent text-foreground'
               : 'text-muted-foreground hover:text-foreground',
@@ -273,16 +288,16 @@ function TileAddTask({ project }: { project: Project }) {
   return (
     <form
       onSubmit={submit}
-      className="hairline flex items-center gap-1.5 rounded-md border bg-bg-sunken px-2 py-1.5 transition-colors focus-within:border-primary/50"
+      className="hairline bg-bg-sunken focus-within:border-primary/50 flex items-center gap-1.5 rounded-md border px-2 py-1.5 transition-colors"
     >
-      <Plus className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+      <Plus className="text-muted-foreground size-3 shrink-0" aria-hidden />
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Add a task..."
         disabled={saving}
         aria-label={`Add a task to ${project.name}`}
-        className="w-full bg-transparent text-xs text-foreground outline-none placeholder:text-subtle-foreground"
+        className="text-foreground placeholder:text-subtle-foreground w-full bg-transparent text-xs outline-none"
       />
     </form>
   );
@@ -292,112 +307,139 @@ function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => v
   const { project, domain, org, total, done, pct, counts, open, urgent, next, hours, isSlipping } =
     stats;
   return (
-    <div className="surface group flex w-full flex-col gap-3 p-4 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)]">
+    <div className="surface group hover:border-border-strong flex w-full flex-col gap-3 p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)]">
       <button
         type="button"
         onClick={onClick}
-        className="flex w-full flex-col gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        className="focus-visible:ring-primary/50 flex w-full flex-col gap-3 rounded-md text-left focus-visible:ring-2 focus-visible:outline-none"
       >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span
-              className="size-3 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]"
-              style={{ background: project.color }}
-              aria-hidden
-            />
-            <span className="truncate text-[15px] font-semibold tracking-tight">{project.name}</span>
-            <span
-              className={cn(
-                'font-mono text-[10px] uppercase tracking-[0.14em]',
-                STATUS_CLASSES[project.status],
-              )}
-            >
-              {STATUS_LABELS[project.status]}
-            </span>
-          </div>
-          {org || domain ? (
-            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-              {org ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
-                  <span className="size-1.5 rounded-full" style={{ background: org.color }} aria-hidden />
-                  <span className="font-mono text-[10px] text-subtle-foreground">{org.name}</span>
-                </span>
-              ) : null}
-              {domain ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5">
-                  <span className="size-1.5 rounded-full" style={{ background: domain.color }} aria-hidden />
-                  <span className="font-mono text-[10px] text-subtle-foreground">{domain.name}</span>
-                </span>
-              ) : null}
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span
+                className="size-3 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]"
+                style={{ background: project.color }}
+                aria-hidden
+              />
+              <span className="truncate text-[15px] font-semibold tracking-tight">
+                {project.name}
+              </span>
+              <span
+                className={cn(
+                  'font-mono text-[10px] tracking-[0.14em] uppercase',
+                  STATUS_CLASSES[project.status],
+                )}
+              >
+                {STATUS_LABELS[project.status]}
+              </span>
             </div>
+            {org || domain ? (
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {org ? (
+                  <span className="bg-bg-sunken inline-flex items-center gap-1 rounded-full px-2 py-0.5">
+                    <span
+                      className="size-1.5 rounded-full"
+                      style={{ background: org.color }}
+                      aria-hidden
+                    />
+                    <span className="text-subtle-foreground font-mono text-[10px]">{org.name}</span>
+                  </span>
+                ) : null}
+                {domain ? (
+                  <span className="bg-bg-sunken inline-flex items-center gap-1 rounded-full px-2 py-0.5">
+                    <span
+                      className="size-1.5 rounded-full"
+                      style={{ background: domain.color }}
+                      aria-hidden
+                    />
+                    <span className="text-subtle-foreground font-mono text-[10px]">
+                      {domain.name}
+                    </span>
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            {project.description ? (
+              <p className="text-muted-foreground mt-1.5 line-clamp-1 text-xs">
+                {project.description}
+              </p>
+            ) : null}
+          </div>
+          <ProgressRing pct={pct} color={project.color} />
+        </div>
+
+        {/* Distribution */}
+        <StatusBar counts={counts} total={total} />
+
+        {/* Legend */}
+        <div className="text-subtle-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+          <span className="tabular-nums">
+            {done}/{total} done
+          </span>
+          {counts.doing > 0 ? (
+            <span className="inline-flex items-center gap-1">
+              <span
+                className="size-1.5 rounded-full"
+                style={{ background: 'var(--warning)' }}
+                aria-hidden
+              />
+              {counts.doing} in progress
+            </span>
           ) : null}
-          {project.description ? (
-            <p className="mt-1.5 line-clamp-1 text-xs text-muted-foreground">{project.description}</p>
+          {counts.blocked > 0 ? (
+            <span className="text-destructive inline-flex items-center gap-1">
+              <span
+                className="size-1.5 rounded-full"
+                style={{ background: 'var(--destructive)' }}
+                aria-hidden
+              />
+              {counts.blocked} blocked
+            </span>
           ) : null}
         </div>
-        <ProgressRing pct={pct} color={project.color} />
-      </div>
 
-      {/* Distribution */}
-      <StatusBar counts={counts} total={total} />
+        {/* Next action */}
+        <div className="hairline flex items-center gap-2 border-t pt-3 text-xs">
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.16em] uppercase">
+            Next
+          </span>
+          {next ? (
+            <>
+              <PriorityDot priority={next.priority} />
+              <span className="text-foreground truncate">{next.title}</span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">All clear</span>
+          )}
+          <ArrowRight
+            className="text-subtle-foreground group-hover:text-foreground ml-auto size-3.5 shrink-0 transition-colors"
+            aria-hidden
+          />
+        </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-subtle-foreground">
-        <span className="tabular-nums">
-          {done}/{total} done
-        </span>
-        {counts.doing > 0 ? (
-          <span className="inline-flex items-center gap-1">
-            <span className="size-1.5 rounded-full" style={{ background: 'var(--warning)' }} aria-hidden />
-            {counts.doing} in progress
-          </span>
-        ) : null}
-        {counts.blocked > 0 ? (
-          <span className="inline-flex items-center gap-1 text-destructive">
-            <span className="size-1.5 rounded-full" style={{ background: 'var(--destructive)' }} aria-hidden />
-            {counts.blocked} blocked
-          </span>
-        ) : null}
-      </div>
-
-      {/* Next action */}
-      <div className="hairline flex items-center gap-2 border-t pt-3 text-xs">
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-subtle-foreground">Next</span>
-        {next ? (
-          <>
-            <PriorityDot priority={next.priority} />
-            <span className="truncate text-foreground">{next.title}</span>
-          </>
-        ) : (
-          <span className="text-muted-foreground">All clear</span>
-        )}
-        <ArrowRight className="ml-auto size-3.5 shrink-0 text-subtle-foreground transition-colors group-hover:text-foreground" aria-hidden />
-      </div>
-
-      {/* Footer */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-subtle-foreground">
-        <span>{open} open</span>
-        {urgent > 0 ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] text-destructive">
-            <Flame className="size-3" aria-hidden />
-            {urgent} urgent
-          </span>
-        ) : null}
-        {hours > 0 ? (
-          <span className="inline-flex items-center gap-1">
-            <Clock className="size-3" aria-hidden />
-            {hours.toFixed(1)}h logged
-          </span>
-        ) : null}
-        {isSlipping && project.status === 'active' ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[10px] text-warning">
-            <AlertTriangle className="size-3" aria-hidden />
-            Slipping
-          </span>
-        ) : null}
-      </div>
+        {/* Footer */}
+        <div className="text-subtle-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+          <span>{open} open</span>
+          {urgent > 0 ? (
+            <span className="bg-destructive/15 text-destructive inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]">
+              <Flame className="size-3" aria-hidden />
+              {urgent} urgent
+            </span>
+          ) : null}
+          {hours > 0 ? (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="size-3" aria-hidden />
+              {hours.toFixed(1)}h logged
+            </span>
+          ) : null}
+          {isSlipping && project.status === 'active' ? (
+            <span className="bg-warning/15 text-warning inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]">
+              <AlertTriangle className="size-3" aria-hidden />
+              Slipping
+            </span>
+          ) : null}
+        </div>
       </button>
 
       <TileAddTask project={project} />
@@ -407,18 +449,26 @@ function ProjectTile({ stats, onClick }: { stats: ProjectStats; onClick: () => v
 
 // ─── Next-actions rail ────────────────────────────────────────────────────────────
 
-function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p: Project) => void }) {
+function NextActionsRail({
+  stats,
+  onPick,
+}: {
+  stats: ProjectStats[];
+  onPick: (p: Project) => void;
+}) {
   const actionable = stats.filter((s) => s.next && s.project.status === 'active');
   return (
     <div className="surface flex flex-col gap-3 p-4">
       <div className="flex items-center gap-2">
-        <Sparkles className="size-3.5 text-primary" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <Sparkles className="text-primary size-3.5" aria-hidden />
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Next actions
         </span>
       </div>
       {actionable.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Nothing queued. Add a task to a project to see it here.</p>
+        <p className="text-muted-foreground text-xs">
+          Nothing queued. Add a task to a project to see it here.
+        </p>
       ) : (
         <ul className="flex flex-col gap-1">
           {actionable.map((s) => (
@@ -426,7 +476,7 @@ function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p:
               <button
                 type="button"
                 onClick={() => onPick(s.project)}
-                className="group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                className="group hover:bg-accent focus-visible:ring-primary/50 flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span
                   className="mt-1 size-2 shrink-0 rounded-full"
@@ -434,8 +484,10 @@ function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p:
                   aria-hidden
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] text-foreground">{s.next!.title}</span>
-                  <span className="block truncate font-mono text-[10px] text-subtle-foreground">
+                  <span className="text-foreground block truncate text-[13px]">
+                    {s.next!.title}
+                  </span>
+                  <span className="text-subtle-foreground block truncate font-mono text-[10px]">
                     {s.project.name}
                   </span>
                 </span>
@@ -450,7 +502,13 @@ function NextActionsRail({ stats, onPick }: { stats: ProjectStats[]; onPick: (p:
 
 // ─── Needs attention ──────────────────────────────────────────────────────────────
 
-function NeedsAttention({ stats, onPick }: { stats: ProjectStats[]; onPick: (p: Project) => void }) {
+function NeedsAttention({
+  stats,
+  onPick,
+}: {
+  stats: ProjectStats[];
+  onPick: (p: Project) => void;
+}) {
   const flagged = stats
     .filter((s) => s.project.status === 'active' && (s.isSlipping || s.urgent > 0))
     .sort((a, b) => b.urgent - a.urgent || b.open - a.open)
@@ -459,8 +517,8 @@ function NeedsAttention({ stats, onPick }: { stats: ProjectStats[]; onPick: (p: 
   return (
     <div className="surface flex flex-col gap-3 p-4">
       <div className="flex items-center gap-2">
-        <AlertTriangle className="size-3.5 text-warning" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <AlertTriangle className="text-warning size-3.5" aria-hidden />
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Needs attention
         </span>
       </div>
@@ -470,22 +528,22 @@ function NeedsAttention({ stats, onPick }: { stats: ProjectStats[]; onPick: (p: 
             <button
               type="button"
               onClick={() => onPick(s.project)}
-              className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              className="group hover:bg-accent focus-visible:ring-primary/50 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <span
                 className="size-2 shrink-0 rounded-full"
                 style={{ background: s.project.color }}
                 aria-hidden
               />
-              <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">
+              <span className="text-foreground min-w-0 flex-1 truncate text-[13px]">
                 {s.project.name}
               </span>
               {s.urgent > 0 ? (
-                <span className="shrink-0 font-mono text-[10px] text-destructive">
+                <span className="text-destructive shrink-0 font-mono text-[10px]">
                   {s.urgent} urgent
                 </span>
               ) : (
-                <span className="shrink-0 font-mono text-[10px] text-warning">slipping</span>
+                <span className="text-warning shrink-0 font-mono text-[10px]">slipping</span>
               )}
             </button>
           </li>
@@ -538,7 +596,8 @@ export function PortfolioDashboard() {
       const lastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
       // Slipping = had activity before but has gone stale. A never-worked project
       // is "not started", not slipping, so it does not get the warning badge.
-      const isSlipping = lastWorked !== null && differenceInDays(new Date(), lastWorked) > SLIPPING_DAYS;
+      const isSlipping =
+        lastWorked !== null && differenceInDays(new Date(), lastWorked) > SLIPPING_DAYS;
       return {
         project,
         domain: project.domainId ? domainMap.get(project.domainId) : undefined,
@@ -563,7 +622,9 @@ export function PortfolioDashboard() {
     );
 
     const presentNames = new Set(allProjects.map((p) => p.name.trim().toLowerCase()));
-    const missing = PORTFOLIO_PROJECT_NAMES.filter((n) => !presentNames.has(n.trim().toLowerCase()));
+    const missing = PORTFOLIO_PROJECT_NAMES.filter(
+      (n) => !presentNames.has(n.trim().toLowerCase()),
+    );
 
     const totals = {
       activeProjects: stats.filter((s) => s.project.status === 'active').length,
@@ -613,9 +674,9 @@ export function PortfolioDashboard() {
         type="button"
         onClick={handleImport}
         disabled={importing}
-        className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-60"
+        className="hairline bg-card text-foreground hover:bg-accent inline-flex h-9 items-center gap-2 rounded-[10px] border px-3 text-xs font-medium transition-colors disabled:opacity-60"
       >
-        <FolderPlus className="size-3.5 text-primary" aria-hidden />
+        <FolderPlus className="text-primary size-3.5" aria-hidden />
         {importing ? 'Loading…' : 'Load my projects'}
       </button>
     ) : null;
@@ -629,13 +690,13 @@ export function PortfolioDashboard() {
         meta={
           data && data.totals.totalTasks > 0 ? (
             <div className="hidden items-center gap-2 sm:flex">
-              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-bg-sunken">
+              <div className="bg-bg-sunken h-1.5 w-24 overflow-hidden rounded-full">
                 <div
-                  className="h-full rounded-full bg-primary transition-all"
+                  className="bg-primary h-full rounded-full transition-all"
                   style={{ width: `${overallPct}%` }}
                 />
               </div>
-              <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+              <span className="text-muted-foreground font-mono text-[11px] tabular-nums">
                 {overallPct}% done
               </span>
             </div>
@@ -654,10 +715,30 @@ export function PortfolioDashboard() {
         <div className="flex flex-col gap-5">
           {/* Stat tiles */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatTile label="Active" value={data?.totals.activeProjects ?? 0} icon={FolderKanban} color="var(--primary)" />
-            <StatTile label="Open tasks" value={data?.totals.openTasks ?? 0} icon={ListTodo} color="var(--foreground)" />
-            <StatTile label="In progress" value={data?.totals.inProgress ?? 0} icon={Activity} color="var(--warning)" />
-            <StatTile label="Done" value={data?.totals.done ?? 0} icon={CheckCircle2} color="var(--success)" />
+            <StatTile
+              label="Active"
+              value={data?.totals.activeProjects ?? 0}
+              icon={FolderKanban}
+              color="var(--primary)"
+            />
+            <StatTile
+              label="Open tasks"
+              value={data?.totals.openTasks ?? 0}
+              icon={ListTodo}
+              color="var(--foreground)"
+            />
+            <StatTile
+              label="In progress"
+              value={data?.totals.inProgress ?? 0}
+              icon={Activity}
+              color="var(--warning)"
+            />
+            <StatTile
+              label="Done"
+              value={data?.totals.done ?? 0}
+              icon={CheckCircle2}
+              color="var(--success)"
+            />
           </div>
 
           {/* Toolbar */}
@@ -682,18 +763,19 @@ export function PortfolioDashboard() {
             </div>
           ) : data.stats.length === 0 ? (
             <div className="surface flex h-64 flex-col items-center justify-center gap-3 text-center">
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+              <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
                 dashboard
               </div>
               <h3 className="text-xl font-semibold tracking-tight">Load your projects.</h3>
-              <p className="max-w-sm text-sm text-muted-foreground">
-                Bring Blue Text, Power Dialer, Mini Monet, and Email Triage into the board with their tasks.
+              <p className="text-muted-foreground max-w-sm text-sm">
+                Bring Blue Text, Power Dialer, Mini Monet, and Email Triage into the board with
+                their tasks.
               </p>
               <button
                 type="button"
                 onClick={handleImport}
                 disabled={importing}
-                className="inline-flex items-center gap-2 rounded-[10px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
               >
                 <FolderPlus className="size-4" aria-hidden />
                 {importing ? 'Loading…' : 'Load my projects'}
@@ -701,7 +783,7 @@ export function PortfolioDashboard() {
             </div>
           ) : visibleStats.length === 0 ? (
             <div className="surface flex h-40 flex-col items-center justify-center gap-1 text-center">
-              <p className="text-sm text-muted-foreground">No projects match this filter.</p>
+              <p className="text-muted-foreground text-sm">No projects match this filter.</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

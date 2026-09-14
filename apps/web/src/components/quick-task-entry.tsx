@@ -96,11 +96,9 @@ export function QuickTaskEntry({
           storedDestination,
           data.organizations.map((organization) => organization.id),
         );
-    const recentProject = fixedProject ?? resolveRecentProject(
-      data.projects,
-      nextDestination,
-      readLocalStorage(LAST_TASK_PROJECT_KEY),
-    );
+    const recentProject =
+      fixedProject ??
+      resolveRecentProject(data.projects, nextDestination, readLocalStorage(LAST_TASK_PROJECT_KEY));
 
     setDestination(nextDestination);
     setProjectId(recentProject?.id ?? '');
@@ -111,8 +109,11 @@ export function QuickTaskEntry({
     () => projectsForDestination(data?.projects ?? [], destination).filter(isActiveProject),
     [data?.projects, destination],
   );
-  const selectedProject = fixedProject ?? availableProjects.find((project) => project.id === projectId);
-  const selectedOrganization = data?.organizations.find((organization) => organization.id === destination);
+  const selectedProject =
+    fixedProject ?? availableProjects.find((project) => project.id === projectId);
+  const selectedOrganization = data?.organizations.find(
+    (organization) => organization.id === destination,
+  );
   const destinationLabel = selectedProject?.name ?? selectedOrganization?.name ?? 'Personal';
 
   function chooseDestination(nextDestination: WorkDestination) {
@@ -169,15 +170,24 @@ export function QuickTaskEntry({
 
   return (
     <section className={cn('surface overflow-hidden', compact ? 'p-2.5 sm:p-3' : 'p-4 sm:p-5')}>
-      <form aria-label="Quick task entry" onSubmit={save} className={cn('flex flex-col', compact ? 'gap-2' : 'gap-3')}>
+      <form
+        aria-label="Quick task entry"
+        onSubmit={save}
+        className={cn('flex flex-col', compact ? 'gap-2' : 'gap-3')}
+      >
         <div className="flex min-w-0 items-center gap-2">
           <span
-            className={cn('hidden size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex', compact && 'sm:hidden')}
+            className={cn(
+              'bg-primary/10 text-primary hidden size-10 shrink-0 items-center justify-center rounded-lg sm:flex',
+              compact && 'sm:hidden',
+            )}
             aria-hidden
           >
             <Plus className="size-4" />
           </span>
-          <label htmlFor={id} className="sr-only">Task title</label>
+          <label htmlFor={id} className="sr-only">
+            Task title
+          </label>
           <input
             ref={inputRef}
             id={id}
@@ -190,16 +200,26 @@ export function QuickTaskEntry({
             placeholder="Add a task and press Enter"
             aria-invalid={Boolean(error) || undefined}
             aria-errormessage={error ? `${id}-error` : undefined}
-            className={cn('input min-w-0 flex-1', compact ? 'min-h-11 text-sm' : 'min-h-12 text-base')}
+            className={cn(
+              'input min-w-0 flex-1',
+              compact ? 'min-h-11 text-sm' : 'min-h-12 text-base',
+            )}
             autoComplete="off"
             autoFocus={autoFocus}
           />
           <button
             type="submit"
             disabled={saving || !title.trim()}
-            className={cn('inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50', compact ? 'min-h-11 px-3' : 'min-h-12 px-4')}
+            className={cn(
+              'bg-primary text-primary-foreground inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-semibold disabled:opacity-50',
+              compact ? 'min-h-11 px-3' : 'min-h-12 px-4',
+            )}
           >
-            {saving ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Plus className="size-4" aria-hidden />}
+            {saving ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Plus className="size-4" aria-hidden />
+            )}
             <span className="hidden sm:inline">Add task</span>
             <span className="sm:hidden">Add</span>
           </button>
@@ -210,7 +230,7 @@ export function QuickTaskEntry({
             <div
               role="group"
               aria-label="Schedule task"
-              className="grid w-full grid-cols-3 gap-1 rounded-lg border bg-bg-sunken p-1 sm:w-auto"
+              className="bg-bg-sunken grid w-full grid-cols-3 gap-1 rounded-lg border p-1 sm:w-auto"
             >
               {QUICK_SCHEDULES.map((option) => (
                 <button
@@ -236,24 +256,30 @@ export function QuickTaskEntry({
                 aria-expanded={detailsOpen}
                 aria-controls={`${id}-details`}
                 onClick={() => setDetailsOpen((open) => !open)}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground sm:min-h-8"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-xs font-medium sm:min-h-8"
               >
                 <SlidersHorizontal className="size-3.5" aria-hidden />
                 Details
-                <ChevronDown className={cn('size-3.5 transition-transform', detailsOpen && 'rotate-180')} aria-hidden />
+                <ChevronDown
+                  className={cn('size-3.5 transition-transform', detailsOpen && 'rotate-180')}
+                  aria-hidden
+                />
               </button>
-              <span className="min-w-0 flex-1 truncate text-xs text-subtle-foreground sm:max-w-64">
+              <span className="text-subtle-foreground min-w-0 flex-1 truncate text-xs sm:max-w-64">
                 {destinationLabel} / {taskScheduleLabel(schedule, scheduledDate)}
                 {priority >= 2 ? ` / ${priority === 3 ? 'Critical' : 'Important'}` : ''}
               </span>
             </div>
           </div>
         ) : (
-          <p className="text-xs text-subtle-foreground">New task in {fixedProject.name}</p>
+          <p className="text-subtle-foreground text-xs">New task in {fixedProject.name}</p>
         )}
 
         {detailsOpen && !fixedProject ? (
-          <div id={`${id}-details`} className="grid gap-3 border-t pt-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            id={`${id}-details`}
+            className="grid gap-3 border-t pt-3 sm:grid-cols-2 lg:grid-cols-4"
+          >
             <label className="flex flex-col gap-1.5 text-xs font-medium">
               Organization
               <select
@@ -262,7 +288,9 @@ export function QuickTaskEntry({
                 className="input min-h-11"
               >
                 {(data?.organizations ?? []).map((organization) => (
-                  <option key={organization.id} value={organization.id}>{organization.name}</option>
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
+                  </option>
                 ))}
                 <option value="personal">Personal</option>
               </select>
@@ -276,7 +304,9 @@ export function QuickTaskEntry({
               >
                 <option value="">No project</option>
                 {availableProjects.map((project) => (
-                  <option key={project.id} value={project.id}>{project.name}</option>
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
                 ))}
               </select>
             </label>
@@ -322,9 +352,13 @@ export function QuickTaskEntry({
       </form>
 
       <div className={cn('text-xs', compact ? 'pt-1' : 'min-h-5 pt-2')}>
-        {error ? <p id={`${id}-error`} role="alert" className="text-destructive">{error}</p> : null}
+        {error ? (
+          <p id={`${id}-error`} role="alert" className="text-destructive">
+            {error}
+          </p>
+        ) : null}
         {status ? (
-          <p role="status" aria-live="polite" className="flex items-center gap-1.5 text-success">
+          <p role="status" aria-live="polite" className="text-success flex items-center gap-1.5">
             <Check className="size-3.5" aria-hidden />
             {status}
           </p>

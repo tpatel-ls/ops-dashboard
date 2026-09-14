@@ -67,30 +67,23 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   if (!data || data.length === 0) {
     return (
       <div
-        className={cn(
-          'surface flex items-center justify-center p-8 text-sm text-muted-foreground',
-        )}
+        className={cn('surface text-muted-foreground flex items-center justify-center p-8 text-sm')}
       >
-        No activity data yet - start completing tasks, routines, and journal
-        entries.
+        No activity data yet - start completing tasks, routines, and journal entries.
       </div>
     );
   }
 
   return (
-    <div
-      className={cn(
-        'surface overflow-hidden p-0',
-      )}
-    >
+    <div className={cn('surface overflow-hidden p-0')}>
       <div className="hairline flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
+          <span className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-[10px]">
             <CalendarDays className="size-4" aria-hidden />
           </span>
           <div>
             <h2 className="text-sm font-semibold tracking-tight">Year identity ledger</h2>
-            <p className="text-xs text-muted-foreground">Every completed action leaves a mark.</p>
+            <p className="text-muted-foreground text-xs">Every completed action leaves a mark.</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
@@ -115,9 +108,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
             totalCount: '{{count}} activity points in the last year',
           }}
           style={{
-            color: dark
-              ? 'oklch(0.96 0.005 80)'
-              : 'oklch(0.48 0.015 280)',
+            color: dark ? 'oklch(0.96 0.005 80)' : 'oklch(0.48 0.015 280)',
           }}
         />
       </div>
@@ -127,9 +118,9 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
 function MiniMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="min-w-[54px] rounded-[10px] border bg-bg-sunken px-2 py-1.5">
+    <div className="bg-bg-sunken min-w-[54px] rounded-[10px] border px-2 py-1.5">
       <div className="font-mono text-sm font-semibold tabular-nums">{value}</div>
-      <div className="font-mono text-[9px] uppercase tracking-[0.12em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[9px] tracking-[0.12em] uppercase">
         {label}
       </div>
     </div>

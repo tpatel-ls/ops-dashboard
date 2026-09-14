@@ -54,33 +54,36 @@ export function CalendarWeek() {
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <div className="flex items-center rounded-md border bg-card p-0.5">
-        <button
-          type="button"
-          aria-label="Previous week"
-          onClick={() => setAnchor((d) => addDays(d, -7))}
-          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <ChevronLeft className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setAnchor(new Date())}
-          className="h-10 border-x px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          aria-label="Next week"
-          onClick={() => setAnchor((d) => addDays(d, 7))}
-          className="inline-flex size-10 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <ChevronRight className="size-4" />
-        </button>
+        <div className="bg-card flex items-center rounded-md border p-0.5">
+          <button
+            type="button"
+            aria-label="Previous week"
+            onClick={() => setAnchor((d) => addDays(d, -7))}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setAnchor(new Date())}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 border-x px-3 text-xs font-medium"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            aria-label="Next week"
+            onClick={() => setAnchor((d) => addDays(d, 7))}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded"
+          >
+            <ChevronRight className="size-4" />
+          </button>
         </div>
-        <span aria-live="polite" className="ml-1 flex items-center gap-2 text-xs font-semibold text-foreground md:ml-2">
-          <CalendarDays className="size-4 text-muted-foreground" aria-hidden />
+        <span
+          aria-live="polite"
+          className="text-foreground ml-1 flex items-center gap-2 text-xs font-semibold md:ml-2"
+        >
+          <CalendarDays className="text-muted-foreground size-4" aria-hidden />
           {format(weekStart, 'MMM d')} to {format(weekEnd, 'MMM d')}
         </span>
         {lanes.showLegend ? (
@@ -101,7 +104,7 @@ export function CalendarWeek() {
         ))}
       </div>
       <div className="surface hidden flex-1 overflow-hidden md:flex">
-        <div className="scrollbar-thin flex flex-1 overflow-auto">
+        <div className="flex flex-1 scrollbar-thin overflow-auto">
           <div
             className="grid w-full"
             style={{ gridTemplateColumns: `48px repeat(7, minmax(120px, 1fr))` }}
@@ -113,11 +116,11 @@ export function CalendarWeek() {
                 <div
                   key={isoDay(d)}
                   className={cn(
-                    'sticky top-0 z-10 border-b border-hairline bg-card/95 px-2 py-2 text-center backdrop-blur',
+                    'border-hairline bg-card/95 sticky top-0 z-10 border-b px-2 py-2 text-center backdrop-blur',
                     isToday && 'text-primary',
                   )}
                 >
-                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+                  <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                     {format(d, 'EEE')}
                   </div>
                   <div className="text-sm font-semibold">{format(d, 'd')}</div>
@@ -153,67 +156,78 @@ function MobileDayAgenda({
   onOpen: (id: string) => void;
 }) {
   const dayIso = isoDay(day);
-  const blocks = tasks
-    .filter((task) => calendarDateOf(task) === dayIso)
-    .sort(compareCalendarTasks);
+  const blocks = tasks.filter((task) => calendarDateOf(task) === dayIso).sort(compareCalendarTasks);
   const isToday = dayIso === isoDay(new Date());
 
   if (blocks.length === 0) {
     return (
       <section
         aria-label={`${format(day, 'EEEE, MMMM d')}, no scheduled work`}
-        className={cn('hairline flex min-h-12 items-center gap-3 border-b px-1 py-2', isToday && 'text-primary')}
+        className={cn(
+          'hairline flex min-h-12 items-center gap-3 border-b px-1 py-2',
+          isToday && 'text-primary',
+        )}
       >
         <span className="w-24 shrink-0 text-sm font-semibold">{format(day, 'EEE, MMM d')}</span>
-        <span className="text-xs text-subtle-foreground">No scheduled work</span>
+        <span className="text-subtle-foreground text-xs">No scheduled work</span>
       </section>
     );
   }
 
   return (
-    <section aria-label={`${format(day, 'EEEE, MMMM d')}, ${blocks.length} scheduled items`} className="min-w-0 py-2">
-      <div className={cn('mb-2 flex items-baseline justify-between gap-3 border-b border-border/70 px-1 pb-2', isToday && 'text-primary')}>
+    <section
+      aria-label={`${format(day, 'EEEE, MMMM d')}, ${blocks.length} scheduled items`}
+      className="min-w-0 py-2"
+    >
+      <div
+        className={cn(
+          'border-border/70 mb-2 flex items-baseline justify-between gap-3 border-b px-1 pb-2',
+          isToday && 'text-primary',
+        )}
+      >
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             {format(day, 'EEE')}
           </div>
-          <div className="text-lg font-semibold leading-none tracking-tight">
+          <div className="text-lg leading-none font-semibold tracking-tight">
             {format(day, 'MMM d')}
           </div>
         </div>
-        <span className="rounded-md border bg-card px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <span className="bg-card text-subtle-foreground rounded-md border px-1.5 py-0.5 font-mono text-[10px] tabular-nums">
           {blocks.length} item{blocks.length === 1 ? '' : 's'}
         </span>
       </div>
       <div className="flex flex-col gap-1.5">
-          {blocks.map((task) => {
-            const kind = calendarKindOf(task);
-            const start = calendarInstant(task.startAt);
-            const color = laneColor(task);
-            return (
-              <button
-                key={task.id}
-                type="button"
-                onClick={() => onOpen(task.id)}
-                aria-label={`Open ${task.title}`}
-                className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-accent"
-                style={{ borderColor: `color-mix(in oklch, ${color} 34%, var(--border))` }}
-              >
-                <span
-                  aria-hidden
-                  className="size-2 shrink-0 rounded-full"
-                  style={{ background: color }}
-                />
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{task.title}</span>
-                <span className={cn(
+        {blocks.map((task) => {
+          const kind = calendarKindOf(task);
+          const start = calendarInstant(task.startAt);
+          const color = laneColor(task);
+          return (
+            <button
+              key={task.id}
+              type="button"
+              onClick={() => onOpen(task.id)}
+              aria-label={`Open ${task.title}`}
+              className="bg-card hover:bg-accent flex min-h-11 min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-left transition-colors"
+              style={{ borderColor: `color-mix(in oklch, ${color} 34%, var(--border))` }}
+            >
+              <span
+                aria-hidden
+                className="size-2 shrink-0 rounded-full"
+                style={{ background: color }}
+              />
+              <span className="min-w-0 flex-1 truncate text-sm font-medium">{task.title}</span>
+              <span
+                className={cn(
                   'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium',
                   kind === 'due' ? 'bg-warning/10 text-warning' : 'bg-card text-subtle-foreground',
-                )}>
-                  {start ? format(start, 'h:mm a') : kind === 'due' ? 'Due' : 'Scheduled'}
-                </span>
-              </button>
-            );
-          })}
+                )}
+              >
+                {start ? format(start, 'h:mm a') : kind === 'due' ? 'Due' : 'Scheduled'}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -234,7 +248,7 @@ function Hour({
 }) {
   return (
     <>
-      <div className="hairline -mt-2 border-t pr-1 text-right font-mono text-[10px] text-subtle-foreground">
+      <div className="hairline text-subtle-foreground -mt-2 border-t pr-1 text-right font-mono text-[10px]">
         {hour.toString().padStart(2, '0')}
       </div>
       {days.map((day) => {
@@ -252,9 +266,7 @@ function Hour({
             {blocks.map((t) => {
               const start = calendarInstant(t.startAt)!;
               const end = calendarInstant(t.endAt);
-              const minutes = end
-                ? Math.max(15, (end.getTime() - start.getTime()) / 60000)
-                : 30;
+              const minutes = end ? Math.max(15, (end.getTime() - start.getTime()) / 60000) : 30;
               const top = (start.getMinutes() / 60) * HOUR_HEIGHT;
               const height = (minutes / 60) * HOUR_HEIGHT - 2;
               const color = laneColor(t);
@@ -263,7 +275,7 @@ function Hour({
                   key={t.id}
                   type="button"
                   onClick={() => onOpen(t.id)}
-                  className="absolute right-0.5 left-0.5 truncate rounded-md border px-1.5 py-1 text-left text-[11px] text-foreground transition-all hover:brightness-110"
+                  className="text-foreground absolute right-0.5 left-0.5 truncate rounded-md border px-1.5 py-1 text-left text-[11px] transition-all hover:brightness-110"
                   style={{
                     top,
                     height,
@@ -272,7 +284,7 @@ function Hour({
                   }}
                 >
                   <div className="truncate font-medium">{t.title}</div>
-                  <div className="font-mono text-[10px] text-muted-foreground">
+                  <div className="text-muted-foreground font-mono text-[10px]">
                     {format(start, 'HH:mm')}
                   </div>
                 </button>

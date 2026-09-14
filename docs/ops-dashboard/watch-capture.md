@@ -72,10 +72,10 @@ This gives you a **one-tap watch tile → speak → task created**.
         - `Content-Type: application/json`
       - **Body:**
         ```json
-        {"raw":"%VOICE","tzOffsetMinutes":300}
+        { "raw": "%VOICE", "tzOffsetMinutes": 300 }
         ```
         (Use your real offset, or drop `tzOffsetMinutes` entirely.)
-   4. *(optional)* **Alert → Flash** `%HTTPD` to see the response.
+   4. _(optional)_ **Alert → Flash** `%HTTPD` to see the response.
 
 ### B. Watch: add the trigger
 
@@ -106,11 +106,11 @@ If you prefer **HTTP Shortcuts** (simpler than Tasker for the request part):
 
 ## Field reference
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| `raw` | yes | The spoken/typed text. Triaged + cleaned by Claude. |
-| `tzOffsetMinutes` | no | `new Date().getTimezoneOffset()` (e.g. 300 = UTC‑5). Makes relative times local. |
-| `Authorization` | yes | `Bearer <OPS_API_SECRET>`. |
+| Field             | Required | Notes                                                                            |
+| ----------------- | -------- | -------------------------------------------------------------------------------- |
+| `raw`             | yes      | The spoken/typed text. Triaged + cleaned by Claude.                              |
+| `tzOffsetMinutes` | no       | `new Date().getTimezoneOffset()` (e.g. 300 = UTC‑5). Makes relative times local. |
+| `Authorization`   | yes      | `Bearer <OPS_API_SECRET>`.                                                       |
 
 Server env required for persistence: `OPS_API_SECRET`, `SUPABASE_SECRET_KEY`,
 `NEXT_PUBLIC_SUPABASE_URL`, and a created user (or `OPS_USER_ID`). `ANTHROPIC_API_KEY`
