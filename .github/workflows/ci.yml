@@ -29,12 +29,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit:high
-      - run: pnpm format:check
+      - run: corepack pnpm run ci:local
       - run: node --test .github/merge-daily.test.cjs
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm build
 
   merge-daily:
     needs: verify
