@@ -48,7 +48,8 @@ CSS variables drive the shared color tokens.
 
 ## Why this shape
 
-- Colocated tests live next to their source. A single `pnpm -r test` runs the
+- Colocated tests live next to their source. A single `corepack pnpm --recursive run
+  test` runs the
   whole suite.
 - Path aliases (`@/*`) only exist inside `apps/web`. Cross package imports
   use named workspace dependencies so refactors stay honest.
