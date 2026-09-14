@@ -59,4 +59,21 @@ describe('useInstallPrompt', () => {
     expect(result.current.canPrompt).toBe(false);
     expect(result.current.installed).toBe(true);
   });
+
+  it('marks the app as installed when appinstalled fires', async () => {
+    const event = new Event('beforeinstallprompt');
+    Object.assign(event, {
+      prompt: vi.fn().mockResolvedValue(undefined),
+      userChoice: Promise.resolve({ outcome: 'dismissed', platform: 'web' }),
+    });
+    const { result } = renderHook(() => useInstallPrompt());
+
+    act(() => window.dispatchEvent(event));
+    await waitFor(() => expect(result.current.canPrompt).toBe(true));
+
+    act(() => window.dispatchEvent(new Event('appinstalled')));
+
+    expect(result.current.canPrompt).toBe(false);
+    expect(result.current.installed).toBe(true);
+  });
 });
