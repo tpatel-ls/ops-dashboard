@@ -11,9 +11,10 @@ execute end to end.
 - Repo: `https://github.com/tpatel-ls/ops-dashboard`. On Tanay's Windows
   machine it is cloned at `C:\Users\Tanay\Desktop\ops-dashboard`. Work on
   `main` (this repo merges directly to main; Vercel deploys from it).
-- Baseline: `pnpm install` (if fresh clone), then `pnpm typecheck` and
-  `pnpm --filter @ops-dashboard/core test` must be green BEFORE starting.
-- Dev server: `pnpm dev` (Turbopack; picks 3001 if 3000 is busy).
+- Baseline: `corepack pnpm install --frozen-lockfile` (if fresh clone), then
+  `corepack pnpm typecheck` and `corepack pnpm --filter @ops-dashboard/core test`
+  must be green BEFORE starting.
+- Dev server: `corepack pnpm dev` (Turbopack; picks 3001 if 3000 is busy).
 - Follow the phase order below. After each phase: typecheck, lint the touched
   files, commit. Full build + browser E2E at the end, then push to main.
 
@@ -24,8 +25,8 @@ execute end to end.
   `exactOptionalPropertyTypes: false`; `packages/*` do not, so in packages use
   the conditional-spread idiom: `...(x ? { x } : {})`.
 - Prettier: single quotes, trailing commas, width 100, plugin sorts Tailwind
-  classes. ESLint: `pnpm --filter @ops-dashboard/web lint` (root `pnpm lint`
-  is broken - the packages lack an eslint install; do not "fix" that here).
+  classes. ESLint: `corepack pnpm --filter @ops-dashboard/web lint` (root
+  `pnpm lint` is intentionally recursive now and runnable through corepack).
 - The recursive `pnpm build` can OOM a type-check worker on this machine. Use:
   `cd apps/web; NODE_OPTIONS=--max-old-space-size=4096 pnpm exec next build --webpack`.
 - Commit author MUST be `Tanay Patel <tpatel@lsglobalgroup.com>` (repo-local
