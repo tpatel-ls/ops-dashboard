@@ -83,4 +83,11 @@ describe('parseQuickAdd', () => {
     expect(r.tags).toEqual(['urgent']);
     expect(r.priority).toBe(2);
   });
+
+  it('ignores an incomplete hashtag token', () => {
+    const r = parseQuickAdd('Plan this #');
+
+    expect(r.tags).toEqual([]);
+    expect(r.title).toBe('Plan this #');
+  });
 });
