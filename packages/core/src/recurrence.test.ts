@@ -336,5 +336,7 @@ describe('shouldGenerateNext', () => {
 
     expect(shouldGenerateNext(rule, 1, new Date('invalid'))).toBe(false);
     expect(shouldGenerateNext(rule, Number.NaN, new Date(2026, 1, 28, 9))).toBe(false);
+    expect(shouldGenerateNext(rule, -1, new Date(2026, 1, 28, 9))).toBe(false);
+    expect(shouldGenerateNext(rule, 0.4, new Date(2026, 1, 28, 9))).toBe(false);
   });
 });
