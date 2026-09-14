@@ -94,9 +94,9 @@ describe('overlappedCursor', () => {
 
 describe('advanceSyncCursor', () => {
   it('compares instants instead of timestamp string formatting', () => {
-    expect(
-      advanceSyncCursor('2026-07-15T12:00:00.000Z', '2026-07-15T08:01:00-04:00'),
-    ).toBe('2026-07-15T12:01:00.000Z');
+    expect(advanceSyncCursor('2026-07-15T12:00:00.000Z', '2026-07-15T08:01:00-04:00')).toBe(
+      '2026-07-15T12:01:00.000Z',
+    );
   });
 
   it('does not regress for older or malformed candidates', () => {

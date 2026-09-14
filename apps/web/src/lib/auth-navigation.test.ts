@@ -47,9 +47,9 @@ describe('safeNextPath', () => {
 
 describe('requestedAuthPath', () => {
   it('preserves encoded query text for safe paths', () => {
-    expect(
-      requestedAuthPath('/projects', '?status=doing&label=blue%2Bgreen'),
-    ).toEqual('/projects?status=doing&label=blue%2Bgreen');
+    expect(requestedAuthPath('/projects', '?status=doing&label=blue%2Bgreen')).toEqual(
+      '/projects?status=doing&label=blue%2Bgreen',
+    );
   });
 
   it('preserves the original query through sign-in', () => {

@@ -29,34 +29,34 @@ export function SlippingProjects() {
   return (
     <section className="surface-flat">
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5">
-        <AlertTriangle className="size-3.5 text-warning" aria-hidden />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <AlertTriangle className="text-warning size-3.5" aria-hidden />
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Needs attention
         </span>
       </div>
-      <ul className="flex flex-col divide-y divide-border">
+      <ul className="divide-border flex flex-col divide-y">
         {projects.map((p) => (
           <li key={p.id} className="flex items-center gap-3 px-4 py-2.5">
             <span
-              className="size-2.5 shrink-0 rounded-[3px] ring-1 ring-inset ring-black/5"
+              className="size-2.5 shrink-0 rounded-[3px] ring-1 ring-black/5 ring-inset"
               style={{ background: p.color ?? 'var(--color-muted-foreground)' }}
               aria-hidden
             />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] leading-5">{p.name}</div>
-              <div className="font-mono text-[10px] text-muted-foreground">
+              <div className="text-muted-foreground font-mono text-[10px]">
                 {p.lastWorkedAt
                   ? `last worked ${formatDistanceToNow(parseISO(p.lastWorkedAt), { addSuffix: true })}`
                   : 'never worked on'}
               </div>
             </div>
-            <span className="shrink-0 rounded bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] text-warning">
+            <span className="bg-warning/15 text-warning shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px]">
               {p.kind}
             </span>
             <button
               type="button"
               onClick={() => openWorkLogger('task', p.id)}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors"
               aria-label={`Add task to ${p.name}`}
             >
               <Plus className="size-4" aria-hidden />

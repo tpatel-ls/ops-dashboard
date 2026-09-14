@@ -38,7 +38,8 @@ export function isSyncedTable(t: string): t is DexieTableName {
 }
 
 const camelToSnake = (k: string): string => k.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`);
-const snakeToCamel = (k: string): string => k.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+const snakeToCamel = (k: string): string =>
+  k.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
 
 /**
  * Local record -> DB row. SHALLOW key transform only: jsonb columns (reminders,

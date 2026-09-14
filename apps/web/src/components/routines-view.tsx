@@ -2,14 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
-import {
-  Archive,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  Flame,
-  Trash2,
-} from 'lucide-react';
+import { Archive, ChevronDown, ChevronUp, Check, Flame, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Routine, RoutineCheck } from '@ops-dashboard/core';
 import {
@@ -93,7 +86,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
           'mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
           doneToday
             ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border-strong text-transparent hover:border-primary hover:bg-primary/10',
+            : 'border-border-strong hover:border-primary hover:bg-primary/10 text-transparent',
         )}
       >
         <Check className="size-3" strokeWidth={3} aria-hidden />
@@ -104,8 +97,8 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={cn(
-              'text-[14px] font-medium leading-5',
-              doneToday && 'text-muted-foreground line-through decoration-muted-foreground/50',
+              'text-[14px] leading-5 font-medium',
+              doneToday && 'text-muted-foreground decoration-muted-foreground/50 line-through',
             )}
           >
             {routine.name}
@@ -113,11 +106,11 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
 
           {/* Kind badge */}
           {isFixed ? (
-            <span className="rounded-full bg-primary-soft px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+            <span className="bg-primary-soft text-primary rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
               day {clampedDay} / {routine.durationDays}
             </span>
           ) : (
-            <span className="rounded-full bg-accent px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-accent-foreground">
+            <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
               ongoing
             </span>
           )}
@@ -140,14 +133,12 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
         </div>
 
         {/* Streak */}
-        <div className="mt-1 flex items-center gap-1 font-mono text-[11px] text-subtle-foreground">
+        <div className="text-subtle-foreground mt-1 flex items-center gap-1 font-mono text-[11px]">
           <Flame
             className={cn('size-3', streak > 0 ? 'text-warning' : 'text-subtle-foreground')}
             aria-hidden
           />
-          <span>
-            {streak > 0 ? `${streak} day streak` : 'No streak yet'}
-          </span>
+          <span>{streak > 0 ? `${streak} day streak` : 'No streak yet'}</span>
         </div>
       </div>
 
@@ -156,7 +147,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
         <button
           type="button"
           onClick={handleArchive}
-          className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md transition-colors"
           aria-label="Archive routine"
           title="Archive"
         >
@@ -203,11 +194,11 @@ function TimeOfDaySection({ label, routines, checks, domains, today }: TimeOfDay
   return (
     <section className="grid gap-2">
       <div className="flex items-center gap-3">
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {label}
         </div>
         <div className="hairline flex-1 border-t" aria-hidden />
-        <div className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {doneCount}/{routines.length}
         </div>
       </div>
@@ -244,28 +235,25 @@ function ArchivedSection({ routines }: ArchivedSectionProps) {
         onClick={() => setExpanded((v) => !v)}
         className="flex items-center gap-2 text-left"
       >
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Archived ({routines.length})
         </div>
         {expanded ? (
-          <ChevronUp className="size-3 text-subtle-foreground" />
+          <ChevronUp className="text-subtle-foreground size-3" />
         ) : (
-          <ChevronDown className="size-3 text-subtle-foreground" />
+          <ChevronDown className="text-subtle-foreground size-3" />
         )}
       </button>
 
       {expanded && (
         <ul className="grid gap-1.5">
           {routines.map((r) => (
-            <li
-              key={r.id}
-              className="surface-flat flex items-center gap-3 px-4 py-3 opacity-50"
-            >
+            <li key={r.id} className="surface-flat flex items-center gap-3 px-4 py-3 opacity-50">
               <span className="size-5 shrink-0" aria-hidden />
-              <span className="flex-1 text-[13px] text-muted-foreground line-through">
+              <span className="text-muted-foreground flex-1 text-[13px] line-through">
                 {r.name}
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 archived
               </span>
             </li>
@@ -321,11 +309,11 @@ export function RoutinesView() {
       {/* Empty state */}
       {!hasActive && archived.length === 0 && (
         <div className="surface flex min-h-60 flex-col items-center justify-center gap-3 p-10 text-center">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Routines
           </div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-sm text-sm">
             Build daily habits - morning stretches, evening reviews, or a 30-day challenge. Track
             your streaks and stay consistent.
           </p>
@@ -362,7 +350,7 @@ function SkeletonRows() {
       {['Morning', 'Anytime'].map((label) => (
         <section key={label} className="grid gap-2">
           <div className="flex items-center gap-3">
-            <div className="h-3 w-16 animate-pulse rounded bg-border" />
+            <div className="bg-border h-3 w-16 animate-pulse rounded" />
             <div className="hairline flex-1 border-t" />
           </div>
           <ul className="grid gap-1.5">

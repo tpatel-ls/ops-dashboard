@@ -73,8 +73,8 @@ export function findStaleDomains(input: {
           (task) =>
             !task.deletedAt &&
             task.status !== 'archived' &&
-            (task.domainId ?? (task.projectId ? projectDomainById.get(task.projectId) : undefined)) ===
-              domain.id,
+            (task.domainId ??
+              (task.projectId ? projectDomainById.get(task.projectId) : undefined)) === domain.id,
         )
         .flatMap((task) => [task.completedAt, task.updatedAt, task.createdAt])
         .filter(Boolean) as string[];

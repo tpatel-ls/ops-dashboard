@@ -84,25 +84,24 @@ function relativeTime(iso: string): string {
 /* ------------------------------------------------------------------ */
 
 function CaptureRow({ cap }: { cap: Capture }) {
-  const routeLabel =
-    cap.routedTo ? `to ${KIND_LABEL[cap.routedTo.type] ?? cap.routedTo.type}` : null;
+  const routeLabel = cap.routedTo
+    ? `to ${KIND_LABEL[cap.routedTo.type] ?? cap.routedTo.type}`
+    : null;
 
   const KindIcon = cap.aiKind ? KIND_ICON[cap.aiKind] : FileText;
 
   return (
     <li className="surface-flat group flex items-start gap-2.5 px-3 py-3 sm:gap-3 sm:px-4">
       {/* Icon */}
-      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-bg-sunken text-subtle-foreground">
+      <span className="bg-bg-sunken text-subtle-foreground mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md">
         <KindIcon className="size-4" aria-hidden />
       </span>
 
       {/* Content */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-foreground">
-          {cap.aiSummary ?? cap.raw}
-        </p>
+        <p className="text-foreground truncate text-sm font-medium">{cap.aiSummary ?? cap.raw}</p>
         {cap.aiSummary && cap.aiSummary !== cap.raw ? (
-          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{cap.raw}</p>
+          <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">{cap.raw}</p>
         ) : null}
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           {/* Status chip */}
@@ -117,18 +116,18 @@ function CaptureRow({ cap }: { cap: Capture }) {
 
           {/* Route chip */}
           {routeLabel ? (
-            <span className="rounded-md bg-bg-sunken px-2 py-0.5 text-[10px] text-muted-foreground">
+            <span className="bg-bg-sunken text-muted-foreground rounded-md px-2 py-0.5 text-[10px]">
               {routeLabel}
             </span>
           ) : null}
 
           {/* Source chip */}
-          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground">
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.12em] uppercase">
             via {cap.source}
           </span>
 
           {/* Time */}
-          <span className="ml-auto font-mono text-[10px] text-subtle-foreground">
+          <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
             {relativeTime(cap.createdAt)}
           </span>
         </div>
@@ -141,7 +140,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
             type="button"
             title="Dismiss"
             onClick={() => dismissCapture(cap.id)}
-            className="flex size-10 items-center justify-center rounded-md text-subtle-foreground hover:bg-bg-sunken hover:text-foreground sm:size-8"
+            className="text-subtle-foreground hover:bg-bg-sunken hover:text-foreground flex size-10 items-center justify-center rounded-md sm:size-8"
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -150,7 +149,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
           type="button"
           title="Delete"
           onClick={() => deleteCapture(cap.id)}
-          className="flex size-10 items-center justify-center rounded-md text-subtle-foreground hover:bg-destructive/10 hover:text-destructive sm:size-8"
+          className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive flex size-10 items-center justify-center rounded-md sm:size-8"
         >
           <Trash2 className="size-4" aria-hidden />
         </button>
@@ -169,19 +168,20 @@ export default function InboxPage() {
   const captures = useLiveQuery(async () => {
     const db = getDb();
     const all = await db.captures.toArray();
-    return all
-      .filter((c) => !c.deletedAt)
-      .sort(compareCaptureRecency);
+    return all.filter((c) => !c.deletedAt).sort(compareCaptureRecency);
   });
 
   const pending = captures?.filter((c) => c.status === 'pending').length ?? 0;
-  const visibleCaptures = captures?.filter((capture) => filter === 'all' || capture.status === filter);
+  const visibleCaptures = captures?.filter(
+    (capture) => filter === 'all' || capture.status === filter,
+  );
 
-  const meta = pending > 0 ? (
-    <span className="rounded-full bg-primary px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
-      {pending} pending
-    </span>
-  ) : null;
+  const meta =
+    pending > 0 ? (
+      <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 font-mono text-[10px]">
+        {pending} pending
+      </span>
+    ) : null;
 
   return (
     <ViewShell
@@ -198,7 +198,11 @@ export default function InboxPage() {
         <EmptyState onCapture={() => openWorkLogger('task')} />
       ) : (
         <div className="flex flex-col gap-3">
-          <div role="group" aria-label="Inbox status" className="grid grid-cols-4 gap-0.5 rounded-lg border bg-bg-sunken p-0.5 sm:w-fit">
+          <div
+            role="group"
+            aria-label="Inbox status"
+            className="bg-bg-sunken grid grid-cols-4 gap-0.5 rounded-lg border p-0.5 sm:w-fit"
+          >
             {CAPTURE_FILTERS.map((item) => (
               <button
                 key={item.id}
@@ -223,7 +227,7 @@ export default function InboxPage() {
               ))}
             </ul>
           ) : (
-            <div className="flex min-h-32 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex min-h-32 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm">
               No {filter} captures.
             </div>
           )}
@@ -237,7 +241,7 @@ function SkeletonRows() {
   return (
     <ul className="flex flex-col gap-2" aria-label="Loading">
       {[1, 2, 3].map((i) => (
-        <li key={i} className="surface-flat h-16 animate-pulse bg-bg-sunken" />
+        <li key={i} className="surface-flat bg-bg-sunken h-16 animate-pulse" />
       ))}
     </ul>
   );
@@ -246,17 +250,17 @@ function SkeletonRows() {
 function EmptyState({ onCapture }: { onCapture: () => void }) {
   return (
     <div className="surface flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
-      <span className="flex size-9 items-center justify-center rounded-lg bg-bg-sunken text-subtle-foreground">
+      <span className="bg-bg-sunken text-subtle-foreground flex size-9 items-center justify-center rounded-lg">
         <Inbox className="size-4" aria-hidden />
       </span>
-      <p className="text-sm font-semibold text-foreground">Inbox cleared</p>
-      <p className="max-w-xs text-xs text-muted-foreground">
+      <p className="text-foreground text-sm font-semibold">Inbox cleared</p>
+      <p className="text-muted-foreground max-w-xs text-xs">
         Capture the next task before it gets lost.
       </p>
       <button
         type="button"
         onClick={onCapture}
-        className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-primary-foreground"
+        className="bg-primary text-primary-foreground mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md px-4 text-xs font-semibold"
       >
         <Plus className="size-3.5" aria-hidden />
         Capture task

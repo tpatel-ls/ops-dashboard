@@ -30,11 +30,11 @@ export function JournalList() {
   if (entries.length === 0) {
     return (
       <div className="surface flex h-64 flex-col items-center justify-center gap-2 p-10 text-center">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
           journal
         </div>
         <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-        <p className="max-w-sm text-sm text-muted-foreground">
+        <p className="text-muted-foreground max-w-sm text-sm">
           Upload a photo, paste some text, or type a quick note. AI will extract a clean entry and
           detect completed habits.
         </p>
@@ -64,45 +64,39 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
   })();
 
   return (
-    <li className="surface-flat group relative flex flex-col gap-3 px-4 py-3 transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
+    <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-3 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <time
-              dateTime={entry.date}
-              className="font-mono text-[11px] text-subtle-foreground"
-            >
+            <time dateTime={entry.date} className="text-subtle-foreground font-mono text-[11px]">
               {formattedDate}
             </time>
             {mood && (
               <span
-                className={cn(
-                  'font-mono text-[10px] uppercase tracking-[0.14em]',
-                  mood.color,
-                )}
+                className={cn('font-mono text-[10px] tracking-[0.14em] uppercase', mood.color)}
                 title={mood.label}
               >
                 {mood.symbol} {mood.label}
               </span>
             )}
             {entry.source === 'upload' && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-accent px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-accent-foreground">
+              <span className="bg-accent text-accent-foreground inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-mono text-[9px] tracking-[0.14em] uppercase">
                 <Upload className="size-2.5" aria-hidden />
                 upload
               </span>
             )}
           </div>
           {entry.title && (
-            <p className="mt-0.5 text-[14px] font-medium leading-snug">{entry.title}</p>
+            <p className="mt-0.5 text-[14px] leading-snug font-medium">{entry.title}</p>
           )}
         </div>
         <button
           type="button"
           onClick={() => deleteJournalEntry(entry.id)}
           className={cn(
-            'inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors',
-            'opacity-100 hover:text-destructive sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+            'text-muted-foreground inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-colors',
+            'hover:text-destructive opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
           )}
           aria-label="Delete entry"
         >
@@ -111,7 +105,7 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       {/* Body excerpt */}
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{excerpt}</p>
+      <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{excerpt}</p>
 
       {/* Tags */}
       {entry.tags && entry.tags.length > 0 && (
@@ -119,7 +113,7 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
           {entry.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-accent px-2 py-0.5 text-[10px] text-accent-foreground"
+              className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
             >
               #{tag}
             </span>

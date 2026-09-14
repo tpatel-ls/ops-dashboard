@@ -43,10 +43,10 @@ execute end to end.
 ### Current state you inherit (as of 2026-07-01)
 
 - The app is Tanay's live life-OS PWA ("Ops Dashboard"), Next.js 16 + React 19
-  + Tailwind v4 + Dexie (local-first) + Supabase realtime sync + Serwist PWA.
-  Prod: Vercel project `taskify` (taskify-three-delta.vercel.app) on Tanay's
-  PERSONAL Vercel account; Supabase project `jnaycounllaafvorakss` on his
-  PERSONAL Supabase account.
+  - Tailwind v4 + Dexie (local-first) + Supabase realtime sync + Serwist PWA.
+    Prod: Vercel project `taskify` (taskify-three-delta.vercel.app) on Tanay's
+    PERSONAL Vercel account; Supabase project `jnaycounllaafvorakss` on his
+    PERSONAL Supabase account.
 - Org lanes shipped 2026-07-01: `organizations` table, `orgId` on
   projects/tasks, top-bar context switcher (All / LS Global Group / Personal),
   lane-colored Week+Month calendars, quick-add project picker, inline add on
@@ -75,6 +75,7 @@ Voical / SpeakMeal (say what you ate, AI estimates calories + macros),
 Reflect / NotePlan (brain-dump notes, AI extracts the action items).
 
 Approved decisions:
+
 1. Food logging = AI-estimated calories + protein/carbs/fat, logged by voice
    or text, with a Food page showing daily totals and history.
 2. Notepad = full brain dump. One page, type or dictate anything - mixed
@@ -168,13 +169,14 @@ export interface RoutedResult {
   title: string;
   recordType: 'task' | 'journalEntry' | 'note' | 'quote' | 'foodLog' | 'routineCheck';
   recordId: string;
-  detail?: string;           // e.g. "Blue Text" or "640 kcal" or routine name
+  detail?: string; // e.g. "Blue Text" or "640 kcal" or routine name
   undo: () => Promise<void>;
 }
-export async function processBrainDump(raw: string, source: CaptureSource): Promise<RoutedResult[]>
+export async function processBrainDump(raw: string, source: CaptureSource): Promise<RoutedResult[]>;
 ```
 
 Behavior:
+
 1. Gather context from Dexie: active project names (not deleted/archived),
    active routine names, `todayISO()`.
 2. POST `/api/braindump`. On `ok:false` or fetch error -> FALLBACK (below).
@@ -220,8 +222,8 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export interface FoodItem {
   name: string;
   quantity?: string;
-  calories: number;   // kcal
-  protein?: number;   // grams
+  calories: number; // kcal
+  protein?: number; // grams
   carbs?: number;
   fat?: number;
 }
@@ -243,15 +245,17 @@ export interface FoodLog extends SyncMeta {
 Also in types.ts: add `'foodLogs'` to the `SyncTable` union; add `'notepad'`
 to `CaptureSource`; add `'food' | 'habit'` to `CaptureKind` (update the
 Inbox `KIND_LABEL`/`KIND_ICON` maps in `apps/web/src/app/(app)/inbox/page.tsx`
+
 - they must cover every CaptureKind or it is a type error); widen
-`RoutineCheck.source` to `'manual' | 'journal' | 'capture'`.
+  `RoutineCheck.source` to `'manual' | 'journal' | 'capture'`.
 
 Touchpoint checklist for the new entity (this exact recipe shipped
 `organizations`, verified):
+
 1. `packages/core/src/types.ts` - interface + SyncTable member (above).
 2. `packages/core/src/db.ts` - `foodLogs!: EntityTable<FoodLog, 'id'>;` field
-   + new `this.version(6).stores({ foodLogs: 'id, date, mealType, updatedAt, deletedAt' });`
-   (only new/changed stores go in the new version block).
+   - new `this.version(6).stores({ foodLogs: 'id, date, mealType, updatedAt, deletedAt' });`
+     (only new/changed stores go in the new version block).
 3. `packages/core/src/sync.ts` - add `FoodLog` to the `Syncable` union.
 4. `apps/web/src/lib/sync/mapping.ts` - add `foodLogs: 'food_logs'` to
    `SYNC_TABLES`. That single entry auto-wires outbox push, pull cursors,
@@ -371,6 +375,7 @@ end $$;
 
 `apps/web/src/components/quick-add-dialog.tsx` currently calls `addTask(text)`
 directly (NO AI - inconsistent with the top bar). Change it to:
+
 - `processBrainDump(text, 'text')` on submit; show a one-line result summary
   ("3 items filed") briefly before close, or just close (keep it fast).
 - Add the mic via `useVoiceInput` (transcript appends to the input).

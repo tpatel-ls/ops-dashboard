@@ -35,9 +35,7 @@ export function summarizeTodayTasks(tasks: Task[], day: string) {
   return {
     total: today.length,
     done: today.filter((task) => task.status === 'done').length,
-    overdue: live.filter(
-      (task) => task.status !== 'done' && taskIsOverdue(task, day),
-    ).length,
+    overdue: live.filter((task) => task.status !== 'done' && taskIsOverdue(task, day)).length,
   };
 }
 

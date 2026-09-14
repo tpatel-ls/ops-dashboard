@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, BookText, MessageSquareQuote, NotebookPen, PenLine, Plus, X } from 'lucide-react';
+import {
+  BookOpen,
+  BookText,
+  MessageSquareQuote,
+  NotebookPen,
+  PenLine,
+  Plus,
+  X,
+} from 'lucide-react';
 import { ViewShell } from '@/components/view-shell';
 import { JournalList } from '@/components/journal-list';
 import { JournalUpload } from '@/components/journal-upload';
@@ -76,7 +84,7 @@ export default function LibraryPage() {
       <div className="flex flex-col gap-4">
         {/* ── Tab bar ── */}
         <nav
-          className="grid grid-cols-4 gap-1 rounded-lg bg-bg-sunken p-1"
+          className="bg-bg-sunken grid grid-cols-4 gap-1 rounded-lg p-1"
           aria-label="Library sections"
           role="tablist"
         >
@@ -106,8 +114,8 @@ export default function LibraryPage() {
           <>
             {/* Section header */}
             <div className="flex items-center gap-2">
-              <BookOpen className="size-4 text-primary" aria-hidden />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+              <BookOpen className="text-primary size-4" aria-hidden />
+              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 Journal
               </span>
             </div>
@@ -128,7 +136,7 @@ export default function LibraryPage() {
                 type="button"
                 onClick={() => setAddOpen(true)}
                 className={cn(
-                  'flex min-h-12 items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors',
+                  'border-border text-muted-foreground flex min-h-12 items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm transition-colors',
                   'hover:border-primary hover:bg-primary-soft hover:text-primary',
                 )}
               >

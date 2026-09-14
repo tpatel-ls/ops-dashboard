@@ -45,7 +45,7 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="surface-flat flex flex-col gap-3 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
         New Note
       </div>
       <input
@@ -81,14 +81,14 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving || !body.trim()}
-          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save Note'}
         </button>
@@ -101,14 +101,13 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
 
 function NoteCard({ note }: { note: Note }) {
   const [confirming, setConfirming] = useState(false);
-  const excerpt =
-    note.title
-      ? note.body.length > 240
-        ? note.body.slice(0, 240) + '…'
-        : note.body
-      : note.body.length > 240
-        ? note.body.slice(0, 240) + '…'
-        : note.body;
+  const excerpt = note.title
+    ? note.body.length > 240
+      ? note.body.slice(0, 240) + '…'
+      : note.body
+    : note.body.length > 240
+      ? note.body.slice(0, 240) + '…'
+      : note.body;
 
   async function handleFlag() {
     await updateNote(note.id, { flaggedForReview: !note.flaggedForReview });
@@ -123,15 +122,15 @@ function NoteCard({ note }: { note: Note }) {
   }
 
   return (
-    <li className="surface-flat group relative flex flex-col gap-2.5 px-4 py-3 transition-all hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
+    <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-2.5 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {note.title && (
-            <p className="truncate text-[14px] font-medium leading-snug">{note.title}</p>
+            <p className="truncate text-[14px] leading-snug font-medium">{note.title}</p>
           )}
           {note.source && (
-            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+            <p className="text-subtle-foreground mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
               {note.source}
             </p>
           )}
@@ -144,9 +143,7 @@ function NoteCard({ note }: { note: Note }) {
             title={note.flaggedForReview ? 'Unflag for review' : 'Flag for review'}
             className={cn(
               'inline-flex size-9 items-center justify-center rounded-md transition-colors',
-              note.flaggedForReview
-                ? 'text-warning'
-                : 'text-muted-foreground hover:text-warning',
+              note.flaggedForReview ? 'text-warning' : 'text-muted-foreground hover:text-warning',
             )}
           >
             <Flag className="size-3.5" fill={note.flaggedForReview ? 'currentColor' : 'none'} />
@@ -170,12 +167,12 @@ function NoteCard({ note }: { note: Note }) {
       </div>
 
       {/* Body excerpt */}
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{excerpt}</p>
+      <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{excerpt}</p>
 
       {/* Footer: tags + flag indicator */}
       <div className="flex flex-wrap items-center gap-1.5">
         {note.flaggedForReview && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-warning">
+          <span className="bg-warning/15 text-warning inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
             <Flag className="size-2.5" fill="currentColor" />
             Review
           </span>
@@ -183,7 +180,7 @@ function NoteCard({ note }: { note: Note }) {
         {note.tags.map((tag) => (
           <span
             key={tag}
-            className="rounded-full bg-accent px-2 py-0.5 text-[10px] text-accent-foreground"
+            className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
           >
             #{tag}
           </span>
@@ -218,7 +215,7 @@ export function NotesView() {
           type="button"
           onClick={() => setFormOpen(true)}
           className={cn(
-            'flex min-h-12 items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors',
+            'border-border text-muted-foreground flex min-h-12 items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm transition-colors',
             'hover:border-primary hover:bg-primary-soft hover:text-primary',
           )}
         >
@@ -230,11 +227,11 @@ export function NotesView() {
       {/* Empty state */}
       {notes.length === 0 && !formOpen && (
         <div className="surface flex min-h-52 flex-col items-center justify-center gap-3 p-10 text-center">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Notes
           </div>
           <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-sm text-sm">
             Capture ideas, excerpts, and references. Flag anything worth revisiting later.
           </p>
         </div>

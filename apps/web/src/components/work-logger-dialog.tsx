@@ -383,7 +383,7 @@ function WorkLoggerPanel({
           </button>
         </header>
 
-        <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
+        <div className="min-h-0 flex-1 scrollbar-thin overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
           {launchMode !== 'task' ? (
             <div className="bg-bg-sunken grid grid-cols-3 gap-1 rounded-lg border p-1">
               {MODE_META.map(({ id, label, icon: Icon }) => (

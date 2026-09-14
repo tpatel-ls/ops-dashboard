@@ -26,23 +26,19 @@ function StatCard({ label, value, icon: Icon, tone = 'text-primary', sub }: Stat
     <div className="surface flex items-center gap-4 px-5 py-4">
       <div
         className={cn(
-          'flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft',
+          'bg-primary-soft flex size-9 shrink-0 items-center justify-center rounded-[10px]',
           tone,
         )}
       >
         <Icon className="size-4" aria-hidden />
       </div>
       <div className="min-w-0">
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {label}
         </div>
         <div className="mt-0.5 flex items-baseline gap-1.5">
-          <span className="font-mono text-xl font-semibold tabular-nums leading-none">
-            {value}
-          </span>
-          {sub ? (
-            <span className="text-xs text-muted-foreground">{sub}</span>
-          ) : null}
+          <span className="font-mono text-xl leading-none font-semibold tabular-nums">{value}</span>
+          {sub ? <span className="text-muted-foreground text-xs">{sub}</span> : null}
         </div>
       </div>
     </div>
@@ -53,14 +49,12 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-foreground">{label}</span>
-        <span className="font-mono text-[10px] tabular-nums text-subtle-foreground">
-          {value}%
-        </span>
+        <span className="text-foreground text-xs font-medium">{label}</span>
+        <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">{value}%</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-bg-sunken">
+      <div className="bg-bg-sunken h-2 overflow-hidden rounded-full">
         <div
-          className="h-full rounded-full bg-primary transition-all"
+          className="bg-primary h-full rounded-full transition-all"
           style={{ width: `${value}%` }}
         />
       </div>
@@ -81,9 +75,7 @@ export default function HabitsPage() {
 
     // Best streak across all active routines
     const routines = await db.routines.filter((r) => !r.deletedAt && !r.archivedAt).toArray();
-    const allChecks = await db.routineChecks
-      .filter((c) => !c.deletedAt)
-      .toArray();
+    const allChecks = await db.routineChecks.filter((c) => !c.deletedAt).toArray();
 
     let bestStreak = 0;
     for (const routine of routines) {
@@ -171,34 +163,36 @@ export default function HabitsPage() {
             />
             <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
               <div>
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-                  <ShieldCheck className="size-3.5 text-primary" aria-hidden />
+                <div className="bg-card/70 text-muted-foreground mb-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs backdrop-blur">
+                  <ShieldCheck className="text-primary size-3.5" aria-hidden />
                   Identity score
                 </div>
                 <div className="flex items-end gap-2">
-                  <span className="font-mono text-6xl font-semibold leading-none tabular-nums tracking-tight md:text-7xl">
+                  <span className="font-mono text-6xl leading-none font-semibold tracking-tight tabular-nums md:text-7xl">
                     {identityScore}
                   </span>
-                  <span className="pb-2 font-mono text-sm text-subtle-foreground">/100</span>
+                  <span className="text-subtle-foreground pb-2 font-mono text-sm">/100</span>
                 </div>
-                <div className="mt-2 inline-flex rounded-full border bg-card/65 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-primary backdrop-blur">
+                <div className="bg-card/65 text-primary mt-2 inline-flex rounded-full border px-3 py-1 font-mono text-[10px] tracking-[0.14em] uppercase backdrop-blur">
                   {band}
                 </div>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+                <p className="text-muted-foreground mt-3 max-w-xl text-sm leading-6">
                   Built from streak, weekly consistency, completed tasks, reflection, and the
                   year-long activity signal.
                 </p>
               </div>
               <div className="grid min-w-[220px] grid-cols-2 gap-2">
-                <div className="rounded-[14px] border bg-card/70 p-3 backdrop-blur">
-                  <div className="font-mono text-xl font-semibold tabular-nums">{weeklyActiveDays}/7</div>
-                  <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+                <div className="bg-card/70 rounded-[14px] border p-3 backdrop-blur">
+                  <div className="font-mono text-xl font-semibold tabular-nums">
+                    {weeklyActiveDays}/7
+                  </div>
+                  <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.14em] uppercase">
                     days this week
                   </div>
                 </div>
-                <div className="rounded-[14px] border bg-card/70 p-3 backdrop-blur">
+                <div className="bg-card/70 rounded-[14px] border p-3 backdrop-blur">
                   <div className="font-mono text-xl font-semibold tabular-nums">{activeDays}</div>
-                  <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+                  <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.14em] uppercase">
                     active days
                   </div>
                 </div>
@@ -206,9 +200,9 @@ export default function HabitsPage() {
               <button
                 type="button"
                 onClick={() => void shareIdentityScore()}
-                className="hairline inline-flex h-9 items-center gap-2 rounded-[10px] border bg-card/75 px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                className="hairline bg-card/75 text-foreground hover:bg-accent inline-flex h-9 items-center gap-2 rounded-[10px] border px-3 text-xs font-medium transition-colors"
               >
-                <Share2 className="size-3.5 text-primary" aria-hidden />
+                <Share2 className="text-primary size-3.5" aria-hidden />
                 Share score
               </button>
             </div>
@@ -216,10 +210,12 @@ export default function HabitsPage() {
 
           <section className="surface p-5">
             <div className="mb-4 flex items-center gap-2">
-              <Target className="size-4 text-primary" aria-hidden />
+              <Target className="text-primary size-4" aria-hidden />
               <div>
                 <h2 className="text-sm font-semibold tracking-tight">Identity sections</h2>
-                <p className="text-xs text-muted-foreground">Each score is normalized to a weekly or monthly target.</p>
+                <p className="text-muted-foreground text-xs">
+                  Each score is normalized to a weekly or monthly target.
+                </p>
               </div>
             </div>
             <div className="flex flex-col gap-3">
@@ -268,11 +264,11 @@ export default function HabitsPage() {
 
         {/* Heatmap */}
         <div>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+          <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
             Activity · Last 365 days
           </div>
           {data === undefined ? (
-            <div className="surface flex h-40 animate-pulse items-center justify-center text-sm text-muted-foreground">
+            <div className="surface text-muted-foreground flex h-40 animate-pulse items-center justify-center text-sm">
               Loading…
             </div>
           ) : !hasActivity ? (
@@ -280,10 +276,10 @@ export default function HabitsPage() {
               <span className="text-2xl" aria-hidden>
                 🌱
               </span>
-              <p className="text-sm font-medium text-foreground">A clean slate.</p>
-              <p className="max-w-xs text-xs text-muted-foreground">
-                Complete tasks, check off routines, or write a journal entry - every action
-                lights up the grid.
+              <p className="text-foreground text-sm font-medium">A clean slate.</p>
+              <p className="text-muted-foreground max-w-xs text-xs">
+                Complete tasks, check off routines, or write a journal entry - every action lights
+                up the grid.
               </p>
             </div>
           ) : (
@@ -293,7 +289,7 @@ export default function HabitsPage() {
 
         {/* Legend */}
         {hasActivity && (
-          <div className="flex items-center gap-2 text-[11px] text-subtle-foreground">
+          <div className="text-subtle-foreground flex items-center gap-2 text-[11px]">
             <span>Less</span>
             {[0, 1, 2, 3, 4].map((lvl) => (
               <span
@@ -310,7 +306,7 @@ export default function HabitsPage() {
               />
             ))}
             <span>More</span>
-            <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em]">
+            <span className="ml-auto font-mono text-[10px] tracking-[0.18em] uppercase">
               task ×1 · routine ×2 · journal ×3 · work ×0.5/30 min
             </span>
           </div>

@@ -43,12 +43,7 @@ export function OpenTasks() {
       db.domains.toArray(),
     ]);
     const tasks = allTasks
-      .filter(
-        (t) =>
-          !t.deletedAt &&
-          t.status !== 'done' &&
-          t.status !== 'archived',
-      )
+      .filter((t) => !t.deletedAt && t.status !== 'done' && t.status !== 'archived')
       .sort(compareTasksByCommitment);
     return {
       tasks,
@@ -58,10 +53,7 @@ export function OpenTasks() {
   }) ?? { tasks: undefined, projects: {}, domains: {} };
 
   const openEdit = useAppStore((s) => s.openEdit);
-  const summary =
-    tasks === undefined
-      ? null
-      : summarizeOpenTasks(tasks, today);
+  const summary = tasks === undefined ? null : summarizeOpenTasks(tasks, today);
 
   return (
     <section>
@@ -69,17 +61,17 @@ export function OpenTasks() {
         type="button"
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
-        className="mb-2.5 flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-accent/55"
+        className="hover:bg-accent/55 mb-2.5 flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left transition-colors"
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Open Tasks
         </span>
         {tasks !== undefined && (
-          <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+          <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
             ({tasks.length})
           </span>
         )}
-        <span className="ml-auto text-subtle-foreground">
+        <span className="text-subtle-foreground ml-auto">
           {collapsed ? (
             <ChevronRight className="size-3.5" aria-hidden />
           ) : (
@@ -93,16 +85,20 @@ export function OpenTasks() {
           {tasks === undefined ? (
             <ul className="flex flex-col gap-1.5">
               {Array.from({ length: 4 }).map((_, i) => (
-                <li key={i} className="surface-flat h-12 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                <li
+                  key={i}
+                  className="surface-flat h-12 animate-pulse"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                />
               ))}
             </ul>
           ) : tasks.length === 0 ? (
             <div className="os-panel flex min-h-[118px] flex-col items-center justify-center gap-2 rounded-lg p-6 text-center">
-              <span className="relative font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+              <span className="text-subtle-foreground relative font-mono text-[10px] tracking-[0.22em] uppercase">
                 open tasks
               </span>
               <h3 className="text-base font-semibold tracking-tight">A clean slate.</h3>
-              <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+              <p className="text-muted-foreground max-w-sm text-sm leading-6">
                 All caught up! Use the quick-add bar to capture what&apos;s next.
               </p>
             </div>
@@ -117,104 +113,104 @@ export function OpenTasks() {
               ) : null}
               <ul className="flex flex-col gap-1.5">
                 {tasks.map((task) => {
-                const priorityColor = PRIORITY_COLOR[task.priority];
-                const project = task.projectId ? projects[task.projectId] : null;
-                const domain = task.domainId
-                  ? domains[task.domainId]
-                  : project?.domainId
-                    ? domains[project.domainId]
-                    : null;
-                const commitmentDay = taskCommitmentDay(task);
-                const isOverdue = taskIsOverdue(task, today);
+                  const priorityColor = PRIORITY_COLOR[task.priority];
+                  const project = task.projectId ? projects[task.projectId] : null;
+                  const domain = task.domainId
+                    ? domains[task.domainId]
+                    : project?.domainId
+                      ? domains[project.domainId]
+                      : null;
+                  const commitmentDay = taskCommitmentDay(task);
+                  const isOverdue = taskIsOverdue(task, today);
 
-                return (
-                  <li
-                    key={task.id}
-                    className={cn(
-                      'surface-flat group relative flex items-center gap-2 px-3 py-2 transition-all sm:gap-3 sm:px-4',
-                      'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]',
-                    )}
-                  >
-                    {/* priority accent */}
-                    <span
-                      aria-hidden
-                      className="absolute inset-y-2 left-0 w-[3px] rounded-r-full"
-                      style={{
-                        background: priorityColor,
-                        opacity: task.priority === 0 ? 0 : 1,
-                      }}
-                    />
-
-                    {/* check */}
-                    <button
-                      type="button"
-                      onClick={() => setTaskStatus(task.id, 'done')}
-                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10 hover:text-primary"
-                      aria-label={`Complete ${task.title}`}
-                    >
-                      <Check className="size-3" strokeWidth={3} aria-hidden />
-                    </button>
-
-                    {/* title + meta */}
-                    <button
-                      type="button"
-                      onClick={() => openEdit(task.id)}
-                      className="min-w-0 flex-1 py-1 text-left"
-                    >
-                      <div className="flex items-baseline gap-2">
-                        <span className="truncate text-[13px] leading-5">{task.title}</span>
-                        {task.priority > 0 && (
-                          <span
-                            className="rounded border px-1 py-0.5 font-mono text-[9px] font-semibold leading-none"
-                            style={{ borderColor: priorityColor, color: priorityColor }}
-                            aria-label={`Priority ${task.priority}`}
-                          >
-                            {PRIORITY_LABEL[task.priority]}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        {/* due/scheduled chip */}
-                        {commitmentDay && (
-                          <span
-                            className={cn(
-                              'font-mono text-[10px]',
-                              isOverdue ? 'text-destructive' : 'text-subtle-foreground',
-                            )}
-                          >
-                            {format(parseISO(`${commitmentDay}T00:00:00`), 'EEE d MMM')}
-                          </span>
-                        )}
-                        {/* project / domain chip */}
-                        {(project || domain) && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-bg-sunken px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-                            {project?.color && (
-                              <span
-                                className="inline-block size-1.5 rounded-full"
-                                style={{ background: project.color }}
-                                aria-hidden
-                              />
-                            )}
-                            {project?.name ?? domain?.name}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-
-                    {/* star to promote */}
-                    <button
-                      type="button"
-                      onClick={() => updateTask(task.id, { starred: true })}
+                  return (
+                    <li
+                      key={task.id}
                       className={cn(
-                        'inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-70 transition-all sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
-                        'hover:text-primary',
+                        'surface-flat group relative flex items-center gap-2 px-3 py-2 transition-all sm:gap-3 sm:px-4',
+                        'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.45)]',
                       )}
-                      aria-label={`Add ${task.title} to daily mission`}
                     >
-                      <Star className="size-4" aria-hidden />
-                    </button>
-                  </li>
-                );
+                      {/* priority accent */}
+                      <span
+                        aria-hidden
+                        className="absolute inset-y-2 left-0 w-[3px] rounded-r-full"
+                        style={{
+                          background: priorityColor,
+                          opacity: task.priority === 0 ? 0 : 1,
+                        }}
+                      />
+
+                      {/* check */}
+                      <button
+                        type="button"
+                        onClick={() => setTaskStatus(task.id, 'done')}
+                        className="border-border-strong hover:border-primary hover:bg-primary/10 hover:text-primary inline-flex size-9 shrink-0 items-center justify-center rounded-full border text-transparent transition-all"
+                        aria-label={`Complete ${task.title}`}
+                      >
+                        <Check className="size-3" strokeWidth={3} aria-hidden />
+                      </button>
+
+                      {/* title + meta */}
+                      <button
+                        type="button"
+                        onClick={() => openEdit(task.id)}
+                        className="min-w-0 flex-1 py-1 text-left"
+                      >
+                        <div className="flex items-baseline gap-2">
+                          <span className="truncate text-[13px] leading-5">{task.title}</span>
+                          {task.priority > 0 && (
+                            <span
+                              className="rounded border px-1 py-0.5 font-mono text-[9px] leading-none font-semibold"
+                              style={{ borderColor: priorityColor, color: priorityColor }}
+                              aria-label={`Priority ${task.priority}`}
+                            >
+                              {PRIORITY_LABEL[task.priority]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                          {/* due/scheduled chip */}
+                          {commitmentDay && (
+                            <span
+                              className={cn(
+                                'font-mono text-[10px]',
+                                isOverdue ? 'text-destructive' : 'text-subtle-foreground',
+                              )}
+                            >
+                              {format(parseISO(`${commitmentDay}T00:00:00`), 'EEE d MMM')}
+                            </span>
+                          )}
+                          {/* project / domain chip */}
+                          {(project || domain) && (
+                            <span className="bg-bg-sunken text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]">
+                              {project?.color && (
+                                <span
+                                  className="inline-block size-1.5 rounded-full"
+                                  style={{ background: project.color }}
+                                  aria-hidden
+                                />
+                              )}
+                              {project?.name ?? domain?.name}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+
+                      {/* star to promote */}
+                      <button
+                        type="button"
+                        onClick={() => updateTask(task.id, { starred: true })}
+                        className={cn(
+                          'text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md opacity-70 transition-all sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+                          'hover:text-primary',
+                        )}
+                        aria-label={`Add ${task.title} to daily mission`}
+                      >
+                        <Star className="size-4" aria-hidden />
+                      </button>
+                    </li>
+                  );
                 })}
               </ul>
             </>
@@ -237,8 +233,10 @@ function SummaryChip({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border bg-card px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground',
-        value > 0 && tone === 'danger' && 'border-destructive/35 bg-destructive/10 text-destructive',
+        'bg-card text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] uppercase',
+        value > 0 &&
+          tone === 'danger' &&
+          'border-destructive/35 bg-destructive/10 text-destructive',
         value > 0 && tone === 'primary' && 'border-primary/35 bg-primary/10 text-primary',
         value > 0 && tone === 'warn' && 'border-warning/40 bg-warning/10 text-warning',
       )}

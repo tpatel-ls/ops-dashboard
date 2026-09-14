@@ -60,10 +60,7 @@
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import {
-  simpleKanbanColumn,
-  statusForSimpleKanbanColumn,
-} from './simple-kanban';
+import { simpleKanbanColumn, statusForSimpleKanbanColumn } from './simple-kanban';
 
 describe('simpleKanbanColumn', () => {
   it.each([

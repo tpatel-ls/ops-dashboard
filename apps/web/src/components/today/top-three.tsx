@@ -20,11 +20,7 @@ export function TopThree() {
     const all = await getDb().tasks.toArray();
     return all
       .filter(
-        (t) =>
-          !t.deletedAt &&
-          t.starred === true &&
-          t.status !== 'done' &&
-          t.status !== 'archived',
+        (t) => !t.deletedAt && t.starred === true && t.status !== 'done' && t.status !== 'archived',
       )
       .slice(0, 3);
   });
@@ -34,12 +30,12 @@ export function TopThree() {
   return (
     <section>
       <div className="mb-2.5 flex items-center gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Daily mission
         </span>
-        <Star className="size-3 text-primary" fill="currentColor" aria-hidden />
+        <Star className="text-primary size-3" fill="currentColor" aria-hidden />
         {tasks !== undefined ? (
-          <span className="ml-auto rounded-full border bg-card px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+          <span className="bg-card text-muted-foreground ml-auto rounded-full border px-2 py-0.5 font-mono text-[10px] tabular-nums">
             {tasks.length}/3 slots
           </span>
         ) : null}
@@ -49,8 +45,8 @@ export function TopThree() {
         <div className="surface-flat h-[96px] animate-pulse" />
       ) : tasks.length === 0 ? (
         <div className="surface flex min-h-[80px] items-center justify-center gap-2 px-5 py-4 text-center">
-          <Star className="size-4 text-muted-foreground" aria-hidden />
-          <p className="text-sm text-muted-foreground">
+          <Star className="text-muted-foreground size-4" aria-hidden />
+          <p className="text-muted-foreground text-sm">
             Star up to three tasks to pin them here as your daily focus.
           </p>
         </div>
@@ -76,7 +72,7 @@ export function TopThree() {
                   }}
                 />
 
-                <span className="hidden size-6 shrink-0 items-center justify-center rounded-full bg-bg-sunken font-mono text-[10px] text-subtle-foreground sm:inline-flex">
+                <span className="bg-bg-sunken text-subtle-foreground hidden size-6 shrink-0 items-center justify-center rounded-full font-mono text-[10px] sm:inline-flex">
                   {index + 1}
                 </span>
 
@@ -87,7 +83,7 @@ export function TopThree() {
                     hapticSuccess();
                     void setTaskStatus(task.id, 'done');
                   }}
-                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-all hover:border-primary hover:bg-primary/10 hover:text-primary"
+                  className="border-border-strong hover:border-primary hover:bg-primary/10 hover:text-primary inline-flex size-9 shrink-0 items-center justify-center rounded-full border text-transparent transition-all"
                   aria-label={`Complete ${task.title}`}
                 >
                   <Check className="size-3" strokeWidth={3} aria-hidden />
@@ -96,7 +92,7 @@ export function TopThree() {
                 <button
                   type="button"
                   onClick={() => openEdit(task.id)}
-                  className="min-w-0 flex-1 truncate py-2 text-left text-[14px] font-medium leading-5 hover:text-primary"
+                  className="hover:text-primary min-w-0 flex-1 truncate py-2 text-left text-[14px] leading-5 font-medium"
                 >
                   {task.title}
                 </button>
@@ -105,7 +101,7 @@ export function TopThree() {
                 <button
                   type="button"
                   onClick={() => updateTask(task.id, { starred: false })}
-                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-primary opacity-80 transition-colors hover:bg-accent hover:opacity-100"
+                  className="text-primary hover:bg-accent inline-flex size-9 shrink-0 items-center justify-center rounded-md opacity-80 transition-colors hover:opacity-100"
                   aria-label={`Remove ${task.title} from daily mission`}
                 >
                   <Star className="size-4" fill="currentColor" aria-hidden />
@@ -116,9 +112,10 @@ export function TopThree() {
 
           {tasks.length < 3 && (
             <li className="surface-flat flex items-center gap-2 px-4 py-2.5">
-              <Star className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-              <span className="text-xs text-muted-foreground">
-                Star {3 - tasks.length} more task{3 - tasks.length === 1 ? '' : 's'} to fill your top three.
+              <Star className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
+              <span className="text-muted-foreground text-xs">
+                Star {3 - tasks.length} more task{3 - tasks.length === 1 ? '' : 's'} to fill your
+                top three.
               </span>
             </li>
           )}

@@ -106,7 +106,8 @@ const VENDOR_RAILS: Array<{
     name: 'RingCentral',
     status: 'Voice, call control, call logs, recordings, SMS',
     icon: PhoneCall,
-    detail: 'Best first connector for click-to-call, active call control, call results, and call recording ingestion.',
+    detail:
+      'Best first connector for click-to-call, active call control, call results, and call recording ingestion.',
   },
   {
     name: 'NICE CXone',
@@ -118,13 +119,15 @@ const VENDOR_RAILS: Array<{
     name: 'Apple messaging',
     status: 'Approved business messaging path required',
     icon: MessageSquareText,
-    detail: 'Blue texting should use Apple Messages for Business or an approved MSP, with SMS and callback fallback.',
+    detail:
+      'Blue texting should use Apple Messages for Business or an approved MSP, with SMS and callback fallback.',
   },
   {
     name: 'CRM write-back',
     status: 'Schema-first connector',
     icon: Database,
-    detail: 'Normalize leads, attempts, recordings, transcripts, dispositions, notes, and next actions.',
+    detail:
+      'Normalize leads, attempts, recordings, transcripts, dispositions, notes, and next actions.',
   },
 ];
 
@@ -217,85 +220,88 @@ export function PowerDialerCommandCenter() {
           type="button"
           onClick={handleSync}
           disabled={syncing}
-          className="hairline inline-flex min-h-11 items-center gap-2 rounded-lg border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-60 sm:min-h-9"
+          className="hairline bg-card text-foreground hover:bg-accent inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-xs font-medium transition-colors disabled:opacity-60 sm:min-h-9"
         >
-          <Sparkles className="size-3.5 text-primary" aria-hidden />
+          <Sparkles className="text-primary size-3.5" aria-hidden />
           {syncing ? 'Syncing' : 'Sync launch plan'}
         </button>
       }
     >
       <div className="grid min-w-0 gap-5">
         <section className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
-            <div className="surface flex min-w-0 flex-col gap-4 p-4 md:p-5">
-              <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground">
-                  <Radar className="size-3.5 text-primary" aria-hidden />
-                  Launch command
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground">
-                  <span className="size-1.5 rounded-full bg-success live-dot" aria-hidden />
-                  {data?.powerDialer ? 'Power Dialer tracked' : 'Ready to create project'}
-                </span>
-              </div>
+          <div className="surface flex min-w-0 flex-col gap-4 p-4 md:p-5">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className="bg-card text-muted-foreground inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs">
+                <Radar className="text-primary size-3.5" aria-hidden />
+                Launch command
+              </span>
+              <span className="bg-card text-muted-foreground inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs">
+                <span className="bg-success live-dot size-1.5 rounded-full" aria-hidden />
+                {data?.powerDialer ? 'Power Dialer tracked' : 'Ready to create project'}
+              </span>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Launch overview</h2>
+              <p className="text-muted-foreground mt-1 max-w-3xl text-sm leading-6">
+                Track integration, dialing, rep assist, follow-up, CRM write-back, and manager
+                controls.
+              </p>
+            </div>
+            <div className="grid min-w-0 grid-cols-2 gap-2 lg:grid-cols-4">
+              <HeroMetric label="Launch tasks" value={summary.total} icon={ClipboardList} />
+              <HeroMetric label="Open" value={summary.open} icon={Activity} />
+              <HeroMetric label="In progress" value={summary.doing} icon={Workflow} />
+              <HeroMetric label="Urgent" value={summary.urgent} icon={ShieldCheck} tone="danger" />
+            </div>
+          </div>
+
+          <div className="surface min-w-0 p-4 md:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold">Launch overview</h2>
-                <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Track integration, dialing, rep assist, follow-up, CRM write-back, and manager controls.
+                <h3 className="text-sm font-semibold tracking-tight">Launch progress</h3>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Blue Text plus Power Dialer tasks.
                 </p>
               </div>
-              <div className="grid min-w-0 grid-cols-2 gap-2 lg:grid-cols-4">
-                <HeroMetric label="Launch tasks" value={summary.total} icon={ClipboardList} />
-                <HeroMetric label="Open" value={summary.open} icon={Activity} />
-                <HeroMetric label="In progress" value={summary.doing} icon={Workflow} />
-                <HeroMetric label="Urgent" value={summary.urgent} icon={ShieldCheck} tone="danger" />
-              </div>
+              <span className="font-mono text-3xl font-semibold tabular-nums">
+                {summary.pct}
+                <span className="text-muted-foreground ml-1 text-xs">%</span>
+              </span>
             </div>
-
-            <div className="surface min-w-0 p-4 md:p-5">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold tracking-tight">Launch progress</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">Blue Text plus Power Dialer tasks.</p>
-                </div>
-                <span className="font-mono text-3xl font-semibold tabular-nums">
-                  {summary.pct}
-                  <span className="ml-1 text-xs text-muted-foreground">%</span>
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-bg-sunken">
-                <div
-                  className="h-full rounded-full bg-success transition-all"
-                  style={{ width: `${summary.pct}%` }}
-                />
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <MiniMetric label="Done" value={summary.done} />
-                <MiniMetric label="Doing" value={summary.doing} />
-                <MiniMetric label="Open" value={summary.open} />
-              </div>
-              <Link
-                href="/calendar"
-                className="mt-4 flex min-h-11 items-center gap-2 rounded-lg border bg-bg-sunken px-3 py-2.5 text-sm transition-colors hover:bg-accent"
-              >
-                <CalendarDays className="size-4 text-primary" aria-hidden />
-                <span className="min-w-0 flex-1">Open calendar schedule</span>
-                <ArrowRight className="size-3.5 text-subtle-foreground" aria-hidden />
-              </Link>
+            <div className="bg-bg-sunken h-2 overflow-hidden rounded-full">
+              <div
+                className="bg-success h-full rounded-full transition-all"
+                style={{ width: `${summary.pct}%` }}
+              />
             </div>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <MiniMetric label="Done" value={summary.done} />
+              <MiniMetric label="Doing" value={summary.doing} />
+              <MiniMetric label="Open" value={summary.open} />
+            </div>
+            <Link
+              href="/calendar"
+              className="bg-bg-sunken hover:bg-accent mt-4 flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition-colors"
+            >
+              <CalendarDays className="text-primary size-4" aria-hidden />
+              <span className="min-w-0 flex-1">Open calendar schedule</span>
+              <ArrowRight className="text-subtle-foreground size-3.5" aria-hidden />
+            </Link>
+          </div>
         </section>
 
         <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.6fr)]">
           <div className="min-w-0">
-            <div className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-border/70 pb-3">
+            <div className="border-border/70 mb-3 flex flex-wrap items-end justify-between gap-3 border-b pb-3">
               <div>
                 <h2 className="text-base font-semibold tracking-tight">Capability map</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Each card is backed by launch tasks under the LSG org lane.
                 </p>
               </div>
               <Link
                 href="/projects"
-                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                className="text-primary inline-flex items-center gap-1 text-xs font-medium hover:underline"
               >
                 Open projects
                 <ArrowRight className="size-3" aria-hidden />
@@ -306,25 +312,22 @@ export function PowerDialerCommandCenter() {
                 const Icon = capability.icon;
                 const progress = capabilityProgress(data?.launchTasks ?? [], capability.terms);
                 return (
-                  <article
-                    key={capability.title}
-                    className="surface-flat min-w-0 p-3"
-                  >
+                  <article key={capability.title} className="surface-flat min-w-0 p-3">
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <span className="flex size-9 items-center justify-center rounded-lg border bg-card text-primary">
+                      <span className="bg-card text-primary flex size-9 items-center justify-center rounded-lg border">
                         <Icon className="size-4" aria-hidden />
                       </span>
-                      <span className="font-mono text-[11px] text-subtle-foreground">
+                      <span className="text-subtle-foreground font-mono text-[11px]">
                         {progress.matched.length} tasks
                       </span>
                     </div>
                     <h3 className="text-sm font-semibold tracking-tight">{capability.title}</h3>
-                    <p className="mt-1 min-h-12 text-xs leading-5 text-muted-foreground">
+                    <p className="text-muted-foreground mt-1 min-h-12 text-xs leading-5">
                       {capability.detail}
                     </p>
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-card">
+                    <div className="bg-card mt-3 h-1.5 overflow-hidden rounded-full">
                       <div
-                        className="h-full rounded-full bg-primary"
+                        className="bg-primary h-full rounded-full"
                         style={{ width: `${progress.pct}%` }}
                       />
                     </div>
@@ -337,23 +340,28 @@ export function PowerDialerCommandCenter() {
           <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-tight">Upcoming calendar</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Scheduled launch tasks now feed Week, Calendar, and Month.
               </p>
             </div>
             {summary.scheduled.length === 0 ? (
-              <div className="rounded-lg border border-dashed bg-bg-sunken/60 p-6 text-center text-sm text-muted-foreground">
+              <div className="bg-bg-sunken/60 text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
                 No scheduled launch work yet.
               </div>
             ) : (
               <ol className="flex flex-col gap-2">
                 {summary.scheduled.map(({ task }) => (
-                  <li key={task.id} className="rounded-lg border bg-bg-sunken/60 px-3 py-2.5">
+                  <li key={task.id} className="bg-bg-sunken/60 rounded-lg border px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+                      <span className="text-primary font-mono text-[10px] tracking-[0.14em] uppercase">
                         {dateLabel(task)}
                       </span>
-                      <span className={cn('ml-auto rounded-full border px-2 py-0.5 font-mono text-[10px]', STATUS_TONE[task.status])}>
+                      <span
+                        className={cn(
+                          'ml-auto rounded-full border px-2 py-0.5 font-mono text-[10px]',
+                          STATUS_TONE[task.status],
+                        )}
+                      >
                         {task.status}
                       </span>
                     </div>
@@ -367,9 +375,9 @@ export function PowerDialerCommandCenter() {
 
         <section className="grid min-w-0 gap-4 xl:grid-cols-3">
           <div className="min-w-0 xl:col-span-2">
-            <div className="mb-3 border-b border-border/70 pb-3">
+            <div className="border-border/70 mb-3 border-b pb-3">
               <h2 className="text-base font-semibold tracking-tight">Integration rails</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Current research path for customer phone systems, blue messaging, and CRM.
               </p>
             </div>
@@ -379,15 +387,17 @@ export function PowerDialerCommandCenter() {
                 return (
                   <article key={rail.name} className="surface-flat min-w-0 p-4">
                     <div className="flex items-start gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-card text-primary">
+                      <span className="bg-card text-primary flex size-10 shrink-0 items-center justify-center rounded-lg border">
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold tracking-tight">{rail.name}</h3>
-                        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground">
+                        <p className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.12em] uppercase">
                           {rail.status}
                         </p>
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">{rail.detail}</p>
+                        <p className="text-muted-foreground mt-2 text-xs leading-5">
+                          {rail.detail}
+                        </p>
                       </div>
                     </div>
                   </article>
@@ -399,12 +409,17 @@ export function PowerDialerCommandCenter() {
           <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4">
               <h2 className="text-base font-semibold tracking-tight">Sequence</h2>
-              <p className="mt-1 text-sm text-muted-foreground">The operating loop we are building.</p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                The operating loop we are building.
+              </p>
             </div>
             <ol className="flex flex-col gap-2">
               {SCRIPT_STEPS.map((step, index) => (
-                <li key={step} className="flex items-center gap-3 rounded-lg border bg-bg-sunken/60 px-3 py-2">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-card font-mono text-[10px] text-primary">
+                <li
+                  key={step}
+                  className="bg-bg-sunken/60 flex items-center gap-3 rounded-lg border px-3 py-2"
+                >
+                  <span className="bg-card text-primary flex size-7 shrink-0 items-center justify-center rounded-full border font-mono text-[10px]">
                     {index + 1}
                   </span>
                   <span className="text-sm font-medium">{step}</span>
@@ -417,7 +432,7 @@ export function PowerDialerCommandCenter() {
         <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <div className="surface min-w-0 p-4 md:p-5">
             <div className="mb-4 flex items-center gap-2">
-              <ShieldCheck className="size-4 text-primary" aria-hidden />
+              <ShieldCheck className="text-primary size-4" aria-hidden />
               <h2 className="text-base font-semibold tracking-tight">Guardrails</h2>
             </div>
             <div className="grid gap-2">
@@ -427,9 +442,12 @@ export function PowerDialerCommandCenter() {
                 'Customer phone systems stay in place. We connect to RingCentral or NICE instead of forcing migration.',
                 'AI handoff must preserve lead, transcript, current script, and owner.',
               ].map((item) => (
-                <div key={item} className="flex gap-2 rounded-lg border bg-bg-sunken/60 px-3 py-2.5">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
-                  <p className="text-sm leading-5 text-muted-foreground">{item}</p>
+                <div
+                  key={item}
+                  className="bg-bg-sunken/60 flex gap-2 rounded-lg border px-3 py-2.5"
+                >
+                  <CheckCircle2 className="text-success mt-0.5 size-4 shrink-0" aria-hidden />
+                  <p className="text-muted-foreground text-sm leading-5">{item}</p>
                 </div>
               ))}
             </div>
@@ -439,11 +457,11 @@ export function PowerDialerCommandCenter() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold tracking-tight">Pilot dashboard targets</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   These are the first manager metrics to wire once a vendor connector is live.
                 </p>
               </div>
-              <Upload className="size-4 text-primary" aria-hidden />
+              <Upload className="text-primary size-4" aria-hidden />
             </div>
             <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <TargetMetric label="Reach rate" value="18%" detail="answered leads" />
@@ -470,13 +488,13 @@ function HeroMetric({
   tone?: 'primary' | 'danger';
 }) {
   return (
-    <div className="min-w-0 border-l-2 border-primary/35 bg-bg-sunken px-3 py-2">
+    <div className="border-primary/35 bg-bg-sunken min-w-0 border-l-2 px-3 py-2">
       <div className="mb-3 flex items-center justify-between">
         <Icon
           className={cn('size-4', tone === 'danger' ? 'text-destructive' : 'text-primary')}
           aria-hidden
         />
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
           {label}
         </span>
       </div>
@@ -487,9 +505,9 @@ function HeroMetric({
 
 function MiniMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="min-w-0 border-l-2 border-border-strong bg-bg-sunken p-2">
+    <div className="border-border-strong bg-bg-sunken min-w-0 border-l-2 p-2">
       <div className="font-mono text-xl font-semibold tabular-nums">{value}</div>
-      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+      <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.14em] uppercase">
         {label}
       </div>
     </div>
@@ -498,10 +516,10 @@ function MiniMetric({ label, value }: { label: string; value: number }) {
 
 function TargetMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="min-w-0 border-l-2 border-primary/35 bg-bg-sunken p-3">
+    <div className="border-primary/35 bg-bg-sunken min-w-0 border-l-2 p-3">
       <div className="font-mono text-2xl font-semibold tabular-nums">{value}</div>
       <div className="mt-2 text-sm font-semibold tracking-tight">{label}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{detail}</div>
+      <div className="text-muted-foreground mt-1 text-xs">{detail}</div>
     </div>
   );
 }

@@ -6,6 +6,7 @@
 > Last updated: 2026-07-01 (session 4 - universal capture: notepad, braindump brain, food logs).
 
 ## Session 4 - universal capture: one brain, many mouths (2026-07-01)
+
 - **The brain:** `/api/braindump` parses ANY capture (a line or a whole ramble)
   into N routed items (forced `route_items` tool call on `MODELS.triage`;
   context = active project/routine names + client-local date; caps 8000 chars /
@@ -26,13 +27,13 @@
   `wipeLocalData` now clears `organizations` (latent org-rollout bug) and
   `foodLogs`.
 - **/notepad** (sidebar PLAN, `g p`, palette entry): big auto-growing textarea
-  + mic; the transcript APPENDS instead of auto-submitting. Process
-  (Ctrl+Enter) -> session feed rows with kind icon, destination chip (project /
-  "Food - N kcal" / "checked: routine" / Journal / Note / Quote) and one-tap
-  Undo (row goes struck-through); amber notice row on AI-offline dumps. Voice
-  logic extracted to `lib/use-voice-input.ts` (Whisper-preferred, Web Speech
-  fallback, 60s cap, hydration-safe `available`); `quick-add.tsx` consumes the
-  hook - one implementation, zero top-bar behavior change.
+  - mic; the transcript APPENDS instead of auto-submitting. Process
+    (Ctrl+Enter) -> session feed rows with kind icon, destination chip (project /
+    "Food - N kcal" / "checked: routine" / Journal / Note / Quote) and one-tap
+    Undo (row goes struck-through); amber notice row on AI-offline dumps. Voice
+    logic extracted to `lib/use-voice-input.ts` (Whisper-preferred, Web Speech
+    fallback, 60s cap, hydration-safe `available`); `quick-add.tsx` consumes the
+    hook - one implementation, zero top-bar behavior change.
 - **/food** (sidebar PLAN after Week, palette entry; intentionally NOT
   org-scoped): selected-day stat tiles (kcal/protein/carbs/fat), meals grouped
   breakfast/lunch/dinner/snacks with per-item breakdown + total-kcal chip +
@@ -81,6 +82,7 @@
   inline macro editing (delete + re-log is v1) also deferred.
 
 ## Session 3 - org context + portfolio dashboard: code-complete, one prod step pending
+
 - **Portfolio dashboard** at `/dashboard` (now the landing route): per-project
   progress rings, status bars, next actions, filters/sort, needs-attention
   rail, plus a "Load my projects" idempotent importer (Blue Text, Power
@@ -106,19 +108,20 @@
   to prod project `jnaycounllaafvorakss`** - the CLI on this machine is authed
   to the LSG Supabase account, not the personal one hosting Taskify. Paste the
   file into the Supabase SQL editor (or `supabase link --project-ref
-  jnaycounllaafvorakss && supabase db push`). Until then, org rows retry
+jnaycounllaafvorakss && supabase db push`). Until then, org rows retry
   harmlessly; everything else syncs.
 
 ## Session 2 - multi-device realtime sync: **DEPLOYED & LIVE** ✅
+
 - **Production:** https://taskify-three-delta.vercel.app (Vercel project `taskify`,
   Root Directory `apps/web`). Login: `your-email@example.com`.
 - **Supabase:** project `jnaycounllaafvorakss` (Taskify), migrations 0001→0004
   applied, single user created, realtime publication + version-guard live.
 - **Verified in production:** login gate works; Settings→Sync shows **Live**; the
   watch webhook `POST /api/capture` ("buy milk tomorrow 5pm", secret-gated) parsed
-  + persisted + appeared in the browser **live via realtime** (correct local day
-  2026-06-09), and the soft-delete tombstone propagated back. `/api/health`
-  returns `{ok:true,db:"up"}`. Env vars set in Vercel (prod/preview/dev).
+  - persisted + appeared in the browser **live via realtime** (correct local day
+    2026-06-09), and the soft-delete tombstone propagated back. `/api/health`
+    returns `{ok:true,db:"up"}`. Env vars set in Vercel (prod/preview/dev).
 - **Server secret note:** the new `sb_secret_` key was rejected by this project's
   GoTrue admin + Data API (401), so `SUPABASE_SECRET_KEY` uses the legacy
   `service_role` key (works everywhere; valid until end-2026).
@@ -148,6 +151,7 @@ A 6-dimension adversarial review (each finding independently refuted/confirmed)
 raised 7, confirmed 6, all fixed: per-table pull cursors (was a global cursor that
 could silently drop rows), start/stop generation token (was a re-entrancy leak),
 capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect.
+
 - **P1 Auth:** `@supabase/ssr` (2026 publishable/secret keys, `getClaims`) - factories
   in `utils/supabase/{client,server,middleware,admin}.ts`, root `middleware.ts`
   (gates pages, never redirects `/api`, no-op when unconfigured), `/login`
@@ -174,6 +178,7 @@ capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect
 `ANTHROPIC_API_KEY`, and an `OPS_API_SECRET`. See `deploy.md`.
 
 ## Snapshot
+
 - **Product:** Ops Dashboard - local-first personal life-OS PWA, built on the
   recovered **Ops Dashboard** monorepo (Next.js 16, React 19, Tailwind v4, Dexie, Supabase
   sync, PWA, cmdk).
@@ -181,68 +186,76 @@ capture `scheduledFor` UTC-midnight off-by-one, and a login `next` open redirect
 - **Deps installed:** yes. **Baseline (typecheck/test):** verifying.
 
 ## Locked decisions
+
 1. Foundation→Core first. 2. Local-first dev, host later (Supabase+Vercel).
-3. Pushover notifications. 4. Capture API now, Wear OS capture later.
+2. Pushover notifications. 4. Capture API now, Wear OS capture later.
 
 ## Phases (detail in spec §5)
+
 P0 Foundation · P1 Capture+Today+Tasks · P2 Habits+Heatmap+Journal ·
 P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Search/Watch.
 
 ## Status
+
 - [x] Brainstorm + 4 decisions + design-research workflow (`wf_b1308e73-3e2`).
 - [x] Recover Ops Dashboard from git history; install deps; write spec.
 - [x] Baseline verify (typecheck + tests green).
 - [x] **P0** core extension, lib layer, shell rebrand + mobile nav, capture/triage +
-  Pushover API, supabase 0002, env example, seed. Committed `dee9109`.
+      Pushover API, supabase 0002, env example, seed. Committed `dee9109`.
 - [x] **Browser-verified** in Playwright: app boots, renders, **0 console errors**.
-  Fixed an inherited zustand-selector infinite loop in app-shell (`closeAll`).
+      Fixed an inherited zustand-selector infinite loop in app-shell (`closeAll`).
 - [x] **Security hardening** on API routes (review-flagged): same-origin/secret
-  guard, input caps, priority clamp, dropped user-supplied push `url`, no error reflection.
+      guard, input caps, priority clamp, dropped user-supplied push `url`, no error reflection.
 - [x] **P1 + P2 features** built (8 parallel agents) + integrated + browser-verified:
-  capture+Inbox, Today (top-three/open/routines/slipping/resurfacing/notifications),
-  Tasks (filter→edit drawer), Routines (streaks/groups), Habits (heatmap + stats),
-  Domains, Projects/Areas/Retainers (milestones/checklists/worklogs/slipping), Content
-  pipeline, Library journal + AI journal-upload. Commits `a912540`, `32cac33`.
+      capture+Inbox, Today (top-three/open/routines/slipping/resurfacing/notifications),
+      Tasks (filter→edit drawer), Routines (streaks/groups), Habits (heatmap + stats),
+      Domains, Projects/Areas/Retainers (milestones/checklists/worklogs/slipping), Content
+      pipeline, Library journal + AI journal-upload. Commits `a912540`, `32cac33`.
 - [x] Browser-verified all 9 new routes: **0 console errors each**; full seed renders
-  (NL-parsed task dates, priority, domain/project chips, 12-day streak, heatmap, 1.5h logged).
+      (NL-parsed task dates, priority, domain/project chips, 12-day streak, heatmap, 1.5h logged).
 - [x] Fixed: `order` not indexed (broke all task creation) → Dexie v3; mic-button hydration.
 - [x] Adversarial code review (3 reviewers) → fixed timezone-local dates (streaks/
-  heatmap/journal), reminder boolean-index query, capture aiKind preservation,
-  overdue local date, streak label. Re-verified Habits (streak 12, journal counted,
-  0 errors). Commit `0a4458c`.
+      heatmap/journal), reminder boolean-index query, capture aiKind preservation,
+      overdue local date, streak label. Re-verified Habits (streak 12, journal counted,
+      0 errors). Commit `0a4458c`.
 - [x] Production build: 24 routes compile, TS + lint clean.
 - [x] **P4/P5 local features** (8 more agents + integration): People CRM (facts/
-  interactions), Library tabs (Notes/Quotes/Books beside Journal), enriched task
-  edit-drawer (domain/project/content/star/reminders/recurrence), chat-with-data
-  (`/ask` + `/api/chat`), Wear OS capture webhook (`/api/capture`, secret-gated),
-  **PWA install icons** + typed manifest, polished Calendar/Week/Month/Kanban.
-  Browser-verified; production build (28 routes) clean. Commits `c…` (P4 core) + this batch.
+      interactions), Library tabs (Notes/Quotes/Books beside Journal), enriched task
+      edit-drawer (domain/project/content/star/reminders/recurrence), chat-with-data
+      (`/ask` + `/api/chat`), Wear OS capture webhook (`/api/capture`, secret-gated),
+      **PWA install icons** + typed manifest, polished Calendar/Week/Month/Kanban.
+      Browser-verified; production build (28 routes) clean. Commits `c…` (P4 core) + this batch.
 - [ ] **Needs your accounts/keys (not buildable by me alone):** hosting (Supabase +
-  Vercel for true multi-device sync across S24 Ultra/Tab/Watch); live AI
-  (`ANTHROPIC_API_KEY` for triage/journal/chat, `GROQ_API_KEY` voice, Pushover push) -
-  code is in place with fallbacks, just unconfigured; Google Calendar; the physical
-  Wear OS shortcut that hits `/api/capture`.
+      Vercel for true multi-device sync across S24 Ultra/Tab/Watch); live AI
+      (`ANTHROPIC_API_KEY` for triage/journal/chat, `GROQ_API_KEY` voice, Pushover push) -
+      code is in place with fallbacks, just unconfigured; Google Calendar; the physical
+      Wear OS shortcut that hits `/api/capture`.
 
 ## Security posture
+
 API routes (`/api/triage`, `/api/push`) use `lib/server/guard.ts`: same-origin
 browser calls allowed; server-to-server needs `OPS_API_SECRET`; at host-time also
 behind Supabase auth middleware. Inputs capped; push `url` not user-controllable.
 
 ## How to resume
+
 1. Read this + `spec.md`. 2. `git log --oneline feat/ops-dashboard`.
-3. Jump to **Next steps**. 4. `pnpm install` if needed, then `pnpm dev`.
+2. Jump to **Next steps**. 4. `pnpm install` if needed, then `pnpm dev`.
 
 ## Commands
+
 - Dev server: `pnpm dev` → http://localhost:3000 (redirects to `/today`).
 - Checks: `pnpm typecheck` · `pnpm test` · `pnpm build`.
 
 ## Env (app runs fully local without them; sync/auth need the Supabase trio)
+
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`),
 `SUPABASE_SECRET_KEY` (`sb_secret_…`, server-only). Optional: `OPS_USER_ID`,
 `OPS_API_SECRET` (watch + cron), `CRON_SECRET`, `ANTHROPIC_API_KEY`, `GROQ_API_KEY`,
 `PUSHOVER_TOKEN`, `PUSHOVER_USER`. See `apps/web/.env.local.example`.
 
 ## Next steps (live - keep current)
+
 1. **Go live (needs your accounts):** follow `deploy.md` - create Supabase project,
    `supabase db push` (0001→0004), create the single user (signups off), set env,
    `vercel link`/deploy, Auth URL config, set the cron `CRON_SECRET`.
@@ -254,6 +267,7 @@ behind Supabase auth middleware. Inputs capped; push `url` not user-controllable
    changed rows in one catch-up.
 
 ## Notes / decisions log
+
 - Keep `@ops-dashboard/*` package scope + Dexie name `ops-dashboard` (no churn; no user data yet).
   "Ops Dashboard" is display-name only.
 - Activity heatmap = **derived** (no stored table). `react-activity-calendar` v3.

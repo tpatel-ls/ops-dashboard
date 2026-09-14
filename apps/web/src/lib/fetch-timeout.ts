@@ -13,7 +13,9 @@ export async function fetchWithTimeout(
   const callerSignal = init.signal;
 
   if (callerSignal?.aborted) {
-    return Promise.reject(callerSignal.reason ?? new DOMException('Request canceled', 'AbortError'));
+    return Promise.reject(
+      callerSignal.reason ?? new DOMException('Request canceled', 'AbortError'),
+    );
   }
 
   const abortFromCaller = () => controller.abort(callerSignal?.reason);

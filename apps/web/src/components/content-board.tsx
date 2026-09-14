@@ -40,7 +40,11 @@ const STATUS_DOT: Record<ContentStatus, string> = {
   done: 'bg-success/60',
 };
 
-const CONTENT_TYPES: { key: ContentType; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
+const CONTENT_TYPES: {
+  key: ContentType;
+  label: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}[] = [
   { key: 'video', label: 'Video', Icon: Video },
   { key: 'article', label: 'Article', Icon: FileText },
   { key: 'podcast', label: 'Podcast', Icon: Mic },
@@ -58,7 +62,7 @@ function TypeBadge({ type }: { type: ContentType }) {
   const meta = TYPE_MAP[type];
   const Icon = meta.Icon;
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-bg-sunken px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+    <span className="bg-bg-sunken text-subtle-foreground inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
       <Icon className="size-3 shrink-0" aria-hidden />
       {meta.label}
     </span>
@@ -121,7 +125,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
   }
 
   async function handleDelete() {
-    if (!confirming) { setConfirming(true); return; }
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
     await deleteContent(item.id);
     onClose();
   }
@@ -130,13 +137,13 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
     <div className="surface flex flex-col gap-4 p-4" onClick={(e) => e.stopPropagation()}>
       {/* header */}
       <div className="flex items-start justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Edit item
         </span>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex size-9 items-center justify-center rounded-md text-subtle-foreground hover:bg-accent hover:text-foreground"
+          className="text-subtle-foreground hover:bg-accent hover:text-foreground inline-flex size-9 items-center justify-center rounded-md"
           aria-label="Close editor"
         >
           <X className="size-3.5" />
@@ -159,7 +166,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
       {/* row: type + status */}
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${fieldId}-type`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label
+            htmlFor={`${fieldId}-type`}
+            className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+          >
             Type
           </label>
           <select
@@ -169,12 +179,17 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             onChange={(e) => setType(e.target.value as ContentType)}
           >
             {CONTENT_TYPES.map((t) => (
-              <option key={t.key} value={t.key}>{t.label}</option>
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${fieldId}-status`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label
+            htmlFor={`${fieldId}-status`}
+            className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+          >
             Status
           </label>
           <select
@@ -184,7 +199,9 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             onChange={(e) => setStatus(e.target.value as ContentStatus)}
           >
             {STATUSES.map((s) => (
-              <option key={s.key} value={s.key}>{s.label}</option>
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
             ))}
           </select>
         </div>
@@ -193,7 +210,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
       {/* row: channel + domain */}
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${fieldId}-channel`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label
+            htmlFor={`${fieldId}-channel`}
+            className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+          >
             Channel
           </label>
           <input
@@ -206,7 +226,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${fieldId}-domain`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+          <label
+            htmlFor={`${fieldId}-domain`}
+            className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+          >
             Domain
           </label>
           <select
@@ -217,7 +240,9 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
           >
             <option value="">None</option>
             {domains.map((d) => (
-              <option key={d.id} value={d.id}>{d.name}</option>
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
             ))}
           </select>
         </div>
@@ -225,7 +250,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* url */}
       <div className="flex flex-col gap-1">
-        <label htmlFor={`${fieldId}-url`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <label
+          htmlFor={`${fieldId}-url`}
+          className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+        >
           URL
         </label>
         <input
@@ -241,7 +269,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* publish date */}
       <div className="flex flex-col gap-1">
-        <label htmlFor={`${fieldId}-publish-date`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <label
+          htmlFor={`${fieldId}-publish-date`}
+          className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+        >
           Publish date
         </label>
         <input
@@ -256,7 +287,10 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* outline */}
       <div className="flex flex-col gap-1">
-        <label htmlFor={`${fieldId}-outline`} className="font-mono text-[10px] uppercase tracking-[0.14em] text-subtle-foreground">
+        <label
+          htmlFor={`${fieldId}-outline`}
+          className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+        >
           Outline (markdown)
         </label>
         <textarea
@@ -272,7 +306,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
 
       {/* actions */}
       {error ? (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-destructive text-xs">
           {error}
         </p>
       ) : null}
@@ -295,7 +329,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="h-10 rounded-md px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 rounded-md px-3 text-xs"
             >
               Cancel
             </button>
@@ -304,7 +338,7 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             type="button"
             onClick={save}
             disabled={saving}
-            className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-60"
+            className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -346,7 +380,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
         )}
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="line-clamp-2 min-w-0 flex-1 text-sm font-medium leading-snug">
+          <p className="line-clamp-2 min-w-0 flex-1 text-sm leading-snug font-medium">
             {item.title}
           </p>
           {item.url && (
@@ -355,7 +389,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-subtle-foreground hover:bg-accent hover:text-primary"
+              className="text-subtle-foreground hover:bg-accent hover:text-primary inline-flex size-8 shrink-0 items-center justify-center rounded-md"
               aria-label="Open link"
             >
               <ExternalLink className="size-3.5" />
@@ -369,7 +403,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
         </div>
 
         {(item.channel || item.publishDate) && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px] text-subtle-foreground">
+          <div className="text-subtle-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px]">
             {item.channel && <span>{item.channel}</span>}
             {item.publishDate && (
               <span>
@@ -383,13 +417,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
         )}
       </div>
 
-      {isOpen && (
-        <ContentEditor
-          item={item}
-          domains={domains}
-          onClose={onToggle}
-        />
-      )}
+      {isOpen && <ContentEditor item={item} domains={domains} onClose={onToggle} />}
     </div>
   );
 }
@@ -424,33 +452,35 @@ function QuickAdd({ onAdd }: QuickAddProps) {
 
   return (
     <form onSubmit={submit} className="surface flex flex-wrap items-center gap-2 px-3 py-2">
-      <Plus className="size-4 shrink-0 text-primary" aria-hidden />
+      <Plus className="text-primary size-4 shrink-0" aria-hidden />
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="New content idea"
         aria-label="Content title"
-        className="min-w-[12rem] flex-1 bg-transparent text-sm outline-none placeholder:text-subtle-foreground"
+        className="placeholder:text-subtle-foreground min-w-[12rem] flex-1 bg-transparent text-sm outline-none"
       />
       <select
         value={type}
         onChange={(e) => setType(e.target.value as ContentType)}
         aria-label="Content type"
-        className="h-10 rounded-md bg-bg-sunken px-2 font-mono text-[11px] text-muted-foreground outline-none"
+        className="bg-bg-sunken text-muted-foreground h-10 rounded-md px-2 font-mono text-[11px] outline-none"
       >
         {CONTENT_TYPES.map((t) => (
-          <option key={t.key} value={t.key}>{t.label}</option>
+          <option key={t.key} value={t.key}>
+            {t.label}
+          </option>
         ))}
       </select>
       <button
         type="submit"
         disabled={busy || !title.trim()}
-        className="h-10 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50"
+        className="bg-primary text-primary-foreground h-10 rounded-md px-3 text-xs font-medium disabled:opacity-50"
       >
         Add
       </button>
       {error ? (
-        <p role="alert" className="basis-full text-xs text-destructive">
+        <p role="alert" className="text-destructive basis-full text-xs">
           {error}
         </p>
       ) : null}
@@ -476,10 +506,10 @@ function Column({ status, label, items, domains, openId, onToggle }: ColumnProps
       {/* column header */}
       <div className="flex items-center gap-2 px-0.5">
         <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {label}
         </span>
-        <span className="ml-auto font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <span className="text-subtle-foreground ml-auto font-mono text-[10px] tabular-nums">
           {items.length}
         </span>
       </div>
@@ -487,7 +517,7 @@ function Column({ status, label, items, domains, openId, onToggle }: ColumnProps
       {/* cards */}
       <div className="flex flex-col gap-1.5">
         {items.length === 0 ? (
-          <div className="surface-flat flex h-20 items-center justify-center rounded-md text-[11px] text-subtle-foreground">
+          <div className="surface-flat text-subtle-foreground flex h-20 items-center justify-center rounded-md text-[11px]">
             Empty
           </div>
         ) : (
@@ -519,7 +549,15 @@ interface ListGroupProps {
   defaultOpen?: boolean;
 }
 
-function ListGroup({ status, label, items, domains, openId, onToggle, defaultOpen = true }: ListGroupProps) {
+function ListGroup({
+  status,
+  label,
+  items,
+  domains,
+  openId,
+  onToggle,
+  defaultOpen = true,
+}: ListGroupProps) {
   const [collapsed, setCollapsed] = useState(!defaultOpen);
   const domainMap = Object.fromEntries(domains.map((d) => [d.id, d]));
 
@@ -533,15 +571,15 @@ function ListGroup({ status, label, items, domains, openId, onToggle, defaultOpe
         className="flex items-center gap-2 py-1 text-left"
       >
         <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {label}
         </span>
-        <span className="font-mono text-[10px] tabular-nums text-subtle-foreground">
+        <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {items.length}
         </span>
         <ChevronDown
           className={cn(
-            'ml-auto size-3.5 text-subtle-foreground transition-transform',
+            'text-subtle-foreground ml-auto size-3.5 transition-transform',
             collapsed && '-rotate-90',
           )}
           aria-hidden
@@ -570,12 +608,13 @@ function ListGroup({ status, label, items, domains, openId, onToggle, defaultOpe
 function EmptyState() {
   return (
     <div className="surface flex h-64 flex-col items-center justify-center gap-2 text-center">
-      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle-foreground">
+      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
         content
       </div>
       <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
-      <p className="max-w-xs text-sm text-muted-foreground">
-        Add your first content idea above - articles, videos, podcasts, and newsletters all in one pipeline.
+      <p className="text-muted-foreground max-w-xs text-sm">
+        Add your first content idea above - articles, videos, podcasts, and newsletters all in one
+        pipeline.
       </p>
     </div>
   );
@@ -622,7 +661,7 @@ export function ContentBoard() {
 
       {isLoading ? (
         <div className="surface flex h-48 items-center justify-center">
-          <span className="live-dot inline-block size-2 rounded-full bg-primary" />
+          <span className="live-dot bg-primary inline-block size-2 rounded-full" />
         </div>
       ) : isEmpty ? (
         <EmptyState />

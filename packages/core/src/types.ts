@@ -183,15 +183,7 @@ export interface RoutineCheck extends SyncMeta {
 export type CaptureSource = 'text' | 'voice' | 'watch' | 'journal' | 'notepad';
 export type CaptureStatus = 'pending' | 'triaged' | 'dismissed';
 export type CaptureKind =
-  | 'task'
-  | 'note'
-  | 'journal'
-  | 'event'
-  | 'person'
-  | 'quote'
-  | 'routine'
-  | 'food'
-  | 'habit';
+  'task' | 'note' | 'journal' | 'event' | 'person' | 'quote' | 'routine' | 'food' | 'habit';
 
 export interface CaptureRoute {
   type: CaptureKind;
@@ -230,13 +222,7 @@ export interface WorkLog extends SyncMeta {
 
 export type ContentType = 'video' | 'article' | 'podcast' | 'newsletter';
 export type ContentStatus =
-  | 'idea'
-  | 'outline'
-  | 'draft'
-  | 'editing'
-  | 'waiting'
-  | 'published'
-  | 'done';
+  'idea' | 'outline' | 'draft' | 'editing' | 'waiting' | 'published' | 'done';
 
 export interface Content extends SyncMeta {
   title: string;
