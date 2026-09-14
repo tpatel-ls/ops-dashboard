@@ -61,4 +61,12 @@ describe('browser storage helpers', () => {
     expect(localStorage.setItem).toHaveBeenCalledWith('key', 'value');
     expect(localStorage.removeItem).toHaveBeenCalledWith('key');
   });
+
+  it('returns null or false when localStorage methods are unavailable', () => {
+    vi.stubGlobal('window', { localStorage: {} as Storage });
+
+    expect(readLocalStorage('sync-token')).toBeNull();
+    expect(writeLocalStorage('sync-token', '{}')).toBe(false);
+    expect(removeLocalStorage('sync-token')).toBe(false);
+  });
 });
