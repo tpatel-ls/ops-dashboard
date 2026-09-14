@@ -38,4 +38,23 @@ describe('useNetworkStatus', () => {
 
     expect(result.current).toBe(true);
   });
+
+  it('removes listeners when the component unmounts', () => {
+    const listeners: Record<string, Array<EventListener>> = {};
+    const addSpy = vi.spyOn(window, 'addEventListener').mockImplementation((type, handler) => {
+      if (typeof handler === 'function') {
+        listeners[type] = [...(listeners[type] ?? []), handler];
+      }
+      return undefined;
+    });
+    const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+    const { unmount } = renderHook(() => useNetworkStatus());
+
+    unmount();
+
+    expect(removeSpy).toHaveBeenCalledWith('online', listeners.online?.[0]);
+    expect(removeSpy).toHaveBeenCalledWith('offline', listeners.offline?.[0]);
+    addSpy.mockRestore();
+  });
 });
