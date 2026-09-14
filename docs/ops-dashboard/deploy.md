@@ -45,6 +45,13 @@ Copy the checked-in template and fill only the features you use:
 cp apps/web/.env.local.example apps/web/.env.local
 ```
 
+Run a preflight before testing on hardware:
+
+```sh
+corepack pnpm ci:local
+corepack pnpm audit:high
+```
+
 The template documents Supabase, Anthropic, watch and cron authentication,
 OpenAI-compatible transcription, model overrides, and Pushover settings. Keep
 `NEXT_PUBLIC_TRANSCRIBE_ENABLED=0` unless the matching server transcription
