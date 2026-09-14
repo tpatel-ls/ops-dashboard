@@ -51,6 +51,12 @@ corepack pnpm build
 corepack pnpm test:e2e
 ```
 
+Or run the combined local verification script:
+
+```sh
+corepack pnpm ci:local
+```
+
 Run focused dependency checks whenever lockfile or workspace dependency changes:
 
 ```sh
