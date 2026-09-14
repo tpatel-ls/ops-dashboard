@@ -19,7 +19,7 @@ docs/                 architecture, sync, deployment, and device guides
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22 or newer
 - pnpm 10 or newer
 
 If your environment does not provide `pnpm` globally, the repo works with
@@ -33,8 +33,8 @@ corepack pnpm --version
 ## Getting started
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm dev
+corepack pnpm install --frozen-lockfile
+corepack pnpm dev
 ```
 
 The development server runs at `http://localhost:3000`.
@@ -54,10 +54,10 @@ corepack pnpm test:e2e
 Run focused dependency checks whenever lockfile or workspace dependency changes:
 
 ```sh
-pnpm audit:high
+corepack pnpm audit:high
 ```
 
-Install the Chromium runtime once with `pnpm --filter @ops-dashboard/web exec
+Install the Chromium runtime once with `corepack pnpm --filter @ops-dashboard/web exec
 playwright install chromium` before running the end-to-end smoke suite locally.
 
 ## Configuration
