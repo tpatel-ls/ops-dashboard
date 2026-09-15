@@ -3,8 +3,11 @@
 import { DEFAULT_SETTINGS, getDb } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
 
-const THEMES: Settings['theme'][] = ['light', 'dark', 'system'];
-export const DEFAULT_VIEWS: Settings['defaultView'][] = [
+/** Fails to compile when T still has members, naming the missing ones. */
+type Exhaustive<T extends never> = T;
+
+const THEMES = ['light', 'dark', 'system'] as const satisfies readonly Settings['theme'][];
+export const DEFAULT_VIEWS = [
   'today',
   'week',
   'month',
@@ -20,7 +23,15 @@ export const DEFAULT_VIEWS: Settings['defaultView'][] = [
   'library',
   'people',
   'domains',
-];
+] as const satisfies readonly Settings['defaultView'][];
+
+// These lists drive the settings form and reject unknown stored values, so a
+// theme or view added to the core union but missing here would be silently
+// unreachable. Assert both cover their union.
+export type UnlistedTheme = Exhaustive<Exclude<Settings['theme'], (typeof THEMES)[number]>>;
+export type UnlistedDefaultView = Exhaustive<
+  Exclude<Settings['defaultView'], (typeof DEFAULT_VIEWS)[number]>
+>;
 
 export function defaultViewPath(view: Settings['defaultView']): string {
   return view === 'whiteboard' ? '/whiteboards' : `/${view}`;
@@ -30,7 +41,7 @@ function booleanSetting(value: unknown, fallback: boolean): boolean {
   return typeof value === 'boolean' ? value : fallback;
 }
 
-function listedSetting<T extends string>(value: unknown, values: T[], fallback: T): T {
+function listedSetting<T extends string>(value: unknown, values: readonly T[], fallback: T): T {
   return typeof value === 'string' && values.includes(value as T) ? (value as T) : fallback;
 }
 
