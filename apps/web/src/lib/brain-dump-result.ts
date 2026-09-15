@@ -52,13 +52,23 @@ export function boundedDraftText(value: unknown, limit: number): string | undefi
   return text || undefined;
 }
 
+/**
+ * Canonical tag form, shared with the triage route and the quick-add parser so
+ * tags that differ only by Unicode composition or locale casing collapse to a
+ * single value no matter which capture path produced them.
+ */
+function routedTag(value: string): string {
+  return value.normalize('NFKC').toLocaleLowerCase('en-US');
+}
+
 function normalizedTags(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const tags: string[] = [];
   const seen = new Set<string>();
   for (const raw of value) {
     if (tags.length >= MAX_ROUTED_TAGS) break;
-    const tag = boundedDraftText(raw, MAX_ROUTED_TAG_LENGTH)?.toLowerCase();
+    const bounded = boundedDraftText(raw, MAX_ROUTED_TAG_LENGTH);
+    const tag = bounded ? routedTag(bounded) : undefined;
     if (tag && !seen.has(tag)) {
       seen.add(tag);
       tags.push(tag);
