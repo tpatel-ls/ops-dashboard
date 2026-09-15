@@ -41,30 +41,34 @@ The development server runs at `http://localhost:3000`.
 
 ## Validation
 
-Run the same checks used by CI:
+CI runs the dependency audit and then one combined verification script, so the
+fastest way to match it locally is:
 
 ```sh
+corepack pnpm audit:high
+corepack pnpm ci:local
+```
+
+`ci:local` chains the individual checks, which can also be run on their own
+while iterating:
+
+```sh
+corepack pnpm format:check
 corepack pnpm lint
 corepack pnpm typecheck
 corepack pnpm test
 corepack pnpm build
+```
+
+The Playwright smoke suite is not part of CI. Run it locally when a change
+touches app boot, routing, or capture:
+
+```sh
+corepack pnpm --filter @ops-dashboard/web exec playwright install chromium
 corepack pnpm test:e2e
 ```
 
-Or run the combined local verification script:
-
-```sh
-corepack pnpm ci:local
-```
-
-Run focused dependency checks whenever lockfile or workspace dependency changes:
-
-```sh
-corepack pnpm audit:high
-```
-
-Install the Chromium runtime once with `corepack pnpm --filter @ops-dashboard/web exec
-playwright install chromium` before running the end-to-end smoke suite locally.
+The Chromium install only needs to run once per machine.
 
 ## Configuration
 
