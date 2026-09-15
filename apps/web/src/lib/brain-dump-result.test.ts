@@ -94,6 +94,17 @@ describe('normalizeBrainDumpItem', () => {
     expect(items).toHaveLength(100);
   });
 
+  it('omits a food payload whose items are all unusable', () => {
+    expect(normalizeBrainDumpItem({ title: 'a', food: { items: [] } })?.food).toBeUndefined();
+    expect(
+      normalizeBrainDumpItem({ title: 'a', food: { items: [null, { name: ' ' }] } })?.food,
+    ).toBeUndefined();
+    // A valid meal type still survives on its own.
+    expect(
+      normalizeBrainDumpItem({ title: 'a', food: { mealType: 'snack', items: [] } })?.food,
+    ).toEqual({ mealType: 'snack' });
+  });
+
   it('drops food entries and meal types it cannot use', () => {
     expect(
       normalizeBrainDumpItem({ title: 'a', food: { mealType: 'brunch' } })?.food,

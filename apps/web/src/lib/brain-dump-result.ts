@@ -117,7 +117,11 @@ function normalizedFood(value: unknown): RoutedItemDraft['food'] | undefined {
   const requestedMealType = boundedDraftText(input.mealType, 20)?.toLowerCase();
   const mealType =
     requestedMealType && MEAL_TYPES.has(requestedMealType) ? requestedMealType : undefined;
-  const items = Array.isArray(input.items) ? boundedFoodItems(input.items) : undefined;
+  const parsed = Array.isArray(input.items) ? boundedFoodItems(input.items) : undefined;
+  // Every other optional field here is omitted when it has no content. An empty
+  // list carries no meal information, so drop it rather than shipping an
+  // `items: []` key the client would have to ignore.
+  const items = parsed && parsed.length > 0 ? parsed : undefined;
   return mealType || items
     ? { ...(mealType ? { mealType } : {}), ...(items ? { items } : {}) }
     : undefined;
