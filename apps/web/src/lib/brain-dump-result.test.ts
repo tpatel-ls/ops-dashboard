@@ -51,6 +51,15 @@ describe('normalizeBrainDumpItem', () => {
     expect(normalizeBrainDumpItem({ title: 'a', tags: [] })?.tags).toBeUndefined();
   });
 
+  it('collapses tags that differ only by Unicode composition', () => {
+    // NFD "cafe\u0301" and NFC "caf\u00e9" are the same tag to the user.
+    const tags = normalizeBrainDumpItem({
+      title: 'a',
+      tags: ['Caf\u00e9', 'cafe\u0301', '\uff34\uff32\uff29\uff30'],
+    })?.tags;
+    expect(tags).toEqual(['caf\u00e9', 'trip']);
+  });
+
   it('omits absent optional fields rather than emitting undefined keys', () => {
     expect(normalizeBrainDumpItem({ title: 'Bare' })).toEqual({ title: 'Bare' });
   });
