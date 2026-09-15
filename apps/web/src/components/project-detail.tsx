@@ -664,6 +664,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground w-20 text-xs">Status</span>
           <select
+            aria-label="Project status"
             value={project.status}
             onChange={(e) => set('status', e.target.value as ProjectStatus)}
             className="input flex-1"
@@ -679,6 +680,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground w-20 text-xs">Kind</span>
           <select
+            aria-label="Project kind"
             value={project.kind}
             onChange={(e) => set('kind', e.target.value as ProjectKind)}
             className="input flex-1"
@@ -694,6 +696,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground w-20 text-xs">Org</span>
           <select
+            aria-label="Project organization"
             value={project.orgId ?? ''}
             onChange={(e) => void setOrg(e.target.value)}
             className="input flex-1"
@@ -710,6 +713,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground w-20 text-xs">Domain</span>
           <select
+            aria-label="Project domain"
             value={project.domainId ?? ''}
             onChange={(e) => set('domainId', e.target.value || undefined)}
             className="input flex-1"
