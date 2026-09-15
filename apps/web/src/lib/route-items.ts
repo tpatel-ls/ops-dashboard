@@ -23,6 +23,9 @@ import { fetchWithTimeout } from './fetch-timeout';
 import { journalEntrySource } from './journal-source';
 import {
   boundedDraftText,
+  MAX_NUTRITION_ESTIMATE,
+  MAX_ROUTED_FOOD_ITEMS,
+  MAX_ROUTED_FOOD_TEXT_LENGTH,
   MAX_ROUTED_ITEMS,
   MAX_ROUTED_TITLE_LENGTH,
   normalizeBrainDumpItems,
@@ -44,10 +47,6 @@ export interface RoutedResult {
   aiOffline?: boolean;
   undo: () => Promise<void>;
 }
-
-const MAX_FOOD_ITEMS = 100;
-const MAX_FOOD_TEXT_LENGTH = 200;
-const MAX_NUTRITION_ESTIMATE = 1_000_000;
 
 interface RouteContext {
   projects: Project[];
@@ -405,7 +404,7 @@ export function normalizeCaptureFoodItems(value: unknown): FoodItem[] {
   if (!Array.isArray(value)) return [];
   const items: FoodItem[] = [];
   for (const raw of value) {
-    if (items.length >= MAX_FOOD_ITEMS) break;
+    if (items.length >= MAX_ROUTED_FOOD_ITEMS) break;
     const item = toFoodItem(raw as DraftFoodItem);
     if (item) items.push(item);
   }
@@ -414,7 +413,7 @@ export function normalizeCaptureFoodItems(value: unknown): FoodItem[] {
 
 function boundedFoodText(value: unknown): string {
   return typeof value === 'string'
-    ? Array.from(value.trim()).slice(0, MAX_FOOD_TEXT_LENGTH).join('')
+    ? Array.from(value.trim()).slice(0, MAX_ROUTED_FOOD_TEXT_LENGTH).join('')
     : '';
 }
 
