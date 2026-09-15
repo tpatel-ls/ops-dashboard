@@ -21,6 +21,26 @@ describe('matchesHotkey', () => {
     expect(matchesHotkey('?', keyboardEvent('?', { ctrlKey: true }))).toBe(false);
   });
 
+  it('matches a symbol key that the layout produces with shift', () => {
+    // US and UK layouts report "?" for Shift+/, so the help shortcut always
+    // arrives with shiftKey set.
+    expect(matchesHotkey('?', keyboardEvent('?', { shiftKey: true }))).toBe(true);
+    expect(matchesHotkey('?', keyboardEvent('?', { shiftKey: true, altKey: true }))).toBe(false);
+  });
+
+  it('still requires shift to be absent for letter and named keys', () => {
+    expect(matchesHotkey('q', keyboardEvent('q', { shiftKey: true }))).toBe(false);
+    expect(matchesHotkey('escape', keyboardEvent('Escape', { shiftKey: true }))).toBe(false);
+    expect(matchesHotkey('escape', keyboardEvent('Escape'))).toBe(true);
+  });
+
+  it('honors an explicitly requested shift modifier', () => {
+    expect(
+      matchesHotkey('mod+shift+z', keyboardEvent('z', { metaKey: true, shiftKey: true })),
+    ).toBe(true);
+    expect(matchesHotkey('mod+shift+z', keyboardEvent('z', { metaKey: true }))).toBe(false);
+  });
+
   it('supports the platform-neutral mod modifier', () => {
     expect(matchesHotkey('mod+k', keyboardEvent('k', { metaKey: true }))).toBe(true);
     expect(matchesHotkey('mod+k', keyboardEvent('k', { ctrlKey: true }))).toBe(true);
