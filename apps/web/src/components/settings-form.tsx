@@ -128,6 +128,7 @@ export function SettingsForm() {
 
       <Section title="Default view" description="Where Ops Dashboard opens.">
         <select
+          aria-label="Default view"
           value={settings.defaultView}
           onChange={(e) => patch({ defaultView: e.target.value as Settings['defaultView'] })}
           className="input max-w-xs capitalize"

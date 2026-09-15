@@ -95,6 +95,7 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
       <div className="grid gap-3 sm:grid-cols-2">
         <select
           className="input"
+          aria-label="Quote source type"
           value={sourceType}
           onChange={(e) => setSourceType(e.target.value as QuoteSourceType | '')}
         >

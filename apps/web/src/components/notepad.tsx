@@ -161,6 +161,7 @@ export function Notepad() {
           </div>
           <textarea
             ref={taRef}
+            aria-label="Work intake"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
