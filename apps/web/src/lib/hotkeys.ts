@@ -34,7 +34,13 @@ export function matchesHotkey(combo: string, e: KeyboardEvent): boolean {
   if (wantMod && !wantMeta && !wantCtrl && e.metaKey && e.ctrlKey) return false;
   if (wantMeta !== e.metaKey && !wantMod) return false;
   if (wantCtrl !== e.ctrlKey && !wantMod) return false;
-  if (wantShift !== e.shiftKey) return false;
+  // Symbol keys already encode Shift in `event.key`: pressing Shift+/ on a US
+  // layout reports "?" with shiftKey true. Requiring shiftKey to be false there
+  // would make every symbol binding unreachable, so only letters, digits, and
+  // named keys honor an implicit "no shift" requirement.
+  const symbolKey = Array.from(key).length === 1 && !/[\p{Letter}\p{Number}]/u.test(key);
+  if (wantShift && !e.shiftKey) return false;
+  if (!wantShift && e.shiftKey && !symbolKey) return false;
   if (wantAlt !== e.altKey) return false;
   if (e.key.toLowerCase() !== key) return false;
   return true;
