@@ -78,6 +78,22 @@ describe('normalizeBrainDumpItem', () => {
     ]);
   });
 
+  it('stops reading food items once the per-item cap is reached', () => {
+    const poisoned = {
+      get name(): string {
+        throw new Error('read past the food cap');
+      },
+    };
+    const items = normalizeBrainDumpItem({
+      title: 'Buffet',
+      food: {
+        mealType: 'dinner',
+        items: [...Array.from({ length: 100 }, (_, i) => ({ name: `f${i}` })), poisoned],
+      },
+    })?.food?.items;
+    expect(items).toHaveLength(100);
+  });
+
   it('drops food entries and meal types it cannot use', () => {
     expect(
       normalizeBrainDumpItem({ title: 'a', food: { mealType: 'brunch' } })?.food,
@@ -95,6 +111,19 @@ describe('normalizeBrainDumpItems', () => {
   it('returns an empty list for non-array payloads', () => {
     expect(normalizeBrainDumpItems(undefined)).toEqual([]);
     expect(normalizeBrainDumpItems({ items: [] })).toEqual([]);
+  });
+
+  it('stops reading the payload once the batch cap is reached', () => {
+    const poisoned = {
+      get title(): string {
+        throw new Error('read past the item cap');
+      },
+    };
+    const payload = [
+      ...Array.from({ length: MAX_ROUTED_ITEMS }, (_, i) => ({ title: `t${i}` })),
+      poisoned,
+    ];
+    expect(normalizeBrainDumpItems(payload)).toHaveLength(MAX_ROUTED_ITEMS);
   });
 
   it('skips unusable entries and caps the batch size', () => {

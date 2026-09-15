@@ -83,37 +83,41 @@ function nutritionEstimate(value: unknown): number | undefined {
     : undefined;
 }
 
+type RoutedFoodItem = NonNullable<NonNullable<RoutedItemDraft['food']>['items']>[number];
+
+/** Read at most MAX_ROUTED_FOOD_ITEMS usable entries, ignoring the rest. */
+function boundedFoodItems(value: unknown[]): RoutedFoodItem[] {
+  const items: RoutedFoodItem[] = [];
+  for (const raw of value) {
+    if (items.length >= MAX_ROUTED_FOOD_ITEMS) break;
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
+    const item = raw as Record<string, unknown>;
+    const name = boundedDraftText(item.name, MAX_ROUTED_FOOD_TEXT_LENGTH);
+    if (!name) continue;
+    const quantity = boundedDraftText(item.quantity, MAX_ROUTED_FOOD_TEXT_LENGTH);
+    const calories = nutritionEstimate(item.calories);
+    const protein = nutritionEstimate(item.protein);
+    const carbs = nutritionEstimate(item.carbs);
+    const fat = nutritionEstimate(item.fat);
+    items.push({
+      name,
+      ...(quantity ? { quantity } : {}),
+      ...(calories !== undefined ? { calories } : {}),
+      ...(protein !== undefined ? { protein } : {}),
+      ...(carbs !== undefined ? { carbs } : {}),
+      ...(fat !== undefined ? { fat } : {}),
+    });
+  }
+  return items;
+}
+
 function normalizedFood(value: unknown): RoutedItemDraft['food'] | undefined {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const input = value as Record<string, unknown>;
   const requestedMealType = boundedDraftText(input.mealType, 20)?.toLowerCase();
   const mealType =
     requestedMealType && MEAL_TYPES.has(requestedMealType) ? requestedMealType : undefined;
-  const items = Array.isArray(input.items)
-    ? input.items
-        .flatMap((raw) => {
-          if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
-          const item = raw as Record<string, unknown>;
-          const name = boundedDraftText(item.name, MAX_ROUTED_FOOD_TEXT_LENGTH);
-          if (!name) return [];
-          const quantity = boundedDraftText(item.quantity, MAX_ROUTED_FOOD_TEXT_LENGTH);
-          const calories = nutritionEstimate(item.calories);
-          const protein = nutritionEstimate(item.protein);
-          const carbs = nutritionEstimate(item.carbs);
-          const fat = nutritionEstimate(item.fat);
-          return [
-            {
-              name,
-              ...(quantity ? { quantity } : {}),
-              ...(calories !== undefined ? { calories } : {}),
-              ...(protein !== undefined ? { protein } : {}),
-              ...(carbs !== undefined ? { carbs } : {}),
-              ...(fat !== undefined ? { fat } : {}),
-            },
-          ];
-        })
-        .slice(0, MAX_ROUTED_FOOD_ITEMS)
-    : undefined;
+  const items = Array.isArray(input.items) ? boundedFoodItems(input.items) : undefined;
   return mealType || items
     ? { ...(mealType ? { mealType } : {}), ...(items ? { items } : {}) }
     : undefined;
@@ -154,8 +158,11 @@ export function normalizeBrainDumpItem(value: unknown): NormalizedRoutedItemDraf
 
 export function normalizeBrainDumpItems(value: unknown): NormalizedRoutedItemDraft[] {
   if (!Array.isArray(value)) return [];
-  return value
-    .map(normalizeBrainDumpItem)
-    .filter((item): item is NormalizedRoutedItemDraft => Boolean(item))
-    .slice(0, MAX_ROUTED_ITEMS);
+  const items: NormalizedRoutedItemDraft[] = [];
+  for (const raw of value) {
+    if (items.length >= MAX_ROUTED_ITEMS) break;
+    const item = normalizeBrainDumpItem(raw);
+    if (item) items.push(item);
+  }
+  return items;
 }
