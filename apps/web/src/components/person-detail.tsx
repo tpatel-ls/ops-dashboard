@@ -320,6 +320,7 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
           <span className="text-muted-foreground w-24 shrink-0 text-xs">Relationship</span>
           <input
             className="input flex-1"
+            aria-label="Relationship"
             placeholder="e.g. colleague, mentor, friend"
             value={relationship}
             onChange={(e) => setRelationship(e.target.value)}
@@ -334,6 +335,7 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground w-24 shrink-0 text-xs">Domain</span>
             <select
+              aria-label="Person domain"
               value={person.domainId ?? ''}
               onChange={(e) => setDomain(e.target.value)}
               className="input flex-1"
