@@ -71,6 +71,7 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
         />
         <select
           className="input"
+          aria-label="Book status"
           value={status}
           onChange={(e) => setStatus(e.target.value as BookStatus)}
         >
@@ -258,6 +259,7 @@ function BookCard({ book, quotes }: BookCardProps) {
           <StarRating value={book.rating} onChange={handleRating} />
           <select
             className="border-border bg-input text-foreground h-9 rounded-md border px-2 font-mono text-[10px] tracking-[0.12em] uppercase focus:outline-none"
+            aria-label="Reading status"
             value={book.status}
             onChange={(e) => handleStatus(e.target.value as BookStatus)}
           >
