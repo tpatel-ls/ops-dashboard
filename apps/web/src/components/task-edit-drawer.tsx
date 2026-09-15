@@ -308,6 +308,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           {/* Recurrence */}
           <Section title="Repeat" icon={<RefreshCw className="size-3.5" />}>
             <select
+              aria-label="Repeat"
               value={currentRecurrence}
               onChange={(e) => {
                 const val = e.target.value;
@@ -335,6 +336,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           {/* Domain */}
           <Section title="Domain">
             <select
+              aria-label="Domain"
               value={task.domainId ?? ''}
               onChange={(e) => updateTask(task.id, { domainId: e.target.value || undefined })}
               className="input w-full"
@@ -351,6 +353,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           {/* Project */}
           <Section title="Project">
             <select
+              aria-label="Project"
               value={task.projectId ?? ''}
               onChange={(e) => {
                 const pid = e.target.value;
@@ -377,6 +380,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           {/* Content link */}
           <Section title="Content" icon={<Link2 className="size-3.5" />}>
             <select
+              aria-label="Content link"
               value={task.contentId ?? ''}
               onChange={(e) => updateTask(task.id, { contentId: e.target.value || undefined })}
               className="input w-full"
