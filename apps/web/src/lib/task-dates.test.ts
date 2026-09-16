@@ -40,6 +40,7 @@ describe('task calendar dates', () => {
   });
   it('treats a task due today as needing attention today', () => {\n    expect(taskNeedsAttentionBy({ dueAt: '2026-08-24T12:00:00Z' }, '2026-08-24')).toBe(true);\n  });
   it('does not mark a task due today as overdue', () => {\n    expect(taskIsOverdue({ dueAt: '2026-08-24' }, '2026-08-24')).toBe(false);\n  });
+  it('uses a due date when no schedule exists', () => {\n    expect(taskCommitmentDay({ dueAt: '2026-08-24' })).toBe('2026-08-24');\n  });
 });
 
 describe('open task dates', () => {
