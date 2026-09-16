@@ -4,6 +4,7 @@ import { fetchWithTimeout } from './fetch-timeout';
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
+  it('rejects fractional timeout values before calling fetch', async () => {\n    const fetch = vi.fn();\n    vi.stubGlobal('fetch', fetch);\n    await expect(fetchWithTimeout('/api/test', {}, 0.5)).rejects.toThrow(RangeError);\n    expect(fetch).not.toHaveBeenCalled();\n  });
 });
 
 describe('fetchWithTimeout', () => {
