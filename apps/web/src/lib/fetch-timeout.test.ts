@@ -4,9 +4,26 @@ import { fetchWithTimeout } from './fetch-timeout';
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
-  it('rejects fractional timeout values before calling fetch', async () => {\n    const fetch = vi.fn();\n    vi.stubGlobal('fetch', fetch);\n    await expect(fetchWithTimeout('/api/test', {}, 0.5)).rejects.toThrow(RangeError);\n    expect(fetch).not.toHaveBeenCalled();\n  });
-  it('accepts the maximum supported timer delay', async () => {\n    const fetch = vi.fn(async () => new Response('ok'));\n    vi.stubGlobal('fetch', fetch);\n    await expect(fetchWithTimeout('/api/test', {}, 2_147_483_647)).resolves.toBeInstanceOf(Response);\n  });
-  it('clears the timeout after a successful response', async () => {\n    vi.useFakeTimers();\n    const fetch = vi.fn(async () => new Response('ok'));\n    vi.stubGlobal('fetch', fetch);\n    await fetchWithTimeout('/api/test', {}, 50);\n    await vi.advanceTimersByTimeAsync(50);\n    expect(fetch).toHaveBeenCalledOnce();\n  });
+});
+
+it('rejects fractional timeout values before calling fetch', async () => {
+  const fetch = vi.fn();
+  vi.stubGlobal('fetch', fetch);
+  await expect(fetchWithTimeout('/api/test', {}, 0.5)).rejects.toThrow(RangeError);
+  expect(fetch).not.toHaveBeenCalled();
+});
+it('accepts the maximum supported timer delay', async () => {
+  const fetch = vi.fn(async () => new Response('ok'));
+  vi.stubGlobal('fetch', fetch);
+  await expect(fetchWithTimeout('/api/test', {}, 2_147_483_647)).resolves.toBeInstanceOf(Response);
+});
+it('clears the timeout after a successful response', async () => {
+  vi.useFakeTimers();
+  const fetch = vi.fn(async () => new Response('ok'));
+  vi.stubGlobal('fetch', fetch);
+  await fetchWithTimeout('/api/test', {}, 50);
+  await vi.advanceTimersByTimeAsync(50);
+  expect(fetch).toHaveBeenCalledOnce();
 });
 
 describe('fetchWithTimeout', () => {
@@ -122,6 +139,9 @@ describe('fetchWithTimeout', () => {
       '/api/options',
       expect.objectContaining({ method: 'POST', headers: { 'x-test': 'yes' } }),
     );
-    expect(fetch.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/options',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 });

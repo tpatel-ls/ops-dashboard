@@ -47,6 +47,12 @@ describe('normalizeStringList', () => {
   it('rejects non-array input before attempting normalization', () => {
     expect(() => normalizeStringList('alpha', 'invalid')).toThrow('invalid');
   });
-  it('preserves the first spelling when case-insensitive values repeat', () => {\n    expect(normalizeStringList([' Alpha ', 'ALPHA'], 'invalid', { caseInsensitive: true })).toEqual(['Alpha']);\n  });
-  it('applies custom item limits after trimming', () => {\n    expect(normalizeStringList([' abc '], 'invalid', { maxItemLength: 3 })).toEqual(['abc']);\n  });
+  it('preserves the first spelling when case-insensitive values repeat', () => {
+    expect(normalizeStringList([' Alpha ', 'ALPHA'], 'invalid', { caseInsensitive: true })).toEqual(
+      ['Alpha'],
+    );
+  });
+  it('applies custom item limits after trimming', () => {
+    expect(normalizeStringList([' abc '], 'invalid', { maxItemLength: 3 })).toEqual(['abc']);
+  });
 });
