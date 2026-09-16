@@ -47,4 +47,5 @@ describe('normalizeStringList', () => {
   it('rejects non-array input before attempting normalization', () => {
     expect(() => normalizeStringList('alpha', 'invalid')).toThrow('invalid');
   });
+  it('preserves the first spelling when case-insensitive values repeat', () => {\n    expect(normalizeStringList([' Alpha ', 'ALPHA'], 'invalid', { caseInsensitive: true })).toEqual(['Alpha']);\n  });
 });
