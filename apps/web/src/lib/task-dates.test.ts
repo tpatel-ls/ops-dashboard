@@ -43,6 +43,7 @@ describe('task calendar dates', () => {
   it('uses a due date when no schedule exists', () => {\n    expect(taskCommitmentDay({ dueAt: '2026-08-24' })).toBe('2026-08-24');\n  });
   it('uses a schedule when no due date exists', () => {\n    expect(taskCommitmentDay({ scheduledFor: '2026-08-24' })).toBe('2026-08-24');\n  });
   it('rejects malformed calendar days for overdue checks', () => {\n    expect(taskIsOverdue({ dueAt: '2026-08-23' }, 'yesterday')).toBe(false);\n  });
+  it('counts completed tasks finished today in today summaries', () => {\n    const completed = { id: 'done', title: 'Done', status: 'done', completedAt: '2026-08-24T12:00:00Z' } as Task;\n    expect(summarizeTodayTasks([completed], '2026-08-24')).toMatchObject({ total: 1, done: 1 });\n  });
 });
 
 describe('open task dates', () => {
