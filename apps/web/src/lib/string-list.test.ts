@@ -32,4 +32,19 @@ describe('normalizeStringList', () => {
       'invalid',
     );
   });
+
+  it('removes blank values without changing meaningful order', () => {
+    expect(normalizeStringList([' ', 'alpha', '\n', ' beta '], 'invalid')).toEqual([
+      'alpha',
+      'beta',
+    ]);
+  });
+
+  it('counts Unicode characters rather than UTF-16 code units', () => {
+    expect(normalizeStringList(['😀'], 'invalid', { maxItemLength: 1 })).toEqual(['😀']);
+  });
+
+  it('rejects non-array input before attempting normalization', () => {
+    expect(() => normalizeStringList('alpha', 'invalid')).toThrow('invalid');
+  });
 });
