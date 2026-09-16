@@ -6,6 +6,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   it('rejects fractional timeout values before calling fetch', async () => {\n    const fetch = vi.fn();\n    vi.stubGlobal('fetch', fetch);\n    await expect(fetchWithTimeout('/api/test', {}, 0.5)).rejects.toThrow(RangeError);\n    expect(fetch).not.toHaveBeenCalled();\n  });
   it('accepts the maximum supported timer delay', async () => {\n    const fetch = vi.fn(async () => new Response('ok'));\n    vi.stubGlobal('fetch', fetch);\n    await expect(fetchWithTimeout('/api/test', {}, 2_147_483_647)).resolves.toBeInstanceOf(Response);\n  });
+  it('clears the timeout after a successful response', async () => {\n    vi.useFakeTimers();\n    const fetch = vi.fn(async () => new Response('ok'));\n    vi.stubGlobal('fetch', fetch);\n    await fetchWithTimeout('/api/test', {}, 50);\n    await vi.advanceTimersByTimeAsync(50);\n    expect(fetch).toHaveBeenCalledOnce();\n  });
 });
 
 describe('fetchWithTimeout', () => {
