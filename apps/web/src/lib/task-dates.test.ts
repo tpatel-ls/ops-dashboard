@@ -38,14 +38,50 @@ describe('task calendar dates', () => {
     expect(taskNeedsAttentionBy({}, '2026-99-99')).toBe(false);
     expect(taskIsOverdue(task, '2026-08-24')).toBe(false);
   });
-  it('treats a task due today as needing attention today', () => {\n    expect(taskNeedsAttentionBy({ dueAt: '2026-08-24T12:00:00Z' }, '2026-08-24')).toBe(true);\n  });
-  it('does not mark a task due today as overdue', () => {\n    expect(taskIsOverdue({ dueAt: '2026-08-24' }, '2026-08-24')).toBe(false);\n  });
-  it('uses a due date when no schedule exists', () => {\n    expect(taskCommitmentDay({ dueAt: '2026-08-24' })).toBe('2026-08-24');\n  });
-  it('uses a schedule when no due date exists', () => {\n    expect(taskCommitmentDay({ scheduledFor: '2026-08-24' })).toBe('2026-08-24');\n  });
-  it('rejects malformed calendar days for overdue checks', () => {\n    expect(taskIsOverdue({ dueAt: '2026-08-23' }, 'yesterday')).toBe(false);\n  });
-  it('counts completed tasks finished today in today summaries', () => {\n    const completed = { id: 'done', title: 'Done', status: 'done', completedAt: '2026-08-24T12:00:00Z' } as Task;\n    expect(summarizeTodayTasks([completed], '2026-08-24')).toMatchObject({ total: 1, done: 1 });\n  });
-  it('excludes archived tasks from today summaries', () => {\n    const archived = { id: 'archived', title: 'Archived', status: 'archived' } as Task;\n    expect(summarizeTodayTasks([archived], '2026-08-24')).toEqual({ total: 0, done: 0, overdue: 0 });\n  });
-  it('orders equal commitments by id as a stable tie breaker', () => {\n    const make = (id: string) => ({ id, title: id, status: 'todo', priority: 0, scheduledFor: '2026-08-24' }) as Task;\n    expect([make('b'), make('a')].sort(compareTasksByCommitment).map((task) => task.id)).toEqual(['a', 'b']);\n  });
+  it('treats a task due today as needing attention today', () => {
+    expect(taskNeedsAttentionBy({ dueAt: '2026-08-24T12:00:00Z' }, '2026-08-24')).toBe(true);
+  });
+  it('does not mark a task due today as overdue', () => {
+    expect(taskIsOverdue({ dueAt: '2026-08-24' }, '2026-08-24')).toBe(false);
+  });
+  it('uses a due date when no schedule exists', () => {
+    expect(taskCommitmentDay({ dueAt: '2026-08-24' })).toBe('2026-08-24');
+  });
+  it('uses a schedule when no due date exists', () => {
+    expect(taskCommitmentDay({ scheduledFor: '2026-08-24' })).toBe('2026-08-24');
+  });
+  it('rejects malformed calendar days for overdue checks', () => {
+    expect(taskIsOverdue({ dueAt: '2026-08-23' }, 'yesterday')).toBe(false);
+  });
+  it('counts completed tasks finished today in today summaries', () => {
+    const completed = {
+      id: 'done',
+      title: 'Done',
+      status: 'done',
+      completedAt: '2026-08-24T12:00:00Z',
+    } as Task;
+    expect(summarizeTodayTasks([completed], '2026-08-24')).toMatchObject({ total: 1, done: 1 });
+  });
+  it('excludes archived tasks from today summaries', () => {
+    const archived = { id: 'archived', title: 'Archived', status: 'archived' } as Task;
+    expect(summarizeTodayTasks([archived], '2026-08-24')).toEqual({
+      total: 0,
+      done: 0,
+      overdue: 0,
+    });
+  });
+  it('orders equal commitments by id as a stable tie breaker', () => {
+    const make = (id: string) =>
+      ({ id, title: id, status: 'todo', priority: 0, scheduledFor: '2026-08-24' }) as Task;
+    expect([make('b'), make('a')].sort(compareTasksByCommitment).map((task) => task.id)).toEqual([
+      'a',
+      'b',
+    ]);
+  });
+  it('reports high priority open tasks independently of date', () => {
+    const high = { id: 'high', title: 'High', status: 'todo', priority: 3 } as Task;
+    expect(summarizeOpenTasks([high], '2026-08-24').high).toBe(1);
+  });
 });
 
 describe('open task dates', () => {
