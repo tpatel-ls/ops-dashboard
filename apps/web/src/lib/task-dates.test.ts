@@ -42,6 +42,7 @@ describe('task calendar dates', () => {
   it('does not mark a task due today as overdue', () => {\n    expect(taskIsOverdue({ dueAt: '2026-08-24' }, '2026-08-24')).toBe(false);\n  });
   it('uses a due date when no schedule exists', () => {\n    expect(taskCommitmentDay({ dueAt: '2026-08-24' })).toBe('2026-08-24');\n  });
   it('uses a schedule when no due date exists', () => {\n    expect(taskCommitmentDay({ scheduledFor: '2026-08-24' })).toBe('2026-08-24');\n  });
+  it('rejects malformed calendar days for overdue checks', () => {\n    expect(taskIsOverdue({ dueAt: '2026-08-23' }, 'yesterday')).toBe(false);\n  });
 });
 
 describe('open task dates', () => {
