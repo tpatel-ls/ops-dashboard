@@ -97,4 +97,28 @@ describe('fetchWithTimeout', () => {
 
     expect(fetch).not.toHaveBeenCalled();
   });
+
+  it('uses AbortError when an already-aborted signal has no reason', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    const caller = new AbortController();
+    caller.abort();
+
+    await expect(fetchWithTimeout('/api/test', { signal: caller.signal })).rejects.toMatchObject({
+      name: 'AbortError',
+    });
+  });
+
+  it('forwards request options while replacing the signal', async () => {
+    const fetch = vi.fn(async () => new Response('ok'));
+    vi.stubGlobal('fetch', fetch);
+
+    await fetchWithTimeout('/api/options', { method: 'POST', headers: { 'x-test': 'yes' } }, 100);
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/options',
+      expect.objectContaining({ method: 'POST', headers: { 'x-test': 'yes' } }),
+    );
+    expect(fetch.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+  });
 });
