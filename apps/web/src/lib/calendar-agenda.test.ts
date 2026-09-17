@@ -91,6 +91,10 @@ describe('calendar agenda', () => {
     expect(calendarInstant(undefined)).toBeUndefined();
   });
 
+  it('rejects date-only calendar instants because they have no time', () => {
+    expect(calendarInstant('2026-07-20')).toBeUndefined();
+  });
+
   it('sorts timed work first, followed by priority and title', () => {
     const items = [
       task('normal', { scheduledFor: '2026-07-20', title: 'Normal' }),
