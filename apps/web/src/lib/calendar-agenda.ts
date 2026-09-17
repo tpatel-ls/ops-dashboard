@@ -24,23 +24,32 @@ export function calendarKindOf(
   return undefined;
 }
 
+/**
+ * Calendar day for one task field. A date-only value is already a local
+ * calendar day and must be kept verbatim: `new Date('2026-07-20')` is midnight
+ * UTC, which `isoDay` renders as the previous day everywhere west of UTC.
+ */
+function calendarDay(value: string): string | undefined {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return localDay(value) === value ? value : undefined;
+  }
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? isoDay(parsed) : undefined;
+}
+
 export function calendarDateOf(
   task: Pick<Task, 'startAt' | 'scheduledFor' | 'dueAt'>,
 ): string | undefined {
   if (task.startAt) {
-    const start = new Date(task.startAt);
-    if (Number.isFinite(start.getTime())) return isoDay(start);
+    const start = calendarDay(task.startAt);
+    if (start) return start;
   }
   if (task.scheduledFor) {
     const scheduled = localDay(task.scheduledFor);
     if (scheduled) return scheduled;
   }
   if (task.dueAt) {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(task.dueAt)) {
-      return localDay(task.dueAt) === task.dueAt ? task.dueAt : undefined;
-    }
-    const due = new Date(task.dueAt);
-    return Number.isFinite(due.getTime()) ? isoDay(due) : undefined;
+    return calendarDay(task.dueAt);
   }
   return undefined;
 }
