@@ -113,6 +113,12 @@ describe('calendar agenda', () => {
     ]);
   });
 
+  it('uses the task id as a final deterministic tie breaker', () => {
+    const alpha = task('a', { title: 'Same' });
+    const bravo = task('b', { title: 'Same' });
+    expect(compareCalendarTasks(alpha, bravo)).toBeLessThan(0);
+  });
+
   it('orders simultaneous time blocks deterministically', () => {
     const items = [
       task('bravo', { startAt: '2026-07-20T09:00:00', title: 'Review' }),
