@@ -15,4 +15,9 @@ describe('themePreference', () => {
     expect(themePreference(' Light ')).toBe('system');
     expect(themePreference('DARK')).toBe('system');
   });
+
+  it('does not accept arbitrary persisted values', () => {
+    expect(themePreference('auto')).toBe('system');
+    expect(themePreference('')).toBe('system');
+  });
 });
