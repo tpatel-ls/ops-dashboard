@@ -10,4 +10,9 @@ describe('themePreference', () => {
   it.each(['light', 'dark', 'system'] as const)('keeps the supported %s preference', (theme) => {
     expect(themePreference(theme)).toBe(theme);
   });
+
+  it('falls back for whitespace and differently cased values', () => {
+    expect(themePreference(' Light ')).toBe('system');
+    expect(themePreference('DARK')).toBe('system');
+  });
 });
