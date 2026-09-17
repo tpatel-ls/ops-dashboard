@@ -55,4 +55,8 @@ describe('normalizeStringList', () => {
   it('applies custom item limits after trimming', () => {
     expect(normalizeStringList([' abc '], 'invalid', { maxItemLength: 3 })).toEqual(['abc']);
   });
+
+  it('retains distinct values when only surrounding whitespace differs', () => {
+    expect(normalizeStringList(['a', ' a '], 'invalid')).toEqual(['a']);
+  });
 });
