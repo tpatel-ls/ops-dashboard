@@ -149,6 +149,10 @@ describe('addTask', () => {
     );
     expect(mocks.last).not.toHaveBeenCalled();
   });
+
+  it('trims task titles before persistence', async () => {
+    await expect(addTask('  Trim me  ')).resolves.toMatchObject({ title: 'Trim me' });
+  });
 });
 
 describe('addTaskToProject', () => {
