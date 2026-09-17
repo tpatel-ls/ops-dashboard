@@ -138,6 +138,10 @@ describe('addTask', () => {
     expect(mocks.last).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
   });
+
+  it('normalizes Unicode emoji title length by characters', async () => {
+    await expect(addTask('😀'.repeat(500))).resolves.toMatchObject({ title: '😀'.repeat(500) });
+  });
 });
 
 describe('addTaskToProject', () => {
