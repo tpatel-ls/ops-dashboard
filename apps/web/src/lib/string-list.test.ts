@@ -63,4 +63,8 @@ describe('normalizeStringList', () => {
   it('allows an explicitly empty list', () => {
     expect(normalizeStringList([], 'invalid')).toEqual([]);
   });
+
+  it('uses the caller error message for invalid item types', () => {
+    expect(() => normalizeStringList([null], 'custom error')).toThrow('custom error');
+  });
 });
