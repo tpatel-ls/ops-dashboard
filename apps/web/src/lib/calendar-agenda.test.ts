@@ -136,4 +136,12 @@ describe('calendar agenda', () => {
       'bravo',
     ]);
   });
+
+  it('sorts higher priority untimed tasks first', () => {
+    expect(
+      [task('low', { priority: 0 }), task('high', { priority: 3 })]
+        .sort(compareCalendarTasks)
+        .map((item) => item.id),
+    ).toEqual(['high', 'low']);
+  });
 });
