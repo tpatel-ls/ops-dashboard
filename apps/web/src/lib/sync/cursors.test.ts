@@ -86,7 +86,14 @@ describe('overlappedCursor', () => {
   });
 
   it('clamps overlap at the synchronization epoch', () => {
-    expect(overlappedCursor('1970-01-01T00:00:01.000Z', 120_000)).toBe('1970-01-01T00:00:00.000Z');
+    expect(overlappedCursor('1970-01-01T00:00:01.000Z', 120_000)).toBe(SYNC_EPOCH);
+  });
+
+  it('spells the epoch exactly as the cursors it is compared against', () => {
+    expect(SYNC_EPOCH).toBe(new Date(0).toISOString());
+    // A cursor that round-trips through storage must still hit the epoch
+    // fast path in overlappedCursor.
+    expect(parseSyncCursors(JSON.stringify({ tasks: SYNC_EPOCH })).tasks).toBe(SYNC_EPOCH);
   });
 
   it('never advances a cursor when given a malformed overlap', () => {
