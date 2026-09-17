@@ -115,4 +115,9 @@ describe('advanceSyncCursor', () => {
       '2026-07-15T17:00:00.000Z',
     );
   });
+
+  it('does not advance for an equal instant in another timezone', () => {
+    const current = '2026-07-15T12:00:00.000Z';
+    expect(advanceSyncCursor(current, '2026-07-15T08:00:00-04:00')).toBe(current);
+  });
 });
