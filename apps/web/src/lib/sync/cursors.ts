@@ -1,4 +1,7 @@
-export const SYNC_EPOCH = '1970-01-01T00:00:00Z';
+// Canonical `Date#toISOString()` form. Every other cursor in this module is
+// produced by `toISOString()`, so the epoch must match that spelling or a
+// stored epoch cursor compares unequal to this constant.
+export const SYNC_EPOCH = '1970-01-01T00:00:00.000Z';
 
 export interface SyncCursorCache {
   read: (raw: string | null) => Record<string, string>;
