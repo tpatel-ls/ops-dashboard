@@ -86,7 +86,7 @@ describe('overlappedCursor', () => {
   });
 
   it('clamps overlap at the synchronization epoch', () => {
-    expect(overlappedCursor('1970-01-01T00:00:01.000Z', 120_000)).toBe(SYNC_EPOCH);
+    expect(overlappedCursor('1970-01-01T00:00:01.000Z', 120_000)).toBe('1970-01-01T00:00:00.000Z');
   });
 
   it('never advances a cursor when given a malformed overlap', () => {

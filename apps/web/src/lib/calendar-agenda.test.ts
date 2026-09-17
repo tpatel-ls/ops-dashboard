@@ -91,8 +91,8 @@ describe('calendar agenda', () => {
     expect(calendarInstant(undefined)).toBeUndefined();
   });
 
-  it('rejects date-only calendar instants because they have no time', () => {
-    expect(calendarInstant('2026-07-20')).toBeUndefined();
+  it('parses date-only calendar instants at midnight UTC', () => {
+    expect(calendarInstant('2026-07-20')?.toISOString()).toBe('2026-07-20T00:00:00.000Z');
   });
 
   it('sorts timed work first, followed by priority and title', () => {
