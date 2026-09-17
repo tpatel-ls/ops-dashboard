@@ -105,4 +105,10 @@ describe('advanceSyncCursor', () => {
     expect(advanceSyncCursor(current, 'not-a-date')).toBe(current);
     expect(advanceSyncCursor(current, null)).toBe(current);
   });
+
+  it('starts from the candidate when the current cursor is malformed', () => {
+    expect(advanceSyncCursor('not-a-date', '2026-07-15T12:00:00-05:00')).toBe(
+      '2026-07-15T17:00:00.000Z',
+    );
+  });
 });
