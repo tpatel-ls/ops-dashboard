@@ -59,4 +59,8 @@ describe('normalizeStringList', () => {
   it('retains distinct values when only surrounding whitespace differs', () => {
     expect(normalizeStringList(['a', ' a '], 'invalid')).toEqual(['a']);
   });
+
+  it('allows an explicitly empty list', () => {
+    expect(normalizeStringList([], 'invalid')).toEqual([]);
+  });
 });
