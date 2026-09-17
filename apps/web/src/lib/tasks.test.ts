@@ -153,6 +153,13 @@ describe('addTask', () => {
   it('trims task titles before persistence', async () => {
     await expect(addTask('  Trim me  ')).resolves.toMatchObject({ title: 'Trim me' });
   });
+
+  it('rejects a non-finite task order', async () => {
+    await expect(addTask('Invalid order', { order: Number.POSITIVE_INFINITY })).rejects.toThrow(
+      'Task order must be finite',
+    );
+    expect(mocks.last).not.toHaveBeenCalled();
+  });
 });
 
 describe('addTaskToProject', () => {
