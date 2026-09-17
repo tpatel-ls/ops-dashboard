@@ -142,6 +142,13 @@ describe('addTask', () => {
   it('normalizes Unicode emoji title length by characters', async () => {
     await expect(addTask('😀'.repeat(500))).resolves.toMatchObject({ title: '😀'.repeat(500) });
   });
+
+  it('rejects a title that exceeds the Unicode character limit', async () => {
+    await expect(addTask('😀'.repeat(501))).rejects.toThrow(
+      'Task title must contain at most 500 characters',
+    );
+    expect(mocks.last).not.toHaveBeenCalled();
+  });
 });
 
 describe('addTaskToProject', () => {
