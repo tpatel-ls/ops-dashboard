@@ -3,10 +3,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Calendar, Plus, Search, User, Users, X } from 'lucide-react';
-import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
 import { createPerson, latestInteraction, matchesPersonSearch } from '@/lib/people';
+import { relativeTimeLabel } from '@/lib/relative-time';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
 
@@ -155,7 +155,7 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
         {lastInteraction ? (
           <span className="inline-flex items-center gap-1">
             <Calendar className="size-3" aria-hidden />
-            {formatDistanceToNow(parseISO(lastInteraction.date), { addSuffix: true })}
+            {relativeTimeLabel(lastInteraction.date) ?? 'Date unavailable'}
           </span>
         ) : (
           <span className="text-subtle-foreground text-[11px]">No interactions yet</span>
