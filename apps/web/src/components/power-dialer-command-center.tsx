@@ -151,7 +151,12 @@ function taskText(task: Task): string {
 }
 
 function capabilityProgress(tasks: Task[], terms: string[]) {
-  const matched = tasks.filter((task) => terms.some((term) => taskText(task).includes(term)));
+  const matched = tasks.filter((task) => {
+    // Build the haystack once per task: `taskText` joins tags and lowercases
+    // the whole string, and it does not vary across the terms being tested.
+    const text = taskText(task);
+    return terms.some((term) => text.includes(term));
+  });
   const done = matched.filter((task) => task.status === 'done').length;
   const pct = matched.length > 0 ? Math.round((done / matched.length) * 100) : 0;
   return { matched, pct };
