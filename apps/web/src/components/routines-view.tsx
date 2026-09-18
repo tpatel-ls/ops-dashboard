@@ -17,9 +17,11 @@ import { RoutineForm } from '@/components/routine-form';
 
 /* ─── helpers ─────────────────────────────────────────────────── */
 
-function daysBetween(a: string, b: string): number {
+/** Calendar days from `a` to `b`, or null when either day cannot be read. */
+function daysBetween(a: string, b: string): number | null {
   const msA = new Date(`${a}T00:00:00`).getTime();
   const msB = new Date(`${b}T00:00:00`).getTime();
+  if (!Number.isFinite(msA) || !Number.isFinite(msB)) return null;
   return Math.round((msB - msA) / 86_400_000);
 }
 
@@ -48,8 +50,11 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
 
   // Fixed-kind progress
   const isFixed = routine.kind === 'fixed' && routine.durationDays;
-  const dayIndex = isFixed ? Math.max(0, daysBetween(routine.startDate, today)) + 1 : null;
-  const clampedDay = isFixed ? Math.min(dayIndex!, routine.durationDays!) : null;
+  // `startDate` is validated on local writes but sync casts rows in unchecked,
+  // so an unreadable day must not render as "day NaN".
+  const elapsedDays = isFixed ? daysBetween(routine.startDate, today) : null;
+  const clampedDay =
+    elapsedDays === null ? null : Math.min(Math.max(0, elapsedDays) + 1, routine.durationDays!);
 
   const [confirming, setConfirming] = useState(false);
 
@@ -105,7 +110,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
           </span>
 
           {/* Kind badge */}
-          {isFixed ? (
+          {clampedDay !== null ? (
             <span className="bg-primary-soft text-primary rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
               day {clampedDay} / {routine.durationDays}
             </span>
