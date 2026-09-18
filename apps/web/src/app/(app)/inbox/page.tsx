@@ -2,7 +2,6 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
-import { formatDistanceToNow, parseISO } from 'date-fns';
 import {
   Archive,
   BookOpen,
@@ -21,6 +20,7 @@ import { compareCaptureRecency, dismissCapture, deleteCapture } from '@/lib/capt
 import { ViewShell } from '@/components/view-shell';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { relativeTimeLabel } from '@/lib/relative-time';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */
@@ -72,11 +72,7 @@ const CAPTURE_FILTERS: Array<{ id: CaptureFilter; label: string }> = [
 ];
 
 function relativeTime(iso: string): string {
-  try {
-    return formatDistanceToNow(parseISO(iso), { addSuffix: true });
-  } catch {
-    return '';
-  }
+  return relativeTimeLabel(iso) ?? '';
 }
 
 /* ------------------------------------------------------------------ */
