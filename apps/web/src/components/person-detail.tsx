@@ -3,9 +3,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, Lightbulb, MessageSquare, Plus, Trash2, X } from 'lucide-react';
-import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Interaction, Person, PersonFact } from '@ops-dashboard/core';
+import { relativeTimeLabel } from '@/lib/relative-time';
 import {
   compareInteractionRecency,
   deletePerson,
@@ -252,8 +252,7 @@ function InteractionRow({
   interaction: Interaction;
   onRemove: () => void;
 }) {
-  const date = parseISO(interaction.date);
-  const relative = formatDistanceToNow(date, { addSuffix: true });
+  const relative = relativeTimeLabel(interaction.date);
 
   return (
     <li className="group surface-flat flex gap-2.5 px-3 py-2.5">
@@ -262,7 +261,9 @@ function InteractionRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-foreground text-sm">{interaction.note}</p>
-        <span className="text-subtle-foreground font-mono text-[10px]">{relative}</span>
+        {relative ? (
+          <span className="text-subtle-foreground font-mono text-[10px]">{relative}</span>
+        ) : null}
       </div>
       <button
         type="button"
