@@ -366,14 +366,46 @@ interface PersonDetailProps {
 export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Close on Escape
+  // Move focus into the panel, keep Tab inside it while it is open, and hand
+  // focus back to the trigger on close. Matches the project detail panel and
+  // the work logger dialog.
   useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
+
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener('keydown', onKey);
+      previousFocusRef.current?.focus();
+    };
   }, [onClose]);
 
   async function handleDelete() {
@@ -404,6 +436,9 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
       {/* Panel */}
       <div
         ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="person-detail-title"
         className="bg-background relative z-10 flex h-full w-full max-w-lg flex-col shadow-2xl"
       >
         {/* Header */}
@@ -423,7 +458,9 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
               )}
             </div>
             <div>
-              <h2 className="text-[15px] leading-tight font-semibold">{person.name}</h2>
+              <h2 id="person-detail-title" className="text-[15px] leading-tight font-semibold">
+                {person.name}
+              </h2>
               <div className="mt-0.5 flex flex-wrap items-center gap-2">
                 {person.relationship ? (
                   <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
@@ -475,6 +512,7 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
               </button>
             )}
             <button
+              ref={closeButtonRef}
               type="button"
               onClick={onClose}
               className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md"
