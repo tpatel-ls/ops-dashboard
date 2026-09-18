@@ -1,6 +1,6 @@
 'use client';
 
-import { format, isValid, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { getDb, localDay } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 import { compareTasks } from './task-query';
@@ -334,8 +334,11 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
   const grouped: Record<string, Task[]> = {};
   for (const t of tasks) {
     if (t.deletedAt || t.status === 'archived') continue;
-    const parsedDay = t.scheduledFor ? parseISO(t.scheduledFor) : null;
-    const k = parsedDay && isValid(parsedDay) ? t.scheduledFor! : 'unscheduled';
+    // `scheduledFor` is normally a local calendar day, but imported and synced
+    // rows can still carry a full timestamp. Normalize through `localDay` so the
+    // grouping key is always `YYYY-MM-DD`; grouping on a raw timestamp made the
+    // heading below format an invalid date and threw, failing the whole export.
+    const k = localDay(t.scheduledFor) ?? 'unscheduled';
     grouped[k] = grouped[k] ?? [];
     grouped[k].push(t);
   }

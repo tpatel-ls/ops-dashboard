@@ -62,6 +62,17 @@ describe('tasksToMarkdown', () => {
     expect(markdown).toContain('- [ ] Recover imported task');
   });
 
+  it('groups a timestamp scheduled value by its local calendar day', () => {
+    const markdown = tasksToMarkdown(
+      [task('Imported with a time', '2026-07-28T15:30:00.000Z')],
+      'Tasks',
+    );
+
+    expect(markdown).toContain('## Tuesday, July 28');
+    expect(markdown).toContain('- [ ] Imported with a time');
+    expect(markdown).not.toContain('## Unscheduled');
+  });
+
   it('formats valid scheduled dates', () => {
     const markdown = tasksToMarkdown([task('Tuesday task', '2026-07-28')], 'Tasks');
 
