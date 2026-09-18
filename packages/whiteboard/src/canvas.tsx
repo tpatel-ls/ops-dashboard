@@ -3,6 +3,7 @@
 import { Tldraw, type TLStoreSnapshot } from 'tldraw';
 import 'tldraw/tldraw.css';
 import { useCallback, useEffect, useRef } from 'react';
+import { isPenEvent, shouldRejectAsPalm } from './pen';
 
 export interface DriftCanvasProps {
   initialDocument?: unknown;
@@ -41,13 +42,11 @@ export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanva
     if (!el) return;
 
     function onPointer(e: PointerEvent) {
-      if (e.pointerType === 'pen') {
+      if (isPenEvent(e)) {
         lastPenAt.current = Date.now();
-      } else if (e.pointerType === 'touch') {
-        if (Date.now() - lastPenAt.current < PALM_REJECT_WINDOW_MS) {
-          e.stopPropagation();
-          e.preventDefault();
-        }
+      } else if (shouldRejectAsPalm(e, lastPenAt.current, PALM_REJECT_WINDOW_MS)) {
+        e.stopPropagation();
+        e.preventDefault();
       }
     }
 
