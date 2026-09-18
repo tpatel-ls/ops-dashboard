@@ -17,6 +17,7 @@ import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
+import { calendarInstant } from '@/lib/calendar-agenda';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 
@@ -197,6 +198,9 @@ function DraggableCard({
   };
 
   const project = task.projectId ? projectsMap.get(task.projectId) : undefined;
+  // A synced row can carry an unparseable `startAt`, and date-fns `format`
+  // throws `RangeError` on the Invalid Date that produces.
+  const startsAt = calendarInstant(task.startAt);
 
   return (
     <div
@@ -228,9 +232,9 @@ function DraggableCard({
         <span className="min-w-0 truncate">{task.title}</span>
       </div>
       <div className="mt-0.5 ml-2 flex min-w-0 items-center gap-1.5">
-        {task.startAt ? (
+        {startsAt ? (
           <span className="text-subtle-foreground font-mono text-[10px]">
-            {format(new Date(task.startAt), 'HH:mm')}
+            {format(startsAt, 'HH:mm')}
           </span>
         ) : null}
         {project ? (
