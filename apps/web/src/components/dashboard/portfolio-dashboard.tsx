@@ -15,7 +15,7 @@ import {
   Plus,
   Sparkles,
 } from 'lucide-react';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, isValid, parseISO } from 'date-fns';
 import { getDb, matchesOrgContext } from '@ops-dashboard/core';
 import type {
   Domain,
@@ -593,7 +593,10 @@ export function PortfolioDashboard() {
       const openTasks = pTasks
         .filter((t) => t.status !== 'done')
         .sort((a, b) => b.priority - a.priority || a.order - b.order);
-      const lastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
+      const parsedLastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
+      // An Invalid Date makes `differenceInDays` return NaN, and `NaN > n` is
+      // false, which quietly cleared the slipping badge instead of raising it.
+      const lastWorked = parsedLastWorked && isValid(parsedLastWorked) ? parsedLastWorked : null;
       // Slipping = had activity before but has gone stale. A never-worked project
       // is "not started", not slipping, so it does not get the warning badge.
       const isSlipping =
