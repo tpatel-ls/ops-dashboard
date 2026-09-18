@@ -24,7 +24,7 @@ import {
   Workflow,
   type LucideIcon,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import type { Task, TaskStatus } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
@@ -162,17 +162,31 @@ function capabilityProgress(tasks: Task[], terms: string[]) {
   return { matched, pct };
 }
 
-function taskDate(task: Task): Date | null {
-  if (task.startAt) return parseISO(task.startAt);
-  if (task.scheduledFor) return parseISO(task.scheduledFor);
-  if (task.dueAt) return parseISO(task.dueAt);
+/**
+ * Earliest usable planning instant for a task, plus whether it carries a time.
+ * Imported and synced rows can hold a malformed date, and an Invalid Date here
+ * reached `format`, which throws `RangeError` and takes the whole command
+ * center down with it. It also made the schedule sort compare `NaN`. Skip
+ * unparseable values and fall through to the next field instead.
+ */
+function taskInstant(task: Task): { at: Date; timed: boolean } | null {
+  const candidates: Array<{ value: string | undefined; timed: boolean }> = [
+    { value: task.startAt, timed: true },
+    { value: task.scheduledFor, timed: false },
+    { value: task.dueAt, timed: false },
+  ];
+  for (const { value, timed } of candidates) {
+    if (!value) continue;
+    const parsed = parseISO(value);
+    if (isValid(parsed)) return { at: parsed, timed };
+  }
   return null;
 }
 
 function dateLabel(task: Task): string {
-  const d = taskDate(task);
-  if (!d) return 'Unscheduled';
-  return format(d, task.startAt ? 'EEE, MMM d h:mm a' : 'EEE, MMM d');
+  const instant = taskInstant(task);
+  if (!instant) return 'Unscheduled';
+  return format(instant.at, instant.timed ? 'EEE, MMM d h:mm a' : 'EEE, MMM d');
 }
 
 export function PowerDialerCommandCenter() {
@@ -199,7 +213,7 @@ export function PowerDialerCommandCenter() {
     const urgent = open.filter((task) => task.priority >= 3).length;
     const pct = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
     const scheduled = tasks
-      .map((task) => ({ task, date: taskDate(task) }))
+      .map((task) => ({ task, date: taskInstant(task)?.at ?? null }))
       .filter((item): item is { task: Task; date: Date } => item.date !== null && isOpen(item.task))
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(0, 8);
