@@ -1,11 +1,10 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { format, parseISO } from 'date-fns';
 import { BookOpen, Trash2, Upload } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
-import { compareJournalEntries, deleteJournalEntry } from '@/lib/journal';
+import { compareJournalEntries, deleteJournalEntry, journalDateLabel } from '@/lib/journal';
 import { cn } from '@ops-dashboard/ui';
 
 const MOOD_GLYPH: Record<string, { symbol: string; label: string; color: string }> = {
@@ -55,13 +54,7 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
   const mood = entry.mood ? MOOD_GLYPH[entry.mood] : null;
   const excerpt = entry.body.length > 280 ? entry.body.slice(0, 280) + '…' : entry.body;
 
-  const formattedDate = (() => {
-    try {
-      return format(parseISO(`${entry.date}T00:00:00`), 'EEEE, d MMM yyyy');
-    } catch {
-      return entry.date;
-    }
-  })();
+  const formattedDate = journalDateLabel(entry.date, 'EEEE, d MMM yyyy');
 
   return (
     <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-3 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
