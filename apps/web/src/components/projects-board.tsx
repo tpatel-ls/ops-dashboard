@@ -278,7 +278,8 @@ function ProjectCard({
   const milestonePct =
     milestones.length > 0 ? Math.round((milestoneDone / milestones.length) * 100) : null;
 
-  const lastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
+  const parsedLastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
+  const lastWorked = parsedLastWorked && isValid(parsedLastWorked) ? parsedLastWorked : null;
   const daysAgo = lastWorked ? differenceInDays(new Date(), lastWorked) : null;
   const isSlipping = daysAgo === null || daysAgo > SLIPPING_DAYS;
   const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
