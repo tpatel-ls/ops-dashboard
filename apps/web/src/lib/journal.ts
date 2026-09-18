@@ -1,5 +1,6 @@
 'use client';
 
+import { format, parseISO } from 'date-fns';
 import { localDay } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
@@ -10,6 +11,19 @@ const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', '
 const MAX_JOURNAL_BODY_LENGTH = 50_000;
 const MAX_JOURNAL_TITLE_LENGTH = 500;
 const MAX_JOURNAL_MOOD_LENGTH = 100;
+
+/**
+ * Human label for a journal entry's calendar day.
+ *
+ * `date` is meant to be a local `YYYY-MM-DD`, but sync writes rows into Dexie
+ * without validating them, and date-fns `format` throws `RangeError` on the
+ * Invalid Date a bad value produces. Confirming the value is a real calendar
+ * day first makes the `parseISO` below total. Anything else falls back to the
+ * raw string, which is still the most informative thing to show the reader.
+ */
+export function journalDateLabel(date: string, pattern: string): string {
+  return localDay(date) === date ? format(parseISO(`${date}T00:00:00`), pattern) : date;
+}
 
 export function compareJournalEntries(
   left: Pick<JournalEntry, 'id' | 'date' | 'createdAt'>,

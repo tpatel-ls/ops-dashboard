@@ -2,8 +2,8 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
+import { journalDateLabel } from '@/lib/journal';
 
 export function ResurfacingEntry() {
   const entry = useLiveQuery(async () => {
@@ -33,7 +33,7 @@ export function ResurfacingEntry() {
           Resurfacing
         </span>
         <span className="text-muted-foreground ml-auto font-mono text-[10px]">
-          {format(parseISO(`${entry.date}T00:00:00`), 'MMM d, yyyy')}
+          {journalDateLabel(entry.date, 'MMM d, yyyy')}
         </span>
       </div>
 
