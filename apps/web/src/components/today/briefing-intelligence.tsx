@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AlertTriangle, ArrowRight, Inbox, Layers3, Radar } from 'lucide-react';
-import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
+import { relativeTimeLabel } from '@/lib/relative-time';
 import {
   findCaptureRoutingIssues,
   findStaleDomains,
@@ -183,6 +183,8 @@ function BriefingPanel({
 }
 
 function StaleDomainRow({ domain }: { domain: StaleDomain }) {
+  const lastTouched = relativeTimeLabel(domain.lastTouchedAt);
+
   return (
     <li className="bg-bg-sunken/50 flex items-center gap-3 rounded-md border px-3 py-2">
       <span
@@ -193,9 +195,7 @@ function StaleDomainRow({ domain }: { domain: StaleDomain }) {
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm">{domain.domainName}</div>
         <div className="text-muted-foreground font-mono text-[10px]">
-          {domain.lastTouchedAt
-            ? `last touched ${formatDistanceToNow(parseISO(domain.lastTouchedAt), { addSuffix: true })}`
-            : 'never touched'}
+          {lastTouched ? `last touched ${lastTouched}` : 'never touched'}
         </div>
       </div>
       <span className="bg-warning/15 text-warning rounded px-2 py-0.5 font-mono text-[10px]">
@@ -212,6 +212,7 @@ function CaptureIssueRow({ issue }: { issue: CaptureRoutingIssue }) {
       : issue.reason === 'missing-context'
         ? 'needs domain'
         : 'missing record';
+  const created = relativeTimeLabel(issue.createdAt);
 
   return (
     <li className="bg-bg-sunken/50 flex items-center gap-3 rounded-md border px-3 py-2">
@@ -219,7 +220,8 @@ function CaptureIssueRow({ issue }: { issue: CaptureRoutingIssue }) {
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm">{issue.title}</div>
         <div className="text-muted-foreground font-mono text-[10px]">
-          {issue.source} · {formatDistanceToNow(parseISO(issue.createdAt), { addSuffix: true })}
+          {issue.source}
+          {created ? ` · ${created}` : null}
         </div>
       </div>
       <span className="bg-primary/10 text-primary rounded px-2 py-0.5 font-mono text-[10px]">
