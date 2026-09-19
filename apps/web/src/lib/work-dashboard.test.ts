@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Project, Task } from '@ops-dashboard/core';
-import { buildWorkDashboard } from './work-dashboard';
+import { buildWorkDashboard, workTaskDay } from './work-dashboard';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   const now = '2026-07-16T12:00:00.000Z';
@@ -195,5 +195,27 @@ describe('buildWorkDashboard', () => {
     expect(result.projects).toHaveLength(6);
     expect(result.today[0]?.id).toBe('task-0');
     expect(result.projects[0]?.project.id).toBe('project-0');
+  });
+});
+
+describe('workTaskDay', () => {
+  // Local noon, so the instant lands on the intended day in every timezone.
+  const dueAt = new Date(2026, 8, 20, 12, 0).toISOString();
+  const startAt = new Date(2026, 8, 28, 9, 0).toISOString();
+
+  it('uses the earliest of the scheduled, due, and start days', () => {
+    expect(workTaskDay({ scheduledFor: '2026-09-25', dueAt, startAt })).toBe('2026-09-20');
+  });
+
+  it('is not simply the first populated field', () => {
+    // The agenda row used to derive its label as
+    // `scheduledFor ?? dueAt ?? startAt`, so a task due before its scheduled
+    // day sat in one section and displayed the other day.
+    expect(workTaskDay({ scheduledFor: '2026-09-25', dueAt })).toBe('2026-09-20');
+  });
+
+  it('has no day when nothing parses', () => {
+    expect(workTaskDay({})).toBeUndefined();
+    expect(workTaskDay({ scheduledFor: 'not-a-day', dueAt: '2026-02-30' })).toBeUndefined();
   });
 });
