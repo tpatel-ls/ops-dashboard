@@ -9,7 +9,13 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { compareFoodLogCreation, createFoodLog, updateFoodLog } from './food-logs';
+import {
+  compareFoodLogCreation,
+  createFoodLog,
+  foodEstimate,
+  sumFoodLogTotals,
+  updateFoodLog,
+} from './food-logs';
 
 describe('compareFoodLogCreation', () => {
   it('orders offset timestamps by instant and corrupted timestamps last', () => {
@@ -123,5 +129,55 @@ describe('updateFoodLog', () => {
         items: [{ name: 'Eggs', quantity: 2, calories: 140 }] as never,
       }),
     ).toThrow('Food items must be valid');
+  });
+});
+
+describe('foodEstimate', () => {
+  it('keeps a usable stored estimate', () => {
+    expect(foodEstimate(0)).toBe(0);
+    expect(foodEstimate(540)).toBe(540);
+  });
+
+  it('drops values computeFoodTotals would never have stored', () => {
+    expect(foodEstimate(undefined)).toBe(0);
+    expect(foodEstimate(-10)).toBe(0);
+    expect(foodEstimate(Number.NaN)).toBe(0);
+    expect(foodEstimate(Number.POSITIVE_INFINITY)).toBe(0);
+    expect(foodEstimate('420' as unknown as number)).toBe(0);
+  });
+});
+
+describe('sumFoodLogTotals', () => {
+  it('totals every macro across logs', () => {
+    expect(
+      sumFoodLogTotals([
+        { totalCalories: 500, totalProtein: 30, totalCarbs: 40, totalFat: 20 },
+        { totalCalories: 250, totalProtein: 10, totalCarbs: 5, totalFat: 8 },
+      ]),
+    ).toEqual({ calories: 750, protein: 40, carbs: 45, fat: 28 });
+  });
+
+  it('treats a missing macro as no contribution', () => {
+    expect(sumFoodLogTotals([{ totalCalories: 200 }])).toEqual({
+      calories: 200,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+    });
+  });
+
+  it('keeps one unusable synced row from making the day total NaN', () => {
+    const totals = sumFoodLogTotals([
+      { totalCalories: 300 },
+      { totalCalories: Number.NaN, totalProtein: -4 },
+      { totalCalories: 'oops' as unknown as number },
+      { totalCalories: 200 },
+    ]);
+    expect(totals.calories).toBe(500);
+    expect(totals.protein).toBe(0);
+  });
+
+  it('is all zero for no logs', () => {
+    expect(sumFoodLogTotals([])).toEqual({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   });
 });
