@@ -1,8 +1,9 @@
 # Architecture
 
 Ops Dashboard is a pnpm monorepo. The web app is a Next.js 16 App Router project that
-talks to IndexedDB through Dexie. Optional Supabase sync runs in the browser and is
-enabled automatically for an authenticated session, with a device-local off switch.
+talks to IndexedDB through Dexie. Optional Supabase sync runs in the browser, is off
+by default, and starts only once the device-local `syncEnabled` setting is turned on
+and a Supabase session exists.
 
 ## Packages
 
