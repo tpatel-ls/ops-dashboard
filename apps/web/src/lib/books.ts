@@ -5,6 +5,19 @@ import type { Book, BookStatus } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
 
+/**
+ * Number of filled stars for a stored rating.
+ *
+ * `updateBook` only accepts an integer from 1 to 5 (or undefined), but synced
+ * rows reach Dexie through `fromRow`, which casts without validating. An
+ * out-of-range or non-integer rating would otherwise fill a nonsensical number
+ * of stars and, more importantly, misreport the control's pressed state to
+ * assistive technology.
+ */
+export function bookRatingStars(rating: number | undefined): number {
+  return Number.isInteger(rating) && rating! >= 1 && rating! <= 5 ? rating! : 0;
+}
+
 const BOOK_STATUSES = new Set<BookStatus>(['want', 'reading', 'finished', 'abandoned']);
 const MAX_BOOK_TITLE_LENGTH = 500;
 const MAX_BOOK_AUTHOR_LENGTH = 500;
