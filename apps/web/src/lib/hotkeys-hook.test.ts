@@ -42,6 +42,24 @@ describe('useHotkeys', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it('skips an unmodified combo while a text field has focus', () => {
+    // Why every overlay owns its own Escape listener: a component that
+    // autofocuses an input (the command palette) can never be dismissed by the
+    // global `escape` hotkey, because the event target is the field.
+    const handler = vi.fn();
+    renderHook(() => useHotkeys([{ combo: 'escape', handler }]));
+
+    const input = document.createElement('input');
+    document.body.append(input);
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(handler).not.toHaveBeenCalled();
+
+    input.remove();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
   it('does not complete same-key chords from keyboard auto-repeat', () => {
     const handler = vi.fn();
     renderHook(() => useHotkeys([{ combo: 'g then g', handler }]));
