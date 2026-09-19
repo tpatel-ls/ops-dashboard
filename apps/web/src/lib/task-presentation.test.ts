@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { taskDateLabel, taskPlanningTimestamp, taskResultSummary } from './task-presentation';
+import {
+  taskClockTime,
+  taskDateLabel,
+  taskPlanningTimestamp,
+  taskReminderLabel,
+  taskResultSummary,
+} from './task-presentation';
 
 describe('taskPlanningTimestamp', () => {
   it('uses the first valid planning instant', () => {
@@ -50,5 +56,31 @@ describe('taskDateLabel', () => {
     expect(taskDateLabel('2026-07-24 trailing', today, false)).toBe('2026-07-24 trailing');
     expect(taskDateLabel('2026-02-30', today, false)).toBe('2026-02-30');
     expect(taskDateLabel('2026-07-24', 'not-a-day', false)).toBe('Jul 24');
+  });
+});
+
+describe('taskClockTime', () => {
+  it('formats a parseable instant as a time input value', () => {
+    const at = new Date(2026, 8, 19, 14, 5).toISOString();
+    expect(taskClockTime(at)).toBe('14:05');
+  });
+
+  it('returns an empty value instead of throwing on an unreadable instant', () => {
+    expect(taskClockTime(undefined)).toBe('');
+    expect(taskClockTime('')).toBe('');
+    expect(taskClockTime('not-a-date')).toBe('');
+    expect(taskClockTime('2026-02-30')).toBe('');
+  });
+});
+
+describe('taskReminderLabel', () => {
+  it('formats a parseable trigger instant', () => {
+    const at = new Date(2026, 8, 19, 9, 30).toISOString();
+    expect(taskReminderLabel(at)).toBe('Sat 19 Sep 09:30');
+  });
+
+  it('states that the time is unavailable rather than throwing', () => {
+    expect(taskReminderLabel('not-a-date')).toBe('Time unavailable');
+    expect(taskReminderLabel(undefined)).toBe('Time unavailable');
   });
 });

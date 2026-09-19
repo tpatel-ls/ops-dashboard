@@ -26,6 +26,7 @@ import {
   updateTask,
 } from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
+import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
 import { cn } from '@ops-dashboard/ui';
 
 const STATUSES: Task['status'][] = ['backlog', 'todo', 'doing', 'blocked', 'done'];
@@ -277,7 +278,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <Field label="Start">
                 <input
                   type="time"
-                  value={task.startAt ? format(new Date(task.startAt), 'HH:mm') : ''}
+                  value={taskClockTime(task.startAt)}
                   onChange={(e) => {
                     const day = task.scheduledFor ?? todayIso();
                     const iso = e.target.value
@@ -291,7 +292,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <Field label="End">
                 <input
                   type="time"
-                  value={task.endAt ? format(new Date(task.endAt), 'HH:mm') : ''}
+                  value={taskClockTime(task.endAt)}
                   onChange={(e) => {
                     const day = task.scheduledFor ?? todayIso();
                     const iso = e.target.value
@@ -438,9 +439,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   key={r.id}
                   className="border-hairline bg-input flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs"
                 >
-                  <span className="font-mono">
-                    {format(new Date(r.triggerAt), 'EEE d MMM HH:mm')}
-                  </span>
+                  <span className="font-mono">{taskReminderLabel(r.triggerAt)}</span>
                   <button
                     type="button"
                     onClick={async () => {
