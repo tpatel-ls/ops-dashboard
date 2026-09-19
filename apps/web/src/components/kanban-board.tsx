@@ -26,6 +26,7 @@ import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { nextBoardColumn, previousBoardColumn } from '@/lib/board-actions';
 import { taskLane } from '@/lib/org-lanes';
 import { taskDateLabel } from '@/lib/task-presentation';
@@ -269,7 +270,7 @@ function KanbanCard({
   });
   const openEdit = useAppStore((state) => state.openEdit);
   const organization = organizationId ? organizationsMap.get(organizationId) : undefined;
-  const dateValue = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
+  const dateValue = taskDueOrScheduledDay(task);
   const today = format(new Date(), 'yyyy-MM-dd');
   const overdue = Boolean(task.status !== 'done' && dateValue && dateValue < today);
   const dateLabel = dateValue ? taskDateLabel(dateValue, today, task.status === 'done') : null;

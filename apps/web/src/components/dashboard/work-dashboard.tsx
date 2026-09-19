@@ -3,7 +3,7 @@
 import { format, isValid, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Plus } from 'lucide-react';
-import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, localDay, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -213,7 +213,7 @@ function AgendaTaskRow({
   showOrganization: boolean;
   onOpen: () => void;
 }) {
-  const date = task.scheduledFor ?? task.dueAt?.slice(0, 10) ?? task.startAt?.slice(0, 10);
+  const date = localDay(task.scheduledFor) ?? localDay(task.dueAt) ?? localDay(task.startAt);
   const parsedDate = date ? parseISO(date) : null;
   const dateLabel =
     date === today
