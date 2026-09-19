@@ -5,7 +5,13 @@ import { useState } from 'react';
 import { Archive, ChevronDown, ChevronUp, Check, Flame, Trash2 } from 'lucide-react';
 import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Domain, Routine, RoutineCheck } from '@ops-dashboard/core';
-import { archiveRoutine, computeStreak, deleteRoutine, toggleRoutineCheck } from '@/lib/routines';
+import {
+  archiveRoutine,
+  computeStreak,
+  deleteRoutine,
+  fixedRoutineDuration,
+  toggleRoutineCheck,
+} from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { RoutineForm } from '@/components/routine-form';
 
@@ -43,12 +49,12 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
   const streak = computeStreak(routineChecks, today);
 
   // Fixed-kind progress
-  const isFixed = routine.kind === 'fixed' && routine.durationDays;
+  const durationDays = fixedRoutineDuration(routine);
   // `startDate` is validated on local writes but sync casts rows in unchecked,
   // so an unreadable day must not render as "day NaN".
-  const elapsedDays = isFixed ? daysBetween(routine.startDate, today) : null;
+  const elapsedDays = durationDays === undefined ? null : daysBetween(routine.startDate, today);
   const clampedDay =
-    elapsedDays === null ? null : Math.min(Math.max(0, elapsedDays) + 1, routine.durationDays!);
+    elapsedDays === null ? null : Math.min(Math.max(0, elapsedDays) + 1, durationDays!);
 
   const [confirming, setConfirming] = useState(false);
 
@@ -106,7 +112,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
           {/* Kind badge */}
           {clampedDay !== null ? (
             <span className="bg-primary-soft text-primary rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
-              day {clampedDay} / {routine.durationDays}
+              day {clampedDay} / {durationDays}
             </span>
           ) : (
             <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
