@@ -148,7 +148,12 @@ export function CommandPalette() {
         if (e.target === e.currentTarget) dismiss();
       }}
     >
-      <div className="command-surface w-full max-w-2xl overflow-hidden rounded-xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        className="command-surface w-full max-w-2xl overflow-hidden rounded-xl"
+      >
         <Command label="Command palette" shouldFilter={false} className="flex flex-col">
           <div className="border-hairline border-b px-4 py-3">
             <div className="mb-2 flex items-center justify-between gap-3">
