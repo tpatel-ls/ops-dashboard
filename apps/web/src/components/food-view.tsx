@@ -20,7 +20,13 @@ import {
 import { getDb } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
-import { compareFoodLogCreation, deleteFoodLog, updateFoodLog } from '@/lib/food-logs';
+import {
+  compareFoodLogCreation,
+  deleteFoodLog,
+  foodEstimate,
+  sumFoodLogTotals,
+  updateFoodLog,
+} from '@/lib/food-logs';
 import { processBrainDump } from '@/lib/route-items';
 import { addDaysISO, todayISO } from '@/lib/routines';
 import { useVoiceInput } from '@/lib/use-voice-input';
@@ -43,15 +49,7 @@ export function FoodView() {
     return rows.filter((r) => !r.deletedAt).sort(compareFoodLogCreation);
   }, [day]);
 
-  const totals = (dayLogs ?? []).reduce(
-    (acc, log) => ({
-      calories: acc.calories + log.totalCalories,
-      protein: acc.protein + (log.totalProtein ?? 0),
-      carbs: acc.carbs + (log.totalCarbs ?? 0),
-      fat: acc.fat + (log.totalFat ?? 0),
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
-  );
+  const totals = sumFoodLogTotals(dayLogs ?? []);
 
   const isToday = day === today;
 
@@ -285,7 +283,7 @@ function WeekTrend({
 
   const byDay = new Map<string, number>(days.map((d) => [d, 0]));
   for (const log of logs ?? []) {
-    byDay.set(log.date, (byDay.get(log.date) ?? 0) + log.totalCalories);
+    byDay.set(log.date, (byDay.get(log.date) ?? 0) + foodEstimate(log.totalCalories));
   }
   const max = Math.max(1, ...byDay.values());
 
@@ -340,7 +338,7 @@ function WeekTrend({
 }
 
 function MealGroup({ meal, logs }: { meal: MealType; logs: FoodLog[] }) {
-  const kcal = logs.reduce((sum, l) => sum + l.totalCalories, 0);
+  const kcal = sumFoodLogTotals(logs).calories;
   return (
     <section>
       <div className="mb-1.5 flex items-baseline justify-between px-1">
@@ -379,7 +377,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
                   ) : null}
                 </span>
                 <span className="text-subtle-foreground ml-auto shrink-0 font-mono text-[10px] tabular-nums">
-                  {item.calories} kcal
+                  {foodEstimate(item.calories)} kcal
                 </span>
               </li>
             ))}
@@ -387,7 +385,7 @@ function FoodLogRow({ log }: { log: FoodLog }) {
         ) : null}
       </div>
       <span className="bg-primary-soft text-primary shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] tabular-nums">
-        {log.totalCalories} kcal
+        {foodEstimate(log.totalCalories)} kcal
       </span>
       <div className="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
         <select
