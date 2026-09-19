@@ -1,6 +1,7 @@
 import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { calendarInstant } from './calendar-agenda';
 
 export function taskPlanningTimestamp(
   task: Pick<Task, 'startAt' | 'dueAt' | 'scheduledFor'>,
@@ -32,4 +33,23 @@ export function taskDateLabel(date: string, today: string, done: boolean): strin
   if (!done && offset === -1) return 'Yesterday';
 
   return !done && offset < -1 ? `Overdue · ${calendarLabel}` : calendarLabel;
+}
+
+/**
+ * `HH:mm` for a `type="time"` input bound to a task instant.
+ *
+ * Returns '' when the value is missing or does not parse. date-fns `format`
+ * throws `RangeError: Invalid time value` on an Invalid Date, and `startAt` /
+ * `endAt` reach Dexie through sync's `fromRow`, which casts without
+ * validating. Formatting one inline took the whole edit drawer down.
+ */
+export function taskClockTime(value: string | undefined): string {
+  const instant = calendarInstant(value);
+  return instant ? format(instant, 'HH:mm') : '';
+}
+
+/** Reminder trigger label, or a stated fallback when the instant is unreadable. */
+export function taskReminderLabel(value: string | undefined): string {
+  const instant = calendarInstant(value);
+  return instant ? format(instant, 'EEE d MMM HH:mm') : 'Time unavailable';
 }
