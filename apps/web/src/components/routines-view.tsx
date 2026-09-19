@@ -3,15 +3,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Archive, ChevronDown, ChevronUp, Check, Flame, Trash2 } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Domain, Routine, RoutineCheck } from '@ops-dashboard/core';
-import {
-  archiveRoutine,
-  computeStreak,
-  deleteRoutine,
-  todayISO,
-  toggleRoutineCheck,
-} from '@/lib/routines';
+import { archiveRoutine, computeStreak, deleteRoutine, toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { RoutineForm } from '@/components/routine-form';
 
@@ -272,7 +266,7 @@ function ArchivedSection({ routines }: ArchivedSectionProps) {
 /* ─── RoutinesView (main export) ────────────────────────────────── */
 
 export function RoutinesView() {
-  const today = todayISO();
+  const today = todayIso();
 
   const data = useLiveQuery(async () => {
     const db = getDb();

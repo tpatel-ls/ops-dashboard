@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, matchByName } from '@ops-dashboard/core';
+import { getDb, matchByName, todayIso } from '@ops-dashboard/core';
 import type {
   CaptureKind,
   CaptureSource,
@@ -17,7 +17,7 @@ import { createFoodLog, deleteFoodLog } from './food-logs';
 import { createJournalEntry, deleteJournalEntry } from './journal';
 import { createNote, deleteNote } from './notes';
 import { createQuote, deleteQuote } from './quotes';
-import { todayISO, toggleRoutineCheck } from './routines';
+import { toggleRoutineCheck } from './routines';
 import { addTask, addTaskToProject, softDeleteTask } from './tasks';
 import { fetchWithTimeout } from './fetch-timeout';
 import { journalEntrySource } from './journal-source';
@@ -89,7 +89,7 @@ export async function processBrainDump(
         context: {
           projects: projects.map((p) => p.name),
           routines: routines.map((r) => r.name),
-          date: todayISO(),
+          date: todayIso(),
         },
       }),
     });
@@ -222,7 +222,7 @@ async function routeHabit(
   title: string,
   routine: Routine,
 ): Promise<RoutedResult> {
-  const date = todayISO();
+  const date = todayIso();
   const matching = await getDb()
     .routineChecks.where('[routineId+date]')
     .equals([routine.id, date])

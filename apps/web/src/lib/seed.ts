@@ -1,9 +1,9 @@
 'use client';
 
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import { createDomain } from './domains';
 import { createProject } from './projects';
-import { addDaysISO, createRoutine, toggleRoutineCheck, todayISO } from './routines';
+import { addDaysISO, createRoutine, toggleRoutineCheck } from './routines';
 import { createJournalEntry } from './journal';
 import { addTask } from './tasks';
 import { logWork } from './worklogs';
@@ -54,7 +54,7 @@ export async function ensureSeed(): Promise<void> {
 
   // Back-fill checks so streaks and the heatmap have history.
   for (let i = 1; i <= 12; i += 1) {
-    const d = addDaysISO(todayISO(), -i);
+    const d = addDaysISO(todayIso(), -i);
     await toggleRoutineCheck(vitamins.id, d, true);
     if (i % 2 === 0) await toggleRoutineCheck(read.id, d, true);
   }
