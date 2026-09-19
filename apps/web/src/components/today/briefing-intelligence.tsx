@@ -9,6 +9,7 @@ import { relativeTimeLabel } from '@/lib/relative-time';
 import {
   findCaptureRoutingIssues,
   findStaleDomains,
+  staleDomainIdleLabel,
   summarizeBriefing,
   type CaptureRoutingIssue,
   type StaleDomain,
@@ -199,7 +200,7 @@ function StaleDomainRow({ domain }: { domain: StaleDomain }) {
         </div>
       </div>
       <span className="bg-warning/15 text-warning rounded px-2 py-0.5 font-mono text-[10px]">
-        {domain.daysIdle}d
+        {staleDomainIdleLabel(domain.daysIdle)}
       </span>
     </li>
   );

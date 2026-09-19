@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Capture, Domain, Project, Task } from '@ops-dashboard/core';
-import { findCaptureRoutingIssues, findStaleDomains, summarizeBriefing } from './briefing';
+import {
+  findCaptureRoutingIssues,
+  findStaleDomains,
+  staleDomainIdleLabel,
+  summarizeBriefing,
+} from './briefing';
 
 const now = new Date('2026-07-03T14:00:00.000Z');
 
@@ -414,5 +419,43 @@ describe('briefing helpers', () => {
     expect(
       summarizeBriefing({ tasks, today: '2026-07-03', routingIssues: 0, staleDomains: 0 }),
     ).toMatchObject({ todayTotal: 0, overdue: 1 });
+  });
+});
+
+describe('staleDomainIdleLabel', () => {
+  it('renders a finite idle count in days', () => {
+    expect(staleDomainIdleLabel(0)).toBe('0d');
+    expect(staleDomainIdleLabel(42)).toBe('42d');
+  });
+
+  it('names the never-touched case instead of printing Infinity', () => {
+    expect(staleDomainIdleLabel(Number.POSITIVE_INFINITY)).toBe('never');
+  });
+});
+
+describe('findStaleDomains never-touched reporting', () => {
+  it('reports a domain whose only timestamps are in the future as never touched', () => {
+    // A device with a fast clock stamps createdAt/updatedAt ahead of real time.
+    // Those candidates are dropped, leaving the domain with no usable activity.
+    const domains = [
+      { ...meta('skewed', '2026-07-05T12:00:00.000Z'), name: 'Skewed', color: '#444', order: 1 },
+    ] satisfies Domain[];
+
+    const [stale] = findStaleDomains({ domains, projects: [], tasks: [], now });
+
+    expect(stale?.reason).toBe('never-touched');
+    expect(stale?.lastTouchedAt).toBeUndefined();
+    expect(staleDomainIdleLabel(stale!.daysIdle)).toBe('never');
+  });
+
+  it('labels a domain with real past activity as stale', () => {
+    const domains = [
+      { ...meta('body', '2026-06-01T12:00:00.000Z'), name: 'Body', color: '#111', order: 1 },
+    ] satisfies Domain[];
+
+    const [stale] = findStaleDomains({ domains, projects: [], tasks: [], now });
+
+    expect(stale?.reason).toBe('stale');
+    expect(staleDomainIdleLabel(stale!.daysIdle)).toBe('32d');
   });
 });
