@@ -7,6 +7,43 @@ import { todayISO } from './routines';
 
 export { computeFoodTotals };
 
+/**
+ * A stored nutrition number, or 0 when it cannot contribute to a total.
+ *
+ * `computeFoodTotals` only ever stores a rounded, non-negative, finite total,
+ * and the write path recomputes totals from validated items rather than
+ * trusting the caller. Synced rows skip all of that: `fromRow` casts without
+ * validating, so a stored total or item estimate is not guaranteed to be a
+ * usable number. Adding one raw makes the running sum NaN, which then renders
+ * as "NaN kcal" and, in the weekly chart, makes `Math.max` NaN so every bar
+ * height collapses.
+ */
+export function foodEstimate(value: number | undefined): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+export interface FoodLogTotals {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+/** Totals across a set of food logs, ignoring unusable stored values. */
+export function sumFoodLogTotals(
+  logs: Array<Pick<FoodLog, 'totalCalories' | 'totalProtein' | 'totalCarbs' | 'totalFat'>>,
+): FoodLogTotals {
+  return logs.reduce<FoodLogTotals>(
+    (totals, log) => ({
+      calories: totals.calories + foodEstimate(log.totalCalories),
+      protein: totals.protein + foodEstimate(log.totalProtein),
+      carbs: totals.carbs + foodEstimate(log.totalCarbs),
+      fat: totals.fat + foodEstimate(log.totalFat),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  );
+}
+
 export function compareFoodLogCreation(
   left: Pick<FoodLog, 'id' | 'createdAt'>,
   right: Pick<FoodLog, 'id' | 'createdAt'>,
