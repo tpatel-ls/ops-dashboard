@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, todayIso } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import {
@@ -13,15 +13,16 @@ import {
 } from '@/lib/focus-timer';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { cn } from '@ops-dashboard/ui';
+import { useLiveSettings } from '@/lib/use-settings';
 
 type Phase = 'focus' | 'break';
 
 export function FocusMode() {
   const open = useAppStore((s) => s.focusOpen);
   const close = useAppStore((s) => s.closeFocus);
-  const settings = useLiveQuery(async () => getDb().settings.get('singleton'));
-  const focusMin = settings?.pomodoroFocusMinutes ?? DEFAULT_SETTINGS.pomodoroFocusMinutes;
-  const breakMin = settings?.pomodoroBreakMinutes ?? DEFAULT_SETTINGS.pomodoroBreakMinutes;
+  const settings = useLiveSettings();
+  const focusMin = settings.pomodoroFocusMinutes;
+  const breakMin = settings.pomodoroBreakMinutes;
 
   const candidates = useLiveQuery(async () => {
     const today = todayIso();
