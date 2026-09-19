@@ -4,17 +4,17 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { addMonths, format, isSameMonth } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, isoDay, monthGrid } from '@ops-dashboard/core';
+import { getDb, isoDay, monthGrid } from '@ops-dashboard/core';
 import type { Project } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
+import { useLiveSettings } from '@/lib/use-settings';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export function MonthGrid() {
-  const settings = useLiveQuery(async () => getDb().settings.get('singleton'));
-  const weekStartsOn = (settings?.weekStartsOn ?? DEFAULT_SETTINGS.weekStartsOn) as 0 | 1;
+  const weekStartsOn = useLiveSettings().weekStartsOn;
   const [anchor, setAnchor] = useState<Date>(() => new Date());
   const days = monthGrid(anchor, weekStartsOn);
   const labels = weekStartsOn === 1 ? WEEKDAY_LABELS : ['Sun', ...WEEKDAY_LABELS.slice(0, 6)];

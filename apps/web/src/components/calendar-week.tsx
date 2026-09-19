@@ -4,11 +4,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { addDays, format, startOfWeek } from 'date-fns';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
-import { DEFAULT_SETTINGS, getDb, isoDay, weekDays } from '@ops-dashboard/core';
+import { getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Project, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
+import { useLiveSettings } from '@/lib/use-settings';
 import {
   calendarDateOf,
   calendarInstant,
@@ -21,8 +22,7 @@ const START_HOUR = 6;
 const END_HOUR = 23;
 
 export function CalendarWeek() {
-  const settings = useLiveQuery(async () => getDb().settings.get('singleton'));
-  const weekStartsOn = (settings?.weekStartsOn ?? DEFAULT_SETTINGS.weekStartsOn) as 0 | 1;
+  const weekStartsOn = useLiveSettings().weekStartsOn;
   const [anchor, setAnchor] = useState<Date>(() => new Date());
   const days = weekDays(anchor, weekStartsOn);
   const weekStart = startOfWeek(anchor, { weekStartsOn });
