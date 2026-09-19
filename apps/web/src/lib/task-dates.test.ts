@@ -7,6 +7,7 @@ import {
   taskCommitmentDay,
   taskDueOrScheduledDay,
   taskIsOverdue,
+  taskScheduledOn,
   taskNeedsAttentionBy,
 } from './task-dates';
 
@@ -249,5 +250,31 @@ describe('taskDueOrScheduledDay', () => {
   it('has no day for values that do not parse', () => {
     expect(taskDueOrScheduledDay({ dueAt: 'not-a-date' })).toBeUndefined();
     expect(taskDueOrScheduledDay({ scheduledFor: '2026-02-30' })).toBeUndefined();
+  });
+});
+
+describe('taskScheduledOn', () => {
+  it('matches a task scheduled on that day', () => {
+    expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, '2026-09-19')).toBe(true);
+    expect(taskScheduledOn({ scheduledFor: '2026-09-20' }, '2026-09-19')).toBe(false);
+    expect(taskScheduledOn({}, '2026-09-19')).toBe(false);
+  });
+
+  it('places a task whose scheduledFor is a full timestamp', () => {
+    // A raw `=== day` comparison never matched these, so the task did not show
+    // up on any day of the month grid or week board at all.
+    const scheduledFor = new Date(2026, 8, 19, 9, 0).toISOString();
+    expect(scheduledFor === '2026-09-19').toBe(false);
+    expect(taskScheduledOn({ scheduledFor }, '2026-09-19')).toBe(true);
+  });
+
+  it('ignores a scheduledFor that is not a real calendar day', () => {
+    expect(taskScheduledOn({ scheduledFor: '2026-02-30' }, '2026-02-30')).toBe(false);
+    expect(taskScheduledOn({ scheduledFor: 'not-a-day' }, '2026-09-19')).toBe(false);
+  });
+
+  it('never matches when the requested day is not a real calendar day', () => {
+    expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, '2026-02-30')).toBe(false);
+    expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, 'today')).toBe(false);
   });
 });

@@ -6,6 +6,7 @@ import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
 import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { taskScheduledOn } from '@/lib/task-dates';
 import {
   accumulatedFocusMinutes,
   elapsedSessionMinutes,
@@ -33,7 +34,7 @@ export function FocusMode() {
           !t.deletedAt &&
           t.status !== 'done' &&
           t.status !== 'archived' &&
-          (t.scheduledFor === today || t.status === 'doing'),
+          (taskScheduledOn(t, today) || t.status === 'doing'),
       )
       .sort((a, b) => b.priority - a.priority);
   });
