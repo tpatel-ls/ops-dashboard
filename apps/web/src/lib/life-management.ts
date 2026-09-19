@@ -156,7 +156,7 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   });
   const dueToday = openTasks.filter(
     (task) =>
-      task.scheduledFor === today ||
+      datePart(task.scheduledFor) === today ||
       datePart(task.dueAt) === today ||
       datePart(task.startAt) === today,
   );

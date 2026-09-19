@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getDb, isoDay, monthGrid } from '@ops-dashboard/core';
 import type { Project } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { taskScheduledOn } from '@/lib/task-dates';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
@@ -34,7 +35,7 @@ export function MonthGrid() {
   const today = isoDay(new Date());
   const [selected, setSelected] = useState<string | null>(null);
   const selectedDay = selected ?? today;
-  const selectedTasks = visibleTasks.filter((t) => t.scheduledFor === selectedDay);
+  const selectedTasks = visibleTasks.filter((t) => taskScheduledOn(t, selectedDay));
   const openEdit = useAppStore((s) => s.openEdit);
 
   return (
@@ -86,7 +87,7 @@ export function MonthGrid() {
           ))}
           {days.map((day) => {
             const iso = isoDay(day);
-            const dayTasks = visibleTasks.filter((t) => t.scheduledFor === iso);
+            const dayTasks = visibleTasks.filter((t) => taskScheduledOn(t, iso));
             const inMonth = isSameMonth(day, anchor);
             const isToday = iso === today;
             const isSelected = iso === selectedDay;

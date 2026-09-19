@@ -16,6 +16,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
+import { taskScheduledOn } from '@/lib/task-dates';
 import { useAppStore } from '@/lib/app-store';
 import { calendarInstant } from '@/lib/calendar-agenda';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
@@ -105,7 +106,7 @@ export function WeekBoard() {
         <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:min-h-[420px] sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {days.map((day) => {
             const dayIso = isoDay(day);
-            const dayTasks = visibleTasks.filter((t) => t.scheduledFor === dayIso);
+            const dayTasks = visibleTasks.filter((t) => taskScheduledOn(t, dayIso));
             return (
               <DayColumn
                 key={dayIso}

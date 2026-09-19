@@ -39,6 +39,20 @@ export function taskNeedsAttentionBy(task: TaskDates, day: string): boolean {
   return scheduled === day || Boolean(due && due <= day);
 }
 
+/**
+ * Whether a task is scheduled on one local calendar day.
+ *
+ * `scheduledFor` is meant to be a date-only local day, and `updateTask`
+ * enforces that, but imported and synced rows can still carry a full
+ * timestamp: `fromRow` casts without validating, which is the same reason
+ * `tasksToMarkdown` groups through `localDay`. Comparing the stored string to
+ * the day directly made such a task invisible, not misplaced, because no cell
+ * ever matched it.
+ */
+export function taskScheduledOn(task: Pick<Task, 'scheduledFor'>, day: string): boolean {
+  return localDay(day) === day && localDay(task.scheduledFor) === day;
+}
+
 export function taskIsOverdue(task: TaskDates, day: string): boolean {
   if (localDay(day) !== day) return false;
   const scheduled = localDay(task.scheduledFor);
