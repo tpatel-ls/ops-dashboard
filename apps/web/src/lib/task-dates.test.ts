@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
 import {
   summarizeTodayTasks,
   summarizeOpenTasks,
   compareTasksByCommitment,
   taskCommitmentDay,
+  taskDueOrScheduledDay,
   taskIsOverdue,
   taskNeedsAttentionBy,
 } from './task-dates';
@@ -203,5 +204,50 @@ describe('summarizeTodayTasks', () => {
     );
 
     expect(result).toEqual({ total: 1, done: 1, overdue: 0 });
+  });
+});
+
+describe('taskDueOrScheduledDay', () => {
+  const originalTimeZone = process.env.TZ;
+  afterEach(() => {
+    process.env.TZ = originalTimeZone;
+  });
+
+  function inTimeZone<T>(timeZone: string, run: () => T): T {
+    process.env.TZ = timeZone;
+    return run();
+  }
+
+  it('prefers the due day over the scheduled day', () => {
+    expect(
+      taskDueOrScheduledDay({ dueAt: '2026-09-19T12:00:00.000Z', scheduledFor: '2026-09-25' }),
+    ).toBe('2026-09-19');
+  });
+
+  it('falls back to the scheduled day', () => {
+    expect(taskDueOrScheduledDay({ scheduledFor: '2026-09-25' })).toBe('2026-09-25');
+    expect(taskDueOrScheduledDay({})).toBeUndefined();
+  });
+
+  it('reports the local day west of UTC, not the UTC day', () => {
+    // 20:00 on Sep 19 in Chicago is already Sep 20 in UTC. Slicing the stored
+    // instant labelled this task "Tomorrow" and let it skip the overdue check.
+    const dueAt = '2026-09-20T01:00:00.000Z';
+    expect(dueAt.slice(0, 10)).toBe('2026-09-20');
+    expect(inTimeZone('America/Chicago', () => taskDueOrScheduledDay({ dueAt }))).toBe(
+      '2026-09-19',
+    );
+  });
+
+  it('reports the local day east of UTC, not the UTC day', () => {
+    // 08:00 on Sep 20 in Tokyo is still Sep 19 in UTC.
+    const dueAt = '2026-09-19T23:00:00.000Z';
+    expect(dueAt.slice(0, 10)).toBe('2026-09-19');
+    expect(inTimeZone('Asia/Tokyo', () => taskDueOrScheduledDay({ dueAt }))).toBe('2026-09-20');
+  });
+
+  it('has no day for values that do not parse', () => {
+    expect(taskDueOrScheduledDay({ dueAt: 'not-a-date' })).toBeUndefined();
+    expect(taskDueOrScheduledDay({ scheduledFor: '2026-02-30' })).toBeUndefined();
   });
 });
