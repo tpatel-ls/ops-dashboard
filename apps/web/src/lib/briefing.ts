@@ -108,11 +108,25 @@ export function findStaleDomains(input: {
         color: domain.color,
         daysIdle,
         lastTouchedAt,
-        reason: daysIdle > staleAfterDays ? ('stale' as const) : ('never-touched' as const),
+        reason: 'stale' as const,
       };
     })
     .filter((item) => item.daysIdle > staleAfterDays)
     .sort((a, b) => b.daysIdle - a.daysIdle || a.domainName.localeCompare(b.domainName));
+}
+
+/**
+ * Idle badge text for a stale domain.
+ *
+ * `daysIdle` is `Number.POSITIVE_INFINITY` when no usable timestamp was found
+ * for the domain, which is reachable: the candidate list drops timestamps that
+ * do not parse and timestamps in the future, so a domain created on a device
+ * with a fast clock has none of its own dates left, and a domain with no
+ * projects or tasks yet has nothing else to fall back on. Rendering the number
+ * directly printed "Infinityd" in the badge.
+ */
+export function staleDomainIdleLabel(daysIdle: number): string {
+  return Number.isFinite(daysIdle) ? `${daysIdle}d` : 'never';
 }
 
 export function findCaptureRoutingIssues(
