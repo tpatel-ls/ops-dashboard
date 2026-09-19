@@ -3,11 +3,11 @@
 import { format, isValid, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Plus } from 'lucide-react';
-import { getDb, localDay, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
-import { buildWorkDashboard } from '@/lib/work-dashboard';
+import { buildWorkDashboard, workTaskDay } from '@/lib/work-dashboard';
 import { useOrgStore } from '@/lib/org-store';
 import { setTaskStatus } from '@/lib/tasks';
 import { ViewShell } from '@/components/view-shell';
@@ -213,7 +213,7 @@ function AgendaTaskRow({
   showOrganization: boolean;
   onOpen: () => void;
 }) {
-  const date = localDay(task.scheduledFor) ?? localDay(task.dueAt) ?? localDay(task.startAt);
+  const date = workTaskDay(task);
   const parsedDate = date ? parseISO(date) : null;
   const dateLabel =
     date === today
