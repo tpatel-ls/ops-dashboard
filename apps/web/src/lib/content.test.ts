@@ -22,7 +22,7 @@ vi.mock('./records', async () => {
   };
 });
 
-import { compareContentOrder, createContent, updateContent } from './content';
+import { compareContentOrder, contentPublishLabel, createContent, updateContent } from './content';
 
 describe('content links', () => {
   beforeEach(() => mocks.putRecord.mockClear());
@@ -83,5 +83,35 @@ describe('updateContent', () => {
     await expect(updateContent('content-1', { publishDate: '2026-09-12' })).resolves.toMatchObject({
       publishDate: '2026-09-12',
     });
+  });
+});
+
+describe('contentPublishLabel', () => {
+  const short = (date: Date) =>
+    date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+  it('labels a real calendar day in the local month and day', () => {
+    expect(contentPublishLabel('2026-09-19')).toBe(short(new Date(2026, 8, 19)));
+  });
+
+  it('does not shift the day backwards in timezones west of UTC', () => {
+    // `new Date('2026-01-01')` is midnight UTC, which is Dec 31 locally in the
+    // Americas. The label must stay on the stored calendar day.
+    expect(contentPublishLabel('2026-01-01')).toBe(short(new Date(2026, 0, 1)));
+  });
+
+  it('has no label for a value the write path would have rejected', () => {
+    expect(contentPublishLabel(undefined)).toBeUndefined();
+    expect(contentPublishLabel('')).toBeUndefined();
+    // A full timestamp: concatenating 'T00:00:00' onto this rendered "Invalid Date".
+    expect(contentPublishLabel('2026-09-19T10:00:00.000Z')).toBeUndefined();
+    expect(contentPublishLabel('2026-02-30')).toBeUndefined();
+    expect(contentPublishLabel('not-a-day')).toBeUndefined();
+  });
+
+  it('never returns the literal Invalid Date string', () => {
+    for (const value of ['2026-09-19T10:00:00.000Z', '2026-02-30', 'not-a-day']) {
+      expect(contentPublishLabel(value)).not.toBe('Invalid Date');
+    }
   });
 });
