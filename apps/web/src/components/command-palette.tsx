@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import {
   Calendar,
   CalendarDays,
@@ -73,6 +73,22 @@ export function CommandPalette() {
     setQuery('');
     close();
   }
+
+  // The palette autofocuses its search input, and the global `escape` hotkey is
+  // deliberately skipped while a text field has focus, so nothing was left to
+  // dismiss the palette from the keyboard. Every other overlay in the app owns
+  // its own Escape listener for the same reason.
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setQuery('');
+      close();
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [close, open]);
 
   const lanes: { ctx: OrgContext; label: string; color: string }[] = [
     { ctx: 'all', label: 'All work', color: 'var(--primary)' },
