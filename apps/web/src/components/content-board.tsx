@@ -15,7 +15,13 @@ import {
 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Content, ContentType, ContentStatus, Domain } from '@ops-dashboard/core';
-import { compareContentOrder, createContent, updateContent, deleteContent } from '@/lib/content';
+import {
+  compareContentOrder,
+  contentPublishLabel,
+  createContent,
+  updateContent,
+  deleteContent,
+} from '@/lib/content';
 import { cn } from '@ops-dashboard/ui';
 
 // ── constants ────────────────────────────────────────────────────────────────
@@ -359,6 +365,8 @@ interface CardProps {
 }
 
 function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
+  const publishLabel = contentPublishLabel(item.publishDate);
+
   return (
     <div className="flex flex-col">
       <div
@@ -402,17 +410,10 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
           {domain && <DomainChip domain={domain} />}
         </div>
 
-        {(item.channel || item.publishDate) && (
+        {(item.channel || publishLabel) && (
           <div className="text-subtle-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px]">
             {item.channel && <span>{item.channel}</span>}
-            {item.publishDate && (
-              <span>
-                {new Date(item.publishDate + 'T00:00:00').toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-            )}
+            {publishLabel && <span>{publishLabel}</span>}
           </div>
         )}
       </div>

@@ -30,6 +30,24 @@ export function compareContentOrder(
   return titleOrder !== 0 ? titleOrder : left.id.localeCompare(right.id);
 }
 
+/**
+ * Short publish-day label for a content card, or undefined when unreadable.
+ *
+ * The write path rejects a `publishDate` that is not a real local calendar day
+ * (`localDay(value) !== value`), but synced rows reach Dexie through
+ * `fromRow`, which casts without validating. The card built its date by
+ * concatenating `+ 'T00:00:00'` onto the stored value, so a full timestamp or
+ * any other non-day string produced an Invalid Date and the chip rendered the
+ * literal text "Invalid Date".
+ */
+export function contentPublishLabel(value: string | undefined): string | undefined {
+  if (!value || localDay(value) !== value) return undefined;
+  return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 function normalizeContentUrl(value: string | undefined): string | undefined {
   const candidate = value?.trim();
   if (!candidate) return undefined;
