@@ -17,7 +17,7 @@ vi.mock('./records', () => ({
   softDeleteRecord: vi.fn(),
 }));
 
-import { compareBookRecency, updateBook } from './books';
+import { bookRatingStars, compareBookRecency, updateBook } from './books';
 
 describe('compareBookRecency', () => {
   it('orders books by creation instant and places malformed metadata last', () => {
@@ -60,5 +60,27 @@ describe('updateBook', () => {
     expect(mocks.patchRecord).toHaveBeenCalledWith('books', 'book-1', {
       finishedAt: '2026-08-21T12:00:00.000Z',
     });
+  });
+});
+
+describe('bookRatingStars', () => {
+  it('keeps a rating the write path would accept', () => {
+    for (const rating of [1, 2, 3, 4, 5]) {
+      expect(bookRatingStars(rating)).toBe(rating);
+    }
+  });
+
+  it('treats an unset rating as no stars', () => {
+    expect(bookRatingStars(undefined)).toBe(0);
+    expect(bookRatingStars(0)).toBe(0);
+  });
+
+  it('drops a synced rating updateBook would have rejected', () => {
+    expect(bookRatingStars(6)).toBe(0);
+    expect(bookRatingStars(99)).toBe(0);
+    expect(bookRatingStars(-2)).toBe(0);
+    expect(bookRatingStars(3.5)).toBe(0);
+    expect(bookRatingStars(Number.NaN)).toBe(0);
+    expect(bookRatingStars('4' as unknown as number)).toBe(0);
   });
 });
