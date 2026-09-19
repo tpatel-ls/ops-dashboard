@@ -24,7 +24,15 @@ export interface WorkDashboardModel {
   };
 }
 
-function taskDate(task: Task): string | undefined {
+/**
+ * The day a task lands on in this dashboard: the earliest of its scheduled,
+ * due, and start days.
+ *
+ * Exported because the agenda row must label a task with the same day that
+ * put it in its section. Deriving the label separately made the two disagree
+ * whenever a task's earliest day was not its first populated field.
+ */
+export function workTaskDay(task: Pick<Task, 'scheduledFor' | 'dueAt' | 'startAt'>) {
   const dates = [task.scheduledFor, task.dueAt, task.startAt]
     .map((value) => localDay(value))
     .filter((value): value is string => Boolean(value));
@@ -60,12 +68,12 @@ export function buildWorkDashboard(
   const openTasks = visibleTasks.filter((task) => task.status !== 'done');
   const sortedOpenTasks = [...openTasks].sort(compareTasks);
   const overdue = sortedOpenTasks.filter((task) => {
-    const date = taskDate(task);
+    const date = workTaskDay(task);
     return Boolean(date && date < today);
   });
-  const dueToday = sortedOpenTasks.filter((task) => taskDate(task) === today);
+  const dueToday = sortedOpenTasks.filter((task) => workTaskDay(task) === today);
   const upcoming = sortedOpenTasks.filter((task) => {
-    const date = taskDate(task);
+    const date = workTaskDay(task);
     return Boolean(date && date > today);
   });
 
