@@ -7,6 +7,27 @@ import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 const MAX_WORK_LOG_MINUTES = 24 * 60;
 const MAX_WORK_LOG_NOTE_LENGTH = 4_000;
 
+/**
+ * Minutes one log contributes to a total.
+ *
+ * `logWork` rejects anything outside this range, but synced rows reach Dexie
+ * through `fromRow`, which casts without validating, so a stored `minutes` is
+ * not guaranteed to be a number at all. Summing one raw turns the running
+ * total into NaN and every hours figure derived from it renders "NaN". Skip
+ * the unusable value instead, which is how `workLogActivityContribution`
+ * already treats the same field.
+ */
+export function workLogMinutes(minutes: number): number {
+  return Number.isSafeInteger(minutes) && minutes > 0 && minutes <= MAX_WORK_LOG_MINUTES
+    ? minutes
+    : 0;
+}
+
+/** Hours logged across a set of work logs, ignoring unusable entries. */
+export function workLoggedHours(logs: Array<Pick<WorkLog, 'minutes'>>): number {
+  return logs.reduce((total, log) => total + workLogMinutes(log.minutes), 0) / 60;
+}
+
 /** Log time against a project and stamp the project's lastWorkedAt (drives slipping). */
 export async function logWork(
   projectId: string,
