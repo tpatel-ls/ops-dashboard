@@ -15,7 +15,7 @@ import type {
   Task,
 } from '@ops-dashboard/core';
 import { updateProject } from '@/lib/projects';
-import { logWork } from '@/lib/worklogs';
+import { logWork, workLoggedHours } from '@/lib/worklogs';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
 import { useActiveOrgs } from '@/components/org-switcher';
 import { useAppStore } from '@/lib/app-store';
@@ -544,10 +544,8 @@ function LogWorkSection({ project }: { project: Project }) {
 
   const totalHours = useLiveQuery(async () => {
     const all = await getDb().workLogs.toArray();
-    const sum = all
-      .filter((w) => !w.deletedAt && w.projectId === project.id)
-      .reduce((acc, w) => acc + w.minutes, 0);
-    return (sum / 60).toFixed(1);
+    const logs = all.filter((w) => !w.deletedAt && w.projectId === project.id);
+    return workLoggedHours(logs).toFixed(1);
   }, [project.id]);
 
   async function handleLog() {

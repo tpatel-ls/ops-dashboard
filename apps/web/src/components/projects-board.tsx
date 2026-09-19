@@ -28,6 +28,7 @@ import type {
 } from '@ops-dashboard/core';
 import { useOrgStore } from '@/lib/org-store';
 import { createProject, projectTaskProgress, type ProjectTaskProgress } from '@/lib/projects';
+import { workLoggedHours } from '@/lib/worklogs';
 import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '@/lib/work-logger';
 import { useAppStore } from '@/lib/app-store';
 import { ProjectDetail } from '@/components/project-detail';
@@ -553,9 +554,7 @@ export function ProjectsBoard() {
       domain: project.domainId ? domainMap.get(project.domainId) : undefined,
       organization: project.orgId ? organizationMap.get(project.orgId) : undefined,
       taskProgress: projectTaskProgress(tasks, project.id),
-      hoursLogged:
-        workLogs.filter((w) => w.projectId === project.id).reduce((acc, w) => acc + w.minutes, 0) /
-        60,
+      hoursLogged: workLoggedHours(workLogs.filter((w) => w.projectId === project.id)),
     }));
 
     return { cardData, domains, organizations };

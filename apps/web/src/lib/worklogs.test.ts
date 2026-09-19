@@ -38,7 +38,7 @@ vi.mock('./records', () => ({
   softDeleteRecord: mocks.softDeleteRecord,
 }));
 
-import { deleteWorkLog, logWork } from './worklogs';
+import { deleteWorkLog, logWork, workLoggedHours, workLogMinutes } from './worklogs';
 
 describe('logWork', () => {
   beforeEach(() => {
@@ -237,5 +237,42 @@ describe('deleteWorkLog', () => {
     expect(mocks.patchRecord).toHaveBeenCalledWith('projects', 'project-1', {
       lastWorkedAt: '2026-08-01T12:00:00.000Z',
     });
+  });
+});
+
+describe('workLogMinutes', () => {
+  it('keeps minutes the write path would accept', () => {
+    expect(workLogMinutes(30)).toBe(30);
+    expect(workLogMinutes(24 * 60)).toBe(24 * 60);
+  });
+
+  it('drops values logWork would have rejected', () => {
+    expect(workLogMinutes(0)).toBe(0);
+    expect(workLogMinutes(-15)).toBe(0);
+    expect(workLogMinutes(24 * 60 + 1)).toBe(0);
+    expect(workLogMinutes(12.5)).toBe(0);
+    expect(workLogMinutes(Number.NaN)).toBe(0);
+    expect(workLogMinutes(undefined as unknown as number)).toBe(0);
+  });
+});
+
+describe('workLoggedHours', () => {
+  it('totals valid logs in hours', () => {
+    expect(workLoggedHours([{ minutes: 30 }, { minutes: 90 }])).toBe(2);
+  });
+
+  it('is zero for no logs', () => {
+    expect(workLoggedHours([])).toBe(0);
+  });
+
+  it('keeps one unusable synced row from turning the total into NaN', () => {
+    const total = workLoggedHours([
+      { minutes: 60 },
+      { minutes: Number.NaN },
+      { minutes: 'oops' as unknown as number },
+      { minutes: 60 },
+    ]);
+    expect(total).toBe(2);
+    expect(Number.isNaN(total)).toBe(false);
   });
 });
