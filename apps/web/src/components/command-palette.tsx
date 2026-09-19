@@ -28,6 +28,7 @@ import {
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useInstallPrompt } from '@/lib/use-install-prompt';
 import { useOrgStore } from '@/lib/org-store';
 import { taskDateLabel } from '@/lib/task-presentation';
@@ -228,7 +229,7 @@ export function CommandPalette() {
                 className="text-subtle-foreground mt-2 text-[10px] uppercase"
               >
                 {results.map((t) => {
-                  const dateValue = t.dueAt?.slice(0, 10) ?? t.scheduledFor;
+                  const dateValue = taskDueOrScheduledDay(t);
                   const dateLabel = dateValue
                     ? taskDateLabel(dateValue, today, t.status === 'done')
                     : null;

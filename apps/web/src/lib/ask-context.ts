@@ -1,4 +1,5 @@
 import type { Domain, Organization, Project, Task } from '@ops-dashboard/core';
+import { localDay } from '@ops-dashboard/core';
 
 const MAX_CONTEXT = 50_000;
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
@@ -78,8 +79,10 @@ export function buildWorkContext({
           ? domainMap.get(project.domainId)
           : undefined;
       const parts = [`[${task.status.toUpperCase()}]`, contextText(task.title)];
-      if (task.dueAt) parts.push(`due:${task.dueAt.slice(0, 10)}`);
-      if (task.scheduledFor) parts.push(`scheduled:${task.scheduledFor}`);
+      const dueDay = localDay(task.dueAt);
+      const scheduledDay = localDay(task.scheduledFor);
+      if (dueDay) parts.push(`due:${dueDay}`);
+      if (scheduledDay) parts.push(`scheduled:${scheduledDay}`);
       if (task.priority > 0) parts.push(`priority:${task.priority}`);
       if (organization) parts.push(`organization:${contextText(organization.name)}`);
       if (project) parts.push(`project:${contextText(project.name)}`);

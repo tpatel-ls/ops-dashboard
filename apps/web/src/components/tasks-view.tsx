@@ -17,6 +17,7 @@ import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useHotkeys } from '@/lib/hotkeys';
 import { taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
@@ -49,7 +50,7 @@ function TaskRow({
 }: TaskRowProps) {
   const done = task.status === 'done';
   const openEdit = useAppStore((state) => state.openEdit);
-  const dateValue = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
+  const dateValue = taskDueOrScheduledDay(task);
   const today = format(new Date(), 'yyyy-MM-dd');
   const overdue = Boolean(!done && dateValue && dateValue < today);
   const dueToday = Boolean(!done && dateValue === today);
@@ -315,7 +316,7 @@ export function TasksView() {
   const count = filteredTasks?.length ?? 0;
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
-      const taskDate = task.dueAt?.slice(0, 10) ?? task.scheduledFor;
+      const taskDate = taskDueOrScheduledDay(task);
       return (
         task.status !== 'done' && Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'))
       );

@@ -12,6 +12,26 @@ export function taskCommitmentDay(task: TaskDates): string | undefined {
   return scheduled < due ? scheduled : due;
 }
 
+/**
+ * Local calendar day a task card labels and colours by: its due day when it has
+ * one, otherwise its scheduled day.
+ *
+ * The board, list, and palette rows each derived this as
+ * `task.dueAt?.slice(0, 10) ?? task.scheduledFor`. `dueAt` is stored as a UTC
+ * instant (`new Date(...).toISOString()`), so the first ten characters are its
+ * UTC calendar day, not the user's. West of UTC an evening due time belongs to
+ * the next UTC day, so a task due tonight was labelled "Tomorrow" and escaped
+ * the overdue check for a day; east of UTC an early morning due time went the
+ * other way.
+ *
+ * This deliberately keeps the existing due-before-scheduled precedence rather
+ * than reusing `taskCommitmentDay`, which answers a different question (the
+ * earliest day the task needs attention).
+ */
+export function taskDueOrScheduledDay(task: TaskDates): string | undefined {
+  return localDay(task.dueAt) ?? localDay(task.scheduledFor);
+}
+
 export function taskNeedsAttentionBy(task: TaskDates, day: string): boolean {
   if (localDay(day) !== day) return false;
   const scheduled = localDay(task.scheduledFor);
