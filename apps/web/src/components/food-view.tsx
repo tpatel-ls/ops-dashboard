@@ -17,7 +17,7 @@ import {
   Utensils,
   Wheat,
 } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import {
@@ -28,7 +28,7 @@ import {
   updateFoodLog,
 } from '@/lib/food-logs';
 import { processBrainDump } from '@/lib/route-items';
-import { addDaysISO, todayISO } from '@/lib/routines';
+import { addDaysISO } from '@/lib/routines';
 import { useVoiceInput } from '@/lib/use-voice-input';
 import { ViewShell } from '@/components/view-shell';
 
@@ -41,8 +41,8 @@ const MEAL_LABEL: Record<MealType, string> = {
 };
 
 export function FoodView() {
-  const [day, setDay] = useState<string>(() => todayISO());
-  const today = todayISO();
+  const [day, setDay] = useState<string>(() => todayIso());
+  const today = todayIso();
 
   const dayLogs = useLiveQuery(async () => {
     const rows = await getDb().foodLogs.where('date').equals(day).toArray();

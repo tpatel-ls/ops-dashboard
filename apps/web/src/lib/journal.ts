@@ -1,10 +1,9 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
-import { localDay } from '@ops-dashboard/core';
+import { localDay, todayIso } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
-import { todayISO } from './routines';
 import { normalizeStringList } from './string-list';
 
 const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', 'text', 'upload']);
@@ -108,7 +107,7 @@ export function createJournalEntry(input: {
   source?: JournalEntry['source'];
 }): Promise<JournalEntry> {
   const fields = normalizeJournalPatch({
-    date: input.date ?? todayISO(),
+    date: input.date ?? todayIso(),
     title: input.title,
     body: input.body,
     mediaUrls: input.mediaUrls ?? [],

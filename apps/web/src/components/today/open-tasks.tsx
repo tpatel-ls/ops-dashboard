@@ -4,10 +4,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, ChevronDown, ChevronRight, Star } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useState } from 'react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Priority } from '@ops-dashboard/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
-import { todayISO } from '@/lib/routines';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
 import {
@@ -33,7 +32,7 @@ const PRIORITY_LABEL: Record<Priority, string> = {
 
 export function OpenTasks() {
   const [collapsed, setCollapsed] = useState(false);
-  const today = todayISO();
+  const today = todayIso();
 
   const { tasks, projects, domains } = useLiveQuery(async () => {
     const db = getDb();
