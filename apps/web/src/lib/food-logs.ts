@@ -1,9 +1,8 @@
 'use client';
 
-import { computeFoodTotals, localDay } from '@ops-dashboard/core';
+import { computeFoodTotals, localDay, todayIso } from '@ops-dashboard/core';
 import type { CaptureSource, FoodItem, FoodLog, MealType } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
-import { todayISO } from './routines';
 
 export { computeFoodTotals };
 
@@ -166,7 +165,7 @@ export function createFoodLog(input: CreateFoodLogInput): Promise<FoodLog> {
     description: input.description,
     items: input.items,
     mealType: input.mealType ?? 'snack',
-    date: input.date ?? todayISO(),
+    date: input.date ?? todayIso(),
     source: input.source,
   });
 

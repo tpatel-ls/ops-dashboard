@@ -2,11 +2,11 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } from 'lucide-react';
-import { getDb, isoDay } from '@ops-dashboard/core';
+import { getDb, isoDay, todayIso } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { activityTimestampWithin, loadActivity } from '@/lib/activity';
-import { computeStreak, todayISO } from '@/lib/routines';
+import { computeStreak } from '@/lib/routines';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
 import { shareOrCopy } from '@/lib/share';
 import { cn } from '@ops-dashboard/ui';
@@ -71,7 +71,7 @@ export default function HabitsPage() {
 
   const stats = useLiveQuery(async () => {
     const db = getDb();
-    const today = todayISO();
+    const today = todayIso();
 
     // Best streak across all active routines
     const routines = await db.routines.filter((r) => !r.deletedAt && !r.archivedAt).toArray();

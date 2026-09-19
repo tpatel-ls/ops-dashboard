@@ -1,6 +1,6 @@
 'use client';
 
-import { getDb, isoDay, localDay } from '@ops-dashboard/core';
+import { getDb, isoDay, localDay, todayIso } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
@@ -76,15 +76,6 @@ export interface CreateRoutineInput {
   order?: number;
 }
 
-/** Format a Date as a LOCAL YYYY-MM-DD (not UTC). All `date` fields store local. */
-function formatLocalDate(d: Date): string {
-  return isoDay(d);
-}
-
-export function todayISO(): string {
-  return formatLocalDate(new Date());
-}
-
 export function addDaysISO(iso: string, days: number): string {
   if (localDay(iso) !== iso || !Number.isInteger(days)) {
     throw new Error('Routine date must be a valid calendar day.');
@@ -95,11 +86,11 @@ export function addDaysISO(iso: string, days: number): string {
   if (!Number.isFinite(date.getTime())) {
     throw new Error('Routine date calculation is out of range.');
   }
-  return formatLocalDate(date);
+  return isoDay(date);
 }
 
 export function createRoutine(input: CreateRoutineInput): Promise<Routine> {
-  const startDate = input.startDate ?? todayISO();
+  const startDate = input.startDate ?? todayIso();
   const fields = normalizeRoutinePatch({
     name: input.name,
     description: input.description,
@@ -228,7 +219,7 @@ export async function toggleRoutineCheck(
 }
 
 /** Consecutive done-days ending today (or yesterday if today is not done yet). */
-export function computeStreak(checks: RoutineCheck[], today = todayISO()): number {
+export function computeStreak(checks: RoutineCheck[], today = todayIso()): number {
   if (localDay(today) !== today) return 0;
   const done = new Set(
     checks

@@ -2,9 +2,9 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Flame } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import type { TimeOfDay } from '@ops-dashboard/core';
-import { computeStreak, todayISO, toggleRoutineCheck } from '@/lib/routines';
+import { computeStreak, toggleRoutineCheck } from '@/lib/routines';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { cn } from '@ops-dashboard/ui';
 
@@ -17,7 +17,7 @@ const TIME_LABEL: Record<TimeOfDay, string> = {
 };
 
 export function RoutineChecklist() {
-  const today = todayISO();
+  const today = todayIso();
 
   const data = useLiveQuery(async () => {
     const db = getDb();

@@ -12,9 +12,9 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, todayIso } from '@ops-dashboard/core';
 import { createJournalEntry } from '@/lib/journal';
-import { toggleRoutineCheck, todayISO } from '@/lib/routines';
+import { toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { fetchWithTimeout } from '@/lib/fetch-timeout';
 
@@ -162,7 +162,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       });
 
       // mark each detected habit
-      const today = todayISO();
+      const today = todayIso();
       for (const name of result.habitsDone) {
         const routine = activeRoutines.find((r) => r.name.toLowerCase() === name.toLowerCase());
         if (routine) {
