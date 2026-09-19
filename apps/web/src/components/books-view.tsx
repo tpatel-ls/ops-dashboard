@@ -5,7 +5,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, ChevronDown, ChevronUp, Plus, Star, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Book, BookStatus, Quote } from '@ops-dashboard/core';
-import { compareBookRecency, createBook, updateBook, deleteBook } from '@/lib/books';
+import {
+  bookRatingStars,
+  compareBookRecency,
+  createBook,
+  updateBook,
+  deleteBook,
+} from '@/lib/books';
 import { cn } from '@ops-dashboard/ui';
 
 /* ─── Constants ────────────────────────────────────────────────── */
@@ -106,18 +112,22 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
 
 function StarRating({ value, onChange }: { value?: number; onChange: (v: number) => void }) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const rated = bookRatingStars(value);
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div role="group" aria-label="Rating" className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => i + 1).map((star) => {
-        const active = hovered !== null ? star <= hovered : star <= (value ?? 0);
+        // Hover is a preview only. `aria-pressed` must report the stored
+        // rating, which is the state a pointer never reveals.
+        const active = hovered !== null ? star <= hovered : star <= rated;
         return (
           <button
             key={star}
             type="button"
+            aria-pressed={star <= rated}
             onMouseEnter={() => setHovered(star)}
             onMouseLeave={() => setHovered(null)}
-            onClick={() => onChange(star === value ? 0 : star)}
+            onClick={() => onChange(star === rated ? 0 : star)}
             title={`${star} star${star !== 1 ? 's' : ''}`}
             className={cn(
               'inline-flex size-8 items-center justify-center rounded-md transition-colors',
