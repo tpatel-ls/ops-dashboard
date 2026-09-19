@@ -76,6 +76,23 @@ export interface CreateRoutineInput {
   order?: number;
 }
 
+/**
+ * Length of a fixed routine in days, or undefined when it has none.
+ *
+ * `normalizeRoutinePatch` rejects a `durationDays` that is not a positive
+ * integer, but synced rows reach Dexie through `fromRow`, which casts without
+ * validating. The progress badge tested the field for truthiness, which lets a
+ * negative or fractional value through, so a corrupt routine rendered
+ * "day -5 / -5" instead of falling back to the ongoing badge.
+ */
+export function fixedRoutineDuration(
+  routine: Pick<Routine, 'kind' | 'durationDays'>,
+): number | undefined {
+  if (routine.kind !== 'fixed') return undefined;
+  const days = routine.durationDays;
+  return Number.isInteger(days) && days! > 0 ? days : undefined;
+}
+
 export function addDaysISO(iso: string, days: number): string {
   if (localDay(iso) !== iso || !Number.isInteger(days)) {
     throw new Error('Routine date must be a valid calendar day.');
