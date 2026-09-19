@@ -35,6 +35,7 @@ import {
   addDaysISO,
   computeStreak,
   createRoutine,
+  fixedRoutineDuration,
   toggleRoutineCheck,
   updateRoutine,
 } from './routines';
@@ -260,5 +261,28 @@ describe('computeStreak', () => {
 
     expect(computeStreak(checks, '2026-08-20')).toBe(2);
     expect(computeStreak(checks, '2026-02-30')).toBe(0);
+  });
+});
+
+describe('fixedRoutineDuration', () => {
+  it('reports the length of a valid fixed routine', () => {
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: 30 })).toBe(30);
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: 1 })).toBe(1);
+  });
+
+  it('has no length for an ongoing routine', () => {
+    expect(fixedRoutineDuration({ kind: 'ongoing', durationDays: 30 })).toBeUndefined();
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: undefined })).toBeUndefined();
+  });
+
+  it('rejects a synced duration createRoutine would never have stored', () => {
+    // A truthiness test let these through and the badge rendered "day -5 / -5".
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: -5 })).toBeUndefined();
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: 0 })).toBeUndefined();
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: 2.5 })).toBeUndefined();
+    expect(fixedRoutineDuration({ kind: 'fixed', durationDays: Number.NaN })).toBeUndefined();
+    expect(
+      fixedRoutineDuration({ kind: 'fixed', durationDays: '30' as unknown as number }),
+    ).toBeUndefined();
   });
 });
