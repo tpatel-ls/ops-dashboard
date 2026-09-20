@@ -275,7 +275,11 @@ export function SettingsForm() {
         ) : null}
       </Section>
 
-      <Section title="Data" description="Export everything, or import a backup." wide>
+      <Section
+        title="Data"
+        description="Export tasks, projects, and whiteboards, or import a backup."
+        wide
+      >
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
