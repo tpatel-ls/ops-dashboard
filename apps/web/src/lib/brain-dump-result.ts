@@ -57,7 +57,7 @@ export function boundedDraftText(value: unknown, limit: number): string | undefi
  * tags that differ only by Unicode composition or locale casing collapse to a
  * single value no matter which capture path produced them.
  */
-function routedTag(value: string): string {
+export function routedTag(value: string): string {
   return value.normalize('NFKC').toLocaleLowerCase('en-US');
 }
 

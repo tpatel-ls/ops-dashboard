@@ -28,6 +28,7 @@ import {
   MAX_ROUTED_FOOD_TEXT_LENGTH,
   MAX_ROUTED_ITEMS,
   MAX_ROUTED_TITLE_LENGTH,
+  routedTag,
   normalizeBrainDumpItems,
   type RoutedItemDraft,
 } from './brain-dump-result';
@@ -381,8 +382,12 @@ export function normalizeCaptureTags(tags: string[] | undefined): string[] {
   const seen = new Set<string>();
   for (const value of tags) {
     if (normalized.length >= 20) break;
-    if (typeof value !== 'string') continue;
-    const tag = Array.from(value.trim().toLowerCase()).slice(0, 64).join('');
+    // Bound first, then canonicalize through the same helper the brain dump
+    // path uses. Lowercasing without NFKC left this route storing "café" and
+    // "cafe\u0301" (and "\uFF2C\uFF33\uFF27" and "LSG") as separate tags, so the
+    // same tag captured two ways did not collapse.
+    const bounded = boundedDraftText(value, 64);
+    const tag = bounded ? routedTag(bounded) : undefined;
     if (tag && !seen.has(tag)) {
       seen.add(tag);
       normalized.push(tag);
