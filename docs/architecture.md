@@ -35,7 +35,8 @@ work.
 
 ## Routing
 
-The root app route opens the work dashboard. Each first-class view has its own folder
+The root app route redirects to the view chosen in settings, falling back to
+`/today` when the settings read fails. Each first-class view has its own folder
 under `apps/web/src/app`. The proxy refreshes Supabase sessions and gates page
 navigations when Supabase is configured. API routes keep JSON semantics and apply
 their own same-origin or bearer-secret guards.
