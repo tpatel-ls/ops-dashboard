@@ -152,6 +152,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 onBlur={() =>
                   draftTitle !== task.title && updateTask(task.id, { title: draftTitle })
                 }
+                aria-label="Task title"
                 className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
                 placeholder="Untitled"
               />
@@ -178,6 +179,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               }
               className="text-muted-foreground mt-2 w-full resize-none bg-transparent text-sm outline-none"
               rows={3}
+              aria-label="Task notes"
               placeholder="Notes (markdown)"
             />
           </div>
@@ -503,6 +505,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                       setChecklistDraft('');
                     }
                   }}
+                  aria-label="New checklist step"
                   placeholder="New step"
                   className="input flex-1"
                 />
