@@ -2,13 +2,14 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } from 'lucide-react';
-import { getDb, isoDay, todayIso } from '@ops-dashboard/core';
+import { getDb, todayIso, weekStartIso } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { activityTimestampWithin, loadActivity } from '@/lib/activity';
 import { computeStreak } from '@/lib/routines';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
 import { shareOrCopy } from '@/lib/share';
+import { useLiveSettings } from '@/lib/use-settings';
 import { cn } from '@ops-dashboard/ui';
 
 // ─── Stat card ───────────────────────────────────────────────────────────────
@@ -69,6 +70,8 @@ export default function HabitsPage() {
     return loadActivity(365);
   });
 
+  const weekStartsOn = useLiveSettings().weekStartsOn;
+
   const stats = useLiveQuery(async () => {
     const db = getDb();
     const today = todayIso();
@@ -84,14 +87,8 @@ export default function HabitsPage() {
       if (streak > bestStreak) bestStreak = streak;
     }
 
-    // Journal entries this week (Mon-today)
-    const weekStart = (() => {
-      const d = new Date();
-      const day = d.getDay(); // 0=Sun
-      const offset = day === 0 ? -6 : 1 - day;
-      d.setDate(d.getDate() + offset);
-      return isoDay(d);
-    })();
+    // Journal entries from the start of the user's week through today
+    const weekStart = weekStartIso(weekStartsOn);
 
     const journalEntries = await db.journalEntries
       .filter((j) => !j.deletedAt && j.date >= weekStart && j.date <= today)
@@ -118,7 +115,7 @@ export default function HabitsPage() {
       completedCount: completedTasks.length,
       totalPoints: Math.round(totalCount),
     };
-  }, [data]);
+  }, [data, weekStartsOn]);
 
   const activity = data ?? [];
   const hasActivity = activity.some((d) => d.count > 0);
