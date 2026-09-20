@@ -84,6 +84,13 @@ describe('parseQuickAdd', () => {
     expect(r.priority).toBe(2);
   });
 
+  it('collapses the gap left by a hashtag removed from mid-title', () => {
+    const r = parseQuickAdd('Call bob #work please', anchor);
+
+    expect(r.title).toBe('Call bob please');
+    expect(r.tags).toEqual(['work']);
+  });
+
   it('ignores an incomplete hashtag token', () => {
     const r = parseQuickAdd('Plan this #');
 
