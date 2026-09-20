@@ -28,7 +28,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       tags.push(tag);
     }
   }
-  working = working.replace(TAG_RE, ' ').trim();
+  working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
   let priority: Priority = 0;
   for (const match of working.matchAll(PRIORITY_RE)) {
