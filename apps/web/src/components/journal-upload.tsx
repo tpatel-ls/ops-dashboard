@@ -12,7 +12,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb, matchByName, todayIso } from '@ops-dashboard/core';
 import { createJournalEntry } from '@/lib/journal';
 import { toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
@@ -164,7 +164,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       // mark each detected habit
       const today = todayIso();
       for (const name of result.habitsDone) {
-        const routine = activeRoutines.find((r) => r.name.toLowerCase() === name.toLowerCase());
+        const routine = matchByName(activeRoutines, name);
         if (routine) {
           await toggleRoutineCheck(routine.id, today, true, 'journal');
         }
