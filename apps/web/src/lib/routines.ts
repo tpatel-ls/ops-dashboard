@@ -162,7 +162,14 @@ async function updateRoutineSchedule(id: string, fields: Partial<Routine>) {
   if (!existing || existing.deletedAt) return null;
   const kind = fields.kind ?? existing.kind;
   const startDate = fields.startDate ?? existing.startDate;
-  const durationDays = fields.durationDays ?? existing.durationDays;
+  // normalizeRoutinePatch already rejects a bad duration supplied in the patch,
+  // but one inherited from the stored row is unvalidated: fromRow casts synced
+  // rows without checking. A negative duration passed the truthiness test below
+  // and produced an endDate before startDate, which makes toggleRoutineCheck
+  // reject every date and leaves the routine permanently un-checkable.
+  const requestedDuration = fields.durationDays ?? existing.durationDays;
+  const durationDays =
+    Number.isInteger(requestedDuration) && requestedDuration! > 0 ? requestedDuration : undefined;
   if (kind === 'fixed' && durationDays === undefined) {
     throw new Error('Fixed routines require a duration.');
   }
