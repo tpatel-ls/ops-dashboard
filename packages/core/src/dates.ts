@@ -31,6 +31,18 @@ export function todayIso(): string {
   return isoDay(new Date());
 }
 
+/**
+ * First local calendar day of the week containing `anchor`, honouring the
+ * user's `weekStartsOn` setting.
+ *
+ * The week views all derive their range from `startOfWeek`, but the habits
+ * page open-coded a Monday-only offset, so "this week" there disagreed with
+ * every other view whenever the user chose a Sunday start.
+ */
+export function weekStartIso(weekStartsOn: 0 | 1, anchor: Date = new Date()): string {
+  return isoDay(startOfWeek(anchor, { weekStartsOn }));
+}
+
 export function weekDays(anchor: Date, weekStartsOn: 0 | 1): Date[] {
   const start = startOfWeek(anchor, { weekStartsOn });
   return Array.from({ length: 7 }, (_, i) => addDays(start, i));
