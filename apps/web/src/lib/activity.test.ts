@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  activityScores,
   activityTimestampOnOrAfter,
   activityTimestampWithin,
   aggregateActivity,
@@ -103,5 +104,53 @@ describe('activityTimestampOnOrAfter', () => {
   it('rejects malformed timestamps and invalid range starts', () => {
     expect(activityTimestampOnOrAfter('not-a-date', start)).toBe(false);
     expect(activityTimestampOnOrAfter('2026-08-01T12:00:00Z', new Date('invalid'))).toBe(false);
+  });
+});
+
+describe('activityScores', () => {
+  const empty = { tasks: [], checks: [], journals: [], workLogs: [] };
+
+  it('keys every contribution by its local calendar day', () => {
+    const scores = activityScores({
+      ...empty,
+      checks: [{ date: '2026-08-24' }],
+      journals: [{ date: '2026-08-24' }],
+    });
+
+    expect(scores.get('2026-08-24')).toBe(5);
+  });
+
+  it('resolves a stored timestamp to the day the heatmap renders', () => {
+    // routineChecks.date and journalEntries.date are meant to be date-only, but
+    // fromRow casts synced rows without validating. Keying on the raw string
+    // produced a key aggregateActivity never looks up, losing the day entirely.
+    const day = '2026-08-24';
+    const timestamp = `${day}T13:30:00`;
+    const scores = activityScores({ ...empty, checks: [{ date: timestamp }] });
+
+    expect([...scores.keys()]).toEqual([day]);
+    expect(scores.get(day)).toBe(2);
+  });
+
+  it('skips contributions whose day cannot be resolved', () => {
+    const scores = activityScores({
+      ...empty,
+      checks: [{ date: 'not-a-date' }],
+      journals: [{ date: '2026-02-30' }],
+    });
+
+    expect(scores.size).toBe(0);
+  });
+
+  it('ignores a work log whose stored minutes are unusable', () => {
+    const scores = activityScores({
+      ...empty,
+      workLogs: [
+        { at: '2026-08-24T09:00:00', minutes: 60 },
+        { at: '2026-08-24T11:00:00', minutes: Number.NaN as number },
+      ],
+    });
+
+    expect(scores.get('2026-08-24')).toBe(1);
   });
 });
