@@ -44,6 +44,9 @@ flight. Track touches and pen pointers separately.
 
 ## Lefty mode
 
-Settings has a `leftyMode` toggle. When true, the whiteboard toolbar mirrors
-to the right edge so a right handed palm is no longer in the way of a left
-handed pen.
+Settings has a `leftyMode` toggle, and `normalizeSettings` stores it, but
+nothing reads it yet. The intent is that a true value mirrors the whiteboard
+toolbar to the right edge so a right handed palm is no longer in the way of a
+left handed pen. The canvas wrapper is tldraw's own UI, so applying this means
+overriding that toolbar's placement. Until that lands, flipping the toggle
+changes nothing on screen.
