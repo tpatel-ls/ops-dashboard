@@ -258,6 +258,15 @@ export function validateOpsExport(value: unknown): OpsExport {
   return payload as OpsExport;
 }
 
+/**
+ * Snapshot of the three tables the export format covers.
+ *
+ * This is deliberately not every syncable table: routines, journal entries,
+ * captures, people, notes, quotes, books, food logs, content, domains, and
+ * work logs are all absent, because `validateOpsExport` only knows how to
+ * verify these three on the way back in. The settings copy names the three so
+ * the file is not mistaken for a full backup.
+ */
 export async function exportAll(): Promise<OpsExport> {
   const db = getDb();
   return db.transaction('r', db.tasks, db.projects, db.whiteboards, async () => {
