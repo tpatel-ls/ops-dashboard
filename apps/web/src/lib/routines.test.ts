@@ -139,6 +139,24 @@ describe('updateRoutine', () => {
     );
   });
 
+  it('refuses to derive an end date from an unusable stored duration', async () => {
+    mocks.getRoutine.mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      kind: 'fixed',
+      // A synced row reaches Dexie through fromRow, which casts without
+      // validating. -5 used to yield an endDate before startDate.
+      durationDays: -5,
+      startDate: '2026-08-01',
+    });
+    mocks.patchRecord.mockClear();
+
+    await expect(updateRoutine('routine-1', { startDate: '2026-08-10' })).rejects.toThrow(
+      'Fixed routines require a duration.',
+    );
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+  });
+
   it('keeps derived fixed-routine dates consistent', async () => {
     await updateRoutine('routine-1', { startDate: '2026-08-10', durationDays: 3 });
     expect(mocks.patchRecord).toHaveBeenCalledWith(
