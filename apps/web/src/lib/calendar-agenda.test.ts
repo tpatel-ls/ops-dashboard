@@ -114,6 +114,22 @@ describe('calendar agenda', () => {
     expect(calendarInstant('2026-07-20')?.toISOString()).toBe('2026-07-20T00:00:00.000Z');
   });
 
+  it('breaks an identical start time by priority, then title, then id', () => {
+    const at = '2026-07-20T09:00:00';
+    const lowZebra = task('b-low', { startAt: at, priority: 0, title: 'Zebra' });
+    const highAlpha = task('a-high', { startAt: at, priority: 3, title: 'Alpha' });
+
+    expect([lowZebra, highAlpha].sort(compareCalendarTasks).map((item) => item.id)).toEqual([
+      'a-high',
+      'b-low',
+    ]);
+    // A comparator must be antisymmetric: reversing the arguments must reverse
+    // the sign, or the sorted order depends on the input order.
+    expect(Math.sign(compareCalendarTasks(lowZebra, highAlpha))).toBe(
+      -Math.sign(compareCalendarTasks(highAlpha, lowZebra)),
+    );
+  });
+
   it('sorts timed work first, followed by priority and title', () => {
     const items = [
       task('normal', { scheduledFor: '2026-07-20', title: 'Normal' }),
