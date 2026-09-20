@@ -6,17 +6,17 @@ Press `?` outside a text field to open the in-app shortcut reference.
 
 - `Cmd/Ctrl K` open the command palette
 - `Q` focus task capture, or open task capture when no composer is visible
-- `g then a` open task capture
+- `g then a` open the "Add a task" dialog
 - `f` open focus mode
 - `Esc` close the active overlay
 
 ## Navigation
 
-- `g then h` Dashboard
+- `g then h` Today
 - `g then t` Tasks
 - `g then p` Projects
 - `g then c` Calendar
-- `g then k` Kanban
+- `g then k` Board
 - `g then i` Inbox
 - `g then l` Power Dialer
 - `g then n` Notepad
