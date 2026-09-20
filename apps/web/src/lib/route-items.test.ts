@@ -128,6 +128,13 @@ describe('normalizeCaptureTags', () => {
     ]);
   });
 
+  it('collapses tags that differ only by Unicode composition or width', () => {
+    expect(normalizeCaptureTags(['Caf\u00e9', 'Cafe\u0301', '\uff2c\uff33\uff27', 'LSG'])).toEqual([
+      'caf\u00e9',
+      'lsg',
+    ]);
+  });
+
   it('bounds untrusted tag counts and Unicode-safe lengths', () => {
     const tags = Array.from({ length: 25 }, (_, index) => `${index}-${'x'.repeat(70)}😀`);
     const result = normalizeCaptureTags(tags);
