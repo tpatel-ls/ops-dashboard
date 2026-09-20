@@ -57,12 +57,17 @@ export function calendarDateOf(
 export function compareCalendarTasks(a: Task, b: Task): number {
   const aStart = validTimestamp(a.startAt);
   const bStart = validTimestamp(b.startAt);
+  // Decide "timed before untimed" before comparing two instants. Testing
+  // `aStart !== undefined` after the equal-start case fell through returned -1
+  // for both compare(a, b) and compare(b, a), so two tasks starting at the same
+  // instant never reached the priority and title tie-break and their order
+  // depended on where the sort happened to place them.
+  if (aStart !== undefined && bStart === undefined) return -1;
+  if (aStart === undefined && bStart !== undefined) return 1;
   if (aStart !== undefined && bStart !== undefined) {
     const startOrder = aStart - bStart;
     if (startOrder !== 0) return startOrder;
   }
-  if (aStart !== undefined) return -1;
-  if (bStart !== undefined) return 1;
   if (a.priority !== b.priority) return b.priority - a.priority;
   const titleOrder = a.title.localeCompare(b.title);
   return titleOrder !== 0 ? titleOrder : a.id.localeCompare(b.id);
