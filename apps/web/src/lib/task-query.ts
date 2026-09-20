@@ -56,6 +56,20 @@ function validTimestamp(value: string): number | undefined {
 }
 
 export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
+  if (sort === 'due') {
+    // The "Due date" option used to fall straight through to compareTasks,
+    // which orders by the earliest of scheduledFor/dueAt/startAt, so picking it
+    // reordered nothing. Order by the due day the task actually carries and
+    // leave tasks without one to the shared tie-break below.
+    const aDue = localDay(a.dueAt);
+    const bDue = localDay(b.dueAt);
+    if (aDue && !bDue) return -1;
+    if (!aDue && bDue) return 1;
+    if (aDue && bDue) {
+      const dueOrder = aDue.localeCompare(bDue);
+      if (dueOrder !== 0) return dueOrder;
+    }
+  }
   if (sort === 'recent') {
     const aUpdatedAt = validTimestamp(a.updatedAt);
     const bUpdatedAt = validTimestamp(b.updatedAt);

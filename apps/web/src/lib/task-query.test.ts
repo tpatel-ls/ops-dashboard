@@ -120,6 +120,34 @@ describe('compareTasksBy', () => {
     expect([urgent, dated].sort((a, b) => compareTasksBy('due', a, b))).toEqual([dated, urgent]);
   });
 
+  it('orders by the due day, not the scheduled day, for due-date sorting', () => {
+    const dueSoon = task('due-soon', { scheduledFor: '2026-07-20', dueAt: '2026-07-17T09:00:00' });
+    const dueLater = task('due-later', {
+      scheduledFor: '2026-07-15',
+      dueAt: '2026-07-19T09:00:00',
+    });
+
+    expect([dueLater, dueSoon].sort((a, b) => compareTasksBy('due', a, b))).toEqual([
+      dueSoon,
+      dueLater,
+    ]);
+    // The default sort still leads with the earliest scheduled day.
+    expect([dueSoon, dueLater].sort((a, b) => compareTasksBy('default', a, b))).toEqual([
+      dueLater,
+      dueSoon,
+    ]);
+  });
+
+  it('sorts tasks without a due day after those that have one', () => {
+    const due = task('due', { dueAt: '2026-07-30T09:00:00' });
+    const scheduledEarlier = task('scheduled', { scheduledFor: '2026-07-15' });
+
+    expect([scheduledEarlier, due].sort((a, b) => compareTasksBy('due', a, b))).toEqual([
+      due,
+      scheduledEarlier,
+    ]);
+  });
+
   it('puts urgent work first for priority sorting', () => {
     expect([dated, urgent].sort((a, b) => compareTasksBy('priority', a, b))).toEqual([
       urgent,
