@@ -177,6 +177,36 @@ describe('validateOpsExport', () => {
     );
   });
 
+  it('names the rejected record so a failed import can be acted on', () => {
+    const base = {
+      version: 1 as const,
+      exportedAt: '2026-07-30T12:00:00.000Z',
+      projects: [],
+      whiteboards: [],
+    };
+    const good = {
+      id: 'task-1',
+      title: 'Keep',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 0,
+      createdAt: '2026-07-30T12:00:00.000Z',
+      updatedAt: '2026-07-30T12:00:00.000Z',
+      version: 1,
+      deviceId: 'device-1',
+    };
+
+    expect(() =>
+      validateOpsExport({ ...base, tasks: [good, { ...good, id: 'task-2', title: '' }] }),
+    ).toThrow('Invalid export tasks: id task-2');
+    expect(() => validateOpsExport({ ...base, tasks: [{ title: 'No id' }] })).toThrow(
+      'Invalid export tasks: entry 1',
+    );
+  });
+
   it('rejects duplicate IDs before bulk import can overwrite records', () => {
     const duplicate = task('Duplicate task');
     expect(() =>

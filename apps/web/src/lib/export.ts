@@ -215,6 +215,12 @@ function isWhiteboardRecord(value: unknown): boolean {
   );
 }
 
+/** Identify a rejected record for the import error message. */
+function describeRecord(record: unknown, index: number): string {
+  const id = isRecord(record) ? record.id : undefined;
+  return typeof id === 'string' && id.trim() ? `id ${id}` : `entry ${index + 1}`;
+}
+
 function hasUniqueIds(records: unknown[]): boolean {
   const ids = records.map((record) => (record as { id: string }).id);
   return new Set(ids).size === ids.length;
@@ -241,18 +247,34 @@ export function validateOpsExport(value: unknown): OpsExport {
   } as const;
   for (const key of ['tasks', 'projects', 'whiteboards'] as const) {
     const records = payload[key];
-    if (!Array.isArray(records) || !records.every(validators[key]) || !hasUniqueIds(records)) {
-      throw new Error(`Invalid export ${key}`);
+    if (!Array.isArray(records)) throw new Error(`Invalid export ${key}`);
+    // Name the offending record. A single row that fails validation rejects the
+    // whole file, and the settings form surfaces this message verbatim, so
+    // "Invalid export tasks" left the user nothing to act on.
+    const invalid = records.findIndex((record) => !validators[key](record));
+    if (invalid !== -1) {
+      throw new Error(`Invalid export ${key}: ${describeRecord(records[invalid], invalid)}`);
     }
+    if (!hasUniqueIds(records)) throw new Error(`Invalid export ${key}: duplicate ids`);
   }
 
   const taskIds = new Set(payload.tasks!.map((task) => task.id));
   const projectIds = new Set(payload.projects!.map((project) => project.id));
-  if (
-    payload.tasks!.some((task) => task.projectId && !projectIds.has(task.projectId)) ||
-    payload.whiteboards!.some((board) => board.linkedTaskIds.some((taskId) => !taskIds.has(taskId)))
-  ) {
-    throw new Error('Invalid export references');
+  const orphanTask = payload.tasks!.find(
+    (task) => task.projectId && !projectIds.has(task.projectId),
+  );
+  if (orphanTask) {
+    throw new Error(
+      `Invalid export references: task ${orphanTask.id} points at missing project ${orphanTask.projectId}`,
+    );
+  }
+  for (const board of payload.whiteboards!) {
+    const missing = board.linkedTaskIds.find((taskId) => !taskIds.has(taskId));
+    if (missing !== undefined) {
+      throw new Error(
+        `Invalid export references: whiteboard ${board.id} links missing task ${missing}`,
+      );
+    }
   }
 
   return payload as OpsExport;
