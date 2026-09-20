@@ -10,8 +10,9 @@ and a Supabase session exists.
 - `@ops-dashboard/core` owns the data shapes, the Dexie schema, the ULID and device
   id helpers, and the natural language quick-add parser. Pure TypeScript so
   it can run in tests, the browser, and server-side route code.
-- `@ops-dashboard/ui` keeps the `cn` helper and the design tokens that any
-  framework-agnostic UI ships with.
+- `@ops-dashboard/ui` keeps the `cn` class-name helper. The design tokens are
+  not here: they are CSS variables declared in `apps/web/src/app/globals.css`,
+  as the theming section below describes.
 - `@ops-dashboard/whiteboard` owns the pen pointer helpers, palm rejection, and the
   tldraw canvas wrapper.
 - `@ops-dashboard/tsconfig` is the shared TS config base that every package extends.
