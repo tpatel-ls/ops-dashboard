@@ -1,5 +1,5 @@
-import { getDb } from '@ops-dashboard/core';
-import type { RoutineCheck } from '@ops-dashboard/core';
+import { getDb, localDay } from '@ops-dashboard/core';
+import type { JournalEntry, RoutineCheck, Task, WorkLog } from '@ops-dashboard/core';
 import { differenceInCalendarDays } from 'date-fns';
 
 export interface ActivityDay {
@@ -100,6 +100,40 @@ export function aggregateActivity(
   return result;
 }
 
+export interface ActivityRecords {
+  tasks: Array<Pick<Task, 'completedAt'>>;
+  checks: Array<Pick<RoutineCheck, 'date'>>;
+  journals: Array<Pick<JournalEntry, 'date'>>;
+  workLogs: Array<Pick<WorkLog, 'at' | 'minutes'>>;
+}
+
+/**
+ * Raw score per local calendar day, keyed the way `aggregateActivity` reads it.
+ *
+ * Every key goes through `localDay`. `routineChecks.date` and
+ * `journalEntries.date` are meant to be date-only local days and the write
+ * paths enforce that, but synced rows reach Dexie through `fromRow`, which
+ * casts without validating. Keying the map on a raw stored timestamp produced
+ * a key no grid cell ever matches, so that day's activity silently vanished
+ * from the heatmap rather than being misplaced. A value that cannot be
+ * resolved to a day is skipped.
+ */
+export function activityScores(records: ActivityRecords): Map<string, number> {
+  const scores = new Map<string, number>();
+  const add = (value: string | undefined, amount: number) => {
+    const day = localDay(value);
+    if (!day || amount === 0) return;
+    scores.set(day, (scores.get(day) ?? 0) + amount);
+  };
+
+  for (const task of records.tasks) add(task.completedAt, WEIGHTS.task);
+  for (const check of records.checks) add(check.date, WEIGHTS.routine);
+  for (const journal of records.journals) add(journal.date, WEIGHTS.journal);
+  for (const log of records.workLogs) add(log.at, workLogActivityContribution(log.minutes));
+
+  return scores;
+}
+
 /**
  * Load all activity from the DB for the last `days` days (default 365),
  * aggregate, and return a dense ActivityDay[] array.
@@ -113,49 +147,24 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   start.setDate(start.getDate() - safeDays + 1);
   start.setHours(0, 0, 0, 0);
 
-  const scores = new Map<string, number>();
+  const startDay = toLocalDate(start);
 
-  function add(date: string, amount: number) {
-    scores.set(date, (scores.get(date) ?? 0) + amount);
-  }
+  const [tasks, checks, journals, workLogs] = await Promise.all([
+    db.tasks
+      .filter(
+        (t) =>
+          !t.deletedAt && t.status === 'done' && activityTimestampOnOrAfter(t.completedAt, start),
+      )
+      .toArray(),
+    // Compare the resolved day, not the stored string: a row carrying a
+    // timestamp would otherwise be admitted or dropped by a string compare
+    // against a YYYY-MM-DD bound.
+    db.routineChecks
+      .filter((c: RoutineCheck) => !c.deletedAt && c.done && (localDay(c.date) ?? '') >= startDay)
+      .toArray(),
+    db.journalEntries.filter((j) => !j.deletedAt && (localDay(j.date) ?? '') >= startDay).toArray(),
+    db.workLogs.filter((w) => !w.deletedAt && activityTimestampOnOrAfter(w.at, start)).toArray(),
+  ]);
 
-  // Tasks completed within the window
-  const tasks = await db.tasks
-    .filter(
-      (t) =>
-        !t.deletedAt && t.status === 'done' && activityTimestampOnOrAfter(t.completedAt, start),
-    )
-    .toArray();
-  for (const t of tasks) {
-    if (t.completedAt) {
-      add(toLocalDate(t.completedAt), WEIGHTS.task);
-    }
-  }
-
-  // Routine checks that are done within the window
-  const checks = await db.routineChecks
-    .filter((c: RoutineCheck) => !c.deletedAt && c.done && c.date >= toLocalDate(start))
-    .toArray();
-  for (const c of checks) {
-    add(c.date, WEIGHTS.routine);
-  }
-
-  // Journal entries within the window
-  const journals = await db.journalEntries
-    .filter((j) => !j.deletedAt && j.date >= toLocalDate(start))
-    .toArray();
-  for (const j of journals) {
-    add(j.date, WEIGHTS.journal);
-  }
-
-  // WorkLogs within the window
-  const worklogs = await db.workLogs
-    .filter((w) => !w.deletedAt && activityTimestampOnOrAfter(w.at, start))
-    .toArray();
-  for (const w of worklogs) {
-    const contribution = workLogActivityContribution(w.minutes);
-    add(toLocalDate(w.at), contribution);
-  }
-
-  return aggregateActivity(scores, start, end);
+  return aggregateActivity(activityScores({ tasks, checks, journals, workLogs }), start, end);
 }
