@@ -2,6 +2,7 @@
 
 import type { Capture, CaptureKind, CaptureRoute, CaptureSource } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { compareCreatedAtRecency } from './recency';
 
 const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
 const CAPTURE_KINDS = new Set<CaptureKind>([
@@ -20,20 +21,7 @@ const MAX_CAPTURE_SUMMARY_LENGTH = 500;
 const MAX_CAPTURE_ROUTE_ID_LENGTH = 128;
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 
-export function compareCaptureRecency(
-  left: Pick<Capture, 'id' | 'createdAt'>,
-  right: Pick<Capture, 'id' | 'createdAt'>,
-): number {
-  const leftTimestamp = Date.parse(left.createdAt);
-  const rightTimestamp = Date.parse(right.createdAt);
-  const leftValid = Number.isFinite(leftTimestamp);
-  const rightValid = Number.isFinite(rightTimestamp);
-  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
-    return rightTimestamp - leftTimestamp;
-  }
-  if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
-}
+export const compareCaptureRecency = compareCreatedAtRecency;
 
 export function createCapture(raw: string, source: CaptureSource = 'text'): Promise<Capture> {
   const normalizedRaw = raw.trim();

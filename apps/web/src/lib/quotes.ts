@@ -4,6 +4,7 @@ import { newId } from '@ops-dashboard/core';
 import type { Quote, QuoteSourceType, Thought } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
+import { compareCreatedAtRecency } from './recency';
 
 const QUOTE_SOURCE_TYPES = new Set<QuoteSourceType>([
   'book',
@@ -17,20 +18,7 @@ const MAX_QUOTE_THOUGHTS = 100;
 const MAX_QUOTE_THOUGHT_TEXT_LENGTH = 2_000;
 const MAX_QUOTE_THOUGHT_ID_LENGTH = 128;
 
-export function compareQuoteRecency(
-  left: Pick<Quote, 'id' | 'createdAt'>,
-  right: Pick<Quote, 'id' | 'createdAt'>,
-): number {
-  const leftTimestamp = Date.parse(left.createdAt);
-  const rightTimestamp = Date.parse(right.createdAt);
-  const leftValid = Number.isFinite(leftTimestamp);
-  const rightValid = Number.isFinite(rightTimestamp);
-  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
-    return rightTimestamp - leftTimestamp;
-  }
-  if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
-}
+export const compareQuoteRecency = compareCreatedAtRecency;
 
 function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
   const normalized = { ...patch };
