@@ -31,10 +31,9 @@ import { ProjectDetail } from '@/components/project-detail';
 import { useOrgStore } from '@/lib/org-store';
 import { addTaskToProject } from '@/lib/tasks';
 import { PORTFOLIO_PROJECT_NAMES, importPortfolioProjects } from '@/lib/import-projects';
+import { useLiveSettings } from '@/lib/use-settings';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
-
-const SLIPPING_DAYS = 5;
 
 const STATUS_RANK: Record<Project['status'], number> = {
   active: 0,
@@ -561,6 +560,7 @@ export function PortfolioDashboard() {
   const [sortKey, setSortKey] = useState<SortKey>('default');
   const [statusFilter, setStatusFilter] = useState<'all' | ProjectStatus>('all');
   const ctx = useOrgStore((s) => s.ctx);
+  const slippingDays = useLiveSettings().slippingDays;
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -600,7 +600,7 @@ export function PortfolioDashboard() {
       // Slipping = had activity before but has gone stale. A never-worked project
       // is "not started", not slipping, so it does not get the warning badge.
       const isSlipping =
-        lastWorked !== null && differenceInDays(new Date(), lastWorked) > SLIPPING_DAYS;
+        lastWorked !== null && differenceInDays(new Date(), lastWorked) > slippingDays;
       return {
         project,
         domain: project.domainId ? domainMap.get(project.domainId) : undefined,
@@ -638,7 +638,7 @@ export function PortfolioDashboard() {
     };
 
     return { stats, totals, missing, domains };
-  }, [ctx]);
+  }, [ctx, slippingDays]);
 
   const visibleStats = useMemo(() => {
     let list = data?.stats ?? [];
