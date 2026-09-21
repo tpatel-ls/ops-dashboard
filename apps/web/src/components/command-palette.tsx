@@ -29,6 +29,7 @@ import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useInstallPrompt } from '@/lib/use-install-prompt';
 import { useOrgStore } from '@/lib/org-store';
@@ -76,6 +77,8 @@ export function CommandPalette() {
     setQuery('');
     close();
   }
+
+  useBodyScrollLock(open);
 
   // The palette autofocuses its search input, and the global `escape` hotkey is
   // deliberately skipped while a text field has focus, so nothing was left to
