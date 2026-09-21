@@ -126,6 +126,22 @@ export function SettingsForm() {
         </div>
       </Section>
 
+      <Section
+        title="Projects"
+        description="When a project counts as slipping for want of recent work."
+      >
+        <Field label="Slipping after (days)">
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={settings.slippingDays}
+            onChange={(e) => patch({ slippingDays: Number(e.target.value) })}
+            className="input max-w-xs"
+          />
+        </Field>
+      </Section>
+
       <Section title="Default view" description="Where Ops Dashboard opens.">
         <select
           aria-label="Default view"
