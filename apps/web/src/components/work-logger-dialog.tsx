@@ -19,6 +19,7 @@ import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Priority, Project, ProjectKind } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore, type WorkLoggerMode } from '@/lib/app-store';
+import { wrapTabFocus } from '@/lib/focus-trap';
 import { useOrgStore } from '@/lib/org-store';
 import { useSyncStatus } from '@/lib/sync/status';
 import { useVoiceInput } from '@/lib/use-voice-input';
@@ -210,22 +211,7 @@ function WorkLoggerPanel({
         onClose();
         return;
       }
-      if (event.key !== 'Tab') return;
-      const focusable = Array.from(
-        panel!.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])',
-        ),
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      wrapTabFocus(event, panel);
     }
 
     document.addEventListener('keydown', onKeyDown);

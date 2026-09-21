@@ -15,6 +15,7 @@ import type {
   Task,
 } from '@ops-dashboard/core';
 import { updateProject } from '@/lib/projects';
+import { wrapTabFocus } from '@/lib/focus-trap';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
 import { useActiveOrgs } from '@/components/org-switcher';
@@ -767,22 +768,7 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
         onClose();
         return;
       }
-      if (e.key !== 'Tab') return;
-      const focusable = Array.from(
-        panelRef.current?.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ) ?? [],
-      );
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
+      wrapTabFocus(e, panelRef.current);
     }
 
     window.addEventListener('keydown', onKey);
