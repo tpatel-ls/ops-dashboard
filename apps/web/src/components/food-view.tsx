@@ -306,9 +306,18 @@ function WeekTrend({
               type="button"
               onClick={() => onSelect(d)}
               title={`${format(parseISO(d), 'EEE, MMM d')}: ${kcal} kcal`}
+              // The visible label is a bare weekday abbreviation and the kcal
+              // figure only appears on hover, so without this the seven bars
+              // read out as "Mon" through "Sun" with no date, no value, and no
+              // hint that they select a day.
+              aria-label={`${format(parseISO(d), 'EEEE, MMMM d')}, ${kcal} kcal`}
+              aria-pressed={isSelected}
               className="group flex flex-1 flex-col items-center gap-1"
             >
-              <span className="text-subtle-foreground font-mono text-[9px] tabular-nums opacity-0 transition-opacity group-hover:opacity-100">
+              <span
+                aria-hidden
+                className="text-subtle-foreground font-mono text-[9px] tabular-nums opacity-0 transition-opacity group-hover:opacity-100"
+              >
                 {kcal > 0 ? kcal : ''}
               </span>
               <span className="flex h-16 w-full items-end">
@@ -322,6 +331,7 @@ function WeekTrend({
                 />
               </span>
               <span
+                aria-hidden
                 className={cn(
                   'font-mono text-[9px] uppercase',
                   isSelected ? 'text-foreground' : 'text-subtle-foreground',
