@@ -4,6 +4,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { Note } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
+import { compareCreatedAtRecency } from './recency';
 
 const MAX_NOTE_TITLE_LENGTH = 500;
 const MAX_NOTE_BODY_LENGTH = 50_000;
@@ -11,20 +12,7 @@ const MAX_NOTE_SOURCE_LENGTH = 200;
 const MAX_NOTE_IMAGE_URL_LENGTH = 2_048;
 const MAX_NOTE_BOOK_ID_LENGTH = 128;
 
-export function compareNoteRecency(
-  left: Pick<Note, 'id' | 'createdAt'>,
-  right: Pick<Note, 'id' | 'createdAt'>,
-): number {
-  const leftTimestamp = Date.parse(left.createdAt);
-  const rightTimestamp = Date.parse(right.createdAt);
-  const leftValid = Number.isFinite(leftTimestamp);
-  const rightValid = Number.isFinite(rightTimestamp);
-  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
-    return rightTimestamp - leftTimestamp;
-  }
-  if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
-}
+export const compareNoteRecency = compareCreatedAtRecency;
 
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   const normalized = { ...patch };

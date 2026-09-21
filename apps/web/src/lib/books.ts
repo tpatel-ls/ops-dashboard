@@ -4,6 +4,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { Book, BookStatus } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
+import { compareCreatedAtRecency } from './recency';
 
 /**
  * Number of filled stars for a stored rating.
@@ -26,20 +27,7 @@ const MAX_BOOK_FORMAT_LENGTH = 100;
 const MAX_BOOK_ISBN_LENGTH = 64;
 const MAX_BOOK_SUMMARY_LENGTH = 50_000;
 
-export function compareBookRecency(
-  left: Pick<Book, 'id' | 'createdAt'>,
-  right: Pick<Book, 'id' | 'createdAt'>,
-): number {
-  const leftTimestamp = Date.parse(left.createdAt);
-  const rightTimestamp = Date.parse(right.createdAt);
-  const leftValid = Number.isFinite(leftTimestamp);
-  const rightValid = Number.isFinite(rightTimestamp);
-  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
-    return rightTimestamp - leftTimestamp;
-  }
-  if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
-}
+export const compareBookRecency = compareCreatedAtRecency;
 
 function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
   const normalized = { ...patch };

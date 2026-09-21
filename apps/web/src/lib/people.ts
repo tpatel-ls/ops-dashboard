@@ -4,6 +4,7 @@ import { localDay, newId } from '@ops-dashboard/core';
 import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
+import { newestFirstBy } from './recency';
 
 const MAX_PERSON_FACTS = 100;
 const MAX_PERSON_INTERACTIONS = 500;
@@ -146,17 +147,9 @@ export function latestInteraction(interactions: Interaction[]): Interaction | nu
   return latest;
 }
 
-export function compareInteractionRecency(left: Interaction, right: Interaction): number {
-  const leftTimestamp = Date.parse(left.date);
-  const rightTimestamp = Date.parse(right.date);
-  const leftValid = Number.isFinite(leftTimestamp);
-  const rightValid = Number.isFinite(rightTimestamp);
-  if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
-    return rightTimestamp - leftTimestamp;
-  }
-  if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
-}
+/** Interactions carry their timestamp on `date`, not `createdAt`. */
+export const compareInteractionRecency: (left: Interaction, right: Interaction) => number =
+  newestFirstBy('date');
 
 export function createPerson(input: {
   name: string;
