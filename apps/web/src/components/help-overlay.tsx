@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useAppStore } from '@/lib/app-store';
+import { wrapTabFocus } from '@/lib/focus-trap';
 
 const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
   {
@@ -61,22 +62,7 @@ export function HelpOverlay() {
         close();
         return;
       }
-      if (event.key !== 'Tab') return;
-      const focusable = Array.from(
-        dialogRef.current?.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ) ?? [],
-      );
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      wrapTabFocus(event, dialogRef.current);
     }
 
     document.addEventListener('keydown', onKeyDown);

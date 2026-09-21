@@ -6,6 +6,7 @@ import { Calendar, Lightbulb, MessageSquare, Plus, Trash2, X } from 'lucide-reac
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { relativeTimeLabel } from '@/lib/relative-time';
+import { wrapTabFocus } from '@/lib/focus-trap';
 import {
   compareInteractionRecency,
   deletePerson,
@@ -383,22 +384,7 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
         onClose();
         return;
       }
-      if (e.key !== 'Tab') return;
-      const focusable = Array.from(
-        panelRef.current?.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ) ?? [],
-      );
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
+      wrapTabFocus(e, panelRef.current);
     }
 
     window.addEventListener('keydown', onKey);
