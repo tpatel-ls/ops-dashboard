@@ -18,6 +18,8 @@ import { addDays, format } from 'date-fns';
 import { getDb, newId, todayIso } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { wrapTabFocus } from '@/lib/focus-trap';
+import { useMediaQuery } from '@/lib/use-media-query';
 import {
   availableTask,
   setChecklist,
@@ -43,6 +45,13 @@ export function TaskEditDrawer() {
   const close = useAppStore((s) => s.closeEdit);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Below `lg` the drawer is a modal sheet over a dimming backdrop. At `lg`
+  // and wider it is a docked master-detail pane: the backdrop becomes a
+  // transparent click-through spacer and the list beside it stays usable.
+  // Claiming `aria-modal` there told assistive technology that list was
+  // inert, so it was skipped while it was plainly still interactive.
+  const docked = useMediaQuery('(min-width: 64rem)');
   const task = useLiveQuery(
     async () => (id ? availableTask(await getDb().tasks.get(id)) : null),
     [id],
@@ -53,7 +62,13 @@ export function TaskEditDrawer() {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+      // Only while it is actually modal: trapping Tab in the docked pane
+      // would strand the keyboard there with the list still on screen.
+      if (!docked) wrapTabFocus(event, panelRef.current);
     };
     document.addEventListener('keydown', onKeyDown);
     return () => {
@@ -61,7 +76,7 @@ export function TaskEditDrawer() {
       document.removeEventListener('keydown', onKeyDown);
       previousFocusRef.current?.focus();
     };
-  }, [close, id]);
+  }, [close, docked, id]);
 
   if (!id) return null;
 
@@ -72,9 +87,10 @@ export function TaskEditDrawer() {
           docked detail pane (master-detail). */}
       <div className="flex-1 bg-black/40 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none" />
       <div
+        ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
-        aria-modal="true"
+        aria-modal={docked ? undefined : true}
         aria-label="Edit task"
         className="surface pointer-events-auto relative h-full w-full max-w-md scrollbar-thin overflow-y-auto rounded-none border-y-0 border-r-0 lg:border-l lg:shadow-2xl"
       >
