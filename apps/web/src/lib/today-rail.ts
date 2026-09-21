@@ -27,3 +27,53 @@ export function validRailEnd(startAt: string, endAt: string | undefined): Date |
   const end = endAt ? Date.parse(endAt) : Number.NaN;
   return Number.isFinite(start) && Number.isFinite(end) && end > start ? new Date(end) : undefined;
 }
+
+const LAST_HOUR = 23;
+
+/** Hour index for an "HH:MM" settings value, or undefined when unusable. */
+function settingHour(value: string): number | undefined {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return undefined;
+  const hour = Number(match[1]);
+  return Number.isInteger(hour) && hour >= 0 && hour <= LAST_HOUR ? hour : undefined;
+}
+
+function blockHour(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? new Date(timestamp).getHours() : undefined;
+}
+
+/**
+ * Inclusive hour range the rail draws.
+ *
+ * The settings page presents the workday as the thing that "drives the Today
+ * rail", but the rail hardcoded 07:00 to 22:00 and ignored it. Simply
+ * switching to the setting would be worse than the hardcoded range: the
+ * default workday ends at 18:00, so an evening block would sit outside the
+ * drawn hours entirely.
+ *
+ * So the workday sets the floor and the day's own blocks widen it. Anything
+ * scheduled is always on the rail, and a user who narrows their workday gets
+ * a shorter rail on the days that allow one. An unusable stored value falls
+ * back to the range the rail used before.
+ */
+export function railHourRange(
+  workdayStart: string,
+  workdayEnd: string,
+  blocks: Array<Pick<Task, 'startAt' | 'endAt'>> = [],
+): { startHour: number; endHour: number } {
+  const configuredStart = settingHour(workdayStart) ?? 7;
+  const configuredEnd = settingHour(workdayEnd) ?? 22;
+  let startHour = Math.min(configuredStart, configuredEnd);
+  let endHour = Math.max(configuredStart, configuredEnd);
+
+  for (const block of blocks) {
+    for (const hour of [blockHour(block.startAt), blockHour(block.endAt)]) {
+      if (hour === undefined) continue;
+      startHour = Math.min(startHour, hour);
+      endHour = Math.max(endHour, hour);
+    }
+  }
+  return { startHour, endHour };
+}

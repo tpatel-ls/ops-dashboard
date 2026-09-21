@@ -6,15 +6,15 @@ import { format } from 'date-fns';
 import { getDb, todayIso } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { usePageVisibility } from '@/lib/use-page-visibility';
-import { tasksForTodayRail, validRailEnd } from '@/lib/today-rail';
+import { useLiveSettings } from '@/lib/use-settings';
+import { railHourRange, tasksForTodayRail, validRailEnd } from '@/lib/today-rail';
 
 const HOUR_HEIGHT = 44;
-const START_HOUR = 7;
-const END_HOUR = 22;
 
 export function TodayRail() {
   const [now, setNow] = useState(() => new Date());
   const visibility = usePageVisibility();
+  const settings = useLiveSettings();
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 60_000);
@@ -33,8 +33,13 @@ export function TodayRail() {
     return tasksForTodayRail(all, today);
   });
 
-  const hours = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
-  const minutesIntoDay = (d: Date) => (d.getHours() - START_HOUR) * 60 + d.getMinutes();
+  const { startHour, endHour } = railHourRange(
+    settings.workdayStart,
+    settings.workdayEnd,
+    blocks ?? [],
+  );
+  const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
+  const minutesIntoDay = (d: Date) => (d.getHours() - startHour) * 60 + d.getMinutes();
   const nowOffset = (minutesIntoDay(now) / 60) * HOUR_HEIGHT;
   const nextBlock = blocks?.filter((task) => Date.parse(task.startAt!) >= now.getTime())[0];
 
