@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { tasksForTodayRail, validRailEnd } from './today-rail';
+import { railHourRange, tasksForTodayRail, validRailEnd } from './today-rail';
 
 function task(id: string, startAt: string, patch: Partial<Task> = {}): Task {
   return {
@@ -68,5 +68,47 @@ describe('validRailEnd', () => {
     );
     expect(validRailEnd('2026-08-20T14:00:00Z', 'not-a-date')).toBeUndefined();
     expect(validRailEnd('2026-08-20T14:00:00Z', '2026-08-20T13:00:00Z')).toBeUndefined();
+  });
+});
+
+describe('railHourRange', () => {
+  const at = (hour: number) => new Date(2026, 8, 21, hour, 0, 0).toISOString();
+
+  it('spans the configured workday when nothing is scheduled outside it', () => {
+    expect(railHourRange('08:00', '18:00')).toEqual({ startHour: 8, endHour: 18 });
+  });
+
+  it('narrows with a shorter workday', () => {
+    expect(railHourRange('09:00', '15:00')).toEqual({ startHour: 9, endHour: 15 });
+  });
+
+  it('widens to keep an early block on the rail', () => {
+    expect(railHourRange('08:00', '18:00', [{ startAt: at(6) }])).toEqual({
+      startHour: 6,
+      endHour: 18,
+    });
+  });
+
+  it('widens to keep a late block and its end hour on the rail', () => {
+    expect(railHourRange('08:00', '18:00', [{ startAt: at(20), endAt: at(22) }])).toEqual({
+      startHour: 8,
+      endHour: 22,
+    });
+  });
+
+  it('ignores a block whose timestamps do not parse', () => {
+    expect(railHourRange('08:00', '18:00', [{ startAt: 'nope', endAt: undefined }])).toEqual({
+      startHour: 8,
+      endHour: 18,
+    });
+  });
+
+  it('falls back to the previous fixed range when the setting is unusable', () => {
+    expect(railHourRange('', '')).toEqual({ startHour: 7, endHour: 22 });
+    expect(railHourRange('99:00', '18:00')).toEqual({ startHour: 7, endHour: 18 });
+  });
+
+  it('orders the range even when the stored workday is inverted', () => {
+    expect(railHourRange('18:00', '08:00')).toEqual({ startHour: 8, endHour: 18 });
   });
 });
