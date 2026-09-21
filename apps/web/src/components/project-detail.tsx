@@ -16,6 +16,7 @@ import type {
 } from '@ops-dashboard/core';
 import { updateProject } from '@/lib/projects';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
 import { useActiveOrgs } from '@/components/org-switcher';
@@ -754,6 +755,8 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
+
+  useBodyScrollLock();
 
   // Move focus into the panel, keep Tab inside it while it is open, and hand
   // focus back to the trigger on close. Matches the help overlay and the work

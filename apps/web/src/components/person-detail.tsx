@@ -7,6 +7,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { Domain, Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import {
   compareInteractionRecency,
   deletePerson,
@@ -370,6 +371,8 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useBodyScrollLock();
 
   // Move focus into the panel, keep Tab inside it while it is open, and hand
   // focus back to the trigger on close. Matches the project detail panel and

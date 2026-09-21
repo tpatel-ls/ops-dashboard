@@ -8,6 +8,7 @@ import { getDb, isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { rollForwardTasks, taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
 import { updateTask } from '@/lib/tasks';
 
@@ -32,6 +33,8 @@ function DailyReview({ onClose }: { onClose: () => void }) {
   });
   const [rolling, setRolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useBodyScrollLock();
 
   useEffect(() => {
     const previousFocus = document.activeElement as HTMLElement | null;
