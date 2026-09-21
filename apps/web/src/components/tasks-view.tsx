@@ -1,6 +1,5 @@
 'use client';
 
-import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowUpDown,
@@ -13,7 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
-import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -51,7 +50,7 @@ function TaskRow({
   const done = task.status === 'done';
   const openEdit = useAppStore((state) => state.openEdit);
   const dateValue = taskDueOrScheduledDay(task);
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = todayIso();
   const overdue = Boolean(!done && dateValue && dateValue < today);
   const dueToday = Boolean(!done && dateValue === today);
   const dateLabel = dateValue ? taskDateLabel(dateValue, today, done) : null;
@@ -317,9 +316,7 @@ export function TasksView() {
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
       const taskDate = taskDueOrScheduledDay(task);
-      return (
-        task.status !== 'done' && Boolean(taskDate && taskDate < format(new Date(), 'yyyy-MM-dd'))
-      );
+      return task.status !== 'done' && Boolean(taskDate && taskDate < todayIso());
     }).length ?? 0;
 
   return (

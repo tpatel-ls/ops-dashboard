@@ -14,8 +14,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { addDays, format } from 'date-fns';
-import { getDb, newId, todayIso } from '@ops-dashboard/core';
+import { addDays } from 'date-fns';
+import { getDb, isoDay, newId, todayIso } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
@@ -247,8 +247,8 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               aria-label="Quick schedule task"
             >
               {[
-                { label: 'Today', value: format(new Date(), 'yyyy-MM-dd') },
-                { label: 'Tomorrow', value: format(addDays(new Date(), 1), 'yyyy-MM-dd') },
+                { label: 'Today', value: todayIso() },
+                { label: 'Tomorrow', value: isoDay(addDays(new Date(), 1)) },
                 { label: 'Clear date', value: undefined },
               ].map((option) => (
                 <button

@@ -18,7 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { differenceInDays, format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
-import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type {
   Domain,
   Organization,
@@ -285,9 +285,7 @@ function ProjectCard({
   const isSlipping = daysAgo === null || daysAgo > SLIPPING_DAYS;
   const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
   const dueLabel = parsedDueDate && isValid(parsedDueDate) ? format(parsedDueDate, 'MMM d') : null;
-  const isOverdue = Boolean(
-    dueLabel && project.dueDate && project.dueDate < format(new Date(), 'yyyy-MM-dd'),
-  );
+  const isOverdue = Boolean(dueLabel && project.dueDate && project.dueDate < todayIso());
 
   return (
     <article

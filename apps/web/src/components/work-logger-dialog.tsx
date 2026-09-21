@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 import {
   Check,
   ChevronDown,
@@ -15,7 +15,7 @@ import {
   Timer,
   X,
 } from 'lucide-react';
-import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, isoDay, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Priority, Project, ProjectKind } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore, type WorkLoggerMode } from '@/lib/app-store';
@@ -69,7 +69,7 @@ function rememberDestination(destination: WorkDestination): void {
 }
 
 function localDate(offsetDays = 0): string {
-  return format(addDays(new Date(), offsetDays), 'yyyy-MM-dd');
+  return isoDay(addDays(new Date(), offsetDays));
 }
 
 function destinationName(destination: WorkDestination, orgs: Organization[]): string {
