@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import {
   Calendar,
   CalendarDays,
@@ -28,6 +28,7 @@ import {
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { wrapTabFocus } from '@/lib/focus-trap';
 import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useInstallPrompt } from '@/lib/use-install-prompt';
 import { useOrgStore } from '@/lib/org-store';
@@ -65,6 +66,7 @@ export function CommandPalette() {
   const setCtx = useOrgStore((s) => s.setCtx);
   const orgs = useActiveOrgs();
   const router = useRouter();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -79,13 +81,21 @@ export function CommandPalette() {
   // deliberately skipped while a text field has focus, so nothing was left to
   // dismiss the palette from the keyboard. Every other overlay in the app owns
   // its own Escape listener for the same reason.
+  //
+  // Tab is handled here too: the palette sets `aria-modal="true"`, but without
+  // a trap Tab walked straight out of it into the page behind, which is still
+  // fully tabbable. cmdk only binds the arrow keys, so nothing else contained
+  // it.
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      setQuery('');
-      close();
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setQuery('');
+        close();
+        return;
+      }
+      wrapTabFocus(event, dialogRef.current);
     }
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -150,6 +160,7 @@ export function CommandPalette() {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
