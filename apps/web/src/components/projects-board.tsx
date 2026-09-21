@@ -31,6 +31,7 @@ import { createProject, projectTaskProgress, type ProjectTaskProgress } from '@/
 import { workLoggedHours } from '@/lib/worklogs';
 import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '@/lib/work-logger';
 import { useAppStore } from '@/lib/app-store';
+import { useLiveSettings } from '@/lib/use-settings';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
 import { compareProjects, matchesProjectSearch, type ProjectSort } from '@/lib/project-query';
@@ -65,7 +66,6 @@ const STATUS_CLASSES: Record<ProjectStatus, string> = {
   archived: 'border-border bg-bg-sunken text-subtle-foreground',
 };
 
-const SLIPPING_DAYS = 5;
 type ProjectStatusFilter = 'all' | Exclude<ProjectStatus, 'archived'>;
 const STATUS_FILTERS: Array<{ id: ProjectStatusFilter; label: string }> = [
   { id: 'all', label: 'All' },
@@ -263,6 +263,7 @@ interface ProjectCardProps {
   onAddTask: () => void;
   onLogProgress: () => void;
   showOrganization: boolean;
+  slippingDays: number;
 }
 
 function ProjectCard({
@@ -271,6 +272,7 @@ function ProjectCard({
   onAddTask,
   onLogProgress,
   showOrganization,
+  slippingDays,
 }: ProjectCardProps) {
   const { project, domain, organization, hoursLogged, taskProgress } = data;
 
@@ -282,7 +284,7 @@ function ProjectCard({
   const parsedLastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
   const lastWorked = parsedLastWorked && isValid(parsedLastWorked) ? parsedLastWorked : null;
   const daysAgo = lastWorked ? differenceInDays(new Date(), lastWorked) : null;
-  const isSlipping = daysAgo === null || daysAgo > SLIPPING_DAYS;
+  const isSlipping = daysAgo === null || daysAgo > slippingDays;
   const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
   const dueLabel = parsedDueDate && isValid(parsedDueDate) ? format(parsedDueDate, 'MMM d') : null;
   const isOverdue = Boolean(dueLabel && project.dueDate && project.dueDate < todayIso());
@@ -455,6 +457,7 @@ function KindGroup({
   onAddTask,
   onLogProgress,
   showOrganization,
+  slippingDays,
 }: {
   kind: ProjectKind;
   items: ProjectCardData[];
@@ -462,6 +465,7 @@ function KindGroup({
   onAddTask: (project: Project) => void;
   onLogProgress: (project: Project) => void;
   showOrganization: boolean;
+  slippingDays: number;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const Icon = KIND_ICONS[kind];
@@ -504,6 +508,7 @@ function KindGroup({
               onAddTask={() => onAddTask(item.project)}
               onLogProgress={() => onLogProgress(item.project)}
               showOrganization={showOrganization}
+              slippingDays={slippingDays}
             />
           ))}
         </div>
@@ -523,6 +528,7 @@ export function ProjectsBoard() {
   const searchRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((s) => s.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
+  const slippingDays = useLiveSettings().slippingDays;
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -762,6 +768,7 @@ export function ProjectsBoard() {
                 onAddTask={(project) => openWorkLogger('task', project.id)}
                 onLogProgress={(project) => openWorkLogger('progress', project.id)}
                 showOrganization={ctx === 'all'}
+                slippingDays={slippingDays}
               />
             ))}
           </div>
