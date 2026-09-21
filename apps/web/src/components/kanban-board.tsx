@@ -9,7 +9,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { format } from 'date-fns';
+
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   CalendarClock,
@@ -22,7 +22,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
-import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -271,7 +271,7 @@ function KanbanCard({
   const openEdit = useAppStore((state) => state.openEdit);
   const organization = organizationId ? organizationsMap.get(organizationId) : undefined;
   const dateValue = taskDueOrScheduledDay(task);
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = todayIso();
   const overdue = Boolean(task.status !== 'done' && dateValue && dateValue < today);
   const dateLabel = dateValue ? taskDateLabel(dateValue, today, task.status === 'done') : null;
   const currentColumn = simpleKanbanColumn(task.status) ?? 'todo';

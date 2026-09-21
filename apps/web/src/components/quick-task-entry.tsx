@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 import { Check, ChevronDown, Loader2, Plus, SlidersHorizontal } from 'lucide-react';
-import { getDb } from '@ops-dashboard/core';
+import { getDb, isoDay } from '@ops-dashboard/core';
 import type { Priority, Project } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useOrgStore } from '@/lib/org-store';
@@ -43,7 +43,7 @@ interface QuickTaskEntryProps {
 }
 
 function localDate(offsetDays = 0): string {
-  return format(addDays(new Date(), offsetDays), 'yyyy-MM-dd');
+  return isoDay(addDays(new Date(), offsetDays));
 }
 
 export function QuickTaskEntry({

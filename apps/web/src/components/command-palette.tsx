@@ -1,7 +1,7 @@
 'use client';
 
 import { Command } from 'cmdk';
-import { format } from 'date-fns';
+
 import { useLiveQuery } from 'dexie-react-hooks';
 import Fuse from 'fuse.js';
 import { useRouter } from 'next/navigation';
@@ -25,7 +25,7 @@ import {
   Settings as SettingsIcon,
   X,
 } from 'lucide-react';
-import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type { OrgContext } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
@@ -70,7 +70,7 @@ export function CommandPalette() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = todayIso();
   const { canPrompt: canInstall, prompt: promptInstall } = useInstallPrompt();
 
   function dismiss() {
