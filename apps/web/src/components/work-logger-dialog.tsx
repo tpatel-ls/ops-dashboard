@@ -20,6 +20,7 @@ import type { Organization, Priority, Project, ProjectKind } from '@ops-dashboar
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore, type WorkLoggerMode } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { useOrgStore } from '@/lib/org-store';
 import { useSyncStatus } from '@/lib/sync/status';
 import { useVoiceInput } from '@/lib/use-voice-input';
@@ -191,12 +192,12 @@ function WorkLoggerPanel({
   const selectedProject = filteredProjects.find((project) => project.id === projectId);
   const selectedDestinationName = destinationName(destination, organizations);
 
+  useBodyScrollLock();
+
   useEffect(() => {
     const panel = panelRef.current;
     if (!panel) return;
     previousFocusRef.current = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     const initialFocus = panel.querySelector<HTMLElement>('[data-autofocus]');
     initialFocus?.focus();
 
@@ -217,7 +218,6 @@ function WorkLoggerPanel({
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = previousOverflow;
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
