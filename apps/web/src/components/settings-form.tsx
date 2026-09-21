@@ -87,7 +87,7 @@ export function SettingsForm() {
         </div>
       </Section>
 
-      <Section title="Workday" description="Drives the Today rail and the daily review prompt.">
+      <Section title="Workday" description="Drives the Today rail and the week views.">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Workday start">
             <input
@@ -115,7 +115,7 @@ export function SettingsForm() {
               <option value={0}>Sunday</option>
             </select>
           </Field>
-          <Field label="Daily review at">
+          <Field label="Daily review at" hint="Saved, but the prompt is still manual.">
             <input
               type="time"
               value={settings.dailyReviewAt}
@@ -373,11 +373,20 @@ function Section({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="text-muted-foreground flex flex-col gap-1 text-xs">
       <span>{label}</span>
       {children}
+      {hint ? <span className="text-subtle-foreground text-[11px]">{hint}</span> : null}
     </label>
   );
 }
