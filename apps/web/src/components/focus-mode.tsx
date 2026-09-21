@@ -7,6 +7,7 @@ import { getDb, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { taskScheduledOn } from '@/lib/task-dates';
 import {
   accumulatedFocusMinutes,
@@ -113,11 +114,11 @@ export function FocusMode() {
     return () => window.clearInterval(id);
   }, [running]);
 
+  useBodyScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     previousFocusRef.current = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     const focusFrame = window.requestAnimationFrame(() => exitButtonRef.current?.focus());
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -130,7 +131,6 @@ export function FocusMode() {
     window.addEventListener('keydown', onKeyDown);
     return () => {
       window.cancelAnimationFrame(focusFrame);
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', onKeyDown);
       previousFocusRef.current?.focus();
     };
