@@ -5,6 +5,7 @@ import { ActivityCalendar } from 'react-activity-calendar';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import type { ActivityDay } from '@/lib/activity';
+import { useLiveSettings } from '@/lib/use-settings';
 
 interface ActivityHeatmapProps {
   data: ActivityDay[];
@@ -51,6 +52,10 @@ const DARK_RAMP: [string, string, string, string, string] = [
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const [dark, setDark] = useState(true);
+  // Every other week-aware view reads this setting, including the weekly
+  // stats directly above this heatmap on the habits page. `weekStart` here
+  // takes the same 0-is-Sunday index the setting stores.
+  const weekStartsOn = useLiveSettings().weekStartsOn;
   const total = data.reduce((sum, day) => sum + day.count, 0);
   const activeDays = data.filter((day) => day.count > 0).length;
   const peak = Math.max(0, ...data.map((day) => day.count));
@@ -96,7 +101,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
         <ActivityCalendar
           data={data}
           maxLevel={4}
-          weekStart={1}
+          weekStart={weekStartsOn}
           colorScheme={dark ? 'dark' : 'light'}
           theme={{
             light: LIGHT_RAMP,
