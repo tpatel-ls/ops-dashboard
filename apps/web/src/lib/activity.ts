@@ -1,4 +1,4 @@
-import { getDb, localDay } from '@ops-dashboard/core';
+import { getDb, isoDay, localDay } from '@ops-dashboard/core';
 import type { JournalEntry, RoutineCheck, Task, WorkLog } from '@ops-dashboard/core';
 import { differenceInCalendarDays } from 'date-fns';
 
@@ -51,15 +51,6 @@ export function activityTimestampWithin(value: unknown, start: Date, end: Date):
   );
 }
 
-/** Convert any ISO/Date to a local YYYY-MM-DD string. */
-function toLocalDate(ts: string | Date): string {
-  const d = typeof ts === 'string' ? new Date(ts) : ts;
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
 /** Derive bucket level 0..4 from a count. */
 function toLevel(count: number): number {
   if (count === 0) return 0;
@@ -91,7 +82,7 @@ export function aggregateActivity(
   endTime.setHours(23, 59, 59, 999);
 
   while (cursor <= endTime) {
-    const date = toLocalDate(cursor);
+    const date = isoDay(cursor);
     const score = scores.get(date);
     const count = typeof score === 'number' && Number.isFinite(score) ? Math.max(0, score) : 0;
     result.push({ date, count, level: toLevel(count) });
@@ -147,7 +138,7 @@ export async function loadActivity(days = 365): Promise<ActivityDay[]> {
   start.setDate(start.getDate() - safeDays + 1);
   start.setHours(0, 0, 0, 0);
 
-  const startDay = toLocalDate(start);
+  const startDay = isoDay(start);
 
   const [tasks, checks, journals, workLogs] = await Promise.all([
     db.tasks
