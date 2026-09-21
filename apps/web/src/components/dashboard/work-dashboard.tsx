@@ -3,7 +3,7 @@
 import { format, isValid, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Plus } from 'lucide-react';
-import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
+import { getDb, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -16,7 +16,7 @@ export function WorkDashboard() {
   const ctx = useOrgStore((state) => state.ctx);
   const openEdit = useAppStore((state) => state.openEdit);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = todayIso();
   const data = useLiveQuery(async () => {
     const db = getDb();
     const [tasks, projects, organizations] = await Promise.all([
