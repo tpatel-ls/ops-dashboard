@@ -10,6 +10,7 @@ import {
   computeStreak,
   deleteRoutine,
   fixedRoutineDuration,
+  isRoutineDoneOn,
   toggleRoutineCheck,
 } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
@@ -44,7 +45,7 @@ interface RoutineCardProps {
 }
 
 function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
-  const doneToday = checks.some((c) => c.routineId === routine.id && c.date === today && c.done);
+  const doneToday = isRoutineDoneOn(checks, routine.id, today);
   const routineChecks = checks.filter((c) => c.routineId === routine.id);
   const streak = computeStreak(routineChecks, today);
 
@@ -192,9 +193,7 @@ function TimeOfDaySection({ label, routines, checks, domains, today }: TimeOfDay
   if (routines.length === 0) return null;
 
   const domainMap = new Map(domains.map((d) => [d.id, d]));
-  const doneCount = routines.filter((r) =>
-    checks.some((c) => c.routineId === r.id && c.date === today && c.done),
-  ).length;
+  const doneCount = routines.filter((r) => isRoutineDoneOn(checks, r.id, today)).length;
 
   return (
     <section className="grid gap-2">
