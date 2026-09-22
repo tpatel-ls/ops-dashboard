@@ -531,6 +531,47 @@ describe('life management summary', () => {
     expect(summary.identityScore).toBe(18);
   });
 
+  it('counts a routine and a meal logged today when the day arrived as an instant', () => {
+    const routine: Routine = {
+      ...meta('r'),
+      name: 'Read',
+      timeOfDay: 'anytime',
+      notify: false,
+      kind: 'ongoing',
+      startDate: '2026-07-01',
+      order: 1,
+    };
+    const instantToday = new Date(2026, 6, 6, 12, 0, 0).toISOString();
+
+    const summary = summarizeLifeManagement({
+      tasks: [],
+      projects: [],
+      domains: [],
+      routines: [routine],
+      routineChecks: [
+        { ...meta('check'), routineId: 'r', date: instantToday, done: true } satisfies RoutineCheck,
+      ],
+      captures: [],
+      journalEntries: [],
+      foodLogs: [
+        {
+          ...meta('meal'),
+          date: instantToday,
+          mealType: 'lunch',
+          description: 'Salad',
+          items: [],
+          totalCalories: 400,
+        } satisfies FoodLog,
+      ],
+      today: '2026-07-06',
+      now,
+    });
+
+    expect(summary.routineDone).toBe(1);
+    expect(summary.routinePct).toBe(100);
+    expect(summary.mealsLogged).toBe(1);
+  });
+
   it('scores a synced day the same whether it arrived as a day or an instant', () => {
     // `fromRow` casts a synced row without validating, so `date` can reach
     // Dexie as an instant. The streak cursor and the weekly active-day Set are

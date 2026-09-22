@@ -199,9 +199,12 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
       (!routine.endDate || (endDay === routine.endDate && endDay >= today)),
     );
   });
+  // `=== today` only matches a day already stored date-only. A check synced
+  // as an instant fell out of the map, so the routine read as not done and
+  // "N left today" counted work the user had already logged.
   const checksToday = new Map(
     input.routineChecks
-      .filter((check) => !check.deletedAt && check.date === today)
+      .filter((check) => !check.deletedAt && localDay(check.date) === today)
       .map((check) => [check.routineId, check.done]),
   );
   const routineDone = activeRoutines.filter(
@@ -210,7 +213,9 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   const routineTotal = activeRoutines.length;
   const routinePct = routineTotal > 0 ? clamp((routineDone / routineTotal) * 100) : 100;
 
-  const mealsLogged = input.foodLogs.filter((log) => !log.deletedAt && log.date === today).length;
+  const mealsLogged = input.foodLogs.filter(
+    (log) => !log.deletedAt && localDay(log.date) === today,
+  ).length;
   const latestJournal = input.journalEntries
     .filter((entry) => {
       const date = localDay(entry.date);
