@@ -142,7 +142,7 @@ export function SettingsForm() {
         </Field>
       </Section>
 
-      <Section title="Default view" description="Where Ops Dashboard opens.">
+      <Section title="Default view" description="Where Taskify opens.">
         <select
           aria-label="Default view"
           value={settings.defaultView}
@@ -311,7 +311,7 @@ export function SettingsForm() {
             type="button"
             onClick={async () => {
               const data = await exportAll();
-              const md = tasksToMarkdown(data.tasks, 'Ops Dashboard tasks');
+              const md = tasksToMarkdown(data.tasks, 'Taskify tasks');
               downloadText(md, `ops-dashboard-${todayIso()}.md`);
             }}
             className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
