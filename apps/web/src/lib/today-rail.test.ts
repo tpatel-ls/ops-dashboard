@@ -111,4 +111,34 @@ describe('railHourRange', () => {
   it('orders the range even when the stored workday is inverted', () => {
     expect(railHourRange('18:00', '08:00')).toEqual({ startHour: 8, endHour: 18 });
   });
+
+  it('draws a block that runs past midnight to the last hour of the day', () => {
+    const startAt = new Date(2026, 8, 21, 22, 0, 0).toISOString();
+    const endAt = new Date(2026, 8, 22, 0, 30, 0).toISOString();
+    // The end hour is 0 on the FOLLOWING day. Reading it as an hour of this
+    // day dragged the rail's top back to midnight and left 22 empty rows
+    // above the only block on it.
+    expect(railHourRange('08:00', '18:00', [{ startAt, endAt }])).toEqual({
+      startHour: 8,
+      endHour: 23,
+    });
+  });
+
+  it('keeps a block that ends exactly at midnight on the same rail', () => {
+    const startAt = new Date(2026, 8, 21, 21, 0, 0).toISOString();
+    const endAt = new Date(2026, 8, 22, 0, 0, 0).toISOString();
+    expect(railHourRange('08:00', '18:00', [{ startAt, endAt }])).toEqual({
+      startHour: 8,
+      endHour: 23,
+    });
+  });
+
+  it('ignores an end that precedes its own start', () => {
+    const startAt = new Date(2026, 8, 21, 10, 0, 0).toISOString();
+    const endAt = new Date(2026, 8, 20, 23, 0, 0).toISOString();
+    expect(railHourRange('08:00', '18:00', [{ startAt, endAt }])).toEqual({
+      startHour: 8,
+      endHour: 18,
+    });
+  });
 });
