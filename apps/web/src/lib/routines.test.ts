@@ -280,6 +280,19 @@ describe('computeStreak', () => {
     expect(computeStreak(checks, '2026-08-20')).toBe(2);
     expect(computeStreak(checks, '2026-02-30')).toBe(0);
   });
+
+  it('counts a check whose day arrived as a timestamp', () => {
+    // `fromRow` casts a synced row without validating, so a check can reach
+    // Dexie carrying an instant instead of a date-only day. Discarding it cut
+    // the streak short at that day.
+    const checks = [
+      { id: 'today', date: '2026-08-20', done: true },
+      { id: 'yesterday', date: new Date(2026, 7, 19, 12, 0, 0).toISOString(), done: true },
+      { id: 'two-days-ago', date: '2026-08-18', done: true },
+    ] as never;
+
+    expect(computeStreak(checks, '2026-08-20')).toBe(3);
+  });
 });
 
 describe('fixedRoutineDuration', () => {

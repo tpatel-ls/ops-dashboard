@@ -242,13 +242,22 @@ export async function toggleRoutineCheck(
   }
 }
 
-/** Consecutive done-days ending today (or yesterday if today is not done yet). */
+/**
+ * Consecutive done-days ending today (or yesterday if today is not done yet).
+ *
+ * `routineChecks.date` is meant to be a date-only local day and the write path
+ * enforces that, but synced rows reach Dexie through `fromRow`, which casts
+ * without validating. Dropping a check whose date arrived as a timestamp broke
+ * the streak at that day and reported a shorter run than the user had kept, so
+ * every stored day is resolved through `localDay` instead.
+ */
 export function computeStreak(checks: RoutineCheck[], today = todayIso()): number {
   if (localDay(today) !== today) return 0;
   const done = new Set(
     checks
-      .filter((check) => check.done && !check.deletedAt && localDay(check.date) === check.date)
-      .map((check) => check.date),
+      .filter((check) => check.done && !check.deletedAt)
+      .map((check) => localDay(check.date))
+      .filter((day): day is string => Boolean(day)),
   );
   let streak = 0;
   let cursor = today;
