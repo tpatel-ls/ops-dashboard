@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Flame } from 'lucide-react';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb, localDay, todayIso } from '@ops-dashboard/core';
 import type { TimeOfDay } from '@ops-dashboard/core';
 import { computeStreak, toggleRoutineCheck } from '@/lib/routines';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
@@ -35,10 +35,15 @@ export function RoutineChecklist() {
       (checksByRoutine[check.routineId] ??= []).push(check);
     }
 
-    // Today's checks: routineId -> done
+    // Today's checks: routineId -> done.
+    //
+    // The stored day is resolved rather than compared with `===`. Synced rows
+    // reach Dexie through `fromRow`, which casts without validating, so a
+    // check can carry an instant instead of a date-only day; that check fell
+    // out of the map and the routine read as untouched on the Today page.
     const todayDone: Record<string, boolean> = {};
     for (const check of activeChecks) {
-      if (check.date === today) todayDone[check.routineId] = check.done;
+      if (localDay(check.date) === today) todayDone[check.routineId] = check.done;
     }
 
     // Group routines by timeOfDay
