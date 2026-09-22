@@ -45,6 +45,25 @@ function blockHour(value: string | undefined): number | undefined {
 }
 
 /**
+ * Hour a block's end contributes to the rail.
+ *
+ * The rail draws a single day, so an end that lands on a later calendar day
+ * runs past the bottom of the rail rather than back up to its top. Taking its
+ * raw hour read a 22:00 to 00:30 block as ending at hour 0 and dragged the
+ * whole rail back to midnight, leaving 22 empty rows above the only block of
+ * the day. Such a block is drawn to the last hour instead. An end that
+ * precedes its own start is unusable and contributes nothing.
+ */
+function blockEndHour(startAt: string | undefined, endAt: string | undefined): number | undefined {
+  const endHour = blockHour(endAt);
+  if (endHour === undefined) return undefined;
+  const startDay = localDay(startAt);
+  const endDay = localDay(endAt);
+  if (!startDay || !endDay || startDay === endDay) return endHour;
+  return endDay > startDay ? LAST_HOUR : undefined;
+}
+
+/**
  * Inclusive hour range the rail draws.
  *
  * The settings page presents the workday as the thing that "drives the Today
@@ -69,11 +88,15 @@ export function railHourRange(
   let endHour = Math.max(configuredStart, configuredEnd);
 
   for (const block of blocks) {
-    for (const hour of [blockHour(block.startAt), blockHour(block.endAt)]) {
-      if (hour === undefined) continue;
-      startHour = Math.min(startHour, hour);
-      endHour = Math.max(endHour, hour);
+    // Only the start may pull the rail earlier. An end never can: it is always
+    // at or after its own start.
+    const start = blockHour(block.startAt);
+    if (start !== undefined) {
+      startHour = Math.min(startHour, start);
+      endHour = Math.max(endHour, start);
     }
+    const end = blockEndHour(block.startAt, block.endAt);
+    if (end !== undefined) endHour = Math.max(endHour, end);
   }
   return { startHour, endHour };
 }
