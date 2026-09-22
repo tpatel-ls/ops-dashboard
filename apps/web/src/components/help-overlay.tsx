@@ -15,6 +15,7 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
       ['Q', 'Capture a task'],
       ['g a', 'Add task'],
       ['f', 'Focus mode'],
+      ['/', 'Search, on the task list'],
       ['Esc', 'Close any overlay'],
     ],
   },
