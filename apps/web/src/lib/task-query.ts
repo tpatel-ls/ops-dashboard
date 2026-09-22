@@ -1,12 +1,6 @@
 import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
-
-function taskDate(task: Task): string | null {
-  const dates = [task.scheduledFor, task.dueAt, task.startAt]
-    .map((value) => localDay(value))
-    .filter((value): value is string => Boolean(value));
-  return dates.sort()[0] ?? null;
-}
+import { taskEarliestDay } from './task-dates';
 
 function taskPriority(task: Task): number {
   return Number.isFinite(task.priority) && task.priority >= 0 && task.priority <= 3
@@ -23,8 +17,8 @@ function taskFilterText(value: string): string {
 }
 
 export function compareTasks(a: Task, b: Task): number {
-  const aDate = taskDate(a);
-  const bDate = taskDate(b);
+  const aDate = taskEarliestDay(a);
+  const bDate = taskEarliestDay(b);
   if (aDate && !bDate) return -1;
   if (!aDate && bDate) return 1;
   if (aDate && bDate) {

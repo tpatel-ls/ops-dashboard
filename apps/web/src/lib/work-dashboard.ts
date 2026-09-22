@@ -2,6 +2,7 @@ import { localDay, matchesOrgContext } from '@ops-dashboard/core';
 import type { OrgContext, Project, Task } from '@ops-dashboard/core';
 import { taskLane } from './org-lanes';
 import { isActiveProject } from './project-query';
+import { taskEarliestDay } from './task-dates';
 import { compareTasks } from './task-query';
 
 export interface WorkProjectSummary {
@@ -22,21 +23,6 @@ export interface WorkDashboardModel {
     today: number;
     activeProjects: number;
   };
-}
-
-/**
- * The day a task lands on in this dashboard: the earliest of its scheduled,
- * due, and start days.
- *
- * Exported because the agenda row must label a task with the same day that
- * put it in its section. Deriving the label separately made the two disagree
- * whenever a task's earliest day was not its first populated field.
- */
-export function workTaskDay(task: Pick<Task, 'scheduledFor' | 'dueAt' | 'startAt'>) {
-  const dates = [task.scheduledFor, task.dueAt, task.startAt]
-    .map((value) => localDay(value))
-    .filter((value): value is string => Boolean(value));
-  return dates.sort()[0];
 }
 
 function projectOrder(a: WorkProjectSummary, b: WorkProjectSummary): number {
@@ -68,12 +54,12 @@ export function buildWorkDashboard(
   const openTasks = visibleTasks.filter((task) => task.status !== 'done');
   const sortedOpenTasks = [...openTasks].sort(compareTasks);
   const overdue = sortedOpenTasks.filter((task) => {
-    const date = workTaskDay(task);
+    const date = taskEarliestDay(task);
     return Boolean(date && date < today);
   });
-  const dueToday = sortedOpenTasks.filter((task) => workTaskDay(task) === today);
+  const dueToday = sortedOpenTasks.filter((task) => taskEarliestDay(task) === today);
   const upcoming = sortedOpenTasks.filter((task) => {
-    const date = workTaskDay(task);
+    const date = taskEarliestDay(task);
     return Boolean(date && date > today);
   });
 
