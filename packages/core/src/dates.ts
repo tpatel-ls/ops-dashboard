@@ -1,4 +1,4 @@
-import { addDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
+import { addDays, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns';
 
 export function isoDay(d: Date): string {
   const yyyy = d.getFullYear();
@@ -56,8 +56,4 @@ export function monthGrid(anchor: Date, weekStartsOn: 0 | 1): Date[] {
     days.push(cursor);
   }
   return days;
-}
-
-export function shortLabel(d: Date): string {
-  return format(d, 'EEE d');
 }
