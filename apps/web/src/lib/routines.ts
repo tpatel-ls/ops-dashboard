@@ -243,6 +243,24 @@ export async function toggleRoutineCheck(
 }
 
 /**
+ * Whether `routineId` is checked off on the local calendar day `day`.
+ *
+ * Comparing `check.date` to the day with `===` only matches a check already
+ * stored date-only. A check synced from another device reaches Dexie through
+ * `fromRow`, which casts without validating, so it can carry an instant; that
+ * check read as not done and the routine offered to be completed again.
+ */
+export function isRoutineDoneOn(checks: RoutineCheck[], routineId: string, day: string): boolean {
+  return checks.some(
+    (check) =>
+      check.routineId === routineId &&
+      check.done &&
+      !check.deletedAt &&
+      localDay(check.date) === day,
+  );
+}
+
+/**
  * Consecutive done-days ending today (or yesterday if today is not done yet).
  *
  * `routineChecks.date` is meant to be a date-only local day and the write path

@@ -35,6 +35,7 @@ import {
   addDaysISO,
   computeStreak,
   createRoutine,
+  isRoutineDoneOn,
   fixedRoutineDuration,
   toggleRoutineCheck,
   updateRoutine,
@@ -292,6 +293,34 @@ describe('computeStreak', () => {
     ] as never;
 
     expect(computeStreak(checks, '2026-08-20')).toBe(3);
+  });
+});
+
+describe('isRoutineDoneOn', () => {
+  const day = '2026-08-20';
+
+  it('reads a check stored as a date-only day', () => {
+    const checks = [{ id: 'c', routineId: 'r', date: day, done: true }] as never;
+    expect(isRoutineDoneOn(checks, 'r', day)).toBe(true);
+  });
+
+  it('reads a check whose day arrived as a timestamp', () => {
+    // Synced rows are cast without validating, so `date` can be an instant.
+    // An exact string compare missed it and the routine read as not done.
+    const checks = [
+      { id: 'c', routineId: 'r', date: new Date(2026, 7, 20, 9, 30, 0).toISOString(), done: true },
+    ] as never;
+    expect(isRoutineDoneOn(checks, 'r', day)).toBe(true);
+  });
+
+  it('ignores another routine, another day, and an undone or deleted check', () => {
+    const checks = [
+      { id: 'other-routine', routineId: 'other', date: day, done: true },
+      { id: 'other-day', routineId: 'r', date: '2026-08-19', done: true },
+      { id: 'undone', routineId: 'r', date: day, done: false },
+      { id: 'deleted', routineId: 'r', date: day, done: true, deletedAt: '2026-08-20T10:00:00Z' },
+    ] as never;
+    expect(isRoutineDoneOn(checks, 'r', day)).toBe(false);
   });
 });
 
