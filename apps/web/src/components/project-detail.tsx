@@ -278,9 +278,10 @@ function ChecklistsSection({ project }: { project: Project }) {
           <button
             type="button"
             onClick={() => setAddingList(false)}
+            aria-label="Cancel new checklist"
             className="text-muted-foreground rounded-md px-2 py-1 text-xs"
           >
-            <X className="size-3.5" />
+            <X className="size-3.5" aria-hidden />
           </button>
         </div>
       ) : null}
