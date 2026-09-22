@@ -7,7 +7,8 @@ import { getDb, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
-import { buildWorkDashboard, workTaskDay } from '@/lib/work-dashboard';
+import { buildWorkDashboard } from '@/lib/work-dashboard';
+import { taskEarliestDay } from '@/lib/task-dates';
 import { useOrgStore } from '@/lib/org-store';
 import { setTaskStatus } from '@/lib/tasks';
 import { ViewShell } from '@/components/view-shell';
@@ -213,7 +214,7 @@ function AgendaTaskRow({
   showOrganization: boolean;
   onOpen: () => void;
 }) {
-  const date = workTaskDay(task);
+  const date = taskEarliestDay(task);
   const parsedDate = date ? parseISO(date) : null;
   const dateLabel =
     date === today

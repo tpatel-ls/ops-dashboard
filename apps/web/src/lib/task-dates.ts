@@ -13,6 +13,28 @@ export function taskCommitmentDay(task: TaskDates): string | undefined {
 }
 
 /**
+ * Earliest local calendar day any of a task's three date fields points at.
+ *
+ * Unlike `taskCommitmentDay`, this also considers `startAt`, so a task whose
+ * only dated field is a time block still lands on a day. The work dashboard
+ * sections and labels its agenda rows by this day, and the task list orders by
+ * it, so the two had grown byte-identical private copies; they have to agree
+ * or a task sorts into one day and reads as another.
+ *
+ * Every field goes through `localDay`: `dueAt` and `startAt` are stored as UTC
+ * instants, and slicing their first ten characters would give the UTC day
+ * rather than the user's.
+ */
+export function taskEarliestDay(
+  task: Pick<Task, 'scheduledFor' | 'dueAt' | 'startAt'>,
+): string | undefined {
+  return [task.scheduledFor, task.dueAt, task.startAt]
+    .map((value) => localDay(value))
+    .filter((value): value is string => Boolean(value))
+    .sort()[0];
+}
+
+/**
  * Local calendar day a task card labels and colours by: its due day when it has
  * one, otherwise its scheduled day.
  *
