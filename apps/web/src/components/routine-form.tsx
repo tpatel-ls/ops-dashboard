@@ -197,6 +197,7 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
             type="button"
             role="switch"
             aria-checked={notify}
+            aria-labelledby={`${formId}-notify-label`}
             onClick={() => setNotify((v) => !v)}
             className={cn(
               'relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors',
@@ -210,7 +211,9 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
               )}
             />
           </button>
-          <span className="text-foreground text-sm">Enable reminders</span>
+          <span id={`${formId}-notify-label`} className="text-foreground text-sm">
+            Enable reminders
+          </span>
         </label>
 
         {/* Submit */}
