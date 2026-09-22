@@ -182,9 +182,10 @@ function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
       <button
         type="button"
         onClick={onDone}
+        aria-label="Cancel thought"
         className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md transition-colors"
       >
-        ×
+        <span aria-hidden>×</span>
       </button>
     </form>
   );
