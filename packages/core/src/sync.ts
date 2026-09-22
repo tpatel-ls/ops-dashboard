@@ -20,13 +20,6 @@ import type {
   WorkLog,
 } from './types';
 
-export interface SyncEnvelope {
-  tasks: Task[];
-  projects: Project[];
-  whiteboards: Whiteboard[];
-  cursor: string;
-}
-
 export type Syncable =
   | Task
   | Project
@@ -113,8 +106,4 @@ export function bumpVersion<T extends SyncMeta>(rec: T): T {
     version: current === Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : (current ?? 0) + 1,
     updatedAt: new Date().toISOString(),
   };
-}
-
-export function isTombstone<T extends Syncable>(rec: T): boolean {
-  return Boolean(rec.deletedAt);
 }
