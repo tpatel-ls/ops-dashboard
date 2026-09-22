@@ -168,7 +168,7 @@ export function SettingsForm() {
       <Section title="Pen and stylus" description="First class S-Pen.">
         <Toggle
           label="Lefty mode"
-          description="Mirror toolbars to the right edge."
+          description="Saved, but the whiteboard toolbar does not move yet."
           checked={settings.leftyMode}
           onChange={(v) => patch({ leftyMode: v })}
         />
