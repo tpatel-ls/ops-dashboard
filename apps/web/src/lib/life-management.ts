@@ -108,12 +108,23 @@ function uniqueActiveDays(input: LifeManagementInput, today: string): number {
   return days.size;
 }
 
+/**
+ * Longest run of done-days ending today across the active routines.
+ *
+ * The cursor this walks is a date-only local day, so every stored day has to
+ * be resolved to one first. `routineChecks.date` is meant to be date-only and
+ * the write path enforces that, but synced rows reach Dexie through `fromRow`,
+ * which casts without validating, so a raw instant keyed a day the cursor
+ * never matched and ended the streak early.
+ */
 function bestRoutineStreak(checks: RoutineCheck[], today: string, routineIds: Set<string>): number {
   const datesByRoutine = new Map<string, Set<string>>();
   for (const check of checks) {
     if (check.deletedAt || !check.done || !routineIds.has(check.routineId)) continue;
+    const day = localDay(check.date);
+    if (!day) continue;
     const dates = datesByRoutine.get(check.routineId) ?? new Set<string>();
-    dates.add(check.date);
+    dates.add(day);
     datesByRoutine.set(check.routineId, dates);
   }
 
@@ -218,21 +229,23 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
     staleAfterDays: 7,
   });
   const activeDays = uniqueActiveDays(input, today);
-  const weeklyActiveDays = new Set([
-    ...liveTasks
-      .filter((task) => task.status === 'done')
-      .map((task) => datePart(task.completedAt))
+  // Every stored day is resolved before it reaches the Set. A raw instant and
+  // the date-only day for the same date are different strings, so mixing the
+  // two counted one day twice and inflated the week's active-day count.
+  const recentDays = (values: Array<string | undefined>): string[] =>
+    values
+      .map((value) => datePart(value))
       .filter((date): date is string => Boolean(date))
-      .filter((date) => isRecentPastDay(date, today, 6)),
-    ...input.routineChecks
-      .filter((check) => !check.deletedAt && check.done && isRecentPastDay(check.date, today, 6))
-      .map((check) => check.date),
-    ...input.journalEntries
-      .filter((entry) => !entry.deletedAt && isRecentPastDay(entry.date, today, 6))
-      .map((entry) => entry.date),
-    ...input.foodLogs
-      .filter((log) => !log.deletedAt && isRecentPastDay(log.date, today, 6))
-      .map((log) => log.date),
+      .filter((date) => isRecentPastDay(date, today, 6));
+  const weeklyActiveDays = new Set([
+    ...recentDays(
+      liveTasks.filter((task) => task.status === 'done').map((task) => task.completedAt),
+    ),
+    ...recentDays(
+      input.routineChecks.filter((check) => !check.deletedAt && check.done).map((c) => c.date),
+    ),
+    ...recentDays(input.journalEntries.filter((entry) => !entry.deletedAt).map((e) => e.date)),
+    ...recentDays(input.foodLogs.filter((log) => !log.deletedAt).map((log) => log.date)),
   ]).size;
 
   const identityInput: IdentityScoreInput = {
