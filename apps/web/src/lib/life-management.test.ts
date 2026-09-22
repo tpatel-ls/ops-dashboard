@@ -530,4 +530,45 @@ describe('life management summary', () => {
 
     expect(summary.identityScore).toBe(18);
   });
+
+  it('scores a synced day the same whether it arrived as a day or an instant', () => {
+    // `fromRow` casts a synced row without validating, so `date` can reach
+    // Dexie as an instant. The streak cursor and the weekly active-day Set are
+    // both keyed by date-only local days, so a raw instant used to end the
+    // streak early while counting its day a second time.
+    const routine: Routine = {
+      ...meta('r'),
+      name: 'Read',
+      timeOfDay: 'anytime',
+      notify: false,
+      kind: 'ongoing',
+      startDate: '2026-07-01',
+      order: 1,
+    };
+    const dayOnly = ['2026-07-06', '2026-07-05', '2026-07-04'];
+    const build = (dates: string[]) =>
+      summarizeLifeManagement({
+        tasks: [],
+        projects: [],
+        domains: [],
+        routines: [routine],
+        routineChecks: dates.map(
+          (date, i) =>
+            ({ ...meta(`check-${i}`), routineId: 'r', date, done: true }) satisfies RoutineCheck,
+        ),
+        captures: [],
+        journalEntries: [],
+        foodLogs: [],
+        today: '2026-07-06',
+        now,
+      });
+
+    const stored = build([
+      '2026-07-06',
+      new Date(2026, 6, 5, 12, 0, 0).toISOString(),
+      '2026-07-04',
+    ]);
+
+    expect(stored.identityScore).toBe(build(dayOnly).identityScore);
+  });
 });
