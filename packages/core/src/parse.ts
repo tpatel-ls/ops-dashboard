@@ -20,11 +20,15 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   const tags: string[] = [];
   const tagKeys = new Set<string>();
 
+  // Store the same canonical form the tag is deduplicated by. Keeping the raw
+  // spelling meant quick-add recorded whichever composition or width the user
+  // happened to type, while the capture and brain-dump paths record the NFKC
+  // form, so one tag reached the tags index as two visually identical chips
+  // that filter to different tasks.
   for (const match of working.matchAll(TAG_RE)) {
-    const tag = match[1]?.toLocaleLowerCase('en-US');
-    const key = tag?.normalize('NFKC');
-    if (tag && key && !tagKeys.has(key)) {
-      tagKeys.add(key);
+    const tag = match[1]?.normalize('NFKC').toLocaleLowerCase('en-US');
+    if (tag && !tagKeys.has(tag)) {
+      tagKeys.add(tag);
       tags.push(tag);
     }
   }

@@ -31,11 +31,19 @@ describe('parseQuickAdd', () => {
     expect(r.title).toBe('Plan trip');
   });
 
-  it('deduplicates canonically equivalent hashtags', () => {
+  it('deduplicates canonically equivalent hashtags and stores the canonical form', () => {
     const r = parseQuickAdd('Plan launch #Caf\u00e9 #Cafe\u0301 #ＬＳＧ #LSG', anchor);
 
-    expect(r.tags).toEqual(['caf\u00e9', 'ｌｓｇ']);
+    expect(r.tags).toEqual(['caf\u00e9', 'lsg']);
     expect(r.title).toBe('Plan launch');
+  });
+
+  it('stores the canonical form even when the decomposed spelling comes first', () => {
+    // The capture and brain-dump paths canonicalize with NFKC, so quick-add has
+    // to agree or the same tag reaches the tags index as two separate chips.
+    const r = parseQuickAdd('Plan launch #Cafe\u0301', anchor);
+
+    expect(r.tags).toEqual(['caf\u00e9']);
   });
 
   it('extracts priority bangs', () => {
