@@ -32,6 +32,7 @@ import {
   type ManagementTone,
 } from '@/lib/life-management';
 import { taskPlanningTimestamp } from '@/lib/task-presentation';
+import { useLiveSettings } from '@/lib/use-settings';
 
 const TONE_CLASS: Record<ManagementTone, string> = {
   success: 'border-success/35 bg-success/10 text-success',
@@ -95,6 +96,7 @@ export function LifeCommandCenter() {
       next: scheduled[0],
     };
   });
+  const slippingDays = useLiveSettings().slippingDays;
   const summary = useLiveQuery(async () => {
     const db = getDb();
     const [tasks, projects, domains, routines, routineChecks, captures, journalEntries, foodLogs] =
@@ -118,8 +120,9 @@ export function LifeCommandCenter() {
       captures,
       journalEntries,
       foodLogs,
+      slippingDays,
     });
-  });
+  }, [slippingDays]);
 
   return (
     <ViewShell
