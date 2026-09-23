@@ -19,6 +19,7 @@ import { getDb, isoDay, newId, todayIso } from '@ops-dashboard/core';
 import type { ChecklistItem, Priority, Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { useMediaQuery } from '@/lib/use-media-query';
 import {
   availableTask,
@@ -56,6 +57,11 @@ export function TaskEditDrawer() {
     async () => (id ? availableTask(await getDb().tasks.get(id)) : null),
     [id],
   );
+
+  // Same condition as `aria-modal` and the Tab trap: hold the page still only
+  // while the drawer is actually a modal sheet. Docked, the list beside it is
+  // meant to stay scrollable.
+  useBodyScrollLock(Boolean(id) && !docked);
 
   useEffect(() => {
     if (!id) return;
