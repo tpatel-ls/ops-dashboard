@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { ActivityCalendar } from 'react-activity-calendar';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import type { ActivityDay } from '@/lib/activity';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useTheme } from './theme-provider';
 
 interface ActivityHeatmapProps {
   data: ActivityDay[];
@@ -51,7 +51,11 @@ const DARK_RAMP: [string, string, string, string, string] = [
 ];
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
-  const [dark, setDark] = useState(true);
+  // ThemeProvider already owns the resolved light/dark value and is what puts
+  // the `.dark` class on <html> in the first place. This component used to
+  // watch that class with its own MutationObserver, seeded to dark, so in light
+  // mode the ramp rendered dark for a frame before the effect corrected it.
+  const dark = useTheme().resolved === 'dark';
   // Every other week-aware view reads this setting, including the weekly
   // stats directly above this heatmap on the habits page. `weekStart` here
   // takes the same 0-is-Sunday index the setting stores.
@@ -59,15 +63,6 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const total = data.reduce((sum, day) => sum + day.count, 0);
   const activeDays = data.filter((day) => day.count > 0).length;
   const peak = Math.max(0, ...data.map((day) => day.count));
-
-  useEffect(() => {
-    const html = document.documentElement;
-    const check = () => setDark(html.classList.contains('dark'));
-    check();
-    const observer = new MutationObserver(check);
-    observer.observe(html, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
 
   if (!data || data.length === 0) {
     return (
