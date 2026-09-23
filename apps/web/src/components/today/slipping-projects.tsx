@@ -6,15 +6,19 @@ import { isValid, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { relativeTimeLabel } from '@/lib/relative-time';
-
-const SLIP_DAYS = 5;
+import { useLiveSettings } from '@/lib/use-settings';
 
 export function SlippingProjects() {
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
+  // The setting is described as deciding when a project counts as slipping,
+  // and the projects board and portfolio dashboard already read it. This rail
+  // kept its own constant, which happened to equal the default, so widening
+  // the setting left the rail flagging projects the rest of the app did not.
+  const slippingDays = useLiveSettings().slippingDays;
   const projects = useLiveQuery(async () => {
     const all = await getDb().projects.toArray();
     const threshold = new Date();
-    threshold.setDate(threshold.getDate() - SLIP_DAYS);
+    threshold.setDate(threshold.getDate() - slippingDays);
 
     return all.filter((p) => {
       if (p.deletedAt || p.archivedAt) return false;
@@ -27,7 +31,7 @@ export function SlippingProjects() {
       if (!isValid(lastWorkedAt)) return true;
       return lastWorkedAt < threshold;
     });
-  });
+  }, [slippingDays]);
 
   if (!projects || projects.length === 0) return null;
 
