@@ -241,6 +241,37 @@ describe('toggleRoutineCheck', () => {
     expect(mocks.findRoutineCheck).not.toHaveBeenCalled();
   });
 
+  it('accepts a check-in when the stored schedule arrived as an instant', async () => {
+    // fromRow casts synced rows without validating, so a routine can reach
+    // Dexie with its bounds stored as timestamps rather than calendar days.
+    mocks.getRoutine.mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      startDate: '2026-08-10T00:00:00.000-05:00',
+      endDate: '2026-08-20T23:00:00.000-05:00',
+    });
+
+    await toggleRoutineCheck('routine-1', '2026-08-15', true);
+
+    expect(mocks.putRecord).toHaveBeenCalledWith(
+      'routineChecks',
+      expect.objectContaining({ routineId: 'routine-1', date: '2026-08-15', done: true }),
+    );
+  });
+
+  it('still rejects a routine whose stored start day cannot be resolved', async () => {
+    mocks.getRoutine.mockResolvedValue({
+      id: 'routine-1',
+      name: 'Reset',
+      startDate: 'not-a-date',
+    });
+
+    await expect(toggleRoutineCheck('routine-1', '2026-08-15', true)).rejects.toThrow(
+      'Routine is not active on this date',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
   it('creates a live check when only a deleted check matches the day', async () => {
     mocks.listRoutineChecks.mockResolvedValue([
       {

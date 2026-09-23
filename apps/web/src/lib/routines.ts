@@ -207,12 +207,19 @@ export async function toggleRoutineCheck(
   if (!routine || routine.deletedAt || routine.archivedAt) {
     throw new Error('Routine is not available for check-ins.');
   }
+  // Resolve the stored bounds rather than requiring them to already be
+  // date-only. `startDate` and `endDate` are written date-only, but synced rows
+  // reach Dexie through `fromRow`, which casts without validating, so one can
+  // arrive as an instant. Demanding the literal form there rejected every date
+  // and left the routine permanently un-checkable, the same dead end a bad
+  // stored duration used to cause. A bound that resolves to no day at all is
+  // still unusable and keeps rejecting.
   const startDate = localDay(routine.startDate);
   const endDate = routine.endDate ? localDay(routine.endDate) : undefined;
   if (
-    startDate !== routine.startDate ||
+    !startDate ||
     date < startDate ||
-    (routine.endDate !== undefined && (endDate !== routine.endDate || date > endDate))
+    (routine.endDate !== undefined && (!endDate || date > endDate))
   ) {
     throw new Error('Routine is not active on this date.');
   }
