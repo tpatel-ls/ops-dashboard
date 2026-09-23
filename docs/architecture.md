@@ -44,12 +44,13 @@ their own same-origin or bearer-secret guards.
 
 ## Settings not yet wired
 
-Every field in `Settings` is normalized and synced, but two are stored without
-a reader. `dailyReviewAt` has no scheduler: the daily review opens only from
-the command palette, so changing the time saves a value nothing acts on.
-`leftyMode` is covered in `docs/pen-input.md`. Both are surfaced in the
-settings form with copy that says so rather than being hidden, so the stored
-value keeps its meaning for whichever change wires it up.
+Settings are device-local: `settings` is not a `SyncTable`, so the sync engine
+never carries it and each device keeps its own copy. Every field is normalized
+on read, but two are stored without a reader. `dailyReviewAt` has no scheduler:
+the daily review opens only from the command palette, so changing the time saves
+a value nothing acts on. `leftyMode` is covered in `docs/pen-input.md`. Both are
+surfaced in the settings form with copy that says so rather than being hidden,
+so the stored value keeps its meaning for whichever change wires it up.
 
 ## Theming
 
