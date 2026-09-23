@@ -46,11 +46,26 @@ their own same-origin or bearer-secret guards.
 
 Settings are device-local: `settings` is not a `SyncTable`, so the sync engine
 never carries it and each device keeps its own copy. Every field is normalized
-on read, but two are stored without a reader. `dailyReviewAt` has no scheduler:
-the daily review opens only from the command palette, so changing the time saves
-a value nothing acts on. `leftyMode` is covered in `docs/pen-input.md`. Both are
-surfaced in the settings form with copy that says so rather than being hidden,
-so the stored value keeps its meaning for whichever change wires it up.
+on read, but five are stored without a reader.
+
+Two are surfaced in the settings form with copy that says so rather than being
+hidden, so the stored value keeps its meaning for whichever change wires it up:
+
+- `dailyReviewAt` has no scheduler. The daily review opens only from the command
+  palette, so changing the time saves a value nothing acts on.
+- `leftyMode` is covered in `docs/pen-input.md`.
+
+Three more are not in the settings form either, so they are defaults in the
+schema and nothing else:
+
+- `aiEnabled` is typed as the master switch for the server AI features, but no
+  route or client path consults it. The AI routes are gated by whether their
+  provider key is configured, not by this field.
+- `captureAutoReminder` is typed as auto-attaching a reminder to captured tasks.
+  Nothing attaches one; reminders are created only from the task drawer.
+- `timezone` is validated against `Intl` on write and then never read, so every
+  view uses the device timezone. The capture route does take a timezone, but as
+  a request-supplied offset rather than from this field.
 
 ## Theming
 
