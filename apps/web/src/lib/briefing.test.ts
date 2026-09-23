@@ -376,6 +376,28 @@ describe('briefing helpers', () => {
     });
   });
 
+  it('counts nothing as due or overdue for a day that is not a calendar day', () => {
+    const overdue = {
+      ...meta('overdue'),
+      title: 'Pay invoice',
+      status: 'todo',
+      priority: 3,
+      tags: [],
+      order: 1,
+      reminders: [],
+      checklist: [],
+      dueAt: '2026-07-02T17:00:00.000Z',
+    } satisfies Task;
+
+    // The shared task-date helpers reject an unusable day rather than string
+    // comparing against it, and the briefing reads through them.
+    for (const today of ['2026-02-30', 'not-a-date']) {
+      expect(
+        summarizeBriefing({ tasks: [overdue], today, routingIssues: 0, staleDomains: 0 }),
+      ).toMatchObject({ overdue: 0, openToday: 0, todayTotal: 0 });
+    }
+  });
+
   it('does not carry previously completed overdue work into today', () => {
     const completed = {
       ...meta('completed'),
