@@ -53,9 +53,14 @@ export function boundedDraftText(value: unknown, limit: number): string | undefi
 }
 
 /**
- * Canonical tag form, shared with the triage route and the quick-add parser so
- * tags that differ only by Unicode composition or locale casing collapse to a
- * single value no matter which capture path produced them.
+ * Canonical tag form, so tags that differ only by Unicode composition, width,
+ * or locale casing collapse to a single value no matter which capture path
+ * produced them.
+ *
+ * The brain-dump and triage routes both call this. `parseQuickAdd` cannot: it
+ * lives in `@ops-dashboard/core`, which does not depend on the web app, so it
+ * mirrors this normalization rather than sharing it. The two have to be changed
+ * together, or the same tag reaches the tags index as two separate chips.
  */
 export function routedTag(value: string): string {
   return value.normalize('NFKC').toLocaleLowerCase('en-US');
