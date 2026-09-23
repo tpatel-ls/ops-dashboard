@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseQuickAdd } from './parse';
+import { parseQuickAdd, quickAddToTask } from './parse';
 
 describe('parseQuickAdd', () => {
   const anchor = new Date('2026-04-26T10:00:00');
@@ -104,5 +104,48 @@ describe('parseQuickAdd', () => {
 
     expect(r.tags).toEqual([]);
     expect(r.title).toBe('Plan this #');
+  });
+});
+
+describe('quickAddToTask', () => {
+  const anchor = new Date('2026-04-26T10:00:00');
+  const base = { id: 'task-1', deviceId: 'device-1', order: 3 };
+
+  it('carries every parsed field onto the new task', () => {
+    const parsed = parseQuickAdd('Ship release #work !! tomorrow 3pm', anchor);
+    const task = quickAddToTask(parsed, base);
+
+    expect(task).toMatchObject({
+      id: 'task-1',
+      deviceId: 'device-1',
+      order: 3,
+      title: parsed.title,
+      status: 'todo',
+      priority: parsed.priority,
+      tags: parsed.tags,
+      scheduledFor: parsed.scheduledFor,
+      startAt: parsed.startAt,
+      dueAt: parsed.dueAt,
+      version: 1,
+    });
+  });
+
+  it('omits date fields the input never set rather than storing undefined', () => {
+    const task = quickAddToTask(parseQuickAdd('Ship release', anchor), base);
+
+    // The sync layer drops nulls but not present-and-undefined keys, so an
+    // absent date has to stay absent rather than round-tripping as a key.
+    for (const key of ['scheduledFor', 'startAt', 'endAt', 'dueAt']) {
+      expect(Object.hasOwn(task, key)).toBe(false);
+    }
+  });
+
+  it('starts a task with empty reminders and checklist and matching timestamps', () => {
+    const task = quickAddToTask(parseQuickAdd('Ship release', anchor), base);
+
+    expect(task.reminders).toEqual([]);
+    expect(task.checklist).toEqual([]);
+    expect(task.createdAt).toBe(task.updatedAt);
+    expect(Number.isFinite(Date.parse(task.createdAt))).toBe(true);
   });
 });
