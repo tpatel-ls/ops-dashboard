@@ -29,8 +29,9 @@ Press `?` outside a text field to open the in-app shortcut reference.
 ## Capture syntax
 
 - `#tag` add a tag
-- `!!` set priority 2
-- `!!!` set priority 3
+- `!` set priority 1 (Low)
+- `!!` set priority 2 (Med)
+- `!!!` set priority 3 (Urgent)
 - `tomorrow 3pm` add a natural-language schedule
 - `Cmd/Ctrl Enter` save from supported capture forms
 
