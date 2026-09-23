@@ -409,6 +409,42 @@ describe('life management summary', () => {
     expect(summary.slippingProjects).toBe(0);
   });
 
+  it('counts a project as slipping by the configured threshold', () => {
+    // Last worked six days before `today`: slipping at the default 5, not at 7.
+    const project = {
+      ...meta('stale-project', '2026-06-30T12:00:00.000Z'),
+      name: 'Quiet project',
+      color: '#fff',
+      kind: 'project',
+      status: 'active',
+      lastWorkedAt: '2026-06-30T12:00:00.000Z',
+      milestones: [],
+      checklists: [],
+    } satisfies Project;
+
+    const summarize = (slippingDays?: number) =>
+      summarizeLifeManagement({
+        tasks: [],
+        projects: [project],
+        domains: [],
+        routines: [],
+        routineChecks: [],
+        captures: [],
+        journalEntries: [],
+        foodLogs: [],
+        today: '2026-07-06',
+        now,
+        ...(slippingDays === undefined ? {} : { slippingDays }),
+      }).slippingProjects;
+
+    expect(summarize(5)).toBe(1);
+    expect(summarize(7)).toBe(0);
+    // An unusable or absent value falls back to the stored default, not to 7.
+    expect(summarize()).toBe(1);
+    expect(summarize(Number.NaN)).toBe(1);
+    expect(summarize(0)).toBe(1);
+  });
+
   it('ignores malformed dates in the all-time activity count', () => {
     const summary = summarizeLifeManagement({
       tasks: [],

@@ -8,7 +8,7 @@ import type {
   RoutineCheck,
   Task,
 } from '@ops-dashboard/core';
-import { isoDay, localDay, todayIso } from '@ops-dashboard/core';
+import { DEFAULT_SETTINGS, isoDay, localDay, todayIso } from '@ops-dashboard/core';
 import { addDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import { computeIdentityScore, type IdentityScoreInput } from './identity-score';
 import { findStaleDomains } from './briefing';
@@ -65,6 +65,8 @@ export interface LifeManagementInput {
   foodLogs: FoodLog[];
   today?: string;
   now?: Date;
+  /** Days a project may go untouched before it counts as slipping. */
+  slippingDays?: number;
 }
 
 function clamp(value: number): number {
@@ -74,6 +76,11 @@ function clamp(value: number): number {
 
 function datePart(value?: string): string | null {
   return localDay(value) ?? null;
+}
+
+/** The stored setting, or its default when the value is unusable. */
+function boundedSlippingDays(value: number | undefined): number {
+  return Number.isFinite(value) && value! >= 1 ? Math.floor(value!) : DEFAULT_SETTINGS.slippingDays;
 }
 
 function daysBetween(from: string, to: string): number {
@@ -180,12 +187,18 @@ export function summarizeLifeManagement(input: LifeManagementInput): LifeManagem
   const activeProjects = input.projects.filter(
     (project) => !project.deletedAt && !project.archivedAt && project.status === 'active',
   );
+  // The projects board and the portfolio dashboard both read this from
+  // settings, and the settings field is described as deciding "when a project
+  // counts as slipping". This module used a hardcoded 7 instead, so the same
+  // project could carry the slipping badge on the board while the life summary
+  // left it out of "need touch", and vice versa.
+  const slippingDays = boundedSlippingDays(input.slippingDays);
   const slippingProjects = activeProjects.filter((project) => {
     if (project.lastWorkedAt && !datePart(project.lastWorkedAt)) return true;
     const lastActivityDay =
       datePart(project.lastWorkedAt) ?? datePart(project.updatedAt) ?? datePart(project.createdAt);
     if (!lastActivityDay) return true;
-    return daysBetween(lastActivityDay, today) > 7;
+    return daysBetween(lastActivityDay, today) > slippingDays;
   });
 
   const activeRoutines = input.routines.filter((routine) => {
