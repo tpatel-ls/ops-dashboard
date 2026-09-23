@@ -36,8 +36,11 @@ Press `?` outside a text field to open the in-app shortcut reference.
 
 ## Whiteboard
 
+These come from tldraw, not from the app's own hotkey table, so the in-app `?`
+overlay does not list them.
+
 - `v` select tool
-- `p` pen
+- `d` draw (also `b` or `x`)
 - `e` eraser
 - `r` rectangle
 - `o` ellipse
