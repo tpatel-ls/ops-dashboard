@@ -37,7 +37,7 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
     heading: 'Quick add',
     rows: [
       ['#tag', 'Adds a tag'],
-      ['!! and !!!', 'Sets priority 2 or 3'],
+      ['!, !! and !!!', 'Sets priority Low, Med or Urgent'],
       ['tomorrow 3pm', 'Schedules with time'],
       ['Cmd/Ctrl Enter', 'Save'],
     ],
