@@ -1,6 +1,7 @@
 import { localDay, todayIso } from '@ops-dashboard/core';
 import type { Capture, Domain, Project, Task } from '@ops-dashboard/core';
 import { differenceInCalendarDays } from 'date-fns';
+import { taskIsOverdue, taskNeedsAttentionBy } from './task-dates';
 
 export interface StaleDomain {
   domainId: string;
@@ -196,22 +197,23 @@ export function summarizeBriefing(input: {
 }): BriefingSummary {
   const today = input.today ?? todayIso();
   const live = input.tasks.filter((task) => !task.deletedAt && task.status !== 'archived');
-  const openToday = live.filter((task) => {
-    if (task.status === 'done') return false;
-    const scheduled = localDay(task.scheduledFor);
-    const due = localDay(task.dueAt);
-    return scheduled === today || Boolean(due && due <= today) || localDay(task.startAt) === today;
-  });
+  // The scheduled/due reading of a day is `taskNeedsAttentionBy`, and its
+  // strictly-earlier counterpart is `taskIsOverdue`. Both had been open-coded
+  // here, so the briefing kept its own copy of rules the rest of the app reads
+  // from one place, and unlike them it accepted a `today` that is not a
+  // calendar day at all. The briefing additionally counts a task whose only
+  // dated field is a time block starting today.
+  const openToday = live.filter(
+    (task) =>
+      task.status !== 'done' &&
+      (taskNeedsAttentionBy(task, today) || localDay(task.startAt) === today),
+  );
   const doneToday = live.filter(
     (task) => task.status === 'done' && localDay(task.completedAt) === today,
   ).length;
-  const overdue = live.filter((task) => {
-    const due = localDay(task.dueAt);
-    const scheduled = localDay(task.scheduledFor);
-    return (
-      task.status !== 'done' && Boolean((due && due < today) || (scheduled && scheduled < today))
-    );
-  }).length;
+  const overdue = live.filter(
+    (task) => task.status !== 'done' && taskIsOverdue(task, today),
+  ).length;
 
   return {
     todayTotal: openToday.length + doneToday,
