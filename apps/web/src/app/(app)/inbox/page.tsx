@@ -84,6 +84,10 @@ function CaptureRow({ cap }: { cap: Capture }) {
     ? `to ${KIND_LABEL[cap.routedTo.type] ?? cap.routedTo.type}`
     : null;
 
+  // The row's own heading, so each action names the capture it acts on rather
+  // than repeating a bare verb for every row in the list.
+  const captureLabel = cap.aiSummary ?? cap.raw;
+
   const KindIcon = cap.aiKind ? KIND_ICON[cap.aiKind] : FileText;
 
   return (
@@ -135,6 +139,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
           <button
             type="button"
             title="Dismiss"
+            aria-label={`Dismiss capture: ${captureLabel}`}
             onClick={() => dismissCapture(cap.id)}
             className="text-subtle-foreground hover:bg-bg-sunken hover:text-foreground flex size-10 items-center justify-center rounded-md sm:size-8"
           >
@@ -144,6 +149,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
         <button
           type="button"
           title="Delete"
+          aria-label={`Delete capture: ${captureLabel}`}
           onClick={() => deleteCapture(cap.id)}
           className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive flex size-10 items-center justify-center rounded-md sm:size-8"
         >
