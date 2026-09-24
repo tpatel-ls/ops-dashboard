@@ -65,8 +65,3 @@ export async function softDeleteRecord<T extends SyncMeta>(
   await t.put(tomb);
   await enqueueOp({ table, recordId: id, op: 'delete', payload: tomb });
 }
-
-export async function listActive<T extends SyncMeta>(table: SyncTable): Promise<T[]> {
-  const all = (await getDb().table<T>(table).toArray()) as T[];
-  return all.filter((r) => !r.deletedAt);
-}
