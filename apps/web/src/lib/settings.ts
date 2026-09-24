@@ -133,7 +133,3 @@ export async function updateSettings(patch: Partial<Settings>): Promise<Settings
   await db.settings.put(next);
   return next;
 }
-
-export async function isSyncEnabled(): Promise<boolean> {
-  return (await getSettings()).syncEnabled;
-}
