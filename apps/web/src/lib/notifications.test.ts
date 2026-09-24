@@ -149,6 +149,37 @@ describe('checkAndFireDueReminders', () => {
     expect(mocks.reminders.update).toHaveBeenCalledWith('reminder-1', { delivered: true });
   });
 
+  it('falls back to a body when a synced task carries blank notes', async () => {
+    // `fromRow` casts synced rows without validating and only drops nulls, so
+    // notes cleared on another device arrive as an empty string rather than
+    // undefined.
+    mocks.tasks.get.mockResolvedValue({ id: 'task-1', title: 'Call customer', notes: '   ' });
+    vi.stubGlobal('navigator', {});
+
+    await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(1);
+
+    expect(Notification).toHaveBeenCalledWith(
+      'Call customer',
+      expect.objectContaining({ body: 'Reminder' }),
+    );
+  });
+
+  it('keeps real notes as the notification body', async () => {
+    mocks.tasks.get.mockResolvedValue({
+      id: 'task-1',
+      title: 'Call customer',
+      notes: 'Ask about the renewal',
+    });
+    vi.stubGlobal('navigator', {});
+
+    await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(1);
+
+    expect(Notification).toHaveBeenCalledWith(
+      'Call customer',
+      expect.objectContaining({ body: 'Ask about the renewal' }),
+    );
+  });
+
   it('skips reminder checks for an invalid clock value', async () => {
     await expect(checkAndFireDueReminders(new Date('invalid'))).resolves.toBe(0);
     expect(mocks.reminders.where).not.toHaveBeenCalled();
