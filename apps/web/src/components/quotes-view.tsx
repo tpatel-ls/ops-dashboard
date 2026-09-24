@@ -283,6 +283,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
                     onClick={() => handleDeleteThought(thought.id)}
                     className="text-subtle-foreground hover:text-destructive mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded opacity-100 transition-colors sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100"
                     title="Remove thought"
+                    aria-label={`Remove thought: ${thought.text}`}
                   >
                     <Trash2 className="size-3" />
                   </button>
@@ -322,6 +323,8 @@ function QuoteCard({ quote }: { quote: Quote }) {
             type="button"
             onClick={handleFavorite}
             title={quote.favorite ? 'Unfavorite' : 'Favorite'}
+            aria-pressed={quote.favorite}
+            aria-label={`Favourite quote: ${quote.text}`}
             className={cn(
               'inline-flex size-7 items-center justify-center rounded-md transition-colors',
               quote.favorite ? 'text-warning' : 'text-muted-foreground hover:text-warning',
@@ -334,6 +337,11 @@ function QuoteCard({ quote }: { quote: Quote }) {
             onClick={handleDelete}
             onBlur={() => setConfirming(false)}
             title={confirming ? 'Click again to confirm' : 'Delete quote'}
+            aria-label={
+              confirming
+                ? `Delete quote: ${quote.text}. Activate again to confirm`
+                : `Delete quote: ${quote.text}`
+            }
             className={cn(
               'inline-flex size-7 items-center justify-center rounded-md transition-colors',
               confirming
