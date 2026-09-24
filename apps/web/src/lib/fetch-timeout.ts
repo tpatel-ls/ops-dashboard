@@ -1,4 +1,4 @@
-export const API_REQUEST_TIMEOUT_MS = 30_000;
+const API_REQUEST_TIMEOUT_MS = 30_000;
 const MAX_TIMER_DELAY_MS = 2_147_483_647;
 
 function timeoutAbortError(): DOMException {

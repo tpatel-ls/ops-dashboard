@@ -52,7 +52,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 
 export const LSG_LAUNCH_PROJECT_NAMES = ['Blue Text', 'Power Dialer'];
 
-export const PORTFOLIO_PROJECTS: SeedProject[] = [
+const PORTFOLIO_PROJECTS: SeedProject[] = [
   {
     name: 'Blue Text',
     color: 'oklch(0.62 0.17 255)',
@@ -417,7 +417,7 @@ export const PORTFOLIO_PROJECTS: SeedProject[] = [
 ];
 
 /** Names used by the dashboard to decide whether the "Load my projects" CTA is needed. */
-export const PORTFOLIO_PROJECT_NAMES = PORTFOLIO_PROJECTS.map((p) => p.name);
+const PORTFOLIO_PROJECT_NAMES = PORTFOLIO_PROJECTS.map((p) => p.name);
 
 export function portfolioNeedsDefaultOrganization(names: string[]): boolean {
   const wantedNames = new Set(names.map(recordKey));
