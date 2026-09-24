@@ -3,7 +3,7 @@
 import { getDb } from '@ops-dashboard/core';
 import type { AppNotification, NotificationKind } from '@ops-dashboard/core';
 import { formatDistance, isValid, parseISO } from 'date-fns';
-import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { newRecord, patchRecord, putRecord } from './records';
 import { compareCreatedAtRecency } from './recency';
 
 const NOTIFICATION_KINDS = new Set<NotificationKind>([
@@ -86,9 +86,6 @@ export function pushNotification(input: {
 
 export const markNotificationRead = (id: string) =>
   patchRecord<AppNotification>('notifications', id, { readAt: new Date().toISOString() });
-
-export const deleteNotification = (id: string) =>
-  softDeleteRecord<AppNotification>('notifications', id);
 
 export async function markAllNotificationsRead(): Promise<void> {
   const all = await getDb()

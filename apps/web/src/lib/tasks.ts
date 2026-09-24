@@ -391,10 +391,6 @@ export async function softDeleteTask(id: string): Promise<void> {
   await enqueueOp({ table: 'tasks', recordId: id, op: 'delete', payload: tomb });
 }
 
-export async function reorderTask(id: string, order: number): Promise<void> {
-  await updateTask(id, { order });
-}
-
 export async function rescheduleTask(id: string, scheduledFor: string | undefined): Promise<void> {
   await updateTask(id, scheduledFor ? { scheduledFor } : { scheduledFor: undefined });
 }
