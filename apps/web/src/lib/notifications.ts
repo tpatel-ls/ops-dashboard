@@ -94,7 +94,12 @@ async function fireDueReminders(now: Date): Promise<number> {
           ? await navigator.serviceWorker.getRegistration('/')
           : undefined;
       const opts: NotificationOptions = {
-        body: task.notes ?? 'Reminder',
+        // `??` alone kept a blank string. `updateTask` folds empty notes to
+        // undefined, but synced rows reach Dexie through `fromRow`, which casts
+        // without validating and only drops nulls, so a task whose notes were
+        // cleared on another device arrives here as '' and produced a
+        // notification with an empty body.
+        body: task.notes?.trim() || 'Reminder',
         tag: `ops-${r.id}`,
         data: { taskId: task.id, reminderId: r.id },
       };
