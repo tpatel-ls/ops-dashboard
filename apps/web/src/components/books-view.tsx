@@ -231,7 +231,14 @@ function BookCard({ book, quotes }: BookCardProps) {
       >
         {book.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={book.coverUrl} alt="" className="h-full w-full object-cover" />
+          <img
+            src={book.coverUrl}
+            alt=""
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <BookOpen className="text-primary size-4" />
         )}

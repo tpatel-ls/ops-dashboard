@@ -441,6 +441,8 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
                 <img
                   src={person.avatarUrl}
                   alt={person.name}
+                  referrerPolicy="no-referrer"
+                  decoding="async"
                   className="size-10 rounded-full object-cover"
                 />
               ) : (

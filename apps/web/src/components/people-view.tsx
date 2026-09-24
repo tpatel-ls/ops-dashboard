@@ -112,6 +112,9 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
             <img
               src={person.avatarUrl}
               alt={person.name}
+              referrerPolicy="no-referrer"
+              loading="lazy"
+              decoding="async"
               className="size-9 rounded-full object-cover"
             />
           ) : (
