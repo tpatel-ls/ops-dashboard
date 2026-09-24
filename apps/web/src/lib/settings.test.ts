@@ -1,7 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
-import { DEFAULT_VIEWS, defaultViewPath, normalizeSettings } from './settings';
+
+const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn() }));
+
+vi.mock('@ops-dashboard/core', async () => {
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
+  return {
+    ...actual,
+    getDb: () => ({ settings: { get: mocks.get, put: mocks.put } }),
+  };
+});
+
+import {
+  DEFAULT_VIEWS,
+  defaultViewPath,
+  getSettings,
+  normalizeSettings,
+  updateSettings,
+} from './settings';
 
 describe('normalizeSettings', () => {
   it('fills settings that were added after an older record was stored', () => {
@@ -123,5 +140,102 @@ describe('defaultViewPath', () => {
     expect(defaultViewPath('today')).toBe('/today');
     expect(defaultViewPath('whiteboard')).toBe('/whiteboards');
     expect(defaultViewPath('people')).toBe('/people');
+  });
+});
+
+function storedSettings(overrides: Partial<Settings> = {}): Settings {
+  return {
+    ...DEFAULT_SETTINGS,
+    id: 'singleton',
+    updatedAt: '2026-08-01T12:00:00.000Z',
+    ...overrides,
+  } as Settings;
+}
+
+describe('getSettings', () => {
+  beforeEach(() => {
+    mocks.get.mockReset();
+    mocks.put.mockReset();
+  });
+
+  it('seeds the singleton when the record is missing', async () => {
+    mocks.get.mockResolvedValue(undefined);
+
+    const settings = await getSettings();
+
+    expect(settings).toMatchObject({ id: 'singleton', theme: DEFAULT_SETTINGS.theme });
+    expect(mocks.put).toHaveBeenCalledWith(settings);
+  });
+
+  it('writes a repaired copy back when the stored record is invalid', async () => {
+    // `fromRow` casts synced rows without validating, so a stored record can
+    // hold values `normalizeSettings` rejects.
+    mocks.get.mockResolvedValue({
+      id: 'singleton',
+      weekStartsOn: 3,
+      pomodoroFocusMinutes: Number.NaN,
+      slippingDays: 9_999,
+      updatedAt: '2026-08-01T12:00:00.000Z',
+    });
+
+    const settings = await getSettings();
+
+    expect(settings.weekStartsOn).toBe(DEFAULT_SETTINGS.weekStartsOn);
+    expect(settings.pomodoroFocusMinutes).toBe(DEFAULT_SETTINGS.pomodoroFocusMinutes);
+    expect(settings.slippingDays).toBe(365);
+    // Persisted, so the next reader does not repeat the repair.
+    expect(mocks.put).toHaveBeenCalledWith(settings);
+  });
+
+  it('leaves an already-normalized record untouched', async () => {
+    mocks.get.mockResolvedValue(storedSettings());
+
+    const settings = await getSettings();
+
+    expect(settings.updatedAt).toBe('2026-08-01T12:00:00.000Z');
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+});
+
+describe('updateSettings', () => {
+  beforeEach(() => {
+    mocks.get.mockReset();
+    mocks.put.mockReset();
+  });
+
+  it('merges the patch over the stored record and stamps updatedAt', async () => {
+    mocks.get.mockResolvedValue(storedSettings({ theme: 'light' }));
+
+    const next = await updateSettings({ theme: 'dark' });
+
+    expect(next.theme).toBe('dark');
+    // Fields the patch does not mention survive the merge.
+    expect(next.weekStartsOn).toBe(DEFAULT_SETTINGS.weekStartsOn);
+    expect(next.updatedAt).not.toBe('2026-08-01T12:00:00.000Z');
+    expect(mocks.put).toHaveBeenLastCalledWith(next);
+  });
+
+  it('normalizes the patch rather than storing an unsupported value', async () => {
+    mocks.get.mockResolvedValue(storedSettings());
+
+    const next = await updateSettings({
+      theme: 'sepia',
+      defaultView: 'nowhere',
+      pomodoroBreakMinutes: 0,
+    } as unknown as Partial<Settings>);
+
+    expect(next.theme).toBe(DEFAULT_SETTINGS.theme);
+    expect(next.defaultView).toBe(DEFAULT_SETTINGS.defaultView);
+    // Clamped into the supported 1..30 range instead of stored as 0.
+    expect(next.pomodoroBreakMinutes).toBe(1);
+  });
+
+  it('rejects a workday range the form could otherwise invert', async () => {
+    mocks.get.mockResolvedValue(storedSettings());
+
+    const next = await updateSettings({ workdayStart: '18:00', workdayEnd: '09:00' });
+
+    expect(next.workdayStart).toBe(DEFAULT_SETTINGS.workdayStart);
+    expect(next.workdayEnd).toBe(DEFAULT_SETTINGS.workdayEnd);
   });
 });
