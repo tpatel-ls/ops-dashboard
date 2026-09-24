@@ -2,7 +2,7 @@
 
 import { getDb } from '@ops-dashboard/core';
 import type { Organization } from '@ops-dashboard/core';
-import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { newRecord, patchRecord, putRecord } from './records';
 
 const ORG_COLORS = [
   'oklch(0.6 0.13 265)',
@@ -120,6 +120,3 @@ async function updateOrganizationName(id: string, fields: Partial<Organization>)
 
 export const archiveOrganization = (id: string) =>
   patchRecord<Organization>('organizations', id, { archivedAt: new Date().toISOString() });
-
-export const deleteOrganization = (id: string) =>
-  softDeleteRecord<Organization>('organizations', id);

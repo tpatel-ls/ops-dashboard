@@ -1,7 +1,7 @@
 'use client';
 
 import type { Domain, Project, Task } from '@ops-dashboard/core';
-import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { newRecord, patchRecord, putRecord } from './records';
 
 const MAX_DOMAIN_NAME_LENGTH = 200;
 const MAX_DOMAIN_COLOR_LENGTH = 100;
@@ -108,5 +108,3 @@ export const updateDomain = (id: string, patch: Partial<Domain>) =>
 
 export const archiveDomain = (id: string) =>
   patchRecord<Domain>('domains', id, { archivedAt: new Date().toISOString() });
-
-export const deleteDomain = (id: string) => softDeleteRecord<Domain>('domains', id);
