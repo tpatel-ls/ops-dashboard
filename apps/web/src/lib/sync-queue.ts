@@ -45,7 +45,3 @@ export async function enqueueOp(args: EnqueueArgs): Promise<void> {
   // window event to avoid an import cycle with the engine.
   if (typeof window !== 'undefined') window.dispatchEvent(new Event('ops:sync-kick'));
 }
-
-export async function pendingOpCount(): Promise<number> {
-  return getDb().syncOps.count();
-}
