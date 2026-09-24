@@ -253,6 +253,11 @@ function BookCard({ book, quotes }: BookCardProps) {
             onClick={handleDelete}
             onBlur={() => setConfirming(false)}
             title={confirming ? 'Click again to confirm' : 'Delete book'}
+            aria-label={
+              confirming
+                ? `Delete book: ${book.title}. Activate again to confirm`
+                : `Delete book: ${book.title}`
+            }
             className={cn(
               'inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
               confirming
@@ -260,7 +265,7 @@ function BookCard({ book, quotes }: BookCardProps) {
                 : 'text-muted-foreground hover:text-destructive',
             )}
           >
-            <Trash2 className="size-3.5" />
+            <Trash2 className="size-3.5" aria-hidden />
           </button>
         </div>
 
