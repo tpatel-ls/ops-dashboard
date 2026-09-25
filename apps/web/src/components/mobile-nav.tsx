@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { CalendarCheck, FolderKanban, KanbanSquare, ListTodo, Plus } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { navPathActive } from '@/lib/nav-active';
 
 const LEFT = [
   { href: '/dashboard', label: 'Today', icon: CalendarCheck },
@@ -16,7 +17,7 @@ const RIGHT = [
 ];
 
 function isActive(pathname: string, item: { href: string; matches?: string[] }): boolean {
-  return (item.matches ?? [item.href]).some((path) => pathname.startsWith(path));
+  return navPathActive(pathname, item.matches ?? [item.href]);
 }
 
 export function MobileNav() {
