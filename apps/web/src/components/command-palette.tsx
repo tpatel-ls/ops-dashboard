@@ -68,6 +68,7 @@ export function CommandPalette() {
   const orgs = useActiveOrgs();
   const router = useRouter();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
   const today = todayIso();
@@ -89,8 +90,14 @@ export function CommandPalette() {
   // a trap Tab walked straight out of it into the page behind, which is still
   // fully tabbable. cmdk only binds the arrow keys, so nothing else contained
   // it.
+  // Closing the palette must also hand focus back where it came from. cmdk
+  // autofocuses the search input on open, so without this the control the user
+  // was on is never restored and focus falls to `<body>`: the next Tab starts
+  // over at the top of the page. The app's seven other modal overlays all
+  // restore focus on close; the palette was the one that did not.
   useEffect(() => {
     if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -101,7 +108,10 @@ export function CommandPalette() {
       wrapTabFocus(event, dialogRef.current);
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
+    };
   }, [close, open]);
 
   const lanes: { ctx: OrgContext; label: string; color: string }[] = [
