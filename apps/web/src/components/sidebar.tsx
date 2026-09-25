@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getDb } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
+import { navPathActive } from '@/lib/nav-active';
 
 interface NavItem {
   href: string;
@@ -48,7 +49,7 @@ const SECONDARY: NavItem[] = [
 ];
 
 function isActive(pathname: string, item: NavItem): boolean {
-  return (item.matches ?? [item.href]).some((path) => pathname.startsWith(path));
+  return navPathActive(pathname, item.matches ?? [item.href]);
 }
 
 export function Sidebar() {
@@ -107,7 +108,7 @@ export function Sidebar() {
       <div className="mt-auto p-2.5">
         <NavLink
           item={{ href: '/settings', label: 'Settings', icon: SettingsIcon, shortcut: 'g s' }}
-          active={pathname.startsWith('/settings')}
+          active={navPathActive(pathname, ['/settings'])}
         />
       </div>
     </aside>
