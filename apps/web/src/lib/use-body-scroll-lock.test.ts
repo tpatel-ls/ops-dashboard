@@ -43,6 +43,33 @@ describe('useBodyScrollLock', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
+  it('keeps the page locked when stacked overlays release out of order', () => {
+    const outer = renderHook(() => useBodyScrollLock());
+    const inner = renderHook(() => useBodyScrollLock());
+
+    // `closeAll` dismisses stacked overlays in one commit, so the outer lock
+    // can release while the inner overlay is still on screen.
+    outer.unmount();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    inner.unmount();
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('restores the original value once the last of three locks releases', () => {
+    document.body.style.overflow = 'scroll';
+    const first = renderHook(() => useBodyScrollLock());
+    const second = renderHook(() => useBodyScrollLock());
+    const third = renderHook(() => useBodyScrollLock());
+
+    second.unmount();
+    first.unmount();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    third.unmount();
+    expect(document.body.style.overflow).toBe('scroll');
+  });
+
   it('releases the lock when it toggles off without unmounting', () => {
     const { rerender } = renderHook(({ active }) => useBodyScrollLock(active), {
       initialProps: { active: true },
