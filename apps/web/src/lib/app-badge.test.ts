@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { isPendingBadgeCapture, updateAppBadge } from './app-badge';
+import { isPendingBadgeCapture, supportsAppBadge, updateAppBadge } from './app-badge';
 
 const originalNavigator = globalThis.navigator;
 
@@ -46,6 +46,46 @@ describe('updateAppBadge', () => {
       expect(clearAppBadge).toHaveBeenCalledOnce();
     },
   );
+});
+
+function withNavigator(value: unknown): void {
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value });
+}
+
+describe('supportsAppBadge', () => {
+  it('requires both halves of the Badging API', () => {
+    // `updateAppBadge` needs `clearAppBadge` to take a badge back down, so a
+    // browser offering only `setAppBadge` would strand a stale count on the
+    // installed icon. Treat that as unsupported rather than half-usable.
+    withNavigator({ setAppBadge: vi.fn(), clearAppBadge: vi.fn() });
+    expect(supportsAppBadge()).toBe(true);
+
+    withNavigator({ setAppBadge: vi.fn() });
+    expect(supportsAppBadge()).toBe(false);
+
+    withNavigator({ clearAppBadge: vi.fn() });
+    expect(supportsAppBadge()).toBe(false);
+
+    withNavigator({});
+    expect(supportsAppBadge()).toBe(false);
+  });
+});
+
+describe('updateAppBadge on a browser without the Badging API', () => {
+  it('reports failure instead of throwing', async () => {
+    withNavigator({});
+    await expect(updateAppBadge(3)).resolves.toBe(false);
+  });
+
+  it('reports failure when the browser rejects the badge write', async () => {
+    withNavigator({
+      setAppBadge: vi.fn(async () => {
+        throw new Error('not allowed');
+      }),
+      clearAppBadge: vi.fn(async () => undefined),
+    });
+    await expect(updateAppBadge(3)).resolves.toBe(false);
+  });
 });
 
 describe('isPendingBadgeCapture', () => {
