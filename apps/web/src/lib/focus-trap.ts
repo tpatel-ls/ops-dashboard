@@ -11,7 +11,13 @@
 const FOCUSABLE_SELECTOR = [
   'button:not([disabled])',
   'a[href]',
-  'input:not([disabled])',
+  // `input[type="hidden"]` carries no `disabled` attribute and is never
+  // focusable, but it is still an `input`, so the bare selector matched it and
+  // left the trap relying on the browser reporting `tabIndex === -1` for it.
+  // jsdom reports 0, and a hidden input as the first or last match becomes an
+  // edge of the trap: Tab at that edge then "focuses" an element that cannot
+  // take focus, so focus stays put or escapes the dialog entirely.
+  'input:not([disabled]):not([type="hidden"])',
   'select:not([disabled])',
   'textarea:not([disabled])',
   '[tabindex]:not([tabindex="-1"])',
