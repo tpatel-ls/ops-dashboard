@@ -177,21 +177,18 @@ export function DevicesHub() {
               <h3 className="text-sm font-semibold tracking-tight">Watch webhook</h3>
             </div>
             <CopyBlock
-              id="endpoint"
               label="Endpoint"
               value={endpoint}
               copied={copied === 'endpoint'}
               onCopy={() => copy('endpoint', endpoint)}
             />
             <CopyBlock
-              id="body"
               label="Tasker body"
               value={watchBody}
               copied={copied === 'body'}
               onCopy={() => copy('body', watchBody)}
             />
             <CopyBlock
-              id="curl"
               label="Smoke test"
               value={watchCurl}
               copied={copied === 'curl'}
@@ -358,7 +355,6 @@ function CopyBlock({
   copied,
   onCopy,
 }: {
-  id: string;
   label: string;
   value: string;
   copied: boolean;
