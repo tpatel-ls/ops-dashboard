@@ -373,6 +373,10 @@ function CopyBlock({
         <button
           type="button"
           onClick={onCopy}
+          // The panel stacks three of these blocks, so the visible "Copy" text
+          // is the same for all three. Name each button by the field it copies
+          // so they are distinguishable out of visual context.
+          aria-label={copied ? `${label} copied` : `Copy ${label}`}
           className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-9 items-center gap-1 rounded-md px-2 text-[11px] transition-colors"
         >
           <Clipboard className="size-3" aria-hidden />
