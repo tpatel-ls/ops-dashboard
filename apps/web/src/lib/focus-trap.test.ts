@@ -31,6 +31,13 @@ describe('focusableElements', () => {
     expect(focusableElements(panel).map((el) => el.id)).toEqual(['a', 'b']);
   });
 
+  it('skips a hidden input, which cannot take focus', () => {
+    const panel = panelWith(
+      '<button id="a"></button><input type="hidden" name="next" value="/today" /><button id="b"></button>',
+    );
+    expect(focusableElements(panel).map((el) => el.id)).toEqual(['a', 'b']);
+  });
+
   it('treats a missing panel as having nothing to focus', () => {
     expect(focusableElements(null)).toEqual([]);
     expect(focusableElements(undefined)).toEqual([]);
@@ -90,6 +97,17 @@ describe('wrapTabFocus', () => {
     document.getElementById('outside')!.focus();
     expect(wrapTabFocus(tab(true), panel)).toBe(true);
     expect(document.activeElement?.id).toBe('b');
+  });
+
+  it('wraps past a trailing hidden input instead of treating it as the edge', () => {
+    const panel = panelWith(
+      '<button id="a"></button><button id="b"></button><input type="hidden" name="next" value="/today" />',
+    );
+    document.getElementById('b')!.focus();
+
+    const event = tab();
+    expect(wrapTabFocus(event, panel)).toBe(true);
+    expect(document.activeElement?.id).toBe('a');
   });
 
   it('does nothing when the panel holds no tabbable control', () => {
