@@ -472,11 +472,14 @@ export function mergeImportedTags(current: string[], next: string[] | undefined)
   const merged = [...current];
   const seen = new Set(current.map(recordKey));
   for (const tag of next) {
-    const normalized = tag.trim();
-    const key = recordKey(normalized);
+    const key = recordKey(tag);
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    merged.push(normalized.toLocaleLowerCase('en-US'));
+    // Store the canonical key, not just the lowercased spelling. Lowercasing
+    // alone leaves the width/composition the seed happened to use, so a
+    // fullwidth or decomposed seed tag reached the tags index as a second chip
+    // that no quick-add or AI-routed tag could ever match.
+    merged.push(key);
   }
   return merged;
 }
