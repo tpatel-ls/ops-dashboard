@@ -33,6 +33,8 @@ import {
   addTaskToProject,
   availableTask,
   projectRecurringReminders,
+  rescheduleTask,
+  setChecklist,
   setTaskStatus,
   softDeleteTask,
   updateTask,
@@ -616,5 +618,101 @@ describe('projectRecurringReminders', () => {
     const projected = { scheduledFor: '2026-08-03' } as Task;
 
     expect(projectRecurringReminders(previous, projected, 'task-new')).toEqual([]);
+  });
+});
+
+describe('rescheduleTask', () => {
+  beforeEach(() => {
+    mocks.get.mockReset().mockResolvedValue({
+      id: 'task-1',
+      title: 'Original',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 1,
+      scheduledFor: '2026-09-20',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-02T12:00:00.000Z',
+      version: 4,
+      deviceId: 'device-original',
+    } satisfies Task);
+    mocks.put.mockReset();
+    mocks.enqueueOp.mockReset();
+  });
+
+  it('moves the task to the given day', async () => {
+    await rescheduleTask('task-1', '2026-09-26');
+    expect(mocks.put.mock.calls[0]?.[0]).toMatchObject({ scheduledFor: '2026-09-26' });
+  });
+
+  it('clears the day for an absent or empty value rather than storing one', async () => {
+    // The unscheduled state is a missing scheduledFor. Passing '' straight
+    // through would leave a blank string that no day view matches.
+    for (const value of [undefined, '']) {
+      mocks.put.mockReset();
+      await rescheduleTask('task-1', value);
+      expect(mocks.put.mock.calls[0]?.[0].scheduledFor).toBeUndefined();
+    }
+  });
+
+  it('rejects a non-empty value that is not a calendar day', async () => {
+    // Only '' means "unschedule". Anything else is validated, so a whitespace
+    // or malformed day is refused instead of silently clearing the schedule.
+    for (const value of ['   ', '2026-02-30', 'tomorrow']) {
+      await expect(rescheduleTask('task-1', value)).rejects.toThrow(
+        'Task schedule must be a valid calendar day.',
+      );
+    }
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+});
+
+describe('setChecklist', () => {
+  beforeEach(() => {
+    mocks.get.mockReset().mockResolvedValue({
+      id: 'task-1',
+      title: 'Original',
+      status: 'todo',
+      priority: 0,
+      tags: [],
+      reminders: [],
+      checklist: [],
+      order: 1,
+      createdAt: '2026-07-01T12:00:00.000Z',
+      updatedAt: '2026-07-02T12:00:00.000Z',
+      version: 4,
+      deviceId: 'device-original',
+    } satisfies Task);
+    mocks.put.mockReset();
+    mocks.enqueueOp.mockReset();
+  });
+
+  it('stores a trimmed checklist and bumps the version once', async () => {
+    await setChecklist('task-1', [{ id: ' item-1 ', text: '  Buy milk  ', done: false }]);
+    expect(mocks.put.mock.calls[0]?.[0]).toMatchObject({
+      checklist: [{ id: 'item-1', text: 'Buy milk', done: false }],
+      version: 5,
+    });
+    expect(mocks.enqueueOp).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a malformed checklist instead of writing it', async () => {
+    for (const bad of [
+      [{ id: 'a', text: '', done: false }],
+      [{ id: '', text: 'x', done: false }],
+      [{ id: 'a', text: 'x', done: 'yes' }],
+      [
+        { id: 'dupe', text: 'x', done: false },
+        { id: 'dupe', text: 'y', done: false },
+      ],
+      'not-a-list',
+    ]) {
+      await expect(setChecklist('task-1', bad as never)).rejects.toThrow(
+        'Task checklist must be valid.',
+      );
+    }
+    expect(mocks.put).not.toHaveBeenCalled();
   });
 });
