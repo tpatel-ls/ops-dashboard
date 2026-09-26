@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS } from '@ops-dashboard/core';
 import type { Settings } from '@ops-dashboard/core';
@@ -135,11 +137,22 @@ describe('normalizeSettings', () => {
 });
 
 describe('defaultViewPath', () => {
-  it('maps every supported default view to an application route', () => {
+  it('renames only the whiteboard view', () => {
     expect(DEFAULT_VIEWS).toHaveLength(15);
     expect(defaultViewPath('today')).toBe('/today');
     expect(defaultViewPath('whiteboard')).toBe('/whiteboards');
     expect(defaultViewPath('people')).toBe('/people');
+  });
+
+  // The root route redirects to whichever view is configured, so a view listed
+  // here without a matching route folder lands the user on a 404 the moment
+  // they open the app. Resolve all fifteen against the routes on disk instead
+  // of spot-checking three.
+  it('maps every supported default view to a route that exists', () => {
+    const missing = DEFAULT_VIEWS.filter(
+      (view) => !existsSync(join(__dirname, '../app/(app)', defaultViewPath(view), 'page.tsx')),
+    );
+    expect(missing).toEqual([]);
   });
 });
 
