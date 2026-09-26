@@ -29,6 +29,7 @@ import {
   updateTask,
 } from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
+import { routedTag } from '@/lib/brain-dump-result';
 import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
 import { cn } from '@ops-dashboard/ui';
 
@@ -442,7 +443,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && tagDraft.trim()) {
                     e.preventDefault();
-                    const t = tagDraft.trim().replace(/^#/, '').toLowerCase();
+                    const t = routedTag(tagDraft.trim().replace(/^#/, ''));
                     if (!task.tags.includes(t)) {
                       updateTask(task.id, { tags: [...task.tags, t] });
                     }
