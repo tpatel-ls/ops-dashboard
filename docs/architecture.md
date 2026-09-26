@@ -42,6 +42,23 @@ under `apps/web/src/app`. The proxy refreshes Supabase sessions and gates page
 navigations when Supabase is configured. API routes keep JSON semantics and apply
 their own same-origin or bearer-secret guards.
 
+### Two Today surfaces
+
+`/today` and `/dashboard` are different pages and both present as "Today":
+
+- `/today` renders the Today rail, top three, routines, and the notification
+  feed. It is the shipped default: `DEFAULT_SETTINGS.defaultView` is `today`, so
+  a fresh install lands here, and it is also the fallback when the settings read
+  fails and the target for a notification with no task id.
+- `/dashboard` renders `WorkDashboard`. The sidebar, the mobile tab bar, and the
+  command palette all label it "Today", and `g then h` goes here.
+
+Nothing links to `/today`, so no nav entry matches it. `navPathActive` compares
+whole path segments, and no nav path is `/today` or a parent of it, which means
+the default landing page renders with no tab marked current. Deciding which page
+owns the name (and whether the other keeps a nav entry) is a product call, so it
+is recorded here rather than guessed at.
+
 ## Tag canonicalization
 
 Every tag is stored in one canonical form: `NFKC` normalized, then lowercased
