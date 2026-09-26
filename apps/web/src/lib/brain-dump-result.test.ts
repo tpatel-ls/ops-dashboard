@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { parseQuickAdd } from '@ops-dashboard/core';
 import {
   boundedDraftText,
   MAX_ROUTED_ITEMS,
   MAX_ROUTED_TITLE_LENGTH,
   normalizeBrainDumpItem,
   normalizeBrainDumpItems,
+  routedTag,
 } from './brain-dump-result';
 
 describe('boundedDraftText', () => {
@@ -143,5 +145,23 @@ describe('normalizeBrainDumpItems', () => {
     ]);
     const many = Array.from({ length: MAX_ROUTED_ITEMS + 10 }, (_, i) => ({ title: `t${i}` }));
     expect(normalizeBrainDumpItems(many)).toHaveLength(MAX_ROUTED_ITEMS);
+  });
+});
+
+describe('routedTag', () => {
+  it('collapses composition, width, and locale casing', () => {
+    expect(routedTag('Cafe\u0301')).toBe('caf\u00e9');
+    expect(routedTag('\uFF30\uFF4C\uFF41\uFF4E')).toBe('plan');
+    expect(routedTag('PLANNING')).toBe('planning');
+  });
+
+  // routedTag documents that parseQuickAdd mirrors this normalization rather
+  // than importing it, because @ops-dashboard/core cannot depend on the web
+  // app. Nothing held the two together, so this locks the shared contract: if
+  // either side changes, one tag reaches the tags index as two chips.
+  it('agrees with the quick-add parser on the same tag', () => {
+    for (const raw of ['Cafe\u0301', '\uFF30\uFF4C\uFF41\uFF4E', 'PLANNING', 'blue-text']) {
+      expect(parseQuickAdd(`Ship it #${raw}`).tags).toEqual([routedTag(raw)]);
+    }
   });
 });
