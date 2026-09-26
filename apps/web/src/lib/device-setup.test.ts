@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { APP_SHORTCUTS, DEVICE_SETUPS, getInstallReadiness } from './device-setup';
 
@@ -33,6 +35,18 @@ describe('device setup model', () => {
       '/inbox',
       '/ask',
     ]);
+  });
+
+  // These become real shortcuts on the user's home screen and survive app
+  // updates, so a url whose route was renamed or removed is a lasting 404 from
+  // the launcher. The list above only compares against its own copy, so resolve
+  // each one against the routes on disk too.
+  it('points every manifest shortcut at a route that exists', () => {
+    const missing = APP_SHORTCUTS.filter((shortcut) => {
+      const path = shortcut.url.split(/[?#]/, 1)[0]!;
+      return !existsSync(join(__dirname, '../app/(app)', path, 'page.tsx'));
+    }).map((shortcut) => shortcut.url);
+    expect(missing).toEqual([]);
   });
 
   it('detects install and voice readiness from browser capability facts', () => {
