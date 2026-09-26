@@ -50,15 +50,18 @@ describe('OpsDB data reset upgrade', () => {
     const legacy = legacyDatabase(name);
     openedDatabases.push(legacy);
     await legacy.open();
-    await legacy.table('tasks').put({ id: 'task-1', status: 'todo' });
-    await legacy.table('projects').put({ id: 'project-1', name: 'Old project' });
-    await legacy.table('organizations').put({ id: 'org-1', name: 'Old organization' });
-    await legacy.table('syncOps').put({
-      id: 'sync-1',
-      table: 'tasks',
-      recordId: 'task-1',
-      createdAt: '2026-07-25T00:00:00.000Z',
-    });
+
+    // Seed EVERY pre-upgrade table, not a sample. The reset exists so no stale
+    // local record or queued sync operation can repopulate the intentionally
+    // emptied server, so a table left out of the upgrade's clear list has to
+    // fail here rather than quietly surviving.
+    const contentTables = legacy.tables
+      .map((table) => table.name)
+      .filter((tableName) => tableName !== 'settings');
+    expect(contentTables.length).toBeGreaterThan(0);
+    for (const tableName of contentTables) {
+      await legacy.table(tableName).put({ id: `seed-${tableName}` });
+    }
     await legacy.table('settings').put({ id: 'singleton', theme: 'dark' });
     legacy.close();
 
@@ -66,10 +69,12 @@ describe('OpsDB data reset upgrade', () => {
     openedDatabases.push(upgraded);
     await upgraded.open();
 
-    await expect(upgraded.tasks.count()).resolves.toBe(0);
-    await expect(upgraded.projects.count()).resolves.toBe(0);
-    await expect(upgraded.organizations.count()).resolves.toBe(0);
-    await expect(upgraded.syncOps.count()).resolves.toBe(0);
+    const remaining: Record<string, number> = {};
+    for (const tableName of contentTables) {
+      remaining[tableName] = await upgraded.table(tableName).count();
+    }
+    expect(remaining).toEqual(Object.fromEntries(contentTables.map((t) => [t, 0])));
+
     await expect(upgraded.settings.get('singleton')).resolves.toMatchObject({
       id: 'singleton',
       theme: 'dark',
