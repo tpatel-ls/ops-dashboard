@@ -43,8 +43,11 @@ const NAV = [
   { id: 'nav-tasks', label: 'Tasks', href: '/tasks', icon: ListTodo, hint: 'g t' },
   { id: 'nav-projects', label: 'Projects', href: '/projects', icon: FolderKanban, hint: 'g p' },
   { id: 'nav-calendar', label: 'Calendar', href: '/calendar', icon: Calendar, hint: 'g c' },
-  { id: 'nav-week', label: 'Week', href: '/week', icon: CalendarRange, hint: 'g w' },
-  { id: 'nav-month', label: 'Month', href: '/month', icon: CalendarDays, hint: 'g m' },
+  // No hint: there is no `g w` / `g m` chord. The app registers g then
+  // a/h/t/p/c/i/k/l/n/s and nothing else, and neither the `?` overlay nor
+  // docs/keyboard-shortcuts.md lists these two.
+  { id: 'nav-week', label: 'Week', href: '/week', icon: CalendarRange },
+  { id: 'nav-month', label: 'Month', href: '/month', icon: CalendarDays },
   { id: 'nav-inbox', label: 'Inbox', href: '/inbox', icon: Inbox, hint: 'g i' },
   { id: 'nav-kanban', label: 'Board', href: '/kanban', icon: KanbanSquare, hint: 'g k' },
   {
