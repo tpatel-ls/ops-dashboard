@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEXIE_TABLES, SYNC_TABLES, fromRow, isSyncedTable, toRow } from './mapping';
 
@@ -58,5 +60,29 @@ describe('isSyncedTable', () => {
     for (const key of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) {
       expect(isSyncedTable(key)).toBe(false);
     }
+  });
+});
+
+describe('sync table coverage', () => {
+  // A synced table whose SQL was never written fails quietly: drainOutbox
+  // records the per-table error and skips that table for the rest of the cycle
+  // so it cannot wedge the outbox, which is right for a migration that is not
+  // applied in production yet but also means a table the repo never created at
+  // all just never syncs. Hold the mapping against the migrations.
+  it('creates every mapped Supabase table in a migration', () => {
+    const dir = join(__dirname, '../../../../../supabase/migrations');
+    const sql = readdirSync(dir)
+      .filter((file) => file.endsWith('.sql'))
+      .map((file) => readFileSync(join(dir, file), 'utf8'))
+      .join('\n');
+    const created = new Set(
+      Array.from(
+        sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_]+)/gi),
+        (match) => match[1]!.toLowerCase(),
+      ),
+    );
+    expect(created.size).toBeGreaterThan(0);
+    const missing = Object.values(SYNC_TABLES).filter((table) => !created.has(table));
+    expect(missing).toEqual([]);
   });
 });
