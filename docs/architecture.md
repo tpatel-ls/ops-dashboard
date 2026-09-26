@@ -42,6 +42,35 @@ under `apps/web/src/app`. The proxy refreshes Supabase sessions and gates page
 navigations when Supabase is configured. API routes keep JSON semantics and apply
 their own same-origin or bearer-secret guards.
 
+## Tag canonicalization
+
+Every tag is stored in one canonical form: `NFKC` normalized, then lowercased
+with `toLocaleLowerCase('en-US')`. The tags index counts and labels chips by the
+stored string, so a tag that reaches Dexie in any other width, composition, or
+casing becomes a second chip with a divided count. Tag filtering normalizes on
+compare, so it still matches both, which is why a drift here shows up as
+duplicate chips rather than as a broken filter.
+
+There is no single owner of the rule, because `@ops-dashboard/core` cannot
+depend on the web app. These paths each apply it and have to stay in agreement:
+
+- `parseQuickAdd` in `packages/core/src/parse.ts` (quick add, `#tag`)
+- `routedTag` in `apps/web/src/lib/brain-dump-result.ts` (brain dump, triage)
+- `normalizeCaptureTags` in `apps/web/src/lib/route-items.ts` (capture routing)
+- `mergeImportedTags` in `apps/web/src/lib/import-projects.ts` (portfolio seed)
+- the tag input in `apps/web/src/components/task-edit-drawer.tsx`, which calls
+  `routedTag` rather than repeating the rule
+
+`normalizeStringList` is deliberately not one of them. With `caseInsensitive` it
+deduplicates on the canonical key but keeps the first spelling it saw, which is
+what the per-entity tag lists (notes, quotes, people, books, journal) want. It
+is a deduplicator, not a canonicalizer, so it does not rescue a caller that
+stored a non-canonical tag.
+
+`brain-dump-result.test.ts` asserts `parseQuickAdd` and `routedTag` agree, so a
+change to one side without the other fails the suite rather than silently
+splitting a tag.
+
 ## Settings not yet wired
 
 Settings are device-local: `settings` is not a `SyncTable`, so the sync engine
