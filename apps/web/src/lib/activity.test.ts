@@ -1,9 +1,42 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { isoDay } from '@ops-dashboard/core';
+
+interface Rows {
+  tasks: unknown[];
+  routineChecks: unknown[];
+  journalEntries: unknown[];
+  workLogs: unknown[];
+}
+
+const rows = vi.hoisted<() => Rows>(() => {
+  const state: Rows = { tasks: [], routineChecks: [], journalEntries: [], workLogs: [] };
+  return () => state;
+});
+
+vi.mock('@ops-dashboard/core', async () => {
+  const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
+  const table = (key: keyof Rows) => ({
+    filter: (predicate: (row: never) => boolean) => ({
+      toArray: async () => (rows()[key] as never[]).filter(predicate),
+    }),
+  });
+  return {
+    ...actual,
+    getDb: () => ({
+      tasks: table('tasks'),
+      routineChecks: table('routineChecks'),
+      journalEntries: table('journalEntries'),
+      workLogs: table('workLogs'),
+    }),
+  };
+});
+
 import {
   activityScores,
   activityTimestampOnOrAfter,
   activityTimestampWithin,
   aggregateActivity,
+  loadActivity,
   normalizeActivityDays,
   workLogActivityContribution,
 } from './activity';
@@ -152,5 +185,73 @@ describe('activityScores', () => {
     });
 
     expect(scores.get('2026-08-24')).toBe(1);
+  });
+});
+
+const dayOffset = (days: number): Date => {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+beforeEach(() => {
+  Object.assign(rows(), { tasks: [], routineChecks: [], journalEntries: [], workLogs: [] });
+});
+
+describe('loadActivity', () => {
+  it('returns one dense entry per requested day, ending today', async () => {
+    const days = await loadActivity(3);
+    expect(days.map((d) => d.date)).toEqual([
+      isoDay(dayOffset(-2)),
+      isoDay(dayOffset(-1)),
+      isoDay(dayOffset(0)),
+    ]);
+    expect(days.every((d) => d.count === 0 && d.level === 0)).toBe(true);
+  });
+
+  it('clamps a non-finite day count to the 365-day default', async () => {
+    expect(await loadActivity(Number.NaN)).toHaveLength(365);
+  });
+
+  it('scores only completed, undeleted tasks', async () => {
+    rows().tasks = [
+      { status: 'done', completedAt: dayOffset(0).toISOString() },
+      {
+        status: 'done',
+        completedAt: dayOffset(0).toISOString(),
+        deletedAt: '2026-01-01T00:00:00Z',
+      },
+      { status: 'todo', completedAt: dayOffset(0).toISOString() },
+    ];
+    const today = (await loadActivity(2)).at(-1);
+    expect(today).toEqual({ date: isoDay(dayOffset(0)), count: 1, level: 1 });
+  });
+
+  it('resolves a routine check stored as a timestamp to its local day', async () => {
+    // routineChecks.date is meant to be date-only, but a synced row reaches
+    // Dexie through fromRow without validation. The day must still match a grid
+    // cell instead of vanishing from the heatmap.
+    rows().routineChecks = [{ done: true, date: dayOffset(0).toISOString() }];
+    const today = (await loadActivity(2)).at(-1);
+    expect(today).toEqual({ date: isoDay(dayOffset(0)), count: 2, level: 1 });
+  });
+
+  it('skips rows whose date cannot be resolved to a day', async () => {
+    rows().routineChecks = [{ done: true, date: 'not-a-date' }];
+    rows().journalEntries = [{ date: 'not-a-date' }];
+    expect((await loadActivity(2)).every((d) => d.count === 0)).toBe(true);
+  });
+
+  it('excludes activity that falls before the window', async () => {
+    rows().journalEntries = [{ date: isoDay(dayOffset(-5)) }];
+    rows().workLogs = [{ at: dayOffset(-5).toISOString(), minutes: 60 }];
+    expect((await loadActivity(2)).every((d) => d.count === 0)).toBe(true);
+  });
+
+  it('weights work-log minutes per half hour', async () => {
+    rows().workLogs = [{ at: dayOffset(0).toISOString(), minutes: 120 }];
+    const today = (await loadActivity(2)).at(-1);
+    expect(today).toEqual({ date: isoDay(dayOffset(0)), count: 2, level: 1 });
   });
 });
