@@ -22,3 +22,16 @@ describe('mergeImportedTags', () => {
     ]);
   });
 });
+
+describe('mergeImportedTags canonical form', () => {
+  it('stores seed tags in the canonical NFKC form the tags index uses', () => {
+    // routedTag / parseQuickAdd both record NFKC + en-US lowercase. A fullwidth
+    // seed tag used to keep its width here, so it could never match them.
+    expect(mergeImportedTags([], ['Ｃａｆｅ'])).toEqual(['cafe']);
+    expect(mergeImportedTags([], ['Café'])).toEqual(['café']);
+  });
+
+  it('keeps already-stored tags untouched', () => {
+    expect(mergeImportedTags(['Café'], ['café'])).toEqual(['Café']);
+  });
+});
