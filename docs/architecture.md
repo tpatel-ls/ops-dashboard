@@ -88,6 +88,41 @@ stored a non-canonical tag.
 change to one side without the other fails the suite rather than silently
 splitting a tag.
 
+## Field length limits
+
+Every lib writer bounds the strings it stores. The limits are not arbitrary:
+they form a small set of tiers reused across entities, so a new writer should
+pick the tier that matches the shape of the field rather than invent a number.
+
+| Tier  | Shape                                 | Examples                                                      |
+| ----- | ------------------------------------- | ------------------------------------------------------------- |
+| 64    | tag, short type token                 | routed tag, ISBN, notification reference type                 |
+| 100   | colour, icon, format token            | project colour, domain icon, journal mood                     |
+| 128   | id or foreign key                     | `projectId`, `bookId`, any nested entry id                    |
+| 200   | short name or label                   | domain, organization, whiteboard, routine; fact label         |
+| 500   | title, person name, nested entry text | task, project, book, note, content titles                     |
+| 2000  | medium prose                          | notification body, quote thought, person fact value           |
+| 2048  | URL                                   | book cover, note image, person avatar, content link           |
+| 4000  | long prose                            | project/domain/routine description, task notes, work log note |
+| 8000  | raw captured text                     | capture raw, quote text, food description                     |
+| 50000 | body                                  | journal body, note body, book summary                         |
+
+Two rules go with the table:
+
+- Count characters, not UTF-16 units. Every limit is checked with
+  `Array.from(value).length`, because an astral character (emoji, many CJK
+  extensions) costs two units and a `.length` check would reject input at half
+  the documented limit. The same rule applies when truncating rather than
+  rejecting: slicing by unit splits a surrogate pair and leaves a lone
+  surrogate, which renders as the replacement glyph. `excerpt` in
+  `apps/web/src/lib/excerpt.ts` is the shared helper for display previews.
+- Identifiers and paths are the deliberate exception and use `.length`, since
+  they are generated rather than typed and a tighter bound is the safer one.
+
+The limits exist because Dexie rows are pushed whole to Supabase on every
+mutation, so an unbounded field is an unbounded sync payload on every device,
+not just a large local row.
+
 ## Settings not yet wired
 
 Settings are device-local: `settings` is not a `SyncTable`, so the sync engine
