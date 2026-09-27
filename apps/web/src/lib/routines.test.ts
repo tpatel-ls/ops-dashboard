@@ -377,3 +377,39 @@ describe('fixedRoutineDuration', () => {
     ).toBeUndefined();
   });
 });
+
+describe('routine field bounds', () => {
+  beforeEach(() => mocks.putRecord.mockClear());
+
+  it('accepts a name at the limit and rejects one past it', async () => {
+    await expect(createRoutine({ name: 'a'.repeat(200) })).resolves.toMatchObject({
+      name: 'a'.repeat(200),
+    });
+    expect(() => createRoutine({ name: 'a'.repeat(201) })).toThrow(
+      'Routine name must contain at most 200 characters.',
+    );
+  });
+
+  it('counts the name bound in characters, not UTF-16 units', async () => {
+    await expect(createRoutine({ name: '\u{1F600}'.repeat(200) })).resolves.toMatchObject({
+      name: '\u{1F600}'.repeat(200),
+    });
+  });
+
+  it('bounds the description, domain reference, and colour', () => {
+    expect(() => updateRoutine('routine-1', { description: 'd'.repeat(4001) })).toThrow(
+      'Routine details must be valid.',
+    );
+    expect(() => updateRoutine('routine-1', { domainId: 'd'.repeat(129) })).toThrow(
+      'Routine details must be valid.',
+    );
+    expect(() => updateRoutine('routine-1', { color: 'c'.repeat(101) })).toThrow(
+      'Routine details must be valid.',
+    );
+  });
+
+  it('keeps accepting the optional details at their limit', () => {
+    expect(() => updateRoutine('routine-1', { description: 'd'.repeat(4000) })).not.toThrow();
+    expect(() => updateRoutine('routine-1', { color: 'c'.repeat(100) })).not.toThrow();
+  });
+});

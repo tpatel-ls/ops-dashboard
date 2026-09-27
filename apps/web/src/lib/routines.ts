@@ -4,6 +4,14 @@ import { getDb, isoDay, localDay, todayIso } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
+// Routines validated types, formats, enums, and ranges but measured no string
+// at all. These mirror the sibling modules: 200 for a short name (domains,
+// organizations, whiteboards), 4000 for prose (a project description), 100 for
+// a colour token, and 128 for a foreign key.
+const MAX_ROUTINE_NAME_LENGTH = 200;
+const MAX_ROUTINE_DESCRIPTION_LENGTH = 4_000;
+const MAX_ROUTINE_COLOR_LENGTH = 100;
+const MAX_ROUTINE_DOMAIN_ID_LENGTH = 128;
 const TIMES_OF_DAY = new Set<TimeOfDay>(['morning', 'afternoon', 'evening', 'anytime']);
 const ROUTINE_KINDS = new Set<RoutineKind>(['ongoing', 'fixed']);
 const ROUTINE_CHECK_SOURCES = new Set<NonNullable<RoutineCheck['source']>>([
@@ -18,6 +26,9 @@ function normalizeRoutinePatch(patch: Partial<Routine>): Partial<Routine> {
     if (typeof normalized.name !== 'string') throw new Error('Routine name is required.');
     normalized.name = normalized.name.trim();
     if (!normalized.name) throw new Error('Routine name is required.');
+    if (Array.from(normalized.name).length > MAX_ROUTINE_NAME_LENGTH) {
+      throw new Error('Routine name must contain at most 200 characters.');
+    }
   }
   if (normalized.specificTime !== undefined) {
     normalized.specificTime = normalized.specificTime.trim() || undefined;
@@ -56,8 +67,17 @@ function normalizeRoutinePatch(patch: Partial<Routine>): Partial<Routine> {
   if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
     throw new Error('Routine order must be finite.');
   }
-  for (const key of ['description', 'domainId', 'color'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['description', MAX_ROUTINE_DESCRIPTION_LENGTH],
+    ['domainId', MAX_ROUTINE_DOMAIN_ID_LENGTH],
+    ['color', MAX_ROUTINE_COLOR_LENGTH],
+  ] as const) {
+    if (normalized[key] === undefined) continue;
+    normalized[key] = normalized[key]?.trim() || undefined;
+    const value = normalized[key];
+    if (value && Array.from(value).length > limit) {
+      throw new Error('Routine details must be valid.');
+    }
   }
   return normalized;
 }
