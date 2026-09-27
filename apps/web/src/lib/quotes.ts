@@ -14,6 +14,12 @@ const QUOTE_SOURCE_TYPES = new Set<QuoteSourceType>([
   'other',
 ]);
 const MAX_QUOTE_TEXT_LENGTH = 8_000;
+// The quote text and its thoughts were bounded but the attribution was not.
+// These are the documented tiers: 500 for an author (matching books), 200 for
+// a short label, and 128 for a foreign key (matching notes' bookId).
+const MAX_QUOTE_AUTHOR_LENGTH = 500;
+const MAX_QUOTE_SOURCE_LENGTH = 200;
+const MAX_QUOTE_BOOK_ID_LENGTH = 128;
 const MAX_QUOTE_THOUGHTS = 100;
 const MAX_QUOTE_THOUGHT_TEXT_LENGTH = 2_000;
 const MAX_QUOTE_THOUGHT_ID_LENGTH = 128;
@@ -33,8 +39,17 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
   if (normalized.sourceType !== undefined && !QUOTE_SOURCE_TYPES.has(normalized.sourceType)) {
     throw new Error('Quote source type must be valid.');
   }
-  for (const key of ['author', 'source', 'bookId'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['author', MAX_QUOTE_AUTHOR_LENGTH],
+    ['source', MAX_QUOTE_SOURCE_LENGTH],
+    ['bookId', MAX_QUOTE_BOOK_ID_LENGTH],
+  ] as const) {
+    if (normalized[key] === undefined) continue;
+    normalized[key] = normalized[key]?.trim() || undefined;
+    const value = normalized[key];
+    if (value && Array.from(value).length > limit) {
+      throw new Error('Quote attribution must be valid.');
+    }
   }
   if (Object.hasOwn(normalized, 'tags')) {
     normalized.tags = normalizeStringList(normalized.tags, 'Quote tags must be valid.', {
