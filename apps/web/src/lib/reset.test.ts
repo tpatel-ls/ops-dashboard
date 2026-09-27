@@ -18,7 +18,7 @@ vi.mock('@ops-dashboard/core', () => ({
   }),
 }));
 
-import { wipeLocalData } from './reset';
+import { TABLES, wipeLocalData } from './reset';
 
 describe('wipeLocalData', () => {
   it('clears content and queued writes in one transaction', async () => {
@@ -26,7 +26,26 @@ describe('wipeLocalData', () => {
 
     expect(mocks.transaction).toHaveBeenCalledOnce();
     expect(mocks.transaction.mock.calls[0]?.[0]).toBe('rw');
-    expect(mocks.clearContent).toHaveBeenCalledTimes(19);
+    expect(mocks.clearContent).toHaveBeenCalledTimes(TABLES.length);
     expect(mocks.clearSyncOps).toHaveBeenCalledOnce();
+  });
+
+  it('enrols every content table in the transaction', () => {
+    const enrolled = (mocks.transaction.mock.calls[0]?.[1] ?? []) as Array<{ name?: string }>;
+
+    // syncOps is passed as the real Dexie table object and has no `name` here.
+    expect(enrolled.map((table) => table.name).filter(Boolean)).toEqual(TABLES);
+  });
+
+  it('leaves settings out of the content list', () => {
+    // The reset deliberately preserves settings. Adding it to the list would
+    // wipe the user's preferences along with their data, and the count-based
+    // assertion above would still pass.
+    expect(TABLES).not.toContain('settings');
+    expect(TABLES).not.toContain('syncOps');
+  });
+
+  it('lists no table twice', () => {
+    expect(new Set(TABLES).size).toBe(TABLES.length);
   });
 });
