@@ -45,6 +45,14 @@ const RECURRENCE_DAYS = new Set<NonNullable<RecurrenceRule['byDay']>[number]>([
   'SU',
 ]);
 const MAX_TASK_TITLE_LENGTH = 500;
+// The title was bounded but the fields around it were not. These mirror the
+// limits the sibling modules already use for the same shapes: 4000 for prose
+// (a project description, a work log note), 128 for a foreign key, and the
+// 128/500 pair projects and content already apply to a checklist entry.
+const MAX_TASK_NOTES_LENGTH = 4_000;
+const MAX_TASK_REFERENCE_LENGTH = 128;
+const MAX_TASK_CHECKLIST_ID_LENGTH = 128;
+const MAX_TASK_CHECKLIST_TEXT_LENGTH = 500;
 
 function normalizedTaskTitle(value: string): string {
   const title = value.trim();
@@ -92,7 +100,15 @@ function normalizeTaskCollections(patch: Partial<Task>): void {
       }
       const id = item.id.trim();
       const text = item.text.trim();
-      if (!id || !text || seen.has(id)) throw new Error('Task checklist must be valid.');
+      if (
+        !id ||
+        !text ||
+        seen.has(id) ||
+        Array.from(id).length > MAX_TASK_CHECKLIST_ID_LENGTH ||
+        Array.from(text).length > MAX_TASK_CHECKLIST_TEXT_LENGTH
+      ) {
+        throw new Error('Task checklist must be valid.');
+      }
       seen.add(id);
       return { id, text, done: item.done };
     });
@@ -175,12 +191,19 @@ function assertTaskFields(patch: Partial<Task>, ownerTaskId: string): void {
   if (patch.notes !== undefined) {
     if (typeof patch.notes !== 'string') throw new Error('Task notes must be valid.');
     patch.notes = patch.notes.trim() || undefined;
+    if (patch.notes && Array.from(patch.notes).length > MAX_TASK_NOTES_LENGTH) {
+      throw new Error('Task notes must contain at most 4000 characters.');
+    }
   }
   for (const key of ['projectId', 'orgId', 'domainId', 'contentId', 'parentId'] as const) {
     const value = patch[key];
     if (value !== undefined) {
       if (typeof value !== 'string') throw new Error('Task references must be valid.');
       patch[key] = value.trim() || undefined;
+      const reference = patch[key];
+      if (reference && Array.from(reference).length > MAX_TASK_REFERENCE_LENGTH) {
+        throw new Error('Task references must be valid.');
+      }
     }
   }
   if (patch.scheduledFor !== undefined && localDay(patch.scheduledFor) !== patch.scheduledFor) {

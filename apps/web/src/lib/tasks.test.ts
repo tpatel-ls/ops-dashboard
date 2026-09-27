@@ -716,3 +716,39 @@ describe('setChecklist', () => {
     expect(mocks.put).not.toHaveBeenCalled();
   });
 });
+
+describe('task field bounds', () => {
+  it('bounds the notes the task drawer writes', async () => {
+    await expect(addTask('Call supplier', { notes: 'n'.repeat(4000) })).resolves.toMatchObject({
+      notes: 'n'.repeat(4000),
+    });
+    await expect(addTask('Call supplier', { notes: 'n'.repeat(4001) })).rejects.toThrow(
+      'Task notes must contain at most 4000 characters.',
+    );
+  });
+
+  it('counts the notes bound in characters, not UTF-16 units', async () => {
+    await expect(
+      addTask('Call supplier', { notes: '\u{1F600}'.repeat(4000) }),
+    ).resolves.toMatchObject({ title: 'Call supplier' });
+  });
+
+  it('bounds a checklist entry the way projects and content already do', async () => {
+    await expect(
+      addTask('Call supplier', {
+        checklist: [{ id: 'item-1', text: 't'.repeat(501), done: false }],
+      }),
+    ).rejects.toThrow('Task checklist must be valid.');
+    await expect(
+      addTask('Call supplier', {
+        checklist: [{ id: 'i'.repeat(129), text: 'Confirm price', done: false }],
+      }),
+    ).rejects.toThrow('Task checklist must be valid.');
+  });
+
+  it('bounds a foreign key so a synced reference cannot be arbitrary', async () => {
+    await expect(addTask('Call supplier', { projectId: 'p'.repeat(129) })).rejects.toThrow(
+      'Task references must be valid.',
+    );
+  });
+});
