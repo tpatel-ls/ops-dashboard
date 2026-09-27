@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { journalDateLabel } from '@/lib/journal';
+import { excerpt } from '@/lib/excerpt';
 
 export function ResurfacingEntry() {
   const entry = useLiveQuery(async () => {
@@ -17,7 +18,7 @@ export function ResurfacingEntry() {
   if (entry === undefined) return null;
   if (entry === null) return null;
 
-  const snippet = entry.body.length > 160 ? `${entry.body.slice(0, 160).trim()}…` : entry.body;
+  const snippet = excerpt(entry.body, 160);
 
   return (
     <section className="surface-flat relative overflow-hidden">
