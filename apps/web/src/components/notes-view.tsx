@@ -7,6 +7,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { Note } from '@ops-dashboard/core';
 import { compareNoteRecency, createNote, updateNote, deleteNote } from '@/lib/notes';
 import { cn } from '@ops-dashboard/ui';
+import { excerpt } from '@/lib/excerpt';
 
 /* ─── Create Form ──────────────────────────────────────────────── */
 
@@ -101,13 +102,9 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
 
 function NoteCard({ note }: { note: Note }) {
   const [confirming, setConfirming] = useState(false);
-  const excerpt = note.title
-    ? note.body.length > 240
-      ? note.body.slice(0, 240) + '…'
-      : note.body
-    : note.body.length > 240
-      ? note.body.slice(0, 240) + '…'
-      : note.body;
+  // Both arms of the old `note.title ? ... : ...` were character for character
+  // identical, so the title never affected the preview.
+  const body = excerpt(note.body, 240);
 
   async function handleFlag() {
     await updateNote(note.id, { flaggedForReview: !note.flaggedForReview });
@@ -167,7 +164,7 @@ function NoteCard({ note }: { note: Note }) {
       </div>
 
       {/* Body excerpt */}
-      <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{excerpt}</p>
+      <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{body}</p>
 
       {/* Footer: tags + flag indicator */}
       <div className="flex flex-wrap items-center gap-1.5">
