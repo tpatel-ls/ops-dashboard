@@ -8,6 +8,15 @@ import { newestFirstBy } from './recency';
 
 const MAX_PERSON_FACTS = 100;
 const MAX_PERSON_INTERACTIONS = 500;
+// A person is the only record type whose primary field was left unbounded
+// while its nested fields were checked. These mirror the limits the sibling
+// modules already use: 500 for a title-like field (projects, books, notes),
+// 200 for a short label (notes' source), 2048 for a URL (books' cover, notes'
+// image), and 128 for a foreign key (notes' bookId, organizations' id).
+const MAX_PERSON_NAME_LENGTH = 500;
+const MAX_PERSON_RELATIONSHIP_LENGTH = 200;
+const MAX_PERSON_AVATAR_URL_LENGTH = 2_048;
+const MAX_PERSON_DOMAIN_ID_LENGTH = 128;
 const MAX_PERSON_NESTED_ID_LENGTH = 128;
 const MAX_PERSON_FACT_LABEL_LENGTH = 200;
 const MAX_PERSON_FACT_VALUE_LENGTH = 2_000;
@@ -34,9 +43,21 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
     if (typeof normalized.name !== 'string') throw new Error('Person name is required.');
     normalized.name = normalized.name.trim();
     if (!normalized.name) throw new Error('Person name is required.');
+    if (!withinCharacters(normalized.name, MAX_PERSON_NAME_LENGTH)) {
+      throw new Error('Person name must contain at most 500 characters.');
+    }
   }
-  for (const key of ['relationship', 'avatarUrl', 'domainId'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['relationship', MAX_PERSON_RELATIONSHIP_LENGTH],
+    ['avatarUrl', MAX_PERSON_AVATAR_URL_LENGTH],
+    ['domainId', MAX_PERSON_DOMAIN_ID_LENGTH],
+  ] as const) {
+    if (normalized[key] === undefined) continue;
+    normalized[key] = normalized[key]?.trim() || undefined;
+    const value = normalized[key];
+    if (value && !withinCharacters(value, limit)) {
+      throw new Error('Person details must be valid.');
+    }
   }
   if (Object.hasOwn(normalized, 'tags')) {
     normalized.tags = normalizeStringList(normalized.tags, 'Person tags must be valid.', {

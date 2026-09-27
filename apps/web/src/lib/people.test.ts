@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Person } from '@ops-dashboard/core';
-import { compareInteractionRecency, latestInteraction, matchesPersonSearch } from './people';
+import {
+  compareInteractionRecency,
+  createPerson,
+  latestInteraction,
+  matchesPersonSearch,
+  updatePerson,
+} from './people';
 
 const person = {
   name: 'Avery Morgan',
@@ -76,5 +82,51 @@ describe('compareInteractionRecency', () => {
       'earlier',
       'invalid',
     ]);
+  });
+});
+
+// normalizePersonPatch runs before either writer reaches Dexie, so a rejection
+// is observable synchronously. An accepted patch does reach it, so settle that
+// rejection rather than leaving it unhandled.
+function accepts(patch: Parameters<typeof updatePerson>[1]): () => void {
+  return () => void updatePerson('person-1', patch).catch(() => {});
+}
+
+describe('person field validation', () => {
+  it('still requires a name that survives trimming', () => {
+    expect(() => createPerson({ name: '   ' })).toThrow('Person name is required.');
+    expect(() => updatePerson('person-1', { name: 7 as unknown as string })).toThrow(
+      'Person name is required.',
+    );
+  });
+
+  it('bounds the person name like every other primary field', () => {
+    expect(accepts({ name: 'a'.repeat(500) })).not.toThrow();
+    expect(() => updatePerson('person-1', { name: 'a'.repeat(501) })).toThrow(
+      'Person name must contain at most 500 characters.',
+    );
+  });
+
+  it('counts the name bound in characters, not UTF-16 units', () => {
+    expect(accepts({ name: '\u{1F600}'.repeat(500) })).not.toThrow();
+  });
+
+  it('bounds the relationship, avatar URL, and domain reference', () => {
+    expect(() => updatePerson('person-1', { relationship: 'r'.repeat(201) })).toThrow(
+      'Person details must be valid.',
+    );
+    expect(() => updatePerson('person-1', { avatarUrl: `https://x/${'a'.repeat(2048)}` })).toThrow(
+      'Person details must be valid.',
+    );
+    expect(() => updatePerson('person-1', { domainId: 'd'.repeat(129) })).toThrow(
+      'Person details must be valid.',
+    );
+  });
+
+  it('keeps accepting the optional details at their limit and when cleared', () => {
+    expect(accepts({ relationship: 'r'.repeat(200) })).not.toThrow();
+    expect(accepts({ avatarUrl: 'a'.repeat(2048) })).not.toThrow();
+    expect(accepts({ domainId: 'd'.repeat(128) })).not.toThrow();
+    expect(accepts({ relationship: '   ' })).not.toThrow();
   });
 });
