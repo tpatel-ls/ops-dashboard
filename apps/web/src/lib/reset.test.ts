@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
@@ -47,5 +49,26 @@ describe('wipeLocalData', () => {
 
   it('lists no table twice', () => {
     expect(new Set(TABLES).size).toBe(TABLES.length);
+  });
+});
+
+describe('content table coverage', () => {
+  // TABLES is exhaustive over SyncTable by construction, and wipeLocalData
+  // resolves each entry with `db.table(name)`, which throws on a name the Dexie
+  // schema never declared. A table added to the union and to this list but not
+  // to the schema would therefore break "Clear all data" outright, at runtime,
+  // on a path the mocked suite above cannot see. Hold the list against the
+  // schema on disk, the way the sync mapping is held against the migrations.
+  it('declares every cleared table in the Dexie schema', () => {
+    const source = readFileSync(join(__dirname, '../../../../packages/core/src/db.ts'), 'utf8');
+    const declared = new Set<string>();
+    for (const block of source.matchAll(/\.stores\(\{([\s\S]*?)\}\)/g)) {
+      for (const key of block[1]!.matchAll(/^\s*([A-Za-z_$][\w$]*)\s*:/gm)) {
+        declared.add(key[1]!);
+      }
+    }
+
+    expect(declared.size).toBeGreaterThan(0);
+    expect(TABLES.filter((table) => !declared.has(table))).toEqual([]);
   });
 });
