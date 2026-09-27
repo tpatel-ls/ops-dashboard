@@ -115,3 +115,45 @@ describe('contentPublishLabel', () => {
     }
   });
 });
+
+describe('content field bounds', () => {
+  beforeEach(() => mocks.putRecord.mockClear());
+
+  it('accepts a title at the limit and rejects one past it', async () => {
+    await expect(createContent({ title: 'a'.repeat(500) })).resolves.toMatchObject({
+      title: 'a'.repeat(500),
+    });
+    expect(() => createContent({ title: 'a'.repeat(501) })).toThrow(
+      'Content title must contain at most 500 characters.',
+    );
+  });
+
+  it('counts the title bound in characters, not UTF-16 units', async () => {
+    // An astral character costs two UTF-16 units, so a `.length` bound would
+    // reject a title half the documented limit.
+    await expect(createContent({ title: '\u{1F600}'.repeat(500) })).resolves.toMatchObject({
+      type: 'video',
+    });
+  });
+
+  it('bounds the channel, domain reference, and outline', () => {
+    expect(() => createContent({ title: 'Post', channel: 'c'.repeat(201) })).toThrow(
+      'Content details must be valid.',
+    );
+    expect(() => createContent({ title: 'Post', domainId: 'd'.repeat(129) })).toThrow(
+      'Content details must be valid.',
+    );
+    expect(() => updateContent('content-1', { outline: 'o'.repeat(4001) })).toThrow(
+      'Content details must be valid.',
+    );
+  });
+
+  it('bounds the link even when it is otherwise a safe URL', () => {
+    const long = `https://example.test/${'a'.repeat(2048)}`;
+
+    expect(() => createContent({ title: 'Post', url: long })).toThrow(
+      'Content URL must contain at most 2048 characters.',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+});

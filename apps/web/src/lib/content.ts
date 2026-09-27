@@ -14,6 +14,16 @@ const CONTENT_STATUSES = new Set<ContentStatus>([
   'published',
   'done',
 ]);
+// The checklist entries were bounded but the fields around them were not.
+// These mirror the limits the sibling modules already use: 500 for a title
+// (projects, books, notes), 200 for a short label (notes' source), 4000 for
+// long-form prose (a project description), 2048 for a URL (books' cover), and
+// 128 for a foreign key (notes' bookId).
+const MAX_CONTENT_TITLE_LENGTH = 500;
+const MAX_CONTENT_CHANNEL_LENGTH = 200;
+const MAX_CONTENT_OUTLINE_LENGTH = 4_000;
+const MAX_CONTENT_URL_LENGTH = 2_048;
+const MAX_CONTENT_DOMAIN_ID_LENGTH = 128;
 const MAX_CONTENT_CHECKLIST_ITEMS = 100;
 const MAX_CONTENT_CHECKLIST_ID_LENGTH = 128;
 const MAX_CONTENT_CHECKLIST_TEXT_LENGTH = 500;
@@ -109,6 +119,9 @@ function normalizeContentPatch(patch: Partial<Content>): Partial<Content> {
     if (typeof normalized.title !== 'string') throw new Error('Content title is required.');
     normalized.title = normalized.title.trim();
     if (!normalized.title) throw new Error('Content title is required.');
+    if (Array.from(normalized.title).length > MAX_CONTENT_TITLE_LENGTH) {
+      throw new Error('Content title must contain at most 500 characters.');
+    }
   }
   if (Object.hasOwn(normalized, 'type') && !CONTENT_TYPES.has(normalized.type!)) {
     throw new Error('Content type must be valid.');
@@ -128,10 +141,24 @@ function normalizeContentPatch(patch: Partial<Content>): Partial<Content> {
   if (Object.hasOwn(normalized, 'checklist')) {
     normalized.checklist = normalizeChecklist(normalized.checklist);
   }
-  for (const key of ['channel', 'domainId', 'outline'] as const) {
-    if (normalized[key] !== undefined) normalized[key] = normalized[key]?.trim() || undefined;
+  for (const [key, limit] of [
+    ['channel', MAX_CONTENT_CHANNEL_LENGTH],
+    ['domainId', MAX_CONTENT_DOMAIN_ID_LENGTH],
+    ['outline', MAX_CONTENT_OUTLINE_LENGTH],
+  ] as const) {
+    if (normalized[key] === undefined) continue;
+    normalized[key] = normalized[key]?.trim() || undefined;
+    const value = normalized[key];
+    if (value && Array.from(value).length > limit) {
+      throw new Error('Content details must be valid.');
+    }
   }
-  if (normalized.url !== undefined) normalized.url = normalizeContentUrl(normalized.url);
+  if (normalized.url !== undefined) {
+    normalized.url = normalizeContentUrl(normalized.url);
+    if (normalized.url && Array.from(normalized.url).length > MAX_CONTENT_URL_LENGTH) {
+      throw new Error('Content URL must contain at most 2048 characters.');
+    }
+  }
   return normalized;
 }
 
