@@ -77,6 +77,24 @@ describe('pickWinner', () => {
     expect(pickWinner(empty, sparse)).toBe(winner);
   });
 
+  it('converges when a synced row arrives without a device id', () => {
+    // fromRow drops SQL NULLs, so a row whose device_id is NULL reaches the
+    // tie-break with deviceId undefined. `undefined > 'device-a'` and
+    // `'device-a' > undefined` are both false, so each peer used to keep its
+    // own copy and the record never converged.
+    const named = task('device-a');
+    const missing = task('device-a', { deviceId: undefined as never });
+
+    expect(pickWinner(named, missing)).toBe(pickWinner(missing, named));
+  });
+
+  it('converges when neither copy carries a usable device id', () => {
+    const left = task('device-a', { deviceId: undefined as never, title: 'Left' });
+    const right = task('device-a', { deviceId: null as never, title: 'Right' });
+
+    expect(pickWinner(left, right)).toBe(pickWinner(right, left));
+  });
+
   it('prefers a valid version over corrupted sync metadata', () => {
     const valid = task('device-a');
     const malformed = task('device-z', { version: Number.NaN });
