@@ -89,8 +89,15 @@ export function pickWinner<T extends Syncable>(local: T | undefined, remote: T):
   if (Boolean(remote.deletedAt) !== Boolean(local.deletedAt)) {
     return remote.deletedAt ? remote : local;
   }
-  if (remote.deviceId !== local.deviceId) {
-    return remote.deviceId > local.deviceId ? remote : local;
+  // `fromRow` skips SQL NULLs and casts without validating, so a synced row can
+  // reach this tie-break carrying no `deviceId` at all. Comparing a missing id
+  // with `>` is false in BOTH directions, so each peer kept whichever copy it
+  // already held and the record never converged. Normalize to a string first so
+  // the ordering stays total and symmetric.
+  const localDeviceId = typeof local.deviceId === 'string' ? local.deviceId : '';
+  const remoteDeviceId = typeof remote.deviceId === 'string' ? remote.deviceId : '';
+  if (remoteDeviceId !== localDeviceId) {
+    return remoteDeviceId > localDeviceId ? remote : local;
   }
 
   // A restored backup or duplicated device ID can produce two different
