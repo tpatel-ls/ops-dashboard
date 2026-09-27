@@ -94,5 +94,10 @@ export function buildWorkContext({
   }
 
   const context = lines.join('\n');
-  return context.length > MAX_CONTEXT ? context.slice(0, MAX_CONTEXT) : context;
+  // Bound by characters, the way `contextText` above already does. A raw
+  // UTF-16 slice cuts an astral character in half and leaves a lone surrogate,
+  // which is not valid UTF-8: the context is JSON-encoded straight into the
+  // model request, so the prompt ended in a replacement character.
+  const characters = Array.from(context);
+  return characters.length > MAX_CONTEXT ? characters.slice(0, MAX_CONTEXT).join('') : context;
 }
