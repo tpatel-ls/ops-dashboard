@@ -63,6 +63,14 @@ describe('isSyncedTable', () => {
   });
 });
 
+function migrationSql(): string {
+  const dir = join(__dirname, '../../../../../supabase/migrations');
+  return readdirSync(dir)
+    .filter((file) => file.endsWith('.sql'))
+    .map((file) => readFileSync(join(dir, file), 'utf8'))
+    .join('\n');
+}
+
 describe('sync table coverage', () => {
   // A synced table whose SQL was never written fails quietly: drainOutbox
   // records the per-table error and skips that table for the rest of the cycle
@@ -70,11 +78,7 @@ describe('sync table coverage', () => {
   // applied in production yet but also means a table the repo never created at
   // all just never syncs. Hold the mapping against the migrations.
   it('creates every mapped Supabase table in a migration', () => {
-    const dir = join(__dirname, '../../../../../supabase/migrations');
-    const sql = readdirSync(dir)
-      .filter((file) => file.endsWith('.sql'))
-      .map((file) => readFileSync(join(dir, file), 'utf8'))
-      .join('\n');
+    const sql = migrationSql();
     const created = new Set(
       Array.from(
         sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_]+)/gi),
@@ -84,5 +88,36 @@ describe('sync table coverage', () => {
     expect(created.size).toBeGreaterThan(0);
     const missing = Object.values(SYNC_TABLES).filter((table) => !created.has(table));
     expect(missing).toEqual([]);
+  });
+
+  // Every synced table is reached with the end user's own Supabase session, so
+  // row-level security is the ONLY thing separating one user's rows from
+  // another's. A new table that is mapped and created but never protected
+  // still syncs perfectly in testing and silently exposes every row, so hold
+  // the mapping against the policies too. Both spellings the migrations use
+  // count: a direct `alter table ... enable row level security` and the
+  // `do $$ ... foreach t in array[...]` loops that apply it in bulk.
+  it('protects every mapped Supabase table with row-level security', () => {
+    const sql = migrationSql();
+    const secured = new Set<string>();
+
+    for (const match of sql.matchAll(
+      /alter\s+table\s+(?:public\.)?([a-z_]+)\s+enable\s+row\s+level\s+security/gi,
+    )) {
+      secured.add(match[1]!.toLowerCase());
+    }
+    for (const block of sql.matchAll(/do\s+\$\$[\s\S]*?\$\$/gi)) {
+      const body = block[0];
+      if (!/enable\s+row\s+level\s+security/i.test(body)) continue;
+      for (const list of body.matchAll(/array\s*\[([^\]]*)\]/gi)) {
+        for (const name of list[1]!.matchAll(/'([a-z_]+)'/gi)) {
+          secured.add(name[1]!.toLowerCase());
+        }
+      }
+    }
+
+    expect(secured.size).toBeGreaterThan(0);
+    const unprotected = Object.values(SYNC_TABLES).filter((table) => !secured.has(table));
+    expect(unprotected).toEqual([]);
   });
 });
