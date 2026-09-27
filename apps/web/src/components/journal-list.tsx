@@ -6,6 +6,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
 import { compareJournalEntries, deleteJournalEntry, journalDateLabel } from '@/lib/journal';
 import { cn } from '@ops-dashboard/ui';
+import { excerpt } from '@/lib/excerpt';
 
 const MOOD_GLYPH: Record<string, { symbol: string; label: string; color: string }> = {
   great: { symbol: '✦', label: 'Great', color: 'text-success' },
@@ -52,7 +53,7 @@ export function JournalList() {
 
 function JournalCard({ entry }: { entry: JournalEntry }) {
   const mood = entry.mood ? MOOD_GLYPH[entry.mood] : null;
-  const excerpt = entry.body.length > 280 ? entry.body.slice(0, 280) + '…' : entry.body;
+  const body = excerpt(entry.body, 280);
 
   const formattedDate = journalDateLabel(entry.date, 'EEEE, d MMM yyyy');
 
@@ -98,7 +99,7 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       {/* Body excerpt */}
-      <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{excerpt}</p>
+      <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{body}</p>
 
       {/* Tags */}
       {entry.tags && entry.tags.length > 0 && (
