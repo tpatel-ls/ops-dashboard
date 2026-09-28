@@ -9,6 +9,12 @@ afterEach(() => {
 });
 
 describe('useBodyScrollLock', () => {
+  it('does not change overflow when the hook starts inactive', () => {
+    document.body.style.overflow = 'auto';
+    const { unmount } = renderHook(() => useBodyScrollLock(false));
+    expect(document.body.style.overflow).toBe('auto');
+    unmount();
+  });
   it('holds the page still while active and restores it on unmount', () => {
     const { unmount } = renderHook(() => useBodyScrollLock());
     expect(document.body.style.overflow).toBe('hidden');
