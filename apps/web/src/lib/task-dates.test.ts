@@ -12,6 +12,11 @@ import {
 } from './task-dates';
 
 describe('task calendar dates', () => {
+  it('prefers a due day over a later scheduled day for labels', () => {
+    expect(
+      taskDueOrScheduledDay({ dueAt: '2026-08-24T12:00:00Z', scheduledFor: '2026-08-25' }),
+    ).toBe('2026-08-24');
+  });
   it('uses the browser-local day for timestamped deadlines', () => {
     const originalTimezone = process.env.TZ;
     process.env.TZ = 'America/Chicago';
