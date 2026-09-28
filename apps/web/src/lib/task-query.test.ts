@@ -21,6 +21,10 @@ function task(id: string, patch: Partial<Task> = {}): Task {
 }
 
 describe('compareTasks', () => {
+  it('uses ids to stabilize otherwise identical task ordering', () => {
+    const tasks = [task('b'), task('a')];
+    expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['a', 'b']);
+  });
   it('sorts dated tasks first by date and then by priority', () => {
     const tasks = [
       task('undated', { priority: 3 }),
