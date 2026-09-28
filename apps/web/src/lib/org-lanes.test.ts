@@ -3,6 +3,12 @@ import type { Project, Task } from '@ops-dashboard/core';
 import { taskLane } from './org-lanes';
 
 describe('taskLane', () => {
+  it('trims the project reference before lookup', () => {
+    const projects = new Map<string, Project>([
+      ['project-1', { id: 'project-1', orgId: 'org-1' } as Project],
+    ]);
+    expect(taskLane({ projectId: ' project-1 ' } as Task, projects)).toBe('org-1');
+  });
   it('prefers a normalized task organization', () => {
     const projects = new Map<string, Project>([
       ['project-1', { id: 'project-1', orgId: 'project-org' } as Project],
