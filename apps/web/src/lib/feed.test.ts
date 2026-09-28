@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { compareNotificationRecency, notificationAge } from './feed';
 
 describe('notificationAge', () => {
+  it('uses a safe fallback for a future notification', () => {
+    expect(notificationAge('2026-08-21T15:00:00.000Z', now)).toBe('in about 1 hour');
+  });
   const now = new Date('2026-08-21T14:00:00.000Z');
 
   it('formats valid notification timestamps relative to now', () => {
