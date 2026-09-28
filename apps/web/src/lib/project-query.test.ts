@@ -34,6 +34,9 @@ describe('isActiveProject', () => {
 });
 
 describe('matchesProjectSearch', () => {
+  it('treats whitespace-only search as an empty query', () => {
+    expect(matchesProjectSearch(project(), '   ')).toBe(true);
+  });
   const launch = project({ name: 'Cross-device Launch', description: 'Ship the mobile rollout' });
 
   it('matches names and descriptions without case sensitivity', () => {
