@@ -30,6 +30,14 @@ const PRIORITY_COLOR: Record<Priority, string> = {
   3: 'var(--color-priority-urgent)',
 };
 
+// dnd-kit's default instructions tell screen reader users to press Space to
+// pick a card up and use the arrow keys to move it. This board installs only a
+// pointer sensor, so describe what the keyboard actually does.
+const WEEK_SCREEN_READER_INSTRUCTIONS = {
+  draggable:
+    'Press Enter to open this task, where its date can be changed. Dragging between days needs a pointer.',
+};
+
 export function WeekBoard() {
   const weekStartsOn = useLiveSettings().weekStartsOn;
   const [anchor, setAnchor] = useState<Date>(() => new Date());
@@ -102,7 +110,11 @@ export function WeekBoard() {
           </div>
         ) : null}
       </div>
-      <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragEnd={onDragEnd}
+        accessibility={{ screenReaderInstructions: WEEK_SCREEN_READER_INSTRUCTIONS }}
+      >
         <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:min-h-[420px] sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {days.map((day) => {
             const dayIso = isoDay(day);

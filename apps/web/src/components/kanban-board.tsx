@@ -42,6 +42,14 @@ import { useOrgStore } from '@/lib/org-store';
 
 const PRIORITY_LABEL = ['', '', 'Important', 'Critical'] as const;
 
+// dnd-kit's default instructions tell screen reader users to press Space to
+// pick a card up and use the arrow keys to move it. This board installs only a
+// pointer sensor, so describe what the keyboard actually does.
+const KANBAN_SCREEN_READER_INSTRUCTIONS = {
+  draggable:
+    'Press Enter to open this task, where its status can be changed. Dragging between columns needs a pointer.',
+};
+
 export function KanbanBoard() {
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -98,7 +106,11 @@ export function KanbanBoard() {
           {scopedTasks.length} {scopedTasks.length === 1 ? 'task' : 'tasks'}
         </span>
       </div>
-      <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragEnd={onDragEnd}
+        accessibility={{ screenReaderInstructions: KANBAN_SCREEN_READER_INSTRUCTIONS }}
+      >
         <div className="-mx-3 flex snap-x snap-mandatory scrollbar-thin gap-3 overflow-x-auto px-3 pb-3 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
           {SIMPLE_KANBAN_COLUMNS.map((column, index) => (
             <KanbanColumn
