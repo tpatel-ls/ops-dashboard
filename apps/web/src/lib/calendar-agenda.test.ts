@@ -27,6 +27,11 @@ function task(id: string, patch: Partial<Task> = {}): Task {
 }
 
 describe('calendar agenda', () => {
+  it('ignores malformed date fields when choosing a calendar day', () => {
+    expect(
+      calendarDateOf(task('invalid', { dueAt: 'not-a-date', scheduledFor: '2026-02-30' })),
+    ).toBeUndefined();
+  });
   it('places time blocks, scheduled tasks, and due tasks on a calendar date', () => {
     expect(calendarDateOf(task('block', { startAt: '2026-07-20T09:00:00' }))).toBe('2026-07-20');
     expect(calendarDateOf(task('scheduled', { scheduledFor: '2026-07-21' }))).toBe('2026-07-21');
