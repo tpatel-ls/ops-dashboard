@@ -33,6 +33,13 @@ afterEach(() => {
 });
 
 describe('useMediaQuery', () => {
+  it('unsubscribes its media listener on unmount', () => {
+    const media = stubMatchMedia(false);
+    const { unmount } = renderHook(() => useMediaQuery('(min-width: 64rem)'));
+    expect(media.listenerCount).toBe(1);
+    unmount();
+    expect(media.listenerCount).toBe(0);
+  });
   it('reports the current match', () => {
     stubMatchMedia(true);
     const { result } = renderHook(() => useMediaQuery('(min-width: 64rem)'));
