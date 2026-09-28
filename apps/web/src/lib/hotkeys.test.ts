@@ -74,4 +74,18 @@ describe('isComposingKeyEvent', () => {
   it('passes an ordinary Enter through', () => {
     expect(isComposingKeyEvent({ keyCode: 13, nativeEvent: { isComposing: false } })).toBe(false);
   });
+
+  it('reads a native document-level event the same way', () => {
+    const native = (init: Partial<KeyboardEvent>) => init as KeyboardEvent;
+
+    expect(isComposingKeyEvent(native({ key: 'Escape', keyCode: 27, isComposing: true }))).toBe(
+      true,
+    );
+    expect(isComposingKeyEvent(native({ key: 'Escape', keyCode: 229, isComposing: false }))).toBe(
+      true,
+    );
+    expect(isComposingKeyEvent(native({ key: 'Escape', keyCode: 27, isComposing: false }))).toBe(
+      false,
+    );
+  });
 });

@@ -38,6 +38,7 @@ import { addTask } from '@/lib/tasks';
 import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { safeTaskTags } from '@/lib/task-query';
 import { useActiveOrgs } from './org-switcher';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 const NAV = [
   { id: 'nav-dashboard', label: 'Today', href: '/dashboard', icon: LayoutDashboard, hint: 'g h' },
@@ -103,6 +104,7 @@ export function CommandPalette() {
     if (!open) return;
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     function onKeyDown(event: KeyboardEvent) {
+      if (isComposingKeyEvent(event)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         setQuery('');
