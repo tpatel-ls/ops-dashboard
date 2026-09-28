@@ -6,6 +6,9 @@ afterEach(() => {
 });
 
 describe('relativeTimeLabel', () => {
+  it('returns undefined for whitespace-only input', () => {
+    expect(relativeTimeLabel('   ')).toBeUndefined();
+  });
   it('describes a past timestamp relative to now', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-28T12:00:00.000Z'));
