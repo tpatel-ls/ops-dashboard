@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { themePreference } from './theme';
 
 describe('themePreference', () => {
+  it('does not coerce arbitrary truthy values into a theme', () => {
+    expect(themePreference(1 as unknown as string)).toBe('system');
+  });
   it('uses the operating system preference when no explicit choice is stored', () => {
     expect(themePreference(null)).toBe('system');
     expect(themePreference('invalid')).toBe('system');
