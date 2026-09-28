@@ -4,6 +4,13 @@ import { compareCreatedAtRecency, newestFirstBy } from './recency';
 const record = (id: string, createdAt: string) => ({ id, createdAt });
 
 describe('compareCreatedAtRecency', () => {
+  it('keeps an invalid timestamp behind a valid timestamp in either input order', () => {
+    expect(
+      [record('bad', 'invalid'), record('good', '2026-03-01T00:00:00Z')]
+        .sort(compareCreatedAtRecency)
+        .map((item) => item.id),
+    ).toEqual(['good', 'bad']);
+  });
   it('orders newest first', () => {
     const items = [
       record('older', '2026-01-01T00:00:00.000Z'),
