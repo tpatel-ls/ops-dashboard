@@ -13,6 +13,10 @@ function tab(shiftKey = false): KeyboardEvent {
 }
 
 describe('focusableElements', () => {
+  it('does not include an element with a negative tabindex', () => {
+    const panel = panelWith('<button id="skip" tabindex="-1"></button><button id="keep"></button>');
+    expect(focusableElements(panel).map((el) => el.id)).toEqual(['keep']);
+  });
   beforeEach(() => {
     document.body.innerHTML = '';
   });
