@@ -58,6 +58,13 @@ rows use the same client-side winner selection before writing to Dexie.
 - Missing authentication reports a signed-out state and restarts sync after sign-in.
 - Browser storage failures fall back safely, but persistent cursor and backfill
   markers normally use local storage.
+- A row the database rejects outright, such as a null in a `not null` column,
+  is never dropped from the outbox. Because a failed table is deferred for the
+  rest of each drain and its oldest operation is retried first, that one row
+  holds back every later write to the same table on the device until the record
+  is edited into a valid shape. Writers must therefore store values the
+  migrations accept: a blank whiteboard, for example, stores its document as
+  `{}` rather than `null`.
 - A per-table pull cursor advances only after every page for that table succeeds.
 - Stopping or restarting sync invalidates in-flight startup work before new
   listeners, timers, or channels are installed.
