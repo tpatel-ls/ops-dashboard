@@ -26,6 +26,7 @@ import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboa
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
+import { DRAG_ANNOUNCEMENTS } from '@/lib/drag-announcements';
 import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { nextBoardColumn, previousBoardColumn } from '@/lib/board-actions';
 import { taskLane } from '@/lib/org-lanes';
@@ -109,7 +110,10 @@ export function KanbanBoard() {
       <DndContext
         sensors={sensors}
         onDragEnd={onDragEnd}
-        accessibility={{ screenReaderInstructions: KANBAN_SCREEN_READER_INSTRUCTIONS }}
+        accessibility={{
+          announcements: DRAG_ANNOUNCEMENTS,
+          screenReaderInstructions: KANBAN_SCREEN_READER_INSTRUCTIONS,
+        }}
       >
         <div className="-mx-3 flex snap-x snap-mandatory scrollbar-thin gap-3 overflow-x-auto px-3 pb-3 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
           {SIMPLE_KANBAN_COLUMNS.map((column, index) => (
@@ -147,7 +151,7 @@ function KanbanColumn({
   addOverrides: Partial<Task>;
   position: number;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  const { setNodeRef, isOver } = useDroppable({ id: column.id, data: { label: column.label } });
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -279,6 +283,7 @@ function KanbanCard({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
+    data: { label: task.title },
   });
   const openEdit = useAppStore((state) => state.openEdit);
   const organization = organizationId ? organizationsMap.get(organizationId) : undefined;

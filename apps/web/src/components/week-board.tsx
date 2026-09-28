@@ -18,6 +18,7 @@ import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
 import { taskScheduledOn } from '@/lib/task-dates';
 import { useAppStore } from '@/lib/app-store';
+import { DRAG_ANNOUNCEMENTS } from '@/lib/drag-announcements';
 import { calendarInstant } from '@/lib/calendar-agenda';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
@@ -113,7 +114,10 @@ export function WeekBoard() {
       <DndContext
         sensors={sensors}
         onDragEnd={onDragEnd}
-        accessibility={{ screenReaderInstructions: WEEK_SCREEN_READER_INSTRUCTIONS }}
+        accessibility={{
+          announcements: DRAG_ANNOUNCEMENTS,
+          screenReaderInstructions: WEEK_SCREEN_READER_INSTRUCTIONS,
+        }}
       >
         <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:min-h-[420px] sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {days.map((day) => {
@@ -152,7 +156,10 @@ function DayColumn({
   projectsMap: Map<string, Project>;
   laneColor: (task: Task) => string;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: isoDate });
+  const { setNodeRef, isOver } = useDroppable({
+    id: isoDate,
+    data: { label: format(day, 'EEEE, MMMM d') },
+  });
   return (
     <div
       ref={setNodeRef}
@@ -202,6 +209,7 @@ export function WeekTaskCard({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
+    data: { label: task.title },
   });
   const openEdit = useAppStore((s) => s.openEdit);
   const style: React.CSSProperties = {
