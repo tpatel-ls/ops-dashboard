@@ -73,6 +73,7 @@ export function TaskEditDrawer() {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isComposingKeyEvent(event)) return;
       if (event.key === 'Escape') {
         close();
         return;

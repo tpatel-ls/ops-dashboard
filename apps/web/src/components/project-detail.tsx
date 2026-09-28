@@ -769,6 +769,7 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
     const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
 
     function onKey(e: KeyboardEvent) {
+      if (isComposingKeyEvent(e)) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         onClose();

@@ -204,6 +204,7 @@ function WorkLoggerPanel({
     initialFocus?.focus();
 
     function onKeyDown(event: KeyboardEvent) {
+      if (isComposingKeyEvent(event)) return;
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
         panelRef.current?.querySelector<HTMLFormElement>('#work-logger-form')?.requestSubmit();

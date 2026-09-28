@@ -17,11 +17,11 @@ export interface Hotkey {
  * the field. Chrome and Firefox set `isComposing`; Safari reports the confirming
  * Enter after `compositionend` and marks it only with the legacy keyCode 229.
  */
-export function isComposingKeyEvent(e: {
-  keyCode: number;
-  nativeEvent: { isComposing: boolean };
-}): boolean {
-  return e.nativeEvent.isComposing || e.keyCode === 229;
+export function isComposingKeyEvent(
+  e: KeyboardEvent | { keyCode: number; nativeEvent: { isComposing: boolean } },
+): boolean {
+  const composing = 'nativeEvent' in e ? e.nativeEvent.isComposing : e.isComposing;
+  return composing || e.keyCode === 229;
 }
 
 function isTypingTarget(e: KeyboardEvent): boolean {

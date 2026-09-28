@@ -390,6 +390,7 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
     const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
 
     function onKey(e: KeyboardEvent) {
+      if (isComposingKeyEvent(e)) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         onClose();
