@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { normalizeStringList } from './string-list';
 
 describe('normalizeStringList', () => {
+  it('counts trimmed Unicode values against the configured limit', () => {
+    expect(normalizeStringList([' 😀 '], 'invalid', { maxItemLength: 1 })).toEqual(['😀']);
+  });
   it('deduplicates tags across case and equivalent Unicode forms', () => {
     expect(
       normalizeStringList(
