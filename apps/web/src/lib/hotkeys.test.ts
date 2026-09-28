@@ -16,6 +16,11 @@ function keyboardEvent(
 }
 
 describe('matchesHotkey', () => {
+  it('rejects a mod shortcut when both platform modifiers are pressed', () => {
+    expect(matchesHotkey('mod+k', keyboardEvent('k', { metaKey: true, ctrlKey: true }))).toBe(
+      false,
+    );
+  });
   it('matches unmodified keys only without extra modifiers', () => {
     expect(matchesHotkey('?', keyboardEvent('?'))).toBe(true);
     expect(matchesHotkey('?', keyboardEvent('?', { ctrlKey: true }))).toBe(false);
