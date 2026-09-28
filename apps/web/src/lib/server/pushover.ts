@@ -1,5 +1,7 @@
 /** Server-only Pushover sender. No-ops (returns not-configured) without keys. */
 
+import { boundedText } from './input';
+
 export interface PushoverMessage {
   message: string;
   title?: string;
@@ -15,13 +17,9 @@ export interface PushoverResult {
 
 export const PUSHOVER_TIMEOUT_MS = 10_000;
 
-function bounded(value: string, limit: number): string {
-  return Array.from(value.trim()).slice(0, limit).join('');
-}
-
 function safeLink(value: string | undefined): string | undefined {
   if (!value) return undefined;
-  const candidate = bounded(value, 512);
+  const candidate = boundedText(value, 512);
   try {
     const url = new URL(candidate);
     return (url.protocol === 'http:' || url.protocol === 'https:') && !url.username && !url.password
@@ -36,7 +34,7 @@ export async function sendPushover(msg: PushoverMessage): Promise<PushoverResult
   const token = process.env.PUSHOVER_TOKEN?.trim();
   const user = process.env.PUSHOVER_USER?.trim();
   if (!token || !user) return { ok: false, reason: 'not-configured' };
-  const message = bounded(msg.message, 1024);
+  const message = boundedText(msg.message, 1024);
   if (!message) return { ok: false, reason: 'empty-message' };
   if (
     msg.priority !== undefined &&
@@ -49,10 +47,10 @@ export async function sendPushover(msg: PushoverMessage): Promise<PushoverResult
   if (requestedUrl && !url) return { ok: false, reason: 'invalid-url' };
 
   const body = new URLSearchParams({ token, user, message });
-  const title = msg.title ? bounded(msg.title, 250) : '';
+  const title = msg.title ? boundedText(msg.title, 250) : '';
   if (title) body.set('title', title);
   if (msg.priority !== undefined) body.set('priority', String(msg.priority));
-  const urlTitle = msg.urlTitle ? bounded(msg.urlTitle, 100) : '';
+  const urlTitle = msg.urlTitle ? boundedText(msg.urlTitle, 100) : '';
   if (url) body.set('url', url);
   if (url && urlTitle) body.set('url_title', urlTitle);
 
