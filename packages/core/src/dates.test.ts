@@ -26,6 +26,9 @@ describe('localDay', () => {
 });
 
 describe('toISODate', () => {
+  it('pads single-digit month and day values', () => {
+    expect(toISODate(new Date(2026, 0, 2))).toBe('2026-01-02');
+  });
   it('formats dates in local calendar terms', () => {
     expect(toISODate(new Date(Date.UTC(2026, 6, 30, 12, 0, 0)))).toBe('2026-07-30');
     expect(toISODate(new Date(2026, 0, 1))).toBe('2026-01-01');
@@ -53,6 +56,10 @@ describe('weekStartIso', () => {
 });
 
 describe('weekDays', () => {
+  it('returns distinct Date instances for each day', () => {
+    const days = weekDays(new Date(2026, 8, 16), 1);
+    expect(new Set(days).size).toBe(7);
+  });
   // 2026-09-16 is a Wednesday.
   const wednesday = new Date(2026, 8, 16, 12, 0, 0);
 
