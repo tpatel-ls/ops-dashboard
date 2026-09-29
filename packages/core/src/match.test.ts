@@ -4,6 +4,13 @@ import { matchByName } from './match';
 const PROJECTS = [{ name: 'Blue Text' }, { name: 'Power Dialer' }, { name: 'Mini Monet' }];
 
 describe('matchByName', () => {
+  it('returns the first match when names repeat', () => {
+    const items = [{ id: 1, name: 'Inbox' }, { id: 2, name: 'Inbox' }];
+    expect(matchByName(items, 'inbox')?.id).toBe(1);
+  });
+  it('does not match a blank item name', () => {
+    expect(matchByName([{ name: '   ' }, ...PROJECTS], ' ')).toBeUndefined();
+  });
   it('matches exact names', () => {
     expect(matchByName(PROJECTS, 'Blue Text')).toBe(PROJECTS[0]);
   });
