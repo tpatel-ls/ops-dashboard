@@ -113,6 +113,9 @@ describe('samplePen', () => {
 });
 
 describe('PEN_BUTTON_ERASER', () => {
+  it('keeps the eraser button numeric for pointer comparisons', () => {
+    expect(Number.isInteger(PEN_BUTTON_ERASER)).toBe(true);
+  });
   it('matches the pointer button the stylus tail reports', () => {
     expect(PEN_BUTTON_ERASER).toBe(5);
   });
