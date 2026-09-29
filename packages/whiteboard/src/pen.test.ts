@@ -79,6 +79,9 @@ describe('shouldRejectAsPalm', () => {
 });
 
 describe('samplePen', () => {
+  it('preserves zero-valued stylus channels', () => {
+    expect(samplePen(pointer())).toMatchObject({ pressure: 0, tiltX: 0, tiltY: 0, twist: 0 });
+  });
   it('copies the stylus channels the canvas records', () => {
     const sample = samplePen(
       pointer({
