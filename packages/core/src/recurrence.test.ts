@@ -4,13 +4,25 @@ import { nextOccurrence, projectNextTask, shouldGenerateNext } from './recurrenc
 
 describe('nextOccurrence', () => {
   it('uses the configured weekly interval without byDay', () => {
-    expect(nextOccurrence({ freq: 'weekly', interval: 3 }, new Date('2026-04-26')).toISOString().slice(0, 10)).toBe('2026-05-17');
+    expect(
+      nextOccurrence({ freq: 'weekly', interval: 3 }, new Date('2026-04-26'))
+        .toISOString()
+        .slice(0, 10),
+    ).toBe('2026-05-17');
   });
   it('floors a fractional monthly interval', () => {
-    expect(nextOccurrence({ freq: 'monthly', interval: 1.9 }, new Date('2026-04-26')).toISOString().slice(0, 10)).toBe('2026-05-26');
+    expect(
+      nextOccurrence({ freq: 'monthly', interval: 1.9 }, new Date('2026-04-26'))
+        .toISOString()
+        .slice(0, 10),
+    ).toBe('2026-05-26');
   });
   it('clamps a zero interval to one day', () => {
-    expect(nextOccurrence({ freq: 'daily', interval: 0 }, new Date('2026-04-26')).toISOString().slice(0, 10)).toBe('2026-04-27');
+    expect(
+      nextOccurrence({ freq: 'daily', interval: 0 }, new Date('2026-04-26'))
+        .toISOString()
+        .slice(0, 10),
+    ).toBe('2026-04-27');
   });
   it('handles daily', () => {
     const next = nextOccurrence({ freq: 'daily', interval: 2 }, new Date('2026-04-26'));

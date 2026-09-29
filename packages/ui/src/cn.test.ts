@@ -9,6 +9,9 @@ import { cn } from './cn';
  * contract so a tailwind-merge upgrade cannot quietly change it.
  */
 describe('cn', () => {
+  it('keeps responsive variants independent', () => {
+    expect(cn('md:px-2', 'px-4')).toBe('md:px-2 px-4');
+  });
   it('resolves conflicts in nested conditional inputs', () => {
     expect(cn(['px-2', { 'px-6': true }])).toBe('px-6');
   });

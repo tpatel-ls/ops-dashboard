@@ -6,7 +6,9 @@ describe('computeFoodTotals', () => {
     expect(computeFoodTotals([{ calories: 10.6 } as never]).totalCalories).toBe(11);
   });
   it('omits negative macro estimates', () => {
-    expect(computeFoodTotals([{ calories: 10, protein: -2 } as never])).toEqual({ totalCalories: 10 });
+    expect(computeFoodTotals([{ calories: 10, protein: -2 } as never])).toEqual({
+      totalCalories: 10,
+    });
   });
   it('returns zero calories for an empty log', () => {
     expect(computeFoodTotals([])).toEqual({ totalCalories: 0 });
