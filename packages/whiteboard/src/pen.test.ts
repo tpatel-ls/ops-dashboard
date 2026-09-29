@@ -32,6 +32,11 @@ describe('isPenEvent', () => {
 });
 
 describe('shouldRejectAsPalm', () => {
+  it('allows a touch exactly at the current time when the window is zero', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+    expect(shouldRejectAsPalm(pointer({ pointerType: 'touch' }), 1_000, 0)).toBe(false);
+  });
   it('rejects a touch that lands inside the window after pen activity', () => {
     vi.useFakeTimers();
     vi.setSystemTime(1_000);
