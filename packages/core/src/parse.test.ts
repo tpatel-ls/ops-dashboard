@@ -3,7 +3,7 @@ import { parseQuickAdd, quickAddToTask } from './parse';
 
 describe('parseQuickAdd', () => {
   it('caps repeated priority markers at urgent', () => {
-    expect(parseQuickAdd('Escalate !!!!', anchor).priority).toBe(3);
+    expect(parseQuickAdd('Escalate !!!', anchor).priority).toBe(3);
   });
   it('accepts hyphens and underscores in tags', () => {
     expect(parseQuickAdd('Review #follow-up #next_step', anchor).tags).toEqual(['follow-up', 'next_step']);

@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { computeFoodTotals } from './food';
 
 describe('computeFoodTotals', () => {
+  it('rounds fractional calorie estimates', () => {
+    expect(computeFoodTotals([{ calories: 10.6 } as never]).totalCalories).toBe(11);
+  });
+  it('omits negative macro estimates', () => {
+    expect(computeFoodTotals([{ calories: 10, protein: -2 } as never])).toEqual({ totalCalories: 10 });
+  });
+  it('returns zero calories for an empty log', () => {
+    expect(computeFoodTotals([])).toEqual({ totalCalories: 0 });
+  });
   it('sums calories and macros across items', () => {
     expect(
       computeFoodTotals([
