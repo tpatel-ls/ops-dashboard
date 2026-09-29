@@ -9,6 +9,9 @@ import { cn } from './cn';
  * contract so a tailwind-merge upgrade cannot quietly change it.
  */
 describe('cn', () => {
+  it('preserves arbitrary non-tailwind class names', () => {
+    expect(cn('dashboard-shell', 'is-ready')).toBe('dashboard-shell is-ready');
+  });
   it('returns an empty string for nullish-only inputs', () => {
     expect(cn(null, undefined)).toBe('');
   });
