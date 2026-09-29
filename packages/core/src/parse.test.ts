@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { parseQuickAdd, quickAddToTask } from './parse';
 
 describe('parseQuickAdd', () => {
+  it('caps repeated priority markers at urgent', () => {
+    expect(parseQuickAdd('Escalate !!!!', anchor).priority).toBe(3);
+  });
+  it('accepts hyphens and underscores in tags', () => {
+    expect(parseQuickAdd('Review #follow-up #next_step', anchor).tags).toEqual(['follow-up', 'next_step']);
+  });
+  it('normalizes repeated whitespace in the title', () => {
+    expect(parseQuickAdd('  Draft   brief  ', anchor).title).toBe('Draft brief');
+  });
   const anchor = new Date('2026-04-26T10:00:00');
 
   it('extracts a plain title', () => {
