@@ -21,6 +21,9 @@ afterEach(() => {
 });
 
 describe('isPenEvent', () => {
+  it('rejects an empty pointer type', () => {
+    expect(isPenEvent(pointer({ pointerType: '' }))).toBe(false);
+  });
   it('accepts only pen pointers', () => {
     expect(isPenEvent(pointer({ pointerType: 'pen' }))).toBe(true);
     expect(isPenEvent(pointer({ pointerType: 'touch' }))).toBe(false);
