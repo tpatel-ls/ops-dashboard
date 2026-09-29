@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { matchesOrgContext } from './org-context';
 
 describe('matchesOrgContext', () => {
+  it('treats an empty organization as personal', () => {
+    expect(matchesOrgContext('', 'personal')).toBe(true);
+  });
   it('matches everything under all', () => {
     expect(matchesOrgContext(undefined, 'all')).toBe(true);
     expect(matchesOrgContext('org_1', 'all')).toBe(true);
