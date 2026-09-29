@@ -9,6 +9,9 @@ import { cn } from './cn';
  * contract so a tailwind-merge upgrade cannot quietly change it.
  */
 describe('cn', () => {
+  it('returns an empty string for nullish-only inputs', () => {
+    expect(cn(null, undefined)).toBe('');
+  });
   it('lets a later class win a conflict with an earlier one', () => {
     // The override pattern: base classes first, caller `className` last.
     expect(cn('px-2 py-1', 'px-4')).toBe('py-1 px-4');
