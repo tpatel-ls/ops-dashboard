@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { isoDay, localDay, monthGrid, toISODate, weekDays, weekStartIso } from './dates';
 
 describe('localDay', () => {
+  it('rejects an empty value', () => {
+    expect(localDay('')).toBeUndefined();
+  });
   it('preserves date-only calendar values', () => {
     expect(localDay('2026-08-01')).toBe('2026-08-01');
   });
