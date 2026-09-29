@@ -6,7 +6,10 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Escalate !!!', anchor).priority).toBe(3);
   });
   it('accepts hyphens and underscores in tags', () => {
-    expect(parseQuickAdd('Review #follow-up #next_step', anchor).tags).toEqual(['follow-up', 'next_step']);
+    expect(parseQuickAdd('Review #follow-up #next_step', anchor).tags).toEqual([
+      'follow-up',
+      'next_step',
+    ]);
   });
   it('normalizes repeated whitespace in the title', () => {
     expect(parseQuickAdd('  Draft   brief  ', anchor).title).toBe('Draft brief');
