@@ -61,4 +61,8 @@ describe('requestedAuthPath', () => {
   it('ignores text that is not a URL query', () => {
     expect(requestedAuthPath('/tasks', 'https://example.com')).toBe('/tasks');
   });
+
+  it('preserves a query marker supplied by the caller', () => {
+    expect(requestedAuthPath('/tasks', '?')).toBe('/tasks?');
+  });
 });
