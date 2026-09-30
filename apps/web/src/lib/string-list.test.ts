@@ -70,4 +70,8 @@ describe('normalizeStringList', () => {
   it('uses the caller error message for invalid item types', () => {
     expect(() => normalizeStringList([null], 'custom error')).toThrow('custom error');
   });
+
+  it('normalizes compatibility forms before comparing values', () => {
+    expect(normalizeStringList(['Ａ', 'A'], 'invalid', { caseInsensitive: true })).toEqual(['Ａ']);
+  });
 });
