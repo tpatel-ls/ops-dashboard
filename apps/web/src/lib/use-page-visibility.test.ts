@@ -9,6 +9,16 @@ afterEach(() => {
 });
 
 describe('usePageVisibility', () => {
+  it('starts from the current document visibility state', () => {
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'hidden',
+    });
+
+    const { result } = renderHook(() => usePageVisibility());
+    expect(result.current).toBe('hidden');
+  });
+
   it('updates visibility from document events', () => {
     const listeners: Record<string, Array<EventListener>> = {};
     vi.spyOn(document, 'addEventListener').mockImplementation((type, handler) => {
