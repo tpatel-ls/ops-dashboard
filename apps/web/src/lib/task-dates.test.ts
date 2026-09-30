@@ -57,6 +57,12 @@ describe('task calendar dates', () => {
   it('uses a schedule when no due date exists', () => {
     expect(taskCommitmentDay({ scheduledFor: '2026-08-24' })).toBe('2026-08-24');
   });
+
+  it('ignores an invalid due date when a valid schedule exists', () => {
+    expect(taskCommitmentDay({ dueAt: 'not-a-date', scheduledFor: '2026-08-24' })).toBe(
+      '2026-08-24',
+    );
+  });
   it('rejects malformed calendar days for overdue checks', () => {
     expect(taskIsOverdue({ dueAt: '2026-08-23' }, 'yesterday')).toBe(false);
   });
