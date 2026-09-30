@@ -55,6 +55,12 @@ function whiteboard(name: string): Whiteboard {
 }
 
 describe('tasksToMarkdown', () => {
+  it('escapes task titles that contain markdown checkboxes', () => {
+    const markdown = tasksToMarkdown([task('- [x] imported')], 'Tasks');
+
+    expect(markdown).toContain('- [ ] - \\[x\\] imported');
+  });
+
   it('groups malformed scheduled dates as unscheduled', () => {
     const markdown = tasksToMarkdown([task('Recover imported task', 'not-a-date')], 'Tasks');
 

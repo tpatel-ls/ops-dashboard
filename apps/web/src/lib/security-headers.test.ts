@@ -22,4 +22,9 @@ describe('security headers', () => {
     const hsts = SECURITY_HEADERS.find(({ key }) => key === 'Strict-Transport-Security');
     expect(hsts?.value).not.toContain('preload');
   });
+
+  it('defines each security header exactly once', () => {
+    const keys = SECURITY_HEADERS.map(({ key }) => key);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
 });

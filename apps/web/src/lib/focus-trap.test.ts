@@ -46,6 +46,11 @@ describe('focusableElements', () => {
     expect(focusableElements(null)).toEqual([]);
     expect(focusableElements(undefined)).toEqual([]);
   });
+
+  it('does not include a contenteditable element without a tab stop', () => {
+    const panel = panelWith('<div contenteditable="true" id="editor"></div>');
+    expect(focusableElements(panel).map((el) => el.id)).toEqual([]);
+  });
 });
 
 describe('wrapTabFocus', () => {

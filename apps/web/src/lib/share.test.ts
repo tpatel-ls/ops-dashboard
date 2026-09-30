@@ -51,4 +51,14 @@ describe('shareOrCopy', () => {
     await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('failed');
     expect(writeText).not.toHaveBeenCalled();
   });
+
+  it('uses the URL when the share payload has no text', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { share });
+
+    await expect(shareOrCopy({ title: 'Task', url: 'https://example.test/task' })).resolves.toBe(
+      'shared',
+    );
+    expect(share).toHaveBeenCalledWith({ title: 'Task', url: 'https://example.test/task' });
+  });
 });

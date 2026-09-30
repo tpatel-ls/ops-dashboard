@@ -39,4 +39,8 @@ describe('navPathActive', () => {
   it('does not match a trailing slash route as a bare parent', () => {
     expect(navPathActive('/tasks-archive', ['/tasks/'])).toBe(false);
   });
+
+  it('matches a nested route with a trailing slash entry', () => {
+    expect(navPathActive('/tasks/1/details', ['/tasks/'])).toBe(true);
+  });
 });

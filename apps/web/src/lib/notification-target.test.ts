@@ -18,4 +18,8 @@ describe('notificationTarget', () => {
     expect(notificationTarget('x'.repeat(129))).toBe('/today');
     expect(notificationTarget('task-1\nredirect')).toBe('/today');
   });
+
+  it('trims identifiers before encoding them', () => {
+    expect(notificationTarget('  task-2  ')).toBe('/today?task=task-2');
+  });
 });
