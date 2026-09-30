@@ -69,4 +69,13 @@ describe('browser storage helpers', () => {
     expect(writeLocalStorage('sync-token', '{}')).toBe(false);
     expect(removeLocalStorage('sync-token')).toBe(false);
   });
+
+  it('does not read storage more than once per request', () => {
+    const getItem = vi.fn().mockReturnValue('saved');
+    vi.stubGlobal('window', { localStorage: { getItem } });
+
+    expect(readLocalStorage('draft')).toBe('saved');
+    expect(getItem).toHaveBeenCalledOnce();
+  });
+
 });
