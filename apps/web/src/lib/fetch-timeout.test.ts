@@ -27,6 +27,14 @@ it('clears the timeout after a successful response', async () => {
 });
 
 describe('fetchWithTimeout', () => {
+  it('rejects negative timeout values before calling fetch', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(fetchWithTimeout('/api/test', {}, -1)).rejects.toThrow(RangeError);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('aborts a request that exceeds its deadline', async () => {
     vi.useFakeTimers();
     const fetch = vi.fn(
