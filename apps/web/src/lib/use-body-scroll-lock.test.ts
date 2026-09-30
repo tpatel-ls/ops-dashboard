@@ -15,6 +15,17 @@ describe('useBodyScrollLock', () => {
     expect(document.body.style.overflow).toBe('auto');
     unmount();
   });
+
+  it('restores the original value when active state toggles off', () => {
+    document.body.style.overflow = 'scroll';
+    const { rerender, unmount } = renderHook(({ active }) => useBodyScrollLock(active), {
+      initialProps: { active: true },
+    });
+
+    rerender({ active: false });
+    expect(document.body.style.overflow).toBe('scroll');
+    unmount();
+  });
   it('holds the page still while active and restores it on unmount', () => {
     const { unmount } = renderHook(() => useBodyScrollLock());
     expect(document.body.style.overflow).toBe('hidden');
