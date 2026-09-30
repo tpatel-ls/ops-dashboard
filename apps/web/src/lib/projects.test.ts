@@ -73,6 +73,19 @@ describe('projectTaskProgress', () => {
       percent: 0,
     });
   });
+
+  it('rounds fractional progress down to a whole percentage', () => {
+    expect(
+      projectTaskProgress(
+        [
+          task('one', { projectId: 'project-a' }),
+          task('two', { projectId: 'project-a' }),
+          task('done', { projectId: 'project-a', status: 'done' }),
+        ],
+        'project-a',
+      ).percent,
+    ).toBe(33);
+  });
 });
 
 describe('createProject', () => {
