@@ -78,4 +78,11 @@ describe('browser storage helpers', () => {
     expect(getItem).toHaveBeenCalledOnce();
   });
 
+  it('passes the exact key to storage adapters', () => {
+    const getItem = vi.fn().mockReturnValue(null);
+    vi.stubGlobal('window', { localStorage: { getItem } });
+
+    readLocalStorage('  draft-key  ');
+    expect(getItem).toHaveBeenCalledWith('  draft-key  ');
+  });
 });
