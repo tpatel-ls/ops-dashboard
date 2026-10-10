@@ -21,6 +21,18 @@ describe('healthRequestAuthorized', () => {
     expect(healthRequestAuthorized(request('wrong-secret'))).toBe(false);
   });
 
+  it('accepts the Bearer scheme case-insensitively', () => {
+    vi.stubEnv('CRON_SECRET', 'cron-secret');
+
+    expect(
+      healthRequestAuthorized(
+        new Request('http://localhost/api/health', {
+          headers: { authorization: 'bEaReR cron-secret' },
+        }),
+      ),
+    ).toBe(true);
+  });
+
   it('rejects configured secrets without the Bearer scheme', () => {
     vi.stubEnv('CRON_SECRET', 'cron-secret');
 
