@@ -35,4 +35,15 @@ describe('usePageVisibility', () => {
 
     expect(result.current).toBe('hidden');
   });
+
+  it('removes the visibility listener when the component unmounts', () => {
+    const addSpy = vi.spyOn(document, 'addEventListener');
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
+
+    const { unmount } = renderHook(() => usePageVisibility());
+
+    unmount();
+
+    expect(removeSpy).toHaveBeenCalledWith('visibilitychange', addSpy.mock.calls[0]?.[1]);
+  });
 });
