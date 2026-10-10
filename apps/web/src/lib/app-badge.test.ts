@@ -69,6 +69,13 @@ describe('supportsAppBadge', () => {
     withNavigator({});
     expect(supportsAppBadge()).toBe(false);
   });
+
+  it('reports unsupported when browser globals are unavailable', async () => {
+    withNavigator(undefined);
+
+    expect(supportsAppBadge()).toBe(false);
+    await expect(updateAppBadge(1)).resolves.toBe(false);
+  });
 });
 
 describe('updateAppBadge on a browser without the Badging API', () => {
