@@ -39,6 +39,26 @@ describe('useNetworkStatus', () => {
     expect(result.current).toBe(true);
   });
 
+  it('updates when the network transitions offline', () => {
+    const listeners: Record<string, Array<EventListener>> = {};
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, handler) => {
+      if (typeof handler === 'function') {
+        listeners[type] = [...(listeners[type] ?? []), handler];
+      }
+      return undefined;
+    });
+
+    Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: true });
+
+    const { result } = renderHook(() => useNetworkStatus());
+    act(() => {
+      Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: false });
+      listeners.offline?.[0]?.(new Event('offline'));
+    });
+
+    expect(result.current).toBe(false);
+  });
+
   it('removes listeners when the component unmounts', () => {
     const listeners: Record<string, Array<EventListener>> = {};
     const addSpy = vi.spyOn(window, 'addEventListener').mockImplementation((type, handler) => {
