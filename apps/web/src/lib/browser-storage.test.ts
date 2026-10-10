@@ -50,12 +50,13 @@ describe('browser storage helpers', () => {
 
   it('returns success for supported write and delete operations', () => {
     const localStorage = {
-      getItem: () => null,
+      getItem: vi.fn(() => 'value'),
       setItem: vi.fn(),
       removeItem: vi.fn(),
     };
     vi.stubGlobal('window', { localStorage });
 
+    expect(readLocalStorage('key')).toBe('value');
     expect(writeLocalStorage('key', 'value')).toBe(true);
     expect(removeLocalStorage('key')).toBe(true);
     expect(localStorage.setItem).toHaveBeenCalledWith('key', 'value');
