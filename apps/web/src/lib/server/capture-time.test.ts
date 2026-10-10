@@ -15,4 +15,11 @@ describe('captureParserNow', () => {
 
     expect(captureParserNow(undefined, serverNow)).toBe(serverNow);
   });
+
+  it('keeps the server clock for non-finite caller offsets', () => {
+    const serverNow = new Date('2026-08-24T04:30:00.000Z');
+
+    expect(captureParserNow(Number.NaN, serverNow)).toBe(serverNow);
+    expect(captureParserNow(Number.POSITIVE_INFINITY, serverNow)).toBe(serverNow);
+  });
 });
