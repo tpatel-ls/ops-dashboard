@@ -26,6 +26,17 @@ it('clears the timeout after a successful response', async () => {
   expect(fetch).toHaveBeenCalledOnce();
 });
 
+it('removes the caller abort listener after a successful response', async () => {
+  const fetch = vi.fn(async () => new Response('ok'));
+  vi.stubGlobal('fetch', fetch);
+  const caller = new AbortController();
+  const removeEventListener = vi.spyOn(caller.signal, 'removeEventListener');
+
+  await fetchWithTimeout('/api/test', { signal: caller.signal }, 50);
+
+  expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function));
+});
+
 describe('fetchWithTimeout', () => {
   it('aborts a request that exceeds its deadline', async () => {
     vi.useFakeTimers();
