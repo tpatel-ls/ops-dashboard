@@ -33,4 +33,10 @@ describe('normalizeTriageResult', () => {
       }),
     ).toMatchObject({ tags: ['café', 'planning'] });
   });
+
+  it.each([0, 3])('preserves supported priority %s values', (priority) => {
+    expect(normalizeTriageResult({ title: 'Review account', priority })).toMatchObject({
+      priority,
+    });
+  });
 });
