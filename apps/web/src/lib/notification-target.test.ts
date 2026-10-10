@@ -10,7 +10,7 @@ describe('notificationTarget', () => {
     expect(notificationTarget('task-1&capture=1')).toBe('/today?task=task-1%26capture%3D1');
   });
 
-  it.each([undefined, null, '', 42])('uses Today for invalid task data: %s', (taskId) => {
+  it.each([undefined, null, '', '   ', 42])('uses Today for invalid task data: %s', (taskId) => {
     expect(notificationTarget(taskId)).toBe('/today');
   });
 
