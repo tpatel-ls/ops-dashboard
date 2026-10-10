@@ -52,6 +52,20 @@ describe('trailingSingleFlight', () => {
 
     await expect(run()).rejects.toThrow('persistent failure');
   });
+
+  it('converts a synchronous action throw into a rejected run', async () => {
+    const action = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(() => {
+        throw new Error('sync failure');
+      })
+      .mockResolvedValueOnce(undefined);
+    const run = trailingSingleFlight(action);
+
+    await expect(run()).rejects.toThrow('sync failure');
+    await expect(run()).resolves.toBeUndefined();
+    expect(action).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('latestSingleFlight', () => {
