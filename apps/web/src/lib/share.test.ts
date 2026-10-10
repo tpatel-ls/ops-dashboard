@@ -15,6 +15,20 @@ describe('shareOrCopy', () => {
     expect(writeText).toHaveBeenCalledWith('Task\nFollow up');
   });
 
+  it('falls back when the browser cannot share the payload', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const canShare = vi.fn().mockReturnValue(false);
+    vi.stubGlobal('navigator', {
+      share: vi.fn(),
+      canShare,
+      clipboard: { writeText },
+    });
+
+    await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('copied');
+    expect(canShare).toHaveBeenCalledOnce();
+    expect(writeText).toHaveBeenCalledWith('Task\nFollow up');
+  });
+
   it('normalizes clipboard text and rejects an empty payload', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal('navigator', { clipboard: { writeText } });
