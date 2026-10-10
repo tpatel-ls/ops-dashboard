@@ -43,6 +43,7 @@ describe('transcription boundaries', () => {
     expect(transcriptionFileError(100, 'text/plain')).toBe('unsupported-type');
     expect(transcriptionFileError(100, 'audio/webm;codecs=opus')).toBeUndefined();
     expect(transcriptionFileError(100, 'audio/mpeg')).toBeUndefined();
+    expect(transcriptionFileError(100, ' Audio/WEBM ; codecs=opus ')).toBeUndefined();
   });
 
   it('accepts only nonempty text results', () => {
