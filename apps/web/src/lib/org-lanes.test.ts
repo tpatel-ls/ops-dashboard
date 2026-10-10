@@ -32,4 +32,12 @@ describe('taskLane', () => {
   it('keeps tasks with unusable references in the personal lane', () => {
     expect(taskLane({ orgId: ' ', projectId: ' ' } as Task, new Map())).toBeUndefined();
   });
+
+  it('keeps a task personal when its legacy project has no organization', () => {
+    const projects = new Map<string, Project>([
+      ['project-1', { id: 'project-1', orgId: '   ' } as Project],
+    ]);
+
+    expect(taskLane({ projectId: 'project-1' } as Task, projects)).toBeUndefined();
+  });
 });
