@@ -10,6 +10,14 @@ describe('validateJournalImage', () => {
     });
   });
 
+  it('trims transport whitespace around valid image data', () => {
+    expect(validateJournalImage('  iVBORw0KGgo=\n', 'image/png', 8)).toEqual({
+      ok: true,
+      data: 'iVBORw0KGgo=',
+      mediaType: 'image/png',
+    });
+  });
+
   it('rejects malformed base64 and unsupported media types', () => {
     expect(validateJournalImage('not base64', 'image/png')).toEqual({
       ok: false,
