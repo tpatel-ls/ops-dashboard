@@ -27,6 +27,13 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/auth%252fsignout')).toBe('/');
   });
 
+  it('rejects redirects that exceed the decode safety depth', () => {
+    let encoded = '//evil.example';
+    for (let depth = 0; depth < 5; depth += 1) encoded = encodeURIComponent(encoded);
+
+    expect(safeNextPath(`/${encoded}`)).toBe('/');
+  });
+
   it('rejects unreasonably long redirect destinations', () => {
     expect(safeNextPath(`/${'a'.repeat(2048)}`)).toBe('/');
   });
