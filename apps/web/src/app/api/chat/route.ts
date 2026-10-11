@@ -29,7 +29,7 @@ export async function POST(req: Request): Promise<Response> {
 
   if (!question) return NextResponse.json({ ok: false, reason: 'empty' }, { status: 400 });
   const client = getAnthropic();
-  if (!client) return NextResponse.json({ ok: false, reason: 'no-key' });
+  if (!client) return NextResponse.json({ ok: false, reason: 'no-key' }, { status: 503 });
 
   try {
     const resp = await client.messages.create({
