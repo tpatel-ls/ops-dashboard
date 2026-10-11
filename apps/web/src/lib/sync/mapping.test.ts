@@ -1,9 +1,49 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DEXIE_TABLES, SYNC_TABLES, fromRow, isSyncedTable, toRow } from './mapping';
+import {
+  DEXIE_TABLES,
+  SYNC_TABLES,
+  fromRow,
+  hasValidSyncMetadata,
+  isSyncedTable,
+  toRow,
+} from './mapping';
 
 describe('sync row mapping', () => {
+  it('accepts complete metadata from a database row', () => {
+    const record = fromRow({
+      id: 'task-1',
+      created_at: '2026-08-25T11:00:00.000Z',
+      updated_at: '2026-08-25T12:00:00.000Z',
+      version: 2,
+      device_id: 'device-1',
+    });
+
+    expect(hasValidSyncMetadata(record)).toBe(true);
+  });
+
+  it('rejects remote rows with unusable sync metadata', () => {
+    const base = {
+      id: 'task-1',
+      created_at: '2026-08-25T11:00:00.000Z',
+      updated_at: '2026-08-25T12:00:00.000Z',
+      version: 2,
+      device_id: 'device-1',
+    };
+
+    for (const patch of [
+      { id: '' },
+      { created_at: 'not-a-date' },
+      { updated_at: null },
+      { version: Number.POSITIVE_INFINITY },
+      { device_id: '   ' },
+      { deleted_at: 'not-a-date' },
+    ]) {
+      expect(hasValidSyncMetadata(fromRow({ ...base, ...patch }))).toBe(false);
+    }
+  });
+
   it('sends explicit optional-field clears as database nulls', () => {
     expect(
       toRow(
