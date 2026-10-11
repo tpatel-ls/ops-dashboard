@@ -30,6 +30,7 @@ function fixture() {
     },
     mainSha: 'tested-base',
     merges: [],
+    branchDeletes: [],
     failures: [],
     merged: true,
   };
@@ -47,6 +48,11 @@ async function execute(f) {
           },
         },
         repos: { getBranch: async () => ({ data: { commit: { sha: f.mainSha } } }) },
+        git: {
+          deleteRef: async (request) => {
+            f.branchDeletes.push(request);
+          },
+        },
       },
     },
     f.context,
@@ -64,6 +70,13 @@ test('merges the verified daily head into main without squashing its commits', a
       pull_number: 39,
       sha: 'tested-head',
       merge_method: 'rebase',
+    },
+  ]);
+  assert.deepEqual(f.branchDeletes, [
+    {
+      owner: 'tpatel-ls',
+      repo: 'ops-dashboard',
+      ref: 'heads/automation/daily-improvements-2026-09-13',
     },
   ]);
   assert.equal(f.failures.length, 0);
@@ -144,4 +157,5 @@ test('reports a rejected merge as failure', async () => {
   f.merged = false;
   await execute(f);
   assert.equal(f.failures.length, 1);
+  assert.equal(f.branchDeletes.length, 0);
 });
