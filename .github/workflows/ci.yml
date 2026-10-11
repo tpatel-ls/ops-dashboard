@@ -84,3 +84,12 @@ jobs:
               return;
             }
             core.info(`Merged daily PR #${pr.number} into main at ${result.sha}.`);
+            try {
+              await github.rest.git.deleteRef({
+                ...context.repo,
+                ref: `heads/${pr.head.ref}`,
+              });
+              core.info(`Deleted daily branch ${pr.head.ref}.`);
+            } catch (error) {
+              core.setFailed(`Merged PR #${pr.number}, but failed to delete ${pr.head.ref}: ${error}`);
+            }
