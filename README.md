@@ -19,7 +19,7 @@ docs/                 architecture, sync, deployment, and device guides
 
 ## Requirements
 
-- Node.js 22 or newer
+- Node.js 22, as pinned in `.node-version`
 - pnpm 10 or newer
 
 If your environment does not provide `pnpm` globally, the repo works with
