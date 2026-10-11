@@ -37,6 +37,25 @@ export function isSyncedTable(t: string): t is DexieTableName {
   return Object.prototype.hasOwnProperty.call(SYNC_TABLES, t);
 }
 
+function validTimestamp(value: unknown): boolean {
+  return typeof value === 'string' && Number.isFinite(Date.parse(value));
+}
+
+/** Reject malformed remote metadata before it can enter a local Dexie table. */
+export function hasValidSyncMetadata(record: Syncable): boolean {
+  return (
+    typeof record.id === 'string' &&
+    record.id.trim().length > 0 &&
+    validTimestamp(record.createdAt) &&
+    validTimestamp(record.updatedAt) &&
+    Number.isSafeInteger(record.version) &&
+    record.version >= 0 &&
+    typeof record.deviceId === 'string' &&
+    record.deviceId.trim().length > 0 &&
+    (record.deletedAt === undefined || validTimestamp(record.deletedAt))
+  );
+}
+
 const camelToSnake = (k: string): string => k.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`);
 const snakeToCamel = (k: string): string =>
   k.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());

@@ -9,6 +9,7 @@ import {
   DEXIE_TABLES,
   SYNC_TABLES,
   fromRow,
+  hasValidSyncMetadata,
   isSyncedTable,
   toRow,
   type DexieTableName,
@@ -50,7 +51,7 @@ function db() {
 /** Apply a remote row locally only when it is strictly newer (skips echoes). */
 async function mergeInbound(table: DexieTableName, row: Record<string, unknown>): Promise<void> {
   const rec = fromRow(row);
-  if (!rec?.id) return;
+  if (!hasValidSyncMetadata(rec)) return;
   const database = db();
   const localTable = database.table(table);
   // Realtime callbacks can overlap for the same record. Keep the winner check
