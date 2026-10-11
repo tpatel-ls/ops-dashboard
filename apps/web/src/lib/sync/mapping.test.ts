@@ -160,4 +160,23 @@ describe('sync table coverage', () => {
     const unprotected = Object.values(SYNC_TABLES).filter((table) => !secured.has(table));
     expect(unprotected).toEqual([]);
   });
+
+  it('registers every mapped Supabase table for realtime updates', () => {
+    const sql = migrationSql();
+    const published = new Set<string>();
+
+    for (const block of sql.matchAll(/do\s+\$\$[\s\S]*?\$\$/gi)) {
+      const body = block[0];
+      if (!/alter\s+publication\s+supabase_realtime\s+add\s+table/i.test(body)) continue;
+      for (const list of body.matchAll(/array\s*\[([^\]]*)\]/gi)) {
+        for (const name of list[1]!.matchAll(/'([a-z_]+)'/gi)) {
+          published.add(name[1]!.toLowerCase());
+        }
+      }
+    }
+
+    expect(published.size).toBeGreaterThan(0);
+    const missing = Object.values(SYNC_TABLES).filter((table) => !published.has(table));
+    expect(missing).toEqual([]);
+  });
 });
