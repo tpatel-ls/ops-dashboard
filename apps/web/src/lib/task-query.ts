@@ -84,8 +84,9 @@ export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
 export function matchesTaskSearch(task: Task, query: string, projectName?: string): boolean {
   const needle = taskFilterText(query.trim());
   if (!needle) return true;
-  return [task.title, task.notes, projectName, ...task.tags]
-    .filter((value): value is string => Boolean(value))
+  const tags = Array.isArray(task.tags) ? task.tags : [];
+  return [task.title, task.notes, projectName, ...tags]
+    .filter((value): value is string => typeof value === 'string' && Boolean(value))
     .some((value) => taskFilterText(value).includes(needle));
 }
 
@@ -93,5 +94,7 @@ export function matchesTaskTag(task: Task, selectedTag: string | null): boolean 
   if (!selectedTag) return true;
   const normalized = taskFilterText(selectedTag.trim());
   if (!normalized) return true;
-  return task.tags.some((tag) => taskFilterText(tag) === normalized);
+  return (Array.isArray(task.tags) ? task.tags : []).some(
+    (tag) => typeof tag === 'string' && taskFilterText(tag) === normalized,
+  );
 }
