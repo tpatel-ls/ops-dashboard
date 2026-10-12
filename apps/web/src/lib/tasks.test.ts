@@ -619,6 +619,26 @@ describe('projectRecurringReminders', () => {
 
     expect(projectRecurringReminders(previous, projected, 'task-new')).toEqual([]);
   });
+
+  it('preserves reminder wall-clock time when a recurrence crosses daylight saving time', () => {
+    const previous = {
+      scheduledFor: '2026-03-07',
+      reminders: [
+        {
+          id: 'reminder-old',
+          taskId: 'task-old',
+          // 08:00 local time on the day before the scheduled task in Chicago.
+          triggerAt: '2026-03-06T14:00:00.000Z',
+          delivered: false,
+        },
+      ],
+    } as Task;
+    const projected = { scheduledFor: '2026-03-14' } as Task;
+
+    expect(projectRecurringReminders(previous, projected, 'task-new')).toMatchObject([
+      { triggerAt: '2026-03-13T13:00:00.000Z' },
+    ]);
+  });
 });
 
 describe('rescheduleTask', () => {
