@@ -168,7 +168,12 @@ function normalizeTaskReminders(patch: Partial<Task>, ownerTaskId: string): void
     }
     const id = reminder.id.trim();
     const timestamp = Date.parse(reminder.triggerAt);
-    if (!id || !Number.isFinite(timestamp) || seen.has(id)) {
+    if (
+      !id ||
+      !Number.isFinite(timestamp) ||
+      seen.has(id) ||
+      Array.from(id).length > MAX_TASK_REFERENCE_LENGTH
+    ) {
       throw new Error('Task reminders must be valid.');
     }
     if (reminder.offsetMinutes !== undefined && !Number.isSafeInteger(reminder.offsetMinutes)) {
