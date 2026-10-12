@@ -18,6 +18,7 @@ import type {
   Task,
   TaskStatus,
 } from '@ops-dashboard/core';
+import { addDays, differenceInCalendarDays } from 'date-fns';
 import { enqueueOp } from './sync-queue';
 import { normalizeStringList } from './string-list';
 
@@ -382,12 +383,12 @@ export function projectRecurringReminders(
   const previousAnchor = recurrenceAnchor(previous);
   const nextAnchor = recurrenceAnchor(projected);
   if (previousAnchor === undefined || nextAnchor === undefined) return [];
-  const shift = nextAnchor - previousAnchor;
+  const dayShift = differenceInCalendarDays(new Date(nextAnchor), new Date(previousAnchor));
 
   return previous.reminders.flatMap((reminder) => {
     const trigger = Date.parse(reminder.triggerAt);
     if (!Number.isFinite(trigger)) return [];
-    const shiftedTrigger = new Date(trigger + shift);
+    const shiftedTrigger = addDays(new Date(trigger), dayShift);
     if (!Number.isFinite(shiftedTrigger.getTime())) return [];
     return [
       {
