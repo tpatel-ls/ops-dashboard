@@ -7,7 +7,7 @@ export function bearerSecretMatches(
 ): boolean {
   const secret = configuredSecret?.trim();
   if (!secret) return false;
-  const match = /^Bearer ([^\s]+)$/i.exec(authorization ?? '');
+  const match = /^Bearer[ \t]+([^\s]+)$/i.exec(authorization ?? '');
   const provided = match?.[1] ?? '';
   const a = Buffer.from(provided);
   const b = Buffer.from(secret);

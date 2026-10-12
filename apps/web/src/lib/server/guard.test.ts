@@ -59,6 +59,7 @@ describe('requestAllowed', () => {
 describe('bearerSecretMatches', () => {
   it('normalizes configured secrets for downstream authorization decisions', () => {
     expect(bearerSecretMatches('Bearer ops-secret', '  ops-secret  ')).toBe(true);
+    expect(bearerSecretMatches('Bearer\t\tops-secret', 'ops-secret')).toBe(true);
     expect(bearerSecretMatches('ops-secret', 'ops-secret')).toBe(false);
     expect(bearerSecretMatches('Bearer anything', '   ')).toBe(false);
   });

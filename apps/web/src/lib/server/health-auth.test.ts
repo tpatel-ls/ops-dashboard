@@ -33,6 +33,18 @@ describe('healthRequestAuthorized', () => {
     ).toBe(true);
   });
 
+  it('accepts horizontal whitespace between the scheme and token', () => {
+    vi.stubEnv('CRON_SECRET', 'cron-secret');
+
+    expect(
+      healthRequestAuthorized(
+        new Request('http://localhost/api/health', {
+          headers: { authorization: 'Bearer\t cron-secret' },
+        }),
+      ),
+    ).toBe(true);
+  });
+
   it('rejects configured secrets without the Bearer scheme', () => {
     vi.stubEnv('CRON_SECRET', 'cron-secret');
 
