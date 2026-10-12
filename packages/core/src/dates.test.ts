@@ -9,6 +9,14 @@ describe('localDay', () => {
     expect(localDay('2026-08-01')).toBe('2026-08-01');
   });
 
+  it('validates and preserves zero-padded years', () => {
+    expect(localDay('0099-01-02')).toBe('0099-01-02');
+    const date = new Date(0);
+    date.setHours(0, 0, 0, 0);
+    date.setFullYear(99, 0, 2);
+    expect(toISODate(date)).toBe('0099-01-02');
+  });
+
   it('uses the runtime local day for timestamps', () => {
     const timestamp = '2026-08-01T00:30:00+14:00';
     expect(localDay(timestamp)).toBe(isoDay(new Date(timestamp)));

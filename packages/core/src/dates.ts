@@ -1,7 +1,7 @@
 import { addDays, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns';
 
 export function isoDay(d: Date): string {
-  const yyyy = d.getFullYear();
+  const yyyy = String(d.getFullYear()).padStart(4, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
@@ -16,7 +16,12 @@ export function localDay(value: string | undefined): string | undefined {
   if (!value) return undefined;
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const [year, month, day] = value.split('-').map(Number);
-    const parsed = new Date(year!, month! - 1, day);
+    // The multi-argument Date constructor treats years 0 through 99 as
+    // 1900 through 1999. Set the full year explicitly so the ISO date we
+    // accepted is also the date we validate.
+    const parsed = new Date(0);
+    parsed.setHours(0, 0, 0, 0);
+    parsed.setFullYear(year!, month! - 1, day);
     return parsed.getFullYear() === year &&
       parsed.getMonth() === month! - 1 &&
       parsed.getDate() === day
