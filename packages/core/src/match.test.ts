@@ -33,6 +33,13 @@ describe('matchByName', () => {
     expect(matchByName(projects, 'Cafe\u0301 Launch')?.id).toBe('project-1');
   });
 
+  it('skips records with malformed names from an untrusted data source', () => {
+    const valid = { name: 'Operations' };
+    const malformed = { name: null } as unknown as { name: string };
+
+    expect(matchByName([malformed, valid], 'operations')).toBe(valid);
+  });
+
   it('returns undefined when nothing matches', () => {
     expect(matchByName(PROJECTS, 'Email Triage')).toBeUndefined();
   });
