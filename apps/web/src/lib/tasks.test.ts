@@ -440,6 +440,22 @@ describe('updateTask', () => {
     );
   });
 
+  it('bounds embedded reminder identifiers like other task references', async () => {
+    await expect(
+      updateTask('task-1', {
+        reminders: [
+          {
+            id: 'r'.repeat(129),
+            taskId: 'task-1',
+            triggerAt: '2026-08-18T09:00:00.000Z',
+            delivered: false,
+          },
+        ],
+      }),
+    ).rejects.toThrow('Task reminders must be valid.');
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('reattaches reminder metadata to the task being updated', async () => {
     await updateTask('task-1', {
       reminders: [
