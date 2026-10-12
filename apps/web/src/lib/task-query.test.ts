@@ -220,6 +220,12 @@ describe('matchesTaskSearch', () => {
     expect(matchesTaskSearch(unicodeTask, 'Cafe\u0301')).toBe(true);
     expect(matchesTaskSearch(unicodeTask, 'LS global')).toBe(true);
   });
+
+  it('ignores a malformed synced tag collection', () => {
+    const malformed = task('malformed', { tags: [42 as never, null as never] });
+
+    expect(matchesTaskSearch(malformed, 'urgent')).toBe(false);
+  });
 });
 
 describe('matchesTaskTag', () => {
@@ -240,5 +246,9 @@ describe('matchesTaskTag', () => {
     const taggedTask = task('unicode-tag', { tags: ['Caf\u00e9'] });
 
     expect(matchesTaskTag(taggedTask, 'Cafe\u0301')).toBe(true);
+  });
+
+  it('treats a malformed synced tag collection as untagged', () => {
+    expect(matchesTaskTag(task('malformed', { tags: undefined as never }), 'urgent')).toBe(false);
   });
 });
