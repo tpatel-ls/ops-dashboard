@@ -21,6 +21,10 @@ export function foodEstimate(value: number | undefined): number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0;
 }
 
+function addFoodTotal(total: number, value: number): number {
+  return Math.min(Number.MAX_SAFE_INTEGER, total + value);
+}
+
 export interface FoodLogTotals {
   calories: number;
   protein: number;
@@ -34,10 +38,10 @@ export function sumFoodLogTotals(
 ): FoodLogTotals {
   return logs.reduce<FoodLogTotals>(
     (totals, log) => ({
-      calories: totals.calories + foodEstimate(log.totalCalories),
-      protein: totals.protein + foodEstimate(log.totalProtein),
-      carbs: totals.carbs + foodEstimate(log.totalCarbs),
-      fat: totals.fat + foodEstimate(log.totalFat),
+      calories: addFoodTotal(totals.calories, foodEstimate(log.totalCalories)),
+      protein: addFoodTotal(totals.protein, foodEstimate(log.totalProtein)),
+      carbs: addFoodTotal(totals.carbs, foodEstimate(log.totalCarbs)),
+      fat: addFoodTotal(totals.fat, foodEstimate(log.totalFat)),
     }),
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   );

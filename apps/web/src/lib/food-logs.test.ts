@@ -177,6 +177,20 @@ describe('sumFoodLogTotals', () => {
     expect(totals.protein).toBe(0);
   });
 
+  it('keeps aggregate totals finite when synced values overflow', () => {
+    const totals = sumFoodLogTotals([
+      { totalCalories: Number.MAX_VALUE, totalProtein: Number.MAX_VALUE },
+      { totalCalories: Number.MAX_VALUE, totalProtein: Number.MAX_VALUE },
+    ]);
+
+    expect(totals).toEqual({
+      calories: Number.MAX_SAFE_INTEGER,
+      protein: Number.MAX_SAFE_INTEGER,
+      carbs: 0,
+      fat: 0,
+    });
+  });
+
   it('is all zero for no logs', () => {
     expect(sumFoodLogTotals([])).toEqual({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   });
