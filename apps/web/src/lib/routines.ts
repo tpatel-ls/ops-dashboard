@@ -118,7 +118,12 @@ export function addDaysISO(iso: string, days: number): string {
     throw new Error('Routine date must be a valid calendar day.');
   }
   const [y, m, d] = iso.split('-').map(Number);
-  const date = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+  // The multi-argument Date constructor remaps years 0 through 99 to
+  // 1900 through 1999. Build from an epoch and set the full year explicitly
+  // so valid padded calendar years remain unchanged.
+  const date = new Date(0);
+  date.setHours(12, 0, 0, 0);
+  date.setFullYear(y ?? 1970, (m ?? 1) - 1, d ?? 1);
   date.setDate(date.getDate() + days);
   if (!Number.isFinite(date.getTime())) {
     throw new Error('Routine date calculation is out of range.');

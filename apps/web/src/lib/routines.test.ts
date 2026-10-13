@@ -294,6 +294,10 @@ describe('toggleRoutineCheck', () => {
 });
 
 describe('addDaysISO', () => {
+  it('preserves padded calendar years', () => {
+    expect(addDaysISO('0099-01-01', 1)).toBe('0099-01-02');
+  });
+
   it('rejects date calculations outside the JavaScript date range', () => {
     expect(() => addDaysISO('2026-08-09', Number.MAX_SAFE_INTEGER)).toThrow(
       'Routine date calculation is out of range',
