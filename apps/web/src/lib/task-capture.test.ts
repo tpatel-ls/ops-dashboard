@@ -76,6 +76,7 @@ describe('taskScheduleLabel', () => {
     expect(taskScheduleLabel('today', '2026-07-20')).toBe('Today');
     expect(taskScheduleLabel('tomorrow', '2026-07-20')).toBe('Tomorrow');
     expect(taskScheduleLabel('date', '2026-07-20')).toBe('Jul 20');
+    expect(taskScheduleLabel('date', '0000-02-29')).toBe('Feb 29');
     expect(taskScheduleLabel('date', '')).toBe('Pick date');
     expect(taskScheduleLabel('date', '2026-02-30')).toBe('Pick date');
     expect(taskScheduleLabel('date', 'not-a-date')).toBe('Pick date');
