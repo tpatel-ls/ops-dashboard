@@ -135,20 +135,32 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
   return normalized;
 }
 
-function personSearchText(value: string): string {
-  return value.normalize('NFKC').toLocaleLowerCase('en-US');
+function personSearchText(value: unknown): string {
+  return typeof value === 'string' ? value.normalize('NFKC').toLocaleLowerCase('en-US') : '';
 }
 
 export function matchesPersonSearch(person: Person, query: string): boolean {
   const normalized = personSearchText(query.trim());
   if (!normalized) return true;
-  return [
-    person.name,
-    person.relationship,
-    ...person.tags,
-    ...person.facts.flatMap((fact) => [fact.label, fact.value]),
-    ...person.interactions.map((interaction) => interaction.note),
-  ].some((value) => value && personSearchText(value).includes(normalized));
+  const tags = Array.isArray(person.tags)
+    ? person.tags.filter((tag): tag is string => typeof tag === 'string')
+    : [];
+  const facts = Array.isArray(person.facts)
+    ? person.facts.flatMap((fact) => {
+        if (!fact || typeof fact !== 'object') return [];
+        const value = fact as unknown as Record<string, unknown>;
+        return [value.label, value.value];
+      })
+    : [];
+  const interactions = Array.isArray(person.interactions)
+    ? person.interactions.flatMap((interaction) => {
+        if (!interaction || typeof interaction !== 'object') return [];
+        return [(interaction as unknown as Record<string, unknown>).note];
+      })
+    : [];
+  return [person.name, person.relationship, ...tags, ...facts, ...interactions].some((value) =>
+    personSearchText(value).includes(normalized),
+  );
 }
 
 export function latestInteraction(interactions: Interaction[]): Interaction | null {
