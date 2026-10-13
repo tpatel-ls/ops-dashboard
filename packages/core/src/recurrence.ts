@@ -35,7 +35,7 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
       ),
     ].sort((a, b) => a - b);
     const laterThisWeek = allowed.find((day) => day > from.getDay());
-    if (laterThisWeek !== undefined) {
+    if (interval === 1 && laterThisWeek !== undefined) {
       return addDays(from, laterThisWeek - from.getDay());
     }
     const firstAllowed = allowed[0];
