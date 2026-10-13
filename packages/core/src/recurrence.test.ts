@@ -47,6 +47,14 @@ describe('nextOccurrence', () => {
     expect(next.getDate()).toBe(4);
     expect(next.getMonth()).toBe(4);
   });
+  it('skips the current week for multi-week byDay rules', () => {
+    const monday = new Date('2026-04-20T12:00:00');
+    const next = nextOccurrence({ freq: 'weekly', interval: 2, byDay: ['MO', 'WE', 'FR'] }, monday);
+
+    expect(next.getFullYear()).toBe(2026);
+    expect(next.getMonth()).toBe(4);
+    expect(next.getDate()).toBe(4);
+  });
 
   it('handles monthly', () => {
     const next = nextOccurrence({ freq: 'monthly', interval: 1 }, new Date('2026-04-26'));
