@@ -45,6 +45,19 @@ describe('matchesPersonSearch', () => {
     expect(matchesPersonSearch(unicodePerson, 'Rene\u0301e')).toBe(true);
     expect(matchesPersonSearch(unicodePerson, 'LS global')).toBe(true);
   });
+
+  it('ignores malformed synced nested fields without throwing', () => {
+    const malformed = {
+      ...person,
+      name: null,
+      tags: [42],
+      facts: [null, { label: 7, value: 'Vendor' }],
+      interactions: [null, { note: 9 }],
+    } as unknown as Person;
+
+    expect(matchesPersonSearch(malformed, 'vendor')).toBe(true);
+    expect(matchesPersonSearch(malformed, 'missing')).toBe(false);
+  });
 });
 
 describe('latestInteraction', () => {
