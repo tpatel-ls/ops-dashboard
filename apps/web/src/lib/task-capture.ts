@@ -15,11 +15,16 @@ export function taskScheduleLabel(schedule: TaskSchedule, scheduledDate: string)
   if (localDay(scheduledDate) !== scheduledDate) return 'Pick date';
 
   const [year, month, day] = scheduledDate.split('-').map(Number);
+  // Date.UTC remaps years 0 through 99 to 1900 through 1999. Set the UTC
+  // full year explicitly so valid padded calendar years keep their real day.
+  const date = new Date(0);
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCFullYear(year!, month! - 1, day!);
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     timeZone: 'UTC',
-  }).format(new Date(Date.UTC(year!, month! - 1, day!)));
+  }).format(date);
 }
 
 export function resolveRecentProject(
