@@ -19,7 +19,7 @@ export function matchesProjectSearch(project: Project, query: string): boolean {
   const needle = projectSearchText(query.trim());
   if (!needle) return true;
   return [project.name, project.description]
-    .filter((value): value is string => Boolean(value))
+    .filter((value): value is string => typeof value === 'string' && Boolean(value))
     .some((value) => projectSearchText(value).includes(needle));
 }
 

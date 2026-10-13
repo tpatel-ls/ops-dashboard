@@ -58,6 +58,16 @@ describe('matchesProjectSearch', () => {
     expect(matchesProjectSearch(unicodeProject, 'Cafe\u0301')).toBe(true);
     expect(matchesProjectSearch(unicodeProject, 'LS global')).toBe(true);
   });
+
+  it('ignores malformed synced text fields without breaking search', () => {
+    expect(matchesProjectSearch(project({ description: 42 as never }), 'launch')).toBe(true);
+    expect(
+      matchesProjectSearch(
+        project({ name: null as never, description: 'Mobile rollout' }),
+        'mobile',
+      ),
+    ).toBe(true);
+  });
 });
 
 describe('compareProjects', () => {
