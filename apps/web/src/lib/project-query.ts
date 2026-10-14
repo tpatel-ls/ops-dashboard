@@ -1,4 +1,5 @@
 import { localDay, type Project } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
 
 export type ProjectSort = 'name' | 'due' | 'recent';
 
@@ -49,6 +50,6 @@ export function compareProjects(a: Project, b: Project, sort: ProjectSort): numb
     const recentOrder = compareRecentTimestamps(a.lastWorkedAt, b.lastWorkedAt);
     if (recentOrder !== 0) return recentOrder;
   }
-  const nameOrder = a.name.localeCompare(b.name);
-  return nameOrder !== 0 ? nameOrder : a.id.localeCompare(b.id);
+  const nameOrder = compareText(a.name, b.name);
+  return nameOrder !== 0 ? nameOrder : compareText(a.id, b.id);
 }

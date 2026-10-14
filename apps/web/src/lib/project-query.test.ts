@@ -127,6 +127,16 @@ describe('compareProjects', () => {
     ]);
   });
 
+  it('keeps project sorting available when a synced name is malformed', () => {
+    const malformed = project({ id: 'malformed', name: null as never });
+    const valid = project({ id: 'valid', name: 'Launch' });
+
+    expect([valid, malformed].sort((a, b) => compareProjects(a, b, 'name'))).toEqual([
+      malformed,
+      valid,
+    ]);
+  });
+
   it('sorts recent activity by instant and puts malformed timestamps last', () => {
     const latest = project({
       id: 'latest',
