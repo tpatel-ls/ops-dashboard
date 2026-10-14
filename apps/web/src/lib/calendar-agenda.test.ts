@@ -159,6 +159,16 @@ describe('calendar agenda', () => {
     expect(compareCalendarTasks(alpha, bravo)).toBeLessThan(0);
   });
 
+  it('keeps sorting when synced labels are malformed', () => {
+    const malformed = task('malformed', { title: null as never });
+    const valid = task('valid', { title: 'Review' });
+
+    expect([valid, malformed].sort(compareCalendarTasks).map((item) => item.id)).toEqual([
+      'malformed',
+      'valid',
+    ]);
+  });
+
   it('orders simultaneous time blocks deterministically', () => {
     const items = [
       task('bravo', { startAt: '2026-07-20T09:00:00', title: 'Review' }),
