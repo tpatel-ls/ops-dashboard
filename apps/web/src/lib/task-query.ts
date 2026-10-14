@@ -1,5 +1,6 @@
 import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
 import { taskEarliestDay } from './task-dates';
 
 function taskPriority(task: Task): number {
@@ -38,8 +39,8 @@ export function compareTasks(a: Task, b: Task): number {
     if (itemOrder !== 0) return itemOrder;
   }
 
-  const titleOrder = a.title.localeCompare(b.title);
-  return titleOrder !== 0 ? titleOrder : a.id.localeCompare(b.id);
+  const titleOrder = compareText(a.title, b.title);
+  return titleOrder !== 0 ? titleOrder : compareText(a.id, b.id);
 }
 
 export type TaskSort = 'default' | 'due' | 'priority' | 'recent';
