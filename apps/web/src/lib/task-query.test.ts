@@ -107,6 +107,16 @@ describe('compareTasks', () => {
       'invalid-order',
     ]);
   });
+
+  it('keeps default sorting available when synced titles are malformed', () => {
+    const malformed = task('malformed', { title: null as never });
+    const valid = task('valid', { title: 'Review' });
+
+    expect([valid, malformed].sort(compareTasks).map((item) => item.id)).toEqual([
+      'malformed',
+      'valid',
+    ]);
+  });
 });
 
 describe('compareTasksBy', () => {
