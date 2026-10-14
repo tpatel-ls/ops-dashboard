@@ -2,6 +2,7 @@
 
 import { localDay } from '@ops-dashboard/core';
 import type { Content, ContentStatus, ContentType } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 const CONTENT_TYPES = new Set<ContentType>(['video', 'article', 'podcast', 'newsletter']);
@@ -36,8 +37,8 @@ export function compareContentOrder(
   const rightValid = Number.isFinite(right.order);
   if (leftValid && rightValid && left.order !== right.order) return left.order - right.order;
   if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  const titleOrder = left.title.localeCompare(right.title);
-  return titleOrder !== 0 ? titleOrder : left.id.localeCompare(right.id);
+  const titleOrder = compareText(left.title, right.title);
+  return titleOrder !== 0 ? titleOrder : compareText(left.id, right.id);
 }
 
 /**

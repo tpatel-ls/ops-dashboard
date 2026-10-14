@@ -69,6 +69,16 @@ describe('compareContentOrder', () => {
 
     expect(items.sort(compareContentOrder).map((item) => item.id)).toEqual(['valid', 'invalid']);
   });
+
+  it('keeps content ordering available when a synced title is malformed', () => {
+    const malformed = { id: 'malformed', title: null as never, order: 1 };
+    const valid = { id: 'valid', title: 'Launch', order: 1 };
+
+    expect([valid, malformed].sort(compareContentOrder).map((item) => item.id)).toEqual([
+      'malformed',
+      'valid',
+    ]);
+  });
 });
 
 describe('updateContent', () => {
