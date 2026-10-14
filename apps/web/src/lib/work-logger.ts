@@ -1,5 +1,6 @@
 import type { OrgContext, Project } from '@ops-dashboard/core';
 import type { SyncState } from './sync/status';
+import { compareText } from './compare-text';
 import { isActiveProject } from './project-query';
 
 export type WorkDestination = 'personal' | string;
@@ -34,8 +35,8 @@ export function projectsForDestination(
       return orgId ? project.orgId === orgId : !project.orgId;
     })
     .sort((a, b) => {
-      const nameOrder = a.name.localeCompare(b.name);
-      return nameOrder !== 0 ? nameOrder : a.id.localeCompare(b.id);
+      const nameOrder = compareText(a.name, b.name);
+      return nameOrder !== 0 ? nameOrder : compareText(a.id, b.id);
     });
 }
 
