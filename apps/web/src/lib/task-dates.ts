@@ -1,5 +1,6 @@
 import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
 
 type TaskDates = Pick<Task, 'scheduledFor' | 'dueAt'>;
 
@@ -100,8 +101,14 @@ export function compareTasksByCommitment(left: Task, right: Task): number {
   const rightDay = taskCommitmentDay(right) ?? '9999-12-31';
   const dayOrder = leftDay.localeCompare(rightDay);
   if (dayOrder !== 0) return dayOrder;
-  if (left.priority !== right.priority) return right.priority - left.priority;
-  return left.id.localeCompare(right.id);
+  const leftPriority =
+    Number.isInteger(left.priority) && left.priority >= 0 && left.priority <= 3 ? left.priority : 0;
+  const rightPriority =
+    Number.isInteger(right.priority) && right.priority >= 0 && right.priority <= 3
+      ? right.priority
+      : 0;
+  if (leftPriority !== rightPriority) return rightPriority - leftPriority;
+  return compareText(left.id, right.id);
 }
 
 export function summarizeOpenTasks(tasks: Task[], day: string) {
