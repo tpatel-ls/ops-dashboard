@@ -3,15 +3,13 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
-import { journalDateLabel } from '@/lib/journal';
+import { journalDateLabel, latestJournalEntry } from '@/lib/journal';
 import { excerpt } from '@/lib/excerpt';
 
 export function ResurfacingEntry() {
   const entry = useLiveQuery(async () => {
     const all = await getDb().journalEntries.toArray();
-    const active = all.filter((e) => !e.deletedAt);
-    if (active.length === 0) return null;
-    return active.sort((a, b) => b.date.localeCompare(a.date))[0];
+    return latestJournalEntry(all);
   });
 
   // undefined = loading, null = none

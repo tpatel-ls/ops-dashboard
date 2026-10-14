@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareJournalEntries, journalDateLabel } from './journal';
+import { compareJournalEntries, journalDateLabel, latestJournalEntry } from './journal';
 
 describe('compareJournalEntries', () => {
   it('orders valid journal days before malformed records', () => {
@@ -28,6 +28,34 @@ describe('compareJournalEntries', () => {
       'bravo',
       'zulu',
     ]);
+  });
+});
+
+describe('latestJournalEntry', () => {
+  it('uses the shared safe ordering for resurfacing entries', () => {
+    const latest = latestJournalEntry([
+      {
+        id: 'invalid',
+        date: 'not-a-day',
+        createdAt: '2026-08-26T15:00:00Z',
+        body: 'Invalid',
+      },
+      {
+        id: 'latest',
+        date: '2026-08-25',
+        createdAt: '2026-08-25T15:00:00Z',
+        body: 'Latest',
+      },
+      {
+        id: 'deleted',
+        date: '2026-08-30',
+        createdAt: '2026-08-30T15:00:00Z',
+        body: 'Deleted',
+        deletedAt: '2026-08-30T16:00:00Z',
+      },
+    ] as never);
+
+    expect(latest?.id).toBe('latest');
   });
 });
 
