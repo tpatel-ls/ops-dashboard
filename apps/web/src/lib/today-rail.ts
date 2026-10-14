@@ -1,5 +1,6 @@
 import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
 
 export function tasksForTodayRail(tasks: Task[], day: string): Task[] {
   if (localDay(day) !== day) return [];
@@ -17,8 +18,8 @@ export function tasksForTodayRail(tasks: Task[], day: string): Task[] {
       const rightOrder = Number.isFinite(right.order) ? right.order : Number.POSITIVE_INFINITY;
       const order = leftOrder - rightOrder;
       if (Number.isFinite(order) && order !== 0) return order;
-      const title = left.title.localeCompare(right.title);
-      return title !== 0 ? title : left.id.localeCompare(right.id);
+      const title = compareText(left.title, right.title);
+      return title !== 0 ? title : compareText(left.id, right.id);
     });
 }
 

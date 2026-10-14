@@ -59,6 +59,16 @@ describe('tasksForTodayRail', () => {
       tasksForTodayRail([later, earlier, positioned], '2026-08-20').map((item) => item.id),
     ).toEqual(['positioned', 'a', 'z']);
   });
+
+  it('keeps sorting when a synced block title is malformed', () => {
+    const malformed = task('malformed', '2026-08-20T09:00:00-05:00', { title: null as never });
+    const valid = task('valid', '2026-08-20T09:00:00-05:00', { title: 'Review' });
+
+    expect(tasksForTodayRail([valid, malformed], '2026-08-20').map((item) => item.id)).toEqual([
+      'malformed',
+      'valid',
+    ]);
+  });
 });
 
 describe('validRailEnd', () => {
