@@ -44,6 +44,10 @@ export function compareJournalEntries(
   return left.id.localeCompare(right.id);
 }
 
+export function latestJournalEntry(entries: JournalEntry[]): JournalEntry | null {
+  return entries.filter((entry) => !entry.deletedAt).sort(compareJournalEntries)[0] ?? null;
+}
+
 function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEntry> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'body')) {
