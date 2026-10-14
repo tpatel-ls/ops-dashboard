@@ -75,6 +75,18 @@ describe('destination helpers', () => {
 
     expect(projectsForDestination([later, earlier], 'personal')).toEqual([earlier, later]);
   });
+
+  it('keeps destination projects usable when a synced name is malformed', () => {
+    const malformed = project('malformed');
+    malformed.name = null as never;
+    const valid = project('valid');
+    valid.name = 'Launch';
+
+    expect(projectsForDestination([valid, malformed], 'personal').map((item) => item.id)).toEqual([
+      'malformed',
+      'valid',
+    ]);
+  });
 });
 
 describe('syncSaveMessage', () => {
