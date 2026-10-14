@@ -1,6 +1,7 @@
 import { localDay, matchesOrgContext } from '@ops-dashboard/core';
 import type { OrgContext, Project, Task } from '@ops-dashboard/core';
 import { taskLane } from './org-lanes';
+import { compareText } from './compare-text';
 import { isActiveProject } from './project-query';
 import { taskEarliestDay } from './task-dates';
 import { compareTasks } from './task-query';
@@ -34,8 +35,8 @@ function projectOrder(a: WorkProjectSummary, b: WorkProjectSummary): number {
     const dueOrder = aDue.localeCompare(bDue);
     if (dueOrder !== 0) return dueOrder;
   }
-  const nameOrder = a.project.name.localeCompare(b.project.name);
-  return nameOrder !== 0 ? nameOrder : a.project.id.localeCompare(b.project.id);
+  const nameOrder = compareText(a.project.name, b.project.name);
+  return nameOrder !== 0 ? nameOrder : compareText(a.project.id, b.project.id);
 }
 
 export function buildWorkDashboard(

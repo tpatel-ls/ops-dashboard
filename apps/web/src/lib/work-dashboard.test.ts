@@ -178,6 +178,15 @@ describe('buildWorkDashboard', () => {
     expect(result.projects.map((summary) => summary.project.id)).toEqual(['a', 'z']);
   });
 
+  it('keeps project summaries available when a synced name is malformed', () => {
+    const malformed = project('malformed', { name: null as never });
+    const valid = project('valid', { name: 'Launch' });
+
+    const result = buildWorkDashboard([], [valid, malformed], 'all', '2026-07-16');
+
+    expect(result.projects.map((summary) => summary.project.id)).toEqual(['malformed', 'valid']);
+  });
+
   it('limits dashboard collections while keeping deterministic order', () => {
     const tasks = Array.from({ length: 12 }, (_, index) =>
       task(`task-${index}`, {
