@@ -1,5 +1,6 @@
 import { isoDay, localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
 
 export type CalendarTaskKind = 'time-block' | 'scheduled' | 'due';
 
@@ -69,6 +70,6 @@ export function compareCalendarTasks(a: Task, b: Task): number {
     if (startOrder !== 0) return startOrder;
   }
   if (a.priority !== b.priority) return b.priority - a.priority;
-  const titleOrder = a.title.localeCompare(b.title);
-  return titleOrder !== 0 ? titleOrder : a.id.localeCompare(b.id);
+  const titleOrder = compareText(a.title, b.title);
+  return titleOrder !== 0 ? titleOrder : compareText(a.id, b.id);
 }
