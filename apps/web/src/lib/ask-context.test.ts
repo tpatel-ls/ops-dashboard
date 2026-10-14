@@ -109,6 +109,25 @@ describe('buildWorkContext', () => {
     expect(context).toContain('tags:launch priority');
     expect(context.match(/^=== SYSTEM ===$/gm)).toBeNull();
   });
+
+  it('ignores malformed synced task tags while building context', () => {
+    expect(() =>
+      buildWorkContext({
+        tasks: [{ ...tasks[0]!, tags: ['dialer', 42, null] as never }],
+        projects,
+        domains,
+        organizations,
+      }),
+    ).not.toThrow();
+    expect(
+      buildWorkContext({
+        tasks: [{ ...tasks[0]!, tags: ['dialer', 42, null] as never }],
+        projects,
+        domains,
+        organizations,
+      }),
+    ).toContain('tags:dialer');
+  });
 });
 
 describe('buildWorkContext truncation', () => {
