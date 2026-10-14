@@ -3,6 +3,7 @@
 import { localDay, newId } from '@ops-dashboard/core';
 import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { compareText } from './compare-text';
 import { normalizeStringList } from './string-list';
 import { newestFirstBy } from './recency';
 
@@ -163,17 +164,21 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
   );
 }
 
-export function latestInteraction(interactions: Interaction[]): Interaction | null {
+export function latestInteraction(interactions: unknown): Interaction | null {
   let latest: Interaction | null = null;
   let latestTimestamp = Number.NEGATIVE_INFINITY;
+  if (!Array.isArray(interactions)) return null;
   for (const interaction of interactions) {
-    const timestamp = Date.parse(interaction.date);
+    if (!interaction || typeof interaction !== 'object') continue;
+    const candidate = interaction as Partial<Interaction>;
+    if (typeof candidate.date !== 'string') continue;
+    const timestamp = Date.parse(candidate.date);
     if (!Number.isFinite(timestamp)) continue;
     if (
       timestamp > latestTimestamp ||
-      (timestamp === latestTimestamp && latest && interaction.id < latest.id)
+      (timestamp === latestTimestamp && latest && compareText(candidate.id, latest.id) < 0)
     ) {
-      latest = interaction;
+      latest = candidate as Interaction;
       latestTimestamp = timestamp;
     }
   }
