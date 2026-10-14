@@ -1,5 +1,6 @@
 import type { Whiteboard } from '@ops-dashboard/core';
 import { format } from 'date-fns';
+import { compareText } from './compare-text';
 
 function updatedTimestamp(value: string): number | undefined {
   const timestamp = Date.parse(value);
@@ -16,8 +17,8 @@ export function compareWhiteboardUpdates(
     if (aUpdated !== bUpdated) return bUpdated - aUpdated;
   } else if (aUpdated !== undefined) return -1;
   else if (bUpdated !== undefined) return 1;
-  const nameOrder = a.name.localeCompare(b.name);
-  return nameOrder !== 0 ? nameOrder : a.id.localeCompare(b.id);
+  const nameOrder = compareText(a.name, b.name);
+  return nameOrder !== 0 ? nameOrder : compareText(a.id, b.id);
 }
 
 export function whiteboardUpdatedLabel(value: string): string {

@@ -37,4 +37,15 @@ describe('whiteboard presentation', () => {
     expect(whiteboardUpdatedLabel('not-a-date')).toBe('Updated time unavailable');
     expect(whiteboardUpdatedLabel('2026-08-01T12:00:00.000Z')).toMatch(/^Updated /);
   });
+
+  it('keeps equal-time ordering available when a synced name is malformed', () => {
+    const updatedAt = '2026-08-02T12:00:00.000Z';
+    const malformed = { id: 'malformed', name: null as never, updatedAt };
+    const valid = { id: 'valid', name: 'Board', updatedAt };
+
+    expect([valid, malformed].sort(compareWhiteboardUpdates).map((record) => record.id)).toEqual([
+      'malformed',
+      'valid',
+    ]);
+  });
 });
