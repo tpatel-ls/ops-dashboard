@@ -85,6 +85,16 @@ describe('task calendar dates', () => {
       'b',
     ]);
   });
+  it('keeps malformed imported priorities from poisoning the order', () => {
+    const make = (id: string, priority: number) =>
+      ({ id, title: id, status: 'todo', priority, scheduledFor: '2026-08-24' }) as Task;
+
+    expect(
+      [make('malformed', Number.NaN), make('urgent', 3)]
+        .sort(compareTasksByCommitment)
+        .map((task) => task.id),
+    ).toEqual(['urgent', 'malformed']);
+  });
   it('reports high priority open tasks independently of date', () => {
     const high = { id: 'high', title: 'High', status: 'todo', priority: 3 } as Task;
     expect(summarizeOpenTasks([high], '2026-08-24').high).toBe(1);
