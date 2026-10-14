@@ -87,8 +87,10 @@ export function buildWorkContext({
       if (organization) parts.push(`organization:${contextText(organization.name)}`);
       if (project) parts.push(`project:${contextText(project.name)}`);
       if (domain) parts.push(`domain:${contextText(domain.name)}`);
-      if (task.tags.length > 0)
-        parts.push(`tags:${task.tags.map((tag) => contextText(tag)).join(',')}`);
+      const tags = Array.isArray(task.tags)
+        ? task.tags.filter((tag): tag is string => typeof tag === 'string')
+        : [];
+      if (tags.length > 0) parts.push(`tags:${tags.map((tag) => contextText(tag)).join(',')}`);
       lines.push(`- ${parts.join(' | ')}`);
     }
   }
