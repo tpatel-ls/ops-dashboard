@@ -80,6 +80,18 @@ describe('latestInteraction', () => {
       ]),
     ).toMatchObject({ id: 'alpha' });
   });
+
+  it('ignores malformed synced interactions without throwing', () => {
+    expect(
+      latestInteraction([
+        null,
+        { id: 'bad-date', date: 'not-a-date', note: 'Bad' },
+        { id: 'valid', date: '2026-08-24T10:00:00Z', note: 'Valid' },
+        { id: 'bad-shape', date: 42, note: 'Bad' },
+      ] as never),
+    ).toMatchObject({ id: 'valid' });
+    expect(latestInteraction(null as never)).toBeNull();
+  });
 });
 
 describe('compareInteractionRecency', () => {
