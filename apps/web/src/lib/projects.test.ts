@@ -28,6 +28,8 @@ import {
   createProject,
   projectTaskProgress,
   renameProject,
+  safeProjectChecklists,
+  safeProjectMilestones,
   updateProject,
 } from './projects';
 
@@ -50,6 +52,22 @@ function task(id: string, patch: Partial<Task> = {}): Task {
 }
 
 describe('projectTaskProgress', () => {
+  it('keeps malformed synced project collections out of detail views', () => {
+    expect(safeProjectMilestones(null)).toEqual([]);
+    expect(
+      safeProjectMilestones([
+        { id: 'milestone', title: 'Ship', done: false },
+        { id: 'bad', title: 42, done: false },
+      ]),
+    ).toEqual([{ id: 'milestone', title: 'Ship', done: false }]);
+    expect(
+      safeProjectChecklists([
+        { id: 'list', name: 'Launch', items: [{ id: 'item', text: 'Test', done: false }] },
+        { id: 'bad', name: 'Broken', items: [null] },
+      ]),
+    ).toEqual([{ id: 'list', name: 'Launch', items: [{ id: 'item', text: 'Test', done: false }] }]);
+  });
+
   it('counts only live tasks in the selected project', () => {
     const result = projectTaskProgress(
       [
