@@ -5,7 +5,12 @@ import { useState } from 'react';
 import { Calendar, Plus, Search, User, Users, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
-import { createPerson, latestInteraction, matchesPersonSearch } from '@/lib/people';
+import {
+  createPerson,
+  latestInteraction,
+  matchesPersonSearch,
+  safePersonFacts,
+} from '@/lib/people';
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
@@ -89,7 +94,7 @@ interface PersonCardProps {
 }
 
 function PersonCard({ person, domain, onClick }: PersonCardProps) {
-  const factCount = person.facts.length;
+  const factCount = safePersonFacts(person.facts).length;
   const lastInteraction = latestInteraction(person.interactions);
 
   const initials = person.name

@@ -140,6 +140,30 @@ function personSearchText(value: unknown): string {
   return typeof value === 'string' ? value.normalize('NFKC').toLocaleLowerCase('en-US') : '';
 }
 
+export function safePersonFacts(value: unknown): PersonFact[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (fact): fact is PersonFact =>
+      Boolean(fact) &&
+      typeof fact === 'object' &&
+      typeof (fact as PersonFact).id === 'string' &&
+      typeof (fact as PersonFact).label === 'string' &&
+      typeof (fact as PersonFact).value === 'string',
+  );
+}
+
+export function safePersonInteractions(value: unknown): Interaction[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (interaction): interaction is Interaction =>
+      Boolean(interaction) &&
+      typeof interaction === 'object' &&
+      typeof (interaction as Interaction).id === 'string' &&
+      typeof (interaction as Interaction).date === 'string' &&
+      typeof (interaction as Interaction).note === 'string',
+  );
+}
+
 export function matchesPersonSearch(person: Person, query: string): boolean {
   const normalized = personSearchText(query.trim());
   if (!normalized) return true;
