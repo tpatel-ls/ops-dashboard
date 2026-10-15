@@ -44,6 +44,7 @@ import {
   validWorkMinutes,
   type WorkDestination,
 } from '@/lib/work-logger';
+import { compareOrganizations } from '@/lib/org-lanes';
 import { readLocalStorage, removeLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 
 const MODE_META: Array<{
@@ -93,7 +94,7 @@ export function WorkLoggerDialog() {
     return {
       organizations: organizations
         .filter((org) => !org.deletedAt && !org.archivedAt)
-        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+        .sort(compareOrganizations),
       projects: projects.filter(
         (project) =>
           !project.deletedAt &&

@@ -1,6 +1,17 @@
 'use client';
 
-import type { Project, Task } from '@ops-dashboard/core';
+import type { Organization, Project, Task } from '@ops-dashboard/core';
+import { compareText } from './compare-text';
+
+export function compareOrganizations(left: Organization, right: Organization): number {
+  const leftOrder = typeof left.order === 'number' && Number.isFinite(left.order) ? left.order : 0;
+  const rightOrder =
+    typeof right.order === 'number' && Number.isFinite(right.order) ? right.order : 0;
+  const order = leftOrder - rightOrder;
+  if (order !== 0) return order;
+  const name = compareText(left.name, right.name);
+  return name !== 0 ? name : compareText(left.id, right.id);
+}
 
 /**
  * Resolve the lane (orgId or undefined = Personal) for a task. orgId is
