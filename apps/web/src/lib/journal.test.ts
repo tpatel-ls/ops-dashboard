@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { compareJournalEntries, journalDateLabel, latestJournalEntry } from './journal';
+import {
+  compareJournalEntries,
+  journalDateLabel,
+  latestJournalEntry,
+  safeJournalTags,
+} from './journal';
 
 describe('compareJournalEntries', () => {
+  it('filters malformed synced journal tags', () => {
+    expect(safeJournalTags(['health', null, 4])).toEqual(['health']);
+  });
+
   it('orders valid journal days before malformed records', () => {
     const entries = [
       { id: 'invalid', date: '2026-99-99', createdAt: '2026-08-26T15:00:00Z' },

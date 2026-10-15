@@ -4,7 +4,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, Trash2, Upload } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
-import { compareJournalEntries, deleteJournalEntry, journalDateLabel } from '@/lib/journal';
+import {
+  compareJournalEntries,
+  deleteJournalEntry,
+  journalDateLabel,
+  safeJournalTags,
+} from '@/lib/journal';
 import { cn } from '@ops-dashboard/ui';
 import { excerpt } from '@/lib/excerpt';
 
@@ -54,6 +59,7 @@ export function JournalList() {
 function JournalCard({ entry }: { entry: JournalEntry }) {
   const mood = entry.mood ? MOOD_GLYPH[entry.mood] : null;
   const body = excerpt(entry.body, 280);
+  const tags = safeJournalTags(entry.tags);
 
   const formattedDate = journalDateLabel(entry.date, 'EEEE, d MMM yyyy');
 
@@ -102,9 +108,9 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
       <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{body}</p>
 
       {/* Tags */}
-      {entry.tags && entry.tags.length > 0 && (
+      {tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {entry.tags.map((tag) => (
+          {tags.map((tag) => (
             <span
               key={tag}
               className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
