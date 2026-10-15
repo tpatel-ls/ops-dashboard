@@ -13,11 +13,23 @@ import {
   compareFoodLogCreation,
   createFoodLog,
   foodEstimate,
+  safeFoodItems,
   sumFoodLogTotals,
   updateFoodLog,
 } from './food-logs';
 
 describe('compareFoodLogCreation', () => {
+  it('keeps malformed synced food items out of the row', () => {
+    expect(safeFoodItems(null)).toEqual([]);
+    expect(
+      safeFoodItems([
+        { name: 'Eggs', calories: 140 },
+        { name: 42 },
+        { name: 'Bread', quantity: 2 },
+      ]),
+    ).toEqual([{ name: 'Eggs', calories: 140 }]);
+  });
+
   it('orders offset timestamps by instant and corrupted timestamps last', () => {
     const logs = [
       { id: 'invalid', createdAt: 'invalid' },

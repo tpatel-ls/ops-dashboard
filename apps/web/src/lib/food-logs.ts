@@ -21,6 +21,18 @@ export function foodEstimate(value: number | undefined): number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0;
 }
 
+export function safeFoodItems(value: unknown): FoodItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is FoodItem =>
+      Boolean(item) &&
+      typeof item === 'object' &&
+      typeof (item as FoodItem).name === 'string' &&
+      ((item as FoodItem).quantity === undefined ||
+        typeof (item as FoodItem).quantity === 'string'),
+  );
+}
+
 function addFoodTotal(total: number, value: number): number {
   return Math.min(Number.MAX_SAFE_INTEGER, total + value);
 }
