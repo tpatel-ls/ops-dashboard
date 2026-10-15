@@ -13,6 +13,8 @@ import {
   deletePerson,
   makeFact,
   makeInteraction,
+  safePersonFacts,
+  safePersonInteractions,
   updatePerson,
 } from '@/lib/people';
 
@@ -22,20 +24,21 @@ function FactsSection({ person }: { person: Person }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState('');
   const [value, setValue] = useState('');
+  const facts = safePersonFacts(person.facts);
 
   async function addFact() {
     const l = label.trim();
     const v = value.trim();
     if (!l || !v) return;
     const fact = makeFact(l, v);
-    await updatePerson(person.id, { facts: [...person.facts, fact] });
+    await updatePerson(person.id, { facts: [...facts, fact] });
     setLabel('');
     setValue('');
     setAdding(false);
   }
 
   async function removeFact(id: string) {
-    await updatePerson(person.id, { facts: person.facts.filter((f) => f.id !== id) });
+    await updatePerson(person.id, { facts: facts.filter((f) => f.id !== id) });
   }
 
   return (
@@ -46,10 +49,8 @@ function FactsSection({ person }: { person: Person }) {
           <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Facts
           </span>
-          {person.facts.length > 0 ? (
-            <span className="text-subtle-foreground font-mono text-[10px]">
-              ({person.facts.length})
-            </span>
+          {facts.length > 0 ? (
+            <span className="text-subtle-foreground font-mono text-[10px]">({facts.length})</span>
           ) : null}
         </div>
         <button
@@ -105,11 +106,11 @@ function FactsSection({ person }: { person: Person }) {
         </div>
       ) : null}
 
-      {person.facts.length === 0 && !adding ? (
+      {facts.length === 0 && !adding ? (
         <p className="text-subtle-foreground text-xs">No facts recorded yet.</p>
       ) : (
         <ul className="flex flex-col gap-1">
-          {person.facts.map((fact) => (
+          {facts.map((fact) => (
             <FactRow key={fact.id} fact={fact} onRemove={() => removeFact(fact.id)} />
           ))}
         </ul>
@@ -147,15 +148,16 @@ function InteractionsSection({ person }: { person: Person }) {
   const [adding, setAdding] = useState(false);
   const [note, setNote] = useState('');
   const [date, setDate] = useState('');
+  const interactions = safePersonInteractions(person.interactions);
 
-  const sorted = [...person.interactions].sort(compareInteractionRecency);
+  const sorted = [...interactions].sort(compareInteractionRecency);
 
   async function addInteraction() {
     const n = note.trim();
     if (!n) return;
     const interaction = makeInteraction(n, date || undefined);
     await updatePerson(person.id, {
-      interactions: [...person.interactions, interaction],
+      interactions: [...interactions, interaction],
     });
     setNote('');
     setDate('');
@@ -164,7 +166,7 @@ function InteractionsSection({ person }: { person: Person }) {
 
   async function removeInteraction(id: string) {
     await updatePerson(person.id, {
-      interactions: person.interactions.filter((i) => i.id !== id),
+      interactions: interactions.filter((i) => i.id !== id),
     });
   }
 
@@ -176,9 +178,9 @@ function InteractionsSection({ person }: { person: Person }) {
           <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Interactions
           </span>
-          {person.interactions.length > 0 ? (
+          {interactions.length > 0 ? (
             <span className="text-subtle-foreground font-mono text-[10px]">
-              ({person.interactions.length})
+              ({interactions.length})
             </span>
           ) : null}
         </div>

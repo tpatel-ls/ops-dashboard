@@ -5,6 +5,8 @@ import {
   createPerson,
   latestInteraction,
   matchesPersonSearch,
+  safePersonFacts,
+  safePersonInteractions,
   updatePerson,
 } from './people';
 
@@ -19,6 +21,19 @@ const person = {
 } as Person;
 
 describe('matchesPersonSearch', () => {
+  it('keeps only renderable synced facts and interactions', () => {
+    expect(safePersonFacts(null)).toEqual([]);
+    expect(
+      safePersonFacts([{ id: 'fact', label: 'Role', value: 'Lead' }, null, { id: 'bad' }]),
+    ).toEqual([{ id: 'fact', label: 'Role', value: 'Lead' }]);
+    expect(
+      safePersonInteractions([
+        { id: 'interaction', date: '2026-08-16', note: 'Met' },
+        { id: 'bad', date: 42 },
+      ]),
+    ).toEqual([{ id: 'interaction', date: '2026-08-16', note: 'Met' }]);
+  });
+
   it('matches useful relationship context without case sensitivity', () => {
     expect(matchesPersonSearch(person, 'avery')).toBe(true);
     expect(matchesPersonSearch(person, 'PRODUCT')).toBe(true);
