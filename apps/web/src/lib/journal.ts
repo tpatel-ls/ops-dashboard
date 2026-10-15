@@ -11,6 +11,10 @@ const MAX_JOURNAL_BODY_LENGTH = 50_000;
 const MAX_JOURNAL_TITLE_LENGTH = 500;
 const MAX_JOURNAL_MOOD_LENGTH = 100;
 
+export function safeJournalTags(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === 'string') : [];
+}
+
 /**
  * Human label for a journal entry's calendar day.
  *
