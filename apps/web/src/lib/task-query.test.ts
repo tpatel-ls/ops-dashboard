@@ -5,6 +5,7 @@ import {
   compareTasksBy,
   matchesTaskSearch,
   matchesTaskTag,
+  safeTaskPriority,
   safeTaskTags,
 } from './task-query';
 
@@ -27,6 +28,12 @@ function task(id: string, patch: Partial<Task> = {}): Task {
 }
 
 describe('compareTasks', () => {
+  it('normalizes malformed priorities for focus ordering', () => {
+    expect(safeTaskPriority(Number.NaN)).toBe(0);
+    expect(safeTaskPriority(3)).toBe(3);
+    expect(safeTaskPriority(9)).toBe(0);
+  });
+
   it('uses ids to stabilize otherwise identical task ordering', () => {
     const tasks = [task('b'), task('a')];
     expect(tasks.sort(compareTasks).map((item) => item.id)).toEqual(['a', 'b']);

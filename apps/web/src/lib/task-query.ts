@@ -3,10 +3,14 @@ import type { Task } from '@ops-dashboard/core';
 import { compareText } from './compare-text';
 import { taskEarliestDay } from './task-dates';
 
-function taskPriority(task: Task): number {
-  return Number.isFinite(task.priority) && task.priority >= 0 && task.priority <= 3
-    ? task.priority
+export function safeTaskPriority(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 3
+    ? value
     : 0;
+}
+
+function taskPriority(task: Task): number {
+  return safeTaskPriority(task.priority);
 }
 
 function taskOrder(task: Task): number | undefined {

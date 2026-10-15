@@ -15,6 +15,7 @@ import {
   elapsedSessionMs,
 } from '@/lib/focus-timer';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
+import { safeTaskPriority } from '@/lib/task-query';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
 
@@ -38,7 +39,7 @@ export function FocusMode() {
           t.status !== 'archived' &&
           (taskScheduledOn(t, today) || t.status === 'doing'),
       )
-      .sort((a, b) => b.priority - a.priority);
+      .sort((a, b) => safeTaskPriority(b.priority) - safeTaskPriority(a.priority));
   });
 
   const [phase, setPhase] = useState<Phase>('focus');
