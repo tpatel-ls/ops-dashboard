@@ -27,7 +27,12 @@ import type {
   ProjectStatus,
 } from '@ops-dashboard/core';
 import { useOrgStore } from '@/lib/org-store';
-import { createProject, projectTaskProgress, type ProjectTaskProgress } from '@/lib/projects';
+import {
+  createProject,
+  projectTaskProgress,
+  safeProjectMilestones,
+  type ProjectTaskProgress,
+} from '@/lib/projects';
 import { workLoggedHours } from '@/lib/worklogs';
 import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '@/lib/work-logger';
 import { useAppStore } from '@/lib/app-store';
@@ -276,7 +281,7 @@ function ProjectCard({
 }: ProjectCardProps) {
   const { project, domain, organization, hoursLogged, taskProgress } = data;
 
-  const milestones = project.milestones ?? [];
+  const milestones = safeProjectMilestones(project.milestones);
   const milestoneDone = milestones.filter((m) => m.done).length;
   const milestonePct =
     milestones.length > 0 ? Math.round((milestoneDone / milestones.length) * 100) : null;
