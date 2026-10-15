@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
-import { taskLane } from '@/lib/org-lanes';
+import { compareOrganizations, taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 
 export interface OrgLane {
@@ -24,9 +24,7 @@ export function useOrgLanes(projectsMap?: Pick<Map<string, Project>, 'get'>) {
   const ctx = useOrgStore((s) => s.ctx);
   const orgs = useLiveQuery(async () => {
     const all = await getDb().organizations.toArray();
-    return all
-      .filter((o) => !o.deletedAt)
-      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+    return all.filter((o) => !o.deletedAt).sort(compareOrganizations);
   });
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
 

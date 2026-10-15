@@ -18,6 +18,7 @@ import {
   resolveWorkDestination,
   type WorkDestination,
 } from '@/lib/work-logger';
+import { compareOrganizations } from '@/lib/org-lanes';
 
 const emptySubscribe = () => () => {};
 
@@ -56,7 +57,7 @@ export function QuickAdd() {
       projects: projects.filter((p) => !p.deletedAt && !p.archivedAt),
       organizations: organizations
         .filter((organization) => !organization.deletedAt && !organization.archivedAt)
-        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+        .sort(compareOrganizations),
     };
   });
 

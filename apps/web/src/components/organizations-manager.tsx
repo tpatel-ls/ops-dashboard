@@ -12,6 +12,7 @@ import {
   nextOrgColor,
   updateOrganization,
 } from '@/lib/organizations';
+import { compareOrganizations } from '@/lib/org-lanes';
 
 const PRESET_COLORS = [
   'oklch(0.6 0.13 265)',
@@ -158,9 +159,7 @@ export function OrganizationsManager() {
   const data = useLiveQuery(async () => {
     const db = getDb();
     const [orgs, projects] = await Promise.all([db.organizations.toArray(), db.projects.toArray()]);
-    const active = orgs
-      .filter((o) => !o.deletedAt && !o.archivedAt)
-      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+    const active = orgs.filter((o) => !o.deletedAt && !o.archivedAt).sort(compareOrganizations);
     const counts = new Map<string, number>();
     for (const p of projects) {
       if (p.deletedAt || p.archivedAt || !p.orgId) continue;

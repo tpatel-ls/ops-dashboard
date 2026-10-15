@@ -18,7 +18,7 @@ import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useHotkeys } from '@/lib/hotkeys';
-import { taskLane } from '@/lib/org-lanes';
+import { compareOrganizations, taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
 import { isActiveProject } from '@/lib/project-query';
 import { compareTasksBy, matchesTaskSearch, type TaskSort } from '@/lib/task-query';
@@ -238,7 +238,7 @@ export function TasksView() {
     const activeProjects = allProjects.filter(isActiveProject);
     const activeDomains = allDomains
       .filter((domain) => !domain.deletedAt)
-      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+      .sort(compareOrganizations);
     const activeOrganizations = allOrganizations.filter(
       (organization) => !organization.deletedAt && !organization.archivedAt,
     );

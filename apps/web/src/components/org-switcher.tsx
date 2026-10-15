@@ -6,7 +6,7 @@ import { Check, ChevronDown, Layers } from 'lucide-react';
 import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { OrgContext, Organization } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
-import { taskLane } from '@/lib/org-lanes';
+import { compareOrganizations, taskLane } from '@/lib/org-lanes';
 import { resolveOrgContext, useOrgStore } from '@/lib/org-store';
 
 const emptySubscribe = () => () => {};
@@ -31,9 +31,7 @@ interface Lane {
 export function useActiveOrgs(): Organization[] | undefined {
   return useLiveQuery(async () => {
     const all = await getDb().organizations.toArray();
-    return all
-      .filter((o) => !o.deletedAt && !o.archivedAt)
-      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+    return all.filter((o) => !o.deletedAt && !o.archivedAt).sort(compareOrganizations);
   });
 }
 

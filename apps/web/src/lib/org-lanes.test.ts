@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import type { Project, Task } from '@ops-dashboard/core';
-import { taskLane } from './org-lanes';
+import type { Organization, Project, Task } from '@ops-dashboard/core';
+import { compareOrganizations, taskLane } from './org-lanes';
 
 describe('taskLane', () => {
+  it('stabilizes organization ordering when synced fields are malformed', () => {
+    const organizations = [
+      { id: 'z', name: null, order: Number.NaN },
+      { id: 'a', name: 'Alpha', order: 1 },
+      { id: 'b', name: 'Beta', order: 1 },
+    ] as Organization[];
+    expect(organizations.sort(compareOrganizations).map((organization) => organization.id)).toEqual(
+      ['z', 'a', 'b'],
+    );
+  });
+
   it('trims the project reference before lookup', () => {
     const projects = new Map<string, Project>([
       ['project-1', { id: 'project-1', orgId: 'org-1' } as Project],
