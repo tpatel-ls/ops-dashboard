@@ -11,6 +11,8 @@ import {
   updateQuote,
   deleteQuote,
   makeThought,
+  safeQuoteTags,
+  safeQuoteThoughts,
 } from '@/lib/quotes';
 import { cn } from '@ops-dashboard/ui';
 
@@ -151,7 +153,7 @@ function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
     setSaving(true);
     try {
       const newThought = makeThought(text.trim());
-      await updateQuote(quote.id, { thoughts: [...quote.thoughts, newThought] });
+      await updateQuote(quote.id, { thoughts: [...safeQuoteThoughts(quote.thoughts), newThought] });
       setText('');
       onDone();
     } finally {
@@ -197,6 +199,8 @@ function QuoteCard({ quote }: { quote: Quote }) {
   const [thoughtsExpanded, setThoughtsExpanded] = useState(false);
   const [addingThought, setAddingThought] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const thoughts = safeQuoteThoughts(quote.thoughts);
+  const tags = safeQuoteTags(quote.tags);
 
   async function handleFavorite() {
     await updateQuote(quote.id, { favorite: !quote.favorite });
@@ -211,11 +215,11 @@ function QuoteCard({ quote }: { quote: Quote }) {
   }
 
   async function handleDeleteThought(thoughtId: string) {
-    const remaining = quote.thoughts.filter((t) => t.id !== thoughtId);
+    const remaining = thoughts.filter((t) => t.id !== thoughtId);
     await updateQuote(quote.id, { thoughts: remaining });
   }
 
-  const hasThoughts = quote.thoughts.length > 0;
+  const hasThoughts = thoughts.length > 0;
 
   return (
     <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-2.5 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
@@ -238,7 +242,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
             {SOURCE_TYPE_LABELS[quote.sourceType]}
           </span>
         )}
-        {quote.tags.map((tag) => (
+        {tags.map((tag) => (
           <span
             key={tag}
             className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
@@ -258,7 +262,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
               className="flex items-center gap-1.5 text-left"
             >
               <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-                Thoughts ({quote.thoughts.length})
+                Thoughts ({thoughts.length})
               </span>
               {thoughtsExpanded ? (
                 <ChevronUp className="text-subtle-foreground size-3" />
@@ -270,7 +274,7 @@ function QuoteCard({ quote }: { quote: Quote }) {
 
           {thoughtsExpanded && (
             <ul className="mt-2 flex flex-col gap-1.5">
-              {quote.thoughts.map((thought) => (
+              {thoughts.map((thought) => (
                 <li
                   key={thought.id}
                   className="group/thought flex items-start justify-between gap-2"
