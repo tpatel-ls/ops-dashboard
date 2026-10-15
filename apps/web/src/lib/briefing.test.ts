@@ -326,6 +326,18 @@ describe('briefing helpers', () => {
     expect(findCaptureRoutingIssues([capture], [])[0]?.title).toBe('Renew passport');
   });
 
+  it('uses a placeholder when synced capture text is malformed', () => {
+    const capture = {
+      ...meta('malformed-text'),
+      raw: 42,
+      source: 'text',
+      status: 'pending',
+      aiSummary: { text: 'not a string' },
+    } as unknown as Capture;
+
+    expect(findCaptureRoutingIssues([capture], [])[0]?.title).toBe('Untitled capture');
+  });
+
   it('summarizes the operating cockpit counts for the briefing header', () => {
     const tasks = [
       {

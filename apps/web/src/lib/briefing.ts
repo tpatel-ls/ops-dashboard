@@ -29,6 +29,10 @@ export interface BriefingSummary {
   staleDomains: number;
 }
 
+function captureText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 export function findStaleDomains(input: {
   domains: Domain[];
   projects: Project[];
@@ -139,7 +143,8 @@ export function findCaptureRoutingIssues(
   return captures
     .filter((capture) => !capture.deletedAt && capture.status !== 'dismissed')
     .flatMap((capture): CaptureRoutingIssue[] => {
-      const title = capture.aiSummary?.trim() || capture.raw.trim() || 'Untitled capture';
+      const title =
+        captureText(capture.aiSummary) || captureText(capture.raw) || 'Untitled capture';
       if (capture.status === 'pending' || !capture.routedTo) {
         return [
           {
