@@ -31,6 +31,7 @@ import {
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { routedTag } from '@/lib/brain-dump-result';
 import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
+import { safeTaskTags } from '@/lib/task-query';
 import { cn } from '@ops-dashboard/ui';
 
 const STATUSES: Task['status'][] = ['backlog', 'todo', 'doing', 'blocked', 'done'];
@@ -161,6 +162,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const [checklistDraft, setChecklistDraft] = useState('');
 
   const currentRecurrence = task.recurrence?.freq ?? 'none';
+  const tags = safeTaskTags(task.tags);
 
   return (
     <>
@@ -422,11 +424,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
           <Section title="Tags" icon={<Hash className="size-3.5" />}>
             <div className="flex flex-wrap items-center gap-1.5">
-              {task.tags.map((t) => (
+              {tags.map((t) => (
                 <button
                   key={t}
                   type="button"
-                  onClick={() => updateTask(task.id, { tags: task.tags.filter((x) => x !== t) })}
+                  onClick={() => updateTask(task.id, { tags: tags.filter((x) => x !== t) })}
                   aria-label={`Remove tag ${t}`}
                   className="group bg-accent text-accent-foreground hover:bg-destructive/10 hover:text-destructive inline-flex min-h-8 items-center gap-1 rounded-full px-2 py-0.5 text-[11px]"
                 >
@@ -444,8 +446,8 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   if (e.key === 'Enter' && tagDraft.trim()) {
                     e.preventDefault();
                     const t = routedTag(tagDraft.trim().replace(/^#/, ''));
-                    if (!task.tags.includes(t)) {
-                      updateTask(task.id, { tags: [...task.tags, t] });
+                    if (!tags.includes(t)) {
+                      updateTask(task.id, { tags: [...tags, t] });
                     }
                     setTagDraft('');
                   }
