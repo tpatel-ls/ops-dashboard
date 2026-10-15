@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { compareNoteRecency, updateNote } from './notes';
+import { compareNoteRecency, safeNoteTags, updateNote } from './notes';
 
 describe('compareNoteRecency', () => {
+  it('filters malformed synced note tags', () => {
+    expect(safeNoteTags(['idea', 7, null])).toEqual(['idea']);
+  });
+
   it('orders notes by creation instant and places malformed metadata last', () => {
     const notes = [
       { id: 'invalid', createdAt: 'invalid' },

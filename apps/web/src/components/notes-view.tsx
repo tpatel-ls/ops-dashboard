@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Flag, Plus, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Note } from '@ops-dashboard/core';
-import { compareNoteRecency, createNote, updateNote, deleteNote } from '@/lib/notes';
+import { compareNoteRecency, createNote, deleteNote, safeNoteTags, updateNote } from '@/lib/notes';
 import { cn } from '@ops-dashboard/ui';
 import { excerpt } from '@/lib/excerpt';
 
@@ -102,6 +102,7 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
 
 function NoteCard({ note }: { note: Note }) {
   const [confirming, setConfirming] = useState(false);
+  const tags = safeNoteTags(note.tags);
   // Both arms of the old `note.title ? ... : ...` were character for character
   // identical, so the title never affected the preview.
   const body = excerpt(note.body, 240);
@@ -174,7 +175,7 @@ function NoteCard({ note }: { note: Note }) {
             Review
           </span>
         )}
-        {note.tags.map((tag) => (
+        {tags.map((tag) => (
           <span
             key={tag}
             className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
