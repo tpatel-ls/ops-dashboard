@@ -1,7 +1,14 @@
 'use client';
 
 import { bumpVersion, getDb, getDeviceId, localDay, newId } from '@ops-dashboard/core';
-import type { Project, ProjectKind, Task } from '@ops-dashboard/core';
+import type {
+  ChecklistItem,
+  Milestone,
+  NamedChecklist,
+  Project,
+  ProjectKind,
+  Task,
+} from '@ops-dashboard/core';
 import { patchRecord } from './records';
 import { enqueueOp } from './sync-queue';
 
@@ -35,6 +42,37 @@ const MAX_PROJECT_CHECKLISTS = 50;
 const MAX_PROJECT_CHECKLIST_ITEMS = 100;
 const MAX_PROJECT_NESTED_ID_LENGTH = 128;
 const MAX_PROJECT_NESTED_TEXT_LENGTH = 500;
+
+export function safeProjectMilestones(value: unknown): Milestone[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (milestone): milestone is Milestone =>
+      Boolean(milestone) &&
+      typeof milestone === 'object' &&
+      typeof (milestone as Milestone).id === 'string' &&
+      typeof (milestone as Milestone).title === 'string' &&
+      typeof (milestone as Milestone).done === 'boolean',
+  );
+}
+
+export function safeProjectChecklists(value: unknown): NamedChecklist[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (checklist): checklist is NamedChecklist =>
+      Boolean(checklist) &&
+      typeof checklist === 'object' &&
+      typeof (checklist as NamedChecklist).id === 'string' &&
+      typeof (checklist as NamedChecklist).name === 'string' &&
+      Array.isArray((checklist as NamedChecklist).items) &&
+      (checklist as NamedChecklist).items.every(
+        (item: ChecklistItem) =>
+          Boolean(item) &&
+          typeof item.id === 'string' &&
+          typeof item.text === 'string' &&
+          typeof item.done === 'boolean',
+      ),
+  );
+}
 
 function projectName(value: string): string {
   const normalized = value.trim();

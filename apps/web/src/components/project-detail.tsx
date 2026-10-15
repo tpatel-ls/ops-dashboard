@@ -14,7 +14,7 @@ import type {
   ProjectStatus,
   Task,
 } from '@ops-dashboard/core';
-import { updateProject } from '@/lib/projects';
+import { safeProjectChecklists, safeProjectMilestones, updateProject } from '@/lib/projects';
 import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
@@ -52,7 +52,7 @@ function MilestonesSection({ project }: { project: Project }) {
   const [newTitle, setNewTitle] = useState('');
   const [newDue, setNewDue] = useState('');
 
-  const milestones = project.milestones ?? [];
+  const milestones = safeProjectMilestones(project.milestones);
   const done = milestones.filter((m) => m.done).length;
   const pct = milestones.length > 0 ? Math.round((done / milestones.length) * 100) : 0;
 
@@ -203,7 +203,7 @@ function ChecklistsSection({ project }: { project: Project }) {
   const [newListName, setNewListName] = useState('');
   const [expandedList, setExpandedList] = useState<string | null>(null);
 
-  const checklists = project.checklists ?? [];
+  const checklists = safeProjectChecklists(project.checklists);
 
   async function addList() {
     const name = newListName.trim();
