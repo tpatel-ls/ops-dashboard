@@ -34,6 +34,8 @@ import {
   availableTask,
   projectRecurringReminders,
   rescheduleTask,
+  safeChecklistItems,
+  safeTaskReminders,
   setChecklist,
   setTaskStatus,
   softDeleteTask,
@@ -41,6 +43,21 @@ import {
 } from './tasks';
 
 describe('availableTask', () => {
+  it('filters malformed synced checklist and reminder collections', () => {
+    expect(safeChecklistItems(null)).toEqual([]);
+    expect(safeChecklistItems([{ id: 'item', text: 'Test', done: false }, { id: 'bad' }])).toEqual([
+      { id: 'item', text: 'Test', done: false },
+    ]);
+    expect(
+      safeTaskReminders([
+        { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
+        { id: 'bad', delivered: 'no' },
+      ]),
+    ).toEqual([
+      { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
+    ]);
+  });
+
   it('maps missing and deleted tasks to a resolved not-found state', () => {
     expect(availableTask(undefined)).toBeNull();
     expect(

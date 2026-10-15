@@ -55,6 +55,31 @@ const MAX_TASK_REFERENCE_LENGTH = 128;
 const MAX_TASK_CHECKLIST_ID_LENGTH = 128;
 const MAX_TASK_CHECKLIST_TEXT_LENGTH = 500;
 
+export function safeChecklistItems(value: unknown): ChecklistItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is ChecklistItem =>
+      Boolean(item) &&
+      typeof item === 'object' &&
+      typeof (item as ChecklistItem).id === 'string' &&
+      typeof (item as ChecklistItem).text === 'string' &&
+      typeof (item as ChecklistItem).done === 'boolean',
+  );
+}
+
+export function safeTaskReminders(value: unknown): Reminder[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (reminder): reminder is Reminder =>
+      Boolean(reminder) &&
+      typeof reminder === 'object' &&
+      typeof (reminder as Reminder).id === 'string' &&
+      typeof (reminder as Reminder).taskId === 'string' &&
+      typeof (reminder as Reminder).triggerAt === 'string' &&
+      typeof (reminder as Reminder).delivered === 'boolean',
+  );
+}
+
 function normalizedTaskTitle(value: string): string {
   const title = value.trim();
   if (!title) throw new Error('Task title is required.');
@@ -390,7 +415,7 @@ export function projectRecurringReminders(
   if (previousAnchor === undefined || nextAnchor === undefined) return [];
   const dayShift = differenceInCalendarDays(new Date(nextAnchor), new Date(previousAnchor));
 
-  return previous.reminders.flatMap((reminder) => {
+  return safeTaskReminders(previous.reminders).flatMap((reminder) => {
     const trigger = Date.parse(reminder.triggerAt);
     if (!Number.isFinite(trigger)) return [];
     const shiftedTrigger = addDays(new Date(trigger), dayShift);

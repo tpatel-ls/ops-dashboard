@@ -23,6 +23,8 @@ import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { useMediaQuery } from '@/lib/use-media-query';
 import {
   availableTask,
+  safeChecklistItems,
+  safeTaskReminders,
   setChecklist,
   setTaskStatus,
   softDeleteTask,
@@ -163,6 +165,8 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
   const currentRecurrence = task.recurrence?.freq ?? 'none';
   const tags = safeTaskTags(task.tags);
+  const reminders = safeTaskReminders(task.reminders);
+  const checklist = safeChecklistItems(task.checklist);
 
   return (
     <>
@@ -461,7 +465,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
           <Section title="Reminders" icon={<Bell className="size-3.5" />}>
             <div className="flex flex-col gap-1.5">
-              {task.reminders.map((r) => (
+              {reminders.map((r) => (
                 <div
                   key={r.id}
                   className="border-hairline bg-input flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs"
@@ -472,7 +476,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     onClick={async () => {
                       await cancelReminder(r.id);
                       updateTask(task.id, {
-                        reminders: task.reminders.filter((x) => x.id !== r.id),
+                        reminders: reminders.filter((x) => x.id !== r.id),
                       });
                     }}
                     className="text-subtle-foreground hover:text-destructive"
@@ -497,7 +501,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     const iso = new Date(reminderDraft).toISOString();
                     const reminder = await scheduleReminder(task.id, iso);
                     await updateTask(task.id, {
-                      reminders: [...task.reminders, reminder],
+                      reminders: [...reminders, reminder],
                     });
                     setReminderDraft('');
                   }}
@@ -512,7 +516,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
           <Section title="Checklist">
             <div className="flex flex-col gap-1.5">
-              {task.checklist.map((item) => (
+              {checklist.map((item) => (
                 <ChecklistRow key={item.id} task={task} item={item} />
               ))}
               <div className="flex items-center gap-2">
@@ -523,7 +527,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     if (e.key === 'Enter' && checklistDraft.trim()) {
                       e.preventDefault();
                       const next: ChecklistItem[] = [
-                        ...task.checklist,
+                        ...checklist,
                         { id: newId(), text: checklistDraft.trim(), done: false },
                       ];
                       setChecklist(task.id, next);
@@ -585,12 +589,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
+  const checklist = safeChecklistItems(task.checklist);
+
   return (
     <div className="flex min-h-10 items-center gap-2">
       <button
         type="button"
         onClick={() => {
-          const next = task.checklist.map((c) => (c.id === item.id ? { ...c, done: !c.done } : c));
+          const next = checklist.map((c) => (c.id === item.id ? { ...c, done: !c.done } : c));
           setChecklist(task.id, next);
         }}
         className={cn(
@@ -607,7 +613,7 @@ function ChecklistRow({ task, item }: { task: Task; item: ChecklistItem }) {
       <button
         type="button"
         onClick={() => {
-          const next = task.checklist.filter((c) => c.id !== item.id);
+          const next = checklist.filter((c) => c.id !== item.id);
           setChecklist(task.id, next);
         }}
         className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive inline-flex size-9 shrink-0 items-center justify-center rounded-md"
