@@ -26,6 +26,22 @@ const MAX_QUOTE_THOUGHT_ID_LENGTH = 128;
 
 export const compareQuoteRecency = compareCreatedAtRecency;
 
+export function safeQuoteTags(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === 'string') : [];
+}
+
+export function safeQuoteThoughts(value: unknown): Thought[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (thought): thought is Thought =>
+      Boolean(thought) &&
+      typeof thought === 'object' &&
+      typeof (thought as Thought).id === 'string' &&
+      typeof (thought as Thought).text === 'string' &&
+      typeof (thought as Thought).at === 'string',
+  );
+}
+
 function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'text')) {

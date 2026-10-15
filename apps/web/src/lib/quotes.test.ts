@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { compareQuoteRecency, createQuote, updateQuote } from './quotes';
+import {
+  compareQuoteRecency,
+  createQuote,
+  safeQuoteTags,
+  safeQuoteThoughts,
+  updateQuote,
+} from './quotes';
 
 describe('compareQuoteRecency', () => {
+  it('keeps malformed synced tags and thoughts out of the card', () => {
+    expect(safeQuoteTags(['work', 42, null])).toEqual(['work']);
+    expect(
+      safeQuoteThoughts([{ id: 'thought', text: 'Useful', at: '2026-08-24' }, { id: 'bad' }]),
+    ).toEqual([{ id: 'thought', text: 'Useful', at: '2026-08-24' }]);
+  });
+
   it('orders quote instants and leaves malformed records last', () => {
     const quotes = [
       { id: 'invalid', createdAt: 'not-a-date' },
