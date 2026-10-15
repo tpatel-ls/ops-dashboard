@@ -36,6 +36,7 @@ import { useOrgStore } from '@/lib/org-store';
 import { taskDateLabel } from '@/lib/task-presentation';
 import { addTask } from '@/lib/tasks';
 import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
+import { safeTaskTags } from '@/lib/task-query';
 import { useActiveOrgs } from './org-switcher';
 
 const NAV = [
@@ -256,6 +257,7 @@ export function CommandPalette() {
                 className="text-subtle-foreground mt-2 text-[10px] uppercase"
               >
                 {results.map((t) => {
+                  const tags = safeTaskTags(t.tags);
                   const dateValue = taskDueOrScheduledDay(t);
                   const dateLabel = dateValue
                     ? taskDateLabel(dateValue, today, t.status === 'done')
@@ -285,9 +287,9 @@ export function CommandPalette() {
                           {dateLabel ? ` · ${dateLabel}` : ''}
                         </span>
                       </span>
-                      {t.tags.length ? (
+                      {tags.length ? (
                         <span className="text-subtle-foreground max-w-24 truncate font-mono text-[10px]">
-                          #{t.tags[0]}
+                          #{tags[0]}
                         </span>
                       ) : null}
                     </Command.Item>

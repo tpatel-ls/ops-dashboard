@@ -17,6 +17,10 @@ function taskFilterText(value: string): string {
   return value.normalize('NFKC').toLocaleLowerCase('en-US');
 }
 
+export function safeTaskTags(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === 'string') : [];
+}
+
 export function compareTasks(a: Task, b: Task): number {
   const aDate = taskEarliestDay(a);
   const bDate = taskEarliestDay(b);
@@ -85,7 +89,7 @@ export function compareTasksBy(sort: TaskSort, a: Task, b: Task): number {
 export function matchesTaskSearch(task: Task, query: string, projectName?: string): boolean {
   const needle = taskFilterText(query.trim());
   if (!needle) return true;
-  const tags = Array.isArray(task.tags) ? task.tags : [];
+  const tags = safeTaskTags(task.tags);
   return [task.title, task.notes, projectName, ...tags]
     .filter((value): value is string => typeof value === 'string' && Boolean(value))
     .some((value) => taskFilterText(value).includes(needle));
@@ -95,7 +99,7 @@ export function matchesTaskTag(task: Task, selectedTag: string | null): boolean 
   if (!selectedTag) return true;
   const normalized = taskFilterText(selectedTag.trim());
   if (!normalized) return true;
-  return (Array.isArray(task.tags) ? task.tags : []).some(
+  return safeTaskTags(task.tags).some(
     (tag) => typeof tag === 'string' && taskFilterText(tag) === normalized,
   );
 }

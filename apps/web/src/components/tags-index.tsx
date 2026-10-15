@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo, useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { matchesTaskTag } from '@/lib/task-query';
+import { matchesTaskTag, safeTaskTags } from '@/lib/task-query';
 
 export function TagsIndex() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -17,12 +17,12 @@ export function TagsIndex() {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
     for (const t of tasks ?? []) {
-      for (const tag of t.tags) map.set(tag, (map.get(tag) ?? 0) + 1);
+      for (const tag of safeTaskTags(t.tags)) map.set(tag, (map.get(tag) ?? 0) + 1);
     }
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
   }, [tasks]);
   const visibleTasks = (tasks ?? []).filter(
-    (task) => task.tags.length > 0 && matchesTaskTag(task, selectedTag),
+    (task) => safeTaskTags(task.tags).length > 0 && matchesTaskTag(task, selectedTag),
   );
 
   if (counts.length === 0) {
@@ -60,7 +60,7 @@ export function TagsIndex() {
               >
                 <span className="truncate">{t.title}</span>
                 <span className="ml-auto flex max-w-[55%] flex-wrap justify-end gap-1">
-                  {t.tags.map((tag) => (
+                  {safeTaskTags(t.tags).map((tag) => (
                     <span
                       key={tag}
                       className="bg-accent text-accent-foreground rounded px-1.5 py-0.5 font-mono text-[10px]"

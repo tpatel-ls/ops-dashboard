@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { compareTasks, compareTasksBy, matchesTaskSearch, matchesTaskTag } from './task-query';
+import {
+  compareTasks,
+  compareTasksBy,
+  matchesTaskSearch,
+  matchesTaskTag,
+  safeTaskTags,
+} from './task-query';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
   return {
@@ -194,6 +200,11 @@ describe('compareTasksBy', () => {
 });
 
 describe('matchesTaskSearch', () => {
+  it('drops malformed tag collections and entries', () => {
+    expect(safeTaskTags(null)).toEqual([]);
+    expect(safeTaskTags(['work', 42, 'home', null])).toEqual(['work', 'home']);
+  });
+
   const launchTask = task('launch', { title: 'Prepare Launch Review' });
 
   it('matches task titles without case sensitivity', () => {

@@ -30,6 +30,7 @@ import type { Task, TaskStatus } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { ViewShell } from '@/components/view-shell';
 import { syncLsgLaunchPlan } from '@/lib/lsg-work-setup';
+import { safeTaskTags } from '@/lib/task-query';
 
 const STATUS_TONE: Record<TaskStatus, string> = {
   backlog: 'bg-bg-sunken text-subtle-foreground border-border',
@@ -147,7 +148,7 @@ function isOpen(task: Task): boolean {
 }
 
 function taskText(task: Task): string {
-  return `${task.title} ${task.notes ?? ''} ${task.tags.join(' ')}`.toLowerCase();
+  return `${task.title} ${task.notes ?? ''} ${safeTaskTags(task.tags).join(' ')}`.toLowerCase();
 }
 
 function capabilityProgress(tasks: Task[], terms: string[]) {
