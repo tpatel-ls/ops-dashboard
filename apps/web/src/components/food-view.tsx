@@ -24,6 +24,7 @@ import {
   compareFoodLogCreation,
   deleteFoodLog,
   foodEstimate,
+  safeFoodItems,
   sumFoodLogTotals,
   updateFoodLog,
 } from '@/lib/food-logs';
@@ -369,13 +370,15 @@ function MealGroup({ meal, logs }: { meal: MealType; logs: FoodLog[] }) {
 }
 
 function FoodLogRow({ log }: { log: FoodLog }) {
+  const items = safeFoodItems(log.items);
+
   return (
     <li className="surface-flat group flex items-start gap-3 rounded-[14px] px-4 py-3">
       <div className="min-w-0 flex-1">
         <p className="text-foreground text-sm font-medium">{log.description}</p>
-        {log.items.length > 0 ? (
+        {items.length > 0 ? (
           <ul className="mt-1 flex flex-col gap-0.5">
-            {log.items.map((item, i) => (
+            {items.map((item, i) => (
               <li
                 key={`${log.id}-${i}`}
                 className="text-muted-foreground flex items-baseline gap-1.5 text-xs"
