@@ -30,6 +30,9 @@ describe('matchesPersonSearch', () => {
       safePersonInteractions([
         { id: 'interaction', date: '2026-08-16', note: 'Met' },
         { id: 'bad', date: 42 },
+        { id: ' ', date: '2026-08-16', note: 'Blank id' },
+        { id: 'invalid-date', date: 'not-a-date', note: 'Broken date' },
+        { id: 'blank-note', date: '2026-08-16', note: ' ' },
       ]),
     ).toEqual([{ id: 'interaction', date: '2026-08-16', note: 'Met' }]);
   });

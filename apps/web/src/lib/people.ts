@@ -148,7 +148,10 @@ export function safePersonFacts(value: unknown): PersonFact[] {
       typeof fact === 'object' &&
       typeof (fact as PersonFact).id === 'string' &&
       typeof (fact as PersonFact).label === 'string' &&
-      typeof (fact as PersonFact).value === 'string',
+      Boolean((fact as PersonFact).id.trim()) &&
+      Boolean((fact as PersonFact).label.trim()) &&
+      typeof (fact as PersonFact).value === 'string' &&
+      Boolean((fact as PersonFact).value.trim()),
   );
 }
 
@@ -160,7 +163,10 @@ export function safePersonInteractions(value: unknown): Interaction[] {
       typeof interaction === 'object' &&
       typeof (interaction as Interaction).id === 'string' &&
       typeof (interaction as Interaction).date === 'string' &&
-      typeof (interaction as Interaction).note === 'string',
+      Boolean((interaction as Interaction).id.trim()) &&
+      Number.isFinite(Date.parse((interaction as Interaction).date)) &&
+      typeof (interaction as Interaction).note === 'string' &&
+      Boolean((interaction as Interaction).note.trim()),
   );
 }
 
