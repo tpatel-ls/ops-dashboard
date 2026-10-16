@@ -37,8 +37,11 @@ export function safeQuoteThoughts(value: unknown): Thought[] {
       Boolean(thought) &&
       typeof thought === 'object' &&
       typeof (thought as Thought).id === 'string' &&
+      Boolean((thought as Thought).id.trim()) &&
       typeof (thought as Thought).text === 'string' &&
-      typeof (thought as Thought).at === 'string',
+      Boolean((thought as Thought).text.trim()) &&
+      typeof (thought as Thought).at === 'string' &&
+      Number.isFinite(Date.parse((thought as Thought).at)),
   );
 }
 
