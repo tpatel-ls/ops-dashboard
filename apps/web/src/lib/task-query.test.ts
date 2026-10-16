@@ -31,6 +31,7 @@ describe('compareTasks', () => {
   it('normalizes malformed priorities for focus ordering', () => {
     expect(safeTaskPriority(Number.NaN)).toBe(0);
     expect(safeTaskPriority(3)).toBe(3);
+    expect(safeTaskPriority(1.5)).toBe(0);
     expect(safeTaskPriority(9)).toBe(0);
   });
 
