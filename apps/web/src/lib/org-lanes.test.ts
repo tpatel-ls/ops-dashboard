@@ -51,4 +51,14 @@ describe('taskLane', () => {
 
     expect(taskLane({ projectId: 'project-1' } as Task, projects)).toBeUndefined();
   });
+
+  it('ignores malformed synced organization references', () => {
+    const projects = new Map<string, Project>([
+      ['project-1', { id: 'project-1', orgId: 42 } as unknown as Project],
+    ]);
+
+    expect(taskLane({ orgId: 42, projectId: 'project-1' } as unknown as Task, projects)).toBe(
+      undefined,
+    );
+  });
 });

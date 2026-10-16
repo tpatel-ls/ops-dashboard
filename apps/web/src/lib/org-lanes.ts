@@ -13,6 +13,12 @@ export function compareOrganizations(left: Organization, right: Organization): n
   return name !== 0 ? name : compareText(left.id, right.id);
 }
 
+function trimmedString(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
 /**
  * Resolve the lane (orgId or undefined = Personal) for a task. orgId is
  * denormalized onto tasks at write time; older records fall back through
@@ -22,8 +28,8 @@ export function taskLane(
   task: Pick<Task, 'orgId' | 'projectId'>,
   projectMap: Pick<Map<string, Project>, 'get'>,
 ): string | undefined {
-  const directOrgId = task.orgId?.trim();
+  const directOrgId = trimmedString(task.orgId);
   if (directOrgId) return directOrgId;
-  const projectId = task.projectId?.trim();
-  return projectId ? projectMap.get(projectId)?.orgId?.trim() || undefined : undefined;
+  const projectId = trimmedString(task.projectId);
+  return projectId ? trimmedString(projectMap.get(projectId)?.orgId) : undefined;
 }
