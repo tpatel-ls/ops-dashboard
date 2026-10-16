@@ -11,7 +11,12 @@ describe('compareQuoteRecency', () => {
   it('keeps malformed synced tags and thoughts out of the card', () => {
     expect(safeQuoteTags(['work', 42, null])).toEqual(['work']);
     expect(
-      safeQuoteThoughts([{ id: 'thought', text: 'Useful', at: '2026-08-24' }, { id: 'bad' }]),
+      safeQuoteThoughts([
+        { id: 'thought', text: 'Useful', at: '2026-08-24' },
+        { id: 'bad' },
+        { id: ' ', text: 'Empty id', at: '2026-08-24' },
+        { id: 'invalid', text: 'Broken date', at: 'not-a-date' },
+      ]),
     ).toEqual([{ id: 'thought', text: 'Useful', at: '2026-08-24' }]);
   });
 
