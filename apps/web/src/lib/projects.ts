@@ -51,7 +51,11 @@ export function safeProjectMilestones(value: unknown): Milestone[] {
       typeof milestone === 'object' &&
       typeof (milestone as Milestone).id === 'string' &&
       typeof (milestone as Milestone).title === 'string' &&
-      typeof (milestone as Milestone).done === 'boolean',
+      Boolean((milestone as Milestone).id.trim()) &&
+      Boolean((milestone as Milestone).title.trim()) &&
+      typeof (milestone as Milestone).done === 'boolean' &&
+      ((milestone as Milestone).dueAt === undefined ||
+        localDay((milestone as Milestone).dueAt) === (milestone as Milestone).dueAt),
   );
 }
 
