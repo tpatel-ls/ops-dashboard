@@ -58,6 +58,8 @@ describe('projectTaskProgress', () => {
       safeProjectMilestones([
         { id: 'milestone', title: 'Ship', done: false },
         { id: 'bad', title: 42, done: false },
+        { id: 'invalid-date', title: 'Broken', done: false, dueAt: '2026-02-30' },
+        { id: 'blank-title', title: ' ', done: false },
       ]),
     ).toEqual([{ id: 'milestone', title: 'Ship', done: false }]);
     expect(
