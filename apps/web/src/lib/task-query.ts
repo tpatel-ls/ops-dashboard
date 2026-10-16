@@ -4,7 +4,7 @@ import { compareText } from './compare-text';
 import { taskEarliestDay } from './task-dates';
 
 export function safeTaskPriority(value: unknown): number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 3
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 3
     ? value
     : 0;
 }
