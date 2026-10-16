@@ -23,14 +23,28 @@ export function foodEstimate(value: number | undefined): number {
 
 export function safeFoodItems(value: unknown): FoodItem[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is FoodItem =>
-      Boolean(item) &&
-      typeof item === 'object' &&
-      typeof (item as FoodItem).name === 'string' &&
-      ((item as FoodItem).quantity === undefined ||
-        typeof (item as FoodItem).quantity === 'string'),
-  );
+  return value.filter((item): item is FoodItem => {
+    if (!item || typeof item !== 'object') return false;
+    const candidate = item as Partial<FoodItem>;
+    const estimates = [candidate.protein, candidate.carbs, candidate.fat];
+    return (
+      typeof candidate.name === 'string' &&
+      Boolean(candidate.name.trim()) &&
+      (candidate.quantity === undefined || typeof candidate.quantity === 'string') &&
+      typeof candidate.calories === 'number' &&
+      Number.isFinite(candidate.calories) &&
+      candidate.calories >= 0 &&
+      candidate.calories <= MAX_NUTRITION_ESTIMATE &&
+      estimates.every(
+        (estimate) =>
+          estimate === undefined ||
+          (typeof estimate === 'number' &&
+            Number.isFinite(estimate) &&
+            estimate >= 0 &&
+            estimate <= MAX_NUTRITION_ESTIMATE),
+      )
+    );
+  });
 }
 
 function addFoodTotal(total: number, value: number): number {
