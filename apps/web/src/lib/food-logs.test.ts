@@ -26,6 +26,8 @@ describe('compareFoodLogCreation', () => {
         { name: 'Eggs', calories: 140 },
         { name: 42 },
         { name: 'Bread', quantity: 2 },
+        { name: 'Broken calories', calories: Number.NaN },
+        { name: 'Broken protein', calories: 100, protein: -1 },
       ]),
     ).toEqual([{ name: 'Eggs', calories: 140 }]);
   });
