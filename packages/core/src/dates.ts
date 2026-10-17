@@ -13,7 +13,7 @@ export function toISODate(d: Date): string {
 
 /** Resolve a date-only value or timestamp to its browser-local calendar day. */
 export function localDay(value: string | undefined): string | undefined {
-  if (!value) return undefined;
+  if (typeof value !== 'string' || !value) return undefined;
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const [year, month, day] = value.split('-').map(Number);
     // The multi-argument Date constructor treats years 0 through 99 as

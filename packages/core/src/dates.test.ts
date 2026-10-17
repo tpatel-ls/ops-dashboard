@@ -5,6 +5,10 @@ describe('localDay', () => {
   it('rejects an empty value', () => {
     expect(localDay('')).toBeUndefined();
   });
+  it('rejects non-string persisted values', () => {
+    expect(localDay(null as unknown as string)).toBeUndefined();
+    expect(localDay(0 as unknown as string)).toBeUndefined();
+  });
   it('preserves date-only calendar values', () => {
     expect(localDay('2026-08-01')).toBe('2026-08-01');
   });
