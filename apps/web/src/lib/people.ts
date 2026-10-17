@@ -194,6 +194,14 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
   );
 }
 
+export function comparePeopleByName(
+  left: Pick<Person, 'id' | 'name'>,
+  right: Pick<Person, 'id' | 'name'>,
+): number {
+  const nameOrder = compareText(left.name, right.name);
+  return nameOrder !== 0 ? nameOrder : compareText(left.id, right.id);
+}
+
 export function latestInteraction(interactions: unknown): Interaction | null {
   let latest: Interaction | null = null;
   let latestTimestamp = Number.NEGATIVE_INFINITY;
