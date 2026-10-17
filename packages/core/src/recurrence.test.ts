@@ -328,6 +328,29 @@ describe('projectNextTask', () => {
     expect(projectNextTask(task)).toBeNull();
   });
 
+  it('drops malformed synced checklist collections while projecting', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Broken checklist',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [null, { id: 'valid', text: 'Keep this', done: true }, { id: 'bad' }],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } as unknown as Task;
+
+    expect(projectNextTask(task)?.checklist).toEqual([
+      { id: 'valid', text: 'Keep this', done: false },
+    ]);
+  });
+
   it('drops a recurring end time that overflows the supported date range', () => {
     const task = {
       id: 'task-1',
