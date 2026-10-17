@@ -26,7 +26,9 @@ export function nextOccurrence(rule: RecurrenceRule, from: Date): Date {
   if (rule.freq === 'monthly') return addMonths(from, interval);
   if (rule.freq === 'yearly') return addYears(from, interval);
   if (rule.freq === 'weekly') {
-    if (!rule.byDay || rule.byDay.length === 0) return addWeeks(from, interval);
+    if (!Array.isArray(rule.byDay) || rule.byDay.length === 0) {
+      return addWeeks(from, interval);
+    }
     const allowed = [
       ...new Set(
         rule.byDay

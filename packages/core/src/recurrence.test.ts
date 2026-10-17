@@ -82,6 +82,13 @@ describe('nextOccurrence', () => {
     expect(nextOccurrence(rule, anchor).getDay()).toBe(3);
   });
 
+  it('falls back when synced weekly days are not an array', () => {
+    const anchor = new Date('2026-04-26');
+    const rule = { freq: 'weekly', interval: 2, byDay: 'WE' } as unknown as RecurrenceRule;
+
+    expect(nextOccurrence(rule, anchor).toISOString().slice(0, 10)).toBe('2026-05-10');
+  });
+
   it('rejects unsupported frequencies from malformed synced data', () => {
     const rule = { freq: 'hourly', interval: 1 } as unknown as RecurrenceRule;
 
