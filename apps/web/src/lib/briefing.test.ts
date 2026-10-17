@@ -492,4 +492,15 @@ describe('findStaleDomains never-touched reporting', () => {
     expect(stale?.reason).toBe('stale');
     expect(staleDomainIdleLabel(stale!.daysIdle)).toBe('32d');
   });
+
+  it('keeps malformed domain names from breaking stale sorting', () => {
+    const domains = [
+      { ...meta('malformed', '2026-06-01T12:00:00.000Z'), name: null, color: '#444', order: 1 },
+    ] as unknown as Domain[];
+
+    expect(() => findStaleDomains({ domains, projects: [], tasks: [], now })).not.toThrow();
+    expect(findStaleDomains({ domains, projects: [], tasks: [], now })[0]).toMatchObject({
+      domainName: 'Untitled domain',
+    });
+  });
 });
