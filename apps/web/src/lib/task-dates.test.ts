@@ -140,6 +140,7 @@ describe('open task dates', () => {
       task('overdue', { dueAt: '2026-08-23T12:00:00Z' }),
       task('today', { scheduledFor: '2026-08-24', priority: 2 }),
       task('invalid', { dueAt: 'not-a-date', priority: 3 }),
+      task('fractional', { priority: 2.5 as Task['priority'] }),
     ];
 
     expect(summarizeOpenTasks(items, '2026-08-24')).toEqual({
