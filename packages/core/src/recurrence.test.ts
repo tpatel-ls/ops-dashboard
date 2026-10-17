@@ -351,6 +351,31 @@ describe('projectNextTask', () => {
     ]);
   });
 
+  it('ignores non-string synced time fields during projection', () => {
+    const task = {
+      id: 'task-1',
+      title: 'Broken times',
+      status: 'done',
+      priority: 0,
+      scheduledFor: '2026-08-01',
+      startAt: 123,
+      endAt: { invalid: true },
+      dueAt: 456,
+      tags: [],
+      order: 1,
+      recurrence: { freq: 'daily', interval: 1 },
+      reminders: [],
+      checklist: [],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:00.000Z',
+      version: 1,
+      deviceId: 'test',
+    } as unknown as Task;
+
+    expect(() => projectNextTask(task)).not.toThrow();
+    expect(projectNextTask(task)).toMatchObject({ scheduledFor: '2026-08-02' });
+  });
+
   it('drops a recurring end time that overflows the supported date range', () => {
     const task = {
       id: 'task-1',
