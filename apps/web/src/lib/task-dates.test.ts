@@ -193,6 +193,7 @@ describe('summarizeTodayTasks', () => {
       [
         task({ dueAt: '2026-08-24T12:00:00Z' }),
         task({ scheduledFor: '2026-08-24', status: 'done' }),
+        task({ startAt: '2026-08-24T15:00:00Z' }),
         task({ scheduledFor: '2026-08-23' }),
         task({ dueAt: 'invalid' }),
         task({ scheduledFor: '2026-08-24', deletedAt: '2026-08-24T12:00:00Z' }),
@@ -200,7 +201,7 @@ describe('summarizeTodayTasks', () => {
       '2026-08-24',
     );
 
-    expect(result).toEqual({ total: 2, done: 1, overdue: 1 });
+    expect(result).toEqual({ total: 3, done: 1, overdue: 1 });
   });
 
   it('does not carry completed overdue work into later daily totals', () => {
