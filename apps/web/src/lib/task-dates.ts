@@ -4,6 +4,12 @@ import { compareText } from './compare-text';
 
 type TaskDates = Pick<Task, 'scheduledFor' | 'dueAt'>;
 
+function safePriority(value: unknown): number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 3
+    ? value
+    : 0;
+}
+
 /** Earliest valid local calendar day on which a task needs attention. */
 export function taskCommitmentDay(task: TaskDates): string | undefined {
   const scheduled = localDay(task.scheduledFor);
@@ -118,6 +124,6 @@ export function summarizeOpenTasks(tasks: Task[], day: string) {
   return {
     overdue: open.filter((task) => taskIsOverdue(task, day)).length,
     today: open.filter((task) => taskCommitmentDay(task) === day).length,
-    high: open.filter((task) => task.priority >= 2).length,
+    high: open.filter((task) => safePriority(task.priority) >= 2).length,
   };
 }
