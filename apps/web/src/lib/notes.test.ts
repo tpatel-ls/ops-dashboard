@@ -19,6 +19,16 @@ describe('compareNoteRecency', () => {
       'invalid',
     ]);
   });
+
+  it('does not throw when a synced id is malformed', () => {
+    const notes = [
+      { id: null as never, createdAt: '2026-08-24T14:00:00Z' },
+      { id: 'valid', createdAt: '2026-08-24T14:00:00Z' },
+    ];
+
+    expect(() => notes.sort(compareNoteRecency)).not.toThrow();
+    expect(notes.map((note) => note.id)).toEqual([null, 'valid']);
+  });
 });
 
 describe('updateNote', () => {
