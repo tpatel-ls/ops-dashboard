@@ -65,18 +65,24 @@ function validIso(value: Date): string | undefined {
   return isValid(value) ? value.toISOString() : undefined;
 }
 
+function parseValidInstant(value: unknown): Date | undefined {
+  if (typeof value !== 'string' || !value) return undefined;
+  const parsed = parseISO(value);
+  return isValid(parsed) ? parsed : undefined;
+}
+
 function recurrenceAnchor(task: Task, fallback: Date): Date | undefined {
-  if (task.scheduledFor && localDay(task.scheduledFor) === task.scheduledFor) {
+  if (
+    typeof task.scheduledFor === 'string' &&
+    task.scheduledFor &&
+    localDay(task.scheduledFor) === task.scheduledFor
+  ) {
     return parseISO(`${task.scheduledFor}T00:00:00`);
   }
-  if (task.startAt) {
-    const start = parseISO(task.startAt);
-    if (isValid(start)) return start;
-  }
-  if (task.dueAt) {
-    const due = parseISO(task.dueAt);
-    if (isValid(due)) return due;
-  }
+  const start = parseValidInstant(task.startAt);
+  if (start) return start;
+  const due = parseValidInstant(task.dueAt);
+  if (due) return due;
   return task.scheduledFor || task.startAt || task.dueAt ? undefined : fallback;
 }
 
@@ -88,13 +94,10 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
   if (!isValid(next)) return null;
   if (!shouldGenerateNext(task.recurrence, 1, next)) return null;
   const isoDate = isoDay(next);
-  const parsedStartAt = task.startAt ? parseISO(task.startAt) : undefined;
-  const startAtSource = parsedStartAt && isValid(parsedStartAt) ? parsedStartAt : undefined;
-  const parsedEndAt = task.endAt ? parseISO(task.endAt) : undefined;
+  const startAtSource = parseValidInstant(task.startAt);
+  const parsedEndAt = parseValidInstant(task.endAt);
   const offsetMs =
-    startAtSource && parsedEndAt && isValid(parsedEndAt)
-      ? parsedEndAt.getTime() - startAtSource.getTime()
-      : 0;
+    startAtSource && parsedEndAt ? parsedEndAt.getTime() - startAtSource.getTime() : 0;
   const nextStart = new Date(next);
   if (startAtSource) {
     nextStart.setHours(
@@ -107,8 +110,7 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
   const startAt = startAtSource ? validIso(nextStart) : undefined;
   const nextEnd = startAt && offsetMs > 0 ? new Date(parseISO(startAt).getTime() + offsetMs) : null;
   const endAt = nextEnd ? validIso(nextEnd) : undefined;
-  const parsedDueAt = task.dueAt ? parseISO(task.dueAt) : undefined;
-  const dueAtSource = parsedDueAt && isValid(parsedDueAt) ? parsedDueAt : undefined;
+  const dueAtSource = parseValidInstant(task.dueAt);
   const nextDue = new Date(next);
   if (dueAtSource) {
     nextDue.setDate(nextDue.getDate() + differenceInCalendarDays(dueAtSource, anchor));
