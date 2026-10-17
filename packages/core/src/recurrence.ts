@@ -125,11 +125,21 @@ export function projectNextTask(task: Task, now: Date = new Date()): Task | null
     task.recurrence.count === undefined
       ? task.recurrence
       : { ...task.recurrence, count: task.recurrence.count - 1 };
+  const checklist = Array.isArray(task.checklist) ? task.checklist : [];
   const projected: Task = {
     ...task,
     id: '',
     status: 'todo',
-    checklist: task.checklist.map((item) => ({ ...item, done: false })),
+    checklist: checklist
+      .filter(
+        (item) =>
+          item &&
+          typeof item === 'object' &&
+          typeof item.id === 'string' &&
+          typeof item.text === 'string' &&
+          typeof item.done === 'boolean',
+      )
+      .map((item) => ({ ...item, done: false })),
     scheduledFor: isoDate,
     recurrence,
     createdAt: nowIso,
