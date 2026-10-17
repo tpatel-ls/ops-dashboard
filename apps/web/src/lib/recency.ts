@@ -20,9 +20,10 @@ export function newestFirstBy<K extends string>(key: K) {
       return rightTimestamp - leftTimestamp;
     }
     if (leftValid !== rightValid) return leftValid ? -1 : 1;
-    return left.id.localeCompare(right.id);
+    return compareText(left.id, right.id);
   };
 }
 
 /** Newest first by `createdAt`, the shape most record lists use. */
 export const compareCreatedAtRecency = newestFirstBy('createdAt');
+import { compareText } from './compare-text';
