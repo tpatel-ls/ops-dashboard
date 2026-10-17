@@ -7,6 +7,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
 import {
   createPerson,
+  comparePeopleByName,
   latestInteraction,
   matchesPersonSearch,
   safePersonFacts,
@@ -192,7 +193,7 @@ export function PeopleView() {
       domain: person.domainId ? domainMap.get(person.domainId) : undefined,
     }));
     // Sort alphabetically by name
-    peopleWithDomains.sort((a, b) => a.person.name.localeCompare(b.person.name));
+    peopleWithDomains.sort((a, b) => comparePeopleByName(a.person, b.person));
     return { peopleWithDomains, domains };
   });
 

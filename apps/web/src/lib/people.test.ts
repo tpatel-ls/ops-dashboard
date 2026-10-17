@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Person } from '@ops-dashboard/core';
 import {
   compareInteractionRecency,
+  comparePeopleByName,
   createPerson,
   latestInteraction,
   matchesPersonSearch,
@@ -125,6 +126,19 @@ describe('compareInteractionRecency', () => {
       'earlier',
       'invalid',
     ]);
+  });
+});
+
+describe('comparePeopleByName', () => {
+  it('sorts malformed names without throwing and uses ids as a tie breaker', () => {
+    const people = [
+      { id: 'zulu', name: null as never },
+      { id: 'alpha', name: null as never },
+      { id: 'valid', name: 'Avery' },
+    ];
+
+    expect(() => people.sort(comparePeopleByName)).not.toThrow();
+    expect(people.map((item) => item.id)).toEqual(['alpha', 'zulu', 'valid']);
   });
 });
 
