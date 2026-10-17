@@ -2,6 +2,7 @@ import { localDay, todayIso } from '@ops-dashboard/core';
 import type { Capture, Domain, Project, Task } from '@ops-dashboard/core';
 import { differenceInCalendarDays } from 'date-fns';
 import { taskIsOverdue, taskNeedsAttentionBy } from './task-dates';
+import { compareText } from './compare-text';
 
 export interface StaleDomain {
   domainId: string;
@@ -63,6 +64,8 @@ export function findStaleDomains(input: {
   return input.domains
     .filter((domain) => !deletedOrArchived(domain))
     .map((domain) => {
+      const domainName =
+        typeof domain.name === 'string' && domain.name.trim() ? domain.name : 'Untitled domain';
       const connectedProjectDates = input.projects
         .filter(
           (project) =>
@@ -99,7 +102,7 @@ export function findStaleDomains(input: {
       if (!lastTouchedAt) {
         return {
           domainId: domain.id,
-          domainName: domain.name,
+          domainName,
           color: domain.color,
           daysIdle: Number.POSITIVE_INFINITY,
           reason: 'never-touched' as const,
@@ -109,7 +112,7 @@ export function findStaleDomains(input: {
       const daysIdle = Math.max(0, differenceInCalendarDays(now, new Date(lastTouchedAt)));
       return {
         domainId: domain.id,
-        domainName: domain.name,
+        domainName,
         color: domain.color,
         daysIdle,
         lastTouchedAt,
@@ -117,7 +120,7 @@ export function findStaleDomains(input: {
       };
     })
     .filter((item) => item.daysIdle > staleAfterDays)
-    .sort((a, b) => b.daysIdle - a.daysIdle || a.domainName.localeCompare(b.domainName));
+    .sort((a, b) => b.daysIdle - a.daysIdle || compareText(a.domainName, b.domainName));
 }
 
 /**
