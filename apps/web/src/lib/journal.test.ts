@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { JournalEntry } from '@ops-dashboard/core';
 import {
   compareJournalEntries,
   journalDateLabel,
@@ -65,6 +66,17 @@ describe('latestJournalEntry', () => {
     ] as never);
 
     expect(latest?.id).toBe('latest');
+  });
+
+  it('does not reorder the caller collection', () => {
+    const entries = [
+      { id: 'older', date: '2026-08-24', createdAt: '2026-08-24T15:00:00Z' },
+      { id: 'newer', date: '2026-08-25', createdAt: '2026-08-25T15:00:00Z' },
+    ] as JournalEntry[];
+
+    latestJournalEntry(entries);
+
+    expect(entries.map((entry) => entry.id)).toEqual(['older', 'newer']);
   });
 });
 

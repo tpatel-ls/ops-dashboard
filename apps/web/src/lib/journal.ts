@@ -49,7 +49,7 @@ export function compareJournalEntries(
 }
 
 export function latestJournalEntry(entries: JournalEntry[]): JournalEntry | null {
-  return entries.filter((entry) => !entry.deletedAt).sort(compareJournalEntries)[0] ?? null;
+  return [...entries].filter((entry) => !entry.deletedAt).sort(compareJournalEntries)[0] ?? null;
 }
 
 function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEntry> {
