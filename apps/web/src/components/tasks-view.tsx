@@ -20,7 +20,7 @@ import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useHotkeys } from '@/lib/hotkeys';
 import { compareOrganizations, taskLane } from '@/lib/org-lanes';
 import { useOrgStore } from '@/lib/org-store';
-import { isActiveProject } from '@/lib/project-query';
+import { compareProjects, isActiveProject } from '@/lib/project-query';
 import { compareTasksBy, matchesTaskSearch, type TaskSort } from '@/lib/task-query';
 import { setTaskStatus } from '@/lib/tasks';
 import { taskDateLabel, taskResultSummary } from '@/lib/task-presentation';
@@ -486,7 +486,7 @@ export function TasksView() {
                 <option value="">All projects</option>
                 {(data?.activeProjects ?? [])
                   .filter((project) => matchesOrgContext(project.orgId, ctx))
-                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .sort((a, b) => compareProjects(a, b, 'name'))
                   .map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name}
