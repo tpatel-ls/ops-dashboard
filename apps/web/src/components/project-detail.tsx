@@ -19,6 +19,7 @@ import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
+import { compareProjectTasks } from '@/lib/task-query';
 import { useActiveOrgs } from '@/components/org-switcher';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
@@ -453,11 +454,7 @@ function LinkedTasksSection({ project }: { project: Project }) {
     const all = await getDb().tasks.toArray();
     return all
       .filter((t) => !t.deletedAt && t.status !== 'archived' && t.projectId === project.id)
-      .sort((a, b) => {
-        if (a.status === 'done' && b.status !== 'done') return 1;
-        if (b.status === 'done' && a.status !== 'done') return -1;
-        return a.order - b.order;
-      });
+      .sort(compareProjectTasks);
   }, [project.id]);
 
   if (!tasks) return null;
