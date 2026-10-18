@@ -66,6 +66,16 @@ describe('projectTaskProgress', () => {
       safeProjectChecklists([
         { id: 'list', name: 'Launch', items: [{ id: 'item', text: 'Test', done: false }] },
         { id: 'bad', name: 'Broken', items: [null] },
+        { id: 'blank', name: ' ', items: [{ id: 'item', text: 'Test', done: false }] },
+        {
+          id: 'duplicate-item',
+          name: 'Duplicate item',
+          items: [
+            { id: 'same', text: 'First', done: false },
+            { id: 'same', text: 'Second', done: true },
+          ],
+        },
+        { id: 'list', name: 'Duplicate list', items: [] },
       ]),
     ).toEqual([{ id: 'list', name: 'Launch', items: [{ id: 'item', text: 'Test', done: false }] }]);
   });
