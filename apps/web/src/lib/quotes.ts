@@ -32,17 +32,25 @@ export function safeQuoteTags(value: unknown): string[] {
 
 export function safeQuoteThoughts(value: unknown): Thought[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (thought): thought is Thought =>
-      Boolean(thought) &&
-      typeof thought === 'object' &&
-      typeof (thought as Thought).id === 'string' &&
-      Boolean((thought as Thought).id.trim()) &&
-      typeof (thought as Thought).text === 'string' &&
-      Boolean((thought as Thought).text.trim()) &&
-      typeof (thought as Thought).at === 'string' &&
-      Number.isFinite(Date.parse((thought as Thought).at)),
-  );
+  const seen = new Set<string>();
+  return value.filter((thought): thought is Thought => {
+    if (
+      !thought ||
+      typeof thought !== 'object' ||
+      typeof (thought as Thought).id !== 'string' ||
+      !(thought as Thought).id.trim() ||
+      typeof (thought as Thought).text !== 'string' ||
+      !(thought as Thought).text.trim() ||
+      typeof (thought as Thought).at !== 'string' ||
+      !Number.isFinite(Date.parse((thought as Thought).at))
+    ) {
+      return false;
+    }
+    const id = (thought as Thought).id.trim();
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {

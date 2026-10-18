@@ -16,6 +16,7 @@ describe('compareQuoteRecency', () => {
         { id: 'bad' },
         { id: ' ', text: 'Empty id', at: '2026-08-24' },
         { id: 'invalid', text: 'Broken date', at: 'not-a-date' },
+        { id: 'thought', text: 'Duplicate', at: '2026-08-25' },
       ]),
     ).toEqual([{ id: 'thought', text: 'Useful', at: '2026-08-24' }]);
   });
