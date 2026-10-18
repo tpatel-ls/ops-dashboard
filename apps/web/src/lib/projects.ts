@@ -61,21 +61,41 @@ export function safeProjectMilestones(value: unknown): Milestone[] {
 
 export function safeProjectChecklists(value: unknown): NamedChecklist[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (checklist): checklist is NamedChecklist =>
-      Boolean(checklist) &&
-      typeof checklist === 'object' &&
-      typeof (checklist as NamedChecklist).id === 'string' &&
-      typeof (checklist as NamedChecklist).name === 'string' &&
-      Array.isArray((checklist as NamedChecklist).items) &&
-      (checklist as NamedChecklist).items.every(
-        (item: ChecklistItem) =>
-          Boolean(item) &&
-          typeof item.id === 'string' &&
-          typeof item.text === 'string' &&
-          typeof item.done === 'boolean',
-      ),
-  );
+  const seenChecklists = new Set<string>();
+  return value.filter((checklist): checklist is NamedChecklist => {
+    if (
+      !checklist ||
+      typeof checklist !== 'object' ||
+      typeof (checklist as NamedChecklist).id !== 'string' ||
+      typeof (checklist as NamedChecklist).name !== 'string' ||
+      !Array.isArray((checklist as NamedChecklist).items)
+    ) {
+      return false;
+    }
+    const id = (checklist as NamedChecklist).id.trim();
+    const name = (checklist as NamedChecklist).name.trim();
+    if (!id || !name || seenChecklists.has(id)) return false;
+
+    const seenItems = new Set<string>();
+    const validItems = (checklist as NamedChecklist).items.every((item: ChecklistItem) => {
+      if (
+        !item ||
+        typeof item.id !== 'string' ||
+        typeof item.text !== 'string' ||
+        typeof item.done !== 'boolean'
+      ) {
+        return false;
+      }
+      const itemId = item.id.trim();
+      const text = item.text.trim();
+      if (!itemId || !text || seenItems.has(itemId)) return false;
+      seenItems.add(itemId);
+      return true;
+    });
+    if (!validItems) return false;
+    seenChecklists.add(id);
+    return true;
+  });
 }
 
 function projectName(value: string): string {
