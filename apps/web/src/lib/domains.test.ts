@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Project, Task } from '@ops-dashboard/core';
-import { countDomainWork } from './domains';
+import { compareDomains, countDomainWork } from './domains';
 
 const projects = [
   { id: 'project-1', domainId: 'domain-1', status: 'active' },
@@ -38,5 +38,31 @@ describe('countDomainWork', () => {
       projects: 1,
       tasks: 2,
     });
+  });
+});
+
+describe('compareDomains', () => {
+  it('puts valid orders first and stabilizes malformed ties', () => {
+    const domains = [
+      { id: 'invalid', name: 'Zeta', order: Number.NaN },
+      { id: 'later', name: 'Beta', order: 2 },
+      { id: 'first', name: 'Alpha', order: 1 },
+    ];
+
+    expect(domains.sort(compareDomains).map((domain) => domain.id)).toEqual([
+      'first',
+      'later',
+      'invalid',
+    ]);
+  });
+
+  it('does not throw when synced domain text is malformed', () => {
+    const domains = [
+      { id: null as never, name: null as never, order: Number.NaN },
+      { id: 'valid', name: 'Alpha', order: Number.NaN },
+    ];
+
+    expect(() => domains.sort(compareDomains)).not.toThrow();
+    expect(domains.map((domain) => domain.id)).toEqual([null, 'valid']);
   });
 });
