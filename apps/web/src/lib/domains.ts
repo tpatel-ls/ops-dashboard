@@ -2,11 +2,24 @@
 
 import type { Domain, Project, Task } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord } from './records';
+import { compareText } from './compare-text';
 
 const MAX_DOMAIN_NAME_LENGTH = 200;
 const MAX_DOMAIN_COLOR_LENGTH = 100;
 const MAX_DOMAIN_ICON_LENGTH = 100;
 const MAX_DOMAIN_DESCRIPTION_LENGTH = 4_000;
+
+export function compareDomains(
+  left: Pick<Domain, 'id' | 'name' | 'order'>,
+  right: Pick<Domain, 'id' | 'name' | 'order'>,
+): number {
+  const leftValid = typeof left.order === 'number' && Number.isFinite(left.order);
+  const rightValid = typeof right.order === 'number' && Number.isFinite(right.order);
+  if (leftValid && rightValid && left.order !== right.order) return left.order - right.order;
+  if (leftValid !== rightValid) return leftValid ? -1 : 1;
+  const nameOrder = compareText(left.name, right.name);
+  return nameOrder !== 0 ? nameOrder : compareText(left.id, right.id);
+}
 
 function normalizeDomainPatch(patch: Partial<Domain>): Partial<Domain> {
   const normalized = { ...patch };

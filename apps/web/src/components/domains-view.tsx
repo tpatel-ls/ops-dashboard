@@ -5,7 +5,13 @@ import { useState } from 'react';
 import { Archive, Boxes, ChevronRight, ListTodo, Pencil, Plus, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain } from '@ops-dashboard/core';
-import { archiveDomain, countDomainWork, createDomain, updateDomain } from '@/lib/domains';
+import {
+  archiveDomain,
+  compareDomains,
+  countDomainWork,
+  createDomain,
+  updateDomain,
+} from '@/lib/domains';
 import { cn } from '@ops-dashboard/ui';
 
 const PRESET_COLORS = [
@@ -195,7 +201,7 @@ export function DomainsView() {
 
   const domains = useLiveQuery(async () => {
     const all = await getDb().domains.toArray();
-    return all.filter((d) => !d.deletedAt).sort((a, b) => a.order - b.order);
+    return all.filter((d) => !d.deletedAt).sort(compareDomains);
   });
 
   const active = domains?.filter((d) => !d.archivedAt) ?? [];
