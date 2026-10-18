@@ -25,7 +25,10 @@ vi.mock('./records', async () => {
 import { compareContentOrder, contentPublishLabel, createContent, updateContent } from './content';
 
 describe('content links', () => {
-  beforeEach(() => mocks.putRecord.mockClear());
+  beforeEach(() => {
+    mocks.putRecord.mockClear();
+    mocks.patchRecord.mockClear();
+  });
 
   it('accepts normalized absolute web links', async () => {
     await expect(
@@ -127,7 +130,10 @@ describe('contentPublishLabel', () => {
 });
 
 describe('content field bounds', () => {
-  beforeEach(() => mocks.putRecord.mockClear());
+  beforeEach(() => {
+    mocks.putRecord.mockClear();
+    mocks.patchRecord.mockClear();
+  });
 
   it('accepts a title at the limit and rejects one past it', async () => {
     await expect(createContent({ title: 'a'.repeat(500) })).resolves.toMatchObject({
@@ -156,6 +162,20 @@ describe('content field bounds', () => {
     expect(() => updateContent('content-1', { outline: 'o'.repeat(4001) })).toThrow(
       'Content details must be valid.',
     );
+  });
+
+  it('rejects non-string metadata without leaking a type error', () => {
+    expect(() => createContent({ title: 'Post', channel: 42 as never })).toThrow(
+      'Content details must be valid.',
+    );
+    expect(() => updateContent('content-1', { domainId: 42 as never })).toThrow(
+      'Content details must be valid.',
+    );
+    expect(() => updateContent('content-1', { url: 42 as never })).toThrow(
+      'Content URL must be valid.',
+    );
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
   });
 
   it('bounds the link even when it is otherwise a safe URL', () => {
