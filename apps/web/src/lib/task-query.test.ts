@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
 import {
+  compareProjectTasks,
   compareTasks,
   compareTasksBy,
   matchesTaskSearch,
@@ -129,6 +130,22 @@ describe('compareTasks', () => {
     expect([valid, malformed].sort(compareTasks).map((item) => item.id)).toEqual([
       'malformed',
       'valid',
+    ]);
+  });
+});
+
+describe('compareProjectTasks', () => {
+  it('keeps completed tasks last and malformed orders stable', () => {
+    const tasks = [
+      task('done', { status: 'done', order: 0 }),
+      task('invalid-order', { order: Number.NaN }),
+      task('first', { order: 1 }),
+    ];
+
+    expect(tasks.sort(compareProjectTasks).map((item) => item.id)).toEqual([
+      'first',
+      'invalid-order',
+      'done',
     ]);
   });
 });

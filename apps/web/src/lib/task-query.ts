@@ -51,6 +51,22 @@ export function compareTasks(a: Task, b: Task): number {
   return titleOrder !== 0 ? titleOrder : compareText(a.id, b.id);
 }
 
+export function compareProjectTasks(a: Task, b: Task): number {
+  if (a.status === 'done' && b.status !== 'done') return 1;
+  if (b.status === 'done' && a.status !== 'done') return -1;
+
+  const aOrder = taskOrder(a);
+  const bOrder = taskOrder(b);
+  if (aOrder !== undefined && bOrder === undefined) return -1;
+  if (aOrder === undefined && bOrder !== undefined) return 1;
+  if (aOrder !== undefined && bOrder !== undefined && aOrder !== bOrder) {
+    return aOrder - bOrder;
+  }
+
+  const titleOrder = compareText(a.title, b.title);
+  return titleOrder !== 0 ? titleOrder : compareText(a.id, b.id);
+}
+
 export type TaskSort = 'default' | 'due' | 'priority' | 'recent';
 
 function validTimestamp(value: string): number | undefined {
