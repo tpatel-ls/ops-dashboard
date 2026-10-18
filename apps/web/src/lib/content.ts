@@ -60,6 +60,9 @@ export function contentPublishLabel(value: string | undefined): string | undefin
 }
 
 function normalizeContentUrl(value: string | undefined): string | undefined {
+  if (value !== undefined && typeof value !== 'string') {
+    throw new Error('Content URL must be valid.');
+  }
   const candidate = value?.trim();
   if (!candidate) return undefined;
   try {
@@ -148,7 +151,8 @@ function normalizeContentPatch(patch: Partial<Content>): Partial<Content> {
     ['outline', MAX_CONTENT_OUTLINE_LENGTH],
   ] as const) {
     if (normalized[key] === undefined) continue;
-    normalized[key] = normalized[key]?.trim() || undefined;
+    if (typeof normalized[key] !== 'string') throw new Error('Content details must be valid.');
+    normalized[key] = normalized[key].trim() || undefined;
     const value = normalized[key];
     if (value && Array.from(value).length > limit) {
       throw new Error('Content details must be valid.');
