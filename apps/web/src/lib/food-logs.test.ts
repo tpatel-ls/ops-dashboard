@@ -45,6 +45,15 @@ describe('compareFoodLogCreation', () => {
       'invalid',
     ]);
   });
+
+  it('keeps sorting when synced ids and timestamps have the wrong type', () => {
+    const logs = [
+      { id: 42 as never, createdAt: 'invalid' },
+      { id: 'valid', createdAt: '2026-08-24T14:00:00Z' },
+    ];
+
+    expect(logs.sort(compareFoodLogCreation).map((log) => log.id)).toEqual(['valid', 42]);
+  });
 });
 
 describe('updateFoodLog', () => {

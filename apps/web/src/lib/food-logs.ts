@@ -3,6 +3,7 @@
 import { computeFoodTotals, localDay, todayIso } from '@ops-dashboard/core';
 import type { CaptureSource, FoodItem, FoodLog, MealType } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
+import { compareText } from './compare-text';
 
 export { computeFoodTotals };
 
@@ -77,15 +78,17 @@ export function compareFoodLogCreation(
   left: Pick<FoodLog, 'id' | 'createdAt'>,
   right: Pick<FoodLog, 'id' | 'createdAt'>,
 ): number {
-  const leftTimestamp = Date.parse(left.createdAt);
-  const rightTimestamp = Date.parse(right.createdAt);
+  const leftTimestamp =
+    typeof left.createdAt === 'string' ? Date.parse(left.createdAt) : Number.NaN;
+  const rightTimestamp =
+    typeof right.createdAt === 'string' ? Date.parse(right.createdAt) : Number.NaN;
   const leftValid = Number.isFinite(leftTimestamp);
   const rightValid = Number.isFinite(rightTimestamp);
   if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
     return leftTimestamp - rightTimestamp;
   }
   if (leftValid !== rightValid) return leftValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
+  return compareText(left.id, right.id);
 }
 
 const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
