@@ -23,9 +23,10 @@ export function tasksForTodayRail(tasks: Task[], day: string): Task[] {
     });
 }
 
-export function validRailEnd(startAt: string, endAt: string | undefined): Date | undefined {
+export function validRailEnd(startAt: unknown, endAt: unknown): Date | undefined {
+  if (typeof startAt !== 'string' || typeof endAt !== 'string' || !endAt) return undefined;
   const start = Date.parse(startAt);
-  const end = endAt ? Date.parse(endAt) : Number.NaN;
+  const end = Date.parse(endAt);
   return Number.isFinite(start) && Number.isFinite(end) && end > start ? new Date(end) : undefined;
 }
 
@@ -39,8 +40,8 @@ function settingHour(value: string): number | undefined {
   return Number.isInteger(hour) && hour >= 0 && hour <= LAST_HOUR ? hour : undefined;
 }
 
-function blockHour(value: string | undefined): number | undefined {
-  if (!value) return undefined;
+function blockHour(value: unknown): number | undefined {
+  if (typeof value !== 'string' || !value) return undefined;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? new Date(timestamp).getHours() : undefined;
 }
@@ -55,11 +56,11 @@ function blockHour(value: string | undefined): number | undefined {
  * the day. Such a block is drawn to the last hour instead. An end that
  * precedes its own start is unusable and contributes nothing.
  */
-function blockEndHour(startAt: string | undefined, endAt: string | undefined): number | undefined {
+function blockEndHour(startAt: unknown, endAt: unknown): number | undefined {
   const endHour = blockHour(endAt);
   if (endHour === undefined) return undefined;
-  const startDay = localDay(startAt);
-  const endDay = localDay(endAt);
+  const startDay = typeof startAt === 'string' ? localDay(startAt) : undefined;
+  const endDay = typeof endAt === 'string' ? localDay(endAt) : undefined;
   if (!startDay || !endDay || startDay === endDay) return endHour;
   return endDay > startDay ? LAST_HOUR : undefined;
 }

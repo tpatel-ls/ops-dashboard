@@ -79,6 +79,11 @@ describe('validRailEnd', () => {
     expect(validRailEnd('2026-08-20T14:00:00Z', 'not-a-date')).toBeUndefined();
     expect(validRailEnd('2026-08-20T14:00:00Z', '2026-08-20T13:00:00Z')).toBeUndefined();
   });
+
+  it('ignores non-string times from malformed synced blocks', () => {
+    expect(validRailEnd(123, '2026-08-20T15:00:00Z')).toBeUndefined();
+    expect(validRailEnd('2026-08-20T14:00:00Z', 456)).toBeUndefined();
+  });
 });
 
 describe('railHourRange', () => {
