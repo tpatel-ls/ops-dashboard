@@ -8,8 +8,8 @@ import { formatDistanceToNow, isValid, parseISO } from 'date-fns';
  * Date, and these timestamps come from imported and synced records, so a
  * caller that formats one inline loses its whole view to a single bad row.
  */
-export function relativeTimeLabel(value: string | undefined): string | undefined {
-  if (!value) return undefined;
+export function relativeTimeLabel(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !value) return undefined;
   const parsed = parseISO(value);
   return isValid(parsed) ? formatDistanceToNow(parsed, { addSuffix: true }) : undefined;
 }
