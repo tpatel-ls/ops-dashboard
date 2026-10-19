@@ -47,6 +47,15 @@ describe('compareCreatedAtRecency', () => {
     const items = [record('b', ''), record('a', 'nope')];
     expect(items.sort(compareCreatedAtRecency).map((item) => item.id)).toEqual(['a', 'b']);
   });
+
+  it('ignores non-string timestamps from malformed synced rows', () => {
+    const items = [
+      { id: 'number', createdAt: 123 as never },
+      { id: 'valid', createdAt: '2026-02-01T00:00:00.000Z' },
+    ];
+
+    expect(items.sort(compareCreatedAtRecency).map((item) => item.id)).toEqual(['valid', 'number']);
+  });
 });
 
 describe('newestFirstBy', () => {
