@@ -35,6 +35,11 @@ describe('relativeTimeLabel', () => {
     expect(relativeTimeLabel('')).toBeUndefined();
   });
 
+  it('returns undefined for non-string persisted values', () => {
+    expect(() => relativeTimeLabel(123)).not.toThrow();
+    expect(relativeTimeLabel(123)).toBeUndefined();
+  });
+
   it('returns undefined instead of throwing on an unparseable value', () => {
     for (const value of ['not-a-date', '2026-13-01', '2026-02-30', 'null']) {
       expect(() => relativeTimeLabel(value)).not.toThrow();
