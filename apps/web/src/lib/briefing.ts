@@ -92,7 +92,7 @@ export function findStaleDomains(input: {
         ...connectedProjectDates,
         ...connectedTaskDates,
       ]
-        .filter(Boolean)
+        .filter((value): value is string => typeof value === 'string' && Boolean(value))
         .filter((value) => {
           const timestamp = Date.parse(value);
           return Number.isFinite(timestamp) && timestamp <= nowMs;

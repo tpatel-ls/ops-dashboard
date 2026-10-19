@@ -77,6 +77,7 @@ describe('briefing helpers', () => {
     const tasks = [
       {
         ...meta('malformed', 'not-a-date'),
+        updatedAt: 123 as never,
         title: 'Imported task',
         status: 'todo',
         priority: 0,
