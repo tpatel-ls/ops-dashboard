@@ -12,8 +12,10 @@
  */
 export function newestFirstBy<K extends string>(key: K) {
   return <T extends { id: string } & Record<K, string>>(left: T, right: T): number => {
-    const leftTimestamp = Date.parse(left[key]);
-    const rightTimestamp = Date.parse(right[key]);
+    const leftValue = left[key];
+    const rightValue = right[key];
+    const leftTimestamp = typeof leftValue === 'string' ? Date.parse(leftValue) : Number.NaN;
+    const rightTimestamp = typeof rightValue === 'string' ? Date.parse(rightValue) : Number.NaN;
     const leftValid = Number.isFinite(leftTimestamp);
     const rightValid = Number.isFinite(rightTimestamp);
     if (leftValid && rightValid && leftTimestamp !== rightTimestamp) {
