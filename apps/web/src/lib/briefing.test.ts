@@ -306,12 +306,20 @@ describe('briefing helpers', () => {
         source: 'text',
         status: 'pending',
       },
+      {
+        ...meta('wrong-type'),
+        createdAt: 123 as never,
+        raw: 'Wrong type issue',
+        source: 'text',
+        status: 'pending',
+      },
     ] satisfies Capture[];
 
     expect(findCaptureRoutingIssues(captures, []).map((issue) => issue.captureId)).toEqual([
       'later',
       'earlier',
       'malformed',
+      'wrong-type',
     ]);
   });
 

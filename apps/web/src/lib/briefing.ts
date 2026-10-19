@@ -187,8 +187,8 @@ export function findCaptureRoutingIssues(
       return [];
     })
     .sort((a, b) => {
-      const aTimestamp = Date.parse(a.createdAt);
-      const bTimestamp = Date.parse(b.createdAt);
+      const aTimestamp = typeof a.createdAt === 'string' ? Date.parse(a.createdAt) : Number.NaN;
+      const bTimestamp = typeof b.createdAt === 'string' ? Date.parse(b.createdAt) : Number.NaN;
       const aValid = Number.isFinite(aTimestamp);
       const bValid = Number.isFinite(bTimestamp);
       if (aValid && bValid && aTimestamp !== bTimestamp) return bTimestamp - aTimestamp;
