@@ -112,6 +112,14 @@ describe('createOrganization', () => {
     );
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
+
+  it('ignores malformed names while checking duplicate organizations', async () => {
+    mocks.toArray.mockResolvedValue([{ id: 'broken', name: null, order: 1 }]);
+
+    await expect(createOrganization({ name: 'New organization' })).resolves.toMatchObject({
+      name: 'New organization',
+    });
+  });
 });
 
 describe('updateOrganization', () => {
