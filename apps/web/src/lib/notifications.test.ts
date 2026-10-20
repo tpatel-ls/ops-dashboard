@@ -180,6 +180,18 @@ describe('checkAndFireDueReminders', () => {
     );
   });
 
+  it('falls back when a synced task carries a non-string note', async () => {
+    mocks.tasks.get.mockResolvedValue({ id: 'task-1', title: 'Call customer', notes: 42 });
+    vi.stubGlobal('navigator', {});
+
+    await expect(checkAndFireDueReminders(new Date('2026-07-29T13:00:00.000Z'))).resolves.toBe(1);
+
+    expect(Notification).toHaveBeenCalledWith(
+      'Call customer',
+      expect.objectContaining({ body: 'Reminder' }),
+    );
+  });
+
   it('skips reminder checks for an invalid clock value', async () => {
     await expect(checkAndFireDueReminders(new Date('invalid'))).resolves.toBe(0);
     expect(mocks.reminders.where).not.toHaveBeenCalled();
