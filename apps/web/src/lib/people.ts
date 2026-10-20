@@ -164,17 +164,30 @@ export function safePersonFacts(value: unknown): PersonFact[] {
 
 export function safePersonInteractions(value: unknown): Interaction[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (interaction): interaction is Interaction =>
-      Boolean(interaction) &&
-      typeof interaction === 'object' &&
-      typeof (interaction as Interaction).id === 'string' &&
-      typeof (interaction as Interaction).date === 'string' &&
-      Boolean((interaction as Interaction).id.trim()) &&
-      Number.isFinite(Date.parse((interaction as Interaction).date)) &&
-      typeof (interaction as Interaction).note === 'string' &&
-      Boolean((interaction as Interaction).note.trim()),
-  );
+  const seen = new Set<string>();
+  return value.filter((interaction): interaction is Interaction => {
+    if (
+      !interaction ||
+      typeof interaction !== 'object' ||
+      typeof (interaction as Interaction).id !== 'string' ||
+      typeof (interaction as Interaction).date !== 'string' ||
+      typeof (interaction as Interaction).note !== 'string'
+    ) {
+      return false;
+    }
+    const id = (interaction as Interaction).id.trim();
+    const note = (interaction as Interaction).note.trim();
+    if (
+      !id ||
+      !note ||
+      !Number.isFinite(Date.parse((interaction as Interaction).date)) ||
+      seen.has(id)
+    ) {
+      return false;
+    }
+    seen.add(id);
+    return true;
+  });
 }
 
 export function matchesPersonSearch(person: Person, query: string): boolean {

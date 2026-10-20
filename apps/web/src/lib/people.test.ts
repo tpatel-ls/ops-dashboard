@@ -39,6 +39,7 @@ describe('matchesPersonSearch', () => {
         { id: ' ', date: '2026-08-16', note: 'Blank id' },
         { id: 'invalid-date', date: 'not-a-date', note: 'Broken date' },
         { id: 'blank-note', date: '2026-08-16', note: ' ' },
+        { id: 'interaction', date: '2026-08-16', note: 'Duplicate' },
       ]),
     ).toEqual([{ id: 'interaction', date: '2026-08-16', note: 'Met' }]);
   });
