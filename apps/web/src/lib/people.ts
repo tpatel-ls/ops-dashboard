@@ -142,17 +142,24 @@ function personSearchText(value: unknown): string {
 
 export function safePersonFacts(value: unknown): PersonFact[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (fact): fact is PersonFact =>
-      Boolean(fact) &&
-      typeof fact === 'object' &&
-      typeof (fact as PersonFact).id === 'string' &&
-      typeof (fact as PersonFact).label === 'string' &&
-      Boolean((fact as PersonFact).id.trim()) &&
-      Boolean((fact as PersonFact).label.trim()) &&
-      typeof (fact as PersonFact).value === 'string' &&
-      Boolean((fact as PersonFact).value.trim()),
-  );
+  const seen = new Set<string>();
+  return value.filter((fact): fact is PersonFact => {
+    if (
+      !fact ||
+      typeof fact !== 'object' ||
+      typeof (fact as PersonFact).id !== 'string' ||
+      typeof (fact as PersonFact).label !== 'string' ||
+      typeof (fact as PersonFact).value !== 'string'
+    ) {
+      return false;
+    }
+    const id = (fact as PersonFact).id.trim();
+    const label = (fact as PersonFact).label.trim();
+    const factValue = (fact as PersonFact).value.trim();
+    if (!id || !label || !factValue || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 export function safePersonInteractions(value: unknown): Interaction[] {
