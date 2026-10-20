@@ -39,6 +39,16 @@ describe('compareJournalEntries', () => {
       'zulu',
     ]);
   });
+
+  it('keeps sorting when a synced id has the wrong type', () => {
+    const malformed = { id: null as never, date: '2026-08-25', createdAt: 'invalid' };
+    const valid = { id: 'valid', date: '2026-08-25', createdAt: 'invalid' };
+
+    expect([valid, malformed].sort(compareJournalEntries).map((entry) => entry.id)).toEqual([
+      null,
+      'valid',
+    ]);
+  });
 });
 
 describe('latestJournalEntry', () => {

@@ -5,6 +5,7 @@ import { localDay, todayIso } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { normalizeStringList } from './string-list';
+import { compareText } from './compare-text';
 
 const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', 'text', 'upload']);
 const MAX_JOURNAL_BODY_LENGTH = 50_000;
@@ -45,7 +46,7 @@ export function compareJournalEntries(
     return rightCreated - leftCreated;
   }
   if (leftCreatedValid !== rightCreatedValid) return leftCreatedValid ? -1 : 1;
-  return left.id.localeCompare(right.id);
+  return compareText(left.id, right.id);
 }
 
 export function latestJournalEntry(entries: JournalEntry[]): JournalEntry | null {
