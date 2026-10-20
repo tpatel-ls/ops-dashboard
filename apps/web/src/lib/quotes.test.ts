@@ -9,7 +9,7 @@ import {
 
 describe('compareQuoteRecency', () => {
   it('keeps malformed synced tags and thoughts out of the card', () => {
-    expect(safeQuoteTags(['work', 42, null])).toEqual(['work']);
+    expect(safeQuoteTags(['work', 42, null, 'work'])).toEqual(['work']);
     expect(
       safeQuoteThoughts([
         { id: 'thought', text: 'Useful', at: '2026-08-24' },
