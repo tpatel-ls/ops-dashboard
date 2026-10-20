@@ -45,18 +45,31 @@ const MAX_PROJECT_NESTED_TEXT_LENGTH = 500;
 
 export function safeProjectMilestones(value: unknown): Milestone[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (milestone): milestone is Milestone =>
-      Boolean(milestone) &&
-      typeof milestone === 'object' &&
-      typeof (milestone as Milestone).id === 'string' &&
-      typeof (milestone as Milestone).title === 'string' &&
-      Boolean((milestone as Milestone).id.trim()) &&
-      Boolean((milestone as Milestone).title.trim()) &&
-      typeof (milestone as Milestone).done === 'boolean' &&
-      ((milestone as Milestone).dueAt === undefined ||
-        localDay((milestone as Milestone).dueAt) === (milestone as Milestone).dueAt),
-  );
+  const seen = new Set<string>();
+  return value.filter((milestone): milestone is Milestone => {
+    if (
+      !milestone ||
+      typeof milestone !== 'object' ||
+      typeof (milestone as Milestone).id !== 'string' ||
+      typeof (milestone as Milestone).title !== 'string' ||
+      typeof (milestone as Milestone).done !== 'boolean'
+    ) {
+      return false;
+    }
+    const id = (milestone as Milestone).id.trim();
+    const title = (milestone as Milestone).title.trim();
+    if (
+      !id ||
+      !title ||
+      seen.has(id) ||
+      ((milestone as Milestone).dueAt !== undefined &&
+        localDay((milestone as Milestone).dueAt) !== (milestone as Milestone).dueAt)
+    ) {
+      return false;
+    }
+    seen.add(id);
+    return true;
+  });
 }
 
 export function safeProjectChecklists(value: unknown): NamedChecklist[] {
