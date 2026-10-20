@@ -17,8 +17,8 @@ const MAX_ORGANIZATION_COLOR_LENGTH = 100;
 const MAX_ORGANIZATION_ID_LENGTH = 128;
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 
-function organizationNameKey(value: string): string {
-  return value.trim().normalize('NFKC').toLocaleLowerCase('en-US');
+function organizationNameKey(value: unknown): string {
+  return typeof value === 'string' ? value.trim().normalize('NFKC').toLocaleLowerCase('en-US') : '';
 }
 
 function normalizeOrganizationPatch(patch: Partial<Organization>): Partial<Organization> {
