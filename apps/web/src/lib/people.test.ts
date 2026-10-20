@@ -25,7 +25,12 @@ describe('matchesPersonSearch', () => {
   it('keeps only renderable synced facts and interactions', () => {
     expect(safePersonFacts(null)).toEqual([]);
     expect(
-      safePersonFacts([{ id: 'fact', label: 'Role', value: 'Lead' }, null, { id: 'bad' }]),
+      safePersonFacts([
+        { id: 'fact', label: 'Role', value: 'Lead' },
+        { id: 'fact', label: 'Duplicate', value: 'Ignored' },
+        null,
+        { id: 'bad' },
+      ]),
     ).toEqual([{ id: 'fact', label: 'Role', value: 'Lead' }]);
     expect(
       safePersonInteractions([
