@@ -91,6 +91,14 @@ export function compareFoodLogCreation(
   return compareText(left.id, right.id);
 }
 
+/** Return live food logs whose stored date resolves to the requested day. */
+export function foodLogsForDay(logs: FoodLog[], day: string): FoodLog[] {
+  if (localDay(day) !== day) return [];
+  return logs
+    .filter((log) => !log.deletedAt && localDay(log.date) === day)
+    .sort(compareFoodLogCreation);
+}
+
 const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
 const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
 const MAX_FOOD_ITEMS = 100;
