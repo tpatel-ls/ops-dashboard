@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { JournalEntry } from '@ops-dashboard/core';
 import {
   compareJournalEntries,
+  journalEntriesBetween,
   journalDateLabel,
   latestJournalEntry,
   safeJournalTags,
@@ -87,6 +88,25 @@ describe('latestJournalEntry', () => {
     latestJournalEntry(entries);
 
     expect(entries.map((entry) => entry.id)).toEqual(['older', 'newer']);
+  });
+});
+
+describe('journalEntriesBetween', () => {
+  it('matches synced timestamp dates by their local calendar day', () => {
+    const entries = [
+      { id: 'timestamp', date: '2026-08-24T13:00:00.000Z', deletedAt: undefined },
+      { id: 'outside', date: '2026-08-26', deletedAt: undefined },
+      { id: 'deleted', date: '2026-08-24', deletedAt: '2026-08-25T00:00:00Z' },
+    ] as never;
+
+    expect(
+      journalEntriesBetween(entries, '2026-08-24', '2026-08-25').map((entry) => entry.id),
+    ).toEqual(['timestamp']);
+  });
+
+  it('rejects invalid and inverted day ranges', () => {
+    expect(journalEntriesBetween([], '2026-02-30', '2026-03-01')).toEqual([]);
+    expect(journalEntriesBetween([], '2026-08-25', '2026-08-24')).toEqual([]);
   });
 });
 
