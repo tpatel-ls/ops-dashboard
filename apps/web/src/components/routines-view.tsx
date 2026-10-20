@@ -11,20 +11,13 @@ import {
   deleteRoutine,
   fixedRoutineDuration,
   isRoutineDoneOn,
+  routineElapsedDays,
   toggleRoutineCheck,
 } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { RoutineForm } from '@/components/routine-form';
 
 /* ─── helpers ─────────────────────────────────────────────────── */
-
-/** Calendar days from `a` to `b`, or null when either day cannot be read. */
-function daysBetween(a: string, b: string): number | null {
-  const msA = new Date(`${a}T00:00:00`).getTime();
-  const msB = new Date(`${b}T00:00:00`).getTime();
-  if (!Number.isFinite(msA) || !Number.isFinite(msB)) return null;
-  return Math.round((msB - msA) / 86_400_000);
-}
 
 const TIME_OF_DAY_LABELS: Record<string, string> = {
   morning: 'Morning',
@@ -53,7 +46,8 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
   const durationDays = fixedRoutineDuration(routine);
   // `startDate` is validated on local writes but sync casts rows in unchecked,
   // so an unreadable day must not render as "day NaN".
-  const elapsedDays = durationDays === undefined ? null : daysBetween(routine.startDate, today);
+  const elapsedDays =
+    durationDays === undefined ? null : routineElapsedDays(routine.startDate, today);
   const clampedDay =
     elapsedDays === null ? null : Math.min(Math.max(0, elapsedDays) + 1, durationDays!);
 

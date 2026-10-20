@@ -37,6 +37,7 @@ import {
   createRoutine,
   isRoutineDoneOn,
   fixedRoutineDuration,
+  routineElapsedDays,
   toggleRoutineCheck,
   updateRoutine,
 } from './routines';
@@ -103,6 +104,17 @@ describe('createRoutine', () => {
     expect(() => createRoutine({ name: 'Reset', specificTime: '25:00' })).toThrow(
       'Routine time must use 24-hour HH:mm format',
     );
+  });
+});
+
+describe('routineElapsedDays', () => {
+  it('counts calendar days for valid routine dates', () => {
+    expect(routineElapsedDays('2026-08-01', '2026-08-10')).toBe(9);
+  });
+
+  it('returns null instead of normalizing an impossible stored date', () => {
+    expect(routineElapsedDays('2026-02-30', '2026-08-10')).toBeNull();
+    expect(routineElapsedDays('2026-08-01', 'not-a-day')).toBeNull();
   });
 });
 
