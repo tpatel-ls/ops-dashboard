@@ -53,6 +53,22 @@ export function latestJournalEntry(entries: JournalEntry[]): JournalEntry | null
   return [...entries].filter((entry) => !entry.deletedAt).sort(compareJournalEntries)[0] ?? null;
 }
 
+/** Return live journal entries whose stored date resolves inside an inclusive day range. */
+export function journalEntriesBetween(
+  entries: JournalEntry[],
+  startDay: string,
+  endDay: string,
+): JournalEntry[] {
+  if (localDay(startDay) !== startDay || localDay(endDay) !== endDay || startDay > endDay) {
+    return [];
+  }
+  return entries.filter((entry) => {
+    if (entry.deletedAt) return false;
+    const day = localDay(entry.date);
+    return Boolean(day && day >= startDay && day <= endDay);
+  });
+}
+
 function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEntry> {
   const normalized = { ...patch };
   if (Object.hasOwn(normalized, 'body')) {

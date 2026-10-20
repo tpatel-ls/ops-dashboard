@@ -7,6 +7,7 @@ import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { activityTimestampWithin, loadActivity } from '@/lib/activity';
 import { computeStreak } from '@/lib/routines';
+import { journalEntriesBetween } from '@/lib/journal';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
 import { shareOrCopy } from '@/lib/share';
 import { useLiveSettings } from '@/lib/use-settings';
@@ -90,9 +91,11 @@ export default function HabitsPage() {
     // Journal entries from the start of the user's week through today
     const weekStart = weekStartIso(weekStartsOn);
 
-    const journalEntries = await db.journalEntries
-      .filter((j) => !j.deletedAt && j.date >= weekStart && j.date <= today)
-      .toArray();
+    const journalEntries = journalEntriesBetween(
+      await db.journalEntries.toArray(),
+      weekStart,
+      today,
+    );
 
     // Tasks completed this week
     const weekStartInstant = new Date(`${weekStart}T00:00:00`);
