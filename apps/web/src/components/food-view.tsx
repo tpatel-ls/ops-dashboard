@@ -21,9 +21,9 @@ import { getDb, todayIso } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import {
-  compareFoodLogCreation,
   deleteFoodLog,
   foodEstimate,
+  foodLogsForDay,
   safeFoodItems,
   sumFoodLogTotals,
   updateFoodLog,
@@ -46,8 +46,8 @@ export function FoodView() {
   const today = todayIso();
 
   const dayLogs = useLiveQuery(async () => {
-    const rows = await getDb().foodLogs.where('date').equals(day).toArray();
-    return rows.filter((r) => !r.deletedAt).sort(compareFoodLogCreation);
+    const rows = await getDb().foodLogs.toArray();
+    return foodLogsForDay(rows, day);
   }, [day]);
 
   const totals = sumFoodLogTotals(dayLogs ?? []);

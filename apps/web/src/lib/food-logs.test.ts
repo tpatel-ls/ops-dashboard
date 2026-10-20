@@ -12,6 +12,7 @@ vi.mock('./records', () => ({
 import {
   compareFoodLogCreation,
   createFoodLog,
+  foodLogsForDay,
   foodEstimate,
   safeFoodItems,
   sumFoodLogTotals,
@@ -53,6 +54,27 @@ describe('compareFoodLogCreation', () => {
     ];
 
     expect(logs.sort(compareFoodLogCreation).map((log) => log.id)).toEqual(['valid', 42]);
+  });
+});
+
+describe('foodLogsForDay', () => {
+  it('resolves synced timestamp dates to the visible local day', () => {
+    const rows = [
+      { id: 'timestamp', date: '2026-08-24T13:00:00.000Z', createdAt: '2026-08-24T13:00:00Z' },
+      { id: 'other-day', date: '2026-08-25', createdAt: '2026-08-25T13:00:00Z' },
+      {
+        id: 'deleted',
+        date: '2026-08-24',
+        deletedAt: '2026-08-24T14:00:00Z',
+        createdAt: '2026-08-24T14:00:00Z',
+      },
+    ] as never;
+
+    expect(foodLogsForDay(rows, '2026-08-24').map((log) => log.id)).toEqual(['timestamp']);
+  });
+
+  it('returns no rows for an invalid requested day', () => {
+    expect(foodLogsForDay([], '2026-02-30')).toEqual([]);
   });
 });
 
