@@ -194,4 +194,16 @@ describe('calendar agenda', () => {
         .map((item) => item.id),
     ).toEqual(['high', 'low']);
   });
+
+  it('treats malformed priorities as the default priority', () => {
+    const malformed = task('malformed', { priority: Number.NaN as never });
+    const normal = task('normal', { priority: 0 });
+    const urgent = task('urgent', { priority: 3 });
+
+    expect([urgent, normal, malformed].sort(compareCalendarTasks).map((item) => item.id)).toEqual([
+      'urgent',
+      'malformed',
+      'normal',
+    ]);
+  });
 });
