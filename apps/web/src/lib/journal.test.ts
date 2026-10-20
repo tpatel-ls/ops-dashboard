@@ -10,7 +10,7 @@ import {
 
 describe('compareJournalEntries', () => {
   it('filters malformed synced journal tags', () => {
-    expect(safeJournalTags(['health', null, 4])).toEqual(['health']);
+    expect(safeJournalTags(['health', null, 4, 'health'])).toEqual(['health']);
   });
 
   it('orders valid journal days before malformed records', () => {

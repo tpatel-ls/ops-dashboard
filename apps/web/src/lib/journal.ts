@@ -13,7 +13,13 @@ const MAX_JOURNAL_TITLE_LENGTH = 500;
 const MAX_JOURNAL_MOOD_LENGTH = 100;
 
 export function safeJournalTags(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === 'string') : [];
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  return value.filter((tag): tag is string => {
+    if (typeof tag !== 'string' || seen.has(tag)) return false;
+    seen.add(tag);
+    return true;
+  });
 }
 
 /**
