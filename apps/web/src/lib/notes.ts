@@ -15,7 +15,13 @@ const MAX_NOTE_BOOK_ID_LENGTH = 128;
 export const compareNoteRecency = compareCreatedAtRecency;
 
 export function safeNoteTags(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === 'string') : [];
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  return value.filter((tag): tag is string => {
+    if (typeof tag !== 'string' || seen.has(tag)) return false;
+    seen.add(tag);
+    return true;
+  });
 }
 
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
