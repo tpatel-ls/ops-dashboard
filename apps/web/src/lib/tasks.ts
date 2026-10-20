@@ -57,14 +57,23 @@ const MAX_TASK_CHECKLIST_TEXT_LENGTH = 500;
 
 export function safeChecklistItems(value: unknown): ChecklistItem[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is ChecklistItem =>
-      Boolean(item) &&
-      typeof item === 'object' &&
-      typeof (item as ChecklistItem).id === 'string' &&
-      typeof (item as ChecklistItem).text === 'string' &&
-      typeof (item as ChecklistItem).done === 'boolean',
-  );
+  const seen = new Set<string>();
+  return value.filter((item): item is ChecklistItem => {
+    if (
+      !item ||
+      typeof item !== 'object' ||
+      typeof (item as ChecklistItem).id !== 'string' ||
+      typeof (item as ChecklistItem).text !== 'string' ||
+      typeof (item as ChecklistItem).done !== 'boolean'
+    ) {
+      return false;
+    }
+    const id = (item as ChecklistItem).id.trim();
+    const text = (item as ChecklistItem).text.trim();
+    if (!id || !text || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 export function safeTaskReminders(value: unknown): Reminder[] {

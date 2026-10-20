@@ -45,8 +45,17 @@ import {
 describe('availableTask', () => {
   it('filters malformed synced checklist and reminder collections', () => {
     expect(safeChecklistItems(null)).toEqual([]);
-    expect(safeChecklistItems([{ id: 'item', text: 'Test', done: false }, { id: 'bad' }])).toEqual([
+    expect(
+      safeChecklistItems([
+        { id: 'item', text: 'Test', done: false },
+        { id: 'bad' },
+        { id: ' ', text: 'Blank id', done: false },
+        { id: 'duplicate', text: 'First', done: false },
+        { id: 'duplicate', text: 'Second', done: true },
+      ]),
+    ).toEqual([
       { id: 'item', text: 'Test', done: false },
+      { id: 'duplicate', text: 'First', done: false },
     ]);
     expect(
       safeTaskReminders([
