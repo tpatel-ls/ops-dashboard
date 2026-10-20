@@ -2,6 +2,7 @@
 
 import { getDb, isoDay, localDay, todayIso } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
+import { differenceInCalendarDays } from 'date-fns';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 // Routines validated types, formats, enums, and ranges but measured no string
@@ -111,6 +112,12 @@ export function fixedRoutineDuration(
   if (routine.kind !== 'fixed') return undefined;
   const days = routine.durationDays;
   return Number.isInteger(days) && days! > 0 ? days : undefined;
+}
+
+/** Calendar days elapsed since a routine started, or null for invalid dates. */
+export function routineElapsedDays(startDate: string, today: string): number | null {
+  if (localDay(startDate) !== startDate || localDay(today) !== today) return null;
+  return differenceInCalendarDays(new Date(`${today}T00:00:00`), new Date(`${startDate}T00:00:00`));
 }
 
 export function addDaysISO(iso: string, days: number): string {
