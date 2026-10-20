@@ -78,15 +78,25 @@ export function safeChecklistItems(value: unknown): ChecklistItem[] {
 
 export function safeTaskReminders(value: unknown): Reminder[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (reminder): reminder is Reminder =>
-      Boolean(reminder) &&
-      typeof reminder === 'object' &&
-      typeof (reminder as Reminder).id === 'string' &&
-      typeof (reminder as Reminder).taskId === 'string' &&
-      typeof (reminder as Reminder).triggerAt === 'string' &&
-      typeof (reminder as Reminder).delivered === 'boolean',
-  );
+  const seen = new Set<string>();
+  return value.filter((reminder): reminder is Reminder => {
+    if (
+      !reminder ||
+      typeof reminder !== 'object' ||
+      typeof (reminder as Reminder).id !== 'string' ||
+      typeof (reminder as Reminder).taskId !== 'string' ||
+      typeof (reminder as Reminder).triggerAt !== 'string' ||
+      typeof (reminder as Reminder).delivered !== 'boolean'
+    ) {
+      return false;
+    }
+    const id = (reminder as Reminder).id.trim();
+    const taskId = (reminder as Reminder).taskId.trim();
+    const triggerAt = (reminder as Reminder).triggerAt;
+    if (!id || !taskId || !Number.isFinite(Date.parse(triggerAt)) || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 function normalizedTaskTitle(value: string): string {

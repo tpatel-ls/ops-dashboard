@@ -61,6 +61,9 @@ describe('availableTask', () => {
       safeTaskReminders([
         { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
         { id: 'bad', delivered: 'no' },
+        { id: 'invalid-date', taskId: 'task', triggerAt: 'not-a-date', delivered: false },
+        { id: ' ', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
+        { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: true },
       ]),
     ).toEqual([
       { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
