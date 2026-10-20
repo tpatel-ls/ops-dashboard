@@ -1,6 +1,7 @@
 import { isoDay, localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { compareText } from './compare-text';
+import { safeTaskPriority } from './task-query';
 
 export type CalendarTaskKind = 'time-block' | 'scheduled' | 'due';
 
@@ -69,7 +70,8 @@ export function compareCalendarTasks(a: Task, b: Task): number {
     const startOrder = aStart - bStart;
     if (startOrder !== 0) return startOrder;
   }
-  if (a.priority !== b.priority) return b.priority - a.priority;
+  const priorityOrder = safeTaskPriority(b.priority) - safeTaskPriority(a.priority);
+  if (priorityOrder !== 0) return priorityOrder;
   const titleOrder = compareText(a.title, b.title);
   return titleOrder !== 0 ? titleOrder : compareText(a.id, b.id);
 }
