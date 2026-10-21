@@ -117,6 +117,16 @@ describe('latestInteraction', () => {
     ).toMatchObject({ id: 'valid' });
     expect(latestInteraction(null as never)).toBeNull();
   });
+
+  it('ignores a valid date when synced interaction fields cannot be rendered', () => {
+    expect(
+      latestInteraction([
+        { id: 'bad-note', date: '2026-08-25T10:00:00Z', note: 7 },
+        { id: null, date: '2026-08-24T10:00:00Z', note: 'Missing id' },
+        { id: 'valid', date: '2026-08-23T10:00:00Z', note: 'Valid' },
+      ] as never),
+    ).toMatchObject({ id: 'valid', note: 'Valid' });
+  });
 });
 
 describe('compareInteractionRecency', () => {

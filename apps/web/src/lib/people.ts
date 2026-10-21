@@ -229,7 +229,15 @@ export function latestInteraction(interactions: unknown): Interaction | null {
   for (const interaction of interactions) {
     if (!interaction || typeof interaction !== 'object') continue;
     const candidate = interaction as Partial<Interaction>;
-    if (typeof candidate.date !== 'string') continue;
+    if (
+      typeof candidate.id !== 'string' ||
+      !candidate.id.trim() ||
+      typeof candidate.date !== 'string' ||
+      typeof candidate.note !== 'string' ||
+      !candidate.note.trim()
+    ) {
+      continue;
+    }
     const timestamp = Date.parse(candidate.date);
     if (!Number.isFinite(timestamp)) continue;
     if (
