@@ -35,6 +35,7 @@ describe('whiteboard presentation', () => {
 
   it('uses a safe label for malformed update times', () => {
     expect(whiteboardUpdatedLabel('not-a-date')).toBe('Updated time unavailable');
+    expect(whiteboardUpdatedLabel(42)).toBe('Updated time unavailable');
     expect(whiteboardUpdatedLabel('2026-08-01T12:00:00.000Z')).toMatch(/^Updated /);
   });
 
