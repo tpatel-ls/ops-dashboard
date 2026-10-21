@@ -128,6 +128,25 @@ describe('buildWorkContext', () => {
       }),
     ).toContain('tags:dialer');
   });
+
+  it('keeps malformed synced text and statuses from breaking context assembly', () => {
+    expect(() =>
+      buildWorkContext({
+        tasks: [{ ...tasks[0]!, title: 42, status: null, tags: null } as never],
+        projects: [{ ...projects[0]!, name: null, description: 7 } as never],
+        domains: [{ ...domains[0]!, name: 7 } as never],
+        organizations: [{ ...organizations[0]!, name: null } as never],
+      }),
+    ).not.toThrow();
+
+    const context = buildWorkContext({
+      tasks: [{ ...tasks[0]!, title: 42, status: null, tags: null } as never],
+      projects: [{ ...projects[0]!, name: null, description: 7 } as never],
+      domains: [{ ...domains[0]!, name: 7 } as never],
+      organizations: [{ ...organizations[0]!, name: null } as never],
+    });
+    expect(context).toContain('- [UNKNOWN]');
+  });
 });
 
 describe('buildWorkContext truncation', () => {

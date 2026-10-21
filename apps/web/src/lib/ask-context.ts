@@ -1,10 +1,12 @@
 import type { Domain, Organization, Project, Task } from '@ops-dashboard/core';
 import { localDay } from '@ops-dashboard/core';
+import { safeTaskTags } from './task-query';
 
 const MAX_CONTEXT = 50_000;
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
 
-function contextText(value: string, maxLength?: number): string {
+function contextText(value: unknown, maxLength?: number): string {
+  if (typeof value !== 'string') return '';
   const normalized = value.replace(CONTROL_CHARACTERS, ' ').replace(/\s+/g, ' ').trim();
   return maxLength === undefined ? normalized : Array.from(normalized).slice(0, maxLength).join('');
 }
@@ -51,7 +53,9 @@ export function buildWorkContext({
     for (const project of activeProjects) {
       const organization = project.orgId ? organizationMap.get(project.orgId) : undefined;
       const domain = project.domainId ? domainMap.get(project.domainId) : undefined;
-      const parts = [`[${project.kind}/${project.status}]`, contextText(project.name)];
+      const kind = contextText(project.kind) || 'unknown';
+      const status = contextText(project.status) || 'unknown';
+      const parts = [`[${kind}/${status}]`, contextText(project.name)];
       if (organization) parts.push(`organization:${contextText(organization.name)}`);
       if (domain) parts.push(`domain:${contextText(domain.name)}`);
       if (project.dueDate) parts.push(`due:${project.dueDate}`);
@@ -78,7 +82,8 @@ export function buildWorkContext({
         : project?.domainId
           ? domainMap.get(project.domainId)
           : undefined;
-      const parts = [`[${task.status.toUpperCase()}]`, contextText(task.title)];
+      const status = contextText(task.status).toUpperCase() || 'UNKNOWN';
+      const parts = [`[${status}]`, contextText(task.title)];
       const dueDay = localDay(task.dueAt);
       const scheduledDay = localDay(task.scheduledFor);
       if (dueDay) parts.push(`due:${dueDay}`);
@@ -87,9 +92,7 @@ export function buildWorkContext({
       if (organization) parts.push(`organization:${contextText(organization.name)}`);
       if (project) parts.push(`project:${contextText(project.name)}`);
       if (domain) parts.push(`domain:${contextText(domain.name)}`);
-      const tags = Array.isArray(task.tags)
-        ? task.tags.filter((tag): tag is string => typeof tag === 'string')
-        : [];
+      const tags = safeTaskTags(task.tags);
       if (tags.length > 0) parts.push(`tags:${tags.map((tag) => contextText(tag)).join(',')}`);
       lines.push(`- ${parts.join(' | ')}`);
     }
