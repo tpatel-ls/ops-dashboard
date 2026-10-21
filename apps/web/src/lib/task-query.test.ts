@@ -227,7 +227,7 @@ describe('compareTasksBy', () => {
 describe('matchesTaskSearch', () => {
   it('drops malformed tag collections and entries', () => {
     expect(safeTaskTags(null)).toEqual([]);
-    expect(safeTaskTags(['work', 42, 'home', null])).toEqual(['work', 'home']);
+    expect(safeTaskTags(['work', 42, 'home', null, 'work'])).toEqual(['work', 'home']);
   });
 
   const launchTask = task('launch', { title: 'Prepare Launch Review' });
