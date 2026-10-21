@@ -323,6 +323,19 @@ describe('briefing helpers', () => {
     ]);
   });
 
+  it('keeps malformed capture ids from breaking issue ordering', () => {
+    const capture = {
+      ...meta('malformed-id'),
+      id: null,
+      raw: 'Malformed id issue',
+      source: 'text',
+      status: 'pending',
+    } as unknown as Capture;
+
+    expect(() => findCaptureRoutingIssues([capture], [])).not.toThrow();
+    expect(findCaptureRoutingIssues([capture], [])[0]?.captureId).toBeNull();
+  });
+
   it('falls back from blank AI summaries to captured text', () => {
     const capture = {
       ...meta('pending'),
