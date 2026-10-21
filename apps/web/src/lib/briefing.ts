@@ -193,7 +193,7 @@ export function findCaptureRoutingIssues(
       const bValid = Number.isFinite(bTimestamp);
       if (aValid && bValid && aTimestamp !== bTimestamp) return bTimestamp - aTimestamp;
       if (aValid !== bValid) return aValid ? -1 : 1;
-      return a.captureId.localeCompare(b.captureId);
+      return compareText(a.captureId, b.captureId);
     });
 }
 
