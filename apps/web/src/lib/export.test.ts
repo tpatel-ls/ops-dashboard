@@ -79,6 +79,14 @@ describe('tasksToMarkdown', () => {
     expect(markdown).toContain('## Tuesday, July 28');
   });
 
+  it('exports tasks with malformed synced tag collections', () => {
+    const malformed = task('Imported task');
+    malformed.tags = null as never;
+
+    expect(() => tasksToMarkdown([malformed], 'Tasks')).not.toThrow();
+    expect(tasksToMarkdown([malformed], 'Tasks')).toContain('- [ ] Imported task');
+  });
+
   it('keeps multiline titles and tags on one task line', () => {
     const multiline = task('First line\n## Injected heading');
     multiline.tags = ['work\nnotes'];
