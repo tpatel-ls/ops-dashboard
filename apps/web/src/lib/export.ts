@@ -3,7 +3,7 @@
 import { format, parseISO } from 'date-fns';
 import { getDb, localDay } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
-import { compareTasks } from './task-query';
+import { compareTasks, safeTaskTags } from './task-query';
 import { enqueueOp } from './sync-queue';
 
 export interface OpsExport {
@@ -380,7 +380,8 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
     lines.push(`## ${label}`, '');
     for (const t of list) {
       const box = t.status === 'done' ? '[x]' : '[ ]';
-      const tags = t.tags.length ? ` ${t.tags.map((x) => `#${markdownTag(x)}`).join(' ')}` : '';
+      const safeTags = safeTaskTags(t.tags);
+      const tags = safeTags.length ? ` ${safeTags.map((x) => `#${markdownTag(x)}`).join(' ')}` : '';
       lines.push(`- ${box} ${markdownInline(t.title)}${tags}`);
     }
     lines.push('');
