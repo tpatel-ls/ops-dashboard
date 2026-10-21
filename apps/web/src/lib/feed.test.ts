@@ -13,6 +13,7 @@ describe('notificationAge', () => {
 
   it('falls back safely for malformed timestamps', () => {
     expect(notificationAge('not-a-timestamp', now)).toBe('Recently');
+    expect(notificationAge(42, now)).toBe('Recently');
     expect(notificationAge('2026-08-21T13:00:00.000Z', new Date('invalid'))).toBe('Recently');
   });
 });
