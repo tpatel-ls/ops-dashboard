@@ -22,7 +22,8 @@ function exceedsCharacters(value: string | undefined, limit: number): boolean {
   return Boolean(value && Array.from(value).length > limit);
 }
 
-export function notificationAge(createdAt: string, now: Date = new Date()): string {
+export function notificationAge(createdAt: unknown, now: Date = new Date()): string {
+  if (typeof createdAt !== 'string' || !createdAt) return 'Recently';
   const created = parseISO(createdAt);
   if (!isValid(created) || !isValid(now)) return 'Recently';
   return formatDistance(created, now, { addSuffix: true });
