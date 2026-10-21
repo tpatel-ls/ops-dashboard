@@ -2,7 +2,8 @@ import type { Whiteboard } from '@ops-dashboard/core';
 import { format } from 'date-fns';
 import { compareText } from './compare-text';
 
-function updatedTimestamp(value: string): number | undefined {
+function updatedTimestamp(value: unknown): number | undefined {
+  if (typeof value !== 'string' || !value) return undefined;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : undefined;
 }
@@ -21,7 +22,7 @@ export function compareWhiteboardUpdates(
   return nameOrder !== 0 ? nameOrder : compareText(a.id, b.id);
 }
 
-export function whiteboardUpdatedLabel(value: string): string {
+export function whiteboardUpdatedLabel(value: unknown): string {
   const timestamp = updatedTimestamp(value);
   return timestamp === undefined
     ? 'Updated time unavailable'
