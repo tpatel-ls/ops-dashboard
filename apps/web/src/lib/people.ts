@@ -54,7 +54,8 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
     ['domainId', MAX_PERSON_DOMAIN_ID_LENGTH],
   ] as const) {
     if (normalized[key] === undefined) continue;
-    normalized[key] = normalized[key]?.trim() || undefined;
+    if (typeof normalized[key] !== 'string') throw new Error('Person details must be valid.');
+    normalized[key] = normalized[key].trim() || undefined;
     const value = normalized[key];
     if (value && !withinCharacters(value, limit)) {
       throw new Error('Person details must be valid.');
