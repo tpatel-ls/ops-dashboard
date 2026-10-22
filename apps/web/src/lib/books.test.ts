@@ -61,6 +61,17 @@ describe('updateBook', () => {
       finishedAt: '2026-08-21T12:00:00.000Z',
     });
   });
+
+  it('rejects non-string dates and metadata with validation errors', () => {
+    expect(() => updateBook('book-1', { startedAt: 42 as never })).toThrow(
+      'Book startedAt must be a valid date',
+    );
+    expect(() => updateBook('book-1', { coverUrl: 42 as never })).toThrow(
+      'Book metadata must be valid',
+    );
+    expect(mocks.getBook).not.toHaveBeenCalled();
+    expect(mocks.patchRecord).not.toHaveBeenCalled();
+  });
 });
 
 describe('bookRatingStars', () => {
