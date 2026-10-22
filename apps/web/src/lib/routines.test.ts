@@ -428,4 +428,16 @@ describe('routine field bounds', () => {
     expect(() => updateRoutine('routine-1', { description: 'd'.repeat(4000) })).not.toThrow();
     expect(() => updateRoutine('routine-1', { color: 'c'.repeat(100) })).not.toThrow();
   });
+
+  it('rejects non-string optional details with validation errors', () => {
+    expect(() => updateRoutine('routine-1', { specificTime: 805 as never })).toThrow(
+      'Routine time must use 24-hour HH:mm format.',
+    );
+    expect(() => updateRoutine('routine-1', { description: 42 as never })).toThrow(
+      'Routine details must be valid.',
+    );
+    expect(() => updateRoutine('routine-1', { domainId: {} as never })).toThrow(
+      'Routine details must be valid.',
+    );
+  });
 });
