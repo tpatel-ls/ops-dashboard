@@ -47,7 +47,8 @@ function normalizeDomainPatch(patch: Partial<Domain>): Partial<Domain> {
     ['description', MAX_DOMAIN_DESCRIPTION_LENGTH],
   ] as const) {
     if (normalized[key] !== undefined) {
-      normalized[key] = normalized[key]?.trim() || undefined;
+      if (typeof normalized[key] !== 'string') throw new Error('Domain metadata must be valid.');
+      normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && Array.from(normalized[key]).length > limit) {
         throw new Error('Domain metadata must be valid.');
       }

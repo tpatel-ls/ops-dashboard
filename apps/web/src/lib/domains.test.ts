@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Project, Task } from '@ops-dashboard/core';
-import { compareDomains, countDomainWork } from './domains';
+import { compareDomains, countDomainWork, updateDomain } from './domains';
 
 const projects = [
   { id: 'project-1', domainId: 'domain-1', status: 'active' },
@@ -64,5 +64,16 @@ describe('compareDomains', () => {
 
     expect(() => domains.sort(compareDomains)).not.toThrow();
     expect(domains.map((domain) => domain.id)).toEqual([null, 'valid']);
+  });
+});
+
+describe('updateDomain', () => {
+  it('rejects non-string metadata with a validation error', () => {
+    expect(() => updateDomain('domain-1', { icon: 42 as never })).toThrow(
+      'Domain metadata must be valid.',
+    );
+    expect(() => updateDomain('domain-1', { description: {} as never })).toThrow(
+      'Domain metadata must be valid.',
+    );
   });
 });
