@@ -32,6 +32,9 @@ function normalizeRoutinePatch(patch: Partial<Routine>): Partial<Routine> {
     }
   }
   if (normalized.specificTime !== undefined) {
+    if (typeof normalized.specificTime !== 'string') {
+      throw new Error('Routine time must use 24-hour HH:mm format.');
+    }
     normalized.specificTime = normalized.specificTime.trim() || undefined;
     if (normalized.specificTime && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(normalized.specificTime)) {
       throw new Error('Routine time must use 24-hour HH:mm format.');
@@ -74,7 +77,8 @@ function normalizeRoutinePatch(patch: Partial<Routine>): Partial<Routine> {
     ['color', MAX_ROUTINE_COLOR_LENGTH],
   ] as const) {
     if (normalized[key] === undefined) continue;
-    normalized[key] = normalized[key]?.trim() || undefined;
+    if (typeof normalized[key] !== 'string') throw new Error('Routine details must be valid.');
+    normalized[key] = normalized[key].trim() || undefined;
     const value = normalized[key];
     if (value && Array.from(value).length > limit) {
       throw new Error('Routine details must be valid.');
