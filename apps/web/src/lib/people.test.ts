@@ -202,4 +202,16 @@ describe('person field validation', () => {
     expect(accepts({ domainId: 'd'.repeat(128) })).not.toThrow();
     expect(accepts({ relationship: '   ' })).not.toThrow();
   });
+
+  it('rejects non-string optional details with a validation error', () => {
+    expect(() => updatePerson('person-1', { relationship: 42 as never })).toThrow(
+      'Person details must be valid.',
+    );
+    expect(() => updatePerson('person-1', { avatarUrl: {} as never })).toThrow(
+      'Person details must be valid.',
+    );
+    expect(() => updatePerson('person-1', { domainId: 42 as never })).toThrow(
+      'Person details must be valid.',
+    );
+  });
 });
