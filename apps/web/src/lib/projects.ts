@@ -142,13 +142,17 @@ function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptio
     ['description', MAX_PROJECT_DESCRIPTION_LENGTH],
   ] as const) {
     if (normalized[key] !== undefined) {
-      normalized[key] = normalized[key]?.trim() || undefined;
+      if (typeof normalized[key] !== 'string') throw new Error('Project metadata must be valid.');
+      normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && !withinCharacters(normalized[key], limit)) {
         throw new Error('Project metadata must be valid.');
       }
     }
   }
   if (normalized.dueDate !== undefined) {
+    if (typeof normalized.dueDate !== 'string') {
+      throw new Error('Project due date must be a valid calendar date.');
+    }
     normalized.dueDate = normalized.dueDate.trim();
     if (localDay(normalized.dueDate) !== normalized.dueDate) {
       throw new Error('Project due date must be a valid calendar date.');
@@ -187,20 +191,26 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
     ['description', MAX_PROJECT_DESCRIPTION_LENGTH],
   ] as const) {
     if (normalized[key] !== undefined) {
-      normalized[key] = normalized[key]?.trim() || undefined;
+      if (typeof normalized[key] !== 'string') throw new Error('Project metadata must be valid.');
+      normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && !withinCharacters(normalized[key], limit)) {
         throw new Error('Project metadata must be valid.');
       }
     }
   }
   for (const key of ['startDate', 'dueDate'] as const) {
-    if (normalized[key] !== undefined && localDay(normalized[key]) !== normalized[key]) {
+    if (
+      normalized[key] !== undefined &&
+      (typeof normalized[key] !== 'string' || localDay(normalized[key]) !== normalized[key])
+    ) {
       throw new Error(`Project ${key} must be a valid calendar date.`);
     }
   }
   if (
     normalized.lastWorkedAt !== undefined &&
-    (!normalized.lastWorkedAt.trim() || !Number.isFinite(Date.parse(normalized.lastWorkedAt)))
+    (typeof normalized.lastWorkedAt !== 'string' ||
+      !normalized.lastWorkedAt.trim() ||
+      !Number.isFinite(Date.parse(normalized.lastWorkedAt)))
   ) {
     throw new Error('Project last worked time must be valid.');
   }

@@ -193,6 +193,17 @@ describe('createProject', () => {
     expect(mocks.put).not.toHaveBeenCalled();
   });
 
+  it('rejects non-string creation metadata with validation errors', async () => {
+    await expect(createProject('Launch', { description: 42 as never })).rejects.toThrow(
+      'Project metadata must be valid',
+    );
+    await expect(createProject('Launch', { dueDate: 42 as never })).rejects.toThrow(
+      'Project due date must be a valid calendar date',
+    );
+    expect(mocks.count).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('does not rename a deleted project', async () => {
     mocks.get.mockResolvedValue({
       id: 'project-test',
@@ -352,6 +363,9 @@ describe('updateProject', () => {
     );
     expect(() => updateProject('project-test', { retainerResetDay: 31 })).toThrow(
       'Project retainer reset day must be from 1 to 28',
+    );
+    expect(() => updateProject('project-test', { lastWorkedAt: 42 as never })).toThrow(
+      'Project last worked time must be valid',
     );
   });
 
