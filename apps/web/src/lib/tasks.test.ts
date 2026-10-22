@@ -148,6 +148,20 @@ describe('addTask', () => {
     }
   });
 
+  it('rejects non-string date overrides with a validation error', async () => {
+    for (const [key, value] of [
+      ['startAt', 42],
+      ['endAt', null],
+      ['dueAt', { value: '2026-08-21' }],
+    ] as const) {
+      await expect(addTask('Invalid date type', { [key]: value } as never)).rejects.toThrow(
+        `Task ${key} must be a valid date.`,
+      );
+    }
+    expect(mocks.last).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('rejects a time block that ends before it starts', async () => {
     await expect(
       addTask('Invalid block', {

@@ -261,7 +261,10 @@ function assertTaskFields(patch: Partial<Task>, ownerTaskId: string): void {
   }
   for (const key of ['startAt', 'endAt', 'dueAt'] as const) {
     const value = patch[key];
-    if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
+    if (
+      value !== undefined &&
+      (typeof value !== 'string' || !value.trim() || !Number.isFinite(Date.parse(value)))
+    ) {
       throw new Error(`Task ${key} must be a valid date.`);
     }
     if (value !== undefined) patch[key] = new Date(Date.parse(value)).toISOString();
