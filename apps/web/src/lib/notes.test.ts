@@ -37,4 +37,14 @@ describe('updateNote', () => {
       'Note content is required',
     );
   });
+
+  it('rejects non-string optional fields with validation errors', () => {
+    expect(() => updateNote('note-1', { title: 42 as never })).toThrow('Note title must be valid');
+    expect(() => updateNote('note-1', { source: 42 as never })).toThrow(
+      'Note metadata must be valid',
+    );
+    expect(() => updateNote('note-1', { imageUrl: {} as never })).toThrow(
+      'Note metadata must be valid',
+    );
+  });
 });

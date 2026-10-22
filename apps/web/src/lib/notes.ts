@@ -26,7 +26,12 @@ export function safeNoteTags(value: unknown): string[] {
 
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   const normalized = { ...patch };
-  if (normalized.title !== undefined) {
+  if (Object.hasOwn(normalized, 'title')) {
+    if (normalized.title !== undefined && typeof normalized.title !== 'string') {
+      throw new Error('Note title must be valid.');
+    }
+  }
+  if (typeof normalized.title === 'string') {
     normalized.title = normalized.title.trim() || undefined;
     if (normalized.title && Array.from(normalized.title).length > MAX_NOTE_TITLE_LENGTH) {
       throw new Error('Note title must contain at most 500 characters.');
@@ -53,7 +58,8 @@ function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
     ['bookId', MAX_NOTE_BOOK_ID_LENGTH],
   ] as const) {
     if (normalized[key] !== undefined) {
-      normalized[key] = normalized[key]?.trim() || undefined;
+      if (typeof normalized[key] !== 'string') throw new Error('Note metadata must be valid.');
+      normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && Array.from(normalized[key]).length > limit) {
         throw new Error('Note metadata must be valid.');
       }
