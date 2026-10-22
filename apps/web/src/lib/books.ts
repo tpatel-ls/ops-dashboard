@@ -53,7 +53,10 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
   }
   for (const key of ['startedAt', 'finishedAt'] as const) {
     const value = normalized[key];
-    if (value !== undefined && (!value.trim() || !Number.isFinite(Date.parse(value)))) {
+    if (
+      value !== undefined &&
+      (typeof value !== 'string' || !value.trim() || !Number.isFinite(Date.parse(value)))
+    ) {
       throw new Error(`Book ${key} must be a valid date.`);
     }
     if (value !== undefined) normalized[key] = new Date(Date.parse(value)).toISOString();
@@ -66,7 +69,8 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     ['summary', MAX_BOOK_SUMMARY_LENGTH],
   ] as const) {
     if (normalized[key] !== undefined) {
-      normalized[key] = normalized[key]?.trim() || undefined;
+      if (typeof normalized[key] !== 'string') throw new Error('Book metadata must be valid.');
+      normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && Array.from(normalized[key]).length > limit) {
         throw new Error('Book metadata must be valid.');
       }
