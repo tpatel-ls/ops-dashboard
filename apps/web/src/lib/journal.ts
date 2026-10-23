@@ -94,12 +94,14 @@ function normalizeJournalPatch(patch: Partial<JournalEntry>): Partial<JournalEnt
     throw new Error('Journal entry source must be valid.');
   }
   if (normalized.title !== undefined) {
+    if (typeof normalized.title !== 'string') throw new Error('Journal entry title must be valid.');
     normalized.title = normalized.title.trim() || undefined;
     if (normalized.title && Array.from(normalized.title).length > MAX_JOURNAL_TITLE_LENGTH) {
       throw new Error('Journal entry title must contain at most 500 characters.');
     }
   }
   if (normalized.mood !== undefined) {
+    if (typeof normalized.mood !== 'string') throw new Error('Journal entry mood must be valid.');
     normalized.mood = normalized.mood.trim() || undefined;
     if (normalized.mood && Array.from(normalized.mood).length > MAX_JOURNAL_MOOD_LENGTH) {
       throw new Error('Journal entry mood must contain at most 100 characters.');
