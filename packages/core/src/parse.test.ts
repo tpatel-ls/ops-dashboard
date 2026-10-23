@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { parseQuickAdd, quickAddToTask } from './parse';
 
 describe('parseQuickAdd', () => {
+  it('rejects non-string input with a validation error', () => {
+    expect(() => parseQuickAdd(42 as never, anchor)).toThrow('Quick add text must be a string.');
+  });
+
   it('caps repeated priority markers at urgent', () => {
     expect(parseQuickAdd('Escalate !!!', anchor).priority).toBe(3);
   });

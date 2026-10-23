@@ -16,6 +16,7 @@ const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {
+  if (typeof input !== 'string') throw new Error('Quick add text must be a string.');
   let working = input.trim();
   const tags: string[] = [];
   const tagKeys = new Set<string>();
