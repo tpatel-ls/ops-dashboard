@@ -35,10 +35,13 @@ export async function ensureServiceWorker(): Promise<ServiceWorkerRegistration |
 }
 
 function reminderFields(taskId: string, triggerAt: string): Pick<Reminder, 'taskId' | 'triggerAt'> {
+  if (typeof taskId !== 'string') throw new Error('Reminder task is required.');
+  if (typeof triggerAt !== 'string') throw new Error('Reminder time must be a valid date.');
   const normalizedTaskId = taskId.trim();
-  const timestamp = Date.parse(triggerAt.trim());
+  const normalizedTriggerAt = triggerAt.trim();
+  const timestamp = Date.parse(normalizedTriggerAt);
   if (!normalizedTaskId) throw new Error('Reminder task is required.');
-  if (!triggerAt.trim() || !Number.isFinite(timestamp)) {
+  if (!normalizedTriggerAt || !Number.isFinite(timestamp)) {
     throw new Error('Reminder time must be a valid date.');
   }
   return { taskId: normalizedTaskId, triggerAt: new Date(timestamp).toISOString() };
