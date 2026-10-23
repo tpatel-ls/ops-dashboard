@@ -60,6 +60,16 @@ describe('scheduleReminder', () => {
     expect(mocks.reminders.put).not.toHaveBeenCalled();
   });
 
+  it('rejects non-string reminder fields with validation errors', async () => {
+    await expect(scheduleReminder(42 as never, '2026-08-02T14:00:00.000Z')).rejects.toThrow(
+      'Reminder task is required',
+    );
+    await expect(scheduleReminder('task-1', 42 as never)).rejects.toThrow(
+      'Reminder time must be a valid date',
+    );
+    expect(mocks.reminders.put).not.toHaveBeenCalled();
+  });
+
   it.each([
     undefined,
     { id: 'task-1', status: 'done' },
