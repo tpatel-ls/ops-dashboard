@@ -66,6 +66,9 @@ export async function createOrganization(input: {
     order: input.order ?? Date.now(),
   });
   const name = fields.name!;
+  if (input.id !== undefined && typeof input.id !== 'string') {
+    throw new Error('Organization id must be valid.');
+  }
   const id = input.id?.trim();
   if (input.id !== undefined && !id) throw new Error('Organization id is required.');
   if (id && (Array.from(id).length > MAX_ORGANIZATION_ID_LENGTH || CONTROL_CHARACTERS.test(id))) {
