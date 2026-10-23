@@ -39,6 +39,7 @@ export async function logWork(
     throw new Error('Work log minutes must be a positive integer up to 1440.');
   }
   if (at !== undefined) {
+    if (typeof at !== 'string') throw new Error('Work log time must be a valid date.');
     const timestamp = Date.parse(at);
     if (!at.trim() || !Number.isFinite(timestamp)) {
       throw new Error('Work log time must be a valid date.');
@@ -46,6 +47,9 @@ export async function logWork(
     if (timestamp > Date.now()) {
       throw new Error('Work log time cannot be in the future.');
     }
+  }
+  if (note !== undefined && typeof note !== 'string') {
+    throw new Error('Work log note must be valid.');
   }
   const normalizedNote = note?.trim();
   if (normalizedNote && Array.from(normalizedNote).length > MAX_WORK_LOG_NOTE_LENGTH) {

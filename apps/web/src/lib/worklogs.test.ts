@@ -51,6 +51,17 @@ describe('logWork', () => {
     mocks.softDeleteRecord.mockReset();
   });
 
+  it('rejects non-string optional fields with validation errors', async () => {
+    await expect(logWork('project-1', 30, 42 as never)).rejects.toThrow(
+      'Work log note must be valid',
+    );
+    await expect(logWork('project-1', 30, undefined, 42 as never)).rejects.toThrow(
+      'Work log time must be a valid date',
+    );
+    expect(mocks.getProject).not.toHaveBeenCalled();
+    expect(mocks.putRecord).not.toHaveBeenCalled();
+  });
+
   it.each([0, -5, 1.5, 1441, Number.MAX_SAFE_INTEGER + 1])(
     'rejects invalid minutes before writing: %s',
     async (minutes) => {
