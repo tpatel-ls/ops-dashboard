@@ -130,6 +130,7 @@ function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptio
     throw new Error('Project kind must be valid.');
   }
   if (normalized.color !== undefined) {
+    if (typeof normalized.color !== 'string') throw new Error('Project metadata must be valid.');
     normalized.color = normalized.color.trim();
     if (!normalized.color) throw new Error('Project color is required.');
     if (!withinCharacters(normalized.color, MAX_PROJECT_COLOR_LENGTH)) {
