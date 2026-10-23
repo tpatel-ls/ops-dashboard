@@ -6,7 +6,19 @@ import {
   journalDateLabel,
   latestJournalEntry,
   safeJournalTags,
+  updateJournalEntry,
 } from './journal';
+
+describe('journal entry validation', () => {
+  it('rejects non-string optional text fields with validation errors', () => {
+    expect(() => updateJournalEntry('journal-1', { title: 42 as never })).toThrow(
+      'Journal entry title must be valid.',
+    );
+    expect(() => updateJournalEntry('journal-1', { mood: 42 as never })).toThrow(
+      'Journal entry mood must be valid.',
+    );
+  });
+});
 
 describe('compareJournalEntries', () => {
   it('filters malformed synced journal tags', () => {
