@@ -194,6 +194,9 @@ describe('createProject', () => {
   });
 
   it('rejects non-string creation metadata with validation errors', async () => {
+    await expect(createProject('Launch', { color: 42 as never })).rejects.toThrow(
+      'Project metadata must be valid',
+    );
     await expect(createProject('Launch', { description: 42 as never })).rejects.toThrow(
       'Project metadata must be valid',
     );
