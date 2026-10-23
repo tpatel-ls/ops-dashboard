@@ -95,6 +95,9 @@ describe('createOrganization', () => {
   });
 
   it('validates deterministic ids and ordering values', async () => {
+    await expect(createOrganization({ id: 42 as never, name: 'Acme' })).rejects.toThrow(
+      'Organization id must be valid',
+    );
     await expect(createOrganization({ id: '   ', name: 'Acme' })).rejects.toThrow(
       'Organization id is required',
     );
