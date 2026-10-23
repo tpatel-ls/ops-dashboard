@@ -366,8 +366,8 @@ const KNOWN_KINDS: CaptureKind[] = [
   'habit',
 ];
 
-export function normalizeCaptureKind(kind: string | undefined): CaptureKind {
-  const normalized = kind?.trim().toLowerCase();
+export function normalizeCaptureKind(kind: unknown): CaptureKind {
+  const normalized = typeof kind === 'string' ? kind.trim().toLowerCase() : undefined;
   return KNOWN_KINDS.includes(normalized as CaptureKind) ? (normalized as CaptureKind) : 'task';
 }
 
