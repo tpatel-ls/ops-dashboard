@@ -171,6 +171,7 @@ describe('normalizeCaptureKind', () => {
     expect(normalizeCaptureKind('FOOD')).toBe('food');
     expect(normalizeCaptureKind('unknown')).toBe('task');
     expect(normalizeCaptureKind(undefined)).toBe('task');
+    expect(normalizeCaptureKind(42)).toBe('task');
   });
 });
 
