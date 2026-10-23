@@ -286,6 +286,9 @@ export const updatePerson = (id: string, patch: Partial<Person>) =>
 export const deletePerson = (id: string) => softDeleteRecord<Person>('people', id);
 
 export function makeFact(label: string, value: string): PersonFact {
+  if (typeof label !== 'string' || typeof value !== 'string') {
+    throw new Error('Fact label and value are required.');
+  }
   const normalizedLabel = label.trim();
   const normalizedValue = value.trim();
   if (!normalizedLabel || !normalizedValue) {
@@ -301,6 +304,10 @@ export function makeFact(label: string, value: string): PersonFact {
 }
 
 export function makeInteraction(note: string, date?: string): Interaction {
+  if (typeof note !== 'string') throw new Error('Interaction note is required.');
+  if (date !== undefined && typeof date !== 'string') {
+    throw new Error('Interaction date must be valid.');
+  }
   const normalizedNote = note.trim();
   if (!normalizedNote) throw new Error('Interaction note is required.');
   if (!withinCharacters(normalizedNote, MAX_PERSON_INTERACTION_NOTE_LENGTH)) {
