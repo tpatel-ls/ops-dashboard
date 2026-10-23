@@ -5,11 +5,21 @@ import {
   comparePeopleByName,
   createPerson,
   latestInteraction,
+  makeFact,
+  makeInteraction,
   matchesPersonSearch,
   safePersonFacts,
   safePersonInteractions,
   updatePerson,
 } from './people';
+
+describe('person input helpers', () => {
+  it('reject malformed helper inputs with validation errors', () => {
+    expect(() => makeFact(42 as never, 'value')).toThrow('Fact label and value are required.');
+    expect(() => makeInteraction(42 as never)).toThrow('Interaction note is required.');
+    expect(() => makeInteraction('Met', 42 as never)).toThrow('Interaction date must be valid.');
+  });
+});
 
 const person = {
   name: 'Avery Morgan',
