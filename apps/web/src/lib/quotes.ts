@@ -78,6 +78,7 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
     ['bookId', MAX_QUOTE_BOOK_ID_LENGTH],
   ] as const) {
     if (normalized[key] === undefined) continue;
+    if (typeof normalized[key] !== 'string') throw new Error('Quote attribution must be valid.');
     normalized[key] = normalized[key]?.trim() || undefined;
     const value = normalized[key];
     if (value && Array.from(value).length > limit) {

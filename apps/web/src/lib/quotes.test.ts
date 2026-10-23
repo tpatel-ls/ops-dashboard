@@ -51,6 +51,15 @@ describe('compareQuoteRecency', () => {
 });
 
 describe('quote attribution bounds', () => {
+  it('rejects non-string attribution fields with a validation error', () => {
+    expect(() => updateQuote('quote-1', { author: 42 as never })).toThrow(
+      'Quote attribution must be valid.',
+    );
+    expect(() => updateQuote('quote-1', { source: 42 as never })).toThrow(
+      'Quote attribution must be valid.',
+    );
+  });
+
   it('bounds the author, source, and book reference', () => {
     expect(() => createQuote({ text: 'Stay curious.', author: 'a'.repeat(501) })).toThrow(
       'Quote attribution must be valid.',
