@@ -24,6 +24,7 @@ const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 export const compareCaptureRecency = compareCreatedAtRecency;
 
 export function createCapture(raw: string, source: CaptureSource = 'text'): Promise<Capture> {
+  if (typeof raw !== 'string') throw new Error('Capture text must be a string.');
   const normalizedRaw = raw.trim();
   if (!normalizedRaw) throw new Error('Capture text is required.');
   if (Array.from(normalizedRaw).length > MAX_CAPTURE_RAW_LENGTH) {

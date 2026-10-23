@@ -18,6 +18,10 @@ describe('compareCaptureRecency', () => {
 });
 
 describe('capture validation', () => {
+  it('rejects non-string capture text with a validation error', () => {
+    expect(() => createCapture(42 as never)).toThrow('Capture text must be a string.');
+  });
+
   it('bounds raw capture text before persistence', () => {
     expect(() => createCapture('x'.repeat(8_001))).toThrow(
       'Capture text must contain at most 8000 characters',
