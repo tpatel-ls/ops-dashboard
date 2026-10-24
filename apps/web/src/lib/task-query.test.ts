@@ -8,6 +8,7 @@ import {
   matchesTaskTag,
   safeTaskPriority,
   safeTaskTags,
+  taskTagCounts,
 } from './task-query';
 
 function task(id: string, patch: Partial<Task> = {}): Task {
@@ -296,5 +297,36 @@ describe('matchesTaskTag', () => {
 
   it('treats a malformed synced tag collection as untagged', () => {
     expect(matchesTaskTag(task('malformed', { tags: undefined as never }), 'urgent')).toBe(false);
+  });
+});
+
+describe('taskTagCounts', () => {
+  it('groups spellings that matchesTaskTag treats as the same tag', () => {
+    const tasks = [
+      task('a', { tags: ['Work', 'Café'] }),
+      task('b', { tags: ['work', 'Café'] }),
+      task('c', { tags: ['WORK', 'work'] }),
+    ];
+    const counts = taskTagCounts(tasks);
+
+    expect(counts).toEqual([
+      ['Work', 3],
+      ['Café', 2],
+    ]);
+    for (const [tag, count] of counts) {
+      expect(tasks.filter((item) => matchesTaskTag(item, tag))).toHaveLength(count);
+    }
+  });
+
+  it('orders equal counts by label and skips blank or malformed tags', () => {
+    const tasks = [
+      task('a', { tags: ['zeta', ' ', 'alpha'] }),
+      task('b', { tags: 'zeta' as never }),
+      task('c', { tags: [42, null] as never }),
+    ];
+    expect(taskTagCounts(tasks)).toEqual([
+      ['alpha', 1],
+      ['zeta', 1],
+    ]);
   });
 });

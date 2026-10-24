@@ -129,3 +129,28 @@ export function matchesTaskTag(task: Task, selectedTag: string | null): boolean 
     (tag) => typeof tag === 'string' && taskFilterText(tag) === normalized,
   );
 }
+
+/**
+ * Tag chips with the number of tasks carrying each tag, grouped the way
+ * `matchesTaskTag` matches: case and Unicode form do not split a tag. Each
+ * chip keeps the first spelling seen, and a task counts once per tag even if
+ * it stores two spellings. Most-used first, ties by label.
+ */
+export function taskTagCounts(tasks: Task[]): Array<[tag: string, count: number]> {
+  const groups = new Map<string, { label: string; count: number }>();
+  for (const task of tasks) {
+    const seen = new Set<string>();
+    for (const tag of safeTaskTags(task.tags)) {
+      const label = tag.trim();
+      const key = taskFilterText(label);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      const group = groups.get(key);
+      if (group) group.count += 1;
+      else groups.set(key, { label, count: 1 });
+    }
+  }
+  return Array.from(groups.values())
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .map(({ label, count }) => [label, count]);
+}

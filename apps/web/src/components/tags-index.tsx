@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo, useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { matchesTaskTag, safeTaskTags } from '@/lib/task-query';
+import { matchesTaskTag, safeTaskTags, taskTagCounts } from '@/lib/task-query';
 
 export function TagsIndex() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -14,13 +14,7 @@ export function TagsIndex() {
   });
   const openEdit = useAppStore((s) => s.openEdit);
 
-  const counts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const t of tasks ?? []) {
-      for (const tag of safeTaskTags(t.tags)) map.set(tag, (map.get(tag) ?? 0) + 1);
-    }
-    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-  }, [tasks]);
+  const counts = useMemo(() => taskTagCounts(tasks ?? []), [tasks]);
   const visibleTasks = (tasks ?? []).filter(
     (task) => safeTaskTags(task.tags).length > 0 && matchesTaskTag(task, selectedTag),
   );
