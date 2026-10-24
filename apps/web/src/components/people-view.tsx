@@ -10,6 +10,7 @@ import {
   comparePeopleByName,
   latestInteraction,
   matchesPersonSearch,
+  personInitials,
   safePersonFacts,
 } from '@/lib/people';
 import { relativeTimeLabel } from '@/lib/relative-time';
@@ -98,11 +99,7 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
   const factCount = safePersonFacts(person.facts).length;
   const lastInteraction = latestInteraction(person.interactions);
 
-  const initials = person.name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
+  const initials = personInitials(person.name);
 
   return (
     <button

@@ -8,6 +8,7 @@ import {
   makeFact,
   makeInteraction,
   matchesPersonSearch,
+  personInitials,
   safePersonFacts,
   safePersonInteractions,
   updatePerson,
@@ -223,5 +224,27 @@ describe('person field validation', () => {
     expect(() => updatePerson('person-1', { domainId: 42 as never })).toThrow(
       'Person details must be valid.',
     );
+  });
+});
+
+describe('personInitials', () => {
+  it('takes the first letter of the first two words', () => {
+    expect(personInitials('ada lovelace byron')).toBe('AL');
+    expect(personInitials('Cher')).toBe('C');
+  });
+
+  it('ignores repeated and surrounding whitespace between words', () => {
+    expect(personInitials('Ada  Lovelace')).toBe('AL');
+    expect(personInitials('  Ada\tLovelace ')).toBe('AL');
+  });
+
+  it('keeps astral characters whole', () => {
+    expect(personInitials('𝒜da 𠀋ee')).toBe('𝒜𠀋');
+  });
+
+  it('returns an empty string for malformed synced names', () => {
+    expect(personInitials(undefined)).toBe('');
+    expect(personInitials(42)).toBe('');
+    expect(personInitials('   ')).toBe('');
   });
 });

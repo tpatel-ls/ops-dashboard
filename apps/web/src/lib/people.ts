@@ -215,6 +215,23 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
   );
 }
 
+/**
+ * Up to two initials from a person's name for the avatar fallback. Splits on
+ * any run of whitespace, so a doubled space does not yield an empty word, and
+ * takes whole code points, so a name starting with an astral character does
+ * not render a lone surrogate. Synced names are not validated, so a non-string
+ * name yields an empty string rather than throwing during render.
+ */
+export function personInitials(name: unknown): string {
+  if (typeof name !== 'string') return '';
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => Array.from(word)[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
 export function comparePeopleByName(
   left: Pick<Person, 'id' | 'name'>,
   right: Pick<Person, 'id' | 'name'>,
