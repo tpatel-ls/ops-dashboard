@@ -13,6 +13,7 @@ import {
   deletePerson,
   makeFact,
   makeInteraction,
+  personInitials,
   safePersonFacts,
   safePersonInteractions,
   updatePerson,
@@ -411,11 +412,7 @@ export function PersonDetail({ person, domains, onClose, onDeleted }: PersonDeta
     return (await getDb().domains.get(person.domainId)) ?? null;
   }, [person.domainId]);
 
-  const initials = person.name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
+  const initials = personInitials(person.name);
 
   return (
     <div className="fixed inset-0 z-40 flex items-stretch justify-end">
