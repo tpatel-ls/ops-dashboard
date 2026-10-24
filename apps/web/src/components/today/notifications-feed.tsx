@@ -20,13 +20,13 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 export function NotificationsFeed() {
-  const notifications = useLiveQuery(async () => {
+  const feed = useLiveQuery(async () => {
     const all = await getDb().notifications.toArray();
-    return all
-      .filter((n) => !n.deletedAt && !n.readAt)
-      .sort(compareNotificationRecency)
-      .slice(0, 5);
+    const unread = all.filter((n) => !n.deletedAt && !n.readAt).sort(compareNotificationRecency);
+    // The header counts every unread notification; only the list is capped.
+    return { items: unread.slice(0, 5), unreadCount: unread.length };
   });
+  const notifications = feed?.items;
 
   return (
     <section
@@ -45,7 +45,7 @@ export function NotificationsFeed() {
           Notifications
         </span>
         <span className="text-muted-foreground ml-auto font-mono text-[10px] tabular-nums">
-          {notifications === undefined ? 'Loading' : `${notifications.length} unread`}
+          {feed === undefined ? 'Loading' : `${feed.unreadCount} unread`}
         </span>
         {notifications && notifications.length > 0 ? (
           <button
