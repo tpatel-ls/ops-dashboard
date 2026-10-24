@@ -32,7 +32,8 @@
       "postcss": "8.5.23",
       "sharp": "0.35.5",
       "source-map-js": "1.2.2",
-      "vite": "8.2.4"
+      "vite": "8.2.4",
+      "zod": "4.6.7"
     },
     "auditConfig": {
       "ignoreGhsas": [
