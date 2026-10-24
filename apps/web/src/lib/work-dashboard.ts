@@ -22,6 +22,7 @@ export interface WorkDashboardModel {
     openTasks: number;
     overdue: number;
     today: number;
+    upcoming: number;
     activeProjects: number;
   };
 }
@@ -91,6 +92,7 @@ export function buildWorkDashboard(
       openTasks: openTasks.length,
       overdue: overdue.length,
       today: dueToday.length,
+      upcoming: upcoming.length,
       activeProjects: activeProjects.length,
     },
   };

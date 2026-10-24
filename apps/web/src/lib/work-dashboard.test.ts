@@ -60,6 +60,16 @@ describe('buildWorkDashboard', () => {
     expect(result.counts.openTasks).toBe(4);
   });
 
+  it('counts every bucketed task even when the rendered lists are capped', () => {
+    const tasks = Array.from({ length: 10 }, (_, index) =>
+      task(`upcoming-${index}`, { scheduledFor: '2026-07-20' }),
+    );
+    const result = buildWorkDashboard(tasks, [], 'all', '2026-07-16');
+
+    expect(result.upcoming).toHaveLength(8);
+    expect(result.counts.upcoming).toBe(10);
+  });
+
   it('buckets timestamps by the browser-local day', () => {
     const timestamp = '2026-08-01T00:30:00+14:00';
     const localDate = `${new Date(timestamp).getFullYear()}-${String(
