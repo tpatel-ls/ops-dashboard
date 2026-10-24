@@ -6,6 +6,8 @@ import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { matchesTaskTag, safeTaskTags, taskTagCounts } from '@/lib/task-query';
 
+const MAX_LISTED_TASKS = 200;
+
 export function TagsIndex() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const tasks = useLiveQuery(async () => {
@@ -45,7 +47,7 @@ export function TagsIndex() {
       </div>
       <div className="surface max-h-[60vh] scrollbar-thin overflow-y-auto p-2">
         <ul className="flex flex-col gap-1">
-          {visibleTasks.slice(0, 200).map((t) => (
+          {visibleTasks.slice(0, MAX_LISTED_TASKS).map((t) => (
             <li key={t.id}>
               <button
                 type="button"
@@ -67,6 +69,12 @@ export function TagsIndex() {
             </li>
           ))}
         </ul>
+        {visibleTasks.length > MAX_LISTED_TASKS ? (
+          <div className="text-muted-foreground px-2 pt-2 text-xs">
+            And {visibleTasks.length - MAX_LISTED_TASKS} more.
+            {selectedTag ? null : ' Select a tag to narrow the list.'}
+          </div>
+        ) : null}
         {visibleTasks.length === 0 ? (
           <div className="text-muted-foreground flex min-h-28 items-center justify-center px-4 text-center text-sm">
             No tasks use #{selectedTag}.
