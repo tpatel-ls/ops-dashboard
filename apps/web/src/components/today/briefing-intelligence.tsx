@@ -24,15 +24,21 @@ export function BriefingIntelligence() {
       db.tasks.toArray(),
       db.captures.toArray(),
     ]);
-    const staleDomains = findStaleDomains({ domains, projects, tasks }).slice(0, 4);
-    const routingIssues = findCaptureRoutingIssues(captures, tasks).slice(0, 5);
+    const allStaleDomains = findStaleDomains({ domains, projects, tasks });
+    const allRoutingIssues = findCaptureRoutingIssues(captures, tasks);
+    // Count the full lists; only the rendered rows are capped. Counting after
+    // the slice pinned the pills at 4 and 5.
     const summary = summarizeBriefing({
       tasks,
-      routingIssues: routingIssues.length,
-      staleDomains: staleDomains.length,
+      routingIssues: allRoutingIssues.length,
+      staleDomains: allStaleDomains.length,
     });
 
-    return { staleDomains, routingIssues, summary };
+    return {
+      staleDomains: allStaleDomains.slice(0, 4),
+      routingIssues: allRoutingIssues.slice(0, 5),
+      summary,
+    };
   });
 
   if (!briefing) {
