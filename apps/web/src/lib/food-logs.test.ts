@@ -189,6 +189,7 @@ describe('foodEstimate', () => {
     expect(foodEstimate(Number.NaN)).toBe(0);
     expect(foodEstimate(Number.POSITIVE_INFINITY)).toBe(0);
     expect(foodEstimate('420' as unknown as number)).toBe(0);
+    expect(foodEstimate(1_000_001)).toBe(1_000_000);
   });
 });
 
@@ -222,15 +223,15 @@ describe('sumFoodLogTotals', () => {
     expect(totals.protein).toBe(0);
   });
 
-  it('keeps aggregate totals finite when synced values overflow', () => {
+  it('bounds huge synced values before aggregating totals', () => {
     const totals = sumFoodLogTotals([
       { totalCalories: Number.MAX_VALUE, totalProtein: Number.MAX_VALUE },
       { totalCalories: Number.MAX_VALUE, totalProtein: Number.MAX_VALUE },
     ]);
 
     expect(totals).toEqual({
-      calories: Number.MAX_SAFE_INTEGER,
-      protein: Number.MAX_SAFE_INTEGER,
+      calories: 2_000_000,
+      protein: 2_000_000,
       carbs: 0,
       fat: 0,
     });

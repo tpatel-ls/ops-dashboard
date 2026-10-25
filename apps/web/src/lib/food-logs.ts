@@ -5,6 +5,8 @@ import type { CaptureSource, FoodItem, FoodLog, MealType } from '@ops-dashboard/
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { compareText } from './compare-text';
 
+const MAX_NUTRITION_ESTIMATE = 1_000_000;
+
 export { computeFoodTotals };
 
 /**
@@ -19,7 +21,9 @@ export { computeFoodTotals };
  * height collapses.
  */
 export function foodEstimate(value: number | undefined): number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0;
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0
+    ? Math.min(value, MAX_NUTRITION_ESTIMATE)
+    : 0;
 }
 
 export function safeFoodItems(value: unknown): FoodItem[] {
@@ -102,7 +106,6 @@ export function foodLogsForDay(logs: FoodLog[], day: string): FoodLog[] {
 const MEAL_TYPES = new Set<MealType>(['breakfast', 'lunch', 'dinner', 'snack']);
 const CAPTURE_SOURCES = new Set<CaptureSource>(['text', 'voice', 'watch', 'journal', 'notepad']);
 const MAX_FOOD_ITEMS = 100;
-const MAX_NUTRITION_ESTIMATE = 1_000_000;
 const MAX_FOOD_DESCRIPTION_LENGTH = 8_000;
 const MAX_FOOD_ITEM_NAME_LENGTH = 500;
 const MAX_FOOD_ITEM_QUANTITY_LENGTH = 200;
