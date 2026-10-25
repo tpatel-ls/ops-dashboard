@@ -61,38 +61,48 @@ export function NotificationsFeed() {
       </div>
 
       {notifications && notifications.length > 0 ? (
-        <ul className="divide-border flex flex-col divide-y">
-          {notifications.map((n) => (
-            <li key={n.id} className="flex items-start gap-3 px-4 py-2.5">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="truncate text-[13px] leading-5">{n.title}</span>
-                  <span
-                    className={cn(
-                      'bg-bg-sunken text-muted-foreground shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] tracking-[0.1em] uppercase',
-                    )}
-                  >
-                    {KIND_LABEL[n.kind] ?? n.kind}
-                  </span>
+        <>
+          <ul className="divide-border flex flex-col divide-y">
+            {notifications.map((n) => (
+              <li key={n.id} className="flex items-start gap-3 px-4 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="truncate text-[13px] leading-5">{n.title}</span>
+                    <span
+                      className={cn(
+                        'bg-bg-sunken text-muted-foreground shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] tracking-[0.1em] uppercase',
+                      )}
+                    >
+                      {KIND_LABEL[n.kind] ?? n.kind}
+                    </span>
+                  </div>
+                  {n.body && (
+                    <p className="text-muted-foreground mt-0.5 line-clamp-2 text-[12px]">
+                      {n.body}
+                    </p>
+                  )}
+                  <p className="text-subtle-foreground mt-0.5 font-mono text-[10px]">
+                    {notificationAge(n.createdAt)}
+                  </p>
                 </div>
-                {n.body && (
-                  <p className="text-muted-foreground mt-0.5 line-clamp-2 text-[12px]">{n.body}</p>
-                )}
-                <p className="text-subtle-foreground mt-0.5 font-mono text-[10px]">
-                  {notificationAge(n.createdAt)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => markNotificationRead(n.id)}
-                className="text-muted-foreground hover:bg-accent hover:text-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-colors"
-                aria-label="Mark as read"
-              >
-                <Check className="size-3.5" aria-hidden />
-              </button>
-            </li>
-          ))}
-        </ul>
+                <button
+                  type="button"
+                  onClick={() => markNotificationRead(n.id)}
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-colors"
+                  aria-label="Mark as read"
+                >
+                  <Check className="size-3.5" aria-hidden />
+                </button>
+              </li>
+            ))}
+          </ul>
+          {feed && feed.unreadCount > notifications.length ? (
+            <p className="text-muted-foreground border-t px-4 py-2.5 text-xs">
+              And {feed.unreadCount - notifications.length} more unread notification
+              {feed.unreadCount - notifications.length === 1 ? '' : 's'}.
+            </p>
+          ) : null}
+        </>
       ) : (
         <p className="text-muted-foreground px-4 py-5 text-sm">
           {notifications === undefined ? 'Loading notifications.' : 'You are all caught up.'}
