@@ -272,7 +272,7 @@ export function FocusMode() {
               Choose a focus task
             </div>
             <div className="surface-flat max-h-40 scrollbar-thin overflow-y-auto p-1">
-              {candidates.slice(0, 6).map((t) => (
+              {candidates.map((t) => (
                 <button
                   key={t.id}
                   type="button"
