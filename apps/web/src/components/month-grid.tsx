@@ -38,6 +38,12 @@ export function MonthGrid() {
   const selectedTasks = visibleTasks.filter((t) => taskScheduledOn(t, selectedDay));
   const openEdit = useAppStore((s) => s.openEdit);
 
+  function moveMonth(amount: number) {
+    const next = addMonths(anchor, amount);
+    setAnchor(next);
+    setSelected(isoDay(next));
+  }
+
   return (
     <div className="grid h-full min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-3">
@@ -46,14 +52,18 @@ export function MonthGrid() {
             <button
               type="button"
               aria-label="Previous month"
-              onClick={() => setAnchor((d) => addMonths(d, -1))}
+              onClick={() => moveMonth(-1)}
               className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded"
             >
               <ChevronLeft className="size-4" />
             </button>
             <button
               type="button"
-              onClick={() => setAnchor(new Date())}
+              onClick={() => {
+                const next = new Date();
+                setAnchor(next);
+                setSelected(isoDay(next));
+              }}
               className="text-muted-foreground hover:bg-accent hover:text-foreground h-10 border-x px-3 text-xs font-medium"
             >
               Today
@@ -61,7 +71,7 @@ export function MonthGrid() {
             <button
               type="button"
               aria-label="Next month"
-              onClick={() => setAnchor((d) => addMonths(d, 1))}
+              onClick={() => moveMonth(1)}
               className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded"
             >
               <ChevronRight className="size-4" />
