@@ -213,13 +213,22 @@ export function PowerDialerCommandCenter() {
     const done = tasks.filter((task) => task.status === 'done').length;
     const urgent = open.filter((task) => task.priority >= 3).length;
     const pct = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
-    const scheduled = tasks
+    const scheduledCandidates = tasks
       .map((task) => ({ task, date: taskInstant(task)?.at ?? null }))
       .filter((item): item is { task: Task; date: Date } => item.date !== null && isOpen(item.task))
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .slice(0, 8);
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+    const scheduled = scheduledCandidates.slice(0, 8);
 
-    return { total: tasks.length, open: open.length, doing, done, urgent, pct, scheduled };
+    return {
+      total: tasks.length,
+      open: open.length,
+      doing,
+      done,
+      urgent,
+      pct,
+      scheduled,
+      scheduledCount: scheduledCandidates.length,
+    };
   }, [data]);
 
   function handleSync() {
@@ -390,6 +399,12 @@ export function PowerDialerCommandCenter() {
                 ))}
               </ol>
             )}
+            {summary.scheduledCount > summary.scheduled.length ? (
+              <p className="text-muted-foreground mt-2 text-xs">
+                And {summary.scheduledCount - summary.scheduled.length} more scheduled task
+                {summary.scheduledCount - summary.scheduled.length === 1 ? '' : 's'}.
+              </p>
+            ) : null}
           </div>
         </section>
 
