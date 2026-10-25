@@ -120,7 +120,11 @@ export function findStaleDomains(input: {
       };
     })
     .filter((item) => item.daysIdle > staleAfterDays)
-    .sort((a, b) => b.daysIdle - a.daysIdle || compareText(a.domainName, b.domainName));
+    .sort((a, b) => {
+      if (a.daysIdle !== b.daysIdle) return b.daysIdle - a.daysIdle;
+      const nameOrder = compareText(a.domainName, b.domainName);
+      return nameOrder !== 0 ? nameOrder : compareText(a.domainId, b.domainId);
+    });
 }
 
 /**
