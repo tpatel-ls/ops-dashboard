@@ -231,6 +231,10 @@ describe('matchesTaskSearch', () => {
     expect(safeTaskTags(['work', 42, 'home', null, 'work'])).toEqual(['work', 'home']);
   });
 
+  it('trims blank tags and collapses Unicode-equivalent spellings', () => {
+    expect(safeTaskTags([' Work ', 'work', ' ', 'Café', 'Cafe\u0301'])).toEqual(['Work', 'Café']);
+  });
+
   const launchTask = task('launch', { title: 'Prepare Launch Review' });
 
   it('matches task titles without case sensitivity', () => {
