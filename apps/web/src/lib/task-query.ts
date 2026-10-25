@@ -24,11 +24,17 @@ function taskFilterText(value: string): string {
 export function safeTaskTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((tag): tag is string => {
-    if (typeof tag !== 'string' || seen.has(tag)) return false;
-    seen.add(tag);
-    return true;
-  });
+  return value
+    .filter((tag): tag is string => {
+      if (typeof tag !== 'string') return false;
+      const normalized = tag.trim();
+      if (!normalized) return false;
+      const key = normalized.normalize('NFKC').toLocaleLowerCase('en-US');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((tag) => tag.trim());
 }
 
 export function compareTasks(a: Task, b: Task): number {
