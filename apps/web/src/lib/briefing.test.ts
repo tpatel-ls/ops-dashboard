@@ -525,4 +525,15 @@ describe('findStaleDomains never-touched reporting', () => {
       domainName: 'Untitled domain',
     });
   });
+
+  it('uses the domain id to break equal idle-time ties', () => {
+    const domains = [
+      { ...meta('domain-b', '2026-06-01T12:00:00.000Z'), name: 'Same', color: '#444', order: 1 },
+      { ...meta('domain-a', '2026-06-01T12:00:00.000Z'), name: 'Same', color: '#555', order: 2 },
+    ] satisfies Domain[];
+
+    expect(
+      findStaleDomains({ domains, projects: [], tasks: [], now }).map((item) => item.domainId),
+    ).toEqual(['domain-a', 'domain-b']);
+  });
 });
