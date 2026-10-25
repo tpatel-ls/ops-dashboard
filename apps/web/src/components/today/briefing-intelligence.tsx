@@ -98,6 +98,8 @@ export function BriefingIntelligence() {
           description="Work areas that have gone quiet."
           href="/domains"
           empty="No stale domains. The board is warm."
+          more={briefing.summary.staleDomains - briefing.staleDomains.length}
+          moreLabel="stale domains"
         >
           {briefing.staleDomains.map((domain) => (
             <StaleDomainRow key={domain.domainId} domain={domain} />
@@ -109,6 +111,8 @@ export function BriefingIntelligence() {
           description="Captures that need a clean home."
           href="/inbox"
           empty="No capture needs routing."
+          more={briefing.summary.routingIssues - briefing.routingIssues.length}
+          moreLabel="routing issues"
         >
           {briefing.routingIssues.map((issue) => (
             <CaptureIssueRow key={issue.captureId} issue={issue} />
@@ -150,6 +154,8 @@ function BriefingPanel({
   description,
   href,
   empty,
+  more = 0,
+  moreLabel,
   children,
 }: {
   icon: typeof AlertTriangle;
@@ -157,6 +163,8 @@ function BriefingPanel({
   description: string;
   href: string;
   empty: string;
+  more?: number;
+  moreLabel: string;
   children: React.ReactNode[];
 }) {
   const hasChildren = children.length > 0;
@@ -179,7 +187,14 @@ function BriefingPanel({
         </Link>
       </div>
       {hasChildren ? (
-        <ul className="space-y-2">{children}</ul>
+        <>
+          <ul className="space-y-2">{children}</ul>
+          {more > 0 ? (
+            <p className="text-muted-foreground mt-2 text-xs">
+              And {more} more {moreLabel}.
+            </p>
+          ) : null}
+        </>
       ) : (
         <div className="border-border bg-bg-sunken/60 text-muted-foreground rounded-md border border-dashed px-3 py-4 text-center text-xs">
           {empty}
