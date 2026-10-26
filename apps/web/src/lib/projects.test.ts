@@ -79,6 +79,22 @@ describe('projectTaskProgress', () => {
         { id: 'list', name: 'Duplicate list', items: [] },
       ]),
     ).toEqual([{ id: 'list', name: 'Launch', items: [{ id: 'item', text: 'Test', done: false }] }]);
+    expect(
+      safeProjectMilestones([
+        { id: 'i'.repeat(129), title: 'Too long', done: false },
+        { id: 'long-title', title: 'x'.repeat(501), done: false },
+        { id: 'valid', title: 'Valid', done: false },
+      ]),
+    ).toEqual([{ id: 'valid', title: 'Valid', done: false }]);
+    expect(
+      safeProjectMilestones(
+        Array.from({ length: 101 }, (_, index) => ({
+          id: `milestone-${index}`,
+          title: 'Valid',
+          done: false,
+        })),
+      ),
+    ).toHaveLength(100);
   });
 
   it('counts only live tasks in the selected project', () => {

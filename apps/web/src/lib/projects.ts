@@ -46,7 +46,7 @@ const MAX_PROJECT_NESTED_TEXT_LENGTH = 500;
 export function safeProjectMilestones(value: unknown): Milestone[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((milestone): milestone is Milestone => {
+  return value.slice(0, MAX_PROJECT_MILESTONES).filter((milestone): milestone is Milestone => {
     if (
       !milestone ||
       typeof milestone !== 'object' ||
@@ -61,6 +61,8 @@ export function safeProjectMilestones(value: unknown): Milestone[] {
     if (
       !id ||
       !title ||
+      !withinCharacters(id, MAX_PROJECT_NESTED_ID_LENGTH) ||
+      !withinCharacters(title, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
       seen.has(id) ||
       ((milestone as Milestone).dueAt !== undefined &&
         localDay((milestone as Milestone).dueAt) !== (milestone as Milestone).dueAt)
