@@ -58,6 +58,22 @@ describe('availableTask', () => {
       { id: 'duplicate', text: 'First', done: false },
     ]);
     expect(
+      safeChecklistItems([
+        { id: 'i'.repeat(129), text: 'Too long', done: false },
+        { id: 'long-text', text: 'x'.repeat(501), done: false },
+        { id: 'valid', text: 'Valid', done: false },
+      ]),
+    ).toEqual([{ id: 'valid', text: 'Valid', done: false }]);
+    expect(
+      safeChecklistItems(
+        Array.from({ length: 101 }, (_, index) => ({
+          id: `item-${index}`,
+          text: 'Valid',
+          done: false,
+        })),
+      ),
+    ).toHaveLength(100);
+    expect(
       safeTaskReminders([
         { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
         { id: 'bad', delivered: 'no' },
