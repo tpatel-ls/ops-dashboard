@@ -80,10 +80,33 @@ describe('availableTask', () => {
         { id: 'invalid-date', taskId: 'task', triggerAt: 'not-a-date', delivered: false },
         { id: ' ', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
         { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: true },
+        {
+          id: 'bad-offset',
+          taskId: 'task',
+          triggerAt: '2026-08-01T09:00:00Z',
+          delivered: false,
+          offsetMinutes: 1.5,
+        },
+        {
+          id: 'x'.repeat(129),
+          taskId: 'task',
+          triggerAt: '2026-08-01T09:00:00Z',
+          delivered: false,
+        },
       ]),
     ).toEqual([
       { id: 'reminder', taskId: 'task', triggerAt: '2026-08-01T09:00:00Z', delivered: false },
     ]);
+    expect(
+      safeTaskReminders(
+        Array.from({ length: 101 }, (_, index) => ({
+          id: `reminder-${index}`,
+          taskId: 'task',
+          triggerAt: '2026-08-01T09:00:00Z',
+          delivered: false,
+        })),
+      ),
+    ).toHaveLength(100);
   });
 
   it('maps missing and deleted tasks to a resolved not-found state', () => {
