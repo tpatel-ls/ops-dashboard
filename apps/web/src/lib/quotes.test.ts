@@ -21,6 +21,17 @@ describe('compareQuoteRecency', () => {
     ).toEqual([{ id: 'thought', text: 'Useful', at: '2026-08-24' }]);
   });
 
+  it('trims, deduplicates, and bounds synced quote tags', () => {
+    expect(
+      safeQuoteTags([
+        ' Work ',
+        'work',
+        'x'.repeat(2_049),
+        ...Array.from({ length: 100 }, (_, i) => `tag-${i}`),
+      ]),
+    ).toEqual(['Work', ...Array.from({ length: 97 }, (_, i) => `tag-${i}`)]);
+  });
+
   it('orders quote instants and leaves malformed records last', () => {
     const quotes = [
       { id: 'invalid', createdAt: 'not-a-date' },

@@ -20,6 +20,8 @@ const MAX_QUOTE_TEXT_LENGTH = 8_000;
 const MAX_QUOTE_AUTHOR_LENGTH = 500;
 const MAX_QUOTE_SOURCE_LENGTH = 200;
 const MAX_QUOTE_BOOK_ID_LENGTH = 128;
+const MAX_QUOTE_TAGS = 100;
+const MAX_QUOTE_TAG_LENGTH = 2_048;
 const MAX_QUOTE_THOUGHTS = 100;
 const MAX_QUOTE_THOUGHT_TEXT_LENGTH = 2_000;
 const MAX_QUOTE_THOUGHT_ID_LENGTH = 128;
@@ -29,11 +31,18 @@ export const compareQuoteRecency = compareCreatedAtRecency;
 export function safeQuoteTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((tag): tag is string => {
-    if (typeof tag !== 'string' || seen.has(tag)) return false;
-    seen.add(tag);
-    return true;
-  });
+  const tags: string[] = [];
+  for (const tag of value.slice(0, MAX_QUOTE_TAGS)) {
+    if (typeof tag !== 'string') continue;
+    const normalized = tag.trim();
+    const key = normalized.normalize('NFKC').toLocaleLowerCase('en-US');
+    if (!normalized || Array.from(normalized).length > MAX_QUOTE_TAG_LENGTH || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    tags.push(normalized);
+  }
+  return tags;
 }
 
 export function safeQuoteThoughts(value: unknown): Thought[] {
