@@ -144,7 +144,7 @@ function personSearchText(value: unknown): string {
 export function safePersonFacts(value: unknown): PersonFact[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((fact): fact is PersonFact => {
+  return value.slice(0, MAX_PERSON_FACTS).filter((fact): fact is PersonFact => {
     if (
       !fact ||
       typeof fact !== 'object' ||
@@ -157,7 +157,16 @@ export function safePersonFacts(value: unknown): PersonFact[] {
     const id = (fact as PersonFact).id.trim();
     const label = (fact as PersonFact).label.trim();
     const factValue = (fact as PersonFact).value.trim();
-    if (!id || !label || !factValue || seen.has(id)) return false;
+    if (
+      !id ||
+      !label ||
+      !factValue ||
+      !withinCharacters(id, MAX_PERSON_NESTED_ID_LENGTH) ||
+      !withinCharacters(label, MAX_PERSON_FACT_LABEL_LENGTH) ||
+      !withinCharacters(factValue, MAX_PERSON_FACT_VALUE_LENGTH) ||
+      seen.has(id)
+    )
+      return false;
     seen.add(id);
     return true;
   });

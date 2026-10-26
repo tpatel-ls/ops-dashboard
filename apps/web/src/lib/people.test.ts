@@ -53,6 +53,23 @@ describe('matchesPersonSearch', () => {
         { id: 'interaction', date: '2026-08-16', note: 'Duplicate' },
       ]),
     ).toEqual([{ id: 'interaction', date: '2026-08-16', note: 'Met' }]);
+    expect(
+      safePersonFacts([
+        { id: 'i'.repeat(129), label: 'Valid', value: 'Value' },
+        { id: 'long-label', label: 'x'.repeat(201), value: 'Value' },
+        { id: 'long-value', label: 'Valid', value: 'x'.repeat(2_001) },
+        { id: 'valid', label: 'Role', value: 'Lead' },
+      ]),
+    ).toEqual([{ id: 'valid', label: 'Role', value: 'Lead' }]);
+    expect(
+      safePersonFacts(
+        Array.from({ length: 101 }, (_, index) => ({
+          id: `fact-${index}`,
+          label: 'Role',
+          value: 'Lead',
+        })),
+      ),
+    ).toHaveLength(100);
   });
 
   it('matches useful relationship context without case sensitivity', () => {
