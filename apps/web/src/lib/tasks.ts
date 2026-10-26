@@ -55,6 +55,7 @@ const MAX_TASK_REFERENCE_LENGTH = 128;
 const MAX_TASK_CHECKLIST_ITEMS = 100;
 const MAX_TASK_CHECKLIST_ID_LENGTH = 128;
 const MAX_TASK_CHECKLIST_TEXT_LENGTH = 500;
+const MAX_TASK_REMINDERS = 100;
 
 export function safeChecklistItems(value: unknown): ChecklistItem[] {
   if (!Array.isArray(value)) return [];
@@ -87,7 +88,7 @@ export function safeChecklistItems(value: unknown): ChecklistItem[] {
 export function safeTaskReminders(value: unknown): Reminder[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((reminder): reminder is Reminder => {
+  return value.slice(0, MAX_TASK_REMINDERS).filter((reminder): reminder is Reminder => {
     if (
       !reminder ||
       typeof reminder !== 'object' ||
@@ -101,7 +102,17 @@ export function safeTaskReminders(value: unknown): Reminder[] {
     const id = (reminder as Reminder).id.trim();
     const taskId = (reminder as Reminder).taskId.trim();
     const triggerAt = (reminder as Reminder).triggerAt;
-    if (!id || !taskId || !Number.isFinite(Date.parse(triggerAt)) || seen.has(id)) return false;
+    if (
+      !id ||
+      !taskId ||
+      Array.from(id).length > MAX_TASK_REFERENCE_LENGTH ||
+      Array.from(taskId).length > MAX_TASK_REFERENCE_LENGTH ||
+      !Number.isFinite(Date.parse(triggerAt)) ||
+      ((reminder as Reminder).offsetMinutes !== undefined &&
+        !Number.isSafeInteger((reminder as Reminder).offsetMinutes)) ||
+      seen.has(id)
+    )
+      return false;
     seen.add(id);
     return true;
   });
@@ -209,6 +220,9 @@ function normalizeTaskRecurrence(patch: Partial<Task>): void {
 function normalizeTaskReminders(patch: Partial<Task>, ownerTaskId: string): void {
   if (!Object.hasOwn(patch, 'reminders')) return;
   if (!Array.isArray(patch.reminders)) throw new Error('Task reminders must be valid.');
+  if (patch.reminders.length > MAX_TASK_REMINDERS) {
+    throw new Error('Task reminders must contain at most 100 items.');
+  }
   const seen = new Set<string>();
   patch.reminders = patch.reminders.map((reminder) => {
     if (
