@@ -52,13 +52,14 @@ const MAX_TASK_TITLE_LENGTH = 500;
 // 128/500 pair projects and content already apply to a checklist entry.
 const MAX_TASK_NOTES_LENGTH = 4_000;
 const MAX_TASK_REFERENCE_LENGTH = 128;
+const MAX_TASK_CHECKLIST_ITEMS = 100;
 const MAX_TASK_CHECKLIST_ID_LENGTH = 128;
 const MAX_TASK_CHECKLIST_TEXT_LENGTH = 500;
 
 export function safeChecklistItems(value: unknown): ChecklistItem[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((item): item is ChecklistItem => {
+  return value.slice(0, MAX_TASK_CHECKLIST_ITEMS).filter((item): item is ChecklistItem => {
     if (
       !item ||
       typeof item !== 'object' ||
@@ -70,7 +71,14 @@ export function safeChecklistItems(value: unknown): ChecklistItem[] {
     }
     const id = (item as ChecklistItem).id.trim();
     const text = (item as ChecklistItem).text.trim();
-    if (!id || !text || seen.has(id)) return false;
+    if (
+      !id ||
+      !text ||
+      Array.from(id).length > MAX_TASK_CHECKLIST_ID_LENGTH ||
+      Array.from(text).length > MAX_TASK_CHECKLIST_TEXT_LENGTH ||
+      seen.has(id)
+    )
+      return false;
     seen.add(id);
     return true;
   });
@@ -132,6 +140,9 @@ function normalizeTaskCollections(patch: Partial<Task>): void {
   }
   if (Object.hasOwn(patch, 'checklist')) {
     if (!Array.isArray(patch.checklist)) throw new Error('Task checklist must be valid.');
+    if (patch.checklist.length > MAX_TASK_CHECKLIST_ITEMS) {
+      throw new Error('Task checklist must contain at most 100 items.');
+    }
     const seen = new Set<string>();
     patch.checklist = patch.checklist.map((item) => {
       if (
