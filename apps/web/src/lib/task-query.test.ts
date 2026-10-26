@@ -235,6 +235,15 @@ describe('matchesTaskSearch', () => {
     expect(safeTaskTags([' Work ', 'work', ' ', 'Café', 'Cafe\u0301'])).toEqual(['Work', 'Café']);
   });
 
+  it('bounds oversized synced tag collections and entries', () => {
+    const tags = ['keep', 'x'.repeat(2_049), ...Array.from({ length: 100 }, (_, i) => `tag-${i}`)];
+
+    expect(safeTaskTags(tags)).toEqual([
+      'keep',
+      ...Array.from({ length: 98 }, (_, i) => `tag-${i}`),
+    ]);
+  });
+
   const launchTask = task('launch', { title: 'Prepare Launch Review' });
 
   it('matches task titles without case sensitivity', () => {
