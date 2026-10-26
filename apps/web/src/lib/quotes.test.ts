@@ -32,6 +32,25 @@ describe('compareQuoteRecency', () => {
     ).toEqual(['Work', ...Array.from({ length: 97 }, (_, i) => `tag-${i}`)]);
   });
 
+  it('bounds synced thought identifiers and text', () => {
+    expect(
+      safeQuoteThoughts([
+        { id: 'i'.repeat(129), text: 'Too long', at: '2026-08-24' },
+        { id: 'long-text', text: 'x'.repeat(2_001), at: '2026-08-24' },
+        { id: 'valid', text: 'Useful', at: '2026-08-24' },
+      ]),
+    ).toEqual([{ id: 'valid', text: 'Useful', at: '2026-08-24' }]);
+    expect(
+      safeQuoteThoughts(
+        Array.from({ length: 101 }, (_, index) => ({
+          id: `thought-${index}`,
+          text: 'Useful',
+          at: '2026-08-24',
+        })),
+      ),
+    ).toHaveLength(100);
+  });
+
   it('orders quote instants and leaves malformed records last', () => {
     const quotes = [
       { id: 'invalid', createdAt: 'not-a-date' },
