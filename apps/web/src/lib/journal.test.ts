@@ -25,6 +25,17 @@ describe('compareJournalEntries', () => {
     expect(safeJournalTags(['health', null, 4, 'health'])).toEqual(['health']);
   });
 
+  it('trims, deduplicates, and bounds synced journal tags', () => {
+    expect(
+      safeJournalTags([
+        ' Health ',
+        'health',
+        'x'.repeat(65),
+        ...Array.from({ length: 50 }, (_, i) => `tag-${i}`),
+      ]),
+    ).toEqual(['Health', ...Array.from({ length: 47 }, (_, i) => `tag-${i}`)]);
+  });
+
   it('orders valid journal days before malformed records', () => {
     const entries = [
       { id: 'invalid', date: '2026-99-99', createdAt: '2026-08-26T15:00:00Z' },

@@ -11,15 +11,24 @@ const JOURNAL_SOURCES = new Set<NonNullable<JournalEntry['source']>>(['voice', '
 const MAX_JOURNAL_BODY_LENGTH = 50_000;
 const MAX_JOURNAL_TITLE_LENGTH = 500;
 const MAX_JOURNAL_MOOD_LENGTH = 100;
+const MAX_JOURNAL_TAGS = 50;
+const MAX_JOURNAL_TAG_LENGTH = 64;
 
 export function safeJournalTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((tag): tag is string => {
-    if (typeof tag !== 'string' || seen.has(tag)) return false;
-    seen.add(tag);
-    return true;
-  });
+  const tags: string[] = [];
+  for (const tag of value.slice(0, MAX_JOURNAL_TAGS)) {
+    if (typeof tag !== 'string') continue;
+    const normalized = tag.trim();
+    const key = normalized.normalize('NFKC').toLocaleLowerCase('en-US');
+    if (!normalized || Array.from(normalized).length > MAX_JOURNAL_TAG_LENGTH || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    tags.push(normalized);
+  }
+  return tags;
 }
 
 /**
