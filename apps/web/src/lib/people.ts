@@ -175,29 +175,33 @@ export function safePersonFacts(value: unknown): PersonFact[] {
 export function safePersonInteractions(value: unknown): Interaction[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((interaction): interaction is Interaction => {
-    if (
-      !interaction ||
-      typeof interaction !== 'object' ||
-      typeof (interaction as Interaction).id !== 'string' ||
-      typeof (interaction as Interaction).date !== 'string' ||
-      typeof (interaction as Interaction).note !== 'string'
-    ) {
-      return false;
-    }
-    const id = (interaction as Interaction).id.trim();
-    const note = (interaction as Interaction).note.trim();
-    if (
-      !id ||
-      !note ||
-      !Number.isFinite(Date.parse((interaction as Interaction).date)) ||
-      seen.has(id)
-    ) {
-      return false;
-    }
-    seen.add(id);
-    return true;
-  });
+  return value
+    .slice(0, MAX_PERSON_INTERACTIONS)
+    .filter((interaction): interaction is Interaction => {
+      if (
+        !interaction ||
+        typeof interaction !== 'object' ||
+        typeof (interaction as Interaction).id !== 'string' ||
+        typeof (interaction as Interaction).date !== 'string' ||
+        typeof (interaction as Interaction).note !== 'string'
+      ) {
+        return false;
+      }
+      const id = (interaction as Interaction).id.trim();
+      const note = (interaction as Interaction).note.trim();
+      if (
+        !id ||
+        !note ||
+        !withinCharacters(id, MAX_PERSON_NESTED_ID_LENGTH) ||
+        !withinCharacters(note, MAX_PERSON_INTERACTION_NOTE_LENGTH) ||
+        !Number.isFinite(Date.parse((interaction as Interaction).date)) ||
+        seen.has(id)
+      ) {
+        return false;
+      }
+      seen.add(id);
+      return true;
+    });
 }
 
 export function matchesPersonSearch(person: Person, query: string): boolean {

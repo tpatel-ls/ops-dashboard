@@ -70,6 +70,30 @@ describe('matchesPersonSearch', () => {
         })),
       ),
     ).toHaveLength(100);
+    expect(
+      safePersonInteractions([
+        {
+          id: 'i'.repeat(129),
+          date: '2026-08-16',
+          note: 'Valid',
+        },
+        {
+          id: 'long-note',
+          date: '2026-08-16',
+          note: 'x'.repeat(4_001),
+        },
+        { id: 'valid', date: '2026-08-16', note: 'Met' },
+      ]),
+    ).toEqual([{ id: 'valid', date: '2026-08-16', note: 'Met' }]);
+    expect(
+      safePersonInteractions(
+        Array.from({ length: 501 }, (_, index) => ({
+          id: `interaction-${index}`,
+          date: '2026-08-16',
+          note: 'Met',
+        })),
+      ),
+    ).toHaveLength(500);
   });
 
   it('matches useful relationship context without case sensitivity', () => {
