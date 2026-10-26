@@ -29,8 +29,18 @@ describe('compareFoodLogCreation', () => {
         { name: 'Bread', quantity: 2 },
         { name: 'Broken calories', calories: Number.NaN },
         { name: 'Broken protein', calories: 100, protein: -1 },
+        { name: 'x'.repeat(501), calories: 100 },
+        { name: 'Valid', quantity: 'x'.repeat(201), calories: 100 },
       ]),
     ).toEqual([{ name: 'Eggs', calories: 140 }]);
+    expect(
+      safeFoodItems(
+        Array.from({ length: 101 }, (_, index) => ({
+          name: `Food ${index}`,
+          calories: 100,
+        })),
+      ),
+    ).toHaveLength(100);
   });
 
   it('orders offset timestamps by instant and corrupted timestamps last', () => {

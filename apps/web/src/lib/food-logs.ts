@@ -28,14 +28,17 @@ export function foodEstimate(value: number | undefined): number {
 
 export function safeFoodItems(value: unknown): FoodItem[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is FoodItem => {
+  return value.slice(0, MAX_FOOD_ITEMS).filter((item): item is FoodItem => {
     if (!item || typeof item !== 'object') return false;
     const candidate = item as Partial<FoodItem>;
     const estimates = [candidate.protein, candidate.carbs, candidate.fat];
     return (
       typeof candidate.name === 'string' &&
       Boolean(candidate.name.trim()) &&
+      Array.from(candidate.name.trim()).length <= MAX_FOOD_ITEM_NAME_LENGTH &&
       (candidate.quantity === undefined || typeof candidate.quantity === 'string') &&
+      (candidate.quantity === undefined ||
+        Array.from(candidate.quantity.trim()).length <= MAX_FOOD_ITEM_QUANTITY_LENGTH) &&
       typeof candidate.calories === 'number' &&
       Number.isFinite(candidate.calories) &&
       candidate.calories >= 0 &&
