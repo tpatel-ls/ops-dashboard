@@ -77,7 +77,7 @@ export function safeProjectMilestones(value: unknown): Milestone[] {
 export function safeProjectChecklists(value: unknown): NamedChecklist[] {
   if (!Array.isArray(value)) return [];
   const seenChecklists = new Set<string>();
-  return value.filter((checklist): checklist is NamedChecklist => {
+  return value.slice(0, MAX_PROJECT_CHECKLISTS).filter((checklist): checklist is NamedChecklist => {
     if (
       !checklist ||
       typeof checklist !== 'object' ||
@@ -89,7 +89,15 @@ export function safeProjectChecklists(value: unknown): NamedChecklist[] {
     }
     const id = (checklist as NamedChecklist).id.trim();
     const name = (checklist as NamedChecklist).name.trim();
-    if (!id || !name || seenChecklists.has(id)) return false;
+    if (
+      !id ||
+      !name ||
+      !withinCharacters(id, MAX_PROJECT_NESTED_ID_LENGTH) ||
+      !withinCharacters(name, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
+      checklist.items.length > MAX_PROJECT_CHECKLIST_ITEMS ||
+      seenChecklists.has(id)
+    )
+      return false;
 
     const seenItems = new Set<string>();
     const validItems = (checklist as NamedChecklist).items.every((item: ChecklistItem) => {
@@ -103,7 +111,14 @@ export function safeProjectChecklists(value: unknown): NamedChecklist[] {
       }
       const itemId = item.id.trim();
       const text = item.text.trim();
-      if (!itemId || !text || seenItems.has(itemId)) return false;
+      if (
+        !itemId ||
+        !text ||
+        !withinCharacters(itemId, MAX_PROJECT_NESTED_ID_LENGTH) ||
+        !withinCharacters(text, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
+        seenItems.has(itemId)
+      )
+        return false;
       seenItems.add(itemId);
       return true;
     });

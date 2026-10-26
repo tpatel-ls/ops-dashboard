@@ -95,6 +95,39 @@ describe('projectTaskProgress', () => {
         })),
       ),
     ).toHaveLength(100);
+    expect(
+      safeProjectChecklists([
+        {
+          id: 'long-name',
+          name: 'x'.repeat(501),
+          items: [],
+        },
+        {
+          id: 'long-item',
+          name: 'Valid',
+          items: [{ id: 'item', text: 'x'.repeat(501), done: false }],
+        },
+        {
+          id: 'too-many-items',
+          name: 'Valid',
+          items: Array.from({ length: 101 }, (_, index) => ({
+            id: `item-${index}`,
+            text: 'Valid',
+            done: false,
+          })),
+        },
+        { id: 'valid', name: 'Valid', items: [] },
+      ]),
+    ).toEqual([{ id: 'valid', name: 'Valid', items: [] }]);
+    expect(
+      safeProjectChecklists(
+        Array.from({ length: 51 }, (_, index) => ({
+          id: `list-${index}`,
+          name: 'Valid',
+          items: [],
+        })),
+      ),
+    ).toHaveLength(50);
   });
 
   it('counts only live tasks in the selected project', () => {
