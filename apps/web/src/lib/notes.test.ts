@@ -6,6 +6,17 @@ describe('compareNoteRecency', () => {
     expect(safeNoteTags(['idea', 7, null, 'idea'])).toEqual(['idea']);
   });
 
+  it('trims, deduplicates, and bounds synced note tags', () => {
+    expect(
+      safeNoteTags([
+        ' Work ',
+        'work',
+        'x'.repeat(65),
+        ...Array.from({ length: 50 }, (_, i) => `tag-${i}`),
+      ]),
+    ).toEqual(['Work', ...Array.from({ length: 47 }, (_, i) => `tag-${i}`)]);
+  });
+
   it('orders notes by creation instant and places malformed metadata last', () => {
     const notes = [
       { id: 'invalid', createdAt: 'invalid' },

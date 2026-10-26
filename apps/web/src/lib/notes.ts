@@ -11,17 +11,26 @@ const MAX_NOTE_BODY_LENGTH = 50_000;
 const MAX_NOTE_SOURCE_LENGTH = 200;
 const MAX_NOTE_IMAGE_URL_LENGTH = 2_048;
 const MAX_NOTE_BOOK_ID_LENGTH = 128;
+const MAX_NOTE_TAGS = 50;
+const MAX_NOTE_TAG_LENGTH = 64;
 
 export const compareNoteRecency = compareCreatedAtRecency;
 
 export function safeNoteTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((tag): tag is string => {
-    if (typeof tag !== 'string' || seen.has(tag)) return false;
-    seen.add(tag);
-    return true;
-  });
+  const tags: string[] = [];
+  for (const tag of value.slice(0, MAX_NOTE_TAGS)) {
+    if (typeof tag !== 'string') continue;
+    const normalized = tag.trim();
+    const key = normalized.normalize('NFKC').toLocaleLowerCase('en-US');
+    if (!normalized || Array.from(normalized).length > MAX_NOTE_TAG_LENGTH || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    tags.push(normalized);
+  }
+  return tags;
 }
 
 function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
