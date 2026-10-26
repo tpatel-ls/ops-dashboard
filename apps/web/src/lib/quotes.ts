@@ -48,7 +48,7 @@ export function safeQuoteTags(value: unknown): string[] {
 export function safeQuoteThoughts(value: unknown): Thought[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value.filter((thought): thought is Thought => {
+  return value.slice(0, MAX_QUOTE_THOUGHTS).filter((thought): thought is Thought => {
     if (
       !thought ||
       typeof thought !== 'object' ||
@@ -62,7 +62,13 @@ export function safeQuoteThoughts(value: unknown): Thought[] {
       return false;
     }
     const id = (thought as Thought).id.trim();
-    if (seen.has(id)) return false;
+    const text = (thought as Thought).text.trim();
+    if (
+      Array.from(id).length > MAX_QUOTE_THOUGHT_ID_LENGTH ||
+      Array.from(text).length > MAX_QUOTE_THOUGHT_TEXT_LENGTH ||
+      seen.has(id)
+    )
+      return false;
     seen.add(id);
     return true;
   });
