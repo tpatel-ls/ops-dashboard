@@ -3,6 +3,9 @@ import type { Task } from '@ops-dashboard/core';
 import { compareText } from './compare-text';
 import { taskEarliestDay } from './task-dates';
 
+const MAX_TASK_TAGS = 100;
+const MAX_TASK_TAG_LENGTH = 2_048;
+
 export function safeTaskPriority(value: unknown): number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 3
     ? value
@@ -24,17 +27,21 @@ function taskFilterText(value: string): string {
 export function safeTaskTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
-  return value
-    .filter((tag): tag is string => {
-      if (typeof tag !== 'string') return false;
-      const normalized = tag.trim();
-      if (!normalized) return false;
-      const key = normalized.normalize('NFKC').toLocaleLowerCase('en-US');
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .map((tag) => tag.trim());
+  const tags: string[] = [];
+  for (const tag of value.slice(0, MAX_TASK_TAGS)) {
+    if (typeof tag !== 'string') continue;
+    const normalized = tag.trim();
+    if (
+      !normalized ||
+      Array.from(normalized).length > MAX_TASK_TAG_LENGTH ||
+      seen.has(normalized.normalize('NFKC').toLocaleLowerCase('en-US'))
+    ) {
+      continue;
+    }
+    seen.add(normalized.normalize('NFKC').toLocaleLowerCase('en-US'));
+    tags.push(normalized);
+  }
+  return tags;
 }
 
 export function compareTasks(a: Task, b: Task): number {
