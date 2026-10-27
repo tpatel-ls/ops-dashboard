@@ -60,7 +60,12 @@ export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanva
 
   const handleMount = useCallback(
     (editor: import('tldraw').Editor) => {
-      if (initialDocument && typeof initialDocument === 'object') {
+      // A blank board is stored as `{}`, which is not a loadable snapshot.
+      if (
+        initialDocument &&
+        typeof initialDocument === 'object' &&
+        Object.keys(initialDocument).length > 0
+      ) {
         try {
           editor.store.loadStoreSnapshot(initialDocument as TLStoreSnapshot);
         } catch {
