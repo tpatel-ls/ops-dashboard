@@ -20,7 +20,7 @@ function whiteboardName(name: string): string {
 // held back every later whiteboard write on the device. An empty object is the
 // stored form of a blank board; boards saved as null before this are repaired
 // on their next rename or delete.
-function storedDocument(document: unknown): unknown {
+export function storedDocument(document: unknown): unknown {
   return document ?? {};
 }
 

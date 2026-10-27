@@ -89,4 +89,28 @@ describe('importAll', () => {
     });
     expect(mocks.transactionTables).toHaveLength(4);
   });
+
+  it('restores a blank board from an older export with a non-null document', async () => {
+    mocks.enqueueOp.mockClear();
+    const board = {
+      ...metadata,
+      id: 'board-2',
+      name: 'Blank board',
+      document: null,
+      linkedTaskIds: [],
+    };
+
+    await importAll({
+      version: 1,
+      exportedAt: '2026-08-23T12:00:00.000Z',
+      tasks: [],
+      projects: [],
+      whiteboards: [board],
+    });
+
+    expect(mocks.bulkPutWhiteboards).toHaveBeenLastCalledWith([{ ...board, document: {} }]);
+    expect(mocks.enqueueOp).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { ...board, document: {} } }),
+    );
+  });
 });
