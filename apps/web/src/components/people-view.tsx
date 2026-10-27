@@ -16,6 +16,7 @@ import {
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 // ─── Create person form ───────────────────────────────────────────────────────
 
@@ -57,6 +58,7 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
         className="input"
         autoFocus
         onKeyDown={(e) => {
+          if (isComposingKeyEvent(e)) return;
           if (e.key === 'Escape') onCancel();
         }}
       />

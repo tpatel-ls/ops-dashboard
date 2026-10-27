@@ -23,6 +23,7 @@ import { compareProjectTasks } from '@/lib/task-query';
 import { useActiveOrgs } from '@/components/org-switcher';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 // ─── Status + kind labels ────────────────────────────────────────────────────
 
@@ -130,6 +131,7 @@ function MilestonesSection({ project }: { project: Project }) {
             onChange={(e) => setNewTitle(e.target.value)}
             autoFocus
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') addMilestone();
               if (e.key === 'Escape') setAdding(false);
             }}
@@ -264,6 +266,7 @@ function ChecklistsSection({ project }: { project: Project }) {
             onChange={(e) => setNewListName(e.target.value)}
             autoFocus
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') addList();
               if (e.key === 'Escape') setAddingList(false);
             }}
@@ -391,6 +394,7 @@ function ChecklistGroup({
                 onChange={(e) => setItemText(e.target.value)}
                 autoFocus
                 onKeyDown={(e) => {
+                  if (isComposingKeyEvent(e)) return;
                   if (e.key === 'Enter' && itemText.trim()) {
                     onAddItem(itemText.trim());
                     setItemText('');
@@ -616,6 +620,7 @@ function LogWorkSection({ project }: { project: Project }) {
             onChange={(e) => setNote(e.target.value)}
             className="input flex-1"
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') handleLog();
             }}
           />

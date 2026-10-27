@@ -18,6 +18,7 @@ import {
   safePersonInteractions,
   updatePerson,
 } from '@/lib/people';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 // ─── Facts section ────────────────────────────────────────────────────────────
 
@@ -73,6 +74,7 @@ function FactsSection({ person }: { person: Person }) {
             onChange={(e) => setLabel(e.target.value)}
             autoFocus
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Escape') setAdding(false);
             }}
           />
@@ -83,6 +85,7 @@ function FactsSection({ person }: { person: Person }) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') addFact();
               if (e.key === 'Escape') setAdding(false);
             }}
@@ -317,6 +320,7 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
             onChange={(e) => setName(e.target.value)}
             onBlur={saveName}
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
             }}
           />
@@ -332,6 +336,7 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
             onChange={(e) => setRelationship(e.target.value)}
             onBlur={saveRelationship}
             onKeyDown={(e) => {
+              if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
             }}
           />

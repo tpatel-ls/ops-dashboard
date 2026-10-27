@@ -10,6 +10,20 @@ export interface Hotkey {
   when?: () => boolean;
 }
 
+/**
+ * True while a key press belongs to an IME composition (Japanese, Chinese,
+ * Korean, and other input methods). The Enter that confirms a conversion and
+ * the Escape that cancels one must reach the input method, not submit or close
+ * the field. Chrome and Firefox set `isComposing`; Safari reports the confirming
+ * Enter after `compositionend` and marks it only with the legacy keyCode 229.
+ */
+export function isComposingKeyEvent(e: {
+  keyCode: number;
+  nativeEvent: { isComposing: boolean };
+}): boolean {
+  return e.nativeEvent.isComposing || e.keyCode === 229;
+}
+
 function isTypingTarget(e: KeyboardEvent): boolean {
   const target = e.target as HTMLElement | null;
   if (!target) return false;
