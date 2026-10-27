@@ -78,10 +78,14 @@ export function Notepad() {
       setValue((v) => (v.trim() ? `${v.replace(/\s+$/, '')}\n${text}` : text)),
   });
 
+  // Mirror every edit into the draft hook. It saves its own copy when the tab
+  // is hidden and when the notepad unmounts, so a copy left at the mount-time
+  // text overwrote whatever the debounce below had already stored.
   useEffect(() => {
+    setDraft(value);
     const id = window.setTimeout(() => saveDraft(value), 450);
     return () => window.clearTimeout(id);
-  }, [saveDraft, value]);
+  }, [saveDraft, setDraft, value]);
 
   // Auto-grow the textarea with its content (capped so it never eats the page).
   useEffect(() => {
