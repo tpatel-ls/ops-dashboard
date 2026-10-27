@@ -196,17 +196,27 @@ export function OpenTasks() {
                         </div>
                       </button>
 
-                      {/* star to promote */}
+                      {/* star to promote, or unstar if already in the daily mission */}
                       <button
                         type="button"
-                        onClick={() => updateTask(task.id, { starred: true })}
+                        onClick={() => updateTask(task.id, { starred: !task.starred })}
                         className={cn(
-                          'text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md opacity-70 transition-all sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
-                          'hover:text-primary',
+                          'inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-all',
+                          task.starred
+                            ? 'text-primary opacity-80 hover:opacity-100'
+                            : 'text-muted-foreground hover:text-primary opacity-70 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
                         )}
-                        aria-label={`Add ${task.title} to daily mission`}
+                        aria-label={
+                          task.starred
+                            ? `Remove ${task.title} from daily mission`
+                            : `Add ${task.title} to daily mission`
+                        }
                       >
-                        <Star className="size-4" aria-hidden />
+                        <Star
+                          className="size-4"
+                          fill={task.starred ? 'currentColor' : 'none'}
+                          aria-hidden
+                        />
                       </button>
                     </li>
                   );
