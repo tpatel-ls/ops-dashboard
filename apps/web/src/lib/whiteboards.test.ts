@@ -116,4 +116,21 @@ describe('whiteboard names', () => {
       expect.objectContaining({ recordId: 'whiteboard-test', op: 'put' }),
     );
   });
+
+  it('stores a blank board with a non-null document for the jsonb not null column', async () => {
+    const board = await createWhiteboard('Launch map');
+
+    expect(board.document).toEqual({});
+  });
+
+  it('repairs a null document when a legacy board is renamed or deleted', async () => {
+    const legacy = { id: 'whiteboard-test', name: 'Launch map', version: 1, document: null };
+    mocks.get.mockResolvedValue(legacy);
+
+    await renameWhiteboard('whiteboard-test', 'Roadmap');
+    await softDeleteWhiteboard('whiteboard-test');
+
+    expect(mocks.put).toHaveBeenNthCalledWith(1, expect.objectContaining({ document: {} }));
+    expect(mocks.put).toHaveBeenNthCalledWith(2, expect.objectContaining({ document: {} }));
+  });
 });
