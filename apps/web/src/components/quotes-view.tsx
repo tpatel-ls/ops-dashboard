@@ -15,6 +15,7 @@ import {
   safeQuoteThoughts,
 } from '@/lib/quotes';
 import { cn } from '@ops-dashboard/ui';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 
@@ -171,6 +172,7 @@ function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
+          if (isComposingKeyEvent(e)) return;
           if (e.key === 'Escape') onDone();
         }}
       />

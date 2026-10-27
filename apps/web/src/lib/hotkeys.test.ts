@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchesHotkey } from './hotkeys';
+import { isComposingKeyEvent, matchesHotkey } from './hotkeys';
 
 function keyboardEvent(
   key: string,
@@ -59,5 +59,19 @@ describe('matchesHotkey', () => {
       false,
     );
     expect(matchesHotkey('mod+k', keyboardEvent('k', { ctrlKey: true, altKey: true }))).toBe(false);
+  });
+});
+
+describe('isComposingKeyEvent', () => {
+  it('flags a key pressed inside an IME composition', () => {
+    expect(isComposingKeyEvent({ keyCode: 13, nativeEvent: { isComposing: true } })).toBe(true);
+  });
+
+  it("flags Safari's confirming Enter, which reports only keyCode 229", () => {
+    expect(isComposingKeyEvent({ keyCode: 229, nativeEvent: { isComposing: false } })).toBe(true);
+  });
+
+  it('passes an ordinary Enter through', () => {
+    expect(isComposingKeyEvent({ keyCode: 13, nativeEvent: { isComposing: false } })).toBe(false);
   });
 });

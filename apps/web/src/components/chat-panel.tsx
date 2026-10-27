@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, KeyRound } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 export interface ChatMessage {
   id: string;
@@ -38,6 +39,7 @@ export function ChatPanel({
   }, [messages]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (isComposingKeyEvent(e)) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!loading && input.trim()) onSubmit();

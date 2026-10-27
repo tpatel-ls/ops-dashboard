@@ -46,6 +46,7 @@ import {
 } from '@/lib/work-logger';
 import { compareOrganizations } from '@/lib/org-lanes';
 import { readLocalStorage, removeLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 const MODE_META: Array<{
   id: WorkLoggerMode;
@@ -517,6 +518,7 @@ function WorkLoggerPanel({
                     aria-errormessage={error ? 'work-logger-error' : undefined}
                     className="input min-h-11 flex-1"
                     onKeyDown={(event) => {
+                      if (isComposingKeyEvent(event)) return;
                       if (event.key === 'Enter') {
                         event.preventDefault();
                         void addOrganization();

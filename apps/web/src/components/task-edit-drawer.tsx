@@ -35,6 +35,7 @@ import { routedTag } from '@/lib/brain-dump-result';
 import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
 import { safeTaskTags } from '@/lib/task-query';
 import { cn } from '@ops-dashboard/ui';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 const STATUSES: Task['status'][] = ['backlog', 'todo', 'doing', 'blocked', 'done'];
 const PRIORITY_LABEL: Record<Priority, string> = { 0: 'None', 1: 'Low', 2: 'Med', 3: 'Urgent' };
@@ -447,6 +448,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 value={tagDraft}
                 onChange={(e) => setTagDraft(e.target.value)}
                 onKeyDown={(e) => {
+                  if (isComposingKeyEvent(e)) return;
                   if (e.key === 'Enter' && tagDraft.trim()) {
                     e.preventDefault();
                     const t = routedTag(tagDraft.trim().replace(/^#/, ''));
@@ -524,6 +526,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   value={checklistDraft}
                   onChange={(e) => setChecklistDraft(e.target.value)}
                   onKeyDown={(e) => {
+                    if (isComposingKeyEvent(e)) return;
                     if (e.key === 'Enter' && checklistDraft.trim()) {
                       e.preventDefault();
                       const next: ChecklistItem[] = [
