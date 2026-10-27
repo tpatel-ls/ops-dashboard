@@ -39,6 +39,7 @@ const SECTIONS: Array<{ heading: string; rows: Array<[string, string]> }> = [
       ['#tag', 'Adds a tag'],
       ['!, !! and !!!', 'Sets priority Low, Med or Urgent'],
       ['tomorrow 3pm', 'Schedules with time'],
+      ['tomorrow 3pm-4pm', 'Schedules a time block'],
       ['Cmd/Ctrl Enter', 'Save'],
     ],
   },
