@@ -85,6 +85,23 @@ describe('parseQuickAdd', () => {
     expect(start.getDate()).toBe(27);
   });
 
+  it('sets an end time and strips the whole range from the title', () => {
+    const r = parseQuickAdd('Standup tomorrow 9am-9:30am', anchor);
+    expect(r.title).toBe('Standup');
+    expect(r.startAt).toBe(new Date('2026-04-27T09:00:00').toISOString());
+    expect(r.endAt).toBe(new Date('2026-04-27T09:30:00').toISOString());
+    expect(r.dueAt).toBe(r.startAt);
+  });
+
+  it('schedules a date-only phrase without inventing a time', () => {
+    const r = parseQuickAdd('Renew passport tomorrow', anchor);
+    expect(r.title).toBe('Renew passport');
+    expect(r.scheduledFor).toBe('2026-04-27');
+    expect(r).not.toHaveProperty('startAt');
+    expect(r).not.toHaveProperty('endAt');
+    expect(r).not.toHaveProperty('dueAt');
+  });
+
   it('handles combined directives', () => {
     const r = parseQuickAdd('Finish report tomorrow 3pm #work !!', anchor);
     expect(r.tags).toEqual(['work']);
