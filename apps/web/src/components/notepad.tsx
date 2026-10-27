@@ -61,13 +61,24 @@ function destinationLabel(r: RoutedResult): string {
   }
 }
 
+// A share opens the notepad with the shared text in the URL. Starting from the
+// shared text alone replaced an unfinished draft, and the draft autosave then
+// made the loss permanent. Append it instead, and skip it when the draft
+// already holds it, since the query string survives a reload.
+function withSharedText(draft: string, shared: string): string {
+  if (!shared) return draft;
+  if (!draft.trim()) return shared;
+  if (draft.includes(shared)) return draft;
+  return `${draft.replace(/\s+$/, '')}\n${shared}`;
+}
+
 export function Notepad() {
   const searchParams = useSearchParams();
   const { draft, setDraft, saveDraft } = useLocalDraft('ops:notepad-draft');
   const sharedValue = [searchParams.get('title'), searchParams.get('text'), searchParams.get('url')]
     .filter(Boolean)
     .join('\n');
-  const [value, setValue] = useState(() => sharedValue || draft);
+  const [value, setValue] = useState(() => withSharedText(draft, sharedValue));
   const [feed, setFeed] = useState<FeedEntry[]>([]);
   const [pending, startTransition] = useTransition();
   const taRef = useRef<HTMLTextAreaElement>(null);
