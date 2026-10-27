@@ -5,6 +5,7 @@ import { getDb, localDay } from '@ops-dashboard/core';
 import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
 import { compareTasks, safeTaskTags } from './task-query';
 import { enqueueOp } from './sync-queue';
+import { storedDocument } from './whiteboards';
 
 export interface OpsExport {
   version: 1;
@@ -308,7 +309,16 @@ export async function exportAll(): Promise<OpsExport> {
 }
 
 export async function importAll(value: unknown): Promise<void> {
-  const payload = validateOpsExport(value);
+  const validated = validateOpsExport(value);
+  // Exports taken before blank boards were stored as `{}` carry a null
+  // document, which the jsonb not null column rejects on push.
+  const payload = {
+    ...validated,
+    whiteboards: validated.whiteboards.map((board) => ({
+      ...board,
+      document: storedDocument(board.document),
+    })),
+  };
   const db = getDb();
   await db.transaction('rw', db.tasks, db.projects, db.whiteboards, db.syncOps, async () => {
     if (payload.projects) await db.projects.bulkPut(payload.projects);
