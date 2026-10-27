@@ -144,13 +144,18 @@ describe('activityScores', () => {
   const empty = { tasks: [], checks: [], journals: [], workLogs: [] };
 
   it('keys every contribution by its local calendar day', () => {
+    // A late-evening completion is stored as UTC, which is often the next
+    // calendar day; it must still land on the local day the user saw.
+    const lateEvening = new Date(2026, 7, 24, 23, 30).toISOString();
     const scores = activityScores({
-      ...empty,
+      tasks: [{ completedAt: lateEvening }],
       checks: [{ date: '2026-08-24' }],
       journals: [{ date: '2026-08-24' }],
+      workLogs: [{ at: new Date(2026, 7, 24, 22, 0).toISOString(), minutes: 60 }],
     });
 
-    expect(scores.get('2026-08-24')).toBe(5);
+    expect([...scores.keys()]).toEqual(['2026-08-24']);
+    expect(scores.get('2026-08-24')).toBe(7);
   });
 
   it('resolves a stored timestamp to the day the heatmap renders', () => {
