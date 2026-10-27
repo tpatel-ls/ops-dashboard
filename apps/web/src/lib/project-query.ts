@@ -24,6 +24,12 @@ export function matchesProjectSearch(project: Project, query: string): boolean {
     .some((value) => projectSearchText(value).includes(needle));
 }
 
+/** Name-only match for pickers that show just the project name. */
+export function matchesProjectName(project: Pick<Project, 'name'>, query: string): boolean {
+  const needle = projectSearchText(query.trim());
+  return !needle || projectSearchText(project.name).includes(needle);
+}
+
 function compareOptionalDates(a?: string, b?: string, descending = false): number {
   if (a && !b) return -1;
   if (!a && b) return 1;

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Project } from '@ops-dashboard/core';
-import { compareProjects, isActiveProject, matchesProjectSearch } from './project-query';
+import {
+  compareProjects,
+  isActiveProject,
+  matchesProjectName,
+  matchesProjectSearch,
+} from './project-query';
 
 function project(patch: Partial<Project> = {}): Project {
   return {
@@ -67,6 +72,20 @@ describe('matchesProjectSearch', () => {
         'mobile',
       ),
     ).toBe(true);
+  });
+});
+
+describe('matchesProjectName', () => {
+  const launch = project({ name: 'Caf\u00e9 ＬＳ Launch', description: 'Ship the mobile rollout' });
+
+  it('matches canonically equivalent and compatibility forms of the name', () => {
+    expect(matchesProjectName(launch, 'Cafe\u0301')).toBe(true);
+    expect(matchesProjectName(launch, 'ls launch')).toBe(true);
+  });
+
+  it('ignores the description and keeps every project for a blank query', () => {
+    expect(matchesProjectName(launch, 'mobile')).toBe(false);
+    expect(matchesProjectName(launch, '  ')).toBe(true);
   });
 });
 

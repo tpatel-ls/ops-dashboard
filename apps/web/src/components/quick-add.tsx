@@ -11,6 +11,7 @@ import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { useVoiceInput } from '@/lib/use-voice-input';
 import { useOrgStore } from '@/lib/org-store';
 import { LAST_TASK_DESTINATION_KEY } from '@/lib/task-capture';
+import { matchesProjectName } from '@/lib/project-query';
 import { readLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 import {
   destinationOrgId,
@@ -75,7 +76,7 @@ export function QuickAdd() {
       : (data?.organizations.find((organization) => organization.id === destination)?.name ??
         'Workspace');
   const filteredProjects = projects.filter((candidate) =>
-    candidate.name.toLowerCase().includes(projectFilter.trim().toLowerCase()),
+    matchesProjectName(candidate, projectFilter),
   );
 
   useEffect(() => {
