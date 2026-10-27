@@ -128,8 +128,11 @@ describe('quickAddToTask', () => {
   const base = { id: 'task-1', deviceId: 'device-1', order: 3 };
 
   it('carries every parsed field onto the new task', () => {
-    const parsed = parseQuickAdd('Ship release #work !! tomorrow 3pm', anchor);
+    const parsed = parseQuickAdd('Ship release #work !! tomorrow 3pm-4pm', anchor);
     const task = quickAddToTask(parsed, base);
+
+    // Guard the premise: a range is the only input that yields endAt.
+    expect(parsed.endAt).toBe(new Date('2026-04-27T16:00:00').toISOString());
 
     expect(task).toMatchObject({
       id: 'task-1',
@@ -141,6 +144,7 @@ describe('quickAddToTask', () => {
       tags: parsed.tags,
       scheduledFor: parsed.scheduledFor,
       startAt: parsed.startAt,
+      endAt: parsed.endAt,
       dueAt: parsed.dueAt,
       version: 1,
     });
