@@ -6,6 +6,7 @@ import { getDb } from '@ops-dashboard/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
 import { hapticSuccess } from '@/lib/haptics';
+import { DAILY_MISSION_SLOTS, dailyMissionTasks } from '@/lib/task-dates';
 import { cn } from '@ops-dashboard/ui';
 
 const PRIORITY_COLOR: Record<number, string> = {
@@ -17,12 +18,7 @@ const PRIORITY_COLOR: Record<number, string> = {
 
 export function TopThree() {
   const tasks = useLiveQuery(async () => {
-    const all = await getDb().tasks.toArray();
-    return all
-      .filter(
-        (t) => !t.deletedAt && t.starred === true && t.status !== 'done' && t.status !== 'archived',
-      )
-      .slice(0, 3);
+    return dailyMissionTasks(await getDb().tasks.toArray());
   });
 
   const openEdit = useAppStore((s) => s.openEdit);
@@ -36,7 +32,7 @@ export function TopThree() {
         <Star className="text-primary size-3" fill="currentColor" aria-hidden />
         {tasks !== undefined ? (
           <span className="bg-card text-muted-foreground ml-auto rounded-full border px-2 py-0.5 font-mono text-[10px] tabular-nums">
-            {tasks.length}/3 slots
+            {tasks.length}/{DAILY_MISSION_SLOTS} slots
           </span>
         ) : null}
       </div>
@@ -110,12 +106,12 @@ export function TopThree() {
             );
           })}
 
-          {tasks.length < 3 && (
+          {tasks.length < DAILY_MISSION_SLOTS && (
             <li className="surface-flat flex items-center gap-2 px-4 py-2.5">
               <Star className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
               <span className="text-muted-foreground text-xs">
-                Star {3 - tasks.length} more task{3 - tasks.length === 1 ? '' : 's'} to fill your
-                top three.
+                Star {DAILY_MISSION_SLOTS - tasks.length} more task
+                {DAILY_MISSION_SLOTS - tasks.length === 1 ? '' : 's'} to fill your top three.
               </span>
             </li>
           )}

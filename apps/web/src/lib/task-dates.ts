@@ -129,3 +129,23 @@ export function summarizeOpenTasks(tasks: Task[], day: string) {
     high: open.filter((task) => safePriority(task.priority) >= 2).length,
   };
 }
+
+export const DAILY_MISSION_SLOTS = 3;
+
+/**
+ * Starred open tasks for the Today "daily mission", most pressing first.
+ * Starring is not capped, so when more than three are starred the choice of
+ * which to show (and their 1-3 numbering) must not depend on database order.
+ */
+export function dailyMissionTasks(tasks: Task[]): Task[] {
+  return tasks
+    .filter(
+      (task) =>
+        !task.deletedAt &&
+        task.starred === true &&
+        task.status !== 'done' &&
+        task.status !== 'archived',
+    )
+    .sort(compareTasksByCommitment)
+    .slice(0, DAILY_MISSION_SLOTS);
+}

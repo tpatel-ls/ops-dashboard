@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
 import {
+  dailyMissionTasks,
   summarizeTodayTasks,
   summarizeOpenTasks,
   compareTasksByCommitment,
@@ -293,5 +294,33 @@ describe('taskScheduledOn', () => {
   it('never matches when the requested day is not a real calendar day', () => {
     expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, '2026-02-30')).toBe(false);
     expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, 'today')).toBe(false);
+  });
+});
+
+describe('dailyMissionTasks', () => {
+  const task = (id: string, patch: Partial<Task> = {}): Task =>
+    ({ id, title: id, status: 'todo', priority: 0, starred: true, ...patch }) as Task;
+
+  it('keeps only starred open tasks', () => {
+    const tasks = [
+      task('kept'),
+      task('unstarred', { starred: false }),
+      task('done', { status: 'done' }),
+      task('archived', { status: 'archived' }),
+      task('deleted', { deletedAt: '2026-08-24T00:00:00Z' }),
+    ];
+    expect(dailyMissionTasks(tasks).map((t) => t.id)).toEqual(['kept']);
+  });
+
+  it('shows the three most pressing starred tasks regardless of storage order', () => {
+    const tasks = [
+      task('a-someday'),
+      task('b-later', { scheduledFor: '2026-08-30' }),
+      task('c-urgent-today', { scheduledFor: '2026-08-24', priority: 3 }),
+      task('d-today', { scheduledFor: '2026-08-24' }),
+    ];
+    const expected = ['c-urgent-today', 'd-today', 'b-later'];
+    expect(dailyMissionTasks(tasks).map((t) => t.id)).toEqual(expected);
+    expect(dailyMissionTasks([...tasks].reverse()).map((t) => t.id)).toEqual(expected);
   });
 });
