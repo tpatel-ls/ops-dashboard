@@ -55,4 +55,33 @@ describe('Notepad draft', () => {
 
     expect(window.localStorage.getItem(DRAFT_KEY)).toBe('Earlier draft\nNew line');
   });
+
+  it('adds shared text below an unfinished draft instead of replacing it', () => {
+    window.localStorage.setItem(DRAFT_KEY, 'Unfinished plan');
+    searchParams = new URLSearchParams({ title: 'Article', url: 'https://example.com/a' });
+    render(createElement(Notepad));
+
+    expect(screen.getByLabelText('Work intake')).toHaveProperty(
+      'value',
+      'Unfinished plan\nArticle\nhttps://example.com/a',
+    );
+  });
+
+  it('does not append the shared text again when the share URL reloads', () => {
+    window.localStorage.setItem(DRAFT_KEY, 'Unfinished plan\nArticle');
+    searchParams = new URLSearchParams({ title: 'Article' });
+    render(createElement(Notepad));
+
+    expect(screen.getByLabelText('Work intake')).toHaveProperty(
+      'value',
+      'Unfinished plan\nArticle',
+    );
+  });
+
+  it('opens a share on its own when there is no draft', () => {
+    searchParams = new URLSearchParams({ text: 'Shared note' });
+    render(createElement(Notepad));
+
+    expect(screen.getByLabelText('Work intake')).toHaveProperty('value', 'Shared note');
+  });
 });
