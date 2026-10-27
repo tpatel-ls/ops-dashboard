@@ -17,7 +17,7 @@ import {
   Timer,
   X,
 } from 'lucide-react';
-import { differenceInDays, format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
 import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
 import type {
   Domain,
@@ -39,7 +39,12 @@ import { useAppStore } from '@/lib/app-store';
 import { useLiveSettings } from '@/lib/use-settings';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
-import { compareProjects, matchesProjectSearch, type ProjectSort } from '@/lib/project-query';
+import {
+  compareProjects,
+  matchesProjectSearch,
+  projectIsSlipping,
+  type ProjectSort,
+} from '@/lib/project-query';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -288,8 +293,7 @@ function ProjectCard({
 
   const parsedLastWorked = project.lastWorkedAt ? parseISO(project.lastWorkedAt) : null;
   const lastWorked = parsedLastWorked && isValid(parsedLastWorked) ? parsedLastWorked : null;
-  const daysAgo = lastWorked ? differenceInDays(new Date(), lastWorked) : null;
-  const isSlipping = daysAgo === null || daysAgo > slippingDays;
+  const isSlipping = projectIsSlipping(project.lastWorkedAt, slippingDays);
   const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
   const dueLabel = parsedDueDate && isValid(parsedDueDate) ? format(parsedDueDate, 'MMM d') : null;
   const isOverdue = Boolean(dueLabel && project.dueDate && project.dueDate < todayIso());

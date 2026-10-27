@@ -1,3 +1,4 @@
+import { differenceInDays, isValid, parseISO } from 'date-fns';
 import { localDay, type Project } from '@ops-dashboard/core';
 import { compareText } from './compare-text';
 
@@ -22,6 +23,23 @@ export function matchesProjectSearch(project: Project, query: string): boolean {
   return [project.name, project.description]
     .filter((value): value is string => typeof value === 'string' && Boolean(value))
     .some((value) => projectSearchText(value).includes(needle));
+}
+
+/**
+ * Whether a project has gone more than `slippingDays` whole days without
+ * logged work. Missing or unparseable timestamps count as slipping: they are
+ * no evidence of recent work. The projects board and the Today rail share this
+ * so the same setting flags the same projects in both places.
+ */
+export function projectIsSlipping(
+  lastWorkedAt: string | undefined,
+  slippingDays: number,
+  now: Date = new Date(),
+): boolean {
+  if (!lastWorkedAt) return true;
+  const lastWorked = parseISO(lastWorkedAt);
+  if (!isValid(lastWorked)) return true;
+  return differenceInDays(now, lastWorked) > slippingDays;
 }
 
 /** Name-only match for pickers that show just the project name. */

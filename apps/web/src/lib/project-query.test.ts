@@ -5,6 +5,7 @@ import {
   isActiveProject,
   matchesProjectName,
   matchesProjectSearch,
+  projectIsSlipping,
 } from './project-query';
 
 function project(patch: Partial<Project> = {}): Project {
@@ -86,6 +87,22 @@ describe('matchesProjectName', () => {
   it('ignores the description and keeps every project for a blank query', () => {
     expect(matchesProjectName(launch, 'mobile')).toBe(false);
     expect(matchesProjectName(launch, '  ')).toBe(true);
+  });
+});
+
+describe('projectIsSlipping', () => {
+  const now = new Date('2026-08-24T12:00:00.000Z');
+
+  it('flags a project only after more than the configured whole days', () => {
+    // Seven days and a few hours: still within a seven-day window, as the
+    // projects board has always counted it.
+    expect(projectIsSlipping('2026-08-17T08:00:00.000Z', 7, now)).toBe(false);
+    expect(projectIsSlipping('2026-08-16T08:00:00.000Z', 7, now)).toBe(true);
+  });
+
+  it('treats missing or unparseable work timestamps as slipping', () => {
+    expect(projectIsSlipping(undefined, 7, now)).toBe(true);
+    expect(projectIsSlipping('not-a-date', 7, now)).toBe(true);
   });
 });
 
