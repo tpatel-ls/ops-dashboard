@@ -167,7 +167,7 @@ function DayColumn({
       </div>
       <div className="flex flex-col gap-1">
         {tasks.map((t) => (
-          <DraggableCard key={t.id} task={t} projectsMap={projectsMap} laneColor={laneColor(t)} />
+          <WeekTaskCard key={t.id} task={t} projectsMap={projectsMap} laneColor={laneColor(t)} />
         ))}
         {tasks.length === 0 ? (
           <div className="text-subtle-foreground flex min-h-20 items-center justify-center rounded border border-dashed px-3 text-center text-[11px]">
@@ -179,7 +179,7 @@ function DayColumn({
   );
 }
 
-function DraggableCard({
+export function WeekTaskCard({
   task,
   projectsMap,
   laneColor,
@@ -209,9 +209,19 @@ function DraggableCard({
       style={style}
       {...listeners}
       {...attributes}
+      aria-label={`Open ${task.title}`}
       onClick={(e) => {
         e.stopPropagation();
         openEdit(task.id);
+      }}
+      // dnd-kit makes the card a focusable role="button", but only a pointer
+      // sensor is installed, so without this Enter and Space did nothing.
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openEdit(task.id);
+        }
       }}
       className={cn(
         'surface-flat relative min-w-0 cursor-grab touch-none px-2 py-1.5 text-[12px] select-none',
