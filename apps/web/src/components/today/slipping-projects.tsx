@@ -2,9 +2,9 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AlertTriangle, Plus } from 'lucide-react';
-import { isValid, parseISO } from 'date-fns';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
+import { projectIsSlipping } from '@/lib/project-query';
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { useLiveSettings } from '@/lib/use-settings';
 
@@ -17,19 +17,13 @@ export function SlippingProjects() {
   const slippingDays = useLiveSettings().slippingDays;
   const projects = useLiveQuery(async () => {
     const all = await getDb().projects.toArray();
-    const threshold = new Date();
-    threshold.setDate(threshold.getDate() - slippingDays);
+    const now = new Date();
 
     return all.filter((p) => {
       if (p.deletedAt || p.archivedAt) return false;
       if (p.kind !== 'project' && p.kind !== 'retainer') return false;
       if (p.status !== 'active') return false;
-      if (!p.lastWorkedAt) return true;
-      // An unparseable timestamp is no evidence of recent work. Comparing an
-      // Invalid Date is always false, which used to hide the project here.
-      const lastWorkedAt = parseISO(p.lastWorkedAt);
-      if (!isValid(lastWorkedAt)) return true;
-      return lastWorkedAt < threshold;
+      return projectIsSlipping(p.lastWorkedAt, slippingDays, now);
     });
   }, [slippingDays]);
 
