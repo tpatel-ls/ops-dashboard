@@ -22,6 +22,7 @@ export function SettingsForm() {
   const [perm, setPerm] = useState<PermissionState>('default');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [importMessage, setImportMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -334,18 +335,28 @@ export function SettingsForm() {
               const input = e.currentTarget;
               const file = input.files?.[0];
               if (!file) return;
+              setImportMessage(null);
               try {
                 const text = await file.text();
                 const parsed: unknown = JSON.parse(text);
                 await importAll(parsed);
+                setImportMessage({ ok: true, text: `Imported ${file.name}.` });
               } catch (err) {
-                alert(`Import failed: ${(err as Error).message}`);
+                setImportMessage({ ok: false, text: `Import failed: ${(err as Error).message}` });
               } finally {
                 input.value = '';
               }
             }}
           />
         </div>
+        <p role="status" className="text-muted-foreground mt-2 text-xs empty:hidden">
+          {importMessage?.ok ? importMessage.text : null}
+        </p>
+        {importMessage && !importMessage.ok ? (
+          <p role="alert" className="text-destructive mt-2 text-xs">
+            {importMessage.text}
+          </p>
+        ) : null}
       </Section>
     </div>
   );
