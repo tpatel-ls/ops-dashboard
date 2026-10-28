@@ -10,7 +10,14 @@ import {
   requestNotifications,
   type PermissionState,
 } from '@/lib/notifications';
-import { downloadJson, downloadText, exportAll, importAll, tasksToMarkdown } from '@/lib/export';
+import {
+  downloadJson,
+  downloadText,
+  exportAll,
+  importAll,
+  tasksToMarkdown,
+  type OpsExport,
+} from '@/lib/export';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
 import { OrganizationsManager } from '@/components/organizations-manager';
@@ -22,7 +29,7 @@ export function SettingsForm() {
   const [perm, setPerm] = useState<PermissionState>('default');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [importMessage, setImportMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [dataMessage, setDataMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +43,15 @@ export function SettingsForm() {
       cancelled = true;
     };
   }, []);
+
+  async function exportWith(save: (data: OpsExport) => void) {
+    setDataMessage(null);
+    try {
+      save(await exportAll());
+    } catch (err) {
+      setDataMessage({ ok: false, text: `Export failed: ${(err as Error).message}` });
+    }
+  }
 
   async function patch(update: Partial<Settings>) {
     if (!settings) return;
@@ -300,21 +316,23 @@ export function SettingsForm() {
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={async () => {
-              const data = await exportAll();
-              downloadJson(data, `ops-dashboard-${todayIso()}.json`);
-            }}
+            onClick={() =>
+              exportWith((data) => downloadJson(data, `ops-dashboard-${todayIso()}.json`))
+            }
             className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
           >
             Export JSON
           </button>
           <button
             type="button"
-            onClick={async () => {
-              const data = await exportAll();
-              const md = tasksToMarkdown(data.tasks, 'Taskify tasks');
-              downloadText(md, `ops-dashboard-${todayIso()}.md`);
-            }}
+            onClick={() =>
+              exportWith((data) =>
+                downloadText(
+                  tasksToMarkdown(data.tasks, 'Taskify tasks'),
+                  `ops-dashboard-${todayIso()}.md`,
+                ),
+              )
+            }
             className="bg-card hover:bg-accent h-10 rounded-md border px-3 text-xs"
           >
             Export markdown
@@ -335,14 +353,14 @@ export function SettingsForm() {
               const input = e.currentTarget;
               const file = input.files?.[0];
               if (!file) return;
-              setImportMessage(null);
+              setDataMessage(null);
               try {
                 const text = await file.text();
                 const parsed: unknown = JSON.parse(text);
                 await importAll(parsed);
-                setImportMessage({ ok: true, text: `Imported ${file.name}.` });
+                setDataMessage({ ok: true, text: `Imported ${file.name}.` });
               } catch (err) {
-                setImportMessage({ ok: false, text: `Import failed: ${(err as Error).message}` });
+                setDataMessage({ ok: false, text: `Import failed: ${(err as Error).message}` });
               } finally {
                 input.value = '';
               }
@@ -350,11 +368,11 @@ export function SettingsForm() {
           />
         </div>
         <p role="status" className="text-muted-foreground mt-2 text-xs empty:hidden">
-          {importMessage?.ok ? importMessage.text : null}
+          {dataMessage?.ok ? dataMessage.text : null}
         </p>
-        {importMessage && !importMessage.ok ? (
+        {dataMessage && !dataMessage.ok ? (
           <p role="alert" className="text-destructive mt-2 text-xs">
-            {importMessage.text}
+            {dataMessage.text}
           </p>
         ) : null}
       </Section>

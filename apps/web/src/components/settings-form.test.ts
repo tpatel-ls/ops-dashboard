@@ -6,6 +6,8 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const importAll = vi.fn<(value: unknown) => Promise<void>>();
+const exportAll = vi.fn<() => Promise<unknown>>();
+const downloadJson = vi.fn();
 
 vi.mock('./theme-provider', () => ({ useTheme: () => ({ theme: 'system', setTheme: vi.fn() }) }));
 vi.mock('@/lib/notifications', () => ({
@@ -13,9 +15,9 @@ vi.mock('@/lib/notifications', () => ({
   requestNotifications: vi.fn(),
 }));
 vi.mock('@/lib/export', () => ({
-  downloadJson: vi.fn(),
+  downloadJson,
   downloadText: vi.fn(),
-  exportAll: vi.fn(),
+  exportAll,
   importAll,
   tasksToMarkdown: vi.fn(),
 }));
@@ -33,6 +35,8 @@ const { SettingsForm } = await import('./settings-form');
 afterEach(() => {
   cleanup();
   importAll.mockReset();
+  exportAll.mockReset();
+  downloadJson.mockReset();
 });
 
 async function chooseBackup(contents: string) {
@@ -64,5 +68,28 @@ describe('SettingsForm import', () => {
     );
     expect(alert).not.toHaveBeenCalled();
     alert.mockRestore();
+  });
+});
+
+describe('SettingsForm export', () => {
+  it('says the export failed instead of leaving the button looking dead', async () => {
+    exportAll.mockRejectedValue(new Error('The database connection is closing.'));
+    render(createElement(SettingsForm));
+    fireEvent.click(await screen.findByRole('button', { name: 'Export JSON' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Export failed: The database connection is closing.',
+    );
+    expect(downloadJson).not.toHaveBeenCalled();
+  });
+
+  it('downloads the snapshot when the export succeeds', async () => {
+    const snapshot = { version: 1, tasks: [], projects: [], whiteboards: [] };
+    exportAll.mockResolvedValue(snapshot);
+    render(createElement(SettingsForm));
+    fireEvent.click(await screen.findByRole('button', { name: 'Export JSON' }));
+
+    await vi.waitFor(() => expect(downloadJson).toHaveBeenCalledWith(snapshot, expect.any(String)));
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });
