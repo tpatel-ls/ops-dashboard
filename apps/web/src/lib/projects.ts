@@ -43,6 +43,22 @@ const MAX_PROJECT_CHECKLIST_ITEMS = 100;
 const MAX_PROJECT_NESTED_ID_LENGTH = 128;
 const MAX_PROJECT_NESTED_TEXT_LENGTH = 500;
 
+/**
+ * Kind a project is grouped under on the Projects board.
+ *
+ * The board renders one group per known kind and nothing else, so a project
+ * whose `kind` is missing or unrecognised was in no group and simply never
+ * appeared. Postgres only requires `kind` to be non-null text, and synced rows
+ * reach Dexie through `fromRow` without validation, so such rows are possible
+ * (for example a kind added by a newer version). Fall back to `project`, the
+ * column's default, so the record stays visible and editable.
+ */
+export function projectBoardKind(kind: unknown): ProjectKind {
+  return typeof kind === 'string' && PROJECT_KINDS.has(kind as ProjectKind)
+    ? (kind as ProjectKind)
+    : 'project';
+}
+
 export function safeProjectMilestones(value: unknown): Milestone[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();

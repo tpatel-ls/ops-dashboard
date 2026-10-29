@@ -26,6 +26,7 @@ vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 import {
   archiveProject,
   createProject,
+  projectBoardKind,
   projectTaskProgress,
   renameProject,
   safeProjectChecklists,
@@ -531,5 +532,19 @@ describe('updateProject', () => {
         ],
       }),
     ).toThrow('Project checklists must be valid');
+  });
+});
+
+describe('projectBoardKind', () => {
+  it('keeps every known kind', () => {
+    expect(projectBoardKind('project')).toBe('project');
+    expect(projectBoardKind('area')).toBe('area');
+    expect(projectBoardKind('retainer')).toBe('retainer');
+  });
+
+  it('groups a missing or unknown synced kind as a project so the card still shows', () => {
+    for (const kind of [undefined, null, '', 'client', 'constructor', 3]) {
+      expect(projectBoardKind(kind)).toBe('project');
+    }
   });
 });

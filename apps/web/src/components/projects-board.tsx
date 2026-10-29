@@ -29,6 +29,7 @@ import type {
 import { useOrgStore } from '@/lib/org-store';
 import {
   createProject,
+  projectBoardKind,
   projectTaskProgress,
   safeProjectMilestones,
   type ProjectTaskProgress,
@@ -591,7 +592,7 @@ export function ProjectsBoard() {
 
   const grouped = KIND_ORDER.reduce<Record<ProjectKind, ProjectCardData[]>>(
     (acc, k) => {
-      acc[k] = filteredCardData.filter((c) => c.project.kind === k);
+      acc[k] = filteredCardData.filter((c) => projectBoardKind(c.project.kind) === k);
       return acc;
     },
     { project: [], area: [], retainer: [] },
