@@ -15,7 +15,9 @@ export async function POST(req: Request): Promise<Response> {
 
   let body: { message?: unknown; title?: unknown; priority?: unknown } = {};
   try {
-    body = (await req.json()) as typeof body;
+    // `null` and other non-object JSON parse fine but have no fields to read.
+    const parsed: unknown = await req.json();
+    if (parsed && typeof parsed === 'object') body = parsed as typeof body;
   } catch {
     /* ignore */
   }
