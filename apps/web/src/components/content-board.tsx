@@ -23,6 +23,7 @@ import {
   deleteContent,
 } from '@/lib/content';
 import { cn } from '@ops-dashboard/ui';
+import { knownValue } from '@/lib/known-value';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ const STATUSES: { key: ContentStatus; label: string }[] = [
   { key: 'published', label: 'Published' },
   { key: 'done', label: 'Done' },
 ];
+const STATUS_KEYS = STATUSES.map((s) => s.key);
 
 const STATUS_DOT: Record<ContentStatus, string> = {
   idea: 'bg-subtle-foreground/40',
@@ -649,7 +651,7 @@ export function ContentBoard() {
 
   const byStatus = STATUSES.reduce<Record<ContentStatus, Content[]>>(
     (acc, s) => {
-      acc[s.key] = items?.filter((c) => c.status === s.key) ?? [];
+      acc[s.key] = items?.filter((c) => knownValue(c.status, STATUS_KEYS, 'idea') === s.key) ?? [];
       return acc;
     },
     {} as Record<ContentStatus, Content[]>,

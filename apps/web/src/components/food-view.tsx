@@ -20,6 +20,7 @@ import {
 import { getDb, todayIso } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
+import { knownValue } from '@/lib/known-value';
 import {
   deleteFoodLog,
   foodEstimate,
@@ -137,7 +138,9 @@ export function FoodView() {
         ) : (
           <div className="flex flex-col gap-4">
             {MEAL_ORDER.map((meal) => {
-              const logs = dayLogs.filter((l) => l.mealType === meal);
+              const logs = dayLogs.filter(
+                (l) => knownValue(l.mealType, MEAL_ORDER, 'snack') === meal,
+              );
               if (logs.length === 0) return null;
               return <MealGroup key={meal} meal={meal} logs={logs} />;
             })}
