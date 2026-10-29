@@ -17,6 +17,7 @@ import { createJournalEntry } from '@/lib/journal';
 import { toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { fetchWithTimeout } from '@/lib/fetch-timeout';
+import { journalExtractErrorMessage } from '@/lib/journal-extract-error';
 
 type Mode = 'idle' | 'text' | 'photo';
 type Stage = 'input' | 'processing' | 'confirm' | 'done' | 'manual-fallback';
@@ -123,24 +124,29 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         }),
       });
 
-      const data = (await resp.json()) as
-        { ok: true; result: ExtractResult } | { ok: false; reason: string };
+      const data = (await resp.json().catch(() => null)) as
+        { ok: true; result: ExtractResult } | { ok: false; reason: string } | null;
 
-      if (!data.ok) {
-        if ((data as { ok: false; reason: string }).reason === 'no-key') {
+      if (!data?.ok) {
+        const reason = data?.reason;
+        if (reason === 'no-key') {
           // graceful fallback: show plain textarea
           setManualBody(text.trim());
           setStage('manual-fallback');
           return;
         }
-        throw new Error((data as { ok: false; reason: string }).reason);
+        console.error('[journal-upload] extract error:', resp.status, reason);
+        setError(journalExtractErrorMessage(resp.status, reason));
+        setManualBody(text.trim());
+        setStage('manual-fallback');
+        return;
       }
 
       setResult(data.result);
       setStage('confirm');
     } catch (err) {
       console.error('[journal-upload] extract error:', err);
-      setError('Something went wrong. You can still write your entry below.');
+      setError(journalExtractErrorMessage(0, undefined));
       setManualBody(text.trim());
       setStage('manual-fallback');
     }
