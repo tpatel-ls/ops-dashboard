@@ -88,6 +88,16 @@ export function QuickAdd() {
     return () => document.removeEventListener('mousedown', onDown);
   }, [pickerOpen]);
 
+  // The input is disabled while a task saves, and disabling the focused element
+  // drops its focus, so every Enter left the user clicking back into the field
+  // before typing the next task. Hand focus back once the save settles.
+  const refocusAfterSave = useRef(false);
+  useEffect(() => {
+    if (pending || !refocusAfterSave.current) return;
+    refocusAfterSave.current = false;
+    inputRef.current?.focus();
+  }, [pending]);
+
   useEffect(() => {
     if (notice !== 'Task added') return;
     const timeout = window.setTimeout(() => setNotice(null), 2_000);
@@ -95,6 +105,7 @@ export function QuickAdd() {
   }, [notice]);
 
   function captureText(text: string) {
+    refocusAfterSave.current = document.activeElement === inputRef.current;
     hapticTap();
     setError(null);
     setNotice(null);
