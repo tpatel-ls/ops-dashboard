@@ -293,7 +293,13 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
 
   async function saveName() {
     const n = name.trim();
-    if (!n || n === person.name) return;
+    // A person needs a name, so a cleared field goes back to the saved one
+    // instead of reading blank while nothing was stored.
+    if (!n) {
+      setName(person.name);
+      return;
+    }
+    if (n === person.name) return;
     await updatePerson(person.id, { name: n });
   }
 

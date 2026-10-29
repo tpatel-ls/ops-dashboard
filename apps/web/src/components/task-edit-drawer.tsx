@@ -180,9 +180,16 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <input
                 value={draftTitle}
                 onChange={(e) => setDraftTitle(e.target.value)}
-                onBlur={() =>
-                  draftTitle !== task.title && updateTask(task.id, { title: draftTitle })
-                }
+                onBlur={() => {
+                  // `updateTask` rejects a blank title. Without the revert the
+                  // cleared field kept reading blank while the task silently
+                  // kept its old title.
+                  if (!draftTitle.trim()) {
+                    setDraftTitle(task.title);
+                    return;
+                  }
+                  if (draftTitle !== task.title) void updateTask(task.id, { title: draftTitle });
+                }}
                 aria-label="Task title"
                 className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
                 placeholder="Untitled"
