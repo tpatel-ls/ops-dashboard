@@ -11,15 +11,16 @@ import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
 import {
+  CALENDAR_END_HOUR,
+  CALENDAR_START_HOUR,
   calendarDateOf,
+  calendarGridSlot,
   calendarInstant,
   calendarKindOf,
   compareCalendarTasks,
 } from '@/lib/calendar-agenda';
 
 const HOUR_HEIGHT = 48;
-const START_HOUR = 6;
-const END_HOUR = 23;
 
 export function CalendarWeek() {
   const weekStartsOn = useLiveSettings().weekStartsOn;
@@ -49,7 +50,10 @@ export function CalendarWeek() {
 
   const openEdit = useAppStore((s) => s.openEdit);
   const today = isoDay(new Date());
-  const hours = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
+  const hours = Array.from(
+    { length: CALENDAR_END_HOUR - CALENDAR_START_HOUR + 1 },
+    (_, i) => CALENDAR_START_HOUR + i,
+  );
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">
@@ -255,7 +259,9 @@ function Hour({
         const dayIso = isoDay(day);
         const blocks = tasks.filter((t) => {
           const start = calendarInstant(t.startAt);
-          return Boolean(start && isoDay(start) === dayIso && start.getHours() === hour);
+          return Boolean(
+            start && isoDay(start) === dayIso && calendarGridSlot(start).hour === hour,
+          );
         });
         return (
           <div
@@ -267,7 +273,7 @@ function Hour({
               const start = calendarInstant(t.startAt)!;
               const end = calendarInstant(t.endAt);
               const minutes = end ? Math.max(15, (end.getTime() - start.getTime()) / 60000) : 30;
-              const top = (start.getMinutes() / 60) * HOUR_HEIGHT;
+              const top = (calendarGridSlot(start).minute / 60) * HOUR_HEIGHT;
               const height = (minutes / 60) * HOUR_HEIGHT - 2;
               const color = laneColor(t);
               return (
