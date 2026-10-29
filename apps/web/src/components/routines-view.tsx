@@ -15,6 +15,7 @@ import {
   toggleRoutineCheck,
 } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
+import { knownValue } from '@/lib/known-value';
 import { RoutineForm } from '@/components/routine-form';
 
 /* ─── helpers ─────────────────────────────────────────────────── */
@@ -293,7 +294,7 @@ export function RoutinesView() {
 
   // Group active routines by timeOfDay
   const grouped = TIME_OF_DAY_ORDER.reduce<Record<string, Routine[]>>((acc, tod) => {
-    acc[tod] = active.filter((r) => r.timeOfDay === tod);
+    acc[tod] = active.filter((r) => knownValue(r.timeOfDay, TIME_OF_DAY_ORDER, 'anytime') === tod);
     return acc;
   }, {});
 

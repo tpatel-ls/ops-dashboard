@@ -13,6 +13,7 @@ import {
   deleteBook,
 } from '@/lib/books';
 import { cn } from '@ops-dashboard/ui';
+import { knownValue } from '@/lib/known-value';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 
@@ -354,7 +355,7 @@ export function BooksView() {
 
   const grouped = STATUS_ORDER.reduce<Record<BookStatus, Book[]>>(
     (acc, status) => {
-      acc[status] = books.filter((b) => b.status === status);
+      acc[status] = books.filter((b) => knownValue(b.status, STATUS_ORDER, 'want') === status);
       return acc;
     },
     { want: [], reading: [], finished: [], abandoned: [] },
