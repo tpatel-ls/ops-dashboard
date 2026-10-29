@@ -75,3 +75,22 @@ export function compareCalendarTasks(a: Task, b: Task): number {
   const titleOrder = compareText(a.title, b.title);
   return titleOrder !== 0 ? titleOrder : compareText(a.id, b.id);
 }
+
+/** First and last hour rows the desktop week grid draws. */
+export const CALENDAR_START_HOUR = 6;
+export const CALENDAR_END_HOUR = 23;
+
+/**
+ * Hour row and minute offset a time block is drawn at in the week grid.
+ *
+ * The grid only has rows from `CALENDAR_START_HOUR`, and each row drew the
+ * blocks whose start hour equalled it, so a block starting before 06:00 (an
+ * early workout, a red-eye flight) matched no row and vanished from the
+ * desktop week while the mobile agenda still listed it. Such a block now pins
+ * to the top of the first row; it still prints its real start time.
+ */
+export function calendarGridSlot(start: Date): { hour: number; minute: number } {
+  const hour = start.getHours();
+  if (hour < CALENDAR_START_HOUR) return { hour: CALENDAR_START_HOUR, minute: 0 };
+  return { hour: Math.min(hour, CALENDAR_END_HOUR), minute: start.getMinutes() };
+}

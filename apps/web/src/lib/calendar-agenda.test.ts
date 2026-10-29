@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import {
+  CALENDAR_START_HOUR,
   calendarDateOf,
+  calendarGridSlot,
   calendarInstant,
   calendarKindOf,
   compareCalendarTasks,
@@ -205,5 +207,27 @@ describe('calendar agenda', () => {
       'malformed',
       'normal',
     ]);
+  });
+});
+
+describe('calendarGridSlot', () => {
+  it('places a block in its own hour row at its minute offset', () => {
+    expect(calendarGridSlot(new Date(2026, 9, 29, 14, 45))).toEqual({ hour: 14, minute: 45 });
+  });
+
+  it('pins a block that starts before the first row to the top of the grid', () => {
+    // Before this, a 05:30 block matched no row and was not drawn at all.
+    expect(calendarGridSlot(new Date(2026, 9, 29, 5, 30))).toEqual({
+      hour: CALENDAR_START_HOUR,
+      minute: 0,
+    });
+    expect(calendarGridSlot(new Date(2026, 9, 29, 0, 0))).toEqual({
+      hour: CALENDAR_START_HOUR,
+      minute: 0,
+    });
+  });
+
+  it('keeps the last hour row for a late-evening block', () => {
+    expect(calendarGridSlot(new Date(2026, 9, 29, 23, 15))).toEqual({ hour: 23, minute: 15 });
   });
 });
