@@ -4,6 +4,7 @@ import { Tldraw, type TLStoreSnapshot } from 'tldraw';
 import 'tldraw/tldraw.css';
 import { useCallback, useEffect, useRef } from 'react';
 import { isPenEvent, shouldRejectAsPalm } from './pen';
+import { createSnapshotSaver } from './snapshot-saver';
 
 export interface DriftCanvasProps {
   initialDocument?: unknown;
@@ -12,30 +13,41 @@ export interface DriftCanvasProps {
 }
 
 const PALM_REJECT_WINDOW_MS = 200;
+const SAVE_DELAY_MS = 600;
 
 export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPenAt = useRef(0);
-  const saveTimer = useRef<number | null>(null);
-  const pendingSnapshot = useRef<TLStoreSnapshot | null>(null);
   const stopListening = useRef<(() => void) | null>(null);
   const onSnapshotRef = useRef(onSnapshot);
+  const saver = useRef(
+    createSnapshotSaver<TLStoreSnapshot>(
+      (snapshot) => onSnapshotRef.current(snapshot),
+      SAVE_DELAY_MS,
+    ),
+  );
 
   useEffect(() => {
     onSnapshotRef.current = onSnapshot;
   }, [onSnapshot]);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    const pending = saver.current;
+    // Closing or backgrounding the tab does not unmount the canvas, so an edit
+    // still inside the debounce window would otherwise never be saved.
+    function onHidden() {
+      if (document.visibilityState === 'hidden') pending.flush();
+    }
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', pending.flush);
+    return () => {
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', pending.flush);
       stopListening.current?.();
       stopListening.current = null;
-      if (saveTimer.current) window.clearTimeout(saveTimer.current);
-      saveTimer.current = null;
-      if (pendingSnapshot.current) onSnapshotRef.current(pendingSnapshot.current);
-      pendingSnapshot.current = null;
-    },
-    [],
-  );
+      pending.flush();
+    };
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -74,16 +86,7 @@ export function OpsCanvas({ initialDocument, onSnapshot, className }: DriftCanva
       }
       stopListening.current?.();
       stopListening.current = editor.store.listen(
-        () => {
-          pendingSnapshot.current = editor.store.getStoreSnapshot();
-          if (saveTimer.current) window.clearTimeout(saveTimer.current);
-          saveTimer.current = window.setTimeout(() => {
-            const snapshot = pendingSnapshot.current;
-            pendingSnapshot.current = null;
-            saveTimer.current = null;
-            if (snapshot) onSnapshotRef.current(snapshot);
-          }, 600);
-        },
+        () => saver.current.schedule(editor.store.getStoreSnapshot()),
         { source: 'user', scope: 'document' },
       );
     },
