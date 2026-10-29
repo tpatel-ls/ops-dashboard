@@ -28,8 +28,11 @@ on every pen sample so a resting palm stays rejected.
 ## Side button as eraser
 
 Most Samsung S-Pens fire `button === 5` when the side button is held during a
-stroke. Feature detect by reading `e.button` on `pointerdown` and switch the
-active tool to eraser for the lifetime of that stroke.
+stroke. The canvas does not handle this itself: tldraw's editor already
+switches to its eraser tool when a pointer goes down with button 5 and restores
+the previous tool on pointer up. `PEN_BUTTON_ERASER` is exported with the same
+value for code outside the canvas, but `OpsCanvas` does not read it, so do not
+add a second handler there.
 
 ## Hover preview
 
