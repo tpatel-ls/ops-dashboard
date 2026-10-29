@@ -88,7 +88,14 @@ function CaptureRow({ cap }: { cap: Capture }) {
   // than repeating a bare verb for every row in the list.
   const captureLabel = cap.aiSummary ?? cap.raw;
 
-  const KindIcon = cap.aiKind ? KIND_ICON[cap.aiKind] : FileText;
+  // Synced and imported captures reach Dexie through `fromRow`, which does not
+  // validate, so `aiKind` can be a kind this build does not know (one added by
+  // a newer version, say). Indexing the map with it rendered `undefined` as a
+  // component and took down the whole inbox.
+  const KindIcon =
+    typeof cap.aiKind === 'string' && Object.hasOwn(KIND_ICON, cap.aiKind)
+      ? KIND_ICON[cap.aiKind]
+      : FileText;
 
   return (
     <li className="surface-flat group flex items-start gap-2.5 px-3 py-3 sm:gap-3 sm:px-4">
