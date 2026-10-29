@@ -553,6 +553,9 @@ function LogWorkSection({ project }: { project: Project }) {
   }, [project.id]);
 
   async function handleLog() {
+    // Enter in the note field calls this directly, past the Log button's
+    // `disabled`, so a second Enter while a save was in flight logged twice.
+    if (saving) return;
     const mins = parseInt(minutes, 10);
     if (!mins || mins <= 0) return;
     setSaving(true);
