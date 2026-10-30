@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { format, parseISO } from 'date-fns';
 import {
@@ -157,6 +157,17 @@ function QuickLog() {
   const [value, setValue] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // The input is disabled while the meal is parsed, and disabling the focused
+  // element drops its focus, so logging a second item meant clicking back into
+  // the field first. Hand focus back once the log settles.
+  const refocusAfterLog = useRef(false);
+  useEffect(() => {
+    if (pending || !refocusAfterLog.current) return;
+    refocusAfterLog.current = false;
+    inputRef.current?.focus();
+  }, [pending]);
 
   const { available, listening, transcribing, toggle } = useVoiceInput({
     onTranscript: (text) => setValue((v) => (v.trim() ? `${v.trim()} ${text}` : text)),
@@ -166,6 +177,7 @@ function QuickLog() {
     e.preventDefault();
     const text = value.trim();
     if (!text || pending) return;
+    refocusAfterLog.current = document.activeElement === inputRef.current;
     startTransition(async () => {
       const results = await processBrainDump(`(food log) ${text}`, 'text');
       setNotice(
@@ -182,6 +194,7 @@ function QuickLog() {
       <div className="surface-flat flex items-center gap-2 rounded-[14px] px-4 py-2.5">
         <Utensils className="text-subtle-foreground size-4 shrink-0" aria-hidden />
         <input
+          ref={inputRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Log a meal: 2 eggs and toast with butter..."
