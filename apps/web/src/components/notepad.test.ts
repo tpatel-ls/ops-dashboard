@@ -19,6 +19,7 @@ vi.mock('@/lib/use-voice-input', () => ({
 }));
 
 const { Notepad } = await import('./notepad');
+const { processBrainDump } = await import('@/lib/route-items');
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -83,5 +84,37 @@ describe('Notepad draft', () => {
     render(createElement(Notepad));
 
     expect(screen.getByLabelText('Work intake')).toHaveProperty('value', 'Shared note');
+  });
+});
+
+describe('Notepad capture', () => {
+  it('returns focus to the field after a capture is routed', async () => {
+    render(createElement(Notepad));
+    const field = screen.getByLabelText<HTMLTextAreaElement>('Work intake');
+    // Browsers blur a focused textarea when it becomes disabled for routing;
+    // jsdom does not, so the routing stands in for that focus loss.
+    vi.mocked(processBrainDump).mockImplementationOnce(async () => {
+      field.blur();
+      return [
+        {
+          captureId: 'c1',
+          kind: 'task',
+          title: 'Email Sam',
+          recordType: 'task',
+          recordId: 't1',
+          undo: async () => {},
+        },
+      ];
+    });
+
+    field.focus();
+    type('email sam');
+    await act(async () => {
+      fireEvent.keyDown(field, { key: 'Enter', ctrlKey: true });
+    });
+
+    expect(processBrainDump).toHaveBeenCalledWith('email sam', 'notepad');
+    expect(field.value).toBe('');
+    expect(document.activeElement).toBe(field);
   });
 });
