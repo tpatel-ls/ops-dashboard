@@ -60,4 +60,17 @@ describe('FoodView quick log', () => {
     expect(processBrainDump).toHaveBeenCalled();
     expect(document.activeElement).not.toBe(input);
   });
+
+  it('announces when the meal was saved as a task because the AI is offline', async () => {
+    render(createElement(FoodView));
+    const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Log food' });
+    processBrainDump.mockResolvedValue([{ aiOffline: true }]);
+
+    fireEvent.change(input, { target: { value: '2 eggs' } });
+    await act(async () => {
+      fireEvent.submit(input.form!);
+    });
+
+    expect(screen.getByRole('status').textContent).toContain('AI offline');
+  });
 });

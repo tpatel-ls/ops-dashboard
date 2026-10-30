@@ -319,7 +319,11 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
           </div>
         )}
 
-        {error && <p className="text-destructive text-xs">{error}</p>}
+        {error && (
+          <p role="alert" className="text-destructive text-xs">
+            {error}
+          </p>
+        )}
 
         <div className="flex justify-end gap-2">
           <button
@@ -352,7 +356,9 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
           <span className="text-sm font-medium">Write your entry</span>
         </div>
         {error && (
-          <p className="bg-warning/10 text-warning rounded-[10px] px-3 py-2 text-xs">{error}</p>
+          <p role="alert" className="bg-warning/10 text-warning rounded-[10px] px-3 py-2 text-xs">
+            {error}
+          </p>
         )}
         <textarea
           value={manualBody}
@@ -520,7 +526,11 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
         </div>
       )}
 
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      {error && (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      )}
 
       <div className="flex justify-end">
         <button
