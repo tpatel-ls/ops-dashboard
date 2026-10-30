@@ -39,6 +39,8 @@ export default async function LoginPage({
             <input
               type="email"
               name="email"
+              aria-invalid={message ? true : undefined}
+              aria-describedby={message ? 'login-error' : undefined}
               autoComplete="username"
               required
               className="input min-h-11"
@@ -50,6 +52,8 @@ export default async function LoginPage({
             <input
               type="password"
               name="password"
+              aria-invalid={message ? true : undefined}
+              aria-describedby={message ? 'login-error' : undefined}
               autoComplete="current-password"
               required
               className="input min-h-11"
@@ -58,7 +62,11 @@ export default async function LoginPage({
           </label>
 
           {message ? (
-            <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-xs">
+            <div
+              id="login-error"
+              role="alert"
+              className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-xs"
+            >
               {message}
             </div>
           ) : null}
