@@ -233,9 +233,15 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
 
 ## Security posture
 
-API routes (`/api/triage`, `/api/push`) use `lib/server/guard.ts`: same-origin
-browser calls allowed; server-to-server needs `OPS_API_SECRET`; at host-time also
-behind Supabase auth middleware. Inputs capped; push `url` not user-controllable.
+Every API route except `/api/health` (`/api/braindump`, `/api/capture`, `/api/chat`,
+`/api/journal/extract`, `/api/push`, `/api/transcribe`, `/api/triage`) checks
+`requestAllowed` from `lib/server/guard.ts` first: same-origin browser calls allowed;
+server-to-server needs `OPS_API_SECRET`; at host-time also behind Supabase auth
+middleware. `/api/health` uses `lib/server/health-auth.ts` instead, accepting
+`CRON_SECRET` or `OPS_API_SECRET` as a bearer (open when neither is set).
+`api-guard.test.ts` finds the routes on disk and fails if any answers an
+unauthorized request with anything but 401.
+Inputs capped; push `url` not user-controllable.
 
 ## How to resume
 
