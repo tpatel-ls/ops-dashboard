@@ -98,6 +98,16 @@ export function Notepad() {
     return () => window.clearTimeout(id);
   }, [saveDraft, setDraft, value]);
 
+  // The textarea is disabled while a capture is routed, and disabling the
+  // focused element drops its focus, so each Ctrl+Enter left the user clicking
+  // back in before the next batch. Hand focus back once the routing settles.
+  const refocusAfterProcess = useRef(false);
+  useEffect(() => {
+    if (pending || !refocusAfterProcess.current) return;
+    refocusAfterProcess.current = false;
+    taRef.current?.focus();
+  }, [pending]);
+
   // Auto-grow the textarea with its content (capped so it never eats the page).
   useEffect(() => {
     const el = taRef.current;
@@ -109,6 +119,7 @@ export function Notepad() {
   function process() {
     const text = value.trim();
     if (!text || pending) return;
+    refocusAfterProcess.current = document.activeElement === taRef.current;
     startTransition(async () => {
       const results = await processBrainDump(text, 'notepad');
       if (results.length === 0) return;
