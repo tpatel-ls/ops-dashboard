@@ -6,6 +6,7 @@ import { getDb, localDay, todayIso } from '@ops-dashboard/core';
 import type { TimeOfDay } from '@ops-dashboard/core';
 import { computeStreak, toggleRoutineCheck } from '@/lib/routines';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
+import { knownValue } from '@/lib/known-value';
 import { cn } from '@ops-dashboard/ui';
 
 const TIME_ORDER: TimeOfDay[] = ['morning', 'afternoon', 'evening', 'anytime'];
@@ -46,10 +47,12 @@ export function RoutineChecklist() {
       if (localDay(check.date) === today) todayDone[check.routineId] = check.done;
     }
 
-    // Group routines by timeOfDay
+    // Group routines by timeOfDay. An unknown or missing value goes to
+    // Anytime: an exact match left such a routine in the done count but in no
+    // section, so it could not be checked off from Today.
     const grouped: Partial<Record<TimeOfDay, typeof activeRoutines>> = {};
     for (const r of activeRoutines) {
-      const tod = r.timeOfDay as TimeOfDay;
+      const tod = knownValue(r.timeOfDay, TIME_ORDER, 'anytime');
       if (!grouped[tod]) grouped[tod] = [];
       grouped[tod]!.push(r);
     }
