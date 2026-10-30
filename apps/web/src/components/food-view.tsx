@@ -237,12 +237,14 @@ function QuickLog() {
           Log
         </button>
       </div>
-      {notice ? (
-        <div className="border-warning/40 bg-warning/10 text-warning flex items-center gap-2 rounded-md border px-3 py-2 text-xs">
-          <CloudOff className="size-3.5 shrink-0" aria-hidden />
-          <span>{notice}</span>
-        </div>
-      ) : null}
+      <div role="status" className="empty:hidden">
+        {notice ? (
+          <div className="border-warning/40 bg-warning/10 text-warning flex items-center gap-2 rounded-md border px-3 py-2 text-xs">
+            <CloudOff className="size-3.5 shrink-0" aria-hidden />
+            <span>{notice}</span>
+          </div>
+        ) : null}
+      </div>
     </form>
   );
 }
