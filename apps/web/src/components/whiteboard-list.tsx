@@ -3,6 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import Link from 'next/link';
 import { useState } from 'react';
+import { cn } from '@ops-dashboard/ui';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { createWhiteboard, softDeleteWhiteboard } from '@/lib/whiteboards';
@@ -74,18 +75,41 @@ export function WhiteboardList() {
                   {whiteboardUpdatedLabel(b.updatedAt)}
                 </div>
               </Link>
-              <button
-                type="button"
-                onClick={() => void softDeleteWhiteboard(b.id)}
-                className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-md"
-                aria-label={`Delete ${b.name}`}
-              >
-                <Trash2 className="size-4" aria-hidden />
-              </button>
+              <DeleteWhiteboardButton id={b.id} name={b.name} />
             </li>
           ))}
         </ul>
       )}
     </div>
+  );
+}
+
+// A board is often hours of drawing and the app has no way to restore a
+// deleted one, so deleting takes a second activation like books, notes, and
+// quotes do.
+export function DeleteWhiteboardButton({ id, name }: { id: string; name: string }) {
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!confirming) {
+          setConfirming(true);
+          return;
+        }
+        void softDeleteWhiteboard(id);
+      }}
+      onBlur={() => setConfirming(false)}
+      title={confirming ? 'Click again to confirm' : 'Delete whiteboard'}
+      aria-label={confirming ? `Delete ${name}. Activate again to confirm` : `Delete ${name}`}
+      className={cn(
+        'absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-md transition-colors',
+        confirming
+          ? 'bg-destructive text-destructive-foreground'
+          : 'text-subtle-foreground hover:bg-destructive/10 hover:text-destructive',
+      )}
+    >
+      <Trash2 className="size-4" aria-hidden />
+    </button>
   );
 }
