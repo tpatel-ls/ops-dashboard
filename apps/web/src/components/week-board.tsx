@@ -163,6 +163,7 @@ function DayColumn({
   return (
     <div
       ref={setNodeRef}
+      aria-current={isToday ? 'date' : undefined}
       className={cn(
         'surface-flat flex min-h-40 min-w-0 scrollbar-thin flex-col overflow-y-auto p-2 transition-colors sm:h-full sm:min-h-[200px]',
         isOver && 'border-primary/50 bg-primary/5',

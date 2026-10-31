@@ -331,6 +331,7 @@ function WeekTrend({
               // hint that they select a day.
               aria-label={`${format(parseISO(d), 'EEEE, MMMM d')}, ${kcal} kcal`}
               aria-pressed={isSelected}
+              aria-current={isToday ? 'date' : undefined}
               className="group flex flex-1 flex-col items-center gap-1"
             >
               <span
