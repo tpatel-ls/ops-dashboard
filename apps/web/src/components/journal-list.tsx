@@ -1,6 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useState } from 'react';
 import { BookOpen, Trash2, Upload } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { JournalEntry } from '@ops-dashboard/core';
@@ -56,12 +57,23 @@ export function JournalList() {
   );
 }
 
-function JournalCard({ entry }: { entry: JournalEntry }) {
+export function JournalCard({ entry }: { entry: JournalEntry }) {
+  // Deleting takes a second activation, as it does for books, notes, and
+  // quotes: an entry is the user's own writing and nothing restores it.
+  const [confirming, setConfirming] = useState(false);
   const mood = entry.mood ? MOOD_GLYPH[entry.mood] : null;
   const body = excerpt(entry.body, 280);
   const tags = safeJournalTags(entry.tags);
 
   const formattedDate = journalDateLabel(entry.date, 'EEEE, d MMM yyyy');
+
+  function handleDelete() {
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    void deleteJournalEntry(entry.id);
+  }
 
   return (
     <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-3 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
@@ -93,14 +105,23 @@ function JournalCard({ entry }: { entry: JournalEntry }) {
         </div>
         <button
           type="button"
-          onClick={() => deleteJournalEntry(entry.id)}
+          onClick={handleDelete}
+          onBlur={() => setConfirming(false)}
+          title={confirming ? 'Click again to confirm' : 'Delete entry'}
           className={cn(
-            'text-muted-foreground inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-colors',
-            'hover:text-destructive opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+            'inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-colors',
+            'opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+            confirming
+              ? 'bg-destructive text-destructive-foreground'
+              : 'text-muted-foreground hover:text-destructive',
           )}
-          aria-label="Delete entry"
+          aria-label={
+            confirming
+              ? `Delete entry from ${formattedDate}. Activate again to confirm`
+              : `Delete entry from ${formattedDate}`
+          }
         >
-          <Trash2 className="size-3.5" />
+          <Trash2 className="size-3.5" aria-hidden />
         </button>
       </div>
 
