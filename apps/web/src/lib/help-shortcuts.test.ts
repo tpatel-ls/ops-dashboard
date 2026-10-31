@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const COMPONENTS = join(__dirname, '../components');
+const SHORTCUTS_DOC = join(__dirname, '../../../../docs/keyboard-shortcuts.md');
 
 // The overlay writes a combo for people ("Cmd/Ctrl K", "g a", "Esc") while
 // useHotkeys takes "mod+k", "g then a", "escape". Reduce both to one form.
@@ -28,6 +29,13 @@ function documentedShortcuts(): string[] {
   );
 }
 
+function shortcutsInDocs(): string[] {
+  const source = readFileSync(SHORTCUTS_DOC, 'utf8');
+  // Capture syntax and the tldraw whiteboard keys are not app hotkeys.
+  const hotkeySections = source.slice(0, source.indexOf('## Capture syntax'));
+  return [...hotkeySections.matchAll(/^- `([^`]+)`/gm)].map((match) => canonical(match[1]!));
+}
+
 describe('keyboard shortcut help', () => {
   // The overlay is a hand-written table beside the useHotkeys calls it
   // describes. A renamed or removed binding left the overlay advertising a key
@@ -38,6 +46,7 @@ describe('keyboard shortcut help', () => {
     expect(registered).toContain('mod+k');
     expect(registered).toContain('/');
     expect(documentedShortcuts()).toContain('g then h');
+    expect(shortcutsInDocs()).toContain('g then h');
   });
 
   it('documents every global hotkey the app registers', () => {
@@ -48,5 +57,12 @@ describe('keyboard shortcut help', () => {
   it('only documents hotkeys that are registered', () => {
     const bound = new Set(registered);
     expect(documentedShortcuts().filter((keys) => !bound.has(keys))).toEqual([]);
+  });
+});
+
+describe('docs/keyboard-shortcuts.md', () => {
+  // The shortcuts doc is a second hand-written copy of the same table.
+  it('lists exactly the hotkeys the in-app overlay documents', () => {
+    expect([...shortcutsInDocs()].sort()).toEqual([...documentedShortcuts()].sort());
   });
 });
