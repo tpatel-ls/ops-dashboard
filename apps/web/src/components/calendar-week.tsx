@@ -119,6 +119,7 @@ export function CalendarWeek() {
               return (
                 <div
                   key={isoDay(d)}
+                  aria-current={isToday ? 'date' : undefined}
                   className={cn(
                     'border-hairline bg-card/95 sticky top-0 z-10 border-b px-2 py-2 text-center backdrop-blur',
                     isToday && 'text-primary',
@@ -167,6 +168,7 @@ function MobileDayAgenda({
     return (
       <section
         aria-label={`${format(day, 'EEEE, MMMM d')}, no scheduled work`}
+        aria-current={isToday ? 'date' : undefined}
         className={cn(
           'hairline flex min-h-12 items-center gap-3 border-b px-1 py-2',
           isToday && 'text-primary',
@@ -181,6 +183,7 @@ function MobileDayAgenda({
   return (
     <section
       aria-label={`${format(day, 'EEEE, MMMM d')}, ${blocks.length} scheduled items`}
+      aria-current={isToday ? 'date' : undefined}
       className="min-w-0 py-2"
     >
       <div
