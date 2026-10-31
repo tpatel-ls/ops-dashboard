@@ -106,6 +106,8 @@ export function MonthGrid() {
                 key={iso}
                 type="button"
                 onClick={() => setSelected(iso)}
+                aria-pressed={isSelected}
+                aria-current={isToday ? 'date' : undefined}
                 aria-label={`${format(day, 'MMMM d')}, ${dayTasks.length} ${dayTasks.length === 1 ? 'task' : 'tasks'}`}
                 className={cn(
                   'bg-card flex min-h-[54px] min-w-0 flex-col gap-1 p-1.5 text-left transition-colors sm:min-h-[88px] sm:p-2',
