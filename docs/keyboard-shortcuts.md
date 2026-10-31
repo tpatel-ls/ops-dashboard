@@ -4,6 +4,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 
 ## Global
 
+- `?` open the shortcut reference
 - `Cmd/Ctrl K` open the command palette
 - `Q` focus task capture, or open task capture when no composer is visible
 - `g then a` open the "Add a task" dialog
