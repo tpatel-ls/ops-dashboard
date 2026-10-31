@@ -10,6 +10,7 @@ import {
   taskIsOverdue,
   taskScheduledOn,
   taskNeedsAttentionBy,
+  taskOnScheduleGrid,
 } from './task-dates';
 
 describe('task calendar dates', () => {
@@ -294,6 +295,25 @@ describe('taskScheduledOn', () => {
   it('never matches when the requested day is not a real calendar day', () => {
     expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, '2026-02-30')).toBe(false);
     expect(taskScheduledOn({ scheduledFor: '2026-09-19' }, 'today')).toBe(false);
+  });
+});
+
+describe('taskOnScheduleGrid', () => {
+  it('keeps scheduled tasks, including finished ones', () => {
+    expect(taskOnScheduleGrid({ status: 'todo', scheduledFor: '2026-10-31' })).toBe(true);
+    expect(taskOnScheduleGrid({ status: 'done', scheduledFor: '2026-10-31' })).toBe(true);
+  });
+
+  it('leaves out archived, deleted, and unscheduled tasks', () => {
+    expect(taskOnScheduleGrid({ status: 'archived', scheduledFor: '2026-10-31' })).toBe(false);
+    expect(
+      taskOnScheduleGrid({
+        status: 'todo',
+        scheduledFor: '2026-10-31',
+        deletedAt: '2026-10-30T12:00:00.000Z',
+      }),
+    ).toBe(false);
+    expect(taskOnScheduleGrid({ status: 'todo' })).toBe(false);
   });
 });
 

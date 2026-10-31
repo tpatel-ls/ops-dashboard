@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getDb, isoDay, monthGrid } from '@ops-dashboard/core';
 import type { Project } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { taskScheduledOn } from '@/lib/task-dates';
+import { taskOnScheduleGrid, taskScheduledOn } from '@/lib/task-dates';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
@@ -22,7 +22,7 @@ export function MonthGrid() {
 
   const tasks = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
-    return all.filter((t) => !t.deletedAt && t.scheduledFor);
+    return all.filter(taskOnScheduleGrid);
   });
   const projectsMap = useLiveQuery(async () => {
     const all = await getDb().projects.toArray();

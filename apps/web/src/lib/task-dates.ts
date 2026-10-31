@@ -82,6 +82,18 @@ export function taskScheduledOn(task: Pick<Task, 'scheduledFor'>, day: string): 
   return localDay(day) === day && localDay(task.scheduledFor) === day;
 }
 
+/**
+ * Whether a task belongs on a scheduling grid such as the month view.
+ *
+ * Archived tasks are put away: the week board, calendar week, kanban, and task
+ * list all leave them out. The month grid filtered on `deletedAt` alone, so an
+ * archived task kept its dot and title on its day and was counted in the
+ * day's "N tasks" label.
+ */
+export function taskOnScheduleGrid(task: Pick<Task, 'deletedAt' | 'status' | 'scheduledFor'>) {
+  return !task.deletedAt && task.status !== 'archived' && Boolean(task.scheduledFor);
+}
+
 export function taskIsOverdue(task: TaskDates, day: string): boolean {
   if (localDay(day) !== day) return false;
   const scheduled = localDay(task.scheduledFor);
