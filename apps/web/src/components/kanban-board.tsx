@@ -34,6 +34,7 @@ import { taskDateLabel } from '@/lib/task-presentation';
 import {
   SIMPLE_KANBAN_COLUMNS,
   simpleKanbanColumn,
+  statusForKanbanDrop,
   statusForSimpleKanbanColumn,
   type SimpleKanbanColumn,
   type SimpleKanbanColumnId,
@@ -92,8 +93,11 @@ export function KanbanBoard() {
   function onDragEnd(event: DragEndEvent) {
     if (!event.over) return;
     const taskId = String(event.active.id);
+    const task = scopedTasks.find((candidate) => candidate.id === taskId);
+    if (!task) return;
     const columnId = String(event.over.id) as SimpleKanbanColumnId;
-    void setTaskStatus(taskId, statusForSimpleKanbanColumn(columnId));
+    const status = statusForKanbanDrop(task.status, columnId);
+    if (status) void setTaskStatus(taskId, status);
   }
 
   return (
