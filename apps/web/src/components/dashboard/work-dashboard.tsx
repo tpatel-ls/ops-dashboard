@@ -78,6 +78,7 @@ export function WorkDashboard() {
                 title="Overdue"
                 description="Needs a new date or a quick finish."
                 tasks={data.model.overdue}
+                total={data.model.counts.overdue}
                 projects={data.projects}
                 organizations={data.organizations}
                 today={today}
@@ -91,6 +92,7 @@ export function WorkDashboard() {
               title="Today"
               description="Your focus for today."
               tasks={data.model.today}
+              total={data.model.counts.today}
               projects={data.projects}
               organizations={data.organizations}
               today={today}
@@ -104,6 +106,7 @@ export function WorkDashboard() {
                 title="Upcoming"
                 description="Next scheduled work."
                 tasks={data.model.upcoming}
+                total={data.model.counts.upcoming}
                 projects={data.projects}
                 organizations={data.organizations}
                 today={today}
@@ -118,10 +121,11 @@ export function WorkDashboard() {
   );
 }
 
-function AgendaSection({
+export function AgendaSection({
   title,
   description,
   tasks,
+  total,
   projects,
   organizations,
   today,
@@ -133,6 +137,8 @@ function AgendaSection({
   title: string;
   description: string;
   tasks: Task[];
+  /** Matching tasks before `tasks` was cut down for display. */
+  total: number;
   projects: Project[];
   organizations: Organization[];
   today: string;
@@ -154,7 +160,7 @@ function AgendaSection({
           <p className="text-subtle-foreground mt-0.5 truncate text-[11px]">{description}</p>
         </div>
         <span className="bg-bg-sunken text-muted-foreground rounded-full px-2 py-0.5 text-xs tabular-nums">
-          {tasks.length}
+          {total}
         </span>
       </header>
 
@@ -171,6 +177,11 @@ function AgendaSection({
               onOpen={() => onOpen(task.id)}
             />
           ))}
+          {total > tasks.length ? (
+            <li className="text-muted-foreground px-4 py-2.5 text-xs">
+              And {total - tasks.length} more.
+            </li>
+          ) : null}
         </ul>
       ) : (
         <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-5 text-center">
