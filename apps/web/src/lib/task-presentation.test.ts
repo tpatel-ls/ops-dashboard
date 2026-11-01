@@ -5,6 +5,7 @@ import {
   taskPlanningTimestamp,
   taskReminderLabel,
   taskResultSummary,
+  taskSearchStatus,
 } from './task-presentation';
 
 describe('taskPlanningTimestamp', () => {
@@ -82,5 +83,23 @@ describe('taskReminderLabel', () => {
   it('states that the time is unavailable rather than throwing', () => {
     expect(taskReminderLabel('not-a-date')).toBe('Time unavailable');
     expect(taskReminderLabel(undefined)).toBe('Time unavailable');
+  });
+});
+
+describe('taskSearchStatus', () => {
+  it('labels archived tasks as archived rather than open', () => {
+    expect(taskSearchStatus('archived')).toEqual({ label: 'Archived', closed: true });
+  });
+
+  it('treats done as closed and every other status as open', () => {
+    expect(taskSearchStatus('done')).toEqual({ label: 'Done', closed: true });
+    for (const status of ['backlog', 'todo', 'doing', 'blocked'] as const) {
+      expect(taskSearchStatus(status)).toEqual({ label: 'Open', closed: false });
+    }
+  });
+
+  it('keeps an archived task with a past date from reading as overdue', () => {
+    const { closed } = taskSearchStatus('archived');
+    expect(taskDateLabel('2026-07-24', '2026-07-26', closed)).toBe('Jul 24');
   });
 });

@@ -21,6 +21,17 @@ export function taskResultSummary(count: number, filtered: boolean): string {
   return filtered ? `${count} matching ${noun}` : `${count} ${noun}`;
 }
 
+/**
+ * Status shown beside a task in search results. Search is the one task list
+ * that still includes archived tasks, so they need their own label instead of
+ * reading as open, and a closed task's past date is not overdue.
+ */
+export function taskSearchStatus(status: Task['status']): { label: string; closed: boolean } {
+  if (status === 'done') return { label: 'Done', closed: true };
+  if (status === 'archived') return { label: 'Archived', closed: true };
+  return { label: 'Open', closed: false };
+}
+
 export function taskDateLabel(date: string, today: string, done: boolean): string {
   if (localDay(date) !== date) return date;
   const parsed = parseISO(date);
