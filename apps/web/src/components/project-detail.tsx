@@ -20,7 +20,8 @@ import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
 import { compareProjectTasks } from '@/lib/task-query';
-import { useActiveOrgs } from '@/components/org-switcher';
+import { compareOrganizations } from '@/lib/org-lanes';
+import { linkOptions } from '@/lib/link-options';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
@@ -643,8 +644,13 @@ function LogWorkSection({ project }: { project: Project }) {
 
 // ─── Meta / editable fields ───────────────────────────────────────────────────
 
-function MetaSection({ project, domains }: { project: Project; domains: Domain[] }) {
-  const orgs = useActiveOrgs();
+export function MetaSection({ project, domains }: { project: Project; domains: Domain[] }) {
+  // All organizations, not just active ones: a project can still belong to an
+  // archived organization, and leaving it out made the picker read "Personal".
+  const allOrgs = useLiveQuery(async () =>
+    (await getDb().organizations.toArray()).sort(compareOrganizations),
+  );
+  const orgs = allOrgs && linkOptions(allOrgs, project.orgId);
 
   async function set<K extends keyof Project>(key: K, value: Project[K]) {
     await updateProject(project.id, { [key]: value } as Partial<Project>);
@@ -710,7 +716,7 @@ function MetaSection({ project, domains }: { project: Project; domains: Domain[]
             <option value="">Personal</option>
             {(orgs ?? []).map((o) => (
               <option key={o.id} value={o.id}>
-                {o.name}
+                {o.archivedAt ? `${o.name} (archived)` : o.name}
               </option>
             ))}
           </select>
