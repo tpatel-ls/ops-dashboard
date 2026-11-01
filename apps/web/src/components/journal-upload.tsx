@@ -261,11 +261,12 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
               Mood
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1" role="group" aria-label="Entry mood">
               {(['great', 'good', 'neutral', 'low', 'rough'] as const).map((m) => (
                 <button
                   key={m}
                   type="button"
+                  aria-pressed={result.mood === m}
                   onClick={() => setResult((prev) => (prev ? { ...prev, mood: m } : prev))}
                   className={cn(
                     'rounded-md px-2 py-1 text-xs transition-colors',
