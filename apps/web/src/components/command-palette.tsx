@@ -33,7 +33,7 @@ import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { taskDueOrScheduledDay } from '@/lib/task-dates';
 import { useInstallPrompt } from '@/lib/use-install-prompt';
 import { useOrgStore } from '@/lib/org-store';
-import { taskDateLabel } from '@/lib/task-presentation';
+import { taskDateLabel, taskSearchStatus } from '@/lib/task-presentation';
 import { addTask } from '@/lib/tasks';
 import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { safeTaskTags } from '@/lib/task-query';
@@ -261,8 +261,9 @@ export function CommandPalette() {
                 {results.map((t) => {
                   const tags = safeTaskTags(t.tags);
                   const dateValue = taskDueOrScheduledDay(t);
+                  const status = taskSearchStatus(t.status);
                   const dateLabel = dateValue
-                    ? taskDateLabel(dateValue, today, t.status === 'done')
+                    ? taskDateLabel(dateValue, today, status.closed)
                     : null;
                   return (
                     <Command.Item
@@ -278,14 +279,16 @@ export function CommandPalette() {
                         className={
                           t.status === 'done'
                             ? 'bg-success size-1.5 rounded-full'
-                            : 'bg-primary size-1.5 rounded-full'
+                            : t.status === 'archived'
+                              ? 'bg-subtle-foreground size-1.5 rounded-full'
+                              : 'bg-primary size-1.5 rounded-full'
                         }
                         aria-hidden
                       />
                       <span className="flex min-w-0 flex-1 flex-col">
                         <span className="truncate">{t.title}</span>
                         <span className="text-subtle-foreground text-[10px] normal-case">
-                          {t.status === 'done' ? 'Done' : 'Open'}
+                          {status.label}
                           {dateLabel ? ` · ${dateLabel}` : ''}
                         </span>
                       </span>
