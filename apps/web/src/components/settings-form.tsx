@@ -87,6 +87,7 @@ export function SettingsForm() {
             <button
               key={opt}
               type="button"
+              aria-pressed={theme === opt}
               onClick={() => {
                 setTheme(opt);
                 patch({ theme: opt });
