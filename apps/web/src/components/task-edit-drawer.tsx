@@ -223,11 +223,12 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           </div>
 
           <Section title="Status">
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Task status">
               {STATUSES.map((s) => (
                 <button
                   key={s}
                   type="button"
+                  aria-pressed={task.status === s}
                   onClick={() => setTaskStatus(task.id, s)}
                   className={cn(
                     'rounded-md border px-2.5 py-1 text-xs capitalize',
@@ -243,11 +244,12 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
           </Section>
 
           <Section title="Priority">
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5" role="group" aria-label="Task priority">
               {([0, 1, 2, 3] as Priority[]).map((p) => (
                 <button
                   key={p}
                   type="button"
+                  aria-pressed={task.priority === p}
                   onClick={() => updateTask(task.id, { priority: p })}
                   className={cn(
                     'rounded-md border px-3 py-1 text-xs',
@@ -276,6 +278,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <button
                   key={option.label}
                   type="button"
+                  aria-pressed={task.scheduledFor === option.value}
                   onClick={() => updateTask(task.id, { scheduledFor: option.value })}
                   className={cn(
                     'min-h-9 rounded-md border px-2.5 text-xs font-medium transition-colors',
