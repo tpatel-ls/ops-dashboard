@@ -553,20 +553,41 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
             </div>
           </Section>
 
-          <button
-            type="button"
-            onClick={() => {
-              softDeleteTask(task.id);
-              onClose();
-            }}
-            className="text-destructive inline-flex items-center gap-2 text-xs hover:underline"
-          >
-            <Trash2 className="size-3.5" />
-            Delete task
-          </button>
+          <DeleteTaskButton id={task.id} onDeleted={onClose} />
         </div>
       }
     </>
+  );
+}
+
+// A task carries notes, a checklist, and reminders, and nothing in the app
+// restores a deleted one, so deleting takes a second activation like notes,
+// journal entries, and whiteboards do.
+export function DeleteTaskButton({ id, onDeleted }: { id: string; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!confirming) {
+          setConfirming(true);
+          return;
+        }
+        void softDeleteTask(id);
+        onDeleted();
+      }}
+      onBlur={() => setConfirming(false)}
+      aria-label={confirming ? 'Delete task. Activate again to confirm' : undefined}
+      className={cn(
+        'inline-flex items-center gap-2 text-xs',
+        confirming
+          ? 'bg-destructive text-destructive-foreground rounded-md px-2 py-1 font-medium'
+          : 'text-destructive hover:underline',
+      )}
+    >
+      <Trash2 className="size-3.5" aria-hidden />
+      {confirming ? 'Click again to delete' : 'Delete task'}
+    </button>
   );
 }
 
