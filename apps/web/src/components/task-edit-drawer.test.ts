@@ -3,14 +3,33 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Task } from '@ops-dashboard/core';
+import type { Project, Task } from '@ops-dashboard/core';
 
 const softDeleteTask = vi.fn();
 let liveTask: Task | null = null;
-// The drawer's own query passes deps ([id]); the project, domain, and content
-// pickers do not.
-vi.mock('dexie-react-hooks', () => ({
-  useLiveQuery: (_query: unknown, deps?: unknown[]) => (deps ? liveTask : []),
+let liveProjects: Array<Partial<Project>> = [];
+// Run each live query once, against the in-memory rows below.
+vi.mock('dexie-react-hooks', async () => {
+  const { useEffect, useState } = await import('react');
+  return {
+    useLiveQuery: (query: () => Promise<unknown>, deps: unknown[] = []) => {
+      const [value, setValue] = useState<unknown>();
+      useEffect(() => {
+        void query().then(setValue);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, deps);
+      return value;
+    },
+  };
+});
+vi.mock('@ops-dashboard/core', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
+  getDb: () => ({
+    tasks: { get: async () => liveTask },
+    projects: { toArray: async () => liveProjects },
+    domains: { toArray: async () => [] },
+    content: { filter: () => ({ toArray: async () => [] }) },
+  }),
 }));
 vi.mock('@/lib/use-media-query', () => ({ useMediaQuery: () => false }));
 vi.mock('@/lib/tasks', async (importOriginal) => ({
@@ -28,6 +47,7 @@ afterEach(() => {
   cleanup();
   softDeleteTask.mockReset();
   liveTask = null;
+  liveProjects = [];
   useAppStore.setState({ editTaskId: null });
 });
 
@@ -60,7 +80,7 @@ describe('DeleteTaskButton', () => {
 });
 
 describe('TaskEditDrawer pickers', () => {
-  it('exposes the selected status, priority, and quick date as pressed', () => {
+  it('exposes the selected status, priority, and quick date as pressed', async () => {
     liveTask = {
       id: 'task-1',
       title: 'Ship it',
@@ -73,6 +93,7 @@ describe('TaskEditDrawer pickers', () => {
     } as unknown as Task;
     useAppStore.setState({ editTaskId: 'task-1' });
     render(createElement(TaskEditDrawer));
+    await screen.findByRole('group', { name: 'Task status' });
 
     const pressed = (group: string) =>
       Array.from(
@@ -83,5 +104,27 @@ describe('TaskEditDrawer pickers', () => {
     expect(pressed('Task priority')).toEqual(['Urgent']);
     expect(pressed('Quick schedule task')).toEqual(['Clear date']);
     expect(screen.getByRole('button', { name: 'todo' }).getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
+describe('TaskEditDrawer links', () => {
+  it('keeps showing a project the task still belongs to after it was archived', async () => {
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', projectId: 'old' } as Task;
+    liveProjects = [
+      { id: 'live', name: 'Launch' },
+      { id: 'old', name: 'Retired', archivedAt: '2026-10-01T00:00:00.000Z' },
+      { id: 'gone', name: 'Other', archivedAt: '2026-10-01T00:00:00.000Z' },
+    ];
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    const select = (await screen.findByRole('combobox', { name: 'Project' })) as HTMLSelectElement;
+    await vi.waitFor(() => expect(select.options).toHaveLength(3));
+    expect(Array.from(select.options).map((option) => option.textContent)).toEqual([
+      'No project',
+      'Launch',
+      'Retired (archived)',
+    ]);
+    expect(select.value).toBe('old');
   });
 });

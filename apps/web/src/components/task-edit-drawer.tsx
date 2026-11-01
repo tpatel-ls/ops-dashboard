@@ -34,6 +34,7 @@ import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { routedTag } from '@/lib/brain-dump-result';
 import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
 import { safeTaskTags } from '@/lib/task-query';
+import { linkOptions } from '@/lib/link-options';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
 
@@ -143,16 +144,10 @@ export function TaskEditDrawer() {
 }
 
 function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
-  const projects = useLiveQuery(async () =>
-    getDb()
-      .projects.filter((p) => !p.deletedAt && !p.archivedAt)
-      .toArray(),
-  );
-  const domains = useLiveQuery(async () =>
-    getDb()
-      .domains.filter((d) => !d.deletedAt && !d.archivedAt)
-      .toArray(),
-  );
+  const allProjects = useLiveQuery(async () => getDb().projects.toArray());
+  const allDomains = useLiveQuery(async () => getDb().domains.toArray());
+  const projects = allProjects && linkOptions(allProjects, task.projectId);
+  const domains = allDomains && linkOptions(allDomains, task.domainId);
   const contentItems = useLiveQuery(async () =>
     getDb()
       .content.filter((c) => !c.deletedAt)
@@ -388,7 +383,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <option value="">No domain</option>
               {domains?.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name}
+                  {d.archivedAt ? `${d.name} (archived)` : d.name}
                 </option>
               ))}
             </select>
@@ -415,7 +410,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               <option value="">No project</option>
               {projects?.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name}
+                  {p.archivedAt ? `${p.name} (archived)` : p.name}
                 </option>
               ))}
             </select>
