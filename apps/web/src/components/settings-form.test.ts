@@ -93,3 +93,20 @@ describe('SettingsForm export', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 });
+
+describe('SettingsForm appearance', () => {
+  it('tells assistive technology which theme is selected', async () => {
+    render(createElement(SettingsForm));
+    const group = await screen.findByRole('group', { name: 'Color theme' });
+    const pressed = Array.from(group.querySelectorAll('button')).map((button) => [
+      button.textContent,
+      button.getAttribute('aria-pressed'),
+    ]);
+
+    expect(pressed).toEqual([
+      ['light', 'false'],
+      ['dark', 'false'],
+      ['system', 'true'],
+    ]);
+  });
+});
