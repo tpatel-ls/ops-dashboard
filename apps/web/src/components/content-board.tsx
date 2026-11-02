@@ -24,6 +24,7 @@ import {
 } from '@/lib/content';
 import { cn } from '@ops-dashboard/ui';
 import { knownValue } from '@/lib/known-value';
+import { linkOptions } from '@/lib/link-options';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -96,8 +97,11 @@ interface EditorProps {
   onClose: () => void;
 }
 
-function ContentEditor({ item, domains, onClose }: EditorProps) {
+export function ContentEditor({ item, domains, onClose }: EditorProps) {
   const fieldId = useId();
+  // Offer the archived domain this item still belongs to, or the picker reads
+  // "None" and saving clears the link.
+  const domainOptions = linkOptions(domains, item.domainId);
   const [title, setTitle] = useState(item.title);
   const [type, setType] = useState<ContentType>(item.type);
   const [status, setStatus] = useState<ContentStatus>(item.status);
@@ -247,9 +251,9 @@ function ContentEditor({ item, domains, onClose }: EditorProps) {
             onChange={(e) => setDomainId(e.target.value)}
           >
             <option value="">None</option>
-            {domains.map((d) => (
+            {domainOptions.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {d.archivedAt ? `${d.name} (archived)` : d.name}
               </option>
             ))}
           </select>
@@ -639,7 +643,7 @@ export function ContentBoard() {
 
   const domains = useLiveQuery(async () => {
     const all = await getDb().domains.toArray();
-    return all.filter((d) => !d.deletedAt && !d.archivedAt);
+    return all.filter((d) => !d.deletedAt);
   }, []);
 
   async function handleAdd(title: string, type: ContentType) {
