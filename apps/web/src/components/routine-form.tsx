@@ -22,6 +22,7 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
   const [domainId, setDomainId] = useState<string>('');
   const [notify, setNotify] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const domains = useLiveQuery(async () => {
     const all = await getDb().domains.toArray();
@@ -33,6 +34,7 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
     const trimmed = name.trim();
     if (!trimmed) return;
     setSubmitting(true);
+    setError(null);
     try {
       await createRoutine({
         name: trimmed,
@@ -50,6 +52,8 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
       setNotify(false);
       setOpen(false);
       onCreated?.();
+    } catch {
+      setError('Could not create this routine. Your details are still here.');
     } finally {
       setSubmitting(false);
     }
@@ -215,6 +219,12 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
             Enable reminders
           </span>
         </label>
+
+        {error ? (
+          <p role="alert" className="text-destructive text-xs">
+            {error}
+          </p>
+        ) : null}
 
         {/* Submit */}
         <div className="flex justify-end gap-2 pt-1">
