@@ -16,17 +16,19 @@ interface NoteFormProps {
   onCancel: () => void;
 }
 
-function NoteForm({ onSaved, onCancel }: NoteFormProps) {
+export function NoteForm({ onSaved, onCancel }: NoteFormProps) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [source, setSource] = useState('');
   const [tagsRaw, setTagsRaw] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!body.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       const tags = tagsRaw
         .split(',')
@@ -39,6 +41,8 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
         tags,
       });
       onSaved();
+    } catch {
+      setError('Could not save this note. Your draft is still here.');
     } finally {
       setSaving(false);
     }
@@ -78,6 +82,11 @@ function NoteForm({ onSaved, onCancel }: NoteFormProps) {
         value={tagsRaw}
         onChange={(e) => setTagsRaw(e.target.value)}
       />
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
