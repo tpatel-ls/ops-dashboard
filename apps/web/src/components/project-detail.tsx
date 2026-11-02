@@ -441,11 +441,23 @@ export function LinkedTasksSection({ project }: { project: Project }) {
   const [adding, setAdding] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // The field is disabled while the task saves, and disabling the focused
+  // element drops its focus, so rapid entry meant clicking back in after every
+  // Enter. Hand focus back once the save settles.
+  const refocusAfterSave = useRef(false);
+  useEffect(() => {
+    if (saving || !refocusAfterSave.current) return;
+    refocusAfterSave.current = false;
+    inputRef.current?.focus();
+  }, [saving]);
 
   async function submitAdd(e: React.FormEvent) {
     e.preventDefault();
     const text = adding.trim();
     if (!text || saving) return;
+    refocusAfterSave.current = document.activeElement === inputRef.current;
     setSaving(true);
     setError(null);
     try {
@@ -486,6 +498,7 @@ export function LinkedTasksSection({ project }: { project: Project }) {
       >
         <Plus className="text-muted-foreground size-3 shrink-0" aria-hidden />
         <input
+          ref={inputRef}
           value={adding}
           onChange={(e) => setAdding(e.target.value)}
           placeholder="Add a task... (try: call Bryan tomorrow 2pm !!)"

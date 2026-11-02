@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Organization, Project } from '@ops-dashboard/core';
@@ -29,6 +29,11 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   }),
 }));
 const logWork = vi.fn();
+const addTaskToProject = vi.fn();
+vi.mock('@/lib/tasks', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/tasks')>()),
+  addTaskToProject,
+}));
 vi.mock('@/lib/worklogs', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/worklogs')>()),
   logWork,
@@ -40,6 +45,7 @@ afterEach(() => {
   cleanup();
   liveOrganizations = [];
   logWork.mockReset();
+  addTaskToProject.mockReset();
 });
 
 describe('MetaSection organization picker', () => {
@@ -94,8 +100,12 @@ describe('LogWorkSection', () => {
 });
 
 describe('LinkedTasksSection', () => {
+  const project = { id: 'p-1', name: 'Launch', status: 'active' } as Project;
+
   it('reports a rejected task and keeps the text', async () => {
-    const project = { id: 'p-1', name: 'Launch', status: 'active' } as Project;
+    addTaskToProject.mockImplementation(
+      (await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks')).addTaskToProject,
+    );
     render(createElement(LinkedTasksSection, { project }));
     const input = await screen.findByRole<HTMLInputElement>('textbox', {
       name: 'Add task to Launch',
@@ -109,5 +119,43 @@ describe('LinkedTasksSection', () => {
       'Could not add this task. Your text is still here.',
     );
     expect(input.value).toBe(title);
+  });
+
+  it('returns focus to the field after a task is added', async () => {
+    render(createElement(LinkedTasksSection, { project }));
+    const input = await screen.findByRole<HTMLInputElement>('textbox', {
+      name: 'Add task to Launch',
+    });
+    // Browsers blur a focused input when it becomes disabled for the save;
+    // jsdom does not, so the save stands in for that focus loss.
+    addTaskToProject.mockImplementation(async () => {
+      input.blur();
+    });
+
+    input.focus();
+    fireEvent.change(input, { target: { value: 'Ship spec' } });
+    await act(async () => {
+      fireEvent.submit(input.form!);
+    });
+
+    expect(addTaskToProject).toHaveBeenCalledWith('Ship spec', project);
+    expect(input.value).toBe('');
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('leaves focus alone when the field was not focused at submit', async () => {
+    render(createElement(LinkedTasksSection, { project }));
+    const input = await screen.findByRole<HTMLInputElement>('textbox', {
+      name: 'Add task to Launch',
+    });
+    addTaskToProject.mockResolvedValue(undefined);
+
+    fireEvent.change(input, { target: { value: 'Ship spec' } });
+    await act(async () => {
+      fireEvent.submit(input.form!);
+    });
+
+    expect(addTaskToProject).toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(input);
   });
 });
