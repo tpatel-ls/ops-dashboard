@@ -25,21 +25,25 @@ interface CreatePersonFormProps {
   onCancel: () => void;
 }
 
-function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
+export function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       const person = await createPerson({
         name: name.trim(),
         relationship: relationship.trim() || undefined,
       });
       onCreated(person);
+    } catch {
+      setError('Could not create this person. Your details are still here.');
     } finally {
       setSaving(false);
     }
@@ -69,6 +73,11 @@ function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
         aria-label="Relationship"
         className="input"
       />
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       <div className="flex justify-end gap-2">
         <button
           type="button"
