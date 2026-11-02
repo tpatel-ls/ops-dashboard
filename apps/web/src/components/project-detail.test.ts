@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Organization, Project } from '@ops-dashboard/core';
@@ -22,14 +22,23 @@ vi.mock('dexie-react-hooks', async () => {
 });
 vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
-  getDb: () => ({ organizations: { toArray: async () => liveOrganizations } }),
+  getDb: () => ({
+    organizations: { toArray: async () => liveOrganizations },
+    workLogs: { toArray: async () => [] },
+  }),
+}));
+const logWork = vi.fn();
+vi.mock('@/lib/worklogs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/worklogs')>()),
+  logWork,
 }));
 
-const { MetaSection } = await import('./project-detail');
+const { LogWorkSection, MetaSection } = await import('./project-detail');
 
 afterEach(() => {
   cleanup();
   liveOrganizations = [];
+  logWork.mockReset();
 });
 
 describe('MetaSection organization picker', () => {
@@ -52,5 +61,33 @@ describe('MetaSection organization picker', () => {
       'Old Co (archived)',
     ]);
     expect(select.value).toBe('old');
+  });
+});
+
+describe('LogWorkSection', () => {
+  const project = { id: 'p-1', name: 'Launch', status: 'active' } as Project;
+
+  it('explains the minute limit instead of silently ignoring a longer entry', () => {
+    render(createElement(LogWorkSection, { project }));
+    fireEvent.change(screen.getByLabelText('Minutes worked'), { target: { value: '1500' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+
+    expect(screen.getByRole('alert').textContent).toBe('Enter whole minutes between 1 and 1440.');
+    expect(logWork).not.toHaveBeenCalled();
+  });
+
+  it('reports a rejected save and keeps the entry', async () => {
+    logWork.mockRejectedValue(new Error('QuotaExceededError'));
+    render(createElement(LogWorkSection, { project }));
+    fireEvent.change(screen.getByLabelText('Minutes worked'), { target: { value: '45' } });
+    fireEvent.change(screen.getByLabelText('Progress note'), { target: { value: 'Draft' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not log this work. Your entry is still here.',
+    );
+    expect(logWork).toHaveBeenCalledWith('p-1', 45, 'Draft');
+    expect((screen.getByLabelText('Minutes worked') as HTMLInputElement).value).toBe('45');
+    expect((screen.getByLabelText('Progress note') as HTMLInputElement).value).toBe('Draft');
   });
 });
