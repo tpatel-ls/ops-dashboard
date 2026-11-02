@@ -36,18 +36,20 @@ interface QuoteFormProps {
   onCancel: () => void;
 }
 
-function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
+export function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
   const [text, setText] = useState('');
   const [author, setAuthor] = useState('');
   const [source, setSource] = useState('');
   const [sourceType, setSourceType] = useState<QuoteSourceType | ''>('');
   const [tagsRaw, setTagsRaw] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!text.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       const tags = tagsRaw
         .split(',')
@@ -61,6 +63,8 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
         tags,
       });
       onSaved();
+    } catch {
+      setError('Could not save this quote. Your draft is still here.');
     } finally {
       setSaving(false);
     }
@@ -117,6 +121,11 @@ function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
           onChange={(e) => setTagsRaw(e.target.value)}
         />
       </div>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
@@ -144,26 +153,30 @@ interface AddThoughtInputProps {
   onDone: () => void;
 }
 
-function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
+export function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!text.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       const newThought = makeThought(text.trim());
       await updateQuote(quote.id, { thoughts: [...safeQuoteThoughts(quote.thoughts), newThought] });
       setText('');
       onDone();
+    } catch {
+      setError('Could not add this thought. Your text is still here.');
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-1">
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-center gap-2 pt-1">
       <input
         autoFocus
         className="input flex-1"
@@ -191,6 +204,11 @@ function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
       >
         <span aria-hidden>×</span>
       </button>
+      {error ? (
+        <p role="alert" className="text-destructive basis-full text-xs">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }
