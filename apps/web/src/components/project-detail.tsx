@@ -18,6 +18,7 @@ import { safeProjectChecklists, safeProjectMilestones, updateProject } from '@/l
 import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
+import { validWorkMinutes } from '@/lib/work-logger';
 import { addTaskToProject, setTaskStatus, updateTask } from '@/lib/tasks';
 import { compareProjectTasks } from '@/lib/task-query';
 import { compareOrganizations } from '@/lib/org-lanes';
@@ -542,10 +543,11 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
 
 // ─── Log work ─────────────────────────────────────────────────────────────────
 
-function LogWorkSection({ project }: { project: Project }) {
+export function LogWorkSection({ project }: { project: Project }) {
   const [minutes, setMinutes] = useState('');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const totalHours = useLiveQuery(async () => {
     const all = await getDb().workLogs.toArray();
@@ -556,14 +558,21 @@ function LogWorkSection({ project }: { project: Project }) {
   async function handleLog() {
     // Enter in the note field calls this directly, past the Log button's
     // `disabled`, so a second Enter while a save was in flight logged twice.
-    if (saving) return;
-    const mins = parseInt(minutes, 10);
-    if (!mins || mins <= 0) return;
+    if (saving || !minutes.trim()) return;
+    const mins = Number(minutes);
+    // logWork rejects anything outside this range, which used to fail silently.
+    if (!validWorkMinutes(mins)) {
+      setError('Enter whole minutes between 1 and 1440.');
+      return;
+    }
     setSaving(true);
+    setError(null);
     try {
       await logWork(project.id, mins, note.trim() || undefined);
       setMinutes('');
       setNote('');
+    } catch {
+      setError('Could not log this work. Your entry is still here.');
     } finally {
       setSaving(false);
     }
@@ -609,6 +618,7 @@ function LogWorkSection({ project }: { project: Project }) {
             id={`project-${project.id}-minutes`}
             type="number"
             min={1}
+            max={1440}
             placeholder="Minutes"
             value={minutes}
             onChange={(e) => setMinutes(e.target.value)}
@@ -637,6 +647,11 @@ function LogWorkSection({ project }: { project: Project }) {
             Log
           </button>
         </div>
+        {error ? (
+          <p role="alert" className="text-destructive text-xs">
+            {error}
+          </p>
+        ) : null}
       </div>
     </section>
   );
