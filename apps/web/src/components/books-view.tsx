@@ -33,16 +33,18 @@ interface BookFormProps {
   onCancel: () => void;
 }
 
-function BookForm({ onSaved, onCancel }: BookFormProps) {
+export function BookForm({ onSaved, onCancel }: BookFormProps) {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [status, setStatus] = useState<BookStatus>('want');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       await createBook({
         title: title.trim(),
@@ -50,6 +52,8 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
         status,
       });
       onSaved();
+    } catch {
+      setError('Could not add this book. Your details are still here.');
     } finally {
       setSaving(false);
     }
@@ -89,6 +93,11 @@ function BookForm({ onSaved, onCancel }: BookFormProps) {
           ))}
         </select>
       </div>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
