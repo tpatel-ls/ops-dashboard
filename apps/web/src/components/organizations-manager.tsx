@@ -45,7 +45,7 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
   );
 }
 
-function OrgForm({
+export function OrgForm({
   initial,
   onSave,
   onCancel,
@@ -57,14 +57,18 @@ function OrgForm({
   const [name, setName] = useState(initial?.name ?? '');
   const [color, setColor] = useState(initial?.color ?? PRESET_COLORS[0]!);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed || saving) return;
     setSaving(true);
+    setError(null);
     try {
       await onSave(trimmed, color);
+    } catch {
+      setError('Could not save this organization. Your changes are still here.');
     } finally {
       setSaving(false);
     }
@@ -81,6 +85,11 @@ function OrgForm({
         autoFocus
       />
       <ColorPicker value={color} onChange={setColor} />
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       <div className="flex justify-end gap-2">
         <button
           type="button"
