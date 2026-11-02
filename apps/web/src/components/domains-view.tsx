@@ -52,18 +52,22 @@ interface DomainFormProps {
   onCancel: () => void;
 }
 
-function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
+export function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [color, setColor] = useState(initial?.color ?? PRESET_COLORS[0]!.value);
   const [description, setDescription] = useState(initial?.description ?? '');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
+    setError(null);
     try {
       await onSave(name.trim(), color, description.trim());
+    } catch {
+      setError('Could not save this domain. Your changes are still here.');
     } finally {
       setSaving(false);
     }
@@ -94,6 +98,11 @@ function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
         <div className="text-muted-foreground mb-2 text-xs">Color</div>
         <ColorPicker value={color} onChange={setColor} />
       </div>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       <div className="flex justify-end gap-2">
         <button
           type="button"
