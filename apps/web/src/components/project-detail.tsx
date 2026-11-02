@@ -436,21 +436,25 @@ function ChecklistGroup({
 
 // ─── Linked tasks ────────────────────────────────────────────────────────────
 
-function LinkedTasksSection({ project }: { project: Project }) {
+export function LinkedTasksSection({ project }: { project: Project }) {
   const openEdit = useAppStore((s) => s.openEdit);
   const [adding, setAdding] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function submitAdd(e: React.FormEvent) {
     e.preventDefault();
     const text = adding.trim();
     if (!text || saving) return;
     setSaving(true);
+    setError(null);
     try {
       // NL parsing applies (dates, #tags, !!); the task inherits the
       // project's domain + org lane. Input stays put for rapid entry.
       await addTaskToProject(text, project);
       setAdding('');
+    } catch {
+      setError('Could not add this task. Your text is still here.');
     } finally {
       setSaving(false);
     }
@@ -491,6 +495,11 @@ function LinkedTasksSection({ project }: { project: Project }) {
         />
         <span className="kbd hidden sm:inline">Enter</span>
       </form>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
       {tasks.length === 0 ? (
         <p className="text-subtle-foreground text-xs">No tasks linked to this project.</p>
       ) : (

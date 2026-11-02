@@ -24,6 +24,7 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
   getDb: () => ({
     organizations: { toArray: async () => liveOrganizations },
+    tasks: { toArray: async () => [] },
     workLogs: { toArray: async () => [] },
   }),
 }));
@@ -33,7 +34,7 @@ vi.mock('@/lib/worklogs', async (importOriginal) => ({
   logWork,
 }));
 
-const { LogWorkSection, MetaSection } = await import('./project-detail');
+const { LinkedTasksSection, LogWorkSection, MetaSection } = await import('./project-detail');
 
 afterEach(() => {
   cleanup();
@@ -89,5 +90,24 @@ describe('LogWorkSection', () => {
     expect(logWork).toHaveBeenCalledWith('p-1', 45, 'Draft');
     expect((screen.getByLabelText('Minutes worked') as HTMLInputElement).value).toBe('45');
     expect((screen.getByLabelText('Progress note') as HTMLInputElement).value).toBe('Draft');
+  });
+});
+
+describe('LinkedTasksSection', () => {
+  it('reports a rejected task and keeps the text', async () => {
+    const project = { id: 'p-1', name: 'Launch', status: 'active' } as Project;
+    render(createElement(LinkedTasksSection, { project }));
+    const input = await screen.findByRole<HTMLInputElement>('textbox', {
+      name: 'Add task to Launch',
+    });
+    // The title limit is 500 characters, so addTaskToProject rejects this one.
+    const title = 'x'.repeat(501);
+    fireEvent.change(input, { target: { value: title } });
+    fireEvent.submit(input.form!);
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not add this task. Your text is still here.',
+    );
+    expect(input.value).toBe(title);
   });
 });
