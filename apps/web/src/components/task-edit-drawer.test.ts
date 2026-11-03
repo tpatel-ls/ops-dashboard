@@ -128,3 +128,26 @@ describe('TaskEditDrawer links', () => {
     expect(select.value).toBe('old');
   });
 });
+
+describe('TaskEditDrawer save errors', () => {
+  it('reports an edit the task validator rejects instead of dropping it silently', async () => {
+    const tasks = await import('@/lib/tasks');
+    const actual = await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks');
+    vi.mocked(tasks.updateTask).mockImplementationOnce(actual.updateTask);
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'todo',
+      scheduledFor: '2026-11-03',
+      startAt: new Date('2026-11-03T10:00:00').toISOString(),
+    } as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    fireEvent.change(await screen.findByLabelText('End'), { target: { value: '09:00' } });
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not save that change. Task end time must be after its start time.',
+    );
+  });
+});
