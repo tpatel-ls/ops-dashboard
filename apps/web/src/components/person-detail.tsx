@@ -26,14 +26,20 @@ function FactsSection({ person }: { person: Person }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState('');
   const [value, setValue] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const facts = safePersonFacts(person.facts);
 
   async function addFact() {
     const l = label.trim();
     const v = value.trim();
     if (!l || !v) return;
-    const fact = makeFact(l, v);
-    await updatePerson(person.id, { facts: [...facts, fact] });
+    setError(null);
+    try {
+      await updatePerson(person.id, { facts: [...facts, makeFact(l, v)] });
+    } catch {
+      setError('Could not save this fact. Your draft is still here.');
+      return;
+    }
     setLabel('');
     setValue('');
     setAdding(false);
@@ -90,6 +96,11 @@ function FactsSection({ person }: { person: Person }) {
               if (e.key === 'Escape') setAdding(false);
             }}
           />
+          {error ? (
+            <p role="alert" className="text-destructive text-xs">
+              {error}
+            </p>
+          ) : null}
           <div className="flex justify-end gap-2">
             <button
               type="button"
@@ -152,6 +163,7 @@ function InteractionsSection({ person }: { person: Person }) {
   const [adding, setAdding] = useState(false);
   const [note, setNote] = useState('');
   const [date, setDate] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const interactions = safePersonInteractions(person.interactions);
 
   const sorted = [...interactions].sort(compareInteractionRecency);
@@ -159,10 +171,15 @@ function InteractionsSection({ person }: { person: Person }) {
   async function addInteraction() {
     const n = note.trim();
     if (!n) return;
-    const interaction = makeInteraction(n, date || undefined);
-    await updatePerson(person.id, {
-      interactions: [...interactions, interaction],
-    });
+    setError(null);
+    try {
+      await updatePerson(person.id, {
+        interactions: [...interactions, makeInteraction(n, date || undefined)],
+      });
+    } catch {
+      setError('Could not log this interaction. Your draft is still here.');
+      return;
+    }
     setNote('');
     setDate('');
     setAdding(false);
@@ -216,6 +233,11 @@ function InteractionsSection({ person }: { person: Person }) {
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
+          {error ? (
+            <p role="alert" className="text-destructive text-xs">
+              {error}
+            </p>
+          ) : null}
           <div className="flex justify-end gap-2">
             <button
               type="button"
