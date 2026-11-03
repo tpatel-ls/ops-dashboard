@@ -215,10 +215,11 @@ export function MilestonesSection({ project }: { project: Project }) {
 
 // ─── Named checklists ────────────────────────────────────────────────────────
 
-function ChecklistsSection({ project }: { project: Project }) {
+export function ChecklistsSection({ project }: { project: Project }) {
   const [addingList, setAddingList] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [expandedList, setExpandedList] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const checklists = safeProjectChecklists(project.checklists);
 
@@ -226,18 +227,31 @@ function ChecklistsSection({ project }: { project: Project }) {
     const name = newListName.trim();
     if (!name) return;
     const list: NamedChecklist = { id: newId(), name, items: [] };
-    await updateProject(project.id, { checklists: [...checklists, list] });
+    setError(null);
+    try {
+      await updateProject(project.id, { checklists: [...checklists, list] });
+    } catch {
+      setError('Could not add this checklist. Your draft is still here.');
+      return;
+    }
     setNewListName('');
     setAddingList(false);
     setExpandedList(list.id);
   }
 
-  async function addItem(listId: string, text: string) {
+  async function addItem(listId: string, text: string): Promise<boolean> {
     const item: ChecklistItem = { id: newId(), text, done: false };
     const updated = checklists.map((cl) =>
       cl.id === listId ? { ...cl, items: [...cl.items, item] } : cl,
     );
-    await updateProject(project.id, { checklists: updated });
+    setError(null);
+    try {
+      await updateProject(project.id, { checklists: updated });
+      return true;
+    } catch {
+      setError('Could not add this item. Your draft is still here.');
+      return false;
+    }
   }
 
   async function toggleItem(listId: string, itemId: string) {
@@ -304,6 +318,12 @@ function ChecklistsSection({ project }: { project: Project }) {
         </div>
       ) : null}
 
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
+
       {checklists.length === 0 && !addingList ? (
         <p className="text-subtle-foreground text-xs">No checklists yet.</p>
       ) : (
@@ -335,11 +355,19 @@ function ChecklistGroup({
   expanded: boolean;
   onToggleExpand: () => void;
   onToggleItem: (id: string) => void;
-  onAddItem: (text: string) => void;
+  onAddItem: (text: string) => Promise<boolean>;
 }) {
   const [addingItem, setAddingItem] = useState(false);
   const [itemText, setItemText] = useState('');
   const done = checklist.items.filter((it) => it.done).length;
+
+  // Close the field only once the item is saved, so a rejected one (over the
+  // 500 character limit) stays put instead of being discarded.
+  async function addItem() {
+    if (!(await onAddItem(itemText.trim()))) return;
+    setItemText('');
+    setAddingItem(false);
+  }
 
   return (
     <div className="surface-flat overflow-hidden">
@@ -409,22 +437,15 @@ function ChecklistGroup({
                 autoFocus
                 onKeyDown={(e) => {
                   if (isComposingKeyEvent(e)) return;
-                  if (e.key === 'Enter' && itemText.trim()) {
-                    onAddItem(itemText.trim());
-                    setItemText('');
-                    setAddingItem(false);
-                  }
+                  if (e.key === 'Enter' && itemText.trim()) void addItem();
                   if (e.key === 'Escape') setAddingItem(false);
                 }}
               />
               <button
                 type="button"
                 onClick={() => {
-                  if (itemText.trim()) {
-                    onAddItem(itemText.trim());
-                    setItemText('');
-                  }
-                  setAddingItem(false);
+                  if (itemText.trim()) void addItem();
+                  else setAddingItem(false);
                 }}
                 className="bg-primary text-primary-foreground rounded-md px-3 py-1 text-xs font-medium"
               >

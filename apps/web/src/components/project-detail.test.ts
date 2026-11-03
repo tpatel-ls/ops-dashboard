@@ -39,7 +39,7 @@ vi.mock('@/lib/worklogs', async (importOriginal) => ({
   logWork,
 }));
 
-const { LinkedTasksSection, LogWorkSection, MetaSection, MilestonesSection } =
+const { ChecklistsSection, LinkedTasksSection, LogWorkSection, MetaSection, MilestonesSection } =
   await import('./project-detail');
 
 afterEach(() => {
@@ -180,5 +180,48 @@ describe('MilestonesSection', () => {
       'Could not add this milestone. Your draft is still here.',
     );
     expect((screen.getByLabelText('Milestone title') as HTMLInputElement).value).toBe(title);
+  });
+});
+
+describe('ChecklistsSection', () => {
+  it('reports a rejected checklist item and keeps it in the field', async () => {
+    const project = {
+      id: 'p-1',
+      name: 'Launch',
+      status: 'active',
+      checklists: [{ id: 'cl-1', name: 'Prep', items: [] }],
+    } as unknown as Project;
+    render(createElement(ChecklistsSection, { project }));
+    fireEvent.click(screen.getByRole('button', { name: /Prep/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add item' }));
+    // Item text is limited to 500 characters, so updateProject rejects this one.
+    const text = 'x'.repeat(501);
+    const field = screen.getByLabelText('New item for Prep') as HTMLInputElement;
+    fireEvent.change(field, { target: { value: text } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not add this item. Your draft is still here.',
+    );
+    expect((screen.getByLabelText('New item for Prep') as HTMLInputElement).value).toBe(text);
+  });
+
+  it('reports a rejected checklist name and keeps the draft', async () => {
+    const project = {
+      id: 'p-1',
+      name: 'Launch',
+      status: 'active',
+      checklists: [],
+    } as unknown as Project;
+    render(createElement(ChecklistsSection, { project }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add checklist' }));
+    const name = 'x'.repeat(501);
+    fireEvent.change(screen.getByLabelText('Checklist name'), { target: { value: name } });
+    fireEvent.keyDown(screen.getByLabelText('Checklist name'), { key: 'Enter' });
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not add this checklist. Your draft is still here.',
+    );
+    expect((screen.getByLabelText('Checklist name') as HTMLInputElement).value).toBe(name);
   });
 });
