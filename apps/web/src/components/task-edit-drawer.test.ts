@@ -150,4 +150,21 @@ describe('TaskEditDrawer save errors', () => {
       'Could not save that change. Task end time must be after its start time.',
     );
   });
+
+  it('keeps a checklist step the validator rejects in its field', async () => {
+    const tasks = await import('@/lib/tasks');
+    const actual = await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks');
+    vi.mocked(tasks.updateTask).mockImplementationOnce(actual.updateTask);
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', checklist: [] } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+    const step = 'x'.repeat(501);
+    const field = (await screen.findByLabelText('New checklist step')) as HTMLInputElement;
+
+    fireEvent.change(field, { target: { value: step } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+
+    expect((await screen.findByRole('alert')).textContent).toMatch(/^Could not save that change\./);
+    expect(field.value).toBe(step);
+  });
 });
