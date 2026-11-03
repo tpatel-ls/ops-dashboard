@@ -312,6 +312,18 @@ function InteractionRow({
 function MetaSection({ person, domains }: { person: Person; domains: Domain[] }) {
   const [name, setName] = useState(person.name);
   const [relationship, setRelationship] = useState(person.relationship ?? '');
+  const [error, setError] = useState<string | null>(null);
+
+  // These fields save on blur, so a rejected value (a relationship over 200
+  // characters, say) would otherwise stay on screen looking saved.
+  async function save(patch: Partial<Person>, failure: string) {
+    setError(null);
+    try {
+      await updatePerson(person.id, patch);
+    } catch {
+      setError(failure);
+    }
+  }
 
   async function saveName() {
     const n = name.trim();
@@ -322,17 +334,20 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
       return;
     }
     if (n === person.name) return;
-    await updatePerson(person.id, { name: n });
+    await save({ name: n }, 'Could not save the name. It is still in the field.');
   }
 
   async function saveRelationship() {
     const r = relationship.trim();
     if (r === (person.relationship ?? '')) return;
-    await updatePerson(person.id, { relationship: r || undefined });
+    await save(
+      { relationship: r || undefined },
+      'Could not save the relationship. It is still in the field.',
+    );
   }
 
   async function setDomain(domainId: string) {
-    await updatePerson(person.id, { domainId: domainId || undefined });
+    await save({ domainId: domainId || undefined }, 'Could not change the domain.');
   }
 
   return (
@@ -389,6 +404,11 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
           </div>
         ) : null}
       </div>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
     </section>
   );
 }
