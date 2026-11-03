@@ -159,6 +159,21 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const [tagDraft, setTagDraft] = useState('');
   const [reminderDraft, setReminderDraft] = useState('');
   const [checklistDraft, setChecklistDraft] = useState('');
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Every field saves as it changes, and `updateTask` throws on input it
+  // rejects (an end time before the start, text past its length limit).
+  // Unhandled, the edit silently did not stick.
+  async function save(patch: Partial<Task>): Promise<boolean> {
+    setSaveError(null);
+    try {
+      await updateTask(task.id, patch);
+      return true;
+    } catch (err) {
+      setSaveError(`Could not save that change. ${err instanceof Error ? err.message : ''}`.trim());
+      return false;
+    }
+  }
 
   const currentRecurrence = task.recurrence?.freq ?? 'none';
   const tags = safeTaskTags(task.tags);
@@ -169,6 +184,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
     <>
       {
         <div className="space-y-5 p-4 sm:space-y-6 sm:p-5">
+          {saveError ? (
+            <p role="alert" className="text-destructive text-xs">
+              {saveError}
+            </p>
+          ) : null}
           {/* Title + notes */}
           <div>
             <div className="flex items-start gap-2">
@@ -183,7 +203,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     setDraftTitle(task.title);
                     return;
                   }
-                  if (draftTitle !== task.title) void updateTask(task.id, { title: draftTitle });
+                  if (draftTitle !== task.title) void save({ title: draftTitle });
                 }}
                 aria-label="Task title"
                 className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
@@ -192,7 +212,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               {/* Star toggle */}
               <button
                 type="button"
-                onClick={() => updateTask(task.id, { starred: !task.starred })}
+                onClick={() => save({ starred: !task.starred })}
                 aria-label={task.starred ? 'Unstar task' : 'Star task'}
                 className={cn(
                   'mt-1 shrink-0 rounded-md p-1 transition-colors',
@@ -207,9 +227,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
             <textarea
               value={draftNotes}
               onChange={(e) => setDraftNotes(e.target.value)}
-              onBlur={() =>
-                draftNotes !== (task.notes ?? '') && updateTask(task.id, { notes: draftNotes })
-              }
+              onBlur={() => draftNotes !== (task.notes ?? '') && save({ notes: draftNotes })}
               className="text-muted-foreground mt-2 w-full resize-none bg-transparent text-sm outline-none"
               rows={3}
               aria-label="Task notes"
@@ -245,7 +263,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   key={p}
                   type="button"
                   aria-pressed={task.priority === p}
-                  onClick={() => updateTask(task.id, { priority: p })}
+                  onClick={() => save({ priority: p })}
                   className={cn(
                     'rounded-md border px-3 py-1 text-xs',
                     task.priority === p
@@ -274,7 +292,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   key={option.label}
                   type="button"
                   aria-pressed={task.scheduledFor === option.value}
-                  onClick={() => updateTask(task.id, { scheduledFor: option.value })}
+                  onClick={() => save({ scheduledFor: option.value })}
                   className={cn(
                     'min-h-9 rounded-md border px-2.5 text-xs font-medium transition-colors',
                     task.scheduledFor === option.value
@@ -293,7 +311,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   aria-label="Task scheduled date"
                   value={task.scheduledFor ?? ''}
                   onChange={(e) =>
-                    updateTask(task.id, {
+                    save({
                       scheduledFor: e.target.value || undefined,
                     })
                   }
@@ -306,7 +324,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   min={0}
                   value={task.estimateMinutes ?? ''}
                   onChange={(e) =>
-                    updateTask(task.id, {
+                    save({
                       estimateMinutes: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
@@ -322,7 +340,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     const iso = e.target.value
                       ? new Date(`${day}T${e.target.value}:00`).toISOString()
                       : undefined;
-                    updateTask(task.id, { startAt: iso });
+                    save({ startAt: iso });
                   }}
                   className="input"
                 />
@@ -336,7 +354,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     const iso = e.target.value
                       ? new Date(`${day}T${e.target.value}:00`).toISOString()
                       : undefined;
-                    updateTask(task.id, { endAt: iso });
+                    save({ endAt: iso });
                   }}
                   className="input"
                 />
@@ -352,9 +370,9 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               onChange={(e) => {
                 const val = e.target.value;
                 if (val === 'none') {
-                  updateTask(task.id, { recurrence: undefined });
+                  save({ recurrence: undefined });
                 } else {
-                  updateTask(task.id, {
+                  save({
                     recurrence: {
                       freq: val as 'daily' | 'weekly' | 'monthly' | 'yearly',
                       interval: 1,
@@ -377,7 +395,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
             <select
               aria-label="Domain"
               value={task.domainId ?? ''}
-              onChange={(e) => updateTask(task.id, { domainId: e.target.value || undefined })}
+              onChange={(e) => save({ domainId: e.target.value || undefined })}
               className="input w-full"
             >
               <option value="">No domain</option>
@@ -400,7 +418,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 // The task's org lane follows its project. Clears travel as
                 // SQL null so they propagate to other devices (the sync
                 // mapper drops absent keys).
-                void updateTask(task.id, {
+                void save({
                   projectId: (pid || null) as unknown as string | undefined,
                   orgId: (proj?.orgId ?? null) as unknown as string | undefined,
                 });
@@ -421,7 +439,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
             <select
               aria-label="Content link"
               value={task.contentId ?? ''}
-              onChange={(e) => updateTask(task.id, { contentId: e.target.value || undefined })}
+              onChange={(e) => save({ contentId: e.target.value || undefined })}
               className="input w-full"
             >
               <option value="">No content link</option>
@@ -439,7 +457,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <button
                   key={t}
                   type="button"
-                  onClick={() => updateTask(task.id, { tags: tags.filter((x) => x !== t) })}
+                  onClick={() => save({ tags: tags.filter((x) => x !== t) })}
                   aria-label={`Remove tag ${t}`}
                   className="group bg-accent text-accent-foreground hover:bg-destructive/10 hover:text-destructive inline-flex min-h-8 items-center gap-1 rounded-full px-2 py-0.5 text-[11px]"
                 >
@@ -459,7 +477,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     e.preventDefault();
                     const t = routedTag(tagDraft.trim().replace(/^#/, ''));
                     if (!tags.includes(t)) {
-                      updateTask(task.id, { tags: [...tags, t] });
+                      save({ tags: [...tags, t] });
                     }
                     setTagDraft('');
                   }
@@ -483,7 +501,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     type="button"
                     onClick={async () => {
                       await cancelReminder(r.id);
-                      updateTask(task.id, {
+                      save({
                         reminders: reminders.filter((x) => x.id !== r.id),
                       });
                     }}
@@ -508,7 +526,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     if (!reminderDraft) return;
                     const iso = new Date(reminderDraft).toISOString();
                     const reminder = await scheduleReminder(task.id, iso);
-                    await updateTask(task.id, {
+                    await save({
                       reminders: [...reminders, reminder],
                     });
                     setReminderDraft('');
