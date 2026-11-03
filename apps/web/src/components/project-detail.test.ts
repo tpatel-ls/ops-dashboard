@@ -39,7 +39,8 @@ vi.mock('@/lib/worklogs', async (importOriginal) => ({
   logWork,
 }));
 
-const { LinkedTasksSection, LogWorkSection, MetaSection } = await import('./project-detail');
+const { LinkedTasksSection, LogWorkSection, MetaSection, MilestonesSection } =
+  await import('./project-detail');
 
 afterEach(() => {
   cleanup();
@@ -157,5 +158,27 @@ describe('LinkedTasksSection', () => {
 
     expect(addTaskToProject).toHaveBeenCalled();
     expect(document.activeElement).not.toBe(input);
+  });
+});
+
+describe('MilestonesSection', () => {
+  it('reports a rejected milestone and keeps the draft', async () => {
+    const project = {
+      id: 'p-1',
+      name: 'Launch',
+      status: 'active',
+      milestones: [],
+    } as unknown as Project;
+    render(createElement(MilestonesSection, { project }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    // Milestone titles are limited to 500 characters, so updateProject rejects this one.
+    const title = 'x'.repeat(501);
+    fireEvent.change(screen.getByLabelText('Milestone title'), { target: { value: title } });
+    fireEvent.keyDown(screen.getByLabelText('Milestone title'), { key: 'Enter' });
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not add this milestone. Your draft is still here.',
+    );
+    expect((screen.getByLabelText('Milestone title') as HTMLInputElement).value).toBe(title);
   });
 });

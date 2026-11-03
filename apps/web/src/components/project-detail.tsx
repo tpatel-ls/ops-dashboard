@@ -51,10 +51,11 @@ const STATUS_CLASSES: Record<ProjectStatus, string> = {
 
 // ─── Milestone section ───────────────────────────────────────────────────────
 
-function MilestonesSection({ project }: { project: Project }) {
+export function MilestonesSection({ project }: { project: Project }) {
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDue, setNewDue] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const milestones = safeProjectMilestones(project.milestones);
   const done = milestones.filter((m) => m.done).length;
@@ -69,9 +70,15 @@ function MilestonesSection({ project }: { project: Project }) {
       done: false,
       ...(newDue ? { dueAt: newDue } : {}),
     };
-    await updateProject(project.id, {
-      milestones: [...milestones, milestone],
-    });
+    setError(null);
+    try {
+      await updateProject(project.id, {
+        milestones: [...milestones, milestone],
+      });
+    } catch {
+      setError('Could not add this milestone. Your draft is still here.');
+      return;
+    }
     setNewTitle('');
     setNewDue('');
     setAdding(false);
@@ -146,6 +153,11 @@ function MilestonesSection({ project }: { project: Project }) {
             value={newDue}
             onChange={(e) => setNewDue(e.target.value)}
           />
+          {error ? (
+            <p role="alert" className="text-destructive text-xs">
+              {error}
+            </p>
+          ) : null}
           <div className="flex justify-end gap-2">
             <button
               type="button"
