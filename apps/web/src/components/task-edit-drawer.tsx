@@ -476,10 +476,13 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   if (e.key === 'Enter' && tagDraft.trim()) {
                     e.preventDefault();
                     const t = routedTag(tagDraft.trim().replace(/^#/, ''));
-                    if (!tags.includes(t)) {
-                      save({ tags: [...tags, t] });
+                    // Clear the field only once the tag is saved, so a
+                    // rejected one stays put to be corrected.
+                    if (tags.includes(t)) {
+                      setTagDraft('');
+                    } else {
+                      void save({ tags: [...tags, t] }).then((ok) => ok && setTagDraft(''));
                     }
-                    setTagDraft('');
                   }
                 }}
                 placeholder="add tag"
@@ -557,8 +560,9 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                         ...checklist,
                         { id: newId(), text: checklistDraft.trim(), done: false },
                       ];
-                      setChecklist(task.id, next);
-                      setChecklistDraft('');
+                      // A step past the 500 character limit is rejected;
+                      // keep it in the field instead of discarding it.
+                      void save({ checklist: next }).then((ok) => ok && setChecklistDraft(''));
                     }
                   }}
                   aria-label="New checklist step"
