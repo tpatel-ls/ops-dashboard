@@ -49,3 +49,17 @@ describe('PersonDetail add forms', () => {
     expect((screen.getByLabelText('Interaction notes') as HTMLTextAreaElement).value).toBe(note);
   });
 });
+
+describe('PersonDetail fields', () => {
+  it('reports a relationship the validator rejects instead of looking saved', async () => {
+    renderDetail();
+    // The relationship limit is 200 characters.
+    const field = screen.getByLabelText('Relationship');
+    fireEvent.change(field, { target: { value: 'x'.repeat(201) } });
+    fireEvent.blur(field);
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not save the relationship. It is still in the field.',
+    );
+  });
+});
