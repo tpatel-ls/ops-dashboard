@@ -42,8 +42,13 @@ where the next stroke will begin.
 
 ## Gestures alongside pen
 
-Two finger pan and pinch zoom must keep working while a pen stroke is in
-flight. Track touches and pen pointers separately.
+Two finger pan and pinch zoom do not run while a pen stroke is in flight.
+`OpsCanvas` cannot tell a palm from a deliberate finger, so palm rejection
+drops every touch `pointerdown` and `pointermove` that arrives within 200 ms of
+the last pen sample, including a second finger meant to pan. Lift the pen (or
+let it leave hover range) and touch gestures work again once the window has
+passed. Letting gestures through mid-stroke would mean telling palms and
+fingers apart, for example by contact size, which the canvas does not do yet.
 
 ## Lefty mode
 
