@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Organization, Project } from '@ops-dashboard/core';
 
 let liveOrganizations: Array<Partial<Organization>> = [];
+let liveProjects: Array<Partial<Project>> = [];
 // Run each live query once, against the in-memory rows below.
 vi.mock('dexie-react-hooks', async () => {
   const { useEffect, useState } = await import('react');
@@ -24,6 +25,7 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
   getDb: () => ({
     organizations: { toArray: async () => liveOrganizations },
+    projects: { get: async (id: string) => liveProjects.find((p) => p.id === id) },
     tasks: { toArray: async () => [] },
     workLogs: { toArray: async () => [] },
   }),
@@ -45,6 +47,7 @@ const { ChecklistsSection, LinkedTasksSection, LogWorkSection, MetaSection, Mile
 afterEach(() => {
   cleanup();
   liveOrganizations = [];
+  liveProjects = [];
   logWork.mockReset();
   addTaskToProject.mockReset();
 });
@@ -69,6 +72,27 @@ describe('MetaSection organization picker', () => {
       'Old Co (archived)',
     ]);
     expect(select.value).toBe('old');
+  });
+});
+
+describe('MetaSection due date', () => {
+  it('reports a due date before the start date instead of silently reverting', async () => {
+    const project = {
+      id: 'p-1',
+      name: 'Launch',
+      status: 'active',
+      startDate: '2026-11-10',
+    } as Project;
+    liveProjects = [project];
+    render(createElement(MetaSection, { project, domains: [] }));
+
+    fireEvent.change(screen.getByLabelText('Project due date'), {
+      target: { value: '2026-11-01' },
+    });
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Project due date must not precede its start date.',
+    );
   });
 });
 
