@@ -11,6 +11,7 @@ import { compareWhiteboardUpdates, whiteboardUpdatedLabel } from '@/lib/whiteboa
 
 export function WhiteboardList() {
   const [name, setName] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const boards = useLiveQuery(async () => {
     const all = await getDb().whiteboards.toArray();
     return all.filter((w) => !w.deletedAt).sort(compareWhiteboardUpdates);
@@ -23,8 +24,14 @@ export function WhiteboardList() {
           e.preventDefault();
           const text = name.trim();
           if (!text) return;
-          await createWhiteboard(text);
-          setName('');
+          setError(null);
+          // Names over 200 characters are rejected; keep the text so it can be shortened.
+          try {
+            await createWhiteboard(text);
+            setName('');
+          } catch {
+            setError('Could not create this whiteboard. Your name is still here.');
+          }
         }}
         className="surface flex min-w-0 items-center gap-2 px-3 py-2"
       >
@@ -44,6 +51,11 @@ export function WhiteboardList() {
           Create
         </button>
       </form>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
 
       {boards === undefined ? (
         <div
