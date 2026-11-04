@@ -721,9 +721,18 @@ export function MetaSection({ project, domains }: { project: Project; domains: D
     (await getDb().organizations.toArray()).sort(compareOrganizations),
   );
   const orgs = allOrgs && linkOptions(allOrgs, project.orgId);
+  const [error, setError] = useState<string | null>(null);
 
+  // A due date before the start date is rejected, and the controlled date
+  // input then snapped back to the saved value with nothing said and the
+  // rejection unhandled. Show the validator's reason instead.
   async function set<K extends keyof Project>(key: K, value: Project[K]) {
-    await updateProject(project.id, { [key]: value } as Partial<Project>);
+    setError(null);
+    try {
+      await updateProject(project.id, { [key]: value } as Partial<Project>);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save this change.');
+    }
   }
 
   async function setOrg(orgId: string) {
@@ -820,6 +829,11 @@ export function MetaSection({ project, domains }: { project: Project; domains: D
           />
         </div>
       </div>
+      {error ? (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      ) : null}
     </section>
   );
 }
