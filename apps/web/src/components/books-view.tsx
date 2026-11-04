@@ -206,11 +206,25 @@ interface BookCardProps {
   quotes: Quote[];
 }
 
-function BookCard({ book, quotes }: BookCardProps) {
+export function BookCard({ book, quotes }: BookCardProps) {
   const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // The reading timeline is checked on save: a book marked finished straight
+  // from "want to read" has no start date, so moving it back to reading starts
+  // it after it finished and is rejected. The select then snapped back with
+  // nothing said and the rejection unhandled.
+  async function save(patch: Partial<Book>) {
+    setError(null);
+    try {
+      await updateBook(book.id, patch);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save this change.');
+    }
+  }
 
   async function handleRating(rating: number) {
-    await updateBook(book.id, { rating });
+    await save({ rating });
   }
 
   async function handleStatus(status: BookStatus) {
@@ -221,7 +235,7 @@ function BookCard({ book, quotes }: BookCardProps) {
     if (status === 'finished' && !book.finishedAt) {
       patch.finishedAt = new Date().toISOString();
     }
-    await updateBook(book.id, patch);
+    await save(patch);
   }
 
   async function handleDelete() {
@@ -302,6 +316,11 @@ function BookCard({ book, quotes }: BookCardProps) {
             ))}
           </select>
         </div>
+        {error ? (
+          <p role="alert" className="text-destructive mt-1 text-xs">
+            {error}
+          </p>
+        ) : null}
 
         {/* Highlights */}
         <div className="mt-2">
