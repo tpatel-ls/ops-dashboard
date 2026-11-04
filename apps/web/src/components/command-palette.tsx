@@ -76,11 +76,13 @@ export function CommandPalette() {
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState('');
   const [adding, startAdd] = useTransition();
+  const [addError, setAddError] = useState<string | null>(null);
   const today = todayIso();
   const { canPrompt: canInstall, prompt: promptInstall } = useInstallPrompt();
 
   function dismiss() {
     setQuery('');
+    setAddError(null);
     close();
   }
 
@@ -163,7 +165,15 @@ export function CommandPalette() {
         (orgs ?? []).map((organization) => organization.id),
       );
       const orgId = destinationOrgId(destination);
-      await addTask(text, orgId ? { orgId } : {});
+      setAddError(null);
+      // A title over 500 characters is rejected. Thrown from a transition, that
+      // reached the error boundary and replaced the whole page.
+      try {
+        await addTask(text, orgId ? { orgId } : {});
+      } catch {
+        setAddError('Could not add this task. Your text is still here.');
+        return;
+      }
       dismiss();
       setQuery('');
     });
@@ -211,6 +221,11 @@ export function CommandPalette() {
                 autoFocus
               />
             </div>
+            {addError ? (
+              <p role="alert" className="text-destructive mt-2 text-xs">
+                {addError}
+              </p>
+            ) : null}
           </div>
           <Command.List className="max-h-[calc(100dvh-6rem)] scrollbar-thin overflow-y-auto p-2 sm:max-h-[60vh]">
             <Command.Empty className="text-muted-foreground px-3 py-6 text-center text-xs">
