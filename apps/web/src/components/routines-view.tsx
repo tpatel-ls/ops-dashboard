@@ -3,7 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Archive, ChevronDown, ChevronUp, Check, Flame, Trash2 } from 'lucide-react';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb } from '@ops-dashboard/core';
 import type { Domain, Routine, RoutineCheck } from '@ops-dashboard/core';
 import {
   archiveRoutine,
@@ -16,6 +16,7 @@ import {
 } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { knownValue } from '@/lib/known-value';
+import { useToday } from '@/lib/use-today';
 import { RoutineForm } from '@/components/routine-form';
 
 /* ─── helpers ─────────────────────────────────────────────────── */
@@ -266,7 +267,9 @@ function ArchivedSection({ routines }: ArchivedSectionProps) {
 /* ─── RoutinesView (main export) ────────────────────────────────── */
 
 export function RoutinesView() {
-  const today = todayIso();
+  // Follow the clock past midnight: a render-time todayIso() kept the old day
+  // on a page left open, so the toggle marked yesterday's routine done.
+  const today = useToday();
 
   const data = useLiveQuery(async () => {
     const db = getDb();
