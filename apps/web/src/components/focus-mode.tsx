@@ -13,6 +13,7 @@ import {
   accumulatedFocusMinutes,
   elapsedSessionMinutes,
   elapsedSessionMs,
+  secondsRemaining,
 } from '@/lib/focus-timer';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { safeTaskPriority } from '@/lib/task-query';
@@ -51,6 +52,7 @@ export function FocusMode() {
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const startedRef = useRef<number | null>(null);
   const elapsedRef = useRef(0);
+  const deadlineRef = useRef<number | null>(null);
 
   const recordFocusTime = useCallback(async () => {
     const elapsedMs = elapsedSessionMs(elapsedRef.current, startedRef.current, Date.now());
@@ -101,16 +103,21 @@ export function FocusMode() {
 
   useEffect(() => {
     if (!running) return;
+    // Measure against a wall-clock deadline. Counting one second per tick ran
+    // long whenever the browser throttled the interval (a hidden tab), and
+    // completing the phase inside a state updater ran that side effect twice
+    // under Strict Mode, which flipped the phase straight back.
     const id = window.setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          window.clearInterval(id);
-          setRunning(false);
-          completeRef.current();
-          return 0;
-        }
-        return s - 1;
-      });
+      const deadline = deadlineRef.current;
+      if (deadline === null) return;
+      const remaining = secondsRemaining(deadline, Date.now());
+      setSecondsLeft(remaining);
+      if (remaining === 0) {
+        window.clearInterval(id);
+        deadlineRef.current = null;
+        setRunning(false);
+        completeRef.current();
+      }
     }, 1000);
     return () => window.clearInterval(id);
   }, [running]);
@@ -145,17 +152,20 @@ export function FocusMode() {
       void setTaskStatus(task.id, 'doing');
     }
     startedRef.current = Date.now();
+    deadlineRef.current = startedRef.current + secondsLeft * 1000;
     setRunning(true);
   }
 
   function pause() {
     elapsedRef.current = elapsedSessionMs(elapsedRef.current, startedRef.current, Date.now());
     startedRef.current = null;
+    deadlineRef.current = null;
     setRunning(false);
   }
 
   function reset() {
     setRunning(false);
+    deadlineRef.current = null;
     startedRef.current = null;
     elapsedRef.current = 0;
     setSecondsLeft((phase === 'focus' ? focusMin : breakMin) * 60);
