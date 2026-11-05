@@ -18,7 +18,13 @@ function isAbortError(error: unknown): boolean {
   );
 }
 
-export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'copied' | 'failed'> {
+/**
+ * `cancelled` means the user dismissed the native share sheet, which is not a
+ * failure and should not be reported as one.
+ */
+export type ShareOutcome = 'shared' | 'copied' | 'cancelled' | 'failed';
+
+export async function shareOrCopy(payload: SharePayload): Promise<ShareOutcome> {
   if (typeof navigator === 'undefined') return 'failed';
 
   const nav = navigator as ShareNavigator;
@@ -40,7 +46,7 @@ export async function shareOrCopy(payload: SharePayload): Promise<'shared' | 'co
   } catch (error) {
     // A cancelled share is intentional. Other native-share failures can still
     // use the clipboard fallback.
-    if (isAbortError(error)) return 'failed';
+    if (isAbortError(error)) return 'cancelled';
   }
 
   try {
