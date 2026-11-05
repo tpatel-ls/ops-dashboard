@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { accumulatedFocusMinutes, elapsedSessionMinutes, elapsedSessionMs } from './focus-timer';
+import {
+  accumulatedFocusMinutes,
+  elapsedSessionMinutes,
+  elapsedSessionMs,
+  secondsRemaining,
+} from './focus-timer';
 
 describe('focus timer elapsed time', () => {
   it('adds resumed work to time carried across a pause', () => {
@@ -25,5 +30,19 @@ describe('focus timer elapsed time', () => {
     expect(accumulatedFocusMinutes(12, 4 * 60_000)).toBe(16);
     expect(accumulatedFocusMinutes(Number.NaN, 60_000)).toBe(1);
     expect(accumulatedFocusMinutes(Number.MAX_SAFE_INTEGER, 60_000)).toBe(Number.MAX_SAFE_INTEGER);
+  });
+});
+
+describe('focus timer countdown', () => {
+  it('counts whole seconds left, rounding a partial second up', () => {
+    expect(secondsRemaining(10_000, 0)).toBe(10);
+    expect(secondsRemaining(10_000, 9_001)).toBe(1);
+    expect(secondsRemaining(10_000, 10_000)).toBe(0);
+  });
+
+  it('never goes negative after the deadline or on invalid clocks', () => {
+    expect(secondsRemaining(10_000, 60_000)).toBe(0);
+    expect(secondsRemaining(Number.NaN, 0)).toBe(0);
+    expect(secondsRemaining(10_000, Number.POSITIVE_INFINITY)).toBe(0);
   });
 });

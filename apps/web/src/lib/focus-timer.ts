@@ -20,3 +20,14 @@ export function accumulatedFocusMinutes(
   const elapsed = elapsedSessionMinutes(elapsedMs);
   return Math.min(Number.MAX_SAFE_INTEGER, current + elapsed);
 }
+
+/**
+ * Whole seconds left before `deadline`, rounded up so the display reaches
+ * 00:00 only when the time is really up. The countdown is measured against the
+ * wall clock rather than counted in interval ticks, because browsers throttle
+ * timers in hidden tabs and a ticked countdown then ran far past its length.
+ */
+export function secondsRemaining(deadline: number, now: number): number {
+  if (!Number.isFinite(deadline) || !Number.isFinite(now)) return 0;
+  return Math.max(0, Math.ceil((deadline - now) / 1000));
+}
