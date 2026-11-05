@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo, useTransition } from 'react';
+import { useMemo, useRef, useState, useTransition } from 'react';
 import {
   Activity,
   ArrowRight,
@@ -192,6 +192,8 @@ function dateLabel(task: Task): string {
 
 export function PowerDialerCommandCenter() {
   const [syncing, startSync] = useTransition();
+  const syncingRef = useRef(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -232,8 +234,22 @@ export function PowerDialerCommandCenter() {
   }, [data]);
 
   function handleSync() {
-    startSync(() => {
-      void syncLsgLaunchPlan();
+    // The transition must own the promise. Firing it and returning ended the
+    // pending state at once, so the button never showed "Syncing" or disabled
+    // itself, a second click ran a concurrent import that could create the
+    // launch projects twice, and a failure was an unhandled rejection (an
+    // uncaught error in an async transition reaches the error boundary).
+    if (syncingRef.current) return;
+    syncingRef.current = true;
+    setSyncError(null);
+    startSync(async () => {
+      try {
+        await syncLsgLaunchPlan();
+      } catch {
+        setSyncError('Could not finish syncing the launch plan. Try again.');
+      } finally {
+        syncingRef.current = false;
+      }
     });
   }
 
@@ -245,15 +261,22 @@ export function PowerDialerCommandCenter() {
       fullWidth
       compactHeader
       actions={
-        <button
-          type="button"
-          onClick={handleSync}
-          disabled={syncing}
-          className="hairline bg-card text-foreground hover:bg-accent inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-xs font-medium transition-colors disabled:opacity-60 sm:min-h-9"
-        >
-          <Sparkles className="text-primary size-3.5" aria-hidden />
-          {syncing ? 'Syncing' : 'Sync launch plan'}
-        </button>
+        <>
+          {syncError ? (
+            <p role="alert" className="text-destructive text-xs">
+              {syncError}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={syncing}
+            className="hairline bg-card text-foreground hover:bg-accent inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-xs font-medium transition-colors disabled:opacity-60 sm:min-h-9"
+          >
+            <Sparkles className="text-primary size-3.5" aria-hidden />
+            {syncing ? 'Syncing' : 'Sync launch plan'}
+          </button>
+        </>
       }
     >
       <div className="grid min-w-0 gap-5">
