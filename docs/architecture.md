@@ -123,6 +123,26 @@ The limits exist because Dexie rows are pushed whole to Supabase on every
 mutation, so an unbounded field is an unbounded sync payload on every device,
 not just a large local row.
 
+## The current day in long-lived views
+
+The app is often left open for days, so "today" cannot be read once. Two
+mistakes kept a view on yesterday after midnight:
+
+- Calling `todayIso()` inside a `useLiveQuery` querier with no deps.
+  `dexie-react-hooks` keeps the querier it first received until the deps
+  change, and a database change re-runs that same stale closure.
+- Calling `todayIso()` at render time. The value is right only when something
+  else happens to re-render the view, and nothing does at midnight.
+
+Read the day from `useToday()` (`apps/web/src/lib/use-today.ts`) and list it
+in the query deps. It updates just after local midnight and when the page
+becomes visible again, because a sleeping device can miss the timer. The
+Today page, the work dashboard, Routines, and focus mode use it. Views that
+still read the clock at render time (week, month, kanban, tasks, projects,
+food) are candidates when they are next touched. Dialogs that mount only
+while open, such as the daily review, read the day fresh each time and do
+not need it.
+
 ## Settings not yet wired
 
 Settings are device-local: `settings` is not a `SyncTable`, so the sync engine
