@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { format } from 'date-fns';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { usePageVisibility } from '@/lib/use-page-visibility';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 import { railHourRange, tasksForTodayRail, validRailEnd } from '@/lib/today-rail';
 
 const HOUR_HEIGHT = 44;
@@ -27,11 +28,11 @@ export function TodayRail() {
     return () => window.clearTimeout(id);
   }, [visibility]);
 
+  const today = useToday();
   const blocks = useLiveQuery(async () => {
-    const today = todayIso();
     const all = await getDb().tasks.toArray();
     return tasksForTodayRail(all, today);
-  });
+  }, [today]);
 
   const { startHour, endHour } = railHourRange(
     settings.workdayStart,

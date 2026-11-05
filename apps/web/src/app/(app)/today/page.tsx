@@ -1,6 +1,6 @@
 'use client';
 
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Focus } from 'lucide-react';
 import { useEffect } from 'react';
 import { ViewShell } from '@/components/view-shell';
@@ -14,9 +14,12 @@ import { ResurfacingEntry } from '@/components/today/resurfacing-entry';
 import { NotificationsFeed } from '@/components/today/notifications-feed';
 import { BriefingIntelligence } from '@/components/today/briefing-intelligence';
 import { useAppStore } from '@/lib/app-store';
+import { useToday } from '@/lib/use-today';
 
 export default function TodayPage() {
-  const now = new Date();
+  // The heading names the day, so it must follow useToday rather than the
+  // render-time clock, or it kept yesterday's date on a page left open.
+  const now = parseISO(useToday());
   const openFocus = useAppStore((s) => s.openFocus);
   const openWorkLogger = useAppStore((s) => s.openWorkLogger);
 

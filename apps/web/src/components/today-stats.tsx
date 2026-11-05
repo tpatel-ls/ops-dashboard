@@ -2,19 +2,20 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Flame, ListTodo, Target } from 'lucide-react';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb } from '@ops-dashboard/core';
+import { useToday } from '@/lib/use-today';
 import { summarizeTodayTasks } from '@/lib/task-dates';
 
 export function TodayStats() {
+  const today = useToday();
   const stats = useLiveQuery(async () => {
-    const today = todayIso();
     const all = await getDb().tasks.toArray();
     const summary = summarizeTodayTasks(all, today);
     return {
       ...summary,
       streak: 0,
     };
-  });
+  }, [today]);
 
   const items = [
     { label: 'Brief', value: stats?.total ?? 0, icon: ListTodo, tone: 'text-foreground' },
