@@ -3,7 +3,7 @@
 import { format, isValid, parseISO } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Plus } from 'lucide-react';
-import { getDb, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
+import { getDb, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -11,13 +11,17 @@ import { buildWorkDashboard } from '@/lib/work-dashboard';
 import { taskEarliestDay } from '@/lib/task-dates';
 import { useOrgStore } from '@/lib/org-store';
 import { setTaskStatus } from '@/lib/tasks';
+import { useToday } from '@/lib/use-today';
 import { ViewShell } from '@/components/view-shell';
 
 export function WorkDashboard() {
   const ctx = useOrgStore((state) => state.ctx);
   const openEdit = useAppStore((state) => state.openEdit);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
-  const today = todayIso();
+  // The query already depends on the day, but a render-time todayIso() only
+  // changed when something else re-rendered, so the dashboard kept
+  // yesterday's overdue and due-today lists on a page left open overnight.
+  const today = useToday();
   const data = useLiveQuery(async () => {
     const db = getDb();
     const [tasks, projects, organizations] = await Promise.all([
