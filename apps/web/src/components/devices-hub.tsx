@@ -52,7 +52,7 @@ export function DevicesHub() {
     haptics: false,
   });
   const [endpoint, setEndpoint] = useState('https://APP.vercel.app/api/capture');
-  const [copied, setCopied] = useState<string | null>(null);
+  const [copied, setCopied] = useState<{ id: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,9 +115,29 @@ export function DevicesHub() {
   );
 
   async function copy(id: string, text: string) {
-    await navigator.clipboard.writeText(text);
-    setCopied(id);
-    window.setTimeout(() => setCopied((current) => (current === id ? null : current)), 1400);
+    // The clipboard API is missing outside a secure context (for example a LAN
+    // address on a tablet) and rejects when permission is denied. Say so
+    // instead of leaving an unhandled rejection and a button that did nothing.
+    let ok = false;
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        ok = true;
+      }
+    } catch {
+      ok = false;
+    }
+    const result = { id, ok };
+    setCopied(result);
+    window.setTimeout(
+      () => setCopied((current) => (current === result ? null : current)),
+      ok ? 1400 : 4000,
+    );
+  }
+
+  function copyStatus(id: string): CopyStatus {
+    if (copied?.id !== id) return 'idle';
+    return copied.ok ? 'copied' : 'failed';
   }
 
   return (
@@ -179,19 +199,19 @@ export function DevicesHub() {
             <CopyBlock
               label="Endpoint"
               value={endpoint}
-              copied={copied === 'endpoint'}
+              status={copyStatus('endpoint')}
               onCopy={() => copy('endpoint', endpoint)}
             />
             <CopyBlock
               label="Tasker body"
               value={watchBody}
-              copied={copied === 'body'}
+              status={copyStatus('body')}
               onCopy={() => copy('body', watchBody)}
             />
             <CopyBlock
               label="Smoke test"
               value={watchCurl}
-              copied={copied === 'curl'}
+              status={copyStatus('curl')}
               onCopy={() => copy('curl', watchCurl)}
             />
           </section>
@@ -349,15 +369,17 @@ function TagList({
   );
 }
 
+type CopyStatus = 'idle' | 'copied' | 'failed';
+
 function CopyBlock({
   label,
   value,
-  copied,
+  status,
   onCopy,
 }: {
   label: string;
   value: string;
-  copied: boolean;
+  status: CopyStatus;
   onCopy: () => void;
 }) {
   return (
@@ -372,13 +394,24 @@ function CopyBlock({
           // The panel stacks three of these blocks, so the visible "Copy" text
           // is the same for all three. Name each button by the field it copies
           // so they are distinguishable out of visual context.
-          aria-label={copied ? `${label} copied` : `Copy ${label}`}
+          aria-label={
+            status === 'copied'
+              ? `${label} copied`
+              : status === 'failed'
+                ? `Could not copy ${label}. Select the text to copy it`
+                : `Copy ${label}`
+          }
           className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-9 items-center gap-1 rounded-md px-2 text-[11px] transition-colors"
         >
           <Clipboard className="size-3" aria-hidden />
-          {copied ? 'Copied' : 'Copy'}
+          {status === 'copied' ? 'Copied' : status === 'failed' ? 'Copy failed' : 'Copy'}
         </button>
       </div>
+      {status === 'failed' ? (
+        <p role="alert" className="text-destructive mb-1 text-[11px]">
+          Could not copy {label.toLowerCase()}. Select the text below to copy it.
+        </p>
+      ) : null}
       <pre className="bg-bg-sunken text-muted-foreground max-h-36 max-w-full scrollbar-thin rounded-md border p-3 text-[11px] leading-5 break-all whitespace-pre-wrap sm:overflow-auto sm:break-normal">
         <code>{value}</code>
       </pre>
