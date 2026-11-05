@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Pause, Play, RotateCcw, Square, X } from 'lucide-react';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
@@ -19,6 +19,7 @@ import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { safeTaskPriority } from '@/lib/task-query';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 
 type Phase = 'focus' | 'break';
 
@@ -29,8 +30,11 @@ export function FocusMode() {
   const focusMin = settings.pomodoroFocusMinutes;
   const breakMin = settings.pomodoroBreakMinutes;
 
+  // Focus mode stays mounted in the app shell for the whole visit, so the
+  // query must follow the day. Read once, it offered yesterday's scheduled
+  // tasks when opened the next morning.
+  const today = useToday();
   const candidates = useLiveQuery(async () => {
-    const today = todayIso();
     const all = await getDb().tasks.toArray();
     return all
       .filter(
@@ -41,7 +45,7 @@ export function FocusMode() {
           (taskScheduledOn(t, today) || t.status === 'doing'),
       )
       .sort((a, b) => safeTaskPriority(b.priority) - safeTaskPriority(a.priority));
-  });
+  }, [today]);
 
   const [phase, setPhase] = useState<Phase>('focus');
   const [secondsLeft, setSecondsLeft] = useState(focusMin * 60);
