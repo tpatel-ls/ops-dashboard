@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } from 'lucide-react';
 import { getDb, todayIso, weekStartIso } from '@ops-dashboard/core';
@@ -9,7 +10,7 @@ import { activityTimestampWithin, loadActivity } from '@/lib/activity';
 import { computeStreak } from '@/lib/routines';
 import { journalEntriesBetween } from '@/lib/journal';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
-import { shareOrCopy } from '@/lib/share';
+import { shareOrCopy, type ShareOutcome } from '@/lib/share';
 import { useLiveSettings } from '@/lib/use-settings';
 import { cn } from '@ops-dashboard/ui';
 
@@ -66,7 +67,13 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
+const SHARE_MESSAGES: Partial<Record<ShareOutcome, string>> = {
+  copied: 'Score copied to the clipboard.',
+  failed: 'Could not share or copy your score.',
+};
+
 export default function HabitsPage() {
+  const [shareOutcome, setShareOutcome] = useState<ShareOutcome | null>(null);
   const data = useLiveQuery(async () => {
     return loadActivity(365);
   });
@@ -141,12 +148,17 @@ export default function HabitsPage() {
   const band = identityBand(identityScore);
 
   async function shareIdentityScore() {
-    await shareOrCopy({
+    // Without a native share sheet (most desktops) the score goes to the
+    // clipboard, and the button gave no sign that anything happened.
+    setShareOutcome(null);
+    const outcome = await shareOrCopy({
       title: 'Identity Calendar',
       text: `Identity score: ${identityScore}/100 (${band}). ${weeklyActiveDays}/7 active days this week, ${bestStreak}-day best streak.`,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
     });
+    setShareOutcome(outcome);
   }
+  const shareMessage = shareOutcome ? SHARE_MESSAGES[shareOutcome] : undefined;
 
   return (
     <ViewShell
@@ -205,6 +217,16 @@ export default function HabitsPage() {
                 <Share2 className="text-primary size-3.5" aria-hidden />
                 Share score
               </button>
+              {/* Rendered empty up front so screen readers announce the change. */}
+              <p
+                role="status"
+                className={cn(
+                  'text-xs',
+                  shareOutcome === 'failed' ? 'text-destructive' : 'text-muted-foreground',
+                )}
+              >
+                {shareMessage}
+              </p>
             </div>
           </section>
 

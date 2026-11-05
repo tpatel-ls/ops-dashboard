@@ -50,7 +50,7 @@ describe('shareOrCopy', () => {
       clipboard: { writeText },
     });
 
-    await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('failed');
+    await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('cancelled');
     expect(writeText).not.toHaveBeenCalled();
   });
 
@@ -62,7 +62,7 @@ describe('shareOrCopy', () => {
       clipboard: { writeText },
     });
 
-    await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('failed');
+    await expect(shareOrCopy({ title: 'Task', text: 'Follow up' })).resolves.toBe('cancelled');
     expect(writeText).not.toHaveBeenCalled();
   });
 });
