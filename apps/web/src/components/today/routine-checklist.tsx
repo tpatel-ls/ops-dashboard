@@ -2,7 +2,8 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Flame } from 'lucide-react';
-import { getDb, localDay, todayIso } from '@ops-dashboard/core';
+import { getDb, localDay } from '@ops-dashboard/core';
+import { useToday } from '@/lib/use-today';
 import type { TimeOfDay } from '@ops-dashboard/core';
 import { computeStreak, toggleRoutineCheck } from '@/lib/routines';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
@@ -18,7 +19,7 @@ const TIME_LABEL: Record<TimeOfDay, string> = {
 };
 
 export function RoutineChecklist() {
-  const today = todayIso();
+  const today = useToday();
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -64,7 +65,7 @@ export function RoutineChecklist() {
       totalRoutines: activeRoutines.length,
       doneToday: activeRoutines.filter((r) => todayDone[r.id] === true).length,
     };
-  });
+  }, [today]);
 
   if (!data) {
     return <div className="surface h-48 animate-pulse" />;

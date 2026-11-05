@@ -14,8 +14,10 @@ import {
   type CaptureRoutingIssue,
   type StaleDomain,
 } from '@/lib/briefing';
+import { useToday } from '@/lib/use-today';
 
 export function BriefingIntelligence() {
+  const today = useToday();
   const briefing = useLiveQuery(async () => {
     const db = getDb();
     const [domains, projects, tasks, captures] = await Promise.all([
@@ -30,6 +32,7 @@ export function BriefingIntelligence() {
     // the slice pinned the pills at 4 and 5.
     const summary = summarizeBriefing({
       tasks,
+      today,
       routingIssues: allRoutingIssues.length,
       staleDomains: allStaleDomains.length,
     });
@@ -39,7 +42,7 @@ export function BriefingIntelligence() {
       routingIssues: allRoutingIssues.slice(0, 5),
       summary,
     };
-  });
+  }, [today]);
 
   if (!briefing) {
     return (

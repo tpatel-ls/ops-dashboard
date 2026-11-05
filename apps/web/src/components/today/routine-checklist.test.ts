@@ -1,22 +1,30 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Routine } from '@ops-dashboard/core';
+import type { Routine, RoutineCheck } from '@ops-dashboard/core';
 
 let routines: Partial<Routine>[] = [];
+let checks: Partial<RoutineCheck>[] = [];
 
 vi.mock('dexie-react-hooks', async () => {
   const { useEffect, useState } = await import('react');
   return {
-    useLiveQuery: (query: () => Promise<unknown>) => {
-      // Run the real query once, against the stubbed tables below.
-      const [pending] = useState(query);
+    useLiveQuery: (query: () => Promise<unknown>, deps: unknown[] = []) => {
+      // Run the real query against the stubbed tables below, again whenever
+      // the deps change, as dexie-react-hooks does.
       const [value, setValue] = useState<unknown>();
       useEffect(() => {
-        void pending.then(setValue);
-      }, [pending]);
+        let live = true;
+        void query().then((next) => {
+          if (live) setValue(next);
+        });
+        return () => {
+          live = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, deps);
       return value;
     },
   };
@@ -25,7 +33,7 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
   getDb: () => ({
     routines: { toArray: async () => routines },
-    routineChecks: { toArray: async () => [] },
+    routineChecks: { toArray: async () => checks },
   }),
 }));
 
@@ -33,7 +41,9 @@ const { RoutineChecklist } = await import('./routine-checklist');
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   routines = [];
+  checks = [];
 });
 
 describe('RoutineChecklist', () => {
@@ -51,5 +61,21 @@ describe('RoutineChecklist', () => {
     expect(screen.getByText('Read')).toBeTruthy();
     expect(screen.getByText('Anytime')).toBeTruthy();
     expect(screen.getByText('0/2')).toBeTruthy();
+  });
+
+  it('starts a fresh day at local midnight on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
+    routines = [{ id: 'r1', name: 'Stretch', timeOfDay: 'morning' }];
+    checks = [{ id: 'c1', routineId: 'r1', date: '2026-11-05', done: true }];
+
+    render(createElement(RoutineChecklist));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(screen.getByText('1/1 done')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(31_000));
+
+    expect(screen.getByText('0/1 done')).toBeTruthy();
+    expect(screen.getByText('2026-11-06')).toBeTruthy();
   });
 });
