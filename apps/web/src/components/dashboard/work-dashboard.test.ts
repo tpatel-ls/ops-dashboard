@@ -1,16 +1,21 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
 
-vi.mock('dexie-react-hooks', () => ({ useLiveQuery: vi.fn() }));
+const useLiveQuery = vi.hoisted(() => vi.fn());
+vi.mock('dexie-react-hooks', () => ({ useLiveQuery }));
 vi.mock('@/lib/tasks', () => ({ setTaskStatus: vi.fn() }));
 
-const { AgendaSection } = await import('./work-dashboard');
+const { AgendaSection, WorkDashboard } = await import('./work-dashboard');
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  useLiveQuery.mockReset();
+});
 
 function section(shown: number, total: number) {
   const tasks = Array.from(
@@ -46,5 +51,18 @@ describe('AgendaSection', () => {
 
     expect(within(region).getByText('3')).toBeTruthy();
     expect(within(region).queryByText(/more\.$/)).toBeNull();
+  });
+});
+
+describe('WorkDashboard', () => {
+  it('re-queries for the new day at midnight on a page left open', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
+    render(createElement(WorkDashboard));
+    expect(useLiveQuery.mock.lastCall?.[1]).toContain('2026-11-05');
+
+    act(() => vi.advanceTimersByTime(31_000));
+
+    expect(useLiveQuery.mock.lastCall?.[1]).toContain('2026-11-06');
   });
 });
