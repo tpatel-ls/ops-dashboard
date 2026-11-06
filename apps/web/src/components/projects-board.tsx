@@ -18,7 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
-import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type {
   Domain,
   Organization,
@@ -38,6 +38,7 @@ import { workLoggedHours } from '@/lib/worklogs';
 import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '@/lib/work-logger';
 import { useAppStore } from '@/lib/app-store';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
 import {
@@ -275,6 +276,8 @@ interface ProjectCardProps {
   onLogProgress: () => void;
   showOrganization: boolean;
   slippingDays: number;
+  /** The current local day, from the board's `useToday()`. */
+  today: string;
 }
 
 function ProjectCard({
@@ -284,6 +287,7 @@ function ProjectCard({
   onLogProgress,
   showOrganization,
   slippingDays,
+  today,
 }: ProjectCardProps) {
   const { project, domain, organization, hoursLogged, taskProgress } = data;
 
@@ -297,7 +301,7 @@ function ProjectCard({
   const isSlipping = projectIsSlipping(project.lastWorkedAt, slippingDays);
   const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
   const dueLabel = parsedDueDate && isValid(parsedDueDate) ? format(parsedDueDate, 'MMM d') : null;
-  const isOverdue = Boolean(dueLabel && project.dueDate && project.dueDate < todayIso());
+  const isOverdue = Boolean(dueLabel && project.dueDate && project.dueDate < today);
 
   return (
     <article
@@ -468,6 +472,7 @@ function KindGroup({
   onLogProgress,
   showOrganization,
   slippingDays,
+  today,
 }: {
   kind: ProjectKind;
   items: ProjectCardData[];
@@ -476,6 +481,7 @@ function KindGroup({
   onLogProgress: (project: Project) => void;
   showOrganization: boolean;
   slippingDays: number;
+  today: string;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const Icon = KIND_ICONS[kind];
@@ -519,6 +525,7 @@ function KindGroup({
               onLogProgress={() => onLogProgress(item.project)}
               showOrganization={showOrganization}
               slippingDays={slippingDays}
+              today={today}
             />
           ))}
         </div>
@@ -536,6 +543,7 @@ export function ProjectsBoard() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all');
   const [projectSort, setProjectSort] = useState<ProjectSort>('name');
   const searchRef = useRef<HTMLInputElement>(null);
+  const today = useToday();
   const ctx = useOrgStore((s) => s.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   const slippingDays = useLiveSettings().slippingDays;
@@ -779,6 +787,7 @@ export function ProjectsBoard() {
                 onLogProgress={(project) => openWorkLogger('progress', project.id)}
                 showOrganization={ctx === 'all'}
                 slippingDays={slippingDays}
+                today={today}
               />
             ))}
           </div>

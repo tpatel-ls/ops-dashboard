@@ -17,7 +17,7 @@ import {
   Utensils,
   Wheat,
 } from 'lucide-react';
-import { getDb, todayIso } from '@ops-dashboard/core';
+import { getDb } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { knownValue } from '@/lib/known-value';
@@ -32,6 +32,7 @@ import {
 import { processBrainDump } from '@/lib/route-items';
 import { addDaysISO } from '@/lib/routines';
 import { useVoiceInput } from '@/lib/use-voice-input';
+import { useToday } from '@/lib/use-today';
 import { ViewShell } from '@/components/view-shell';
 
 const MEAL_ORDER: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -43,8 +44,12 @@ const MEAL_LABEL: Record<MealType, string> = {
 };
 
 export function FoodView() {
-  const [day, setDay] = useState<string>(() => todayIso());
-  const today = todayIso();
+  const today = useToday();
+  // null follows the current day, so a view left open overnight moves on to
+  // the day new entries are logged under instead of staying on yesterday.
+  const [pickedDay, setPickedDay] = useState<string | null>(null);
+  const day = pickedDay ?? today;
+  const setDay = (next: string) => setPickedDay(next === today ? null : next);
 
   const dayLogs = useLiveQuery(async () => {
     const rows = await getDb().foodLogs.toArray();
@@ -101,7 +106,7 @@ export function FoodView() {
           <button
             type="button"
             aria-label="Previous day"
-            onClick={() => setDay((d) => addDaysISO(d, -1))}
+            onClick={() => setDay(addDaysISO(day, -1))}
             className="kbd"
           >
             <ChevronLeft className="size-3" />
@@ -116,7 +121,7 @@ export function FoodView() {
           <button
             type="button"
             aria-label="Next day"
-            onClick={() => setDay((d) => addDaysISO(d, 1))}
+            onClick={() => setDay(addDaysISO(day, 1))}
             className="kbd"
           >
             <ChevronRight className="size-3" />

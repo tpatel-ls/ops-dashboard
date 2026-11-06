@@ -1,0 +1,62 @@
+// @vitest-environment jsdom
+
+import { act, cleanup, render, screen } from '@testing-library/react';
+import { createElement } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Project } from '@ops-dashboard/core';
+
+let projects: Partial<Project>[] = [];
+
+vi.mock('dexie-react-hooks', async () => {
+  const { useEffect, useState } = await import('react');
+  return {
+    // Re-runs the query when the deps change, like the real hook.
+    useLiveQuery: (query: () => Promise<unknown>, deps: unknown[] = []) => {
+      const [value, setValue] = useState<unknown>();
+      useEffect(() => {
+        void query().then(setValue);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, deps);
+      return value;
+    },
+  };
+});
+vi.mock('@ops-dashboard/core', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
+  getDb: () => ({ projects: { toArray: async () => projects } }),
+}));
+vi.mock('@/lib/use-settings', () => ({ useLiveSettings: () => ({ slippingDays: 14 }) }));
+
+const { SlippingProjects } = await import('./slipping-projects');
+
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  projects = [];
+});
+
+describe('SlippingProjects', () => {
+  it('flags a project that went quiet overnight on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
+    projects = [
+      {
+        id: 'p1',
+        name: 'Atlas',
+        kind: 'project',
+        status: 'active',
+        // 14 days ago at midnight: not past the 14-day threshold until the
+        // next day starts.
+        lastWorkedAt: new Date(2026, 9, 22).toISOString(),
+      },
+    ];
+
+    render(createElement(SlippingProjects));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(screen.queryByText('Atlas')).toBeNull();
+
+    await act(async () => vi.advanceTimersByTimeAsync(31_000));
+
+    expect(screen.getByText('Atlas')).toBeTruthy();
+  });
+});

@@ -12,7 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
-import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -23,6 +23,7 @@ import { useOrgStore } from '@/lib/org-store';
 import { compareProjects, isActiveProject } from '@/lib/project-query';
 import { compareTasksBy, matchesTaskSearch, type TaskSort } from '@/lib/task-query';
 import { setTaskStatus } from '@/lib/tasks';
+import { useToday } from '@/lib/use-today';
 import { taskDateLabel, taskResultSummary } from '@/lib/task-presentation';
 
 type StatusFilter = 'open' | 'done';
@@ -34,6 +35,8 @@ const STATUS_TABS: Array<{ id: StatusFilter; label: string }> = [
 
 interface TaskRowProps {
   task: Task;
+  /** The current local day, from the parent's `useToday()`. */
+  today: string;
   projectName?: string;
   projectColor?: string;
   organizationName?: string;
@@ -42,6 +45,7 @@ interface TaskRowProps {
 
 function TaskRow({
   task,
+  today,
   projectName,
   projectColor,
   organizationName,
@@ -50,7 +54,6 @@ function TaskRow({
   const done = task.status === 'done';
   const openEdit = useAppStore((state) => state.openEdit);
   const dateValue = taskDueOrScheduledDay(task);
-  const today = todayIso();
   const overdue = Boolean(!done && dateValue && dateValue < today);
   const dueToday = Boolean(!done && dateValue === today);
   const dateLabel = dateValue ? taskDateLabel(dateValue, today, done) : null;
@@ -223,6 +226,7 @@ export function TasksView() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sort, setSort] = useState<TaskSort>('default');
   const searchRef = useRef<HTMLInputElement>(null);
+  const today = useToday();
   const ctx = useOrgStore((state) => state.ctx);
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   useHotkeys([{ combo: '/', handler: () => searchRef.current?.focus() }]);
@@ -316,7 +320,7 @@ export function TasksView() {
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
       const taskDate = taskDueOrScheduledDay(task);
-      return task.status !== 'done' && Boolean(taskDate && taskDate < todayIso());
+      return task.status !== 'done' && Boolean(taskDate && taskDate < today);
     }).length ?? 0;
 
   return (
@@ -539,6 +543,7 @@ export function TasksView() {
             <TaskRow
               key={task.id}
               task={task}
+              today={today}
               projectName={project?.name}
               projectColor={project?.color}
               organizationName={ctx === 'all' ? (organization?.name ?? 'Personal') : undefined}

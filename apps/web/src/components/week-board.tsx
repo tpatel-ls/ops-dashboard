@@ -23,6 +23,7 @@ import { calendarInstant } from '@/lib/calendar-agenda';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 
 const PRIORITY_COLOR: Record<Priority, string> = {
   0: 'transparent',
@@ -66,7 +67,7 @@ export function WeekBoard() {
     rescheduleTask(id, target);
   }
 
-  const today = isoDay(new Date());
+  const today = useToday();
 
   return (
     <div className="flex h-full min-w-0 flex-col gap-3">

@@ -22,7 +22,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
-import { getDb, matchesOrgContext, PERSONAL_COLOR, todayIso } from '@ops-dashboard/core';
+import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type { Organization, Project, Task } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
@@ -41,6 +41,7 @@ import {
 } from '@/lib/simple-kanban';
 import { addTask, setTaskStatus } from '@/lib/tasks';
 import { useOrgStore } from '@/lib/org-store';
+import { useToday } from '@/lib/use-today';
 
 const PRIORITY_LABEL = ['', '', 'Important', 'Critical'] as const;
 
@@ -53,6 +54,7 @@ const KANBAN_SCREEN_READER_INSTRUCTIONS = {
 };
 
 export function KanbanBoard() {
+  const today = useToday();
   const data = useLiveQuery(async () => {
     const db = getDb();
     const [tasks, projects, organizations] = await Promise.all([
@@ -130,6 +132,7 @@ export function KanbanBoard() {
               showOrganization={ctx === 'all'}
               addOverrides={addOverrides}
               position={index + 1}
+              today={today}
             />
           ))}
         </div>
@@ -146,6 +149,7 @@ function KanbanColumn({
   showOrganization,
   addOverrides,
   position,
+  today,
 }: {
   column: SimpleKanbanColumn;
   tasks: Task[];
@@ -154,6 +158,7 @@ function KanbanColumn({
   showOrganization: boolean;
   addOverrides: Partial<Task>;
   position: number;
+  today: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id, data: { label: column.label } });
   const [title, setTitle] = useState('');
@@ -220,6 +225,7 @@ function KanbanColumn({
               organizationId={taskLane(task, projectsMap)}
               organizationsMap={organizationsMap}
               showOrganization={showOrganization}
+              today={today}
             />
           ))
         ) : (
@@ -278,12 +284,15 @@ function KanbanCard({
   organizationId,
   organizationsMap,
   showOrganization,
+  today,
 }: {
   task: Task;
   project?: Project;
   organizationId?: string;
   organizationsMap: Map<string, Organization>;
   showOrganization: boolean;
+  /** The current local day, from the board's `useToday()`. */
+  today: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
@@ -292,7 +301,6 @@ function KanbanCard({
   const openEdit = useAppStore((state) => state.openEdit);
   const organization = organizationId ? organizationsMap.get(organizationId) : undefined;
   const dateValue = taskDueOrScheduledDay(task);
-  const today = todayIso();
   const overdue = Boolean(task.status !== 'done' && dateValue && dateValue < today);
   const dateLabel = dateValue ? taskDateLabel(dateValue, today, task.status === 'done') : null;
   const currentColumn = simpleKanbanColumn(task.status) ?? 'todo';

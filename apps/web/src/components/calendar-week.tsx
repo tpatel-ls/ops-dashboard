@@ -10,6 +10,7 @@ import { useAppStore } from '@/lib/app-store';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 import {
   CALENDAR_END_HOUR,
   CALENDAR_START_HOUR,
@@ -49,7 +50,7 @@ export function CalendarWeek() {
   const timedTasks = visibleTasks.filter((task) => calendarInstant(task.startAt));
 
   const openEdit = useAppStore((s) => s.openEdit);
-  const today = isoDay(new Date());
+  const today = useToday();
   const hours = Array.from(
     { length: CALENDAR_END_HOUR - CALENDAR_START_HOUR + 1 },
     (_, i) => CALENDAR_START_HOUR + i,
@@ -101,6 +102,7 @@ export function CalendarWeek() {
           <MobileDayAgenda
             key={isoDay(day)}
             day={day}
+            today={today}
             tasks={visibleTasks}
             laneColor={(t) => lanes.colorOf(lanes.laneOf(t))}
             onOpen={openEdit}
@@ -151,18 +153,20 @@ export function CalendarWeek() {
 
 function MobileDayAgenda({
   day,
+  today,
   tasks,
   laneColor,
   onOpen,
 }: {
   day: Date;
+  today: string;
   tasks: Task[];
   laneColor: (t: Task) => string;
   onOpen: (id: string) => void;
 }) {
   const dayIso = isoDay(day);
   const blocks = tasks.filter((task) => calendarDateOf(task) === dayIso).sort(compareCalendarTasks);
-  const isToday = dayIso === isoDay(new Date());
+  const isToday = dayIso === today;
 
   if (blocks.length === 0) {
     return (
