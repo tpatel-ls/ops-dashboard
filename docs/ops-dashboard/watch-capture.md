@@ -28,8 +28,13 @@ your phone/tablet - the task "buy milk" appears live, dated tomorrow 5pm.
 - `tzOffsetMinutes` is the JS `new Date().getTimezoneOffset()` value (e.g. `300`
   for UTC-5 / US Eastern, `-60` for UTC+1). It makes "5pm" land at 5pm
   **local**. Omit it and times are interpreted as UTC.
-- A `401` means the secret is wrong; `{"ok":false,"reason":"persist-failed"}`
-  means the Supabase secret key / user isn't configured on the server.
+- A `401` means the secret is wrong. A `503` with
+  `{"ok":false,"reason":"persistence-unavailable"}` means the server has no
+  Supabase secret key or cannot resolve your user (set `OPS_USER_ID`, or keep
+  exactly one Supabase user). A `502` with
+  `"reason":"persist-failed"` means the database rejected the write (check the
+  Vercel function log for `[api/capture] persist error`). A `400` with
+  `"reason":"empty"` means the body had no `raw` text.
 
 ---
 
