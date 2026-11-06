@@ -22,7 +22,38 @@ const { FoodView } = await import('./food-view');
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   processBrainDump.mockReset();
+});
+
+describe('FoodView day', () => {
+  it('moves on to the new day at midnight on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
+    render(createElement(FoodView));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(screen.getByText('Thursday, Nov 5')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(31_000));
+
+    // Quick log files meals under the current time, so the view has to follow
+    // the day or a meal logged after midnight seems to vanish.
+    expect(screen.getByText('Friday, Nov 6')).toBeTruthy();
+    expect(screen.queryByText('Thursday, Nov 5')).toBeNull();
+  });
+
+  it('keeps a day the user picked when midnight passes', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
+    render(createElement(FoodView));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
+    expect(screen.getByText('Wednesday, Nov 4')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(31_000));
+
+    expect(screen.getByText('Wednesday, Nov 4')).toBeTruthy();
+  });
 });
 
 describe('FoodView quick log', () => {

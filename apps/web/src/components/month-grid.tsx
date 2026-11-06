@@ -11,6 +11,7 @@ import { taskOnScheduleGrid, taskScheduledOn } from '@/lib/task-dates';
 import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -32,7 +33,7 @@ export function MonthGrid() {
   const lanes = useOrgLanes(projectsMap);
   const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
 
-  const today = isoDay(new Date());
+  const today = useToday();
   const [selected, setSelected] = useState<string | null>(null);
   const selectedDay = selected ?? today;
   const selectedTasks = visibleTasks.filter((t) => taskScheduledOn(t, selectedDay));

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { format } from 'date-fns';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -31,7 +31,10 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
 
 const { MonthGrid } = await import('./month-grid');
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 function dayButton(day: Date) {
   return screen.getByRole('button', { name: `${format(day, 'MMMM d')}, 0 tasks` });
@@ -55,5 +58,21 @@ describe('MonthGrid', () => {
     expect(dayButton(other).getAttribute('aria-pressed')).toBe('true');
     expect(dayButton(today).getAttribute('aria-pressed')).toBe('false');
     expect(dayButton(today).getAttribute('aria-current')).toBe('date');
+  });
+
+  it('marks and selects the new day after midnight on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
+    render(createElement(MonthGrid));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    const nov5 = new Date(2026, 10, 5);
+    const nov6 = new Date(2026, 10, 6);
+    expect(dayButton(nov5).getAttribute('aria-current')).toBe('date');
+
+    await act(async () => vi.advanceTimersByTimeAsync(31_000));
+
+    expect(dayButton(nov6).getAttribute('aria-current')).toBe('date');
+    expect(dayButton(nov6).getAttribute('aria-pressed')).toBe('true');
+    expect(dayButton(nov5).getAttribute('aria-current')).toBeNull();
   });
 });

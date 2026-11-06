@@ -137,11 +137,14 @@ mistakes kept a view on yesterday after midnight:
 Read the day from `useToday()` (`apps/web/src/lib/use-today.ts`) and list it
 in the query deps. It updates just after local midnight and when the page
 becomes visible again, because a sleeping device can miss the timer. The
-Today page, the work dashboard, Routines, and focus mode use it. Views that
-still read the clock at render time (week, month, kanban, tasks, projects,
-food) are candidates when they are next touched. Dialogs that mount only
-while open, such as the daily review, read the day fresh each time and do
-not need it.
+Today page, the work dashboard, Routines, focus mode, and the week, month,
+calendar, kanban, tasks, projects, and food views use it. Views that render
+one row per record call it once and pass `today` down as a prop, so a long
+list does not start one timer per row. A view whose selected day defaults to
+today keeps `null` for "follow today" (the month grid's `selected`, the food
+view's `pickedDay`) so it moves on at midnight unless the user picked a day.
+Dialogs that mount only while open, such as the daily review, read the day
+fresh each time and do not need it.
 
 ## Settings not yet wired
 

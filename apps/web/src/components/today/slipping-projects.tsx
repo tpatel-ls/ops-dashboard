@@ -7,6 +7,7 @@ import { useAppStore } from '@/lib/app-store';
 import { projectIsSlipping } from '@/lib/project-query';
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 
 export function SlippingProjects() {
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
@@ -15,6 +16,10 @@ export function SlippingProjects() {
   // kept its own constant, which happened to equal the default, so widening
   // the setting left the rail flagging projects the rest of the app did not.
   const slippingDays = useLiveSettings().slippingDays;
+  // Listed in the deps so the rail re-checks each day. Without it the query
+  // ran again only on a database change, so a project that went quiet stayed
+  // off the rail on a page left open.
+  const today = useToday();
   const projects = useLiveQuery(async () => {
     const all = await getDb().projects.toArray();
     const now = new Date();
@@ -25,7 +30,7 @@ export function SlippingProjects() {
       if (p.status !== 'active') return false;
       return projectIsSlipping(p.lastWorkedAt, slippingDays, now);
     });
-  }, [slippingDays]);
+  }, [slippingDays, today]);
 
   if (!projects || projects.length === 0) return null;
 

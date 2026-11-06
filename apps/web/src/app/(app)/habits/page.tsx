@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BookOpen, CheckCircle2, Flame, Share2, ShieldCheck, Sparkles, Target } from 'lucide-react';
-import { getDb, todayIso, weekStartIso } from '@ops-dashboard/core';
+import { getDb, weekStartIso } from '@ops-dashboard/core';
 import { ViewShell } from '@/components/view-shell';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
 import { activityTimestampWithin, loadActivity } from '@/lib/activity';
@@ -12,6 +12,7 @@ import { journalEntriesBetween } from '@/lib/journal';
 import { computeIdentityScore, computeIdentitySections, identityBand } from '@/lib/identity-score';
 import { shareOrCopy, type ShareOutcome } from '@/lib/share';
 import { useLiveSettings } from '@/lib/use-settings';
+import { useToday } from '@/lib/use-today';
 import { cn } from '@ops-dashboard/ui';
 
 // ─── Stat card ───────────────────────────────────────────────────────────────
@@ -74,15 +75,18 @@ const SHARE_MESSAGES: Partial<Record<ShareOutcome, string>> = {
 
 export default function HabitsPage() {
   const [shareOutcome, setShareOutcome] = useState<ShareOutcome | null>(null);
+  // The heatmap and weekly counts end on today. Without the day in the deps the
+  // query re-ran only on a database change, so a page left open overnight kept
+  // ending on yesterday.
+  const today = useToday();
   const data = useLiveQuery(async () => {
     return loadActivity(365);
-  });
+  }, [today]);
 
   const weekStartsOn = useLiveSettings().weekStartsOn;
 
   const stats = useLiveQuery(async () => {
     const db = getDb();
-    const today = todayIso();
 
     // Best streak across all active routines
     const routines = await db.routines.filter((r) => !r.deletedAt && !r.archivedAt).toArray();
@@ -125,7 +129,7 @@ export default function HabitsPage() {
       completedCount: completedTasks.length,
       totalPoints: Math.round(totalCount),
     };
-  }, [data, weekStartsOn]);
+  }, [data, weekStartsOn, today]);
 
   const activity = data ?? [];
   const hasActivity = activity.some((d) => d.count > 0);
