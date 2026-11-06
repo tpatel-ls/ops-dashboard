@@ -89,7 +89,13 @@ vercel --prod                    # or via the dashboard
 - Create a task on one device → it appears on the other within ~2s.
 - Watch: wire `docs/ops-dashboard/watch-capture.md`, then speak a capture → it
   shows on phone + tablet live.
-- Keep-alive: `GET /api/health` (or wait for the cron) returns `{"ok":true,"db":"up"}`.
+- Keep-alive: once `CRON_SECRET` or `OPS_API_SECRET` is set, `/api/health`
+  answers a request without the secret with `401`. Send one of them as a bearer
+  token (or wait for the cron), and it returns `{"ok":true,"db":"up"}`:
+
+  ```bash
+  curl -sS https://<your-app>.vercel.app/api/health -H "Authorization: Bearer $CRON_SECRET"
+  ```
 
 ## Keys I need from you to finish the live wiring
 
