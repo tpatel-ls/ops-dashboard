@@ -39,11 +39,29 @@ export function ChatPanel({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // The input and the send button are disabled while an answer loads, and
+  // disabling the focused element drops its focus, so every question left the
+  // user clicking back into the field to ask a follow-up. Hand focus back to
+  // the input once the answer settles, unless the user has moved focus on.
+  const refocusAfterAnswer = useRef(false);
+  useEffect(() => {
+    if (loading || !refocusAfterAnswer.current) return;
+    refocusAfterAnswer.current = false;
+    const active = document.activeElement;
+    if (active && active !== document.body) return;
+    textareaRef.current?.focus();
+  }, [loading]);
+
+  function submit() {
+    refocusAfterAnswer.current = true;
+    onSubmit();
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (isComposingKeyEvent(e)) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (!loading && input.trim()) onSubmit();
+      if (!loading && input.trim()) submit();
     }
   }
 
@@ -180,7 +198,7 @@ export function ChatPanel({
         />
         <button
           type="button"
-          onClick={onSubmit}
+          onClick={submit}
           disabled={loading || !input.trim()}
           aria-label="Send message"
           className={cn(
