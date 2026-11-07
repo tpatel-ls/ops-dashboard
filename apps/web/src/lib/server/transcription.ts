@@ -1,18 +1,8 @@
-export const MAX_TRANSCRIPTION_BYTES = 25 * 1024 * 1024;
+import { MAX_TRANSCRIPTION_BYTES, supportedTranscriptionType } from '../transcription-audio';
+
+export { MAX_TRANSCRIPTION_BYTES };
 export const MAX_TRANSCRIPTION_TEXT_LENGTH = 100_000;
 export const TRANSCRIPTION_REQUEST_TIMEOUT_MS = 60_000;
-
-const AUDIO_TYPES = new Set([
-  'audio/flac',
-  'audio/m4a',
-  'audio/mp4',
-  'audio/mpeg',
-  'audio/ogg',
-  'audio/wav',
-  'audio/webm',
-  'audio/x-m4a',
-  'audio/x-wav',
-]);
 
 export function transcriptionEndpoint(baseURL: string | undefined): string | undefined {
   const base = baseURL?.trim();
@@ -40,7 +30,7 @@ export function transcriptionFileError(
 ): 'empty-file' | 'too-large' | 'unsupported-type' | undefined {
   if (!Number.isSafeInteger(size) || size <= 0) return 'empty-file';
   if (size > MAX_TRANSCRIPTION_BYTES) return 'too-large';
-  if (mediaType && !AUDIO_TYPES.has(mediaType.split(';', 1)[0]!.trim().toLowerCase())) {
+  if (mediaType && !supportedTranscriptionType(mediaType)) {
     return 'unsupported-type';
   }
   return undefined;
