@@ -156,6 +156,8 @@ export function FoodView() {
   );
 }
 
+const NOTHING_LOGGED_NOTICE = 'Nothing was logged. Your entry is still here; try again.';
+
 /** One-line capture with a food bias: the "(food log) " prefix nudges the
  *  brain to classify as food. Dumb and reliable. */
 function QuickLog() {
@@ -185,6 +187,12 @@ function QuickLog() {
     refocusAfterLog.current = document.activeElement === inputRef.current;
     startTransition(async () => {
       const results = await processBrainDump(`(food log) ${text}`, 'text');
+      // An empty result means every item failed to save. Keep the text so the
+      // meal is not lost, and say so instead of clearing the field silently.
+      if (results.length === 0) {
+        setNotice(NOTHING_LOGGED_NOTICE);
+        return;
+      }
       setNotice(
         results.some((r) => r.aiOffline)
           ? 'AI offline - captured as a task instead; find it in Tasks.'

@@ -80,6 +80,7 @@ export function Notepad() {
     .join('\n');
   const [value, setValue] = useState(() => withSharedText(draft, sharedValue));
   const [feed, setFeed] = useState<FeedEntry[]>([]);
+  const [nothingSaved, setNothingSaved] = useState(false);
   const [pending, startTransition] = useTransition();
   const taRef = useRef<HTMLTextAreaElement>(null);
 
@@ -122,6 +123,9 @@ export function Notepad() {
     refocusAfterProcess.current = document.activeElement === taRef.current;
     startTransition(async () => {
       const results = await processBrainDump(text, 'notepad');
+      // An empty result means every item failed to save. The text stays in the
+      // field, but without a message the button looked like it did nothing.
+      setNothingSaved(results.length === 0);
       if (results.length === 0) return;
       const entries: FeedEntry[] = results.map((r) => ({
         type: 'item',
@@ -207,6 +211,11 @@ export function Notepad() {
             disabled={pending || transcribing}
             spellCheck={false}
           />
+          {nothingSaved ? (
+            <p role="alert" className="text-destructive px-1 text-xs">
+              Nothing could be saved. Your notes are still here; try again.
+            </p>
+          ) : null}
           <div className="flex items-center gap-2">
             {available ? (
               <button
