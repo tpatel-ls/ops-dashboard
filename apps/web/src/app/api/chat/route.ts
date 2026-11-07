@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { boundedText } from '@/lib/server/input';
+import { MAX_CHAT_QUESTION_LENGTH } from '@/lib/ask-context';
 
 export const runtime = 'nodejs';
 
 const MAX_CONTEXT = 60_000;
-const MAX_QUESTION = 4_000;
 
 const CHAT_SYSTEM = `You are the project intelligence assistant inside Taskify. The user is asking about their organizations, projects, domains, schedules, and open tasks.
 
@@ -21,7 +21,7 @@ export async function POST(req: Request): Promise<Response> {
   let context = '';
   try {
     const body = (await req.json()) as { question?: unknown; context?: unknown };
-    question = boundedText(body?.question, MAX_QUESTION);
+    question = boundedText(body?.question, MAX_CHAT_QUESTION_LENGTH);
     context = boundedText(body?.context, MAX_CONTEXT);
   } catch {
     /* ignore malformed body */

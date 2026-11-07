@@ -3,6 +3,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MAX_CHAT_QUESTION_LENGTH } from '@/lib/ask-context';
 import { ChatPanel } from './chat-panel';
 
 afterEach(cleanup);
@@ -37,5 +38,11 @@ describe('ChatPanel', () => {
     fireEvent.keyDown(field, { key: 'Enter', keyCode: 229 });
 
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('stops the question at the length the chat route reads', () => {
+    const { field } = renderPanel();
+
+    expect((field as HTMLTextAreaElement).maxLength).toBe(MAX_CHAT_QUESTION_LENGTH);
   });
 });

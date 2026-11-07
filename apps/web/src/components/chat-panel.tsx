@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, KeyRound } from 'lucide-react';
 import { cn } from '@ops-dashboard/ui';
+import { MAX_CHAT_QUESTION_LENGTH } from '@/lib/ask-context';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 export interface ChatMessage {
@@ -174,6 +175,7 @@ export function ChatPanel({
           }}
           onKeyDown={handleKeyDown}
           disabled={loading}
+          maxLength={MAX_CHAT_QUESTION_LENGTH}
           aria-label="Chat input"
         />
         <button
