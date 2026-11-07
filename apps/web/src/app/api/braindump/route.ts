@@ -3,11 +3,10 @@ import { NextResponse } from 'next/server';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { boundedText, boundedTextList, dateOnlyText } from '@/lib/server/input';
-import { normalizeBrainDumpItems } from '@/lib/brain-dump-result';
+import { MAX_BRAIN_DUMP_TEXT_LENGTH, normalizeBrainDumpItems } from '@/lib/brain-dump-result';
 
 export const runtime = 'nodejs';
 
-const MAX_TEXT = 8000;
 const MAX_NAMES = 100;
 const MAX_NAME_LENGTH = 200;
 
@@ -55,7 +54,7 @@ export async function POST(req: Request): Promise<Response> {
       text?: unknown;
       context?: { projects?: unknown; routines?: unknown; date?: unknown };
     };
-    text = boundedText(body?.text, MAX_TEXT);
+    text = boundedText(body?.text, MAX_BRAIN_DUMP_TEXT_LENGTH);
     projects = cleanNames(body?.context?.projects);
     routines = cleanNames(body?.context?.routines);
     date = dateOnlyText(body?.context?.date);

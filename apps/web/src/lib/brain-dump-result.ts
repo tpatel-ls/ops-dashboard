@@ -23,6 +23,8 @@ export interface RoutedItemDraft {
 
 export type NormalizedRoutedItemDraft = RoutedItemDraft & { title: string };
 
+/** The most characters `/api/braindump` reads from one request's `text`. */
+export const MAX_BRAIN_DUMP_TEXT_LENGTH = 8_000;
 export const MAX_ROUTED_ITEMS = 100;
 export const MAX_ROUTED_TITLE_LENGTH = 500;
 const MAX_ROUTED_NOTES_LENGTH = 2_000;
@@ -50,6 +52,43 @@ export function boundedDraftText(value: unknown, limit: number): string | undefi
   if (typeof value !== 'string') return undefined;
   const text = Array.from(value.trim()).slice(0, limit).join('');
   return text || undefined;
+}
+
+/**
+ * Splits a brain dump into pieces the route reads in full. The route bounds
+ * `text` to {@link MAX_BRAIN_DUMP_TEXT_LENGTH} characters, so a longer notepad
+ * dump used to lose its tail: the AI never saw it, and the notepad cleared it.
+ * Lines are kept whole when they fit, and a single overlong line is split by
+ * characters (never inside a surrogate pair).
+ */
+export function brainDumpChunks(text: string, limit = MAX_BRAIN_DUMP_TEXT_LENGTH): string[] {
+  const size = Math.max(1, Math.floor(limit));
+  const chunks: string[] = [];
+  let current: string[] = [];
+  let currentLength = 0;
+  const flush = () => {
+    const chunk = current.join('\n').trim();
+    if (chunk) chunks.push(chunk);
+    current = [];
+    currentLength = 0;
+  };
+  for (const line of text.split(/\r?\n/)) {
+    const characters = Array.from(line);
+    if (characters.length > size) {
+      flush();
+      for (let start = 0; start < characters.length; start += size) {
+        current = [characters.slice(start, start + size).join('')];
+        flush();
+      }
+      continue;
+    }
+    const added = (current.length > 0 ? 1 : 0) + characters.length;
+    if (currentLength + added > size) flush();
+    currentLength += (current.length > 0 ? 1 : 0) + characters.length;
+    current.push(line);
+  }
+  flush();
+  return chunks;
 }
 
 /**

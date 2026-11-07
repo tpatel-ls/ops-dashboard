@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { parseQuickAdd } from '@ops-dashboard/core';
 import {
   boundedDraftText,
+  brainDumpChunks,
+  MAX_BRAIN_DUMP_TEXT_LENGTH,
   MAX_ROUTED_ITEMS,
   MAX_ROUTED_TITLE_LENGTH,
   normalizeBrainDumpItem,
@@ -163,5 +165,34 @@ describe('routedTag', () => {
     for (const raw of ['Cafe\u0301', '\uFF30\uFF4C\uFF41\uFF4E', 'PLANNING', 'blue-text']) {
       expect(parseQuickAdd(`Ship it #${raw}`).tags).toEqual([routedTag(raw)]);
     }
+  });
+});
+
+describe('brainDumpChunks', () => {
+  it('keeps a dump within the route limit as one piece', () => {
+    expect(brainDumpChunks('Call supplier\nBuy milk')).toEqual(['Call supplier\nBuy milk']);
+  });
+
+  it('splits a long dump on line boundaries without dropping any line', () => {
+    const lines = Array.from({ length: 30 }, (_, index) => `${index} ${'x'.repeat(400)}`);
+    const chunks = brainDumpChunks(lines.join('\n'));
+
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) {
+      expect(Array.from(chunk).length).toBeLessThanOrEqual(MAX_BRAIN_DUMP_TEXT_LENGTH);
+    }
+    expect(chunks.flatMap((chunk) => chunk.split('\n'))).toEqual(lines);
+  });
+
+  it('splits an overlong line by characters without breaking a surrogate pair', () => {
+    const line = '😀'.repeat(5);
+    const chunks = brainDumpChunks(line, 2);
+
+    expect(chunks).toEqual(['😀😀', '😀😀', '😀']);
+    expect(chunks.join('')).toBe(line);
+  });
+
+  it('skips blank pieces', () => {
+    expect(brainDumpChunks('\n\n a \n\n', 2)).toEqual(['a']);
   });
 });

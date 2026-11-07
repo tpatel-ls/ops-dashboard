@@ -23,6 +23,7 @@ import { fetchWithTimeout } from './fetch-timeout';
 import { journalEntrySource } from './journal-source';
 import {
   boundedDraftText,
+  brainDumpChunks,
   MAX_NUTRITION_ESTIMATE,
   MAX_ROUTED_FOOD_ITEMS,
   MAX_ROUTED_FOOD_TEXT_LENGTH,
@@ -80,6 +81,17 @@ export async function processBrainDump(
     db.routines.filter((r) => !r.deletedAt && !r.archivedAt).toArray(),
   ]);
 
+  const ctx: RouteContext = { projects, routines, source };
+  // The route reads at most MAX_BRAIN_DUMP_TEXT_LENGTH characters, so a long
+  // dump goes up in pieces; otherwise everything past the limit was dropped.
+  const results: RoutedResult[] = [];
+  for (const chunk of brainDumpChunks(text)) {
+    results.push(...(await processBrainDumpChunk(chunk, ctx)));
+  }
+  return results;
+}
+
+async function processBrainDumpChunk(text: string, ctx: RouteContext): Promise<RoutedResult[]> {
   let drafts: RoutedItemDraft[] | null = null;
   try {
     const res = await fetchWithTimeout('/api/braindump', {
@@ -88,8 +100,8 @@ export async function processBrainDump(
       body: JSON.stringify({
         text,
         context: {
-          projects: projects.map((p) => p.name),
-          routines: routines.map((r) => r.name),
+          projects: ctx.projects.map((p) => p.name),
+          routines: ctx.routines.map((r) => r.name),
           date: todayIso(),
         },
       }),
@@ -100,9 +112,8 @@ export async function processBrainDump(
     /* network error / offline -> fallback below */
   }
 
-  if (!drafts) return fallbackToTasks(text, source);
+  if (!drafts) return fallbackToTasks(text, ctx.source);
 
-  const ctx: RouteContext = { projects, routines, source };
   const results: RoutedResult[] = [];
   for (const draft of drafts) {
     if (typeof draft?.title !== 'string' || !draft.title.trim()) continue;
