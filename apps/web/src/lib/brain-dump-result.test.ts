@@ -192,6 +192,22 @@ describe('brainDumpChunks', () => {
     expect(chunks.join('')).toBe(line);
   });
 
+  it('holds at most the routed item cap of lines per piece', () => {
+    const lines = Array.from({ length: MAX_ROUTED_ITEMS * 2 + 5 }, (_, index) => `task ${index}`);
+    const chunks = brainDumpChunks(lines.join('\n'));
+
+    expect(chunks.map((chunk) => chunk.split('\n').length)).toEqual([
+      MAX_ROUTED_ITEMS,
+      MAX_ROUTED_ITEMS,
+      5,
+    ]);
+    expect(chunks.flatMap((chunk) => chunk.split('\n'))).toEqual(lines);
+  });
+
+  it('does not count blank lines toward the line cap', () => {
+    expect(brainDumpChunks('a\n\n\nb\n\nc', 100, 2)).toEqual(['a\n\n\nb', 'c']);
+  });
+
   it('skips blank pieces', () => {
     expect(brainDumpChunks('\n\n a \n\n', 2)).toEqual(['a']);
   });
