@@ -2,6 +2,14 @@ import type { Domain, Organization, Project, Task } from '@ops-dashboard/core';
 import { localDay } from '@ops-dashboard/core';
 import { safeTaskTags } from './task-query';
 
+/**
+ * The most characters `/api/chat` reads from a question. The field stops at
+ * this length so a long question is not cut off without the user knowing.
+ * `maxLength` counts UTF-16 units, and a string never has fewer UTF-16 units
+ * than characters, so nothing the field accepts is past the route's limit.
+ */
+export const MAX_CHAT_QUESTION_LENGTH = 4_000;
+
 const MAX_CONTEXT = 50_000;
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
 
