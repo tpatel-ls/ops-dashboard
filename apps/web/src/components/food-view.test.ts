@@ -64,7 +64,7 @@ describe('FoodView quick log', () => {
     // parsed; jsdom does not, so the log stands in for that focus loss.
     processBrainDump.mockImplementation(async () => {
       input.blur();
-      return [];
+      return [{ recordType: 'foodLog' }];
     });
 
     input.focus();
@@ -90,6 +90,20 @@ describe('FoodView quick log', () => {
 
     expect(processBrainDump).toHaveBeenCalled();
     expect(document.activeElement).not.toBe(input);
+  });
+
+  it('keeps the entry and says so when nothing could be logged', async () => {
+    render(createElement(FoodView));
+    const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Log food' });
+    processBrainDump.mockResolvedValue([]);
+
+    fireEvent.change(input, { target: { value: '2 eggs' } });
+    await act(async () => {
+      fireEvent.submit(input.form!);
+    });
+
+    expect(input.value).toBe('2 eggs');
+    expect(screen.getByRole('status').textContent).toMatch(/Nothing was logged/);
   });
 
   it('announces when the meal was saved as a task because the AI is offline', async () => {

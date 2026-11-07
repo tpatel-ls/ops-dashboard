@@ -117,4 +117,18 @@ describe('Notepad capture', () => {
     expect(field.value).toBe('');
     expect(document.activeElement).toBe(field);
   });
+
+  it('keeps the notes and says so when nothing could be saved', async () => {
+    render(createElement(Notepad));
+    const field = screen.getByLabelText<HTMLTextAreaElement>('Work intake');
+    vi.mocked(processBrainDump).mockResolvedValueOnce([]);
+
+    type('email sam');
+    await act(async () => {
+      fireEvent.keyDown(field, { key: 'Enter', ctrlKey: true });
+    });
+
+    expect(field.value).toBe('email sam');
+    expect(screen.getByRole('alert').textContent).toMatch(/Nothing could be saved/);
+  });
 });
