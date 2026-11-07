@@ -8,6 +8,7 @@ import { ViewShell } from '@/components/view-shell';
 import { ChatPanel } from '@/components/chat-panel';
 import type { ChatMessage } from '@/components/chat-panel';
 import { buildWorkContext } from '@/lib/ask-context';
+import { CHAT_NETWORK_ERROR_MESSAGE, chatErrorMessage } from '@/lib/chat-error';
 
 /* ─── unique id helper ───────────────────────────────────────────── */
 
@@ -69,42 +70,21 @@ export default function AskPage() {
         body: JSON.stringify({ question, context }),
       });
 
-      const json = (await res.json()) as
-        { ok: true; answer: string } | { ok: false; reason: string };
+      const json = (await res.json().catch(() => null)) as
+        { ok: true; answer: string } | { ok: false; reason: string } | null;
 
-      if (!json.ok) {
-        if (json.reason === 'no-key') {
-          setNoKey(true);
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === placeholderId
-                ? {
-                    ...m,
-                    loading: false,
-                    error: true,
-                    text: 'No API key configured. Add ANTHROPIC_API_KEY to .env.local.',
-                  }
-                : m,
-            ),
-          );
-        } else {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === placeholderId
-                ? {
-                    ...m,
-                    loading: false,
-                    error: true,
-                    text: 'Something went wrong. Please try again.',
-                  }
-                : m,
-            ),
-          );
-        }
+      if (json?.ok) {
+        const answer = json.answer;
+        setMessages((prev) =>
+          prev.map((m) => (m.id === placeholderId ? { ...m, loading: false, text: answer } : m)),
+        );
       } else {
+        const reason = json?.reason;
+        if (reason === 'no-key') setNoKey(true);
+        const text = chatErrorMessage(res.status, reason);
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === placeholderId ? { ...m, loading: false, text: json.answer } : m,
+            m.id === placeholderId ? { ...m, loading: false, error: true, text } : m,
           ),
         );
       }
@@ -116,7 +96,7 @@ export default function AskPage() {
                 ...m,
                 loading: false,
                 error: true,
-                text: 'Network error. Check your connection and try again.',
+                text: CHAT_NETWORK_ERROR_MESSAGE,
               }
             : m,
         ),
