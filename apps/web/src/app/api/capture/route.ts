@@ -15,6 +15,7 @@ import { captureParserNow } from '@/lib/server/capture-time';
 import { boundedText } from '@/lib/server/input';
 import { triageRequest } from '@/lib/server/triage-request';
 import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
+import { MAX_ROUTED_TITLE_LENGTH } from '@/lib/brain-dump-result';
 import { journalEntrySource } from '@/lib/journal-source';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient, getSingleUserId } from '@/utils/supabase/admin';
@@ -145,12 +146,22 @@ export async function POST(req: Request): Promise<Response> {
       deviceId,
       order: 0,
     });
+    // Without AI the whole capture becomes the title, and raw allows 4000
+    // characters where a task title allows 500, so the app rejected any later
+    // title edit. Bound it the way the in-app fallback does and keep the full
+    // text in the notes, which allow the 4000.
+    const titleCharacters = Array.from(base.title);
+    const titleTooLong = titleCharacters.length > MAX_ROUTED_TITLE_LENGTH;
+    const notes = result?.notes || (titleTooLong ? raw : undefined);
     routedRecord = applyTzOffset(
       {
         ...base,
+        title: titleTooLong
+          ? titleCharacters.slice(0, MAX_ROUTED_TITLE_LENGTH).join('').trim()
+          : base.title,
         priority: ((result?.priority as Task['priority']) ?? base.priority) || 0,
         tags: result?.tags?.length ? result.tags : base.tags,
-        ...(result?.notes ? { notes: result.notes } : {}),
+        ...(notes ? { notes } : {}),
       },
       tzOffsetMinutes,
     );

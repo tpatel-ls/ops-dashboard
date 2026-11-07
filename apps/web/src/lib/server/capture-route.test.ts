@@ -31,6 +31,7 @@ vi.mock('@/utils/supabase/admin', () => ({
 }));
 vi.mock('@/utils/supabase/server', () => ({ createClient: vi.fn().mockResolvedValue(null) }));
 
+import { MAX_ROUTED_TITLE_LENGTH } from '@/lib/brain-dump-result';
 import { POST } from '../../app/api/capture/route';
 
 afterEach(() => vi.unstubAllEnvs());
@@ -55,5 +56,38 @@ describe('capture API persistence', () => {
       ok: false,
       reason: 'persistence-unavailable',
     });
+  });
+
+  it('keeps a long capture without AI within the task title limit', async () => {
+    mocks.createAdminClient.mockReturnValue(null);
+    const raw = `Call the customer about ${'the renewal '.repeat(100)}`.trim();
+    const request = new Request('https://dashboard.example/api/capture', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ raw }),
+    });
+
+    const response = await POST(request);
+    const body = (await response.json()) as { record: { title: string; notes?: string } };
+
+    expect(Array.from(body.record.title).length).toBeLessThanOrEqual(MAX_ROUTED_TITLE_LENGTH);
+    expect(raw.startsWith(body.record.title)).toBe(true);
+    expect(body.record.notes).toBe(raw);
+  });
+
+  it('leaves a short capture without AI as its own title', async () => {
+    mocks.createAdminClient.mockReturnValue(null);
+    const request = new Request('https://dashboard.example/api/capture', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ raw: 'Call the customer' }),
+    });
+
+    const body = (await (await POST(request)).json()) as {
+      record: { title: string; notes?: string };
+    };
+
+    expect(body.record.title).toBe('Call the customer');
+    expect(body.record.notes).toBeUndefined();
   });
 });
