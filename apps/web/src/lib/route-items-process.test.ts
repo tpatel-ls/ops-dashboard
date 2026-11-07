@@ -70,4 +70,18 @@ describe('processBrainDump failure recovery', () => {
     }
     expect(sent.flatMap((text) => text.split('\n'))).toEqual(lines);
   });
+
+  it('captures every line of a long offline dump as a task', async () => {
+    mocks.fetchWithTimeout.mockReset();
+    mocks.fetchWithTimeout.mockRejectedValue(new TypeError('offline'));
+    mocks.createCapture.mockReset();
+    mocks.createCapture.mockImplementation(async () => ({ id: 'capture' }));
+    mocks.addTask.mockReset();
+    mocks.addTask.mockImplementation(async (title: string) => ({ id: title, title }));
+    const lines = Array.from({ length: 150 }, (_, index) => `task ${index}`);
+
+    const results = await processBrainDump(lines.join('\n'), 'notepad');
+
+    expect(results.map((result) => result.title)).toEqual(lines);
+  });
 });

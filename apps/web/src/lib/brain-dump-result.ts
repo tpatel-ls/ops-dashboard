@@ -60,17 +60,28 @@ export function boundedDraftText(value: unknown, limit: number): string | undefi
  * dump used to lose its tail: the AI never saw it, and the notepad cleared it.
  * Lines are kept whole when they fit, and a single overlong line is split by
  * characters (never inside a surrogate pair).
+ *
+ * A piece also holds at most `maxLines` non-blank lines. Both the AI result
+ * and the offline fallback (one task per line) stop at MAX_ROUTED_ITEMS, so a
+ * dump of more lines than that lost every line past the cap.
  */
-export function brainDumpChunks(text: string, limit = MAX_BRAIN_DUMP_TEXT_LENGTH): string[] {
+export function brainDumpChunks(
+  text: string,
+  limit = MAX_BRAIN_DUMP_TEXT_LENGTH,
+  maxLines = MAX_ROUTED_ITEMS,
+): string[] {
   const size = Math.max(1, Math.floor(limit));
+  const lineLimit = Math.max(1, Math.floor(maxLines));
   const chunks: string[] = [];
   let current: string[] = [];
   let currentLength = 0;
+  let currentLines = 0;
   const flush = () => {
     const chunk = current.join('\n').trim();
     if (chunk) chunks.push(chunk);
     current = [];
     currentLength = 0;
+    currentLines = 0;
   };
   for (const line of text.split(/\r?\n/)) {
     const characters = Array.from(line);
@@ -83,8 +94,10 @@ export function brainDumpChunks(text: string, limit = MAX_BRAIN_DUMP_TEXT_LENGTH
       continue;
     }
     const added = (current.length > 0 ? 1 : 0) + characters.length;
-    if (currentLength + added > size) flush();
+    const blank = !line.trim();
+    if (currentLength + added > size || (!blank && currentLines >= lineLimit)) flush();
     currentLength += (current.length > 0 ? 1 : 0) + characters.length;
+    if (!blank) currentLines += 1;
     current.push(line);
   }
   flush();
