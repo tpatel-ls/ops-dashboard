@@ -45,3 +45,21 @@ describe('JournalUpload mood picker', () => {
     expect(pressed()).toEqual([expect.stringContaining('Rough')]);
   });
 });
+
+describe('JournalUpload long text', () => {
+  it('keeps text longer than the extract route reads as written instead of truncating it', async () => {
+    const long = 'Walked by the river. '.repeat(500).trim();
+    render(createElement(JournalUpload));
+    fireEvent.click(screen.getByRole('button', { name: /Paste text/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Journal text to analyze' }), {
+      target: { value: long },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Analyse with AI/ }));
+
+    expect((await screen.findByRole('alert')).textContent).toMatch(/longer than AI analysis reads/);
+    expect(
+      (screen.getByRole('textbox', { name: 'Journal entry' }) as HTMLTextAreaElement).value,
+    ).toBe(long);
+    expect(fetchWithTimeout).not.toHaveBeenCalled();
+  });
+});

@@ -4,6 +4,7 @@ import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { requestAllowed } from '@/lib/server/guard';
 import { type JournalImageMediaType, validateJournalImage } from '@/lib/server/journal-image';
 import { boundedText, boundedTextList } from '@/lib/server/input';
+import { MAX_JOURNAL_EXTRACT_TEXT_LENGTH } from '@/lib/journal-extract-error';
 import {
   journalExtractionSystem,
   normalizeJournalExtraction,
@@ -11,7 +12,6 @@ import {
 
 export const runtime = 'nodejs';
 
-const MAX_TEXT = 8000;
 const MAX_ROUTINE_NAMES = 100;
 const MAX_ROUTINE_NAME_LENGTH = 200;
 
@@ -32,7 +32,7 @@ export async function POST(req: Request): Promise<Response> {
       mediaType?: unknown;
       routineNames?: unknown;
     };
-    text = boundedText(body?.text, MAX_TEXT);
+    text = boundedText(body?.text, MAX_JOURNAL_EXTRACT_TEXT_LENGTH);
     imageBase64 = typeof body?.imageBase64 === 'string' ? body.imageBase64 : undefined;
     const requestedMediaType = typeof body?.mediaType === 'string' ? body.mediaType : 'image/jpeg';
     if (imageBase64) {
