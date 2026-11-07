@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MAX_TRANSCRIBE_BYTES, transcribeBlob, transcriptionFilename } from './transcribe';
+import { transcriptionFileError } from './server/transcription';
+import {
+  MAX_TRANSCRIBE_BYTES,
+  RECORDING_MIME_CANDIDATES,
+  transcribeBlob,
+  transcriptionFilename,
+} from './transcribe';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -71,5 +77,18 @@ describe('transcribeBlob', () => {
     ['audio/webm', 'audio.webm'],
   ])('uses a filename matching %s uploads', (mediaType, expected) => {
     expect(transcriptionFilename(mediaType)).toBe(expected);
+  });
+});
+
+describe('recording formats', () => {
+  it('only records formats the transcription route accepts', () => {
+    for (const mediaType of RECORDING_MIME_CANDIDATES) {
+      expect(transcriptionFileError(1, mediaType), mediaType).toBeUndefined();
+    }
+  });
+
+  it('uploads at the same size limit the route enforces', () => {
+    expect(transcriptionFileError(MAX_TRANSCRIBE_BYTES, 'audio/webm')).toBeUndefined();
+    expect(transcriptionFileError(MAX_TRANSCRIBE_BYTES + 1, 'audio/webm')).toBe('too-large');
   });
 });
