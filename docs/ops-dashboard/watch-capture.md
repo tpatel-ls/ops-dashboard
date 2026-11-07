@@ -111,11 +111,11 @@ If you prefer **HTTP Shortcuts** (simpler than Tasker for the request part):
 
 ## Field reference
 
-| Field             | Required | Notes                                                                            |
-| ----------------- | -------- | -------------------------------------------------------------------------------- |
-| `raw`             | yes      | The spoken/typed text. Triaged + cleaned by Claude.                              |
-| `tzOffsetMinutes` | no       | `new Date().getTimezoneOffset()` (e.g. 300 = UTC‑5). Makes relative times local. |
-| `Authorization`   | yes      | `Bearer <OPS_API_SECRET>`.                                                       |
+| Field             | Required | Notes                                                                                                   |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `raw`             | yes      | The spoken/typed text. Triaged + cleaned by Claude. Only the first 4000 characters are read and stored. |
+| `tzOffsetMinutes` | no       | `new Date().getTimezoneOffset()` (e.g. 300 = UTC‑5). Makes relative times local.                        |
+| `Authorization`   | yes      | `Bearer <OPS_API_SECRET>`.                                                                              |
 
 Server env required for persistence: `OPS_API_SECRET`, `SUPABASE_SECRET_KEY`,
 `NEXT_PUBLIC_SUPABASE_URL`, and a created user (or `OPS_USER_ID`). `ANTHROPIC_API_KEY`
