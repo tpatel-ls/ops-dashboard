@@ -227,7 +227,7 @@ P3 Content · P4 Library/People/Inventory · P5 Integrations/Push-cron/Chat/Sear
       Browser-verified; production build (28 routes) clean. Commits `c…` (P4 core) + this batch.
 - [ ] **Needs your accounts/keys (not buildable by me alone):** hosting (Supabase +
       Vercel for true multi-device sync across S24 Ultra/Tab/Watch); live AI
-      (`ANTHROPIC_API_KEY` for triage/journal/chat, `GROQ_API_KEY` voice, Pushover push) -
+      (`ANTHROPIC_API_KEY` for triage/journal/chat, `TRANSCRIBE_*` voice, Pushover push) -
       code is in place with fallbacks, just unconfigured; Google Calendar; the physical
       Wear OS shortcut that hits `/api/capture`.
 
@@ -257,8 +257,9 @@ Inputs capped; push `url` not user-controllable.
 
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`),
 `SUPABASE_SECRET_KEY` (`sb_secret_…`, server-only). Optional: `OPS_USER_ID`,
-`OPS_API_SECRET` (watch + cron), `CRON_SECRET`, `ANTHROPIC_API_KEY`, `GROQ_API_KEY`,
-`PUSHOVER_TOKEN`, `PUSHOVER_USER`. See `apps/web/.env.local.example`.
+`OPS_API_SECRET` (watch + cron), `CRON_SECRET`, `ANTHROPIC_API_KEY`,
+`NEXT_PUBLIC_TRANSCRIBE_ENABLED`, `TRANSCRIBE_BASE_URL`, `TRANSCRIBE_API_KEY`,
+`TRANSCRIBE_MODEL`, `PUSHOVER_TOKEN`, `PUSHOVER_USER`. See `apps/web/.env.local.example`.
 
 ## Next steps (live - keep current)
 

@@ -186,7 +186,10 @@ configurable per-type `WEIGHTS`. No stored activity table (avoids dual-write dri
 
 ```
 ANTHROPIC_API_KEY=      # AI triage, journal extraction, chat
-GROQ_API_KEY=           # voice transcription (whisper-large-v3-turbo)
+NEXT_PUBLIC_TRANSCRIBE_ENABLED=0  # 1 once the endpoint below is set
+TRANSCRIBE_BASE_URL=    # OpenAI-compatible Whisper endpoint for voice transcription
+TRANSCRIBE_API_KEY=
+TRANSCRIBE_MODEL=whisper-1
 PUSHOVER_TOKEN=         # push app token
 PUSHOVER_USER=          # push user key
 # host-later:

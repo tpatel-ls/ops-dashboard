@@ -88,8 +88,8 @@ deletedAt`. Mutations go through `apps/web/src/lib/*` (and `lib/records.ts`) whi
   **publishable key** (`sb_publishable_…`), and **secret key** (`sb_secret_…`).
   (Or guide me through `npx supabase login` + `link` if you prefer CLI.)
 - **Vercel:** I'll run `vercel login` when you're ready to deploy.
-- **`ANTHROPIC_API_KEY`** (AI triage/journal/chat). Optional: **`GROQ_API_KEY`**
-  (better voice), **`PUSHOVER_TOKEN`/`PUSHOVER_USER`** (push to phone+watch).
+- **`ANTHROPIC_API_KEY`** (AI triage/journal/chat). Optional: **`TRANSCRIBE_BASE_URL`** and
+  **`TRANSCRIBE_API_KEY`** for an OpenAI-compatible Whisper endpoint (better voice), **`PUSHOVER_TOKEN`/`PUSHOVER_USER`** (push to phone+watch).
 - **`OPS_API_SECRET`:** pick/generate one random string (for the watch webhook).
 - For the watch: my Google account is on the watch+phone; I can install **Tasker**
   or **HTTP Shortcuts** if needed.
@@ -166,7 +166,8 @@ push`** to apply migrations 0001→0003 to the hosted DB. Generate types:
 ### Phase 5 - Deploy to Vercel + keep-alive
 
 - `vercel link` + deploy. Set env vars in Vercel (Supabase URL/publishable/secret,
-  `ANTHROPIC_API_KEY`, `GROQ_API_KEY`, `PUSHOVER_*`, `OPS_API_SECRET`). Add the
+  `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_TRANSCRIBE_ENABLED` with `TRANSCRIBE_*`,
+  `PUSHOVER_*`, `OPS_API_SECRET`). Add the
   Vercel domain to Supabase Auth → URL Configuration (Site URL + Redirect URLs).
 - Add **`/api/health`** (trivial authenticated Supabase query) + a **Vercel Cron**
   (`vercel.json`) hitting it daily → free project never pauses.
