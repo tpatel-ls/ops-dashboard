@@ -28,4 +28,9 @@ describe('journalExtractErrorMessage', () => {
       'Something went wrong. You can still write your entry below.',
     );
   });
+
+  it('asks the user to sign in again when the session has ended', () => {
+    expect(journalExtractErrorMessage(401, 'unauthorized')).toMatch(/Sign in again/);
+    expect(journalExtractErrorMessage(401, undefined)).toMatch(/Sign in again/);
+  });
 });

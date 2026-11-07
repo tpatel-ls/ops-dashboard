@@ -19,13 +19,17 @@ export function journalTextTooLongForExtract(text: string): boolean {
  * or one in a format the model cannot read. Those are the failures a user can
  * fix by picking another photo, so say which one it was. A 413 is checked by
  * status as well as reason because a platform body limit can reject the
- * request before the route runs, with a body that is not our JSON.
+ * request before the route runs, with a body that is not our JSON. A 401
+ * means the session has ended, which no retry fixes.
  */
 const GENERIC = 'Something went wrong. You can still write your entry below.';
 
 export function journalExtractErrorMessage(status: number, reason: unknown): string {
   if (status === 413 || reason === 'image-too-large') {
     return 'That photo is too large to read (the limit is 5 MB). Try a smaller photo, or write your entry below.';
+  }
+  if (status === 401 || reason === 'unauthorized') {
+    return 'Your session has ended. Sign in again to analyse an entry, or write it below.';
   }
   if (reason === 'invalid-image-type') {
     return 'That photo format is not supported. Use a JPEG, PNG, GIF, or WebP image, or write your entry below.';
