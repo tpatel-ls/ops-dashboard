@@ -1,3 +1,16 @@
+/** The most characters `/api/journal/extract` reads from the typed text. */
+export const MAX_JOURNAL_EXTRACT_TEXT_LENGTH = 8_000;
+
+/**
+ * Text longer than the route reads would come back as an extracted body that
+ * silently ends where the limit cut it, so the upload keeps it as written.
+ */
+export const JOURNAL_TEXT_TOO_LONG_MESSAGE = `This entry is longer than AI analysis reads (${MAX_JOURNAL_EXTRACT_TEXT_LENGTH.toLocaleString('en-US')} characters), so it is kept as written below.`;
+
+export function journalTextTooLongForExtract(text: string): boolean {
+  return Array.from(text.trim()).length > MAX_JOURNAL_EXTRACT_TEXT_LENGTH;
+}
+
 /**
  * What the journal upload tells the user when `/api/journal/extract` fails.
  *

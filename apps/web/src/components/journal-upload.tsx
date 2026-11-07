@@ -17,7 +17,12 @@ import { createJournalEntry } from '@/lib/journal';
 import { toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { fetchWithTimeout } from '@/lib/fetch-timeout';
-import { journalExtractErrorMessage } from '@/lib/journal-extract-error';
+import {
+  JOURNAL_TEXT_TOO_LONG_MESSAGE,
+  journalExtractErrorMessage,
+  MAX_JOURNAL_EXTRACT_TEXT_LENGTH,
+  journalTextTooLongForExtract,
+} from '@/lib/journal-extract-error';
 
 type Mode = 'idle' | 'text' | 'photo';
 type Stage = 'input' | 'processing' | 'confirm' | 'done' | 'manual-fallback';
@@ -105,6 +110,14 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
 
   async function handleSubmit() {
     setError(null);
+    // A photo is still worth analysing, and its context field stops at the
+    // limit, so only text-only entries fall back to the manual editor.
+    if (!imageBase64 && journalTextTooLongForExtract(text)) {
+      setError(JOURNAL_TEXT_TOO_LONG_MESSAGE);
+      setManualBody(text.trim());
+      setStage('manual-fallback');
+      return;
+    }
     setStage('processing');
 
     try {
@@ -520,6 +533,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
               onChange={(e) => setText(e.target.value)}
               placeholder="Optional: add any context or notes to go along with the photo…"
               aria-label="Journal image context"
+              maxLength={MAX_JOURNAL_EXTRACT_TEXT_LENGTH}
               rows={3}
               className="input mt-3 resize-none"
             />
