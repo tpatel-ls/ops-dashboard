@@ -371,7 +371,7 @@ interface CardProps {
   domains: Domain[];
 }
 
-function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
+export function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
   const publishLabel = contentPublishLabel(item.publishDate);
 
   return (
@@ -405,7 +405,7 @@ function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="text-subtle-foreground hover:bg-accent hover:text-primary inline-flex size-8 shrink-0 items-center justify-center rounded-md"
-              aria-label="Open link"
+              aria-label={`Open link: ${item.title}`}
             >
               <ExternalLink className="size-3.5" />
             </a>
