@@ -8,6 +8,7 @@ import type { Note } from '@ops-dashboard/core';
 import { compareNoteRecency, createNote, deleteNote, safeNoteTags, updateNote } from '@/lib/notes';
 import { cn } from '@ops-dashboard/ui';
 import { excerpt } from '@/lib/excerpt';
+import { saveErrorMessage } from '@/lib/save-error';
 
 /* ─── Create Form ──────────────────────────────────────────────── */
 
@@ -41,8 +42,8 @@ export function NoteForm({ onSaved, onCancel }: NoteFormProps) {
         tags,
       });
       onSaved();
-    } catch {
-      setError('Could not save this note. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not save this note. Your draft is still here.', err));
     } finally {
       setSaving(false);
     }

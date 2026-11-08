@@ -26,6 +26,7 @@ import { linkOptions } from '@/lib/link-options';
 import { useAppStore } from '@/lib/app-store';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Status + kind labels ────────────────────────────────────────────────────
 
@@ -75,8 +76,8 @@ export function MilestonesSection({ project }: { project: Project }) {
       await updateProject(project.id, {
         milestones: [...milestones, milestone],
       });
-    } catch {
-      setError('Could not add this milestone. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this milestone. Your draft is still here.', err));
       return;
     }
     setNewTitle('');
@@ -230,8 +231,8 @@ export function ChecklistsSection({ project }: { project: Project }) {
     setError(null);
     try {
       await updateProject(project.id, { checklists: [...checklists, list] });
-    } catch {
-      setError('Could not add this checklist. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this checklist. Your draft is still here.', err));
       return;
     }
     setNewListName('');
@@ -248,8 +249,8 @@ export function ChecklistsSection({ project }: { project: Project }) {
     try {
       await updateProject(project.id, { checklists: updated });
       return true;
-    } catch {
-      setError('Could not add this item. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this item. Your draft is still here.', err));
       return false;
     }
   }
@@ -498,8 +499,8 @@ export function LinkedTasksSection({ project }: { project: Project }) {
       // project's domain + org lane. Input stays put for rapid entry.
       await addTaskToProject(text, project);
       setAdding('');
-    } catch {
-      setError('Could not add this task. Your text is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this task. Your text is still here.', err));
     } finally {
       setSaving(false);
     }
@@ -626,8 +627,8 @@ export function LogWorkSection({ project }: { project: Project }) {
       await logWork(project.id, mins, note.trim() || undefined);
       setMinutes('');
       setNote('');
-    } catch {
-      setError('Could not log this work. Your entry is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not log this work. Your entry is still here.', err));
     } finally {
       setSaving(false);
     }

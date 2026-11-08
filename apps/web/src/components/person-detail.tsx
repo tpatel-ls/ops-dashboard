@@ -19,6 +19,7 @@ import {
   updatePerson,
 } from '@/lib/people';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Facts section ────────────────────────────────────────────────────────────
 
@@ -36,8 +37,8 @@ function FactsSection({ person }: { person: Person }) {
     setError(null);
     try {
       await updatePerson(person.id, { facts: [...facts, makeFact(l, v)] });
-    } catch {
-      setError('Could not save this fact. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not save this fact. Your draft is still here.', err));
       return;
     }
     setLabel('');
@@ -176,8 +177,8 @@ function InteractionsSection({ person }: { person: Person }) {
       await updatePerson(person.id, {
         interactions: [...interactions, makeInteraction(n, date || undefined)],
       });
-    } catch {
-      setError('Could not log this interaction. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not log this interaction. Your draft is still here.', err));
       return;
     }
     setNote('');
@@ -320,8 +321,8 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
     setError(null);
     try {
       await updatePerson(person.id, patch);
-    } catch {
-      setError(failure);
+    } catch (err) {
+      setError(saveErrorMessage(failure, err));
     }
   }
 

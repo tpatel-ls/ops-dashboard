@@ -39,6 +39,7 @@ import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { safeTaskTags } from '@/lib/task-query';
 import { useActiveOrgs } from './org-switcher';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { saveErrorMessage } from '@/lib/save-error';
 
 const NAV = [
   { id: 'nav-dashboard', label: 'Today', href: '/dashboard', icon: LayoutDashboard, hint: 'g h' },
@@ -170,8 +171,8 @@ export function CommandPalette() {
       // reached the error boundary and replaced the whole page.
       try {
         await addTask(text, orgId ? { orgId } : {});
-      } catch {
-        setAddError('Could not add this task. Your text is still here.');
+      } catch (err) {
+        setAddError(saveErrorMessage('Could not add this task. Your text is still here.', err));
         return;
       }
       dismiss();

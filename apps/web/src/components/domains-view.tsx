@@ -13,6 +13,7 @@ import {
   updateDomain,
 } from '@/lib/domains';
 import { cn } from '@ops-dashboard/ui';
+import { saveErrorMessage } from '@/lib/save-error';
 
 const PRESET_COLORS = [
   { label: 'Amber', value: 'oklch(0.65 0.18 38)' },
@@ -66,8 +67,8 @@ export function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
     setError(null);
     try {
       await onSave(name.trim(), color, description.trim());
-    } catch {
-      setError('Could not save this domain. Your changes are still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not save this domain. Your changes are still here.', err));
     } finally {
       setSaving(false);
     }

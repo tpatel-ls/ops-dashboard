@@ -47,6 +47,7 @@ import {
   projectIsSlipping,
   type ProjectSort,
 } from '@/lib/project-query';
+import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -128,8 +129,8 @@ function CreateProjectForm({
         description: description.trim() || undefined,
       });
       onCreated(project);
-    } catch {
-      setError('Could not create the project. Your details are still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not create the project. Your details are still here.', err));
     } finally {
       setSaving(false);
     }

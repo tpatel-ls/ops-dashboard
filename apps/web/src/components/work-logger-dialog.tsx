@@ -47,6 +47,7 @@ import {
 import { compareOrganizations } from '@/lib/org-lanes';
 import { readLocalStorage, removeLocalStorage, writeLocalStorage } from '@/lib/browser-storage';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { saveErrorMessage } from '@/lib/save-error';
 
 const MODE_META: Array<{
   id: WorkLoggerMode;
@@ -248,8 +249,13 @@ function WorkLoggerPanel({
       chooseDestination(organization.id);
       setNewOrgName('');
       setCreatingOrg(false);
-    } catch {
-      setError('Could not create the organization. Your other entries are unchanged.');
+    } catch (err) {
+      setError(
+        saveErrorMessage(
+          'Could not create the organization. Your other entries are unchanged.',
+          err,
+        ),
+      );
     } finally {
       setSaving(false);
     }
@@ -321,8 +327,8 @@ function WorkLoggerPanel({
       const message = syncSaveMessage(syncState, syncPending + 1);
       setSavedMessage(message);
       closeTimerRef.current = window.setTimeout(onClose, 950);
-    } catch {
-      setError(`Could not save this ${mode}. Your entry is still here.`);
+    } catch (err) {
+      setError(saveErrorMessage(`Could not save this ${mode}. Your entry is still here.`, err));
     } finally {
       setSaving(false);
     }

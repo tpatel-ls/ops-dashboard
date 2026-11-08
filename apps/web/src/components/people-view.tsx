@@ -17,6 +17,7 @@ import { relativeTimeLabel } from '@/lib/relative-time';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Create person form ───────────────────────────────────────────────────────
 
@@ -42,8 +43,8 @@ export function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps)
         relationship: relationship.trim() || undefined,
       });
       onCreated(person);
-    } catch {
-      setError('Could not create this person. Your details are still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not create this person. Your details are still here.', err));
     } finally {
       setSaving(false);
     }

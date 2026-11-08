@@ -13,6 +13,7 @@ import {
   updateOrganization,
 } from '@/lib/organizations';
 import { compareOrganizations } from '@/lib/org-lanes';
+import { saveErrorMessage } from '@/lib/save-error';
 
 const PRESET_COLORS = [
   'oklch(0.6 0.13 265)',
@@ -67,8 +68,10 @@ export function OrgForm({
     setError(null);
     try {
       await onSave(trimmed, color);
-    } catch {
-      setError('Could not save this organization. Your changes are still here.');
+    } catch (err) {
+      setError(
+        saveErrorMessage('Could not save this organization. Your changes are still here.', err),
+      );
     } finally {
       setSaving(false);
     }

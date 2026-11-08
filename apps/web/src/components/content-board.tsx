@@ -25,6 +25,7 @@ import {
 import { cn } from '@ops-dashboard/ui';
 import { knownValue } from '@/lib/known-value';
 import { linkOptions } from '@/lib/link-options';
+import { saveErrorMessage } from '@/lib/save-error';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -129,8 +130,8 @@ export function ContentEditor({ item, domains, onClose }: EditorProps) {
         outline: outline.trim() || undefined,
       });
       onClose();
-    } catch {
-      setError('Could not save this item. Your edits are still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not save this item. Your edits are still here.', err));
     } finally {
       setSaving(false);
     }
@@ -450,8 +451,8 @@ function QuickAdd({ onAdd }: QuickAddProps) {
     try {
       await onAdd(text, type);
       setTitle('');
-    } catch {
-      setError('Could not add this item. Your title is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this item. Your title is still here.', err));
     } finally {
       setBusy(false);
     }

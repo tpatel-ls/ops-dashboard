@@ -7,6 +7,7 @@ import { getDb } from '@ops-dashboard/core';
 import type { TimeOfDay } from '@ops-dashboard/core';
 import { createRoutine } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
+import { saveErrorMessage } from '@/lib/save-error';
 
 interface RoutineFormProps {
   onCreated?: () => void;
@@ -52,8 +53,10 @@ export function RoutineForm({ onCreated }: RoutineFormProps) {
       setNotify(false);
       setOpen(false);
       onCreated?.();
-    } catch {
-      setError('Could not create this routine. Your details are still here.');
+    } catch (err) {
+      setError(
+        saveErrorMessage('Could not create this routine. Your details are still here.', err),
+      );
     } finally {
       setSubmitting(false);
     }

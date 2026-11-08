@@ -19,7 +19,7 @@ describe('QuoteForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save Quote' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save this quote. Your draft is still here.',
+      'Could not save this quote. Your draft is still here. Quote attribution must be valid.',
     );
     expect(onSaved).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Quote text') as HTMLTextAreaElement).value).toBe('Keep going.');
@@ -37,7 +37,7 @@ describe('AddThoughtInput', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this thought. Your text is still here.',
+      'Could not add this thought. Your text is still here. Thought text must contain at most 2000 characters.',
     );
     expect(onDone).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Quote thought') as HTMLInputElement).value).toBe(thought);

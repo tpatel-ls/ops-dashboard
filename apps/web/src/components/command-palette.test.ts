@@ -38,7 +38,7 @@ describe('CommandPalette create task', () => {
     fireEvent.click(await screen.findByText('Create task'));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this task. Your text is still here.',
+      'Could not add this task. Your text is still here. Task title must contain at most 500 characters.',
     );
     expect((input as HTMLInputElement).value).toBe(title);
     expect(useAppStore.getState().paletteOpen).toBe(true);

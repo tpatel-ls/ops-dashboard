@@ -21,7 +21,7 @@ describe('OrgForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save this organization. Your changes are still here.',
+      'Could not save this organization. Your changes are still here. Organization name must contain at most 200 characters.',
     );
     expect(onSave).toHaveBeenCalledOnce();
     expect((screen.getByLabelText('Organization name') as HTMLInputElement).value).toBe(name);

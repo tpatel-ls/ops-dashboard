@@ -109,7 +109,7 @@ describe('LogWorkSection', () => {
   });
 
   it('reports a rejected save and keeps the entry', async () => {
-    logWork.mockRejectedValue(new Error('QuotaExceededError'));
+    logWork.mockRejectedValue(new DOMException('Quota exceeded', 'QuotaExceededError'));
     render(createElement(LogWorkSection, { project }));
     fireEvent.change(screen.getByLabelText('Minutes worked'), { target: { value: '45' } });
     fireEvent.change(screen.getByLabelText('Progress note'), { target: { value: 'Draft' } });
@@ -141,7 +141,7 @@ describe('LinkedTasksSection', () => {
     fireEvent.submit(input.form!);
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this task. Your text is still here.',
+      'Could not add this task. Your text is still here. Task title must contain at most 500 characters.',
     );
     expect(input.value).toBe(title);
   });
@@ -201,7 +201,7 @@ describe('MilestonesSection', () => {
     fireEvent.keyDown(screen.getByLabelText('Milestone title'), { key: 'Enter' });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this milestone. Your draft is still here.',
+      'Could not add this milestone. Your draft is still here. Project milestones must be valid.',
     );
     expect((screen.getByLabelText('Milestone title') as HTMLInputElement).value).toBe(title);
   });
@@ -225,7 +225,7 @@ describe('ChecklistsSection', () => {
     fireEvent.keyDown(field, { key: 'Enter' });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this item. Your draft is still here.',
+      'Could not add this item. Your draft is still here. Project checklists must be valid.',
     );
     expect((screen.getByLabelText('New item for Prep') as HTMLInputElement).value).toBe(text);
   });
@@ -244,7 +244,7 @@ describe('ChecklistsSection', () => {
     fireEvent.keyDown(screen.getByLabelText('Checklist name'), { key: 'Enter' });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this checklist. Your draft is still here.',
+      'Could not add this checklist. Your draft is still here. Project checklists must be valid.',
     );
     expect((screen.getByLabelText('Checklist name') as HTMLInputElement).value).toBe(name);
   });
