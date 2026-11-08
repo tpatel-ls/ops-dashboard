@@ -61,18 +61,18 @@ function normalizeBookPatch(patch: Partial<Book>): Partial<Book> {
     }
     if (value !== undefined) normalized[key] = new Date(Date.parse(value)).toISOString();
   }
-  for (const [key, limit] of [
-    ['author', MAX_BOOK_AUTHOR_LENGTH],
-    ['coverUrl', MAX_BOOK_COVER_URL_LENGTH],
-    ['format', MAX_BOOK_FORMAT_LENGTH],
-    ['isbn', MAX_BOOK_ISBN_LENGTH],
-    ['summary', MAX_BOOK_SUMMARY_LENGTH],
+  for (const [key, limit, label] of [
+    ['author', MAX_BOOK_AUTHOR_LENGTH, 'Book author'],
+    ['coverUrl', MAX_BOOK_COVER_URL_LENGTH, 'Book cover URL'],
+    ['format', MAX_BOOK_FORMAT_LENGTH, 'Book format'],
+    ['isbn', MAX_BOOK_ISBN_LENGTH, 'Book ISBN'],
+    ['summary', MAX_BOOK_SUMMARY_LENGTH, 'Book summary'],
   ] as const) {
     if (normalized[key] !== undefined) {
       if (typeof normalized[key] !== 'string') throw new Error('Book metadata must be valid.');
       normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && Array.from(normalized[key]).length > limit) {
-        throw new Error('Book metadata must be valid.');
+        throw new Error(`${label} must contain at most ${limit} characters.`);
       }
     }
   }

@@ -59,7 +59,7 @@ describe('PersonDetail fields', () => {
     fireEvent.blur(field);
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save the relationship. It is still in the field. Person details must be valid.',
+      'Could not save the relationship. It is still in the field. Person relationship must contain at most 200 characters.',
     );
   });
 });

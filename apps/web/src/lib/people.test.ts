@@ -238,13 +238,13 @@ describe('person field validation', () => {
 
   it('bounds the relationship, avatar URL, and domain reference', () => {
     expect(() => updatePerson('person-1', { relationship: 'r'.repeat(201) })).toThrow(
-      'Person details must be valid.',
+      'Person relationship must contain at most 200 characters.',
     );
     expect(() => updatePerson('person-1', { avatarUrl: `https://x/${'a'.repeat(2048)}` })).toThrow(
-      'Person details must be valid.',
+      'Person avatar URL must contain at most 2048 characters.',
     );
     expect(() => updatePerson('person-1', { domainId: 'd'.repeat(129) })).toThrow(
-      'Person details must be valid.',
+      'Person domain link must contain at most 128 characters.',
     );
   });
 

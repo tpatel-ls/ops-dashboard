@@ -61,16 +61,16 @@ function normalizeNotePatch(patch: Partial<Note>): Partial<Note> {
   ) {
     throw new Error('Note content is required.');
   }
-  for (const [key, limit] of [
-    ['source', MAX_NOTE_SOURCE_LENGTH],
-    ['imageUrl', MAX_NOTE_IMAGE_URL_LENGTH],
-    ['bookId', MAX_NOTE_BOOK_ID_LENGTH],
+  for (const [key, limit, label] of [
+    ['source', MAX_NOTE_SOURCE_LENGTH, 'Note source'],
+    ['imageUrl', MAX_NOTE_IMAGE_URL_LENGTH, 'Note image URL'],
+    ['bookId', MAX_NOTE_BOOK_ID_LENGTH, 'Note book link'],
   ] as const) {
     if (normalized[key] !== undefined) {
       if (typeof normalized[key] !== 'string') throw new Error('Note metadata must be valid.');
       normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && Array.from(normalized[key]).length > limit) {
-        throw new Error('Note metadata must be valid.');
+        throw new Error(`${label} must contain at most ${limit} characters.`);
       }
     }
   }

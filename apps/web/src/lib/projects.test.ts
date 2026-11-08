@@ -217,7 +217,7 @@ describe('createProject', () => {
       'Project name must contain at most 500 characters',
     );
     await expect(createProject('Launch', { description: 'x'.repeat(4_001) })).rejects.toThrow(
-      'Project metadata must be valid',
+      'Project description must contain at most 4000 characters.',
     );
     expect(mocks.count).not.toHaveBeenCalled();
     expect(mocks.put).not.toHaveBeenCalled();
@@ -531,7 +531,7 @@ describe('updateProject', () => {
           },
         ],
       }),
-    ).toThrow('Project checklists must be valid');
+    ).toThrow('A checklist must contain at most 100 items.');
   });
 });
 

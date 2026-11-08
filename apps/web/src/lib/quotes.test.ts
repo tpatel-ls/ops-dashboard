@@ -92,13 +92,13 @@ describe('quote attribution bounds', () => {
 
   it('bounds the author, source, and book reference', () => {
     expect(() => createQuote({ text: 'Stay curious.', author: 'a'.repeat(501) })).toThrow(
-      'Quote attribution must be valid.',
+      'Quote author must contain at most 500 characters.',
     );
     expect(() => updateQuote('quote-1', { source: 's'.repeat(201) })).toThrow(
-      'Quote attribution must be valid.',
+      'Quote source must contain at most 200 characters.',
     );
     expect(() => updateQuote('quote-1', { bookId: 'b'.repeat(129) })).toThrow(
-      'Quote attribution must be valid.',
+      'Quote book link must contain at most 128 characters.',
     );
   });
 
