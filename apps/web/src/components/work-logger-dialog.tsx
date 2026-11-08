@@ -238,7 +238,11 @@ function WorkLoggerPanel({
 
   async function addOrganization() {
     const name = newOrgName.trim();
-    if (!name) return;
+    // The Create button is disabled while saving, but Enter in the name field
+    // is not. createOrganization checks for a duplicate name before it writes,
+    // outside a transaction, so a second Enter during the first save created
+    // the same organization twice.
+    if (!name || saving) return;
     setSaving(true);
     setError(null);
     try {
