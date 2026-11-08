@@ -42,6 +42,7 @@ import {
 import { addTask, setTaskStatus } from '@/lib/tasks';
 import { useOrgStore } from '@/lib/org-store';
 import { useToday } from '@/lib/use-today';
+import { saveErrorMessage } from '@/lib/save-error';
 
 const PRIORITY_LABEL = ['', '', 'Important', 'Critical'] as const;
 
@@ -180,8 +181,8 @@ function KanbanColumn({
       });
       setTitle('');
       added = true;
-    } catch {
-      setError('Could not add task');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add task.', err));
     } finally {
       setSaving(false);
       if (added) {

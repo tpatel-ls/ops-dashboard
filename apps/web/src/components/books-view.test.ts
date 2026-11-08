@@ -28,7 +28,7 @@ describe('BookForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add Book' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this book. Your details are still here.',
+      'Could not add this book. Your details are still here. Book metadata must be valid.',
     );
     expect(onSaved).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Book title') as HTMLInputElement).value).toBe('Dune');

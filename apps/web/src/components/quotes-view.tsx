@@ -16,6 +16,7 @@ import {
 } from '@/lib/quotes';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { saveErrorMessage } from '@/lib/save-error';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 
@@ -63,8 +64,8 @@ export function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
         tags,
       });
       onSaved();
-    } catch {
-      setError('Could not save this quote. Your draft is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not save this quote. Your draft is still here.', err));
     } finally {
       setSaving(false);
     }
@@ -168,8 +169,8 @@ export function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
       await updateQuote(quote.id, { thoughts: [...safeQuoteThoughts(quote.thoughts), newThought] });
       setText('');
       onDone();
-    } catch {
-      setError('Could not add this thought. Your text is still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this thought. Your text is still here.', err));
     } finally {
       setSaving(false);
     }

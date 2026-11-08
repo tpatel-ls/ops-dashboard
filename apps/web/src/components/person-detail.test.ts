@@ -30,7 +30,7 @@ describe('PersonDetail add forms', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add fact' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save this fact. Your draft is still here.',
+      'Could not save this fact. Your draft is still here. Fact label or value is too long.',
     );
     expect((screen.getByLabelText('Fact label') as HTMLInputElement).value).toBe(label);
   });
@@ -44,7 +44,7 @@ describe('PersonDetail add forms', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Log interaction' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not log this interaction. Your draft is still here.',
+      'Could not log this interaction. Your draft is still here. Interaction note must contain at most 4000 characters.',
     );
     expect((screen.getByLabelText('Interaction notes') as HTMLTextAreaElement).value).toBe(note);
   });
@@ -59,7 +59,7 @@ describe('PersonDetail fields', () => {
     fireEvent.blur(field);
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save the relationship. It is still in the field.',
+      'Could not save the relationship. It is still in the field. Person details must be valid.',
     );
   });
 });

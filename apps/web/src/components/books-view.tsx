@@ -14,6 +14,7 @@ import {
 } from '@/lib/books';
 import { cn } from '@ops-dashboard/ui';
 import { knownValue } from '@/lib/known-value';
+import { saveErrorMessage } from '@/lib/save-error';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 
@@ -52,8 +53,8 @@ export function BookForm({ onSaved, onCancel }: BookFormProps) {
         status,
       });
       onSaved();
-    } catch {
-      setError('Could not add this book. Your details are still here.');
+    } catch (err) {
+      setError(saveErrorMessage('Could not add this book. Your details are still here.', err));
     } finally {
       setSaving(false);
     }

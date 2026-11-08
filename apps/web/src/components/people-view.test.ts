@@ -18,7 +18,7 @@ describe('CreatePersonForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not create this person. Your details are still here.',
+      'Could not create this person. Your details are still here. Person details must be valid.',
     );
     expect(onCreated).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Person name') as HTMLInputElement).value).toBe('Ada');

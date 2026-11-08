@@ -21,7 +21,7 @@ describe('RoutineForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create Routine' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not create this routine. Your details are still here.',
+      'Could not create this routine. Your details are still here. Routine name must contain at most 200 characters.',
     );
     expect(onCreated).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe(name);
