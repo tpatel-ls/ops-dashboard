@@ -8,7 +8,8 @@ const processBrainDump = vi.fn<(raw: string, source: string) => Promise<unknown[
 
 vi.mock('dexie-react-hooks', () => ({ useLiveQuery: () => undefined }));
 vi.mock('@/lib/route-items', () => ({ processBrainDump }));
-vi.mock('@/lib/use-voice-input', () => ({
+vi.mock('@/lib/use-voice-input', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/use-voice-input')>()),
   useVoiceInput: () => ({
     available: false,
     listening: false,
