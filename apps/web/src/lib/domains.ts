@@ -42,15 +42,15 @@ function normalizeDomainPatch(patch: Partial<Domain>): Partial<Domain> {
   if (Object.hasOwn(normalized, 'order') && !Number.isFinite(normalized.order)) {
     throw new Error('Domain order must be finite.');
   }
-  for (const [key, limit] of [
-    ['icon', MAX_DOMAIN_ICON_LENGTH],
-    ['description', MAX_DOMAIN_DESCRIPTION_LENGTH],
+  for (const [key, limit, label] of [
+    ['icon', MAX_DOMAIN_ICON_LENGTH, 'Domain icon'],
+    ['description', MAX_DOMAIN_DESCRIPTION_LENGTH, 'Domain description'],
   ] as const) {
     if (normalized[key] !== undefined) {
       if (typeof normalized[key] !== 'string') throw new Error('Domain metadata must be valid.');
       normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && Array.from(normalized[key]).length > limit) {
-        throw new Error('Domain metadata must be valid.');
+        throw new Error(`${label} must contain at most ${limit} characters.`);
       }
     }
   }

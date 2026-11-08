@@ -19,7 +19,7 @@ describe('QuoteForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save Quote' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save this quote. Your draft is still here. Quote attribution must be valid.',
+      'Could not save this quote. Your draft is still here. Quote source must contain at most 200 characters.',
     );
     expect(onSaved).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Quote text') as HTMLTextAreaElement).value).toBe('Keep going.');

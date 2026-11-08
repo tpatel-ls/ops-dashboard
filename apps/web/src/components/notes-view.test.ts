@@ -18,7 +18,7 @@ describe('NoteForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save Note' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not save this note. Your draft is still here. Note metadata must be valid.',
+      'Could not save this note. Your draft is still here. Note source must contain at most 200 characters.',
     );
     expect(onSaved).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Note body') as HTMLTextAreaElement).value).toBe('Keep this');

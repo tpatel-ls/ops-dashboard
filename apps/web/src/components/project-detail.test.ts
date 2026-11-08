@@ -201,7 +201,7 @@ describe('MilestonesSection', () => {
     fireEvent.keyDown(screen.getByLabelText('Milestone title'), { key: 'Enter' });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this milestone. Your draft is still here. Project milestones must be valid.',
+      'Could not add this milestone. Your draft is still here. Milestone title must contain at most 500 characters.',
     );
     expect((screen.getByLabelText('Milestone title') as HTMLInputElement).value).toBe(title);
   });
@@ -225,7 +225,7 @@ describe('ChecklistsSection', () => {
     fireEvent.keyDown(field, { key: 'Enter' });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this item. Your draft is still here. Project checklists must be valid.',
+      'Could not add this item. Your draft is still here. Checklist item must contain at most 500 characters.',
     );
     expect((screen.getByLabelText('New item for Prep') as HTMLInputElement).value).toBe(text);
   });
@@ -244,7 +244,7 @@ describe('ChecklistsSection', () => {
     fireEvent.keyDown(screen.getByLabelText('Checklist name'), { key: 'Enter' });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add this checklist. Your draft is still here. Project checklists must be valid.',
+      'Could not add this checklist. Your draft is still here. Checklist name must contain at most 500 characters.',
     );
     expect((screen.getByLabelText('Checklist name') as HTMLInputElement).value).toBe(name);
   });

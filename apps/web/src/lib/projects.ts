@@ -170,16 +170,16 @@ function normalizeProjectOptions(opts: CreateProjectOptions): CreateProjectOptio
       throw new Error('Project metadata must be valid.');
     }
   }
-  for (const [key, limit] of [
-    ['domainId', MAX_PROJECT_REFERENCE_LENGTH],
-    ['orgId', MAX_PROJECT_REFERENCE_LENGTH],
-    ['description', MAX_PROJECT_DESCRIPTION_LENGTH],
+  for (const [key, limit, label] of [
+    ['domainId', MAX_PROJECT_REFERENCE_LENGTH, 'Project domain link'],
+    ['orgId', MAX_PROJECT_REFERENCE_LENGTH, 'Project organization link'],
+    ['description', MAX_PROJECT_DESCRIPTION_LENGTH, 'Project description'],
   ] as const) {
     if (normalized[key] !== undefined) {
       if (typeof normalized[key] !== 'string') throw new Error('Project metadata must be valid.');
       normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && !withinCharacters(normalized[key], limit)) {
-        throw new Error('Project metadata must be valid.');
+        throw new Error(`${label} must contain at most ${limit} characters.`);
       }
     }
   }
@@ -218,17 +218,17 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       throw new Error('Project metadata must be valid.');
     }
   }
-  for (const [key, limit] of [
-    ['icon', MAX_PROJECT_ICON_LENGTH],
-    ['domainId', MAX_PROJECT_REFERENCE_LENGTH],
-    ['orgId', MAX_PROJECT_REFERENCE_LENGTH],
-    ['description', MAX_PROJECT_DESCRIPTION_LENGTH],
+  for (const [key, limit, label] of [
+    ['icon', MAX_PROJECT_ICON_LENGTH, 'Project icon'],
+    ['domainId', MAX_PROJECT_REFERENCE_LENGTH, 'Project domain link'],
+    ['orgId', MAX_PROJECT_REFERENCE_LENGTH, 'Project organization link'],
+    ['description', MAX_PROJECT_DESCRIPTION_LENGTH, 'Project description'],
   ] as const) {
     if (normalized[key] !== undefined) {
       if (typeof normalized[key] !== 'string') throw new Error('Project metadata must be valid.');
       normalized[key] = normalized[key].trim() || undefined;
       if (normalized[key] && !withinCharacters(normalized[key], limit)) {
-        throw new Error('Project metadata must be valid.');
+        throw new Error(`${label} must contain at most ${limit} characters.`);
       }
     }
   }
@@ -279,11 +279,15 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       }
       const id = milestone.id.trim();
       const title = milestone.title.trim();
+      if (!withinCharacters(title, MAX_PROJECT_NESTED_TEXT_LENGTH)) {
+        throw new Error(
+          `Milestone title must contain at most ${MAX_PROJECT_NESTED_TEXT_LENGTH} characters.`,
+        );
+      }
       if (
         !id ||
         !title ||
         !withinCharacters(id, MAX_PROJECT_NESTED_ID_LENGTH) ||
-        !withinCharacters(title, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
         seen.has(id) ||
         (milestone.dueAt !== undefined && localDay(milestone.dueAt) !== milestone.dueAt)
       ) {
@@ -318,12 +322,18 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
       }
       const id = checklist.id.trim();
       const name = checklist.name.trim();
+      if (!withinCharacters(name, MAX_PROJECT_NESTED_TEXT_LENGTH)) {
+        throw new Error(
+          `Checklist name must contain at most ${MAX_PROJECT_NESTED_TEXT_LENGTH} characters.`,
+        );
+      }
+      if (checklist.items.length > MAX_PROJECT_CHECKLIST_ITEMS) {
+        throw new Error(`A checklist must contain at most ${MAX_PROJECT_CHECKLIST_ITEMS} items.`);
+      }
       if (
         !id ||
         !name ||
         !withinCharacters(id, MAX_PROJECT_NESTED_ID_LENGTH) ||
-        !withinCharacters(name, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
-        checklist.items.length > MAX_PROJECT_CHECKLIST_ITEMS ||
         seenLists.has(id)
       ) {
         throw new Error('Project checklists must be valid.');
@@ -342,11 +352,15 @@ function normalizeProjectPatch(patch: Partial<Project>): Partial<Project> {
         }
         const itemId = item.id.trim();
         const text = item.text.trim();
+        if (!withinCharacters(text, MAX_PROJECT_NESTED_TEXT_LENGTH)) {
+          throw new Error(
+            `Checklist item must contain at most ${MAX_PROJECT_NESTED_TEXT_LENGTH} characters.`,
+          );
+        }
         if (
           !itemId ||
           !text ||
           !withinCharacters(itemId, MAX_PROJECT_NESTED_ID_LENGTH) ||
-          !withinCharacters(text, MAX_PROJECT_NESTED_TEXT_LENGTH) ||
           seenItems.has(itemId)
         ) {
           throw new Error('Project checklists must be valid.');

@@ -87,17 +87,17 @@ function normalizeQuotePatch(patch: Partial<Quote>): Partial<Quote> {
   if (normalized.sourceType !== undefined && !QUOTE_SOURCE_TYPES.has(normalized.sourceType)) {
     throw new Error('Quote source type must be valid.');
   }
-  for (const [key, limit] of [
-    ['author', MAX_QUOTE_AUTHOR_LENGTH],
-    ['source', MAX_QUOTE_SOURCE_LENGTH],
-    ['bookId', MAX_QUOTE_BOOK_ID_LENGTH],
+  for (const [key, limit, label] of [
+    ['author', MAX_QUOTE_AUTHOR_LENGTH, 'Quote author'],
+    ['source', MAX_QUOTE_SOURCE_LENGTH, 'Quote source'],
+    ['bookId', MAX_QUOTE_BOOK_ID_LENGTH, 'Quote book link'],
   ] as const) {
     if (normalized[key] === undefined) continue;
     if (typeof normalized[key] !== 'string') throw new Error('Quote attribution must be valid.');
     normalized[key] = normalized[key]?.trim() || undefined;
     const value = normalized[key];
     if (value && Array.from(value).length > limit) {
-      throw new Error('Quote attribution must be valid.');
+      throw new Error(`${label} must contain at most ${limit} characters.`);
     }
   }
   if (Object.hasOwn(normalized, 'tags')) {

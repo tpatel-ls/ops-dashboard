@@ -86,10 +86,10 @@ describe('book inputs', () => {
       'Book title must contain at most 500 characters',
     );
     expect(() => updateBook('book-1', { summary: 'x'.repeat(50_001) })).toThrow(
-      'Book metadata must be valid',
+      'Book summary must contain at most 50000 characters.',
     );
     expect(() => updateBook('book-1', { coverUrl: 'x'.repeat(2_049) })).toThrow(
-      'Book metadata must be valid',
+      'Book cover URL must contain at most 2048 characters.',
     );
     expect(() => updateBook('book-1', { tags: Array(51).fill('tag') })).toThrow(
       'Book tags must be valid',
@@ -331,7 +331,7 @@ describe('note inputs', () => {
       'Note body must contain at most 50000 characters',
     );
     expect(() => updateNote('note-1', { imageUrl: 'x'.repeat(2_049) })).toThrow(
-      'Note metadata must be valid',
+      'Note image URL must contain at most 2048 characters.',
     );
     expect(() => updateNote('note-1', { tags: Array(51).fill('tag') })).toThrow(
       'Note tags must be valid',
@@ -531,7 +531,7 @@ describe('domain inputs', () => {
       'Domain color must contain at most 100 characters',
     );
     expect(() => updateDomain('domain-1', { description: 'x'.repeat(4_001) })).toThrow(
-      'Domain metadata must be valid',
+      'Domain description must contain at most 4000 characters.',
     );
   });
 });

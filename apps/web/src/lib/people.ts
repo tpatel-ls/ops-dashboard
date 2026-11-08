@@ -48,17 +48,17 @@ function normalizePersonPatch(patch: Partial<Person>): Partial<Person> {
       throw new Error('Person name must contain at most 500 characters.');
     }
   }
-  for (const [key, limit] of [
-    ['relationship', MAX_PERSON_RELATIONSHIP_LENGTH],
-    ['avatarUrl', MAX_PERSON_AVATAR_URL_LENGTH],
-    ['domainId', MAX_PERSON_DOMAIN_ID_LENGTH],
+  for (const [key, limit, label] of [
+    ['relationship', MAX_PERSON_RELATIONSHIP_LENGTH, 'Person relationship'],
+    ['avatarUrl', MAX_PERSON_AVATAR_URL_LENGTH, 'Person avatar URL'],
+    ['domainId', MAX_PERSON_DOMAIN_ID_LENGTH, 'Person domain link'],
   ] as const) {
     if (normalized[key] === undefined) continue;
     if (typeof normalized[key] !== 'string') throw new Error('Person details must be valid.');
     normalized[key] = normalized[key].trim() || undefined;
     const value = normalized[key];
     if (value && !withinCharacters(value, limit)) {
-      throw new Error('Person details must be valid.');
+      throw new Error(`${label} must contain at most ${limit} characters.`);
     }
   }
   if (Object.hasOwn(normalized, 'tags')) {
