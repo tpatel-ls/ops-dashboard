@@ -2,9 +2,9 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { addDays, format } from 'date-fns';
+import { addDays, format, parseISO } from 'date-fns';
 import { CheckCircle2, ListChecks, MoonStar, X } from 'lucide-react';
-import { getDb, isoDay } from '@ops-dashboard/core';
+import { getDb, isoDay, todayIso } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
@@ -24,7 +24,12 @@ function DailyReview({ onClose }: { onClose: () => void }) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const today = isoDay(new Date());
+  // The review covers the day it was opened on. Reading the clock again at
+  // render or click time split one review across two days: opened at 23:59 and
+  // confirmed after midnight, it listed the old day's tasks but rolled them to
+  // the day after the new one, skipping a day.
+  const [today] = useState(todayIso);
+  const reviewDate = parseISO(today);
   const summary = useLiveQuery(async () => {
     const all = await getDb().tasks.toArray();
     const completedToday = all.filter((task) => taskCompletedOn(task, today));
@@ -56,7 +61,7 @@ function DailyReview({ onClose }: { onClose: () => void }) {
     setRolling(true);
     setError(null);
     try {
-      const tomorrow = isoDay(addDays(new Date(), 1));
+      const tomorrow = isoDay(addDays(reviewDate, 1));
       await rollForwardTasks(summary.slipped, today, tomorrow, updateTask);
       onClose();
     } catch {
@@ -88,7 +93,7 @@ function DailyReview({ onClose }: { onClose: () => void }) {
                 <MoonStar className="size-3.5" /> Daily review
               </div>
               <h2 id={titleId} className="mt-1 text-xl font-semibold tracking-tight">
-                {format(new Date(), 'EEEE, MMMM d')}
+                {format(reviewDate, 'EEEE, MMMM d')}
               </h2>
             </div>
             <button

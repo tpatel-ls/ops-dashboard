@@ -143,8 +143,10 @@ one row per record call it once and pass `today` down as a prop, so a long
 list does not start one timer per row. A view whose selected day defaults to
 today keeps `null` for "follow today" (the month grid's `selected`, the food
 view's `pickedDay`) so it moves on at midnight unless the user picked a day.
-Dialogs that mount only while open, such as the daily review, read the day
-fresh each time and do not need it.
+Dialogs that mount only while open, such as the daily review, do not need it,
+but they must read the day once when they open and use that value for every
+date they show or write. Reading the clock again at click time let a review
+opened before midnight and confirmed after it roll tasks past the next day.
 
 ## Settings not yet wired
 
