@@ -56,6 +56,16 @@ export interface VoiceInput {
 }
 
 /**
+ * A one-line draft with a new take added at the end. Dictating into a field
+ * that already holds typed text must not replace it: the user often types the
+ * start of a task and speaks the rest.
+ */
+export function appendTranscript(draft: string, transcript: string): string {
+  const head = draft.trim();
+  return head ? `${head} ${transcript}` : transcript;
+}
+
+/**
  * One shared mic implementation for every capture surface. Prefers the
  * server Whisper path (record -> /api/transcribe) when configured, online,
  * and recordable; falls back to the browser Web Speech API. Recordings are

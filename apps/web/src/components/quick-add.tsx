@@ -8,7 +8,7 @@ import type { Project } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { addTask, addTaskToProject } from '@/lib/tasks';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
-import { useVoiceInput } from '@/lib/use-voice-input';
+import { appendTranscript, useVoiceInput } from '@/lib/use-voice-input';
 import { useOrgStore } from '@/lib/org-store';
 import { LAST_TASK_DESTINATION_KEY } from '@/lib/task-capture';
 import { matchesProjectName } from '@/lib/project-query';
@@ -133,7 +133,7 @@ export function QuickAdd() {
     toggle: toggleMic,
   } = useVoiceInput({
     onTranscript: (text) => {
-      setValue(text);
+      setValue((current) => appendTranscript(current, text));
       setNotice('Voice draft ready');
       window.requestAnimationFrame(() => inputRef.current?.focus());
     },

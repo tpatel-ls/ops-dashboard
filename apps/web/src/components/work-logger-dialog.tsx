@@ -23,7 +23,7 @@ import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { useOrgStore } from '@/lib/org-store';
 import { useSyncStatus } from '@/lib/sync/status';
-import { useVoiceInput } from '@/lib/use-voice-input';
+import { appendTranscript, useVoiceInput } from '@/lib/use-voice-input';
 import { addTask } from '@/lib/tasks';
 import { createProject } from '@/lib/projects';
 import { createOrganization, nextOrgColor } from '@/lib/organizations';
@@ -675,7 +675,7 @@ function TaskTitleField({
   invalid: boolean;
 }) {
   const { available, listening, transcribing, error, toggle } = useVoiceInput({
-    onTranscript: onTitleChange,
+    onTranscript: (text) => onTitleChange(appendTranscript(title, text)),
   });
 
   return (

@@ -31,7 +31,7 @@ import {
 } from '@/lib/food-logs';
 import { processBrainDump } from '@/lib/route-items';
 import { addDaysISO } from '@/lib/routines';
-import { useVoiceInput } from '@/lib/use-voice-input';
+import { appendTranscript, useVoiceInput } from '@/lib/use-voice-input';
 import { useToday } from '@/lib/use-today';
 import { ViewShell } from '@/components/view-shell';
 
@@ -177,7 +177,7 @@ function QuickLog() {
   }, [pending]);
 
   const { available, listening, transcribing, toggle } = useVoiceInput({
-    onTranscript: (text) => setValue((v) => (v.trim() ? `${v.trim()} ${text}` : text)),
+    onTranscript: (text) => setValue((v) => appendTranscript(v, text)),
   });
 
   function submit(e: React.FormEvent) {

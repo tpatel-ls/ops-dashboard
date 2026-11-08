@@ -2,7 +2,7 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useVoiceInput } from './use-voice-input';
+import { appendTranscript, useVoiceInput } from './use-voice-input';
 
 const { transcribeBlobMock } = vi.hoisted(() => ({
   transcribeBlobMock: vi.fn(),
@@ -159,5 +159,18 @@ describe('useVoiceInput', () => {
       );
     });
     expect(stopTrack).toHaveBeenCalledOnce();
+  });
+});
+
+describe('appendTranscript', () => {
+  it('adds the take after typed text with one space', () => {
+    expect(appendTranscript('Call Dana about  ', 'the invoice')).toBe(
+      'Call Dana about the invoice',
+    );
+  });
+
+  it('uses the take alone when nothing was typed', () => {
+    expect(appendTranscript('', 'Book flights')).toBe('Book flights');
+    expect(appendTranscript('   ', 'Book flights')).toBe('Book flights');
   });
 });
