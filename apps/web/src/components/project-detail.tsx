@@ -411,7 +411,7 @@ function ChecklistGroup({
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border-strong hover:border-primary text-transparent',
                     )}
-                    aria-label={it.done ? 'Uncheck' : 'Check'}
+                    aria-label={`${it.done ? 'Uncheck' : 'Check'}: ${it.text}`}
                   >
                     <Check className="size-2.5" strokeWidth={3} />
                   </button>

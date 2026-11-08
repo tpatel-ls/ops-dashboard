@@ -19,6 +19,7 @@ import {
   updatePerson,
 } from '@/lib/people';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { excerpt } from '@/lib/excerpt';
 import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Facts section ────────────────────────────────────────────────────────────
@@ -150,7 +151,7 @@ function FactRow({ fact, onRemove }: { fact: PersonFact; onRemove: () => void })
         type="button"
         onClick={onRemove}
         className="text-muted-foreground hover:text-destructive inline-flex size-6 items-center justify-center rounded opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
-        aria-label="Remove fact"
+        aria-label={`Remove fact: ${fact.label}`}
       >
         <X className="size-3.5" />
       </button>
@@ -300,7 +301,7 @@ function InteractionRow({
         type="button"
         onClick={onRemove}
         className="text-muted-foreground hover:text-destructive inline-flex size-6 shrink-0 items-center justify-center rounded opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
-        aria-label="Remove interaction"
+        aria-label={`Remove interaction: ${excerpt(interaction.note, 60)}`}
       >
         <X className="size-3.5" />
       </button>

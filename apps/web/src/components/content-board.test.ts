@@ -5,7 +5,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Content, Domain } from '@ops-dashboard/core';
 
-const { ContentEditor } = await import('./content-board');
+const { ContentCard, ContentEditor } = await import('./content-board');
 
 afterEach(cleanup);
 
@@ -33,5 +33,21 @@ describe('ContentEditor domain picker', () => {
       'Old Show (archived)',
     ]);
     expect(select.value).toBe('old');
+  });
+});
+
+describe('ContentCard', () => {
+  it('names the item its external link opens', () => {
+    const item = {
+      id: 'c-1',
+      title: 'Pilot episode',
+      type: 'video',
+      status: 'idea',
+      url: 'https://example.com/pilot',
+      checklist: [],
+    } as unknown as Content;
+    render(createElement(ContentCard, { item, isOpen: false, onToggle: () => {}, domains: [] }));
+
+    expect(screen.getByRole('link', { name: 'Open link: Pilot episode' })).toBeTruthy();
   });
 });

@@ -208,6 +208,29 @@ describe('MilestonesSection', () => {
 });
 
 describe('ChecklistsSection', () => {
+  it('names the item each check button toggles', () => {
+    const project = {
+      id: 'p-1',
+      name: 'Launch',
+      status: 'active',
+      checklists: [
+        {
+          id: 'cl-1',
+          name: 'Prep',
+          items: [
+            { id: 'a', text: 'Book venue', done: false },
+            { id: 'b', text: 'Send invites', done: true },
+          ],
+        },
+      ],
+    } as unknown as Project;
+    render(createElement(ChecklistsSection, { project }));
+    fireEvent.click(screen.getByRole('button', { name: /Prep/ }));
+
+    expect(screen.getByRole('button', { name: 'Check: Book venue' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Uncheck: Send invites' })).toBeTruthy();
+  });
+
   it('reports a rejected checklist item and keeps it in the field', async () => {
     const project = {
       id: 'p-1',

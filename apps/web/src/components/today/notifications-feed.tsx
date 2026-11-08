@@ -89,7 +89,7 @@ export function NotificationsFeed() {
                   type="button"
                   onClick={() => markNotificationRead(n.id)}
                   className="text-muted-foreground hover:bg-accent hover:text-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md transition-colors"
-                  aria-label="Mark as read"
+                  aria-label={`Mark as read: ${n.title}`}
                 >
                   <Check className="size-3.5" aria-hidden />
                 </button>

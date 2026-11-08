@@ -63,3 +63,35 @@ describe('PersonDetail fields', () => {
     );
   });
 });
+
+describe('PersonDetail rows', () => {
+  it('names the fact or interaction each remove button deletes', () => {
+    const withRows = {
+      ...person,
+      facts: [
+        { id: 'f1', label: 'Birthday', value: 'March 15' },
+        { id: 'f2', label: 'Kids', value: 'Two' },
+      ],
+      interactions: [
+        { id: 'i1', date: '2026-11-01T12:00:00.000Z', note: 'Coffee at the market' },
+        { id: 'i2', date: '2026-11-02T12:00:00.000Z', note: `Long call ${'x'.repeat(100)}` },
+      ],
+    } as unknown as Person;
+    render(
+      createElement(PersonDetail, {
+        person: withRows,
+        domains: [],
+        onClose: () => {},
+        onDeleted: () => {},
+      }),
+    );
+
+    expect(screen.getByRole('button', { name: 'Remove fact: Birthday' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Remove fact: Kids' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Remove interaction: Coffee at the market' }),
+    ).toBeTruthy();
+    const long = screen.getByRole('button', { name: /^Remove interaction: Long call x+…$/ });
+    expect(Array.from(long.getAttribute('aria-label')!).length).toBeLessThan(85);
+  });
+});
