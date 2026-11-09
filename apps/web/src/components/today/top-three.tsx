@@ -50,6 +50,7 @@ export function TopThree() {
         <ul className="flex flex-col gap-1.5">
           {tasks.map((task, index) => {
             const priorityColor = PRIORITY_COLOR[task.priority] ?? 'transparent';
+            const prioritized = priorityColor !== 'transparent';
             return (
               <li
                 key={task.id}
@@ -58,9 +59,12 @@ export function TopThree() {
                   'hover:border-border-strong hover:shadow-[0_6px_24px_-14px_rgba(0,0,0,0.5)]',
                 )}
               >
-                {/* priority bar */}
+                {/* priority bar: the only priority cue in this list, so it is
+                    named like the "Priority N" chip in the open tasks list. */}
                 <span
-                  aria-hidden
+                  {...(prioritized
+                    ? { role: 'img', 'aria-label': `Priority ${task.priority}` }
+                    : { 'aria-hidden': true })}
                   className="absolute inset-y-2 left-0 w-[3px] rounded-r-full"
                   style={{
                     background: priorityColor,
