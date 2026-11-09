@@ -35,6 +35,7 @@ import { routedTag } from '@/lib/brain-dump-result';
 import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
 import { safeTaskTags } from '@/lib/task-query';
 import { linkOptions } from '@/lib/link-options';
+import { saveErrorMessage } from '@/lib/save-error';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
 
@@ -527,11 +528,21 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   type="button"
                   onClick={async () => {
                     if (!reminderDraft) return;
-                    const iso = new Date(reminderDraft).toISOString();
-                    const reminder = await scheduleReminder(task.id, iso);
-                    await save({
-                      reminders: [...reminders, reminder],
-                    });
+                    // `scheduleReminder` rejects a done or archived task and a
+                    // time it cannot parse. Unhandled, the click did nothing.
+                    setSaveError(null);
+                    let reminder;
+                    try {
+                      reminder = await scheduleReminder(task.id, reminderDraft);
+                    } catch (err) {
+                      setSaveError(saveErrorMessage('Could not add this reminder.', err));
+                      return;
+                    }
+                    if (!(await save({ reminders: [...reminders, reminder] }))) {
+                      // Do not leave a reminder that fires but is not listed.
+                      await cancelReminder(reminder.id);
+                      return;
+                    }
                     setReminderDraft('');
                   }}
                   className="kbd"

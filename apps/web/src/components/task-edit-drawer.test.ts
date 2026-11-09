@@ -167,4 +167,24 @@ describe('TaskEditDrawer save errors', () => {
     expect((await screen.findByRole('alert')).textContent).toMatch(/^Could not save that change\./);
     expect(field.value).toBe(step);
   });
+
+  it('says why a reminder could not be added and keeps the chosen time', async () => {
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'done',
+      reminders: [],
+    } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+    const field = (await screen.findByLabelText('Reminder date and time')) as HTMLInputElement;
+
+    fireEvent.change(field, { target: { value: '2026-11-10T09:00' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add reminder' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not add this reminder. Task is not available for reminders.',
+    );
+    expect(field.value).toBe('2026-11-10T09:00');
+  });
 });
