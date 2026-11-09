@@ -10,9 +10,10 @@ const exportAll = vi.fn<() => Promise<unknown>>();
 const downloadJson = vi.fn();
 
 vi.mock('./theme-provider', () => ({ useTheme: () => ({ theme: 'system', setTheme: vi.fn() }) }));
+const requestNotifications = vi.hoisted(() => vi.fn<() => Promise<string>>());
 vi.mock('@/lib/notifications', () => ({
   notificationPermission: () => 'default',
-  requestNotifications: vi.fn(),
+  requestNotifications,
 }));
 vi.mock('@/lib/export', () => ({
   downloadJson,
@@ -37,6 +38,7 @@ afterEach(() => {
   importAll.mockReset();
   exportAll.mockReset();
   downloadJson.mockReset();
+  requestNotifications.mockReset();
 });
 
 async function chooseBackup(contents: string) {
@@ -108,5 +110,18 @@ describe('SettingsForm appearance', () => {
       ['dark', 'false'],
       ['system', 'true'],
     ]);
+  });
+});
+
+describe('SettingsForm reminders', () => {
+  it('explains how to unblock notifications instead of offering a request that cannot prompt', async () => {
+    requestNotifications.mockResolvedValue('denied');
+    render(createElement(SettingsForm));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Request permission' }));
+
+    expect(await screen.findByText(/Notifications are blocked for this site\./)).toBeTruthy();
+    expect(screen.getByText('Permission: denied')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Request permission' })).toBeNull();
   });
 });

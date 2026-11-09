@@ -243,7 +243,14 @@ export function SettingsForm() {
             />
             Permission: {perm}
           </span>
-          {perm !== 'granted' && perm !== 'unsupported' ? (
+          {perm === 'denied' ? (
+            // Browsers do not prompt again once permission is denied, so a
+            // request button here would do nothing when pressed.
+            <p className="text-muted-foreground text-xs">
+              Notifications are blocked for this site. Allow them in your browser&apos;s site
+              settings to get reminders.
+            </p>
+          ) : perm !== 'granted' && perm !== 'unsupported' ? (
             <button
               type="button"
               onClick={async () => setPerm(await requestNotifications())}
