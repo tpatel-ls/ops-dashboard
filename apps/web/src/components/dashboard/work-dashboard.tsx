@@ -292,6 +292,9 @@ function AgendaTaskRow({
             task.priority === 3 ? 'bg-destructive' : 'bg-warning',
           )}
           title={task.priority === 3 ? 'Critical priority' : 'Important priority'}
+          // A name on a plain span is ignored, so without a role the dot's
+          // priority reached screen readers only as color.
+          role="img"
           aria-label={task.priority === 3 ? 'Critical priority' : 'Important priority'}
         />
       ) : null}
