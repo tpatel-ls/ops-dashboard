@@ -110,12 +110,14 @@ export function NoteForm({ onSaved, onCancel }: NoteFormProps) {
 
 /* ─── NoteCard ─────────────────────────────────────────────────── */
 
-function NoteCard({ note }: { note: Note }) {
+export function NoteCard({ note }: { note: Note }) {
   const [confirming, setConfirming] = useState(false);
   const tags = safeNoteTags(note.tags);
   // Both arms of the old `note.title ? ... : ...` were character for character
   // identical, so the title never affected the preview.
   const body = excerpt(note.body, 240);
+  // Names the row in its controls; untitled notes fall back to the body.
+  const name = note.title?.trim() || excerpt(note.body, 60);
 
   async function handleFlag() {
     await updateNote(note.id, { flaggedForReview: !note.flaggedForReview });
@@ -147,7 +149,7 @@ function NoteCard({ note }: { note: Note }) {
           <button
             type="button"
             onClick={handleFlag}
-            aria-label={note.flaggedForReview ? 'Unflag note for review' : 'Flag note for review'}
+            aria-label={`${note.flaggedForReview ? 'Unflag note for review' : 'Flag note for review'}: ${name}`}
             title={note.flaggedForReview ? 'Unflag for review' : 'Flag for review'}
             className={cn(
               'inline-flex size-9 items-center justify-center rounded-md transition-colors',
@@ -160,7 +162,7 @@ function NoteCard({ note }: { note: Note }) {
             type="button"
             onClick={handleDelete}
             onBlur={() => setConfirming(false)}
-            aria-label={confirming ? 'Confirm deleting note' : 'Delete note'}
+            aria-label={`${confirming ? 'Confirm deleting note' : 'Delete note'}: ${name}`}
             title={confirming ? 'Click again to confirm' : 'Delete note'}
             className={cn(
               'inline-flex size-9 items-center justify-center rounded-md transition-colors',
