@@ -3,6 +3,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { todayIso } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck } from '@ops-dashboard/core';
 
 let routines: Partial<Routine>[] = [];
@@ -77,5 +78,18 @@ describe('RoutineChecklist', () => {
 
     expect(screen.getByText('0/1 done')).toBeTruthy();
     expect(screen.getByText('2026-11-06')).toBeTruthy();
+  });
+
+  it('names the routine each check button toggles', async () => {
+    routines = [
+      { id: 'r1', name: 'Stretch', timeOfDay: 'morning' },
+      { id: 'r2', name: 'Read', timeOfDay: 'morning' },
+    ];
+    checks = [{ id: 'c1', routineId: 'r1', date: todayIso(), done: true }];
+
+    render(createElement(RoutineChecklist));
+
+    expect(await screen.findByRole('button', { name: 'Uncheck: Stretch' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Check: Read' })).toBeTruthy();
   });
 });

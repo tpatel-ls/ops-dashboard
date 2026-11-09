@@ -83,7 +83,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
       <button
         type="button"
         onClick={handleToggle}
-        aria-label={doneToday ? 'Mark as not done' : 'Mark as done today'}
+        aria-label={`${doneToday ? 'Mark as not done' : 'Mark as done today'}: ${routine.name}`}
         className={cn(
           'mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
           doneToday
@@ -150,7 +150,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
           type="button"
           onClick={handleArchive}
           className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md transition-colors"
-          aria-label="Archive routine"
+          aria-label={`Archive routine: ${routine.name}`}
           title="Archive"
         >
           <Archive className="size-3.5" />
@@ -165,7 +165,7 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
               ? 'bg-destructive text-destructive-foreground'
               : 'text-muted-foreground hover:text-destructive',
           )}
-          aria-label={confirming ? 'Confirm delete' : 'Delete routine'}
+          aria-label={`${confirming ? 'Confirm delete' : 'Delete routine'}: ${routine.name}`}
           title={confirming ? 'Click again to confirm' : 'Delete'}
         >
           <Trash2 className="size-3.5" />

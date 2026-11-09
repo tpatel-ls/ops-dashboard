@@ -54,11 +54,28 @@ describe('RoutinesView', () => {
 
     render(createElement(RoutinesView));
     await act(async () => vi.advanceTimersByTimeAsync(0));
-    expect(screen.getByRole('button', { name: 'Mark as not done' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Mark as not done: Stretch' })).toBeTruthy();
 
     await act(async () => vi.advanceTimersByTimeAsync(31_000));
-    screen.getByRole('button', { name: 'Mark as done today' }).click();
+    screen.getByRole('button', { name: 'Mark as done today: Stretch' }).click();
 
     expect(toggleRoutineCheck).toHaveBeenCalledWith('r1', '2026-11-06', true);
+  });
+
+  it('names the routine each row control acts on', async () => {
+    routines = [
+      { id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+      { id: 'r2', name: 'Read', timeOfDay: 'morning', kind: 'ongoing' },
+    ];
+
+    render(createElement(RoutinesView));
+
+    for (const name of ['Stretch', 'Read']) {
+      expect(
+        await screen.findByRole('button', { name: `Mark as done today: ${name}` }),
+      ).toBeTruthy();
+      expect(screen.getByRole('button', { name: `Archive routine: ${name}` })).toBeTruthy();
+      expect(screen.getByRole('button', { name: `Delete routine: ${name}` })).toBeTruthy();
+    }
   });
 });
