@@ -3,8 +3,9 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Note } from '@ops-dashboard/core';
 
-const { NoteForm } = await import('./notes-view');
+const { NoteCard, NoteForm } = await import('./notes-view');
 
 afterEach(cleanup);
 
@@ -23,5 +24,34 @@ describe('NoteForm', () => {
     expect(onSaved).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Note body') as HTMLTextAreaElement).value).toBe('Keep this');
     expect(screen.getByRole('button', { name: 'Save Note' }).hasAttribute('disabled')).toBe(false);
+  });
+});
+
+describe('NoteCard', () => {
+  it('names the note its flag and delete buttons act on', () => {
+    render(
+      createElement('ul', null, [
+        createElement(NoteCard, {
+          key: 'n1',
+          note: { id: 'n1', title: 'Pricing', body: 'Raise tiers', tags: [] } as unknown as Note,
+        }),
+        createElement(NoteCard, {
+          key: 'n2',
+          note: {
+            id: 'n2',
+            body: 'Call the bank',
+            tags: [],
+            flaggedForReview: true,
+          } as unknown as Note,
+        }),
+      ]),
+    );
+
+    expect(screen.getByRole('button', { name: 'Flag note for review: Pricing' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Delete note: Pricing' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Unflag note for review: Call the bank' }),
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Delete note: Call the bank' })).toBeTruthy();
   });
 });
