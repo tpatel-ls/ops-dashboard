@@ -167,3 +167,28 @@ describe('SettingsForm number fields', () => {
     expect(slipping.value).toBe(String(DEFAULT_SETTINGS.slippingDays));
   });
 });
+
+describe('SettingsForm workday', () => {
+  it('keeps the other time when an edit puts the workday end before its start', async () => {
+    updateSettings.mockImplementation(async (patch: object) => ({
+      ...DEFAULT_SETTINGS,
+      ...patch,
+    }));
+    render(createElement(SettingsForm));
+    const start = (await screen.findByLabelText('Workday start')) as HTMLInputElement;
+    const end = screen.getByLabelText('Workday end') as HTMLInputElement;
+    expect([start.value, end.value]).toEqual(['08:00', '18:00']);
+
+    fireEvent.change(start, { target: { value: '19:00' } });
+
+    expect(updateSettings).not.toHaveBeenCalled();
+    expect([start.value, end.value]).toEqual(['19:00', '18:00']);
+    expect(screen.getByRole('alert').textContent).toMatch(/must end after it starts/);
+    expect(start.getAttribute('aria-invalid')).toBe('true');
+
+    fireEvent.change(end, { target: { value: '23:00' } });
+
+    expect(updateSettings.mock.calls).toEqual([[{ workdayStart: '19:00', workdayEnd: '23:00' }]]);
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
