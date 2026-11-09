@@ -146,7 +146,7 @@ export function RoutineChecklist() {
                                 ? 'border-primary bg-primary text-primary-foreground'
                                 : 'border-border-strong hover:border-primary hover:bg-primary/10 text-transparent',
                             )}
-                            aria-label={checkedToday ? 'Uncheck routine' : 'Check routine'}
+                            aria-label={`${checkedToday ? 'Uncheck' : 'Check'}: ${routine.name}`}
                           >
                             <Check className="size-3" strokeWidth={3} aria-hidden />
                           </button>
