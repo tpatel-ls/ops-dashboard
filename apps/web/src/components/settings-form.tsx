@@ -60,6 +60,30 @@ export function SettingsForm() {
     setSettings(next);
   }
 
+  // `normalizeSettings` replaces a workday that ends before it starts with
+  // the default hours, so moving 10:00-16:00 to 18:00-22:00 start first used
+  // to reset both times. Hold an out-of-order pair as a draft instead.
+  const [workdayDraft, setWorkdayDraft] = useState<Pick<
+    Settings,
+    'workdayStart' | 'workdayEnd'
+  > | null>(null);
+
+  function editWorkday(update: Partial<Pick<Settings, 'workdayStart' | 'workdayEnd'>>) {
+    if (!settings) return;
+    const next = {
+      workdayStart: settings.workdayStart,
+      workdayEnd: settings.workdayEnd,
+      ...workdayDraft,
+      ...update,
+    };
+    if (next.workdayStart && next.workdayEnd && next.workdayStart < next.workdayEnd) {
+      setWorkdayDraft(null);
+      void patch(next);
+    } else {
+      setWorkdayDraft(next);
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
     const supabase = getSupabase();
@@ -75,6 +99,9 @@ export function SettingsForm() {
   if (!settings) {
     return <div className="bg-card/40 h-40 animate-pulse rounded-xl border" aria-hidden />;
   }
+
+  const workday = workdayDraft ?? settings;
+  const workdayInvalid = workdayDraft !== null;
 
   return (
     <div className="grid w-full items-start gap-4 lg:grid-cols-2">
@@ -111,19 +138,28 @@ export function SettingsForm() {
           <Field label="Workday start">
             <input
               type="time"
-              value={settings.workdayStart}
-              onChange={(e) => patch({ workdayStart: e.target.value })}
+              value={workday.workdayStart}
+              onChange={(e) => editWorkday({ workdayStart: e.target.value })}
+              aria-invalid={workdayInvalid || undefined}
+              aria-describedby={workdayInvalid ? 'workday-error' : undefined}
               className="input"
             />
           </Field>
           <Field label="Workday end">
             <input
               type="time"
-              value={settings.workdayEnd}
-              onChange={(e) => patch({ workdayEnd: e.target.value })}
+              value={workday.workdayEnd}
+              onChange={(e) => editWorkday({ workdayEnd: e.target.value })}
+              aria-invalid={workdayInvalid || undefined}
+              aria-describedby={workdayInvalid ? 'workday-error' : undefined}
               className="input"
             />
           </Field>
+          {workdayInvalid ? (
+            <p id="workday-error" role="alert" className="text-destructive col-span-2 text-xs">
+              The workday must end after it starts. Change the other time to save.
+            </p>
+          ) : null}
           <Field label="Week starts on">
             <select
               value={settings.weekStartsOn}
