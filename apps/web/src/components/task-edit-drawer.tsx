@@ -510,7 +510,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                       });
                     }}
                     className="text-subtle-foreground hover:text-destructive"
-                    aria-label="Cancel reminder"
+                    aria-label={`Cancel reminder: ${taskReminderLabel(r.triggerAt)}`}
                   >
                     <X className="size-3" />
                   </button>

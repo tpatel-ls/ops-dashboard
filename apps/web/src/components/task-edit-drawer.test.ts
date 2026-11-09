@@ -107,6 +107,37 @@ describe('TaskEditDrawer pickers', () => {
   });
 });
 
+describe('TaskEditDrawer reminders', () => {
+  it('names the reminder each cancel button removes', async () => {
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'todo',
+      reminders: [
+        {
+          id: 'r1',
+          taskId: 'task-1',
+          delivered: false,
+          triggerAt: new Date('2026-11-10T09:00:00').toISOString(),
+        },
+        {
+          id: 'r2',
+          taskId: 'task-1',
+          delivered: false,
+          triggerAt: new Date('2026-11-11T14:30:00').toISOString(),
+        },
+      ],
+    } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    expect(
+      await screen.findByRole('button', { name: 'Cancel reminder: Tue 10 Nov 09:00' }),
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Cancel reminder: Wed 11 Nov 14:30' })).toBeTruthy();
+  });
+});
+
 describe('TaskEditDrawer links', () => {
   it('keeps showing a project the task still belongs to after it was archived', async () => {
     liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', projectId: 'old' } as Task;
