@@ -25,10 +25,11 @@ vi.mock('@/lib/export', () => ({
 vi.mock('@/lib/supabase', () => ({ isSupabaseConfigured: () => false, getSupabase: () => null }));
 vi.mock('@/components/sync-status', () => ({ SyncStatus: () => null }));
 vi.mock('@/components/organizations-manager', () => ({ OrganizationsManager: () => null }));
+const updateSettings = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/settings', () => ({
   DEFAULT_VIEWS: ['today'],
   getSettings: async () => ({ ...DEFAULT_SETTINGS, updatedAt: '2026-10-28T00:00:00.000Z' }),
-  updateSettings: vi.fn(),
+  updateSettings,
 }));
 
 const { SettingsForm } = await import('./settings-form');
@@ -39,6 +40,7 @@ afterEach(() => {
   exportAll.mockReset();
   downloadJson.mockReset();
   requestNotifications.mockReset();
+  updateSettings.mockReset();
 });
 
 async function chooseBackup(contents: string) {
@@ -123,5 +125,45 @@ describe('SettingsForm reminders', () => {
     expect(await screen.findByText(/Notifications are blocked for this site\./)).toBeTruthy();
     expect(screen.getByText('Permission: denied')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Request permission' })).toBeNull();
+  });
+});
+
+describe('SettingsForm number fields', () => {
+  it('lets a value be typed digit by digit instead of clamping each keystroke', async () => {
+    updateSettings.mockImplementation(async (patch: object) => ({
+      ...DEFAULT_SETTINGS,
+      ...patch,
+    }));
+    render(createElement(SettingsForm));
+    const focus = (await screen.findByLabelText('Focus minutes')) as HTMLInputElement;
+
+    fireEvent.change(focus, { target: { value: '' } });
+    fireEvent.change(focus, { target: { value: '4' } });
+    expect(focus.value).toBe('4');
+    fireEvent.change(focus, { target: { value: '45' } });
+    fireEvent.blur(focus);
+
+    expect(updateSettings.mock.calls).toEqual([[{ pomodoroFocusMinutes: 45 }]]);
+    expect(await screen.findByDisplayValue('45')).toBe(focus);
+  });
+
+  it('saves an out-of-range value on blur and keeps the saved value for a blank field', async () => {
+    updateSettings.mockImplementation(async (patch: object) => ({
+      ...DEFAULT_SETTINGS,
+      ...patch,
+    }));
+    render(createElement(SettingsForm));
+    const breakField = (await screen.findByLabelText('Break minutes')) as HTMLInputElement;
+    const slipping = screen.getByLabelText('Slipping after (days)') as HTMLInputElement;
+
+    fireEvent.change(breakField, { target: { value: '45' } });
+    expect(updateSettings).not.toHaveBeenCalled();
+    fireEvent.keyDown(breakField, { key: 'Enter' });
+    expect(updateSettings.mock.calls).toEqual([[{ pomodoroBreakMinutes: 45 }]]);
+
+    fireEvent.change(slipping, { target: { value: '' } });
+    fireEvent.blur(slipping);
+    expect(updateSettings).toHaveBeenCalledTimes(1);
+    expect(slipping.value).toBe(String(DEFAULT_SETTINGS.slippingDays));
   });
 });

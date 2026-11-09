@@ -22,6 +22,7 @@ import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { SyncStatus } from '@/components/sync-status';
 import { OrganizationsManager } from '@/components/organizations-manager';
 import { DEFAULT_VIEWS, getSettings, updateSettings } from '@/lib/settings';
+import { isComposingKeyEvent } from '@/lib/hotkeys';
 
 export function SettingsForm() {
   const { theme, setTheme } = useTheme();
@@ -149,12 +150,11 @@ export function SettingsForm() {
         description="When a project counts as slipping for want of recent work."
       >
         <Field label="Slipping after (days)">
-          <input
-            type="number"
+          <NumberSettingInput
             min={1}
             max={365}
             value={settings.slippingDays}
-            onChange={(e) => patch({ slippingDays: Number(e.target.value) })}
+            onCommit={(value) => patch({ slippingDays: value })}
             className="input max-w-xs"
           />
         </Field>
@@ -195,22 +195,20 @@ export function SettingsForm() {
       <Section title="Focus mode" description="Pomodoro timer defaults.">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Focus minutes">
-            <input
-              type="number"
+            <NumberSettingInput
               min={5}
               max={90}
               value={settings.pomodoroFocusMinutes}
-              onChange={(e) => patch({ pomodoroFocusMinutes: Number(e.target.value) })}
+              onCommit={(value) => patch({ pomodoroFocusMinutes: value })}
               className="input"
             />
           </Field>
           <Field label="Break minutes">
-            <input
-              type="number"
+            <NumberSettingInput
               min={1}
               max={30}
               value={settings.pomodoroBreakMinutes}
-              onChange={(e) => patch({ pomodoroBreakMinutes: Number(e.target.value) })}
+              onCommit={(value) => patch({ pomodoroBreakMinutes: value })}
               className="input"
             />
           </Field>
@@ -385,6 +383,72 @@ export function SettingsForm() {
         ) : null}
       </Section>
     </div>
+  );
+}
+
+/**
+ * A number setting that keeps the typed text until it is a value in range.
+ *
+ * `normalizeSettings` clamps every number into its range, and the fields used
+ * to save on each keystroke. Partial input was clamped before the next digit
+ * arrived: clearing "Focus minutes" and typing 45 saved 5 at the "4", and the
+ * "5" then made it 55. Save as soon as the draft is in range, and otherwise
+ * on blur or Enter, when the settings clamp is the right answer. A blank
+ * field keeps the saved value.
+ */
+function NumberSettingInput({
+  value,
+  min,
+  max,
+  onCommit,
+  className,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  onCommit: (value: number) => unknown;
+  className?: string;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  // The value last saved from this draft; `value` updates only once it lands.
+  const saved = useRef<number | null>(null);
+
+  function parsed(text: string): number | null {
+    if (!text.trim()) return null;
+    const next = Number(text);
+    return Number.isFinite(next) ? next : null;
+  }
+
+  function finish() {
+    if (draft === null) return;
+    const next = parsed(draft);
+    setDraft(null);
+    const already = saved.current ?? value;
+    saved.current = null;
+    if (next !== null && next !== already) void onCommit(next);
+  }
+
+  return (
+    <input
+      type="number"
+      min={min}
+      max={max}
+      value={draft ?? value}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        const next = parsed(e.target.value);
+        if (next !== null && Number.isInteger(next) && next >= min && next <= max) {
+          saved.current = next;
+          void onCommit(next);
+        }
+      }}
+      onBlur={finish}
+      onKeyDown={(e) => {
+        if (isComposingKeyEvent(e)) return;
+        if (e.key === 'Enter') finish();
+      }}
+      className={className}
+    />
   );
 }
 
