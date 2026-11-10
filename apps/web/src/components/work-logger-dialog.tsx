@@ -994,8 +994,12 @@ function ProgressFields({
             min={1}
             max={1440}
             inputMode="numeric"
-            value={minutes}
-            onChange={(event) => onMinutesChange(Number(event.target.value))}
+            value={Number.isNaN(minutes) ? '' : minutes}
+            // A cleared field is NaN, not Number('') === 0, so it stays empty
+            // while the user types and still fails validWorkMinutes on submit.
+            onChange={(event) =>
+              onMinutesChange(event.target.value === '' ? Number.NaN : Number(event.target.value))
+            }
             aria-label="Custom minutes"
             aria-invalid={invalid || undefined}
             aria-errormessage={invalid ? 'work-logger-error' : undefined}
