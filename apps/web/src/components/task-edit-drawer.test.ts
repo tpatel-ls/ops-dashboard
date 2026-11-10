@@ -182,6 +182,21 @@ describe('TaskEditDrawer save errors', () => {
     );
   });
 
+  it('names the estimate field when it rejects a fractional estimate', async () => {
+    const tasks = await import('@/lib/tasks');
+    const actual = await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks');
+    vi.mocked(tasks.updateTask).mockImplementationOnce(actual.updateTask);
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo' } as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    fireEvent.change(await screen.findByLabelText('Estimate (m)'), { target: { value: '1.5' } });
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not save that change. Task estimate must be a whole number of minutes, 0 or more.',
+    );
+  });
+
   it('keeps a checklist step the validator rejects in its field', async () => {
     const tasks = await import('@/lib/tasks');
     const actual = await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks');

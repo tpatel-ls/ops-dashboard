@@ -295,10 +295,14 @@ function assertTaskFields(patch: Partial<Task>, ownerTaskId: string): void {
     }
     if (value !== undefined) patch[key] = new Date(Date.parse(value)).toISOString();
   }
-  for (const key of ['estimateMinutes', 'actualMinutes'] as const) {
+  // The drawer shows this message verbatim, so name the field as the user sees it.
+  for (const [key, label] of [
+    ['estimateMinutes', 'estimate'],
+    ['actualMinutes', 'actual time'],
+  ] as const) {
     const value = patch[key];
     if (value !== undefined && (!Number.isSafeInteger(value) || value < 0)) {
-      throw new Error(`Task ${key} must be a non-negative integer.`);
+      throw new Error(`Task ${label} must be a whole number of minutes, 0 or more.`);
     }
   }
   if (patch.order !== undefined && !Number.isFinite(patch.order)) {

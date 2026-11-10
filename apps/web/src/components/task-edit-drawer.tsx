@@ -325,6 +325,8 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <input
                   type="number"
                   min={0}
+                  step={1}
+                  inputMode="numeric"
                   value={task.estimateMinutes ?? ''}
                   onChange={(e) =>
                     save({
