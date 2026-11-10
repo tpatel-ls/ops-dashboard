@@ -1,5 +1,6 @@
 import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
+import { timeBlockOnDay } from './task-dates';
 
 export function taskCompletedOn(task: Task, day: string): boolean {
   return localDay(day) === day && !task.deletedAt && localDay(task.completedAt) === day;
@@ -17,7 +18,7 @@ export function rollForwardPatch(task: Task, currentDay: string, targetDay: stri
   if (localDay(currentDay) !== currentDay || localDay(targetDay) !== targetDay) {
     throw new Error('Review dates must be valid calendar days.');
   }
-  const patch: Partial<Task> = { scheduledFor: targetDay };
+  const patch: Partial<Task> = { scheduledFor: targetDay, ...timeBlockOnDay(task, targetDay) };
   const dueDay = localDay(task.dueAt);
   if (!task.dueAt || !dueDay || dueDay > currentDay) return patch;
   if (/^\d{4}-\d{2}-\d{2}$/.test(task.dueAt)) {

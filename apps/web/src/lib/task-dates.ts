@@ -161,3 +161,29 @@ export function dailyMissionTasks(tasks: Task[]): Task[] {
     .sort(compareTasksByCommitment)
     .slice(0, DAILY_MISSION_SLOTS);
 }
+
+/**
+ * Moves a task's time block onto `day`, keeping its local clock time and
+ * length. Calendar views and the Today rail place a timed task by `startAt`,
+ * while the week board places it by `scheduledFor`, so rescheduling only the
+ * day left a timed task on its old day in one set of views and the new day in
+ * the other. Returns an empty patch when there is no readable block or `day`
+ * is not a calendar day, so the caller's validation still decides.
+ */
+export function timeBlockOnDay(
+  task: Pick<Task, 'startAt' | 'endAt'>,
+  day: string | undefined,
+): Partial<Pick<Task, 'startAt' | 'endAt'>> {
+  if (!day || localDay(day) !== day || typeof task.startAt !== 'string') return {};
+  const start = new Date(task.startAt);
+  if (!Number.isFinite(start.getTime())) return {};
+  const [year, month, date] = day.split('-').map(Number);
+  const moved = new Date(start);
+  moved.setFullYear(year!, month! - 1, date!);
+  const patch: Partial<Pick<Task, 'startAt' | 'endAt'>> = { startAt: moved.toISOString() };
+  const end = typeof task.endAt === 'string' ? Date.parse(task.endAt) : NaN;
+  if (Number.isFinite(end) && end > start.getTime()) {
+    patch.endAt = new Date(moved.getTime() + (end - start.getTime())).toISOString();
+  }
+  return patch;
+}

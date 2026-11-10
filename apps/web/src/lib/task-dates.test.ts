@@ -8,6 +8,7 @@ import {
   taskCommitmentDay,
   taskDueOrScheduledDay,
   taskIsOverdue,
+  timeBlockOnDay,
   taskScheduledOn,
   taskNeedsAttentionBy,
   taskOnScheduleGrid,
@@ -342,5 +343,39 @@ describe('dailyMissionTasks', () => {
     const expected = ['c-urgent-today', 'd-today', 'b-later'];
     expect(dailyMissionTasks(tasks).map((t) => t.id)).toEqual(expected);
     expect(dailyMissionTasks([...tasks].reverse()).map((t) => t.id)).toEqual(expected);
+  });
+});
+
+describe('timeBlockOnDay', () => {
+  const at = (day: number, hours: number, minutes = 0) =>
+    new Date(2026, 8, day, hours, minutes).toISOString();
+
+  it('moves the block to the new day at the same local time and length', () => {
+    expect(timeBlockOnDay({ startAt: at(20, 9), endAt: at(20, 10, 30) }, '2026-09-26')).toEqual({
+      startAt: at(26, 9),
+      endAt: at(26, 10, 30),
+    });
+  });
+
+  it('keeps a block that runs past midnight the same length', () => {
+    expect(timeBlockOnDay({ startAt: at(20, 23), endAt: at(21, 1) }, '2026-09-26')).toEqual({
+      startAt: at(26, 23),
+      endAt: at(27, 1),
+    });
+  });
+
+  it('moves only the start when there is no usable end', () => {
+    expect(timeBlockOnDay({ startAt: at(20, 9) }, '2026-09-26')).toEqual({ startAt: at(26, 9) });
+    expect(timeBlockOnDay({ startAt: at(20, 9), endAt: 'bad' }, '2026-09-26')).toEqual({
+      startAt: at(26, 9),
+    });
+  });
+
+  it('leaves the task alone without a block or a calendar day to move it to', () => {
+    expect(timeBlockOnDay({}, '2026-09-26')).toEqual({});
+    expect(timeBlockOnDay({ startAt: 'bad' }, '2026-09-26')).toEqual({});
+    for (const day of [undefined, '', '2026-02-30', 'tomorrow']) {
+      expect(timeBlockOnDay({ startAt: at(20, 9) }, day)).toEqual({});
+    }
   });
 });
