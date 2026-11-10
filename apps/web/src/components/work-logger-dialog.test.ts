@@ -49,3 +49,17 @@ describe('WorkLoggerDialog new organization', () => {
     expect(createOrganization).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('WorkLoggerDialog custom minutes', () => {
+  it('stays empty when cleared instead of filling in 0', () => {
+    useAppStore.getState().openWorkLogger('progress');
+    render(createElement(WorkLoggerDialog));
+    const field = screen.getByLabelText('Custom minutes') as HTMLInputElement;
+
+    fireEvent.change(field, { target: { value: '' } });
+    expect(field.value).toBe('');
+
+    fireEvent.change(field, { target: { value: '45' } });
+    expect(field.value).toBe('45');
+  });
+});
