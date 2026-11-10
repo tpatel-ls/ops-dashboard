@@ -32,6 +32,7 @@ import {
 } from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { routedTag } from '@/lib/brain-dump-result';
+import { timeBlockOnDay } from '@/lib/task-dates';
 import { taskClockTime, taskReminderLabel, taskStartTimePatch } from '@/lib/task-presentation';
 import { safeTaskTags } from '@/lib/task-query';
 import { linkOptions } from '@/lib/link-options';
@@ -176,6 +177,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
     }
   }
 
+  /** A new day carries the task's time block with it (see `timeBlockOnDay`). */
+  function saveDay(day: string | undefined): Promise<boolean> {
+    return save({ scheduledFor: day, ...timeBlockOnDay(task, day) });
+  }
+
   const currentRecurrence = task.recurrence?.freq ?? 'none';
   const tags = safeTaskTags(task.tags);
   const reminders = safeTaskReminders(task.reminders);
@@ -293,7 +299,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   key={option.label}
                   type="button"
                   aria-pressed={task.scheduledFor === option.value}
-                  onClick={() => save({ scheduledFor: option.value })}
+                  onClick={() => saveDay(option.value)}
                   className={cn(
                     'min-h-9 rounded-md border px-2.5 text-xs font-medium transition-colors',
                     task.scheduledFor === option.value
@@ -311,11 +317,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   type="date"
                   aria-label="Task scheduled date"
                   value={task.scheduledFor ?? ''}
-                  onChange={(e) =>
-                    save({
-                      scheduledFor: e.target.value || undefined,
-                    })
-                  }
+                  onChange={(e) => saveDay(e.target.value || undefined)}
                   className="input"
                 />
               </Field>

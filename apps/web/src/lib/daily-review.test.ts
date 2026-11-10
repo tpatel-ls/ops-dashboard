@@ -78,6 +78,23 @@ describe('daily review task dates', () => {
     }
   });
 
+  it('carries a time block to the new day so calendar views follow the schedule', () => {
+    const startAt = new Date(2026, 7, 3, 9).toISOString();
+    const endAt = new Date(2026, 7, 3, 10).toISOString();
+
+    expect(
+      rollForwardPatch(
+        task({ scheduledFor: '2026-08-03', startAt, endAt }),
+        '2026-08-03',
+        '2026-08-04',
+      ),
+    ).toEqual({
+      scheduledFor: '2026-08-04',
+      startAt: new Date(2026, 7, 4, 9).toISOString(),
+      endAt: new Date(2026, 7, 4, 10).toISOString(),
+    });
+  });
+
   it('keeps a future deadline when only the schedule slipped', () => {
     const futureDue = '2026-08-10T17:00:00.000Z';
 

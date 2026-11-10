@@ -20,6 +20,7 @@ import type {
 } from '@ops-dashboard/core';
 import { addDays, differenceInCalendarDays } from 'date-fns';
 import { enqueueOp } from './sync-queue';
+import { timeBlockOnDay } from './task-dates';
 import { normalizeStringList } from './string-list';
 
 const TASK_STATUSES = new Set<TaskStatus>([
@@ -493,7 +494,15 @@ export async function softDeleteTask(id: string): Promise<void> {
 }
 
 export async function rescheduleTask(id: string, scheduledFor: string | undefined): Promise<void> {
-  await updateTask(id, scheduledFor ? { scheduledFor } : { scheduledFor: undefined });
+  if (!scheduledFor) {
+    await updateTask(id, { scheduledFor: undefined });
+    return;
+  }
+  const existing = await getDb().tasks.get(id);
+  await updateTask(id, {
+    scheduledFor,
+    ...(existing ? timeBlockOnDay(existing, scheduledFor) : {}),
+  });
 }
 
 export async function setChecklist(id: string, checklist: ChecklistItem[]): Promise<void> {
