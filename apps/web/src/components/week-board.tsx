@@ -16,6 +16,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getDb, isoDay, weekDays } from '@ops-dashboard/core';
 import type { Priority, Project, Task } from '@ops-dashboard/core';
 import { rescheduleTask } from '@/lib/tasks';
+import { saveErrorMessage } from '@/lib/save-error';
 import { taskScheduledOn } from '@/lib/task-dates';
 import { useAppStore } from '@/lib/app-store';
 import { DRAG_ANNOUNCEMENTS } from '@/lib/drag-announcements';
@@ -60,11 +61,19 @@ export function WeekBoard() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
+  const [dropError, setDropError] = useState<string | null>(null);
+
   function onDragEnd(e: DragEndEvent) {
     const id = String(e.active.id);
     const target = e.over?.id ? String(e.over.id) : null;
     if (!target) return;
-    rescheduleTask(id, target);
+    setDropError(null);
+    // The validator can refuse a day (a recurring task's end date precedes
+    // it). Without a catch the card just snapped back and the rejection went
+    // unhandled, so say why instead.
+    rescheduleTask(id, target).catch((err: unknown) =>
+      setDropError(saveErrorMessage('Could not move that task.', err)),
+    );
   }
 
   const today = useToday();
@@ -112,6 +121,11 @@ export function WeekBoard() {
           </div>
         ) : null}
       </div>
+      {dropError ? (
+        <p role="alert" className="text-destructive text-xs">
+          {dropError}
+        </p>
+      ) : null}
       <DndContext
         sensors={sensors}
         onDragEnd={onDragEnd}
