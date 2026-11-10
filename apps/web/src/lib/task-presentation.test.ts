@@ -6,6 +6,7 @@ import {
   taskReminderLabel,
   taskResultSummary,
   taskSearchStatus,
+  taskStartTimePatch,
 } from './task-presentation';
 
 describe('taskPlanningTimestamp', () => {
@@ -101,5 +102,38 @@ describe('taskSearchStatus', () => {
   it('keeps an archived task with a past date from reading as overdue', () => {
     const { closed } = taskSearchStatus('archived');
     expect(taskDateLabel('2026-07-24', '2026-07-26', closed)).toBe('Jul 24');
+  });
+});
+
+describe('taskStartTimePatch', () => {
+  const at = (hours: number, minutes = 0) => new Date(2026, 8, 19, hours, minutes).toISOString();
+  const task = { startAt: at(9), endAt: at(10) };
+
+  it('keeps the end when the new start is still before it', () => {
+    expect(taskStartTimePatch(task, '2026-09-19', '09:30')).toEqual({ startAt: at(9, 30) });
+  });
+
+  it('moves the end with a start set at or past it, keeping the block length', () => {
+    expect(taskStartTimePatch(task, '2026-09-19', '14:00')).toEqual({
+      startAt: at(14),
+      endAt: at(15),
+    });
+    expect(taskStartTimePatch(task, '2026-09-19', '10:00')).toEqual({
+      startAt: at(10),
+      endAt: at(11),
+    });
+  });
+
+  it('leaves an end with no readable previous start for the validator to judge', () => {
+    expect(taskStartTimePatch({ endAt: at(10) }, '2026-09-19', '14:00')).toEqual({
+      startAt: at(14),
+    });
+    expect(taskStartTimePatch({ startAt: 'bad', endAt: at(10) }, '2026-09-19', '14:00')).toEqual({
+      startAt: at(14),
+    });
+  });
+
+  it('clears the start for an empty time value', () => {
+    expect(taskStartTimePatch(task, '2026-09-19', '')).toEqual({ startAt: undefined });
   });
 });
