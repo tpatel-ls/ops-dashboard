@@ -10,6 +10,7 @@ import { useAppStore } from '@/lib/app-store';
 import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { rollForwardTasks, taskCompletedOn, taskNeedsRollForward } from '@/lib/daily-review';
+import { saveErrorMessage } from '@/lib/save-error';
 import { updateTask } from '@/lib/tasks';
 
 export function DailyReviewDialog() {
@@ -62,8 +63,13 @@ function DailyReview({ onClose }: { onClose: () => void }) {
     setError(null);
     try {
       const tomorrow = isoDay(addDays(reviewDate, 1));
-      await rollForwardTasks(summary.slipped, today, tomorrow, updateTask);
-      onClose();
+      const failures = await rollForwardTasks(summary.slipped, today, tomorrow, updateTask);
+      if (failures.length === 0) {
+        onClose();
+        return;
+      }
+      const titles = failures.map(({ task }) => `"${task.title}"`).join(', ');
+      setError(saveErrorMessage(`Could not roll ${titles} forward.`, failures[0]!.error));
     } catch {
       setError('Could not roll every task forward. Review your tasks and try again.');
     } finally {

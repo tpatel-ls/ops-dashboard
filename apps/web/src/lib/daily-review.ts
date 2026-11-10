@@ -33,13 +33,31 @@ export function rollForwardPatch(task: Task, currentDay: string, targetDay: stri
   return patch;
 }
 
+export interface RollForwardFailure {
+  task: Task;
+  error: unknown;
+}
+
+/**
+ * Rolls each task forward and returns the ones that could not be moved.
+ *
+ * One refusal must not stop the rest. A recurring task whose recurrence ends
+ * today cannot move to tomorrow, and when the loop stopped there, every task
+ * after it stayed behind and every retry failed on the same task again.
+ */
 export async function rollForwardTasks(
   tasks: Task[],
   currentDay: string,
   targetDay: string,
   update: (id: string, patch: Partial<Task>) => Promise<unknown>,
-): Promise<void> {
+): Promise<RollForwardFailure[]> {
+  const failures: RollForwardFailure[] = [];
   for (const task of tasks) {
-    await update(task.id, rollForwardPatch(task, currentDay, targetDay));
+    try {
+      await update(task.id, rollForwardPatch(task, currentDay, targetDay));
+    } catch (error) {
+      failures.push({ task, error });
+    }
   }
+  return failures;
 }
