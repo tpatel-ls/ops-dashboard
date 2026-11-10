@@ -32,7 +32,7 @@ import {
 } from '@/lib/tasks';
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { routedTag } from '@/lib/brain-dump-result';
-import { taskClockTime, taskReminderLabel } from '@/lib/task-presentation';
+import { taskClockTime, taskReminderLabel, taskStartTimePatch } from '@/lib/task-presentation';
 import { safeTaskTags } from '@/lib/task-query';
 import { linkOptions } from '@/lib/link-options';
 import { saveErrorMessage } from '@/lib/save-error';
@@ -336,13 +336,9 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <input
                   type="time"
                   value={taskClockTime(task.startAt)}
-                  onChange={(e) => {
-                    const day = task.scheduledFor ?? todayIso();
-                    const iso = e.target.value
-                      ? new Date(`${day}T${e.target.value}:00`).toISOString()
-                      : undefined;
-                    save({ startAt: iso });
-                  }}
+                  onChange={(e) =>
+                    save(taskStartTimePatch(task, task.scheduledFor ?? todayIso(), e.target.value))
+                  }
                   className="input"
                 />
               </Field>

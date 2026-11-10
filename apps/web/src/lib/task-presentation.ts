@@ -59,6 +59,28 @@ export function taskClockTime(value: string | undefined): string {
   return instant ? format(instant, 'HH:mm') : '';
 }
 
+/**
+ * Patch for a new start clock time from the drawer. Moving the start to or past
+ * the current end would fail the time-range check, so the end moves with it and
+ * keeps the block's previous length. Without this, rescheduling a 09:00-10:00
+ * block to 14:00 meant editing the end first.
+ */
+export function taskStartTimePatch(
+  task: Pick<Task, 'startAt' | 'endAt'>,
+  day: string,
+  clock: string,
+): Pick<Task, 'startAt'> | Pick<Task, 'startAt' | 'endAt'> {
+  if (!clock) return { startAt: undefined };
+  const start = new Date(`${day}T${clock}:00`);
+  const startAt = start.toISOString();
+  const end = calendarInstant(task.endAt);
+  const previousStart = calendarInstant(task.startAt);
+  if (!end || end.getTime() > start.getTime() || !previousStart) return { startAt };
+  const length = end.getTime() - previousStart.getTime();
+  if (length <= 0) return { startAt };
+  return { startAt, endAt: new Date(start.getTime() + length).toISOString() };
+}
+
 /** Reminder trigger label, or a stated fallback when the instant is unreadable. */
 export function taskReminderLabel(value: string | undefined): string {
   const instant = calendarInstant(value);
