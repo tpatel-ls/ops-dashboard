@@ -142,10 +142,27 @@ describe('rollForwardTasks', () => {
   });
 
   it('reports persistence failures to the caller', async () => {
-    const update = vi.fn().mockRejectedValue(new Error('storage unavailable'));
+    const error = new Error('storage unavailable');
+    const update = vi.fn().mockRejectedValue(error);
+    const failed = task({});
 
-    await expect(rollForwardTasks([task({})], '2026-08-03', '2026-08-04', update)).rejects.toThrow(
-      'storage unavailable',
-    );
+    await expect(rollForwardTasks([failed], '2026-08-03', '2026-08-04', update)).resolves.toEqual([
+      { task: failed, error },
+    ]);
+  });
+
+  it('keeps rolling the remaining tasks after one is refused', async () => {
+    const error = new Error('Task recurrence end date cannot precede its first occurrence.');
+    const update = vi.fn().mockRejectedValueOnce(error).mockResolvedValue(undefined);
+    const tasks = [
+      task({ id: 'task-1', scheduledFor: '2026-08-03' }),
+      task({ id: 'task-2', scheduledFor: '2026-08-03' }),
+      task({ id: 'task-3', scheduledFor: '2026-08-03' }),
+    ];
+
+    const failures = await rollForwardTasks(tasks, '2026-08-03', '2026-08-04', update);
+
+    expect(update).toHaveBeenCalledTimes(3);
+    expect(failures).toEqual([{ task: tasks[0], error }]);
   });
 });
