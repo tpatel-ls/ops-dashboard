@@ -264,6 +264,13 @@ export function TasksView() {
     )
       ? projectFilter
       : '';
+  // Resolve the domain filter the same way. A domain deleted on another device
+  // left its id selected: the picker fell back to "All domains" and no chip
+  // showed, yet the list stayed filtered to the deleted domain.
+  const visibleDomainFilter =
+    domainFilter && data?.activeDomains.some((domain) => domain.id === domainFilter)
+      ? domainFilter
+      : '';
 
   const filteredTasks = useMemo(() => {
     if (!data) return null;
@@ -278,10 +285,12 @@ export function TasksView() {
     if (visibleProjectFilter) {
       tasks = tasks.filter((task) => task.projectId === visibleProjectFilter);
     }
-    if (domainFilter) {
+    if (visibleDomainFilter) {
       tasks = tasks.filter((task) => {
-        if (task.domainId === domainFilter) return true;
-        return Boolean(task.projectId && projectMap.get(task.projectId)?.domainId === domainFilter);
+        if (task.domainId === visibleDomainFilter) return true;
+        return Boolean(
+          task.projectId && projectMap.get(task.projectId)?.domainId === visibleDomainFilter,
+        );
       });
     }
     if (searchQuery.trim()) {
@@ -305,17 +314,19 @@ export function TasksView() {
           organization: laneId ? organizationMap.get(laneId) : undefined,
         };
       });
-  }, [ctx, data, domainFilter, searchQuery, sort, statusFilter, visibleProjectFilter]);
+  }, [ctx, data, searchQuery, sort, statusFilter, visibleDomainFilter, visibleProjectFilter]);
 
   const activeFilterCount =
     Number(Boolean(visibleProjectFilter)) +
-    Number(Boolean(domainFilter)) +
+    Number(Boolean(visibleDomainFilter)) +
     Number(Boolean(searchQuery.trim()));
   const hasActiveFilters = activeFilterCount > 0;
   const activeProjectName = data?.activeProjects.find(
     (project) => project.id === visibleProjectFilter,
   )?.name;
-  const activeDomainName = data?.activeDomains.find((domain) => domain.id === domainFilter)?.name;
+  const activeDomainName = data?.activeDomains.find(
+    (domain) => domain.id === visibleDomainFilter,
+  )?.name;
   const count = filteredTasks?.length ?? 0;
   const overdueCount =
     filteredTasks?.filter(({ task }) => {
@@ -501,7 +512,7 @@ export function TasksView() {
             <label className="text-muted-foreground flex flex-col gap-1.5 text-xs font-medium">
               Domain
               <select
-                value={domainFilter}
+                value={visibleDomainFilter}
                 onChange={(event) => setDomainFilter(event.target.value)}
                 className="input min-h-11"
               >
