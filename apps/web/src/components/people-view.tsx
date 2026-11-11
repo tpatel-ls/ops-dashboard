@@ -17,6 +17,7 @@ import { relativeTimeLabel } from '@/lib/relative-time';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { availableRecord } from '@/lib/records';
 import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Create person form ───────────────────────────────────────────────────────
@@ -209,7 +210,7 @@ export function PeopleView() {
   // Keep selected person live
   const liveSelectedPerson = useLiveQuery(async () => {
     if (!selectedPerson) return null;
-    return (await getDb().people.get(selectedPerson.id)) ?? null;
+    return availableRecord(await getDb().people.get(selectedPerson.id));
   }, [selectedPerson?.id]);
 
   const displayPerson = liveSelectedPerson !== undefined ? liveSelectedPerson : selectedPerson;

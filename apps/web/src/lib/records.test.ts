@@ -17,7 +17,7 @@ vi.mock('@ops-dashboard/core', async () => {
 
 vi.mock('./sync-queue', () => ({ enqueueOp: mocks.enqueueOp }));
 
-import { patchRecord, softDeleteRecord } from './records';
+import { availableRecord, patchRecord, softDeleteRecord } from './records';
 
 describe('patchRecord', () => {
   beforeEach(() => {
@@ -121,5 +121,16 @@ describe('softDeleteRecord', () => {
     expect(mocks.put).toHaveBeenCalledWith(
       expect.objectContaining({ version: 1, deletedAt: expect.any(String) }),
     );
+  });
+});
+
+describe('availableRecord', () => {
+  it('keeps a live record and drops a missing or tombstoned one', () => {
+    const live = { id: 'a', title: 'Live' } as unknown as Task;
+    const tomb = { ...live, deletedAt: '2026-11-11T10:00:00.000Z' } as Task;
+
+    expect(availableRecord(live)).toBe(live);
+    expect(availableRecord(tomb)).toBeNull();
+    expect(availableRecord<Task>(undefined)).toBeNull();
   });
 });
