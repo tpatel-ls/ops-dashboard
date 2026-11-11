@@ -86,3 +86,19 @@ describe('HabitsPage share score', () => {
     expect(screen.getByRole('status').textContent).toBe('');
   });
 });
+
+describe('HabitsPage weekly active days', () => {
+  it('labels the rolling count apart from the calendar-week cards', async () => {
+    shareOrCopy.mockResolvedValue('shared');
+    render(createElement(HabitsPage));
+
+    expect(screen.getByText('of the last 7 days')).toBeTruthy();
+    expect(screen.queryByText('days this week')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share score' }));
+    await act(async () => {});
+    expect(shareOrCopy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: expect.stringContaining('Active on 0 of the last 7 days') }),
+    );
+  });
+});
