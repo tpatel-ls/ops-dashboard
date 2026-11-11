@@ -134,6 +134,9 @@ export default function HabitsPage() {
   const activity = data ?? [];
   const hasActivity = activity.some((d) => d.count > 0);
   const activeDays = activity.filter((d) => d.count > 0).length;
+  // A rolling window ending today, not the calendar week: the "Tasks done" and
+  // "Journal entries" cards count from the user's week start, so this one is
+  // labelled "last 7 days" rather than "this week" to keep the two apart.
   const weeklyActiveDays = activity.slice(-7).filter((d) => d.count > 0).length;
   const bestStreak = stats?.bestStreak ?? 0;
   const completedCount = stats?.completedCount ?? 0;
@@ -157,7 +160,7 @@ export default function HabitsPage() {
     setShareOutcome(null);
     const outcome = await shareOrCopy({
       title: 'Identity Calendar',
-      text: `Identity score: ${identityScore}/100 (${band}). ${weeklyActiveDays}/7 active days this week, ${bestStreak}-day best streak.`,
+      text: `Identity score: ${identityScore}/100 (${band}). Active on ${weeklyActiveDays} of the last 7 days, ${bestStreak}-day best streak.`,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
     });
     setShareOutcome(outcome);
@@ -203,7 +206,7 @@ export default function HabitsPage() {
                     {weeklyActiveDays}/7
                   </div>
                   <div className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-[0.14em] uppercase">
-                    days this week
+                    of the last 7 days
                   </div>
                 </div>
                 <div className="bg-card/70 rounded-[14px] border p-3 backdrop-blur">
