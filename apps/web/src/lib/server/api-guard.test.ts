@@ -32,19 +32,27 @@ describe('API route guards', () => {
     expect(routeFiles).toContain('health/route.ts');
   });
 
-  it.each(routeFiles)('%s refuses an unauthorized request with 401', async (file) => {
-    const route = (await import(join(API_ROOT, file))) as Record<string, unknown>;
-    const handlers = HTTP_METHODS.filter((method) => typeof route[method] === 'function');
-    expect(handlers.length).toBeGreaterThan(0);
+  // Each case is the first import of its route module, and the brain dump and
+  // capture routes pull in the AI and Supabase clients. A cold import of those
+  // took 5 to 13 seconds here, past vitest's 5 second default, so the case timed
+  // out even when run alone. The budget covers the import, not the request.
+  it.each(routeFiles)(
+    '%s refuses an unauthorized request with 401',
+    { timeout: 30_000 },
+    async (file) => {
+      const route = (await import(join(API_ROOT, file))) as Record<string, unknown>;
+      const handlers = HTTP_METHODS.filter((method) => typeof route[method] === 'function');
+      expect(handlers.length).toBeGreaterThan(0);
 
-    for (const method of handlers) {
-      const request = new Request(`https://dashboard.example/api/${file}`, {
-        method,
-        ...(method === 'GET' ? {} : { body: '{}' }),
-      });
-      const handler = route[method] as (req: Request) => Promise<Response>;
-      const response = await handler(request);
-      expect(response.status, `${method} ${file}`).toBe(401);
-    }
-  });
+      for (const method of handlers) {
+        const request = new Request(`https://dashboard.example/api/${file}`, {
+          method,
+          ...(method === 'GET' ? {} : { body: '{}' }),
+        });
+        const handler = route[method] as (req: Request) => Promise<Response>;
+        const response = await handler(request);
+        expect(response.status, `${method} ${file}`).toBe(401);
+      }
+    },
+  );
 });
