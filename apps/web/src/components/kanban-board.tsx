@@ -173,21 +173,20 @@ function KanbanColumn({
     if (!input || saving) return;
     setSaving(true);
     setError(null);
-    let added = false;
     try {
       await addTask(input, {
         status: statusForSimpleKanbanColumn(column.id),
         ...addOverrides,
       });
       setTitle('');
-      added = true;
     } catch (err) {
       setError(saveErrorMessage('Could not add task.', err));
     } finally {
       setSaving(false);
-      if (added) {
-        window.requestAnimationFrame(() => inputRef.current?.focus());
-      }
+      // The field is disabled while the task saves, which drops its focus. Hand
+      // it back on failure too: the draft is kept there for another try, and
+      // leaving focus on the page body meant clicking back in to fix it.
+      window.requestAnimationFrame(() => inputRef.current?.focus());
     }
   }
 
