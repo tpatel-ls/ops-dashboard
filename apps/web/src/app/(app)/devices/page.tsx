@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { DevicesHub } from '@/components/devices-hub';
 
+export const metadata = { title: 'Devices · Taskify' };
+
 export default function DevicesPage() {
   return (
     <ViewShell

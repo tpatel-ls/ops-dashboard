@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { SettingsForm } from '@/components/settings-form';
 
+export const metadata = { title: 'Settings · Taskify' };
+
 export default function SettingsPage() {
   return (
     <ViewShell

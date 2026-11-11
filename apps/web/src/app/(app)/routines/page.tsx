@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { RoutinesView } from '@/components/routines-view';
 
+export const metadata = { title: 'Routines · Taskify' };
+
 export default function RoutinesPage() {
   return (
     <ViewShell

@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { KanbanBoard } from '@/components/kanban-board';
 
+export const metadata = { title: 'Board · Taskify' };
+
 export default function KanbanPage() {
   return (
     <ViewShell

@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { ContentBoard } from '@/components/content-board';
 
+export const metadata = { title: 'Content · Taskify' };
+
 export default function ContentPage() {
   return (
     <ViewShell
