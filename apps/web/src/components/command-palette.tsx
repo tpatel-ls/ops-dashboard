@@ -39,6 +39,7 @@ import { destinationOrgId, resolveWorkDestination } from '@/lib/work-logger';
 import { safeTaskTags } from '@/lib/task-query';
 import { useActiveOrgs } from './org-switcher';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { matchesPaletteEntry } from '@/lib/palette-match';
 import { saveErrorMessage } from '@/lib/save-error';
 
 const NAV = [
@@ -63,6 +64,10 @@ const NAV = [
   { id: 'nav-notepad', label: 'Notepad', href: '/notepad', icon: NotebookPen, hint: 'g n' },
   { id: 'nav-settings', label: 'Settings', href: '/settings', icon: SettingsIcon, hint: 'g s' },
 ];
+
+const INSTALL_TERMS = ['Install Taskify on this device', 'download', 'app', 'device'];
+const REVIEW_TERMS = ['Review today', 'daily', 'review', 'roll forward'];
+const CONTEXT_TERMS = ['switch', 'context'];
 
 export function CommandPalette() {
   const open = useAppStore((s) => s.paletteOpen);
@@ -147,6 +152,13 @@ export function CommandPalette() {
       ignoreLocation: true,
     });
   }, [tasks]);
+
+  const showInstall = canInstall && matchesPaletteEntry(query, INSTALL_TERMS);
+  const showReview = matchesPaletteEntry(query, REVIEW_TERMS);
+  const visibleLanes = lanes.filter((lane) =>
+    matchesPaletteEntry(query, [`Switch to ${lane.label}`, ...CONTEXT_TERMS]),
+  );
+  const visibleNav = NAV.filter((n) => matchesPaletteEntry(query, [n.label]));
 
   const results =
     query && fuse
@@ -319,97 +331,101 @@ export function CommandPalette() {
               </Command.Group>
             ) : null}
 
-            <Command.Group
-              heading="Actions"
-              className="text-subtle-foreground mt-2 text-[10px] uppercase"
-            >
-              {canInstall ? (
-                <Command.Item
-                  value="install-taskify"
-                  keywords={['download', 'app', 'device']}
-                  onSelect={() => {
-                    void promptInstall();
-                    dismiss();
-                  }}
-                  className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
-                >
-                  <Download className="size-4" aria-hidden />
-                  <span>Install Taskify on this device</span>
-                </Command.Item>
-              ) : null}
-              <Command.Item
-                value="review-today"
-                keywords={['daily', 'review', 'roll forward']}
-                onSelect={() => {
-                  dismiss();
-                  openReview();
-                }}
-                className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+            {showInstall || showReview ? (
+              <Command.Group
+                heading="Actions"
+                className="text-subtle-foreground mt-2 text-[10px] uppercase"
               >
-                <MoonStar className="size-4" aria-hidden />
-                <span>Review today</span>
-              </Command.Item>
-            </Command.Group>
-
-            <Command.Group
-              heading="Context"
-              className="text-subtle-foreground mt-2 text-[10px] uppercase"
-            >
-              {lanes.map((lane) => (
-                <Command.Item
-                  key={`ctx-${lane.ctx}`}
-                  value={`ctx-${lane.ctx}`}
-                  keywords={['switch', 'context', lane.label]}
-                  onSelect={() => {
-                    setCtx(lane.ctx);
-                    dismiss();
-                  }}
-                  className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
-                >
-                  <span
-                    className="size-2.5 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
-                    style={{ background: lane.color }}
-                    aria-hidden
-                  />
-                  <span>Switch to {lane.label}</span>
-                  {ctx === lane.ctx ? (
-                    <span className="text-primary ml-auto inline-flex items-center gap-1 text-[10px] font-medium">
-                      Current
-                      <Check className="size-3.5" aria-hidden />
-                    </span>
-                  ) : null}
-                </Command.Item>
-              ))}
-            </Command.Group>
-
-            <Command.Group
-              heading="Jump"
-              className="text-subtle-foreground mt-2 text-[10px] uppercase"
-            >
-              {NAV.map((n) => {
-                const Icon = n.icon;
-                return (
+                {showInstall ? (
                   <Command.Item
-                    key={n.id}
-                    value={n.id}
-                    keywords={[n.label]}
+                    value="install-taskify"
                     onSelect={() => {
-                      router.push(n.href);
+                      void promptInstall();
+                      dismiss();
+                    }}
+                    className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+                  >
+                    <Download className="size-4" aria-hidden />
+                    <span>Install Taskify on this device</span>
+                  </Command.Item>
+                ) : null}
+                {showReview ? (
+                  <Command.Item
+                    value="review-today"
+                    onSelect={() => {
+                      dismiss();
+                      openReview();
+                    }}
+                    className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+                  >
+                    <MoonStar className="size-4" aria-hidden />
+                    <span>Review today</span>
+                  </Command.Item>
+                ) : null}
+              </Command.Group>
+            ) : null}
+
+            {visibleLanes.length > 0 ? (
+              <Command.Group
+                heading="Context"
+                className="text-subtle-foreground mt-2 text-[10px] uppercase"
+              >
+                {visibleLanes.map((lane) => (
+                  <Command.Item
+                    key={`ctx-${lane.ctx}`}
+                    value={`ctx-${lane.ctx}`}
+                    onSelect={() => {
+                      setCtx(lane.ctx);
                       dismiss();
                     }}
                     className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
                   >
-                    <Icon className="size-4" aria-hidden />
-                    <span>{n.label}</span>
-                    {n.hint ? (
-                      <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
-                        {n.hint}
+                    <span
+                      className="size-2.5 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
+                      style={{ background: lane.color }}
+                      aria-hidden
+                    />
+                    <span>Switch to {lane.label}</span>
+                    {ctx === lane.ctx ? (
+                      <span className="text-primary ml-auto inline-flex items-center gap-1 text-[10px] font-medium">
+                        Current
+                        <Check className="size-3.5" aria-hidden />
                       </span>
                     ) : null}
                   </Command.Item>
-                );
-              })}
-            </Command.Group>
+                ))}
+              </Command.Group>
+            ) : null}
+
+            {visibleNav.length > 0 ? (
+              <Command.Group
+                heading="Jump"
+                className="text-subtle-foreground mt-2 text-[10px] uppercase"
+              >
+                {visibleNav.map((n) => {
+                  const Icon = n.icon;
+                  return (
+                    <Command.Item
+                      key={n.id}
+                      value={n.id}
+                      onSelect={() => {
+                        router.push(n.href);
+                        dismiss();
+                      }}
+                      className="group text-muted-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm"
+                    >
+                      <Icon className="size-4" aria-hidden />
+                      <span>{n.label}</span>
+                      {n.hint ? (
+                        <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
+                          {n.hint}
+                        </span>
+                      ) : null}
+                    </Command.Item>
+                  );
+                })}
+              </Command.Group>
+            ) : null}
           </Command.List>
         </Command>
       </div>
