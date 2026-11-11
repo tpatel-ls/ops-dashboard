@@ -23,6 +23,16 @@ export function newRecord<T extends SyncMeta>(fields: Omit<T, keyof SyncMeta>): 
   } as T;
 }
 
+/**
+ * A record that can still be shown and edited, or null once it is missing or
+ * tombstoned. Detail panels that keep a record live by id need this: a record
+ * deleted on another device arrives as a tombstone, and `patchRecord` ignores
+ * writes to it, so a panel left open on one silently dropped every edit.
+ */
+export function availableRecord<T extends SyncMeta>(record: T | undefined): T | null {
+  return record && !record.deletedAt ? record : null;
+}
+
 export async function putRecord<T extends SyncMeta>(table: SyncTable, rec: T): Promise<T> {
   await getDb().table<T>(table).put(rec);
   await enqueueOp({ table, recordId: rec.id, op: 'put', payload: rec });

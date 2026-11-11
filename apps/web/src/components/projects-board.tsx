@@ -47,6 +47,7 @@ import {
   projectIsSlipping,
   type ProjectSort,
 } from '@/lib/project-query';
+import { availableRecord } from '@/lib/records';
 import { saveErrorMessage } from '@/lib/save-error';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -586,7 +587,7 @@ export function ProjectsBoard() {
   // When a project is updated (e.g. via ProjectDetail), refresh the selected project
   const liveSelectedProject = useLiveQuery(async () => {
     if (!selectedProject) return null;
-    return getDb().projects.get(selectedProject.id) ?? null;
+    return availableRecord(await getDb().projects.get(selectedProject.id));
   }, [selectedProject?.id]);
 
   const displayProject = liveSelectedProject !== undefined ? liveSelectedProject : selectedProject;
