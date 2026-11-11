@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { CalendarWeek } from '@/components/calendar-week';
 
+export const metadata = { title: 'Calendar · Taskify' };
+
 export default function CalendarPage() {
   return (
     <ViewShell

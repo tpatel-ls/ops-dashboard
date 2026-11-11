@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { Notepad } from '@/components/notepad';
 
+export const metadata = { title: 'Notepad · Taskify' };
+
 export default function NotepadPage() {
   return (
     <Suspense

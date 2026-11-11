@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { ProjectsBoard } from '@/components/projects-board';
 
+export const metadata = { title: 'Projects · Taskify' };
+
 export default function ProjectsPage() {
   return (
     <ViewShell

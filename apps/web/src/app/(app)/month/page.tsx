@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { MonthGrid } from '@/components/month-grid';
 
+export const metadata = { title: 'Month · Taskify' };
+
 export default function MonthPage() {
   return (
     <ViewShell

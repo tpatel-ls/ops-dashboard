@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { PeopleView } from '@/components/people-view';
 
+export const metadata = { title: 'People · Taskify' };
+
 export default function PeoplePage() {
   return (
     <ViewShell

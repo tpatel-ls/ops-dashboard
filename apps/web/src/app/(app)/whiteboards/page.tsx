@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { WhiteboardList } from '@/components/whiteboard-list';
 
+export const metadata = { title: 'Whiteboards · Taskify' };
+
 export default function WhiteboardsPage() {
   return (
     <ViewShell

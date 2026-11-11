@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { TagsIndex } from '@/components/tags-index';
 
+export const metadata = { title: 'Tags · Taskify' };
+
 export default function TagsPage() {
   return (
     <ViewShell

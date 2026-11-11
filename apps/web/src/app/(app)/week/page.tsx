@@ -1,6 +1,8 @@
 import { ViewShell } from '@/components/view-shell';
 import { WeekBoard } from '@/components/week-board';
 
+export const metadata = { title: 'Week · Taskify' };
+
 export default function WeekPage() {
   return (
     <ViewShell
