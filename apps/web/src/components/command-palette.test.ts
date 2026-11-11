@@ -44,3 +44,31 @@ describe('CommandPalette create task', () => {
     expect(useAppStore.getState().paletteOpen).toBe(true);
   });
 });
+
+describe('CommandPalette static entries', () => {
+  it('narrows the jump, context, and action entries to the query', () => {
+    act(() => useAppStore.getState().openPalette());
+    render(createElement(CommandPalette));
+    expect(screen.getByText('Inbox')).toBeTruthy();
+    expect(screen.getByText('Switch to Personal')).toBeTruthy();
+
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'settings' } });
+
+    expect(screen.getByText('Settings')).toBeTruthy();
+    expect(screen.queryByText('Inbox')).toBeNull();
+    expect(screen.queryByText('Switch to Personal')).toBeNull();
+    expect(screen.queryByText('Review today')).toBeNull();
+    // Creating a task from the text is still offered first.
+    expect(screen.getByText('Create task')).toBeTruthy();
+  });
+
+  it('finds an entry by its keywords', () => {
+    act(() => useAppStore.getState().openPalette());
+    render(createElement(CommandPalette));
+
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'roll forward' } });
+
+    expect(screen.getByText('Review today')).toBeTruthy();
+    expect(screen.queryByText('Settings')).toBeNull();
+  });
+});
