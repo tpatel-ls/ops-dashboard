@@ -240,6 +240,12 @@ export function TasksView() {
       db.organizations.toArray(),
     ]);
     const activeProjects = allProjects.filter(isActiveProject);
+    // Lanes, project names, and project domains resolve through every project
+    // that still exists, not just the active ones the filter picker offers.
+    // Mapping only active projects put a task whose org comes from a finished
+    // or archived project in the Personal lane here, while the kanban board,
+    // work dashboard, and org switcher all kept it in its org.
+    const liveProjects = allProjects.filter((project) => !project.deletedAt);
     const activeDomains = allDomains
       .filter((domain) => !domain.deletedAt)
       .sort(compareOrganizations);
@@ -250,7 +256,7 @@ export function TasksView() {
       allTasks,
       activeProjects,
       activeDomains,
-      projectMap: new Map(activeProjects.map((project) => [project.id, project])),
+      projectMap: new Map(liveProjects.map((project) => [project.id, project])),
       organizationMap: new Map(
         activeOrganizations.map((organization) => [organization.id, organization]),
       ),
