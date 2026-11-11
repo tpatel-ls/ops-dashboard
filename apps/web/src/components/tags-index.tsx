@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo, useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
-import { matchesTaskTag, safeTaskTags, taskTagCounts } from '@/lib/task-query';
+import { matchesTaskTag, safeTaskTags, selectedTagChip, taskTagCounts } from '@/lib/task-query';
 
 const MAX_LISTED_TASKS = 200;
 
@@ -17,8 +17,13 @@ export function TagsIndex() {
   const openEdit = useAppStore((s) => s.openEdit);
 
   const counts = useMemo(() => taskTagCounts(tasks ?? []), [tasks]);
+  // A selection outlives its tag when the last task carrying it is edited or
+  // deleted. Its chip then disappears, so nothing showed as pressed and the
+  // list stayed on "No tasks use #tag" with no chip to tap it off. Treat a tag
+  // that no longer exists as no selection.
+  const activeTag = selectedTagChip(counts, selectedTag);
   const visibleTasks = (tasks ?? []).filter(
-    (task) => safeTaskTags(task.tags).length > 0 && matchesTaskTag(task, selectedTag),
+    (task) => safeTaskTags(task.tags).length > 0 && matchesTaskTag(task, activeTag),
   );
 
   if (counts.length === 0) {
@@ -36,8 +41,8 @@ export function TagsIndex() {
           <button
             key={tag}
             type="button"
-            onClick={() => setSelectedTag((current) => (current === tag ? null : tag))}
-            aria-pressed={selectedTag === tag}
+            onClick={() => setSelectedTag(activeTag === tag ? null : tag)}
+            aria-pressed={activeTag === tag}
             className="bg-card hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-primary inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-xs transition-colors"
           >
             <span className="text-foreground">#{tag}</span>
@@ -72,12 +77,12 @@ export function TagsIndex() {
         {visibleTasks.length > MAX_LISTED_TASKS ? (
           <div className="text-muted-foreground px-2 pt-2 text-xs">
             And {visibleTasks.length - MAX_LISTED_TASKS} more.
-            {selectedTag ? null : ' Select a tag to narrow the list.'}
+            {activeTag ? null : ' Select a tag to narrow the list.'}
           </div>
         ) : null}
         {visibleTasks.length === 0 ? (
           <div className="text-muted-foreground flex min-h-28 items-center justify-center px-4 text-center text-sm">
-            No tasks use #{selectedTag}.
+            No tasks use #{activeTag}.
           </div>
         ) : null}
       </div>
