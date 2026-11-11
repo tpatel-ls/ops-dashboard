@@ -149,6 +149,22 @@ export function matchesTaskTag(task: Task, selectedTag: string | null): boolean 
  * chip keeps the first spelling seen, and a task counts once per tag even if
  * it stores two spellings. Most-used first, ties by label.
  */
+/**
+ * The chip in `counts` that a tag selection refers to, or null once no task
+ * carries it. Matching uses the same NFKC, case-folded key as the counts, so a
+ * chip whose label changes spelling (the first tagged task was renamed) keeps
+ * its selection.
+ */
+export function selectedTagChip(
+  counts: ReadonlyArray<readonly [tag: string, count: number]>,
+  selectedTag: string | null,
+): string | null {
+  if (!selectedTag) return null;
+  const key = taskFilterText(selectedTag.trim());
+  if (!key) return null;
+  return counts.find(([tag]) => taskFilterText(tag) === key)?.[0] ?? null;
+}
+
 export function taskTagCounts(tasks: Task[]): Array<[tag: string, count: number]> {
   const groups = new Map<string, { label: string; count: number }>();
   for (const task of tasks) {

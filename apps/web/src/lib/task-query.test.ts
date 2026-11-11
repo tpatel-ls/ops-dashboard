@@ -8,6 +8,7 @@ import {
   matchesTaskTag,
   safeTaskPriority,
   safeTaskTags,
+  selectedTagChip,
   taskTagCounts,
 } from './task-query';
 
@@ -341,5 +342,22 @@ describe('taskTagCounts', () => {
       ['alpha', 1],
       ['zeta', 1],
     ]);
+  });
+});
+
+describe('selectedTagChip', () => {
+  it('drops a selection once no task carries the tag', () => {
+    const before = taskTagCounts([task('a', { tags: ['errand'] }), task('b', { tags: ['work'] })]);
+    expect(selectedTagChip(before, 'errand')).toBe('errand');
+
+    const after = taskTagCounts([task('b', { tags: ['work'] })]);
+    expect(selectedTagChip(after, 'errand')).toBeNull();
+  });
+
+  it('follows the chip when its label changes spelling', () => {
+    const counts = taskTagCounts([task('b', { tags: ['work'] })]);
+    expect(selectedTagChip(counts, 'Work')).toBe('work');
+    expect(selectedTagChip(counts, null)).toBeNull();
+    expect(selectedTagChip(counts, '  ')).toBeNull();
   });
 });
