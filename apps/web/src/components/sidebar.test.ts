@@ -22,4 +22,13 @@ describe('Sidebar', () => {
     expect(navs.map((nav) => nav.getAttribute('aria-label'))).toEqual(['Tasks', 'More']);
     expect(screen.getByRole('navigation', { name: 'Tasks' }).textContent).toContain('Today');
   });
+
+  it('keeps the hover-only shortcut hint out of each link name', () => {
+    render(createElement(Sidebar));
+
+    const today = screen.getByRole('link', { name: 'Today' });
+    expect(today.getAttribute('href')).toBe('/dashboard');
+    expect(screen.getByRole('link', { name: 'Settings' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /g h/ })).toBeNull();
+  });
 });
