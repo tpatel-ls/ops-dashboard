@@ -153,7 +153,12 @@ function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badg
           {badge}
         </span>
       ) : item.shortcut ? (
-        <span className="text-subtle-foreground ml-auto text-[10px] opacity-0 transition-opacity group-hover:opacity-100">
+        // Opacity hides the hint from sight only, so without aria-hidden every
+        // link was announced with its key sequence, e.g. "Today g h".
+        <span
+          aria-hidden
+          className="text-subtle-foreground ml-auto text-[10px] opacity-0 transition-opacity group-hover:opacity-100"
+        >
           {item.shortcut}
         </span>
       ) : null}
