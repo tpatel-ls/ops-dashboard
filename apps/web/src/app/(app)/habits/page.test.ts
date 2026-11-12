@@ -56,6 +56,19 @@ describe('HabitsPage activity', () => {
   });
 });
 
+describe('HabitsPage legend', () => {
+  it('leaves the color legend to the heatmap and keeps the scoring key', async () => {
+    live.run = true;
+    loadActivity.mockResolvedValueOnce([{ date: '2026-11-05', count: 2, level: 2 }] as never);
+    render(createElement(HabitsPage));
+    await act(async () => {});
+
+    expect(document.body.textContent).toContain('task ×1 · routine ×2');
+    expect(screen.queryByLabelText(/^Level \d$/)).toBeNull();
+    expect(screen.queryByText('Less')).toBeNull();
+  });
+});
+
 describe('HabitsPage share score', () => {
   it('confirms when the score was copied instead of shared', async () => {
     shareOrCopy.mockResolvedValue('copied');
