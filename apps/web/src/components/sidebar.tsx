@@ -93,7 +93,7 @@ export function Sidebar() {
           />
           More
         </summary>
-        <nav className="mt-1 flex flex-col gap-0.5">
+        <nav aria-label="More" className="mt-1 flex flex-col gap-0.5">
           {SECONDARY.map((item) => (
             <NavLink
               key={item.href}
@@ -121,7 +121,11 @@ function Section({ label, children }: { label: string; children: React.ReactNode
       <p className="text-subtle-foreground px-2.5 pb-1.5 text-[10px] font-semibold uppercase">
         {label}
       </p>
-      <nav className="flex flex-col gap-0.5">{children}</nav>
+      {/* Each list is its own landmark; unnamed, a screen reader's landmark
+          menu showed the sidebar as identical "navigation" entries. */}
+      <nav aria-label={label} className="flex flex-col gap-0.5">
+        {children}
+      </nav>
     </div>
   );
 }
