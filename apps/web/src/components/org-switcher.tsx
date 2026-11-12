@@ -134,7 +134,19 @@ export function OrgSwitcher() {
   }
 
   return (
-    <div ref={rootRef} className="relative">
+    <div
+      ref={rootRef}
+      className="relative"
+      onBlur={(event) => {
+        // Tab out of the open menu closes it, as the menu-button pattern
+        // expects. Otherwise it stayed open over the page with focus elsewhere.
+        // A null target (a click on the menu's own heading) is left to the
+        // outside-mousedown handler.
+        if (!open) return;
+        const next = event.relatedTarget as Node | null;
+        if (next && !rootRef.current?.contains(next)) setOpen(false);
+      }}
+    >
       <span role="status" aria-live="polite" className="sr-only">
         {mounted ? `Current workspace: ${current.label}` : ''}
       </span>
