@@ -103,6 +103,8 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
             dark: DARK_RAMP,
           }}
           showWeekdayLabels
+          // The habits page relies on this legend; it has no swatch row of its own.
+          showColorLegend
           fontSize={11}
           labels={{
             totalCount: '{{count}} activity points in the last year',

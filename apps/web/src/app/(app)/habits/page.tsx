@@ -316,25 +316,11 @@ export default function HabitsPage() {
           )}
         </div>
 
-        {/* Legend */}
+        {/* Scoring key. The heatmap draws its own Less/More color legend in its
+            real ramp; a second swatch row here used theme colors that did not
+            match the grid. */}
         {hasActivity && (
           <div className="text-subtle-foreground flex items-center gap-2 text-[11px]">
-            <span>Less</span>
-            {[0, 1, 2, 3, 4].map((lvl) => (
-              <span
-                key={lvl}
-                className={cn(
-                  'inline-block size-3 rounded-[3px]',
-                  lvl === 0 && 'bg-bg-sunken',
-                  lvl === 1 && 'bg-primary-soft',
-                  lvl === 2 && 'bg-primary/30',
-                  lvl === 3 && 'bg-primary/65',
-                  lvl === 4 && 'bg-primary',
-                )}
-                aria-label={`Level ${lvl}`}
-              />
-            ))}
-            <span>More</span>
             <span className="ml-auto font-mono text-[10px] tracking-[0.18em] uppercase">
               task ×1 · routine ×2 · journal ×3 · work ×0.5/30 min
             </span>
