@@ -4,14 +4,17 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({ usePathname: () => '/dashboard' }));
-vi.mock('dexie-react-hooks', () => ({
-  useLiveQuery: (_query: unknown, _deps: unknown, initial: unknown) => initial,
-}));
+const live = vi.hoisted(() => ({ inboxCount: 0, pathname: '/dashboard' }));
+vi.mock('next/navigation', () => ({ usePathname: () => live.pathname }));
+vi.mock('dexie-react-hooks', () => ({ useLiveQuery: () => live.inboxCount }));
 
 const { Sidebar } = await import('./sidebar');
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  live.inboxCount = 0;
+  live.pathname = '/dashboard';
+});
 
 describe('Sidebar', () => {
   it('names every navigation landmark it renders', () => {
@@ -30,5 +33,15 @@ describe('Sidebar', () => {
     expect(today.getAttribute('href')).toBe('/dashboard');
     expect(screen.getByRole('link', { name: 'Settings' })).toBeTruthy();
     expect(screen.queryByRole('link', { name: /g h/ })).toBeNull();
+  });
+
+  it('says what the inbox badge counts', () => {
+    live.inboxCount = 3;
+    // On /inbox the More section is open, so its links are exposed.
+    live.pathname = '/inbox';
+    render(createElement(Sidebar));
+
+    expect(screen.getByRole('link', { name: 'Inbox, 3 pending' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Notepad' })).toBeTruthy();
   });
 });
