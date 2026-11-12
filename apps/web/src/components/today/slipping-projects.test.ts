@@ -59,4 +59,19 @@ describe('SlippingProjects', () => {
 
     expect(screen.getByText('Atlas')).toBeTruthy();
   });
+
+  it('flags a quiet synced project whose kind is missing or unknown, but not an area', async () => {
+    const quiet = { status: 'active' as const, lastWorkedAt: new Date(2020, 0, 1).toISOString() };
+    projects = [
+      { id: 'p1', name: 'No kind', ...quiet },
+      { id: 'p2', name: 'Future kind', kind: 'client' as Project['kind'], ...quiet },
+      { id: 'p3', name: 'Ongoing area', kind: 'area', ...quiet },
+    ];
+
+    render(createElement(SlippingProjects));
+
+    expect(await screen.findByText('No kind')).toBeTruthy();
+    expect(screen.getByText('Future kind')).toBeTruthy();
+    expect(screen.queryByText('Ongoing area')).toBeNull();
+  });
 });

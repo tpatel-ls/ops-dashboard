@@ -5,6 +5,7 @@ import { AlertTriangle, Plus } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { useAppStore } from '@/lib/app-store';
 import { projectIsSlipping } from '@/lib/project-query';
+import { projectBoardKind } from '@/lib/projects';
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { useLiveSettings } from '@/lib/use-settings';
 import { useToday } from '@/lib/use-today';
@@ -26,7 +27,11 @@ export function SlippingProjects() {
 
     return all.filter((p) => {
       if (p.deletedAt || p.archivedAt) return false;
-      if (p.kind !== 'project' && p.kind !== 'retainer') return false;
+      // Read the kind the way the projects board files it. A synced row with a
+      // missing or unknown kind shows on the board as a project, but an exact
+      // match here kept it off this rail however long it went quiet.
+      const kind = projectBoardKind(p.kind);
+      if (kind !== 'project' && kind !== 'retainer') return false;
       if (p.status !== 'active') return false;
       return projectIsSlipping(p.lastWorkedAt, slippingDays, now);
     });
