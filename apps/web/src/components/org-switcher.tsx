@@ -217,12 +217,15 @@ export function OrgSwitcher() {
                     {lane.description}
                   </span>
                 </span>
+                {/* aria-label on a plain span is ignored by most screen readers,
+                    so the item read as "All work Everything together 3". */}
                 <span
+                  aria-hidden
                   className="bg-bg-sunken text-subtle-foreground inline-flex min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] tabular-nums"
-                  aria-label={`${lane.count} open tasks`}
                 >
                   {lane.count}
                 </span>
+                <span className="sr-only">{`, ${lane.count} open tasks`}</span>
                 {active ? (
                   <span className="text-primary ml-auto inline-flex items-center gap-1 text-[10px] font-medium">
                     Current
