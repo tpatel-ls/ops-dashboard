@@ -40,6 +40,7 @@ export function QuickAdd() {
     value: WorkDestination;
   } | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const pickerTriggerRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const ctx = useOrgStore((state) => state.ctx);
   const storedDestination = useSyncExternalStore(
@@ -84,9 +85,28 @@ export function QuickAdd() {
     function onDown(e: MouseEvent) {
       if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) setPickerOpen(false);
     }
+    // Escape closed nothing, so a keyboard user who opened the picker had to
+    // tab through every project to get back out.
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      setPickerOpen(false);
+      pickerTriggerRef.current?.focus();
+    }
     document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [pickerOpen]);
+
+  // Choosing a row unmounts the focused button, which dropped focus to the
+  // page. Send it to the task field, where the next keystroke belongs.
+  function choosePickerProject(next: Project | null) {
+    setProject(next);
+    setPickerOpen(false);
+    inputRef.current?.focus();
+  }
 
   // The input is disabled while a task saves, and disabling the focused element
   // drops its focus, so every Enter left the user clicking back into the field
@@ -199,6 +219,7 @@ export function QuickAdd() {
       ) : null}
       <div ref={pickerRef} className="relative flex shrink-0 items-center">
         <button
+          ref={pickerTriggerRef}
           type="button"
           onClick={() => {
             setPickerOpen((v) => !v);
@@ -267,10 +288,7 @@ export function QuickAdd() {
             <div className="max-h-56 scrollbar-thin overflow-y-auto py-1" role="listbox">
               <button
                 type="button"
-                onClick={() => {
-                  setProject(null);
-                  setPickerOpen(false);
-                }}
+                onClick={() => choosePickerProject(null)}
                 className="text-muted-foreground hover:bg-accent hover:text-foreground flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
               >
                 <span aria-hidden className="bg-bg-sunken size-2 rounded-full" />
@@ -280,10 +298,7 @@ export function QuickAdd() {
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => {
-                    setProject(p);
-                    setPickerOpen(false);
-                  }}
+                  onClick={() => choosePickerProject(p)}
                   className="text-muted-foreground hover:bg-accent hover:text-foreground flex min-h-10 w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
                 >
                   <span

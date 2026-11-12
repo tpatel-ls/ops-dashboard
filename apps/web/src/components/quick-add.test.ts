@@ -6,8 +6,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const addTask = vi.fn<(text: string, options: unknown) => Promise<void>>();
 
+const live = vi.hoisted(() => ({ projects: [] as unknown[] }));
 vi.mock('dexie-react-hooks', () => ({
-  useLiveQuery: () => ({ projects: [], organizations: [] }),
+  useLiveQuery: () => ({ projects: live.projects, organizations: [] }),
 }));
 vi.mock('@/lib/tasks', () => ({ addTask, addTaskToProject: vi.fn() }));
 vi.mock('@/lib/haptics', () => ({ hapticSuccess: vi.fn(), hapticTap: vi.fn() }));
@@ -31,6 +32,7 @@ const { QuickAdd } = await import('./quick-add');
 afterEach(() => {
   cleanup();
   addTask.mockReset();
+  live.projects = [];
 });
 
 describe('QuickAdd', () => {
@@ -79,5 +81,40 @@ describe('QuickAdd', () => {
 
     expect(addTask).toHaveBeenCalled();
     expect(document.activeElement).not.toBe(input);
+  });
+
+  describe('project picker', () => {
+    const launch = { id: 'p1', name: 'Launch', color: '#f80', status: 'active' };
+
+    function openPicker() {
+      live.projects = [launch];
+      render(createElement(QuickAdd));
+      const trigger = screen.getByRole('button', { name: 'Choose a project' });
+      fireEvent.click(trigger);
+      expect(screen.getByRole('textbox', { name: 'Filter projects' })).toBeTruthy();
+      return trigger;
+    }
+
+    it('closes on Escape and hands focus back to its button', () => {
+      const trigger = openPicker();
+
+      fireEvent.keyDown(screen.getByRole('textbox', { name: 'Filter projects' }), {
+        key: 'Escape',
+      });
+
+      expect(screen.queryByRole('textbox', { name: 'Filter projects' })).toBeNull();
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('moves focus to the task field once a project is chosen', () => {
+      openPicker();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Launch' }));
+
+      expect(screen.queryByRole('textbox', { name: 'Filter projects' })).toBeNull();
+      expect(screen.getByRole('button', { name: 'Adding to Launch' })).toBeTruthy();
+      expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Quick add task' }));
+    });
   });
 });
