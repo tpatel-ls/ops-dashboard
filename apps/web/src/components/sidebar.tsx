@@ -136,6 +136,8 @@ function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badg
     <Link
       href={item.href}
       aria-current={active ? 'page' : undefined}
+      // A bare count read as "Inbox 3", with nothing saying what it counts.
+      aria-label={badge ? `${item.label}, ${badge} pending` : undefined}
       className={cn(
         'group relative flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] transition-colors',
         active
