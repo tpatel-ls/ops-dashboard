@@ -160,7 +160,10 @@ export function OpenTasks() {
                         <div className="flex items-baseline gap-2">
                           <span className="truncate text-[13px] leading-5">{task.title}</span>
                           {task.priority > 0 && (
+                            // role="img" makes the name count: on a plain span
+                            // aria-label is ignored and the chip read as "P2".
                             <span
+                              role="img"
                               className="rounded border px-1 py-0.5 font-mono text-[9px] leading-none font-semibold"
                               style={{ borderColor: priorityColor, color: priorityColor }}
                               aria-label={`Priority ${task.priority}`}
