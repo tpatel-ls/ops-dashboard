@@ -225,7 +225,7 @@ export function QuickAdd() {
             setPickerOpen((v) => !v);
             setProjectFilter('');
           }}
-          aria-haspopup="listbox"
+          aria-haspopup="dialog"
           aria-expanded={pickerOpen}
           aria-label={project ? `Adding to ${project.name}` : 'Choose a project'}
           className={cn(
@@ -256,7 +256,14 @@ export function QuickAdd() {
           )}
         </button>
         {pickerOpen ? (
-          <div className="surface absolute top-full right-0 z-50 mt-3 w-72 overflow-hidden">
+          // A filter field plus a list of buttons, not a listbox: role="listbox"
+          // promised option rows with arrow-key selection that this never had,
+          // and screen readers announced an empty list.
+          <div
+            role="dialog"
+            aria-label="Choose project"
+            className="surface absolute top-full right-0 z-50 mt-3 w-72 overflow-hidden"
+          >
             <div className="hairline flex items-center justify-between border-b px-3 py-2">
               <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.16em] uppercase">
                 Choose project
@@ -285,7 +292,11 @@ export function QuickAdd() {
                 </button>
               ) : null}
             </div>
-            <div className="max-h-56 scrollbar-thin overflow-y-auto py-1" role="listbox">
+            <div
+              className="max-h-56 scrollbar-thin overflow-y-auto py-1"
+              role="group"
+              aria-label="Projects"
+            >
               <button
                 type="button"
                 onClick={() => choosePickerProject(null)}

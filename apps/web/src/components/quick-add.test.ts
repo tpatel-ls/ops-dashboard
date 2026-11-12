@@ -95,6 +95,17 @@ describe('QuickAdd', () => {
       return trigger;
     }
 
+    it('exposes a named dialog of project buttons instead of an empty listbox', () => {
+      const trigger = openPicker();
+
+      expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
+      expect(screen.queryByRole('listbox')).toBeNull();
+      const dialog = screen.getByRole('dialog', { name: 'Choose project' });
+      const group = screen.getByRole('group', { name: 'Projects' });
+      expect(dialog.contains(group)).toBe(true);
+      expect(group.contains(screen.getByRole('button', { name: 'Launch' }))).toBe(true);
+    });
+
     it('closes on Escape and hands focus back to its button', () => {
       const trigger = openPicker();
 
