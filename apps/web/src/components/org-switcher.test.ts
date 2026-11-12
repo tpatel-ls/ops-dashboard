@@ -59,4 +59,12 @@ describe('OrgSwitcher', () => {
 
     expect(screen.getByRole('menu')).toBeTruthy();
   });
+
+  it('says what each workspace count means in the item name', async () => {
+    await openMenu();
+
+    const item = screen.getByRole('menuitemradio', { name: /^All work/ });
+    expect(item.textContent).toContain('0 open tasks');
+    expect(item.querySelector('[aria-label]')).toBeNull();
+  });
 });
