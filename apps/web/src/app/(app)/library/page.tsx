@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   BookOpen,
   BookText,
@@ -40,11 +40,33 @@ const TABS: TabDef[] = [
 export default function LibraryPage() {
   const [tab, setTab] = useState<Tab>('journal');
   const [addOpen, setAddOpen] = useState(false);
+  const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
 
   // Reset add panel when switching away from journal
   function handleTabChange(next: Tab) {
     setTab(next);
     if (next !== 'journal') setAddOpen(false);
+  }
+
+  // The tab pattern: one tab stop for the whole bar, arrows move between tabs.
+  function moveTab(event: React.KeyboardEvent) {
+    const index = TABS.findIndex((t) => t.id === tab);
+    const last = TABS.length - 1;
+    const nextIndex =
+      event.key === 'ArrowRight'
+        ? (index + 1) % TABS.length
+        : event.key === 'ArrowLeft'
+          ? (index - 1 + TABS.length) % TABS.length
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? last
+              : null;
+    if (nextIndex === null) return;
+    event.preventDefault();
+    const next = TABS[nextIndex]!.id;
+    handleTabChange(next);
+    tabRefs.current[next]?.focus();
   }
 
   return (
@@ -83,17 +105,24 @@ export default function LibraryPage() {
     >
       <div className="flex flex-col gap-4">
         {/* ── Tab bar ── */}
-        <nav
+        <div
           className="bg-bg-sunken grid grid-cols-4 gap-1 rounded-lg p-1"
           aria-label="Library sections"
           role="tablist"
+          onKeyDown={moveTab}
         >
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
+              ref={(node) => {
+                tabRefs.current[id] = node;
+              }}
+              id={`library-tab-${id}`}
               type="button"
               role="tab"
               aria-selected={tab === id}
+              aria-controls="library-panel"
+              tabIndex={tab === id ? 0 : -1}
               onClick={() => handleTabChange(id)}
               className={cn(
                 'inline-flex h-10 min-w-0 items-center justify-center gap-1 rounded-md px-1 text-xs font-medium transition-colors sm:gap-1.5 sm:px-3 sm:text-sm',
@@ -101,60 +130,66 @@ export default function LibraryPage() {
                   ? 'bg-card text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.12)]'
                   : 'text-muted-foreground hover:text-foreground',
               )}
-              aria-current={tab === id ? 'page' : undefined}
             >
               <Icon className="size-3.5 shrink-0" aria-hidden />
               <span className="min-w-0 truncate">{label}</span>
             </button>
           ))}
-        </nav>
+        </div>
 
-        {/* ── Journal tab ── */}
-        {tab === 'journal' && (
-          <>
-            {/* Section header */}
-            <div className="flex items-center gap-2">
-              <BookOpen className="text-primary size-4" aria-hidden />
-              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-                Journal
-              </span>
-            </div>
-
-            {/* Upload / add panel */}
-            {addOpen && (
-              <div className="rounded-lg">
-                <JournalUpload onSaved={() => setAddOpen(false)} />
+        <div
+          id="library-panel"
+          role="tabpanel"
+          aria-labelledby={`library-tab-${tab}`}
+          className="flex flex-col gap-4"
+        >
+          {/* ── Journal tab ── */}
+          {tab === 'journal' && (
+            <>
+              {/* Section header */}
+              <div className="flex items-center gap-2">
+                <BookOpen className="text-primary size-4" aria-hidden />
+                <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+                  Journal
+                </span>
               </div>
-            )}
 
-            {/* Entry list */}
-            <JournalList />
+              {/* Upload / add panel */}
+              {addOpen && (
+                <div className="rounded-lg">
+                  <JournalUpload onSaved={() => setAddOpen(false)} />
+                </div>
+              )}
 
-            {/* Bottom CTA when list is visible and add panel is closed */}
-            {!addOpen && (
-              <button
-                type="button"
-                onClick={() => setAddOpen(true)}
-                className={cn(
-                  'border-border text-muted-foreground flex min-h-12 items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm transition-colors',
-                  'hover:border-primary hover:bg-primary-soft hover:text-primary',
-                )}
-              >
-                <PenLine className="size-4" />
-                Add journal entry
-              </button>
-            )}
-          </>
-        )}
+              {/* Entry list */}
+              <JournalList />
 
-        {/* ── Notes tab ── */}
-        {tab === 'notes' && <NotesView />}
+              {/* Bottom CTA when list is visible and add panel is closed */}
+              {!addOpen && (
+                <button
+                  type="button"
+                  onClick={() => setAddOpen(true)}
+                  className={cn(
+                    'border-border text-muted-foreground flex min-h-12 items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm transition-colors',
+                    'hover:border-primary hover:bg-primary-soft hover:text-primary',
+                  )}
+                >
+                  <PenLine className="size-4" />
+                  Add journal entry
+                </button>
+              )}
+            </>
+          )}
 
-        {/* ── Quotes tab ── */}
-        {tab === 'quotes' && <QuotesView />}
+          {/* ── Notes tab ── */}
+          {tab === 'notes' && <NotesView />}
 
-        {/* ── Books tab ── */}
-        {tab === 'books' && <BooksView />}
+          {/* ── Quotes tab ── */}
+          {tab === 'quotes' && <QuotesView />}
+
+          {/* ── Books tab ── */}
+          {tab === 'books' && <BooksView />}
+        </div>
       </div>
     </ViewShell>
   );
