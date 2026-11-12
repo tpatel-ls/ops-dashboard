@@ -217,7 +217,17 @@ export function QuickAdd() {
           <option value="personal">Personal</option>
         </select>
       ) : null}
-      <div ref={pickerRef} className="relative flex shrink-0 items-center">
+      <div
+        ref={pickerRef}
+        className="relative flex shrink-0 items-center"
+        onBlur={(event) => {
+          // Tabbing past the last project left the picker open over the page.
+          // A null target (a click on its own heading) is left to the
+          // outside-mousedown handler.
+          const next = event.relatedTarget as Node | null;
+          if (pickerOpen && next && !pickerRef.current?.contains(next)) setPickerOpen(false);
+        }}
+      >
         <button
           ref={pickerTriggerRef}
           type="button"

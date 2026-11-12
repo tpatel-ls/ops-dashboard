@@ -118,6 +118,20 @@ describe('QuickAdd', () => {
       expect(document.activeElement).toBe(trigger);
     });
 
+    it('closes when focus tabs out of it, but not between its own controls', () => {
+      openPicker();
+      const filter = screen.getByRole('textbox', { name: 'Filter projects' });
+      const launchRow = screen.getByRole('button', { name: 'Launch' });
+
+      fireEvent.blur(filter, { relatedTarget: launchRow });
+      expect(screen.getByRole('dialog', { name: 'Choose project' })).toBeTruthy();
+
+      fireEvent.blur(launchRow, {
+        relatedTarget: screen.getByRole('textbox', { name: 'Quick add task' }),
+      });
+      expect(screen.queryByRole('dialog', { name: 'Choose project' })).toBeNull();
+    });
+
     it('moves focus to the task field once a project is chosen', () => {
       openPicker();
 
