@@ -287,7 +287,7 @@ export function PeopleView() {
               <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
                 People
               </div>
-              <h3 className="mt-1 text-xl font-semibold tracking-tight">A clean slate.</h3>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight">A clean slate.</h2>
               <p className="text-muted-foreground mt-1 max-w-xs text-sm">
                 Add the people who matter - store facts and log interactions so nothing slips
                 through the cracks.

@@ -314,7 +314,7 @@ export function RoutinesView() {
           <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Routines
           </div>
-          <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
+          <h2 className="text-xl font-semibold tracking-tight">A clean slate.</h2>
           <p className="text-muted-foreground max-w-sm text-sm">
             Build daily habits - morning stretches, evening reviews, or a 30-day challenge. Track
             your streaks and stay consistent.

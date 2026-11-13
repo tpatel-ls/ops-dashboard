@@ -747,9 +747,9 @@ export function ProjectsBoard() {
         ) : filteredCardData.length === 0 && !creating ? (
           <div className="surface flex h-64 flex-col items-center justify-center gap-2 text-center">
             <div className="text-subtle-foreground font-mono text-[10px] uppercase">projects</div>
-            <h3 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold">
               {searchQuery || statusFilter !== 'all' ? 'No matching projects.' : 'A clean slate.'}
-            </h3>
+            </h2>
             <p className="text-muted-foreground max-w-xs text-sm">
               {searchQuery || statusFilter !== 'all'
                 ? 'Try a different search or project status.'

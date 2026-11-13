@@ -67,3 +67,12 @@ describe('TasksView domain filter', () => {
     ).toBe(true);
   });
 });
+
+describe('TasksView empty state', () => {
+  it('heads the empty list at level 2, directly under the page title', () => {
+    mocks.data = { ...viewData([]), allTasks: [] };
+    render(createElement(TasksView));
+
+    expect(screen.getByRole('heading', { level: 2, name: 'No open tasks.' })).toBeTruthy();
+  });
+});

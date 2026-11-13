@@ -83,7 +83,7 @@ export function ChatPanel({
             <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
               Ask anything
             </div>
-            <h3 className="text-base font-semibold">Project intelligence</h3>
+            <h2 className="text-base font-semibold">Project intelligence</h2>
             <p className="text-muted-foreground max-w-sm text-sm">
               Ask about organizations, project status, deadlines, and open tasks.
             </p>
