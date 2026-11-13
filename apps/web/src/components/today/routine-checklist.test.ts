@@ -98,4 +98,18 @@ describe('RoutineChecklist', () => {
 
     expect(await screen.findByRole('heading', { level: 2, name: 'Routines' })).toBeTruthy();
   });
+
+  it('heads each time-of-day group under the Routines heading', async () => {
+    routines = [
+      { id: 'r1', name: 'Stretch', timeOfDay: 'morning' },
+      { id: 'r2', name: 'Read', timeOfDay: undefined },
+    ];
+
+    render(createElement(RoutineChecklist));
+    await screen.findByText('Stretch');
+
+    expect(
+      screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent),
+    ).toEqual(['Morning', 'Anytime']);
+  });
 });

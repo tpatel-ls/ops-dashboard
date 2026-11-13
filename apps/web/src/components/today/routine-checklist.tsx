@@ -119,9 +119,9 @@ export function RoutineChecklist() {
               return (
                 <div key={tod}>
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+                    <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
                       {TIME_LABEL[tod]}
-                    </span>
+                    </h3>
                     <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
                       {groupDone}/{routines.length}
                     </span>

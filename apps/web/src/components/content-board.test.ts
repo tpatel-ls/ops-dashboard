@@ -2,12 +2,37 @@
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Content, Domain } from '@ops-dashboard/core';
 
-const { ContentCard, ContentEditor } = await import('./content-board');
+let liveContent: Partial<Content>[] = [];
+vi.mock('dexie-react-hooks', async () => {
+  const { useEffect, useState } = await import('react');
+  return {
+    useLiveQuery: (query: () => Promise<unknown>) => {
+      const [value, setValue] = useState<unknown>();
+      useEffect(() => {
+        void query().then(setValue);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+      return value;
+    },
+  };
+});
+vi.mock('@ops-dashboard/core', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
+  getDb: () => ({
+    content: { toArray: async () => liveContent },
+    domains: { toArray: async () => [] },
+  }),
+}));
 
-afterEach(cleanup);
+const { ContentBoard, ContentCard, ContentEditor } = await import('./content-board');
+
+afterEach(() => {
+  cleanup();
+  liveContent = [];
+});
 
 describe('ContentEditor domain picker', () => {
   it('keeps showing an archived domain the item still belongs to', () => {
@@ -49,5 +74,22 @@ describe('ContentCard', () => {
     render(createElement(ContentCard, { item, isOpen: false, onToggle: () => {}, domains: [] }));
 
     expect(screen.getByRole('link', { name: 'Open link: Pilot episode' })).toBeTruthy();
+  });
+});
+
+describe('ContentBoard', () => {
+  it('titles every status column and phone group with a level-2 heading', async () => {
+    liveContent = [{ id: 'c-1', title: 'Pilot episode', type: 'video', status: 'idea' }];
+    render(createElement(ContentBoard));
+    await screen.findAllByText('Pilot episode');
+
+    const statuses = ['Idea', 'Outline', 'Draft', 'Editing', 'Waiting', 'Published', 'Done'];
+    // The desktop columns show every status; the phone list skips empty groups.
+    expect(
+      screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual([...statuses, 'Idea1']);
+    expect(
+      screen.getByRole('heading', { level: 2, name: /^Idea\s*1$/ }).querySelector('button'),
+    ).toBeTruthy();
   });
 });

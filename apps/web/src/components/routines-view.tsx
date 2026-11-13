@@ -194,9 +194,9 @@ function TimeOfDaySection({ label, routines, checks, domains, today }: TimeOfDay
   return (
     <section className="grid gap-2">
       <div className="flex items-center gap-3">
-        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {label}
-        </div>
+        </h2>
         <div className="hairline flex-1 border-t" aria-hidden />
         <div className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {doneCount}/{routines.length}
