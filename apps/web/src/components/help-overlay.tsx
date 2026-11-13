@@ -116,9 +116,9 @@ export function HelpOverlay() {
               key={s.heading}
               className="border-t pt-4 first:border-t-0 first:pt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 sm:first:border-l-0 sm:first:pl-0"
             >
-              <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
+              <h3 className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
                 {s.heading}
-              </div>
+              </h3>
               <ul className="space-y-1.5 text-sm">
                 {s.rows.map(([k, v]) => (
                   <li key={k} className="flex items-center justify-between gap-3">
