@@ -8,23 +8,21 @@ import { summarizeTodayTasks } from '@/lib/task-dates';
 
 export function TodayStats() {
   const today = useToday();
-  const stats = useLiveQuery(async () => {
-    const all = await getDb().tasks.toArray();
-    const summary = summarizeTodayTasks(all, today);
-    return {
-      ...summary,
-      streak: 0,
-    };
-  }, [today]);
+  const stats = useLiveQuery(
+    async () => summarizeTodayTasks(await getDb().tasks.toArray(), today),
+    [today],
+  );
 
+  // Until the tasks load there is nothing to count, so show a placeholder
+  // rather than a confident "0 Overdue".
   const items = [
-    { label: 'Brief', value: stats?.total ?? 0, icon: ListTodo, tone: 'text-foreground' },
-    { label: 'Done', value: stats?.done ?? 0, icon: Target, tone: 'text-success' },
-    { label: 'Overdue', value: stats?.overdue ?? 0, icon: Flame, tone: 'text-priority-urgent' },
+    { label: 'Brief', value: stats?.total ?? '-', icon: ListTodo, tone: 'text-foreground' },
+    { label: 'Done', value: stats?.done ?? '-', icon: Target, tone: 'text-success' },
+    { label: 'Overdue', value: stats?.overdue ?? '-', icon: Flame, tone: 'text-priority-urgent' },
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2" aria-busy={stats === undefined}>
       {items.map((it) => {
         const Icon = it.icon;
         return (
