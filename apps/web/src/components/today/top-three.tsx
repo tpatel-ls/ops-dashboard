@@ -26,9 +26,9 @@ export function TopThree() {
   return (
     <section>
       <div className="mb-2.5 flex items-center gap-2">
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Daily mission
-        </span>
+        </h2>
         <Star className="text-primary size-3" fill="currentColor" aria-hidden />
         {tasks !== undefined ? (
           <span className="bg-card text-muted-foreground ml-auto rounded-full border px-2 py-0.5 font-mono text-[10px] tabular-nums">

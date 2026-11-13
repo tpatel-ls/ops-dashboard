@@ -43,9 +43,9 @@ export function SlippingProjects() {
     <section className="surface-flat">
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5">
         <AlertTriangle className="text-warning size-3.5" aria-hidden />
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Needs attention
-        </span>
+        </h2>
       </div>
       <ul className="divide-border flex flex-col divide-y">
         {projects.map((p) => {

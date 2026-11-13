@@ -48,4 +48,13 @@ describe('OpenTasks', () => {
     expect(await screen.findByRole('img', { name: 'Priority 3' })).toBeTruthy();
     expect(screen.queryAllByRole('img', { name: /^Priority/ })).toHaveLength(1);
   });
+
+  it('puts the collapse toggle inside a section heading', async () => {
+    tasks = [{ id: 't1', title: 'Pay invoice', status: 'todo', priority: 0, tags: [] }];
+    render(createElement(OpenTasks));
+    await screen.findByText('Pay invoice');
+
+    const heading = screen.getByRole('heading', { level: 2, name: /Open Tasks/ });
+    expect(heading.querySelector('button[aria-expanded="true"]')).toBeTruthy();
+  });
 });
