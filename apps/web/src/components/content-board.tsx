@@ -577,9 +577,10 @@ function ListGroup({
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
+          aria-expanded={!collapsed}
           className="flex w-full items-center gap-2 py-1 text-left"
         >
-          <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
+          <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} aria-hidden />
           <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             {label}
           </span>

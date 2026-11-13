@@ -280,15 +280,16 @@ function QuoteCard({ quote }: { quote: Quote }) {
             <button
               type="button"
               onClick={() => setThoughtsExpanded((v) => !v)}
+              aria-expanded={thoughtsExpanded}
               className="flex items-center gap-1.5 text-left"
             >
               <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 Thoughts ({thoughts.length})
               </span>
               {thoughtsExpanded ? (
-                <ChevronUp className="text-subtle-foreground size-3" />
+                <ChevronUp className="text-subtle-foreground size-3" aria-hidden />
               ) : (
-                <ChevronDown className="text-subtle-foreground size-3" />
+                <ChevronDown className="text-subtle-foreground size-3" aria-hidden />
               )}
             </button>
           )}

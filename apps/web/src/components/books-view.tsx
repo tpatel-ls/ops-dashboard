@@ -170,15 +170,16 @@ function BookHighlights({ bookId, quotes }: { bookId: string; quotes: Quote[] })
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
         className="flex items-center gap-1.5 text-left"
       >
         <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {bookQuotes.length} highlight{bookQuotes.length !== 1 ? 's' : ''}
         </span>
         {expanded ? (
-          <ChevronUp className="text-subtle-foreground size-3" />
+          <ChevronUp className="text-subtle-foreground size-3" aria-hidden />
         ) : (
-          <ChevronDown className="text-subtle-foreground size-3" />
+          <ChevronDown className="text-subtle-foreground size-3" aria-hidden />
         )}
       </button>
 

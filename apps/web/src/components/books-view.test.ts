@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Book } from '@ops-dashboard/core';
+import type { Book, Quote } from '@ops-dashboard/core';
 
 let liveBooks: Array<Partial<Book>> = [];
 vi.mock('dexie-react-hooks', async () => {
@@ -73,6 +73,18 @@ describe('BookCard', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Book finish date must not precede its start date.',
     );
+  });
+
+  it('reports whether the highlights list is expanded', () => {
+    const book = { id: 'b-1', title: 'Dune', status: 'reading', tags: [] } as unknown as Book;
+    const quotes = [{ id: 'q-1', bookId: 'b-1', text: 'Fear is the mind-killer.' }] as Quote[];
+    render(createElement(BookCard, { book, quotes }));
+
+    const toggle = screen.getByRole('button', { name: /1 highlight/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText(/Fear is the mind-killer/)).toBeTruthy();
   });
 });
 
