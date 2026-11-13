@@ -493,28 +493,30 @@ function KindGroup({
 
   return (
     <section className="flex flex-col gap-2">
-      <button
-        type="button"
-        onClick={() => setCollapsed((v) => !v)}
-        aria-expanded={!collapsed}
-        aria-controls={listId}
-        className="border-border/70 flex min-h-10 w-full items-center gap-2 border-b pb-2 text-left"
-      >
-        <span className="bg-bg-sunken text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
-          <Icon className="size-3.5" aria-hidden />
-        </span>
-        <span className="text-foreground text-xs font-semibold">{KIND_LABELS[kind]}</span>
-        <span className="bg-card text-subtle-foreground rounded-md border px-1.5 py-0.5 font-mono text-[10px] tabular-nums">
-          {items.length}
-        </span>
-        <ChevronRight
-          className={cn(
-            'text-muted-foreground ml-auto size-3.5 transition-transform',
-            !collapsed && 'rotate-90',
-          )}
-          aria-hidden
-        />
-      </button>
+      <h2>
+        <button
+          type="button"
+          onClick={() => setCollapsed((v) => !v)}
+          aria-expanded={!collapsed}
+          aria-controls={listId}
+          className="border-border/70 flex min-h-10 w-full items-center gap-2 border-b pb-2 text-left"
+        >
+          <span className="bg-bg-sunken text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
+            <Icon className="size-3.5" aria-hidden />
+          </span>
+          <span className="text-foreground text-xs font-semibold">{KIND_LABELS[kind]}</span>
+          <span className="bg-card text-subtle-foreground rounded-md border px-1.5 py-0.5 font-mono text-[10px] tabular-nums">
+            {items.length}
+          </span>
+          <ChevronRight
+            className={cn(
+              'text-muted-foreground ml-auto size-3.5 transition-transform',
+              !collapsed && 'rotate-90',
+            )}
+            aria-hidden
+          />
+        </button>
+      </h2>
 
       {!collapsed ? (
         <div id={listId} className="grid gap-1.5 lg:grid-cols-2">
