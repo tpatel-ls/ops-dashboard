@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Routine, RoutineCheck } from '@ops-dashboard/core';
@@ -96,5 +96,18 @@ describe('RoutinesView', () => {
     render(createElement(RoutinesView));
 
     expect(await screen.findByRole('heading', { level: 2, name: 'A clean slate.' })).toBeTruthy();
+  });
+
+  it('reports whether the archived routines are shown', async () => {
+    routines = [
+      { id: 'r1', name: 'Old habit', kind: 'ongoing', archivedAt: '2026-11-01T00:00:00.000Z' },
+    ];
+    render(createElement(RoutinesView));
+
+    const toggle = await screen.findByRole('button', { name: /Archived \(1\)/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText('Old habit')).toBeTruthy();
   });
 });

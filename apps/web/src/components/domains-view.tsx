@@ -289,6 +289,7 @@ export function DomainsView() {
           <button
             type="button"
             onClick={() => setShowArchived((v) => !v)}
+            aria-expanded={showArchived}
             className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-[11px]"
           >
             <ChevronRight
