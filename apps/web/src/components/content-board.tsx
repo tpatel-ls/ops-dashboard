@@ -513,10 +513,10 @@ function Column({ status, label, items, domains, openId, onToggle }: ColumnProps
     <div className="flex min-w-0 flex-col gap-2">
       {/* column header */}
       <div className="flex items-center gap-2 px-0.5">
-        <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} aria-hidden />
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {label}
-        </span>
+        </h2>
         <span className="text-subtle-foreground ml-auto font-mono text-[10px] tabular-nums">
           {items.length}
         </span>
@@ -573,26 +573,28 @@ function ListGroup({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <button
-        type="button"
-        onClick={() => setCollapsed((c) => !c)}
-        className="flex items-center gap-2 py-1 text-left"
-      >
-        <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-          {label}
-        </span>
-        <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
-          {items.length}
-        </span>
-        <ChevronDown
-          className={cn(
-            'text-subtle-foreground ml-auto size-3.5 transition-transform',
-            collapsed && '-rotate-90',
-          )}
-          aria-hidden
-        />
-      </button>
+      <h2>
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="flex w-full items-center gap-2 py-1 text-left"
+        >
+          <span className={cn('size-2 shrink-0 rounded-full', STATUS_DOT[status])} />
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+            {label}
+          </span>
+          <span className="text-subtle-foreground font-mono text-[10px] tabular-nums">
+            {items.length}
+          </span>
+          <ChevronDown
+            className={cn(
+              'text-subtle-foreground ml-auto size-3.5 transition-transform',
+              collapsed && '-rotate-90',
+            )}
+            aria-hidden
+          />
+        </button>
+      </h2>
       {!collapsed && (
         <div className="flex flex-col gap-1.5">
           {items.map((item) => (

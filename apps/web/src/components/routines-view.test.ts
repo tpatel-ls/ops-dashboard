@@ -78,4 +78,18 @@ describe('RoutinesView', () => {
       expect(screen.getByRole('button', { name: `Delete routine: ${name}` })).toBeTruthy();
     }
   });
+
+  it('titles each time-of-day group with a level-2 heading', async () => {
+    routines = [
+      { id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+      { id: 'r2', name: 'Read', timeOfDay: 'anytime', kind: 'ongoing' },
+    ];
+
+    render(createElement(RoutinesView));
+    await screen.findByText('Stretch');
+
+    expect(
+      screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual(['Morning', 'Anytime']);
+  });
 });

@@ -6,12 +6,31 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Book } from '@ops-dashboard/core';
 
 let liveBooks: Array<Partial<Book>> = [];
+vi.mock('dexie-react-hooks', async () => {
+  const { useEffect, useState } = await import('react');
+  return {
+    useLiveQuery: (query: () => Promise<unknown>) => {
+      const [value, setValue] = useState<unknown>();
+      useEffect(() => {
+        void query().then(setValue);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+      return value;
+    },
+  };
+});
 vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
-  getDb: () => ({ books: { get: async (id: string) => liveBooks.find((b) => b.id === id) } }),
+  getDb: () => ({
+    books: {
+      get: async (id: string) => liveBooks.find((b) => b.id === id),
+      toArray: async () => liveBooks,
+    },
+    quotes: { toArray: async () => [] },
+  }),
 }));
 
-const { BookCard, BookForm } = await import('./books-view');
+const { BookCard, BookForm, BooksView } = await import('./books-view');
 
 afterEach(() => {
   cleanup();
@@ -54,5 +73,20 @@ describe('BookCard', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Book finish date must not precede its start date.',
     );
+  });
+});
+
+describe('BooksView', () => {
+  it('titles each reading-status group with a level-2 heading', async () => {
+    liveBooks = [
+      { id: 'b1', title: 'Dune', status: 'reading', createdAt: '2026-11-01T00:00:00.000Z' },
+      { id: 'b2', title: 'Emma', status: 'want', createdAt: '2026-11-02T00:00:00.000Z' },
+    ];
+    render(createElement(BooksView));
+    await screen.findByText('Dune');
+
+    expect(
+      screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual(['Reading', 'Want to Read']);
   });
 });

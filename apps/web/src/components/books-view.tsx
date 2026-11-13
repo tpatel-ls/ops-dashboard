@@ -346,9 +346,9 @@ function StatusGroup({ status, books, quotes }: StatusGroupProps) {
   return (
     <section className="grid gap-2">
       <div className="flex items-center gap-3">
-        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           {STATUS_LABELS[status]}
-        </div>
+        </h2>
         <div className="hairline flex-1 border-t" aria-hidden />
         <div className="text-subtle-foreground font-mono text-[10px] tabular-nums">
           {books.length}
