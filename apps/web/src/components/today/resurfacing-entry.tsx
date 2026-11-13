@@ -28,9 +28,9 @@ export function ResurfacingEntry() {
 
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5 pl-5">
         <BookOpen className="text-primary size-3.5" aria-hidden />
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Resurfacing
-        </span>
+        </h2>
         <span className="text-muted-foreground ml-auto font-mono text-[10px]">
           {journalDateLabel(entry.date, 'MMM d, yyyy')}
         </span>

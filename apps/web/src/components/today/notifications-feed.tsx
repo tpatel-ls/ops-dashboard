@@ -38,12 +38,12 @@ export function NotificationsFeed() {
     >
       <div className="hairline flex items-center gap-1.5 border-b px-4 py-2.5">
         <Bell className="text-primary size-3.5" aria-hidden />
-        <span
+        <h2
           id="notifications-title"
           className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase"
         >
           Notifications
-        </span>
+        </h2>
         <span className="text-muted-foreground ml-auto font-mono text-[10px] tabular-nums">
           {feed === undefined ? 'Loading' : `${feed.unreadCount} unread`}
         </span>

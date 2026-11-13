@@ -92,4 +92,10 @@ describe('RoutineChecklist', () => {
     expect(await screen.findByRole('button', { name: 'Uncheck: Stretch' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Check: Read' })).toBeTruthy();
   });
+
+  it('titles the checklist with a level-2 heading', async () => {
+    render(createElement(RoutineChecklist));
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Routines' })).toBeTruthy();
+  });
 });

@@ -51,4 +51,12 @@ describe('NotificationsFeed', () => {
     expect(markNotificationRead).toHaveBeenCalledWith('n2');
     expect(screen.getByRole('button', { name: 'Mark as read: Pay rent' })).toBeTruthy();
   });
+
+  it('labels the section by a level-2 heading', async () => {
+    render(createElement(NotificationsFeed));
+    await act(async () => {});
+
+    const heading = screen.getByRole('heading', { level: 2, name: 'Notifications' });
+    expect(screen.getByRole('region', { name: 'Notifications' }).contains(heading)).toBe(true);
+  });
 });

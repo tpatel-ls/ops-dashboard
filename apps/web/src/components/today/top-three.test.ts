@@ -49,4 +49,10 @@ describe('TopThree', () => {
       'Priority 1',
     ]);
   });
+
+  it('titles the section with a heading so the Today outline can reach it', async () => {
+    render(createElement(TopThree));
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Daily mission' })).toBeTruthy();
+  });
 });

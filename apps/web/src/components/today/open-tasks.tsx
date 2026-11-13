@@ -57,28 +57,30 @@ export function OpenTasks() {
 
   return (
     <section>
-      <button
-        type="button"
-        onClick={() => setCollapsed((c) => !c)}
-        aria-expanded={!collapsed}
-        className="hover:bg-accent/55 mb-2.5 flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left transition-colors"
-      >
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-          Open Tasks
-        </span>
-        {tasks !== undefined && (
-          <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
-            ({tasks.length})
+      <h2 className="mb-2.5">
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-expanded={!collapsed}
+          className="hover:bg-accent/55 flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left transition-colors"
+        >
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+            Open Tasks
           </span>
-        )}
-        <span className="text-subtle-foreground ml-auto">
-          {collapsed ? (
-            <ChevronRight className="size-3.5" aria-hidden />
-          ) : (
-            <ChevronDown className="size-3.5" aria-hidden />
+          {tasks !== undefined && (
+            <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
+              ({tasks.length})
+            </span>
           )}
-        </span>
-      </button>
+          <span className="text-subtle-foreground ml-auto">
+            {collapsed ? (
+              <ChevronRight className="size-3.5" aria-hidden />
+            ) : (
+              <ChevronDown className="size-3.5" aria-hidden />
+            )}
+          </span>
+        </button>
+      </h2>
 
       {!collapsed && (
         <>

@@ -79,9 +79,9 @@ export function RoutineChecklist() {
     <section className="surface flex flex-col">
       <div className="hairline border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Routines
-          </span>
+          </h2>
           <span className="text-muted-foreground font-mono text-[10px]">{today}</span>
           {hasAny ? (
             <span className="text-muted-foreground ml-auto font-mono text-[10px] tabular-nums">

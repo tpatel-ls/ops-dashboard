@@ -74,4 +74,20 @@ describe('SlippingProjects', () => {
     expect(screen.getByText('Future kind')).toBeTruthy();
     expect(screen.queryByText('Ongoing area')).toBeNull();
   });
+
+  it('titles the list with a level-2 heading', async () => {
+    projects = [
+      {
+        id: 'p1',
+        name: 'Atlas',
+        kind: 'project',
+        status: 'active',
+        lastWorkedAt: new Date(2020, 0, 1).toISOString(),
+      },
+    ];
+
+    render(createElement(SlippingProjects));
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Needs attention' })).toBeTruthy();
+  });
 });

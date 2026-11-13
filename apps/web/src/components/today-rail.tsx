@@ -49,9 +49,9 @@ export function TodayRail() {
       <div className="hairline border-b px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
+            <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
               Hour rail
-            </div>
+            </h2>
             <div className="mt-0.5 text-sm font-medium">{format(now, 'EEEE')}</div>
           </div>
           <div className="text-right">
