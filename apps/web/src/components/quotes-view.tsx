@@ -429,7 +429,7 @@ export function QuotesView() {
           <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Quotes
           </div>
-          <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
+          <h2 className="text-xl font-semibold tracking-tight">A clean slate.</h2>
           <p className="text-muted-foreground max-w-sm text-sm">
             Collect the words that move you. Star favorites and attach your own thoughts to any
             quote.

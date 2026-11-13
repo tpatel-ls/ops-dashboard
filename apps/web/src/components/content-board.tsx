@@ -621,7 +621,7 @@ function EmptyState() {
       <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
         content
       </div>
-      <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
+      <h2 className="text-xl font-semibold tracking-tight">A clean slate.</h2>
       <p className="text-muted-foreground max-w-xs text-sm">
         Add your first content idea above - articles, videos, podcasts, and newsletters all in one
         pipeline.

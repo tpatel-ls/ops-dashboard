@@ -184,9 +184,9 @@ function EmptyState({
           <Circle className="size-5" aria-hidden />
         )}
       </span>
-      <h3 className="text-base font-semibold">
+      <h2 className="text-base font-semibold">
         {done ? 'No completed tasks yet.' : 'No open tasks.'}
-      </h3>
+      </h2>
       <p className="text-muted-foreground max-w-md text-sm">
         {done
           ? 'Completed tasks will appear here.'

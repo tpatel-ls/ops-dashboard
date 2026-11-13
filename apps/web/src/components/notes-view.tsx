@@ -240,7 +240,7 @@ export function NotesView() {
           <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
             Notes
           </div>
-          <h3 className="text-xl font-semibold tracking-tight">A clean slate.</h3>
+          <h2 className="text-xl font-semibold tracking-tight">A clean slate.</h2>
           <p className="text-muted-foreground max-w-sm text-sm">
             Capture ideas, excerpts, and references. Flag anything worth revisiting later.
           </p>

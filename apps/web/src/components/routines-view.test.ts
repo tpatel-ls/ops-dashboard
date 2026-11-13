@@ -92,4 +92,9 @@ describe('RoutinesView', () => {
       screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
     ).toEqual(['Morning', 'Anytime']);
   });
+  it('heads the empty state at level 2, directly under the page title', async () => {
+    render(createElement(RoutinesView));
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'A clean slate.' })).toBeTruthy();
+  });
 });
