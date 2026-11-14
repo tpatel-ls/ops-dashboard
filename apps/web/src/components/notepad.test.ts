@@ -118,6 +118,29 @@ describe('Notepad capture', () => {
     expect(document.activeElement).toBe(field);
   });
 
+  it('heads the session feed under the page title once something is routed', async () => {
+    render(createElement(Notepad));
+    expect(screen.queryByRole('heading', { level: 2, name: 'This session' })).toBeNull();
+    vi.mocked(processBrainDump).mockResolvedValueOnce([
+      {
+        captureId: 'c1',
+        kind: 'task',
+        title: 'Email Sam',
+        recordType: 'task',
+        recordId: 't1',
+        undo: async () => {},
+      },
+    ]);
+
+    type('email sam');
+    await act(async () => {
+      fireEvent.keyDown(screen.getByLabelText('Work intake'), { key: 'Enter', ctrlKey: true });
+    });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Work notes' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'This session' })).toBeTruthy();
+  });
+
   it('keeps the notes and says so when nothing could be saved', async () => {
     render(createElement(Notepad));
     const field = screen.getByLabelText<HTMLTextAreaElement>('Work intake');
