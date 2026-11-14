@@ -272,3 +272,25 @@ describe('ChecklistsSection', () => {
     expect((screen.getByLabelText('Checklist name') as HTMLInputElement).value).toBe(name);
   });
 });
+
+describe('project detail section outline', () => {
+  const project = {
+    id: 'p-1',
+    name: 'Launch',
+    status: 'active',
+    milestones: [],
+    checklists: [],
+  } as unknown as Project;
+
+  it('heads each section with an h3 under the drawer title', async () => {
+    render(createElement(MilestonesSection, { project }));
+    render(createElement(ChecklistsSection, { project }));
+    render(createElement(LinkedTasksSection, { project }));
+    render(createElement(LogWorkSection, { project }));
+
+    await screen.findByRole('heading', { level: 3, name: 'Tasks' });
+    expect(
+      screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent),
+    ).toEqual(['Milestones', 'Checklists', 'Tasks', 'Log work']);
+  });
+});

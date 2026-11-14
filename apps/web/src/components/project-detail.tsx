@@ -95,9 +95,9 @@ export function MilestonesSection({ project }: { project: Project }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Layers className="text-muted-foreground size-3.5" aria-hidden />
-          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Milestones
-          </span>
+          </h3>
         </div>
         <div className="flex items-center gap-2">
           {milestones.length > 0 ? (
@@ -272,9 +272,9 @@ export function ChecklistsSection({ project }: { project: Project }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ListChecks className="text-muted-foreground size-3.5" aria-hidden />
-          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Checklists
-          </span>
+          </h3>
         </div>
         <button
           type="button"
@@ -519,9 +519,9 @@ export function LinkedTasksSection({ project }: { project: Project }) {
     <section className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <CheckSquare className="text-muted-foreground size-3.5" aria-hidden />
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Tasks
-        </span>
+        </h3>
         <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
           {tasks.filter((t) => t.status !== 'done').length} open
         </span>
@@ -638,9 +638,9 @@ export function LogWorkSection({ project }: { project: Project }) {
     <section className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <Timer className="text-muted-foreground size-3.5" aria-hidden />
-        <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
           Log work
-        </span>
+        </h3>
         {totalHours !== undefined ? (
           <span className="text-muted-foreground ml-auto font-mono text-[10px]">
             {totalHours}h total
