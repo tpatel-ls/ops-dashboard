@@ -92,6 +92,20 @@ describe('RoutinesView', () => {
       screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
     ).toEqual(['Morning', 'Anytime']);
   });
+
+  it('heads the archived group beside the time-of-day groups', async () => {
+    routines = [
+      { id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+      { id: 'r2', name: 'Old habit', kind: 'ongoing', archivedAt: '2026-11-01T00:00:00.000Z' },
+    ];
+
+    render(createElement(RoutinesView));
+    await screen.findByText('Stretch');
+
+    expect(
+      screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual(['Morning', 'Archived (1)']);
+  });
   it('heads the empty state at level 2, directly under the page title', async () => {
     render(createElement(RoutinesView));
 

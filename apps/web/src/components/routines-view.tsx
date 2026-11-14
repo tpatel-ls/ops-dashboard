@@ -230,21 +230,23 @@ function ArchivedSection({ routines }: ArchivedSectionProps) {
 
   return (
     <div className="mt-4 grid gap-2">
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
-        className="flex items-center gap-2 text-left"
-      >
-        <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-          Archived ({routines.length})
-        </div>
-        {expanded ? (
-          <ChevronUp className="text-subtle-foreground size-3" aria-hidden />
-        ) : (
-          <ChevronDown className="text-subtle-foreground size-3" aria-hidden />
-        )}
-      </button>
+      <h2>
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="flex w-full items-center gap-2 text-left"
+        >
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+            Archived ({routines.length})
+          </span>
+          {expanded ? (
+            <ChevronUp className="text-subtle-foreground size-3" aria-hidden />
+          ) : (
+            <ChevronDown className="text-subtle-foreground size-3" aria-hidden />
+          )}
+        </button>
+      </h2>
 
       {expanded && (
         <ul className="grid gap-1.5">
