@@ -281,8 +281,11 @@ export function FocusMode() {
         </div>
 
         {!active && candidates && candidates.length > 0 ? (
-          <div className="w-full">
-            <div className="text-subtle-foreground mb-2 text-center font-mono text-[10px] tracking-[0.18em] uppercase">
+          <div className="w-full" role="group" aria-labelledby="focus-candidates-label">
+            <div
+              id="focus-candidates-label"
+              className="text-subtle-foreground mb-2 text-center font-mono text-[10px] tracking-[0.18em] uppercase"
+            >
               Choose a focus task
             </div>
             <div className="surface-flat max-h-40 scrollbar-thin overflow-y-auto p-1">
