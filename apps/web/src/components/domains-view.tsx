@@ -1,7 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Archive, Boxes, ChevronRight, ListTodo, Pencil, Plus, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain } from '@ops-dashboard/core';
@@ -54,6 +54,7 @@ interface DomainFormProps {
 }
 
 export function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
+  const titleId = useId();
   const [name, setName] = useState(initial?.name ?? '');
   const [color, setColor] = useState(initial?.color ?? PRESET_COLORS[0]!.value);
   const [description, setDescription] = useState(initial?.description ?? '');
@@ -75,8 +76,15 @@ export function DomainForm({ initial, onSave, onCancel }: DomainFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="surface flex flex-col gap-3 p-4">
-      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+    <form
+      onSubmit={handleSubmit}
+      aria-labelledby={titleId}
+      className="surface flex flex-col gap-3 p-4"
+    >
+      <div
+        id={titleId}
+        className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase"
+      >
         {initial ? 'Edit domain' : 'New domain'}
       </div>
       <input
