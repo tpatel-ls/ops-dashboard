@@ -107,6 +107,38 @@ describe('TaskEditDrawer pickers', () => {
   });
 });
 
+describe('TaskEditDrawer outline', () => {
+  it('heads each field section under the drawer title', async () => {
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'todo',
+      tags: [],
+      reminders: [],
+      checklist: [],
+    } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+    await screen.findByRole('group', { name: 'Task status' });
+
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Edit task');
+    expect(
+      screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent),
+    ).toEqual([
+      'Status',
+      'Priority',
+      'Schedule',
+      'Repeat',
+      'Domain',
+      'Project',
+      'Content',
+      'Tags',
+      'Reminders',
+      'Checklist',
+    ]);
+  });
+});
+
 describe('TaskEditDrawer reminders', () => {
   it('names the reminder each cancel button removes', async () => {
     liveTask = {
