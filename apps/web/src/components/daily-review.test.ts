@@ -55,7 +55,8 @@ describe('DailyReviewDialog', () => {
 
     render(createElement(DailyReviewDialog));
     await act(async () => vi.advanceTimersByTimeAsync(0));
-    expect(screen.getByRole('heading').textContent).toBe('Thursday, November 5');
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Thursday, November 5');
+    expect(screen.getByRole('heading', { level: 3, name: 'Roll to tomorrow?' })).toBeTruthy();
     expect(screen.getByText('Send invoice')).toBeTruthy();
 
     await act(async () => vi.advanceTimersByTimeAsync(60_000));

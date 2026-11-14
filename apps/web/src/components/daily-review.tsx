@@ -130,9 +130,9 @@ function DailyReview({ onClose }: { onClose: () => void }) {
         <div className="max-h-72 scrollbar-thin overflow-y-auto p-5">
           {summary?.slipped.length ? (
             <>
-              <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
+              <h3 className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
                 Roll to tomorrow?
-              </div>
+              </h3>
               <ul className="flex flex-col gap-1">
                 {summary.slipped.slice(0, 8).map((t) => (
                   <SlipRow key={t.id} task={t} />
