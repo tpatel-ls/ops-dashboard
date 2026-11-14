@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DEVICE_SETUPS } from '@/lib/device-setup';
 import { DevicesHub } from './devices-hub';
 
 // jsdom has no matchMedia; the hub reads it to detect an installed PWA.
@@ -55,5 +56,21 @@ describe('DevicesHub copy buttons', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy Smoke test' }));
 
     expect((await screen.findByRole('alert')).textContent).toContain('Could not copy smoke test');
+  });
+});
+
+describe('DevicesHub outline', () => {
+  it('heads each device card section under the device name', () => {
+    render(createElement(DevicesHub));
+
+    for (const device of DEVICE_SETUPS) {
+      const name = screen.getByRole('heading', { level: 3, name: device.name });
+      const card = name.closest('article')!;
+      expect(
+        within(card)
+          .getAllByRole('heading', { level: 4 })
+          .map((heading) => heading.textContent),
+      ).toEqual(['Setup path', 'Best at', 'Watch for']);
+    }
   });
 });

@@ -314,9 +314,9 @@ function DeviceCard({ device }: { device: DeviceSetup }) {
       </p>
       <div className="space-y-4">
         <div>
-          <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h4 className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
             Setup path
-          </div>
+          </h4>
           <ol className="space-y-1.5">
             {device.installSteps.map((step, index) => (
               <li key={step} className="text-muted-foreground flex gap-2 text-sm leading-5">
@@ -348,9 +348,9 @@ function TagList({
 }) {
   return (
     <div className="min-w-0">
-      <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.16em] uppercase">
+      <h4 className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.16em] uppercase">
         {title}
-      </div>
+      </h4>
       <ul className="space-y-1">
         {items.map((item) => (
           <li key={item} className="text-muted-foreground flex min-w-0 gap-1.5 text-xs leading-5">
