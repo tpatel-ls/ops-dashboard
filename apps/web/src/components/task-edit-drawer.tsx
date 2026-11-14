@@ -110,7 +110,7 @@ export function TaskEditDrawer() {
         className="surface pointer-events-auto relative h-full w-full max-w-md scrollbar-thin overflow-y-auto rounded-none border-y-0 border-r-0 lg:border-l lg:shadow-2xl"
       >
         <header className="border-hairline bg-card/95 sticky top-0 z-10 flex min-h-14 items-center justify-between gap-2 border-b px-4 backdrop-blur sm:px-5">
-          <div className="text-subtle-foreground text-xs font-semibold uppercase">Edit task</div>
+          <h2 className="text-subtle-foreground text-xs font-semibold uppercase">Edit task</h2>
           <div className="flex items-center gap-1">
             {task && task.status !== 'done' ? (
               <button
@@ -633,10 +633,10 @@ function Section({
 }) {
   return (
     <div>
-      <div className="text-subtle-foreground mb-1.5 flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase">
+      <h3 className="text-subtle-foreground mb-1.5 flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase">
         {icon}
         {title}
-      </div>
+      </h3>
       {children}
     </div>
   );
