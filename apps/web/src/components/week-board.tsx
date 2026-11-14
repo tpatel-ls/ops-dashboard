@@ -185,20 +185,32 @@ function DayColumn({
       )}
     >
       <div className="mb-2 flex items-baseline justify-between px-1">
-        <div>
-          <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        {/* The visible "Mon" over "3" has no month, so the heading carries
+            the full date for screen readers. */}
+        <h2>
+          <span className="sr-only">{format(day, 'EEEE, MMMM d')}</span>
+          <span
+            aria-hidden
+            className="text-subtle-foreground block font-mono text-[10px] tracking-[0.18em] uppercase"
+          >
             {format(day, 'EEE')}
-          </div>
-          <div
+          </span>
+          <span
+            aria-hidden
             className={cn(
-              'text-lg leading-none font-semibold tracking-tight',
+              'block text-lg leading-none font-semibold tracking-tight',
               isToday && 'text-primary',
             )}
           >
             {format(day, 'd')}
-          </div>
-        </div>
-        <span className="text-subtle-foreground font-mono text-[10px]">{tasks.length}</span>
+          </span>
+        </h2>
+        <span className="text-subtle-foreground font-mono text-[10px]">
+          <span aria-hidden>{tasks.length}</span>
+          <span className="sr-only">
+            {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+          </span>
+        </span>
       </div>
       <div className="flex flex-col gap-1">
         {tasks.map((t) => (

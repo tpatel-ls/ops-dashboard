@@ -2,6 +2,7 @@
 
 import type { DragEndEvent } from '@dnd-kit/core';
 import { act, cleanup, render, screen } from '@testing-library/react';
+import { format } from 'date-fns';
 import { createElement, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -61,5 +62,18 @@ describe('WeekBoard drops', () => {
     await act(async () => drop('2026-10-01'));
 
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
+describe('WeekBoard day columns', () => {
+  it('heads each day with its full date and spells out the task count', () => {
+    render(createElement(WeekBoard));
+
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(7);
+    // The visible "Mon" over "3" stays out of the name, so it reads once.
+    expect(
+      screen.getByRole('heading', { level: 2, name: format(new Date(), 'EEEE, MMMM d') }),
+    ).toBeTruthy();
+    expect(screen.getAllByText('0 tasks')).toHaveLength(7);
   });
 });
