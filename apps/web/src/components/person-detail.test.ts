@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Person } from '@ops-dashboard/core';
@@ -18,6 +18,20 @@ function renderDetail() {
     createElement(PersonDetail, { person, domains: [], onClose: () => {}, onDeleted: () => {} }),
   );
 }
+
+describe('PersonDetail outline', () => {
+  it('heads the facts and interactions sections under the person name', () => {
+    renderDetail();
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByRole('heading', { level: 2 }).textContent).toBe('Ada');
+    expect(
+      within(dialog)
+        .getAllByRole('heading', { level: 3 })
+        .map((heading) => heading.textContent),
+    ).toEqual(['Facts', 'Interactions']);
+  });
+});
 
 describe('PersonDetail add forms', () => {
   it('reports a rejected fact and keeps the draft', async () => {

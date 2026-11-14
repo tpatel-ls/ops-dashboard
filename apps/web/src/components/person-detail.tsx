@@ -56,9 +56,9 @@ function FactsSection({ person }: { person: Person }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Lightbulb className="text-muted-foreground size-3.5" aria-hidden />
-          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Facts
-          </span>
+          </h3>
           {facts.length > 0 ? (
             <span className="text-subtle-foreground font-mono text-[10px]">({facts.length})</span>
           ) : null}
@@ -198,9 +198,9 @@ function InteractionsSection({ person }: { person: Person }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageSquare className="text-muted-foreground size-3.5" aria-hidden />
-          <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h3 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
             Interactions
-          </span>
+          </h3>
           {interactions.length > 0 ? (
             <span className="text-subtle-foreground font-mono text-[10px]">
               ({interactions.length})
