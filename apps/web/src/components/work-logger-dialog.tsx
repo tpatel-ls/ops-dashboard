@@ -490,6 +490,8 @@ function WorkLoggerPanel({
                 <button
                   type="button"
                   onClick={() => setCreatingOrg((value) => !value)}
+                  aria-expanded={creatingOrg}
+                  aria-controls={creatingOrg ? 'work-new-org' : undefined}
                   className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-xs sm:min-h-8"
                 >
                   <Plus className="size-3.5" aria-hidden />
@@ -516,7 +518,10 @@ function WorkLoggerPanel({
               </div>
 
               {creatingOrg ? (
-                <div className="bg-bg-sunken mt-2 flex flex-col gap-2 rounded-lg border p-3 sm:flex-row">
+                <div
+                  id="work-new-org"
+                  className="bg-bg-sunken mt-2 flex flex-col gap-2 rounded-lg border p-3 sm:flex-row"
+                >
                   <label className="sr-only" htmlFor="new-org-name">
                     Organization name
                   </label>
