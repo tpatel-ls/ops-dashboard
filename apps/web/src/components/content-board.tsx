@@ -376,18 +376,11 @@ export function ContentCard({ item, domain, isOpen, onToggle, domains }: CardPro
 
   return (
     <div className="flex flex-col">
+      {/* The whole card toggles on click, but the keyboard and screen reader
+          control is the title button: a role="button" card would hide the
+          link inside it and read every badge into one long name. */}
       <div
-        role="button"
-        tabIndex={0}
-        aria-expanded={isOpen}
         onClick={onToggle}
-        onKeyDown={(e) => {
-          if (e.target !== e.currentTarget) return;
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onToggle();
-          }
-        }}
         className={cn(
           'surface-flat cursor-pointer px-3 py-3 transition-all',
           'hover:border-border-strong hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]',
@@ -395,9 +388,17 @@ export function ContentCard({ item, domain, isOpen, onToggle, domains }: CardPro
         )}
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="line-clamp-2 min-w-0 flex-1 text-sm leading-snug font-medium">
+          <button
+            type="button"
+            aria-expanded={isOpen}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            className="line-clamp-2 min-w-0 flex-1 text-left text-sm leading-snug font-medium"
+          >
             {item.title}
-          </p>
+          </button>
           {item.url && (
             <a
               href={item.url}
