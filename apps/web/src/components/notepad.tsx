@@ -275,9 +275,9 @@ export function Notepad() {
         ) : (
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between px-1">
-              <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+              <h2 className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
                 This session
-              </span>
+              </h2>
               <Link
                 href="/inbox"
                 className="text-muted-foreground hover:text-foreground text-[11px] transition-colors"
