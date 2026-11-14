@@ -50,6 +50,25 @@ describe('WorkLoggerDialog new organization', () => {
   });
 });
 
+describe('WorkLoggerDialog add org toggle', () => {
+  it('reports whether the new organization form is open', () => {
+    useAppStore.getState().openWorkLogger('project');
+    render(createElement(WorkLoggerDialog));
+    const toggle = screen.getByRole('button', { name: 'Add org' });
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByLabelText('Organization name')).toBeNull();
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    const panel = document.getElementById(toggle.getAttribute('aria-controls')!);
+    expect(panel?.contains(screen.getByLabelText('Organization name'))).toBe(true);
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
 describe('WorkLoggerDialog custom minutes', () => {
   it('stays empty when cleared instead of filling in 0', () => {
     useAppStore.getState().openWorkLogger('progress');
