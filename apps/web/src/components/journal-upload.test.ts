@@ -46,6 +46,44 @@ describe('JournalUpload mood picker', () => {
   });
 });
 
+describe('JournalUpload extracted details', () => {
+  async function analyse(result: object) {
+    fetchWithTimeout.mockResolvedValue({ status: 200, json: async () => ({ ok: true, result }) });
+    render(createElement(JournalUpload));
+    fireEvent.click(screen.getByRole('button', { name: /Paste text/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Journal text to analyze' }), {
+      target: { value: 'Walked.' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Analyse with AI/ }));
+    await screen.findByRole('group', { name: 'Entry mood' });
+  }
+
+  it('lists the extracted tags and habits under their labels', async () => {
+    await analyse({
+      summary: 'A day',
+      body: 'Walked.',
+      mood: 'good',
+      tags: ['walk', 'park'],
+      habitsDone: ['Morning walk'],
+    });
+
+    const items = (name: string) =>
+      Array.from(screen.getByRole('list', { name }).querySelectorAll('li')).map(
+        (item) => item.textContent,
+      );
+    expect(items('Tags')).toEqual(['#walk', '#park']);
+    expect(items('Habits detected')).toEqual(['Morning walk']);
+  });
+
+  it('says when no tags were found instead of showing a bare label', async () => {
+    await analyse({ summary: 'A day', body: 'Walked.', mood: 'good', tags: [], habitsDone: [] });
+
+    expect(screen.queryByRole('list', { name: 'Tags' })).toBeNull();
+    expect(screen.getByText('None found')).toBeTruthy();
+    expect(screen.queryByText('Habits detected')).toBeNull();
+  });
+});
+
 describe('JournalUpload long text', () => {
   it('keeps text longer than the extract route reads as written instead of truncating it', async () => {
     const long = 'Walked by the river. '.repeat(500).trim();

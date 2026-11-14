@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import {
   Camera,
   Check,
@@ -52,6 +52,7 @@ const MOOD_LABEL: Record<string, string> = {
 };
 
 export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
+  const reviewId = useId();
   const [mode, setMode] = useState<Mode>('idle');
   const [stage, setStage] = useState<Stage>('input');
   const [text, setText] = useState('');
@@ -294,39 +295,49 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
             </div>
           </div>
           <div>
-            <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
+            <div
+              id={`${reviewId}-tags`}
+              className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase"
+            >
               Tags
             </div>
-            <div className="flex flex-wrap gap-1">
-              {result.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
+            {result.tags.length > 0 ? (
+              <ul aria-labelledby={`${reviewId}-tags`} className="flex flex-wrap gap-1">
+                {result.tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px]"
+                  >
+                    #{tag}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-subtle-foreground text-[11px]">None found</p>
+            )}
           </div>
         </div>
 
         {/* Habits detected */}
         {result.habitsDone.length > 0 && (
           <div>
-            <div className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase">
+            <div
+              id={`${reviewId}-habits`}
+              className="text-subtle-foreground mb-1 font-mono text-[10px] tracking-[0.18em] uppercase"
+            >
               Habits detected
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <ul aria-labelledby={`${reviewId}-habits`} className="flex flex-wrap gap-1.5">
               {result.habitsDone.map((h) => (
-                <span
+                <li
                   key={h}
                   className="bg-success/15 text-success inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px]"
                 >
-                  <Check className="size-3" strokeWidth={3} />
+                  <Check className="size-3" strokeWidth={3} aria-hidden />
                   {h}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
             <p className="text-subtle-foreground mt-1 text-[11px]">
               These routines will be marked done for today.
             </p>
