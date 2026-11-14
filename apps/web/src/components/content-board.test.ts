@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Content, Domain } from '@ops-dashboard/core';
@@ -74,6 +74,30 @@ describe('ContentCard', () => {
     render(createElement(ContentCard, { item, isOpen: false, onToggle: () => {}, domains: [] }));
 
     expect(screen.getByRole('link', { name: 'Open link: Pilot episode' })).toBeTruthy();
+  });
+
+  it('toggles from a title button that leaves the link outside it', () => {
+    const item = {
+      id: 'c-1',
+      title: 'Pilot episode',
+      type: 'video',
+      status: 'idea',
+      channel: 'YouTube',
+      url: 'https://example.com/pilot',
+      checklist: [],
+    } as unknown as Content;
+    const onToggle = vi.fn();
+    render(createElement(ContentCard, { item, isOpen: false, onToggle, domains: [] }));
+
+    const toggle = screen.getByRole('button', { name: 'Pilot episode' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.contains(screen.getByRole('link'))).toBe(false);
+    expect(toggle.closest('[role="button"]')).toBeNull();
+
+    fireEvent.click(toggle);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByText('YouTube'));
+    expect(onToggle).toHaveBeenCalledTimes(2);
   });
 });
 
