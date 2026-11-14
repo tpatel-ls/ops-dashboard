@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { StrictMode, createElement, useEffect, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, type Task } from '@ops-dashboard/core';
@@ -105,5 +105,15 @@ describe('FocusMode countdown', () => {
 
     expect(screen.queryByRole('button', { name: /Yesterday task/ })).toBeNull();
     expect(screen.getByRole('button', { name: /Tomorrow task/ })).toBeTruthy();
+  });
+
+  it('groups the task choices under their label', async () => {
+    liveQuery.impl = useDepsAwareLiveQuery;
+    tasks = [{ id: 't1', title: 'Draft brief', status: 'doing', priority: 1 }];
+    render(createElement(FocusMode));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+
+    const group = screen.getByRole('group', { name: 'Choose a focus task' });
+    expect(within(group).getByRole('button', { name: /Draft brief/ })).toBeTruthy();
   });
 });
