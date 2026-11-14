@@ -69,6 +69,16 @@ describe('HabitsPage legend', () => {
   });
 });
 
+describe('HabitsPage outline', () => {
+  it('heads the activity heatmap beside the identity sections', () => {
+    render(createElement(HabitsPage));
+
+    expect(
+      screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual(['Identity sections', 'Activity · Last 365 days']);
+  });
+});
+
 describe('HabitsPage share score', () => {
   it('confirms when the score was copied instead of shared', async () => {
     shareOrCopy.mockResolvedValue('copied');

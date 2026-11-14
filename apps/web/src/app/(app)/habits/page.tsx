@@ -293,9 +293,9 @@ export default function HabitsPage() {
 
         {/* Heatmap */}
         <div>
-          <div className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h2 className="text-subtle-foreground mb-2 font-mono text-[10px] tracking-[0.18em] uppercase">
             Activity · Last 365 days
-          </div>
+          </h2>
           {data === undefined ? (
             <div className="surface text-muted-foreground flex h-40 animate-pulse items-center justify-center text-sm">
               Loading…
