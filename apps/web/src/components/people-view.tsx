@@ -1,7 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Calendar, Plus, Search, User, Users, X } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Person } from '@ops-dashboard/core';
@@ -28,6 +28,7 @@ interface CreatePersonFormProps {
 }
 
 export function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps) {
+  const titleId = useId();
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
   const [saving, setSaving] = useState(false);
@@ -52,8 +53,15 @@ export function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="surface flex flex-col gap-3 p-4">
-      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+    <form
+      onSubmit={handleSubmit}
+      aria-labelledby={titleId}
+      className="surface flex flex-col gap-3 p-4"
+    >
+      <div
+        id={titleId}
+        className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase"
+      >
         New person
       </div>
       <input

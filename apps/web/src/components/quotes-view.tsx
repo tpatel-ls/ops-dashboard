@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ChevronDown, ChevronUp, MessageSquarePlus, Plus, Star, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
@@ -38,6 +38,7 @@ interface QuoteFormProps {
 }
 
 export function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
+  const titleId = useId();
   const [text, setText] = useState('');
   const [author, setAuthor] = useState('');
   const [source, setSource] = useState('');
@@ -72,8 +73,15 @@ export function QuoteForm({ onSaved, onCancel }: QuoteFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="surface-flat flex flex-col gap-3 p-4">
-      <div className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+    <form
+      onSubmit={handleSubmit}
+      aria-labelledby={titleId}
+      className="surface-flat flex flex-col gap-3 p-4"
+    >
+      <div
+        id={titleId}
+        className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase"
+      >
         New Quote
       </div>
       <textarea
