@@ -172,7 +172,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
       await updateTask(task.id, patch);
       return true;
     } catch (err) {
-      setSaveError(`Could not save that change. ${err instanceof Error ? err.message : ''}`.trim());
+      setSaveError(saveErrorMessage('Could not save that change.', err));
       return false;
     }
   }

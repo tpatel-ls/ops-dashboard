@@ -91,7 +91,7 @@ describe('MetaSection due date', () => {
     });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Project due date must not precede its start date.',
+      'Could not save this change. Project due date must not precede its start date.',
     );
   });
 });
