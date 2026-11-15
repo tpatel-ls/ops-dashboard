@@ -76,7 +76,9 @@ export function OrgLaneLegend({
   onToggle: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    // Each chip is named only by its lane ("Acme, pressed"), so the group says
+    // what pressing them does.
+    <div role="group" aria-label="Lanes shown" className="flex flex-wrap items-center gap-1.5">
       {lanes.map((lane) => {
         const off = hidden.has(lane.id);
         return (
