@@ -23,6 +23,19 @@ export function tasksForTodayRail(tasks: Task[], day: string): Task[] {
     });
 }
 
+/**
+ * The first block still ahead of `now`, for the rail's "Next block" line.
+ *
+ * The rail keeps finished tasks so the day reads as it happened, but a task
+ * ticked off early is not what comes next. Offering it pointed at work that
+ * was already done while the real next block went unmentioned.
+ */
+export function nextRailBlock(blocks: readonly Task[], now: Date): Task | undefined {
+  return blocks.find(
+    (task) => task.status !== 'done' && Date.parse(task.startAt!) >= now.getTime(),
+  );
+}
+
 export function validRailEnd(startAt: unknown, endAt: unknown): Date | undefined {
   if (typeof startAt !== 'string' || typeof endAt !== 'string' || !endAt) return undefined;
   const start = Date.parse(startAt);
