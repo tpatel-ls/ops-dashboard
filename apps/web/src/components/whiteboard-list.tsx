@@ -8,6 +8,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { getDb } from '@ops-dashboard/core';
 import { createWhiteboard, softDeleteWhiteboard } from '@/lib/whiteboards';
 import { compareWhiteboardUpdates, whiteboardUpdatedLabel } from '@/lib/whiteboard-presentation';
+import { saveErrorMessage } from '@/lib/save-error';
 
 export function WhiteboardList() {
   const [name, setName] = useState('');
@@ -29,8 +30,10 @@ export function WhiteboardList() {
           try {
             await createWhiteboard(text);
             setName('');
-          } catch {
-            setError('Could not create this whiteboard. Your name is still here.');
+          } catch (err) {
+            setError(
+              saveErrorMessage('Could not create this whiteboard. Your name is still here.', err),
+            );
           }
         }}
         className="surface flex min-w-0 items-center gap-2 px-3 py-2"

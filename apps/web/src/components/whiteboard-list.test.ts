@@ -27,7 +27,7 @@ describe('WhiteboardList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not create this whiteboard. Your name is still here.',
+      'Could not create this whiteboard. Your name is still here. Whiteboard name must contain at most 200 characters.',
     );
     expect((screen.getByLabelText('Whiteboard name') as HTMLInputElement).value).toBe(name);
   });

@@ -6,7 +6,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const fetchWithTimeout = vi.fn();
 vi.mock('@/lib/fetch-timeout', () => ({ fetchWithTimeout }));
-vi.mock('@/lib/journal', () => ({ createJournalEntry: vi.fn() }));
+const createJournalEntry = vi.fn();
+vi.mock('@/lib/journal', () => ({ createJournalEntry }));
 vi.mock('@/lib/routines', () => ({ toggleRoutineCheck: vi.fn() }));
 vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
@@ -18,6 +19,7 @@ const { JournalUpload } = await import('./journal-upload');
 afterEach(() => {
   cleanup();
   fetchWithTimeout.mockReset();
+  createJournalEntry.mockReset();
 });
 
 describe('JournalUpload mood picker', () => {
@@ -99,5 +101,29 @@ describe('JournalUpload long text', () => {
       (screen.getByRole('textbox', { name: 'Journal entry' }) as HTMLTextAreaElement).value,
     ).toBe(long);
     expect(fetchWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it('says why a manual entry was rejected and keeps the text', async () => {
+    // The real validator rejects a body over 50000 characters before touching the database.
+    const { createJournalEntry: realCreate } =
+      await vi.importActual<typeof import('@/lib/journal')>('@/lib/journal');
+    createJournalEntry.mockImplementation(realCreate);
+    const long = 'x'.repeat(50_001);
+    render(createElement(JournalUpload));
+    fireEvent.click(screen.getByRole('button', { name: /Paste text/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Journal text to analyze' }), {
+      target: { value: long },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Analyse with AI/ }));
+    await screen.findByRole('textbox', { name: 'Journal entry' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save entry' }));
+
+    expect(await screen.findByText(/at most 50000 characters/)).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toBe(
+      'Could not save this entry. Your text is still here. Journal entry body must contain at most 50000 characters.',
+    );
+    expect(
+      (screen.getByRole('textbox', { name: 'Journal entry' }) as HTMLTextAreaElement).value,
+    ).toBe(long);
   });
 });
