@@ -8,7 +8,7 @@ import { cn } from '@ops-dashboard/ui';
 import { usePageVisibility } from '@/lib/use-page-visibility';
 import { useLiveSettings } from '@/lib/use-settings';
 import { useToday } from '@/lib/use-today';
-import { railHourRange, tasksForTodayRail, validRailEnd } from '@/lib/today-rail';
+import { nextRailBlock, railHourRange, tasksForTodayRail, validRailEnd } from '@/lib/today-rail';
 
 const HOUR_HEIGHT = 44;
 
@@ -42,7 +42,7 @@ export function TodayRail() {
   const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
   const minutesIntoDay = (d: Date) => (d.getHours() - startHour) * 60 + d.getMinutes();
   const nowOffset = (minutesIntoDay(now) / 60) * HOUR_HEIGHT;
-  const nextBlock = blocks?.filter((task) => Date.parse(task.startAt!) >= now.getTime())[0];
+  const nextBlock = blocks ? nextRailBlock(blocks, now) : undefined;
 
   return (
     <div className="surface flex h-full flex-col overflow-hidden">

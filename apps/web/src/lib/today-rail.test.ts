@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { railHourRange, tasksForTodayRail, validRailEnd } from './today-rail';
+import { nextRailBlock, railHourRange, tasksForTodayRail, validRailEnd } from './today-rail';
 
 function task(id: string, startAt: string, patch: Partial<Task> = {}): Task {
   return {
@@ -83,6 +83,26 @@ describe('validRailEnd', () => {
   it('ignores non-string times from malformed synced blocks', () => {
     expect(validRailEnd(123, '2026-08-20T15:00:00Z')).toBeUndefined();
     expect(validRailEnd('2026-08-20T14:00:00Z', 456)).toBeUndefined();
+  });
+});
+
+describe('nextRailBlock', () => {
+  const at = (hour: number) => new Date(2026, 8, 21, hour, 0, 0).toISOString();
+  const now = new Date(2026, 8, 21, 12, 0, 0);
+
+  it('returns the first block that starts at or after now', () => {
+    const blocks = [task('morning', at(9)), task('noon', at(12)), task('later', at(15))];
+    expect(nextRailBlock(blocks, now)?.id).toBe('noon');
+  });
+
+  it('skips a block that was finished ahead of time', () => {
+    const blocks = [task('done-early', at(13), { status: 'done' }), task('later', at(15))];
+    expect(nextRailBlock(blocks, now)?.id).toBe('later');
+  });
+
+  it('returns nothing when only past or finished blocks remain', () => {
+    const blocks = [task('morning', at(9)), task('done-early', at(13), { status: 'done' })];
+    expect(nextRailBlock(blocks, now)).toBeUndefined();
   });
 });
 
