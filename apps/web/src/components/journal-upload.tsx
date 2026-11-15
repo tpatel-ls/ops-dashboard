@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getDb, matchByName, todayIso } from '@ops-dashboard/core';
 import { createJournalEntry } from '@/lib/journal';
+import { saveErrorMessage } from '@/lib/save-error';
 import { toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { fetchWithTimeout } from '@/lib/fetch-timeout';
@@ -194,7 +195,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       onSaved?.();
     } catch (err) {
       console.error('[journal-upload] save error:', err);
-      setError('Failed to save. Please try again.');
+      setError(saveErrorMessage('Could not save this entry. Your text is still here.', err));
       setSaving(false);
     }
   }
@@ -209,7 +210,7 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       onSaved?.();
     } catch (err) {
       console.error('[journal-upload] manual save error:', err);
-      setError('Failed to save. Please try again.');
+      setError(saveErrorMessage('Could not save this entry. Your text is still here.', err));
       setSaving(false);
     }
   }
