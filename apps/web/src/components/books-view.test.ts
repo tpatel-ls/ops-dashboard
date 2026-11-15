@@ -71,7 +71,7 @@ describe('BookCard', () => {
     fireEvent.change(screen.getByLabelText('Reading status'), { target: { value: 'reading' } });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Book finish date must not precede its start date.',
+      'Could not save this change. Book finish date must not precede its start date.',
     );
   });
 

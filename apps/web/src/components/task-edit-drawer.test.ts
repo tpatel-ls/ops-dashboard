@@ -214,6 +214,20 @@ describe('TaskEditDrawer save errors', () => {
     );
   });
 
+  it('keeps a database failure to the generic message instead of its technical text', async () => {
+    const tasks = await import('@/lib/tasks');
+    vi.mocked(tasks.updateTask).mockRejectedValueOnce(
+      new DOMException('Encountered full disk while opening backing store', 'QuotaExceededError'),
+    );
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo' } as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    fireEvent.change(await screen.findByLabelText('Estimate (m)'), { target: { value: '30' } });
+
+    expect((await screen.findByRole('alert')).textContent).toBe('Could not save that change.');
+  });
+
   it('names the estimate field when it rejects a fractional estimate', async () => {
     const tasks = await import('@/lib/tasks');
     const actual = await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks');

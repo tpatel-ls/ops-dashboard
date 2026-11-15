@@ -229,7 +229,7 @@ export function BookCard({ book, quotes }: BookCardProps) {
     try {
       await updateBook(book.id, patch);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save this change.');
+      setError(saveErrorMessage('Could not save this change.', err));
     }
   }
 

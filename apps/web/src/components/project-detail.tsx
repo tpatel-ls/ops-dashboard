@@ -732,7 +732,7 @@ export function MetaSection({ project, domains }: { project: Project; domains: D
     try {
       await updateProject(project.id, { [key]: value } as Partial<Project>);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save this change.');
+      setError(saveErrorMessage('Could not save this change.', err));
     }
   }
 
