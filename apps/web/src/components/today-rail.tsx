@@ -94,19 +94,22 @@ export function TodayRail() {
             const height = end
               ? Math.max(20, ((end.getTime() - start.getTime()) / 1000 / 60 / 60) * HOUR_HEIGHT)
               : 32;
+            const done = t.status === 'done';
             return (
               <div
                 key={t.id}
                 className={cn(
                   'border-primary/30 bg-primary/15 text-foreground absolute right-2 left-14 rounded-md border px-2 py-1 text-[11px]',
                   'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]',
+                  done && 'border-border bg-bg-sunken text-muted-foreground',
                 )}
                 style={{ top, height }}
               >
-                <div className="truncate font-medium">{t.title}</div>
+                <div className={cn('truncate font-medium', done && 'line-through')}>{t.title}</div>
                 <div className="text-muted-foreground font-mono text-[10px]">
                   {format(start, 'HH:mm')}
                   {end ? <> to {format(end, 'HH:mm')}</> : null}
+                  {done ? <> · done</> : null}
                 </div>
               </div>
             );
