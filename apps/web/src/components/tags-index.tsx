@@ -43,6 +43,8 @@ export function TagsIndex() {
             type="button"
             onClick={() => setSelectedTag(activeTag === tag ? null : tag)}
             aria-pressed={activeTag === tag}
+            // The bare count read as "#urgent 3", with nothing saying what it counts.
+            aria-label={`#${tag}, ${count} ${count === 1 ? 'task' : 'tasks'}`}
             className="bg-card hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-primary inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-xs transition-colors"
           >
             <span className="text-foreground">#{tag}</span>
