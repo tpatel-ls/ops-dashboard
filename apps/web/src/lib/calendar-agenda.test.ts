@@ -4,6 +4,7 @@ import type { Task } from '@ops-dashboard/core';
 import {
   CALENDAR_START_HOUR,
   calendarDateOf,
+  calendarGridMinutes,
   calendarGridSlot,
   calendarInstant,
   calendarKindOf,
@@ -229,5 +230,25 @@ describe('calendarGridSlot', () => {
 
   it('keeps the last hour row for a late-evening block', () => {
     expect(calendarGridSlot(new Date(2026, 9, 29, 23, 15))).toEqual({ hour: 23, minute: 15 });
+  });
+});
+
+describe('calendarGridMinutes', () => {
+  const at = (hour: number, minute = 0) => new Date(2026, 10, 16, hour, minute);
+
+  it('covers the block from its start to its end', () => {
+    expect(calendarGridMinutes(at(9), at(10, 30))).toBe(90);
+  });
+
+  it('measures a pinned early block from the top of the grid', () => {
+    // Drawn from 06:00, a 05:00 to 07:00 block must end at 07:00, not 08:00.
+    expect(calendarGridMinutes(at(5), at(7))).toBe(60);
+    expect(calendarGridMinutes(at(0), at(CALENDAR_START_HOUR, 45))).toBe(45);
+  });
+
+  it('keeps a minimum height and a default for an open-ended block', () => {
+    expect(calendarGridMinutes(at(5), at(5, 30))).toBe(15);
+    expect(calendarGridMinutes(at(9), at(9, 5))).toBe(15);
+    expect(calendarGridMinutes(at(9), undefined)).toBe(30);
   });
 });
