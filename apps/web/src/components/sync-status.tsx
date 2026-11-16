@@ -8,7 +8,10 @@ const META: Record<SyncState, { label: string; color: string }> = {
   'signed-out': { label: 'Sign in to sync', color: 'var(--color-warning)' },
   connecting: { label: 'Connecting', color: 'var(--color-warning)' },
   live: { label: 'Synced', color: 'var(--color-success)' },
-  offline: { label: 'Offline, queued', color: 'var(--color-warning)' },
+  // The pending badge says how much is queued. Putting "queued" in the label
+  // too claimed queued changes when there were none and read "Offline, queued
+  // 3 queued" when there were.
+  offline: { label: 'Offline', color: 'var(--color-warning)' },
   error: { label: 'Sync needs attention', color: 'var(--color-destructive)' },
 };
 
