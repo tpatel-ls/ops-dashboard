@@ -291,6 +291,7 @@ function AllDay({
                   key={task.id}
                   type="button"
                   onClick={() => onOpen(task.id)}
+                  aria-label={`${task.title}, ${kind === 'due' ? 'due' : 'scheduled'} ${format(day, 'EEEE, MMMM d')}`}
                   className="text-foreground flex min-w-0 items-center gap-1.5 rounded-md border px-1.5 py-1 text-left text-[11px] transition-all hover:brightness-110"
                   style={{
                     background: `color-mix(in oklch, ${color} 16%, transparent)`,
@@ -360,6 +361,9 @@ function Hour({
                   key={t.id}
                   type="button"
                   onClick={() => onOpen(t.id)}
+                  // The grid cell carries no day of its own, so without this a
+                  // repeated block read as the same "Standup 09:00" every day.
+                  aria-label={`${t.title}, ${format(start, 'EEEE, MMMM d, HH:mm')}`}
                   className="text-foreground absolute right-0.5 left-0.5 truncate rounded-md border px-1.5 py-1 text-left text-[11px] transition-all hover:brightness-110"
                   style={{
                     top,

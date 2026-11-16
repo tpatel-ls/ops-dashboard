@@ -3,11 +3,12 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { isoDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const today = isoDay(new Date());
+const now = new Date();
+const today = isoDay(now);
 const farAway = isoDay(addDays(new Date(), 60));
 
 function task(overrides: Partial<Task>): Task {
@@ -26,6 +27,10 @@ const tasks: Task[] = [
   task({ title: 'Plan offsite', scheduledFor: today }),
   task({ title: 'File taxes', dueAt: today }),
   task({ title: 'Next quarter', scheduledFor: farAway }),
+  task({
+    title: 'Standup',
+    startAt: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 30).toISOString(),
+  }),
 ];
 
 vi.mock('dexie-react-hooks', async () => {
@@ -62,9 +67,19 @@ describe('CalendarWeek desktop grid', () => {
     render(createElement(CalendarWeek));
 
     expect(await screen.findByText('All day')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Plan offsite Scheduled' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'File taxes Due' })).toBeTruthy();
+    const day = format(now, 'EEEE, MMMM d');
+    expect(screen.getByRole('button', { name: `Plan offsite, scheduled ${day}` })).toBeTruthy();
+    expect(screen.getByRole('button', { name: `File taxes, due ${day}` })).toBeTruthy();
     // Outside the shown week: neither the agenda nor the grid lists it.
     expect(screen.queryByText('Next quarter')).toBeNull();
+  });
+
+  // A grid cell has no day of its own, so a block named only by its visible
+  // text ("Standup 09:30") was the same for every day of the week.
+  it('names a time block by its day and start time', async () => {
+    render(createElement(CalendarWeek));
+
+    const day = format(now, 'EEEE, MMMM d');
+    expect(await screen.findByRole('button', { name: `Standup, ${day}, 09:30` })).toBeTruthy();
   });
 });
