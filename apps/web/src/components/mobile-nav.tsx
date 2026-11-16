@@ -42,7 +42,10 @@ export function MobileNav() {
         >
           <Plus className="size-5" aria-hidden />
         </button>
-        <span className="text-primary mt-1 text-[10px] font-medium">Add</span>
+        {/* The button is already named "Add task"; this caption is visual only. */}
+        <span className="text-primary mt-1 text-[10px] font-medium" aria-hidden>
+          Add
+        </span>
       </div>
       {RIGHT.map((it) => (
         <Tab key={it.href} {...it} active={isActive(pathname, it)} />
