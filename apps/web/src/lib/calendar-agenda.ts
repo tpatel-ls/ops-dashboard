@@ -94,3 +94,21 @@ export function calendarGridSlot(start: Date): { hour: number; minute: number } 
   if (hour < CALENDAR_START_HOUR) return { hour: CALENDAR_START_HOUR, minute: 0 };
   return { hour: Math.min(hour, CALENDAR_END_HOUR), minute: start.getMinutes() };
 }
+
+/**
+ * Minutes of grid height a time block covers, measured from where it is drawn.
+ *
+ * A block that starts before `CALENDAR_START_HOUR` is pinned to the top of the
+ * first row, but its height used to be its full duration, so a 05:00 to 07:00
+ * block was drawn as 06:00 to 08:00. Measuring from the pinned start keeps the
+ * bottom edge at the real end. Blocks with no end draw as 30 minutes, and no
+ * block draws shorter than 15.
+ */
+export function calendarGridMinutes(start: Date, end: Date | undefined): number {
+  if (!end) return 30;
+  const drawnStart =
+    start.getHours() < CALENDAR_START_HOUR
+      ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), CALENDAR_START_HOUR)
+      : start;
+  return Math.max(15, (end.getTime() - drawnStart.getTime()) / 60000);
+}

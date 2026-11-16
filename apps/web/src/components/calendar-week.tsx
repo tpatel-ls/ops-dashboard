@@ -15,6 +15,7 @@ import {
   CALENDAR_END_HOUR,
   CALENDAR_START_HOUR,
   calendarDateOf,
+  calendarGridMinutes,
   calendarGridSlot,
   calendarInstant,
   calendarKindOf,
@@ -352,7 +353,7 @@ function Hour({
             {blocks.map((t) => {
               const start = calendarInstant(t.startAt)!;
               const end = calendarInstant(t.endAt);
-              const minutes = end ? Math.max(15, (end.getTime() - start.getTime()) / 60000) : 30;
+              const minutes = calendarGridMinutes(start, end);
               const top = (calendarGridSlot(start).minute / 60) * HOUR_HEIGHT;
               const height = (minutes / 60) * HOUR_HEIGHT - 2;
               const color = laneColor(t);
