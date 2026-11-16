@@ -48,6 +48,13 @@ export function CalendarWeek() {
   const lanes = useOrgLanes(projectsMap);
   const visibleTasks = (tasks ?? []).filter((t) => lanes.visible(t));
   const timedTasks = visibleTasks.filter((task) => calendarInstant(task.startAt));
+  // Scheduled and due tasks with no time block have no hour row. The mobile
+  // agenda lists them, so the desktop grid gives them an all-day row instead of
+  // dropping them.
+  const weekDayIsos = new Set(days.map(isoDay));
+  const allDayTasks = visibleTasks
+    .filter((task) => !calendarInstant(task.startAt) && weekDayIsos.has(calendarDateOf(task) ?? ''))
+    .sort(compareCalendarTasks);
 
   const openEdit = useAppStore((s) => s.openEdit);
   const today = useToday();
@@ -134,6 +141,14 @@ export function CalendarWeek() {
                 </div>
               );
             })}
+            {allDayTasks.length > 0 ? (
+              <AllDay
+                days={days}
+                tasks={allDayTasks}
+                laneColor={(t) => lanes.colorOf(lanes.laneOf(t))}
+                onOpen={openEdit}
+              />
+            ) : null}
             {hours.map((h) => (
               <Hour
                 key={h}
@@ -241,6 +256,63 @@ function MobileDayAgenda({
         })}
       </div>
     </section>
+  );
+}
+
+function AllDay({
+  days,
+  tasks,
+  laneColor,
+  onOpen,
+}: {
+  days: Date[];
+  tasks: Task[];
+  laneColor: (t: Task) => string;
+  onOpen: (id: string) => void;
+}) {
+  return (
+    <>
+      <div className="hairline text-subtle-foreground border-b py-1.5 pr-1 text-right font-mono text-[10px]">
+        All day
+      </div>
+      {days.map((day) => {
+        const dayIso = isoDay(day);
+        const blocks = tasks.filter((task) => calendarDateOf(task) === dayIso);
+        return (
+          <div
+            key={`${dayIso}-all-day`}
+            className="hairline flex min-w-0 flex-col gap-1 border-b border-l p-1"
+          >
+            {blocks.map((task) => {
+              const color = laneColor(task);
+              const kind = calendarKindOf(task);
+              return (
+                <button
+                  key={task.id}
+                  type="button"
+                  onClick={() => onOpen(task.id)}
+                  className="text-foreground flex min-w-0 items-center gap-1.5 rounded-md border px-1.5 py-1 text-left text-[11px] transition-all hover:brightness-110"
+                  style={{
+                    background: `color-mix(in oklch, ${color} 16%, transparent)`,
+                    borderColor: `color-mix(in oklch, ${color} 40%, transparent)`,
+                  }}
+                >
+                  <span className="min-w-0 flex-1 truncate font-medium">{task.title}</span>
+                  <span
+                    className={cn(
+                      'shrink-0 text-[10px]',
+                      kind === 'due' ? 'text-warning' : 'text-muted-foreground',
+                    )}
+                  >
+                    {kind === 'due' ? 'Due' : 'Scheduled'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })}
+    </>
   );
 }
 
