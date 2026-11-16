@@ -377,7 +377,16 @@ export function PowerDialerCommandCenter() {
                     <p className="text-muted-foreground mt-1 min-h-12 text-xs leading-5">
                       {capability.detail}
                     </p>
-                    <div className="bg-card mt-3 h-1.5 overflow-hidden rounded-full">
+                    {/* The card prints no percentage, so the bar is the only
+                        place its progress shows. */}
+                    <div
+                      className="bg-card mt-3 h-1.5 overflow-hidden rounded-full"
+                      role="progressbar"
+                      aria-label={`${capability.title} tasks done`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progress.pct}
+                    >
                       <div
                         className="bg-primary h-full rounded-full"
                         style={{ width: `${progress.pct}%` }}

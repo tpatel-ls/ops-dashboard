@@ -54,3 +54,18 @@ describe('PowerDialerCommandCenter launch plan sync', () => {
     expect(await screen.findByRole('button', { name: 'Sync launch plan' })).toBeTruthy();
   });
 });
+
+describe('PowerDialerCommandCenter capability cards', () => {
+  // A capability card shows its task count but no percentage, so its bar was
+  // the only place progress appeared, and a screen reader got nothing from it.
+  it('exposes each capability bar as a named progressbar', () => {
+    render(createElement(PowerDialerCommandCenter));
+
+    const bars = screen.getAllByRole('progressbar');
+    expect(bars.length).toBeGreaterThan(0);
+    for (const bar of bars) {
+      expect(bar.getAttribute('aria-label')).toMatch(/ tasks done$/);
+      expect(bar.getAttribute('aria-valuenow')).toBe('0');
+    }
+  });
+});
