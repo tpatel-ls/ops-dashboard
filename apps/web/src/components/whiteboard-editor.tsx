@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
 import { availableWhiteboard, saveWhiteboard } from '@/lib/whiteboards';
 import { latestSingleFlight } from '@/lib/trailing-single-flight';
@@ -25,6 +25,10 @@ export function WhiteboardEditor({ id }: { id: string }) {
     () => latestSingleFlight((document: unknown) => saveWhiteboard(id, document)),
     [id],
   );
+  // The catch below used to be silent. A later change does retry, but a user
+  // who stops editing after a failed save (a full storage quota, say) was never
+  // told the board on screen is not the one on disk.
+  const [saveFailed, setSaveFailed] = useState(false);
 
   if (board === undefined) {
     return (
@@ -43,15 +47,28 @@ export function WhiteboardEditor({ id }: { id: string }) {
   }
 
   return (
-    <div className="surface relative h-[calc(100vh-180px)] overflow-hidden">
-      <OpsCanvas
-        initialDocument={board.document}
-        onSnapshot={(doc) => {
-          void saveSnapshot(doc).catch(() => {
-            // A later canvas change retries with the latest full snapshot.
-          });
-        }}
-      />
-    </div>
+    <>
+      {/* Above the canvas, not over it, so it never covers the tldraw menus. */}
+      {saveFailed ? (
+        <p
+          role="alert"
+          className="bg-destructive/10 text-destructive border-destructive/30 mb-2 rounded-md border px-3 py-2 text-xs"
+        >
+          Could not save the latest whiteboard changes. Your next edit will try again.
+        </p>
+      ) : null}
+      <div className="surface relative h-[calc(100vh-180px)] overflow-hidden">
+        <OpsCanvas
+          initialDocument={board.document}
+          onSnapshot={(doc) => {
+            void saveSnapshot(doc).then(
+              () => setSaveFailed(false),
+              // A later canvas change retries with the latest full snapshot.
+              () => setSaveFailed(true),
+            );
+          }}
+        />
+      </div>
+    </>
   );
 }
