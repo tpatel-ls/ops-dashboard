@@ -14,8 +14,14 @@ vi.mock('@/lib/server/guard', () => ({
   bearerSecretMatches: (authorization: string | null, secret: string | undefined) =>
     authorization === `Bearer ${secret}`,
 }));
-vi.mock('@/lib/server/timezone', () => ({ normalizeTimezoneOffset: () => undefined }));
-vi.mock('@/lib/server/capture-time', () => ({ captureParserNow: () => new Date() }));
+vi.mock('@/lib/server/timezone', () => ({
+  normalizeTimezoneOffset: () => undefined,
+  timeZoneOffsetMinutes: () => undefined,
+}));
+vi.mock('@/lib/server/capture-time', () => ({
+  captureCallerInstant: (iso: string) => iso,
+  captureParserNow: () => new Date(),
+}));
 vi.mock('@/lib/server/input', () => ({
   boundedText: (value: unknown) => (typeof value === 'string' ? value.trim() : ''),
 }));

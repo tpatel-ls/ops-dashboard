@@ -10,7 +10,7 @@ import type {
 } from '@ops-dashboard/core';
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { bearerSecretMatches, requestAllowed } from '@/lib/server/guard';
-import { normalizeTimezoneOffset } from '@/lib/server/timezone';
+import { normalizeTimezoneOffset, timeZoneOffsetMinutes } from '@/lib/server/timezone';
 import { captureCallerInstant, captureParserNow } from '@/lib/server/capture-time';
 import { boundedText } from '@/lib/server/input';
 import { triageRequest } from '@/lib/server/triage-request';
@@ -102,9 +102,16 @@ export async function POST(req: Request): Promise<Response> {
   let raw = '';
   let tzOffsetMinutes: number | undefined;
   try {
-    const body = (await req.json()) as { raw?: unknown; tzOffsetMinutes?: unknown };
+    const body = (await req.json()) as {
+      raw?: unknown;
+      timeZone?: unknown;
+      tzOffsetMinutes?: unknown;
+    };
     raw = boundedText(body?.raw, MAX_RAW);
-    tzOffsetMinutes = normalizeTimezoneOffset(body?.tzOffsetMinutes);
+    // A zone name follows daylight saving; a fixed offset from a saved
+    // shortcut does not, so prefer the zone when both are sent.
+    tzOffsetMinutes =
+      timeZoneOffsetMinutes(body?.timeZone) ?? normalizeTimezoneOffset(body?.tzOffsetMinutes);
   } catch {
     /* malformed body */
   }
