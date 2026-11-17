@@ -181,6 +181,28 @@ describe('latestInteraction', () => {
   });
 });
 
+describe('interaction recency with a picked date', () => {
+  // The suite runs in Chicago, where UTC midnight on the 25th is 7pm on the 24th.
+  const yesterdayEvening = { id: 'evening', date: '2026-08-25T01:30:00.000Z', note: 'Evening' };
+  const datedToday = { id: 'dated', date: '2026-08-25', note: 'Dated' };
+
+  it('counts a date-only interaction from local midnight', () => {
+    expect(latestInteraction([yesterdayEvening, datedToday])?.id).toBe('dated');
+    expect([yesterdayEvening, datedToday].sort(compareInteractionRecency).map((i) => i.id)).toEqual(
+      ['dated', 'evening'],
+    );
+  });
+
+  it('keeps an impossible calendar day behind valid ones', () => {
+    const impossible = { id: 'impossible', date: '2026-02-30', note: 'Bad' };
+    expect(latestInteraction([impossible, yesterdayEvening])?.id).toBe('evening');
+    expect([impossible, datedToday].sort(compareInteractionRecency).map((i) => i.id)).toEqual([
+      'dated',
+      'impossible',
+    ]);
+  });
+});
+
 describe('compareInteractionRecency', () => {
   it('orders valid interactions newest first and malformed dates last', () => {
     const interactions = [
