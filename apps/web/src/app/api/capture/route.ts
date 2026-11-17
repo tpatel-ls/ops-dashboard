@@ -11,7 +11,7 @@ import type {
 import { getAnthropic, MODELS } from '@/lib/server/ai';
 import { bearerSecretMatches, requestAllowed } from '@/lib/server/guard';
 import { normalizeTimezoneOffset } from '@/lib/server/timezone';
-import { captureParserNow } from '@/lib/server/capture-time';
+import { captureCallerInstant, captureParserNow } from '@/lib/server/capture-time';
 import { boundedText } from '@/lib/server/input';
 import { triageRequest } from '@/lib/server/triage-request';
 import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
@@ -53,16 +53,15 @@ function meta(deviceId: string) {
 }
 
 /**
- * Shift parsed time INSTANTS (dueAt/startAt/endAt) from the server-UTC frame into
- * the caller's local time. `scheduledFor` is deliberately left untouched: it is a
+ * Shift parsed time INSTANTS (dueAt/startAt/endAt) from the server's local frame
+ * into the caller's local time. `scheduledFor` is deliberately left untouched: it is a
  * date-only LOCAL calendar day that the parser already set from the user's
  * wall-clock text. Re-deriving it from the shifted UTC instant would land it on
  * the wrong day whenever the local time straddles UTC midnight.
  */
 function applyTzOffset(task: Task, tzOffsetMinutes: number | undefined): Task {
   if (typeof tzOffsetMinutes !== 'number' || !Number.isFinite(tzOffsetMinutes)) return task;
-  const shift = (iso?: string) =>
-    iso ? new Date(new Date(iso).getTime() + tzOffsetMinutes * 60_000).toISOString() : iso;
+  const shift = (iso?: string) => (iso ? captureCallerInstant(iso, tzOffsetMinutes) : iso);
   const dueAt = shift(task.dueAt);
   const startAt = shift(task.startAt);
   const endAt = shift(task.endAt);
