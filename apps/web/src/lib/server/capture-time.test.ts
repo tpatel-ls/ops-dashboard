@@ -49,6 +49,19 @@ describe('capture times on a server that is not in UTC', () => {
     expect(captureCallerInstant(parsed.startAt!, -540)).toBe('2026-08-25T00:00:00.000Z');
   });
 
+  it('keeps a wall-clock time across a daylight saving change when the zone is known', () => {
+    // 30 October in New York is still on EDT (offset 240); 3 November is EST.
+    const serverNow = new Date('2026-10-30T14:00:00.000Z');
+    const parsed = parseQuickAdd('Call November 3 at 9am', captureParserNow(240, serverNow));
+
+    expect(parsed.scheduledFor).toBe('2026-11-03');
+    expect(captureCallerInstant(parsed.startAt!, 240, 'America/New_York')).toBe(
+      '2026-11-03T14:00:00.000Z',
+    );
+    // With only today's fixed offset the block lands an hour early.
+    expect(captureCallerInstant(parsed.startAt!, 240)).toBe('2026-11-03T13:00:00.000Z');
+  });
+
   it('leaves the instant alone without a usable caller offset', () => {
     expect(captureCallerInstant('2026-08-25T09:00:00.000Z', undefined)).toBe(
       '2026-08-25T09:00:00.000Z',
