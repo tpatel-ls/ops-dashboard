@@ -23,11 +23,16 @@ describe('relativeTimeLabel', () => {
     expect(relativeTimeLabel('2026-07-31T12:00:00.000Z')).toBe('in 3 days');
   });
 
-  it('accepts a date-only value', () => {
+  it('counts a date-only value in calendar days, not hours since midnight', () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-07-28T12:00:00.000Z'));
+    // 20:00 on 28 July in Chicago, where the suite runs.
+    vi.setSystemTime(new Date('2026-07-29T01:00:00.000Z'));
 
-    expect(relativeTimeLabel('2026-07-28')).toBeTypeOf('string');
+    expect(relativeTimeLabel('2026-07-28')).toBe('today');
+    expect(relativeTimeLabel('2026-07-27')).toBe('yesterday');
+    expect(relativeTimeLabel('2026-07-29')).toBe('tomorrow');
+    expect(relativeTimeLabel('2026-07-25')).toBe('3 days ago');
+    expect(relativeTimeLabel('2026-08-04')).toBe('in 7 days');
   });
 
   it('returns undefined for a missing value', () => {
