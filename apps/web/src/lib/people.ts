@@ -5,7 +5,7 @@ import type { Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { compareText } from './compare-text';
 import { normalizeStringList } from './string-list';
-import { newestFirstBy } from './recency';
+import { newestFirstBy, recencyTimestamp } from './recency';
 
 const MAX_PERSON_FACTS = 100;
 const MAX_PERSON_INTERACTIONS = 500;
@@ -269,7 +269,7 @@ export function latestInteraction(interactions: unknown): Interaction | null {
     ) {
       continue;
     }
-    const timestamp = Date.parse(candidate.date);
+    const timestamp = recencyTimestamp(candidate.date);
     if (!Number.isFinite(timestamp)) continue;
     if (
       timestamp > latestTimestamp ||
