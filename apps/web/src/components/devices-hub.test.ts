@@ -74,3 +74,22 @@ describe('DevicesHub outline', () => {
     }
   });
 });
+
+describe('DevicesHub watch body', () => {
+  it('sends the zone name so a saved shortcut survives daylight saving changes', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    stubClipboard({ writeText });
+    render(createElement(DevicesHub));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy Tasker body' }));
+
+    await screen.findByRole('button', { name: 'Tasker body copied' });
+    const body = JSON.parse(String(writeText.mock.calls[0]?.[0])) as Record<string, unknown>;
+    expect(body).toEqual({
+      raw: '%VOICE',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      tzOffsetMinutes: new Date().getTimezoneOffset(),
+    });
+    expect(body.timeZone).toBe('America/Chicago');
+  });
+});

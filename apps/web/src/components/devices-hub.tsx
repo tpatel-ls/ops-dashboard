@@ -100,8 +100,21 @@ export function DevicesHub() {
   }, []);
 
   const watchBody = useMemo(() => {
+    // A saved shortcut keeps this body for months. The zone name follows
+    // daylight saving on the server; the fixed offset alone would turn an hour
+    // wrong at the next clock change, so it is only the fallback.
+    let timeZone: string | undefined;
+    try {
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+    } catch {
+      timeZone = undefined;
+    }
     const offset = new Date().getTimezoneOffset();
-    return JSON.stringify({ raw: '%VOICE', tzOffsetMinutes: offset }, null, 2);
+    return JSON.stringify(
+      { raw: '%VOICE', ...(timeZone ? { timeZone } : {}), tzOffsetMinutes: offset },
+      null,
+      2,
+    );
   }, []);
   const watchCurl = useMemo(
     () =>
