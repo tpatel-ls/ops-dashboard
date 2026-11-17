@@ -59,9 +59,14 @@ function meta(deviceId: string) {
  * wall-clock text. Re-deriving it from the shifted UTC instant would land it on
  * the wrong day whenever the local time straddles UTC midnight.
  */
-function applyTzOffset(task: Task, tzOffsetMinutes: number | undefined): Task {
+function applyTzOffset(
+  task: Task,
+  tzOffsetMinutes: number | undefined,
+  timeZone: string | undefined,
+): Task {
   if (typeof tzOffsetMinutes !== 'number' || !Number.isFinite(tzOffsetMinutes)) return task;
-  const shift = (iso?: string) => (iso ? captureCallerInstant(iso, tzOffsetMinutes) : iso);
+  const shift = (iso?: string) =>
+    iso ? captureCallerInstant(iso, tzOffsetMinutes, timeZone) : iso;
   const dueAt = shift(task.dueAt);
   const startAt = shift(task.startAt);
   const endAt = shift(task.endAt);
@@ -101,6 +106,7 @@ export async function POST(req: Request): Promise<Response> {
 
   let raw = '';
   let tzOffsetMinutes: number | undefined;
+  let timeZone: string | undefined;
   try {
     const body = (await req.json()) as {
       raw?: unknown;
@@ -110,8 +116,11 @@ export async function POST(req: Request): Promise<Response> {
     raw = boundedText(body?.raw, MAX_RAW);
     // A zone name follows daylight saving; a fixed offset from a saved
     // shortcut does not, so prefer the zone when both are sent.
-    tzOffsetMinutes =
-      timeZoneOffsetMinutes(body?.timeZone) ?? normalizeTimezoneOffset(body?.tzOffsetMinutes);
+    const zoneOffset = timeZoneOffsetMinutes(body?.timeZone);
+    if (zoneOffset !== undefined && typeof body.timeZone === 'string') {
+      timeZone = body.timeZone.trim();
+    }
+    tzOffsetMinutes = zoneOffset ?? normalizeTimezoneOffset(body?.tzOffsetMinutes);
   } catch {
     /* malformed body */
   }
@@ -170,6 +179,7 @@ export async function POST(req: Request): Promise<Response> {
         ...(notes ? { notes } : {}),
       },
       tzOffsetMinutes,
+      timeZone,
     );
     routeType = 'task';
   }
