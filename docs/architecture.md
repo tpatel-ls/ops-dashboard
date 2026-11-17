@@ -170,8 +170,9 @@ schema and nothing else:
 - `captureAutoReminder` is typed as auto-attaching a reminder to captured tasks.
   Nothing attaches one; reminders are created only from the task drawer.
 - `timezone` is validated against `Intl` on write and then never read, so every
-  view uses the device timezone. The capture route does take a timezone, but as
-  a request-supplied offset rather than from this field.
+  view uses the device timezone. The capture route does take a timezone, but
+  from the request (an IANA `timeZone` name, or a fixed `tzOffsetMinutes`)
+  rather than from this field.
 
 ## Theming
 
