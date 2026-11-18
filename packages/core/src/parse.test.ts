@@ -75,6 +75,14 @@ describe('parseQuickAdd', () => {
     expect(r.title).toBe('Ship release after review');
   });
 
+  it('reads priority marks glued to the date phrase', () => {
+    const r = parseQuickAdd('Call bob tomorrow!!', anchor);
+
+    expect(r.title).toBe('Call bob');
+    expect(r.priority).toBe(2);
+    expect(r.scheduledFor).toBe('2026-04-27');
+  });
+
   it('parses tomorrow with time', () => {
     const r = parseQuickAdd('Call dentist tomorrow 3pm', anchor);
     expect(r.title.toLowerCase()).toContain('call dentist');
