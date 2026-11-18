@@ -246,6 +246,16 @@ describe('calendarGridMinutes', () => {
     expect(calendarGridMinutes(at(0), at(CALENDAR_START_HOUR, 45))).toBe(45);
   });
 
+  it('stops a block that runs past the last row at the bottom of the grid', () => {
+    const nextDay = (hour: number) => new Date(2026, 10, 17, hour);
+
+    // The last row is 23:00, so the grid ends at midnight.
+    expect(calendarGridMinutes(at(23), nextDay(1))).toBe(60);
+    expect(calendarGridMinutes(at(22, 30), nextDay(2))).toBe(90);
+    // A block spanning days draws to the end of its first day only.
+    expect(calendarGridMinutes(at(9), new Date(2026, 10, 19, 17))).toBe(15 * 60);
+  });
+
   it('keeps a minimum height and a default for an open-ended block', () => {
     expect(calendarGridMinutes(at(5), at(5, 30))).toBe(15);
     expect(calendarGridMinutes(at(9), at(9, 5))).toBe(15);
