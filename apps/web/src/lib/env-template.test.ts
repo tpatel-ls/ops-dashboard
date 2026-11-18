@@ -26,7 +26,11 @@ describe('.env.local.example', () => {
   // The deploy runbook tells operators to copy this template and set every
   // variable from it in Vercel, so a variable the code reads but the template
   // omits is one nobody learns to configure.
-  it('lists every environment variable the web app reads', () => {
+  //
+  // The scan reads every source file. On a cold disk cache, under a full
+  // parallel run, that has taken more than the default 5 s, so the test failed
+  // on a timeout rather than on a missing variable.
+  it('lists every environment variable the web app reads', { timeout: 30_000 }, () => {
     const template = readFileSync(join(WEB_ROOT, '.env.local.example'), 'utf8');
     const listed = new Set(
       [...template.matchAll(/^#?\s*([A-Z][A-Z0-9_]*)=/gm)].map((match) => match[1]!),
