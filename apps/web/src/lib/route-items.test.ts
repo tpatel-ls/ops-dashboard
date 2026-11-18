@@ -111,6 +111,29 @@ describe('fallbackCaptureLines', () => {
     expect(fallbackCaptureLines('  First  \r\n\r\n Second ')).toEqual(['First', 'Second']);
   });
 
+  it('drops list bullets, numbers, and checkboxes from offline task titles', () => {
+    const text =
+      '- Call Sam\n* Email Kim\n\u2022 Book flight\n1. Draft brief\n2) Send invoice\n- [ ] Pay rent\n[x] Renew passport\n- ';
+
+    expect(fallbackCaptureLines(text)).toEqual([
+      'Call Sam',
+      'Email Kim',
+      'Book flight',
+      'Draft brief',
+      'Send invoice',
+      'Pay rent',
+      'Renew passport',
+    ]);
+  });
+
+  it('keeps leading text that only looks like a list marker', () => {
+    expect(fallbackCaptureLines('-5 degrees tonight\n1.5 hours review\n#urgent fix')).toEqual([
+      '-5 degrees tonight',
+      '1.5 hours review',
+      '#urgent fix',
+    ]);
+  });
+
   it('bounds each offline task title without splitting Unicode characters', () => {
     const [line] = fallbackCaptureLines(`${'x'.repeat(499)}😀overflow`);
 
