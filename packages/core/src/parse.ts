@@ -14,6 +14,7 @@ export interface ParsedQuickAdd {
 
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
+const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on)\s*$/i;
 
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {
   if (typeof input !== 'string') throw new Error('Quick add text must be a string.');
@@ -59,7 +60,12 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         if (end) endAt = end.toISOString();
         dueAt = start.toISOString();
       }
-      working = (working.slice(0, first.index) + working.slice(first.index + first.text.length))
+      // chrono consumes the preposition for some phrasings ("at 3pm", "on
+      // friday") but not others ("at noon", "on Dec 5"), which left titles
+      // like "Call at". Drop an "at" or "on" that sits directly before the
+      // date it introduced.
+      const before = working.slice(0, first.index).replace(DANGLING_PREPOSITION_RE, ' ');
+      working = (before + working.slice(first.index + first.text.length))
         .replace(/\s+/g, ' ')
         .trim();
     }
