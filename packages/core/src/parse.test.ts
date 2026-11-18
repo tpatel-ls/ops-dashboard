@@ -83,6 +83,22 @@ describe('parseQuickAdd', () => {
     expect(r.scheduledFor).toBe('2026-04-27');
   });
 
+  it('closes up punctuation left where a date or tag was removed', () => {
+    expect(parseQuickAdd('Call mom tomorrow.', anchor).title).toBe('Call mom.');
+    expect(parseQuickAdd('Call mom tomorrow, then gym', anchor).title).toBe('Call mom, then gym');
+    expect(parseQuickAdd('Buy milk - tomorrow', anchor).title).toBe('Buy milk');
+    expect(parseQuickAdd('Email Kim re: budget, friday 3pm', anchor).title).toBe(
+      'Email Kim re: budget',
+    );
+    expect(parseQuickAdd('Call bob #work, then email', anchor).title).toBe('Call bob, then email');
+    expect(parseQuickAdd('Tomorrow: renew passport', anchor).title).toBe('renew passport');
+  });
+
+  it('leaves punctuation alone when nothing was removed', () => {
+    expect(parseQuickAdd('Agenda:', anchor).title).toBe('Agenda:');
+    expect(parseQuickAdd('-5 degrees , bring coat', anchor).title).toBe('-5 degrees , bring coat');
+  });
+
   it('parses tomorrow with time', () => {
     const r = parseQuickAdd('Call dentist tomorrow 3pm', anchor);
     expect(r.title.toLowerCase()).toContain('call dentist');

@@ -16,6 +16,20 @@ const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on)\s*$/i;
 
+/**
+ * Close up the punctuation a removed date or tag leaves behind: "Call mom
+ * tomorrow." became "Call mom ." and "Buy milk - tomorrow" became "Buy milk -".
+ * Only runs when something was removed, so a title typed as "Agenda:" keeps
+ * its colon.
+ */
+function tidyAfterRemoval(title: string): string {
+  return title
+    .replace(/\s+([,.;:])/g, '$1')
+    .replace(/^(?:[,.;:]|[-\u2013\u2014](?=\s))\s*/, '')
+    .replace(/(?:[,;:]|\s[-\u2013\u2014])$/, '')
+    .trim();
+}
+
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {
   if (typeof input !== 'string') throw new Error('Quick add text must be a string.');
   let working = input.trim();
@@ -34,6 +48,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       tags.push(tag);
     }
   }
+  let removed = tags.length > 0;
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
   const results = chrono.parse(working, now, { forwardDate: true });
@@ -58,6 +73,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // friday") but not others ("at noon", "on Dec 5"), which left titles
       // like "Call at". Drop an "at" or "on" that sits directly before the
       // date it introduced.
+      removed = true;
       const before = working.slice(0, first.index).replace(DANGLING_PREPOSITION_RE, ' ');
       // Rejoin with a space so marks glued to the date ("tomorrow!!") stand
       // alone and are read as priority below.
@@ -75,6 +91,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
     priority = Math.max(priority, Math.min(3, match[1]?.length ?? 0)) as Priority;
   }
   working = working.replace(PRIORITY_RE, ' ').replace(/\s+/g, ' ').trim();
+  if (removed) working = tidyAfterRemoval(working);
 
   return {
     title: working || input.trim(),
