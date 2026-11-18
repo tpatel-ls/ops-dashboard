@@ -45,6 +45,19 @@ export function validRailEnd(startAt: unknown, endAt: unknown): Date | undefined
 
 const LAST_HOUR = 23;
 
+/**
+ * Minutes of rail height a block covers, stopping at the bottom of the rail.
+ *
+ * `railHourRange` ends the rail at `endHour`, which is the last hour for a
+ * block that runs past midnight, but the block itself was drawn for its full
+ * duration, so a 22:00 to 00:30 block hung half an hour below the rail. The
+ * rail ends at the hour after `endHour` on the block's own day.
+ */
+export function railBlockMinutes(start: Date, end: Date, endHour: number): number {
+  const railEnd = new Date(start.getFullYear(), start.getMonth(), start.getDate(), endHour + 1);
+  return (Math.min(end.getTime(), railEnd.getTime()) - start.getTime()) / 60_000;
+}
+
 /** Hour index for an "HH:MM" settings value, or undefined when unusable. */
 function settingHour(value: string): number | undefined {
   const match = /^(\d{2}):(\d{2})$/.exec(value);
