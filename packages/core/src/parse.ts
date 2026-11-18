@@ -36,12 +36,6 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   }
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
-  let priority: Priority = 0;
-  for (const match of working.matchAll(PRIORITY_RE)) {
-    priority = Math.max(priority, Math.min(3, match[1]?.length ?? 0)) as Priority;
-  }
-  working = working.replace(PRIORITY_RE, ' ').replace(/\s+/g, ' ').trim();
-
   const results = chrono.parse(working, now, { forwardDate: true });
   let scheduledFor: string | undefined;
   let startAt: string | undefined;
@@ -65,11 +59,22 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // like "Call at". Drop an "at" or "on" that sits directly before the
       // date it introduced.
       const before = working.slice(0, first.index).replace(DANGLING_PREPOSITION_RE, ' ');
-      working = (before + working.slice(first.index + first.text.length))
+      // Rejoin with a space so marks glued to the date ("tomorrow!!") stand
+      // alone and are read as priority below.
+      working = `${before} ${working.slice(first.index + first.text.length)}`
         .replace(/\s+/g, ' ')
         .trim();
     }
   }
+
+  // Read priority after the date is gone: "Call bob tomorrow!!" only has a
+  // standalone "!!" once "tomorrow" is removed, and reading it first left the
+  // marks in the title and the task at no priority.
+  let priority: Priority = 0;
+  for (const match of working.matchAll(PRIORITY_RE)) {
+    priority = Math.max(priority, Math.min(3, match[1]?.length ?? 0)) as Priority;
+  }
+  working = working.replace(PRIORITY_RE, ' ').replace(/\s+/g, ' ').trim();
 
   return {
     title: working || input.trim(),
