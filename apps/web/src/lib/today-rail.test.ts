@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '@ops-dashboard/core';
-import { nextRailBlock, railHourRange, tasksForTodayRail, validRailEnd } from './today-rail';
+import {
+  nextRailBlock,
+  railBlockMinutes,
+  railHourRange,
+  tasksForTodayRail,
+  validRailEnd,
+} from './today-rail';
 
 function task(id: string, startAt: string, patch: Partial<Task> = {}): Task {
   return {
@@ -103,6 +109,23 @@ describe('nextRailBlock', () => {
   it('returns nothing when only past or finished blocks remain', () => {
     const blocks = [task('morning', at(9)), task('done-early', at(13), { status: 'done' })];
     expect(nextRailBlock(blocks, now)).toBeUndefined();
+  });
+});
+
+describe('railBlockMinutes', () => {
+  const at = (day: number, hour: number, minute = 0) => new Date(2026, 10, day, hour, minute);
+
+  it('covers a block that ends inside the rail', () => {
+    expect(railBlockMinutes(at(18, 9), at(18, 10, 30), 18)).toBe(90);
+  });
+
+  it('stops a block that runs past midnight at the bottom of the rail', () => {
+    // railHourRange draws this day to hour 23, so the rail ends at midnight.
+    const block = { startAt: at(18, 22).toISOString(), endAt: at(19, 0, 30).toISOString() };
+    const { endHour } = railHourRange('09:00', '18:00', [block]);
+
+    expect(endHour).toBe(23);
+    expect(railBlockMinutes(at(18, 22), at(19, 0, 30), endHour)).toBe(120);
   });
 });
 

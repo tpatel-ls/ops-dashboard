@@ -8,7 +8,13 @@ import { cn } from '@ops-dashboard/ui';
 import { usePageVisibility } from '@/lib/use-page-visibility';
 import { useLiveSettings } from '@/lib/use-settings';
 import { useToday } from '@/lib/use-today';
-import { nextRailBlock, railHourRange, tasksForTodayRail, validRailEnd } from '@/lib/today-rail';
+import {
+  nextRailBlock,
+  railBlockMinutes,
+  railHourRange,
+  tasksForTodayRail,
+  validRailEnd,
+} from '@/lib/today-rail';
 
 const HOUR_HEIGHT = 44;
 
@@ -92,7 +98,7 @@ export function TodayRail() {
             const end = validRailEnd(t.startAt!, t.endAt);
             const top = (minutesIntoDay(start) / 60) * HOUR_HEIGHT;
             const height = end
-              ? Math.max(20, ((end.getTime() - start.getTime()) / 1000 / 60 / 60) * HOUR_HEIGHT)
+              ? Math.max(20, (railBlockMinutes(start, end, endHour) / 60) * HOUR_HEIGHT)
               : 32;
             const done = t.status === 'done';
             return (
