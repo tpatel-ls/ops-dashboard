@@ -110,5 +110,16 @@ export function calendarGridMinutes(start: Date, end: Date | undefined): number 
     start.getHours() < CALENDAR_START_HOUR
       ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), CALENDAR_START_HOUR)
       : start;
-  return Math.max(15, (end.getTime() - drawnStart.getTime()) / 60000);
+  // The last row is the `CALENDAR_END_HOUR` hour, so the grid ends at the
+  // following hour on the block's own day. A block running past it (23:00 to
+  // 01:00, or a synced block spanning days) used to hang below the last row
+  // and stretch the scroll area. It now stops at the bottom edge.
+  const gridEnd = new Date(
+    start.getFullYear(),
+    start.getMonth(),
+    start.getDate(),
+    CALENDAR_END_HOUR + 1,
+  );
+  const drawnEnd = Math.min(end.getTime(), gridEnd.getTime());
+  return Math.max(15, (drawnEnd - drawnStart.getTime()) / 60000);
 }
