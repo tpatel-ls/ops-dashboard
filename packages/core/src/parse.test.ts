@@ -93,6 +93,18 @@ describe('parseQuickAdd', () => {
     expect(r.dueAt).toBe(r.startAt);
   });
 
+  it('drops an "at" or "on" left directly before the date it introduced', () => {
+    expect(parseQuickAdd('Call at noon', anchor).title).toBe('Call');
+    expect(parseQuickAdd('Dinner on Dec 5', anchor).title).toBe('Dinner');
+    expect(parseQuickAdd('Meet at noon tomorrow', anchor).title).toBe('Meet');
+  });
+
+  it('keeps an "at" or "on" that belongs to the title or ends a word', () => {
+    expect(parseQuickAdd('Look at report tomorrow', anchor).title).toBe('Look at report');
+    expect(parseQuickAdd('Leave on time tomorrow', anchor).title).toBe('Leave on time');
+    expect(parseQuickAdd('Paint the wagon on Dec 5', anchor).title).toBe('Paint the wagon');
+  });
+
   it('schedules a date-only phrase without inventing a time', () => {
     const r = parseQuickAdd('Renew passport tomorrow', anchor);
     expect(r.title).toBe('Renew passport');
