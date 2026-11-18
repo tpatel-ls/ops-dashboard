@@ -37,6 +37,7 @@ import { taskClockTime, taskReminderLabel, taskStartTimePatch } from '@/lib/task
 import { safeTaskTags } from '@/lib/task-query';
 import { linkOptions } from '@/lib/link-options';
 import { saveErrorMessage } from '@/lib/save-error';
+import { useToday } from '@/lib/use-today';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
 
@@ -162,6 +163,9 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const [reminderDraft, setReminderDraft] = useState('');
   const [checklistDraft, setChecklistDraft] = useState('');
   const [saveError, setSaveError] = useState<string | null>(null);
+  // The quick dates follow the clock: computed at render, a drawer left open
+  // past midnight filed "Today" under yesterday and marked the wrong button.
+  const today = useToday();
 
   // Every field saves as it changes, and `updateTask` throws on input it
   // rejects (an end time before the start, text past its length limit).
@@ -291,8 +295,8 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               aria-label="Quick schedule task"
             >
               {[
-                { label: 'Today', value: todayIso() },
-                { label: 'Tomorrow', value: isoDay(addDays(new Date(), 1)) },
+                { label: 'Today', value: today },
+                { label: 'Tomorrow', value: isoDay(addDays(new Date(`${today}T00:00:00`), 1)) },
                 { label: 'Clear date', value: undefined },
               ].map((option) => (
                 <button

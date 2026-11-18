@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { createElement } from 'react';
+import { act, createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Project, Task } from '@ops-dashboard/core';
 
@@ -41,6 +41,7 @@ vi.mock('@/lib/tasks', async (importOriginal) => ({
 }));
 
 const { DeleteTaskButton, TaskEditDrawer } = await import('./task-edit-drawer');
+const { updateTask } = await import('@/lib/tasks');
 const { useAppStore } = await import('@/lib/app-store');
 
 afterEach(() => {
@@ -104,6 +105,47 @@ describe('TaskEditDrawer pickers', () => {
     expect(pressed('Task priority')).toEqual(['Urgent']);
     expect(pressed('Quick schedule task')).toEqual(['Clear date']);
     expect(screen.getByRole('button', { name: 'todo' }).getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
+describe('TaskEditDrawer quick dates', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.mocked(updateTask).mockReset();
+  });
+
+  it('files "Today" under the new day when the drawer stays open past midnight', async () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    vi.setSystemTime(new Date(2026, 10, 17, 23, 59, 30));
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'todo',
+      scheduledFor: '2026-11-17',
+      tags: [],
+      reminders: [],
+      checklist: [],
+    } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    const quick = () => screen.getByRole('group', { name: 'Quick schedule task' });
+    expect(quick().querySelector('[aria-pressed="true"]')?.textContent).toBe('Today');
+
+    await act(() => vi.advanceTimersByTimeAsync(31_000));
+
+    // The task still sits on the 17th, which is now yesterday.
+    expect(quick().querySelector('[aria-pressed="true"]')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
+    expect(updateTask).toHaveBeenCalledWith(
+      'task-1',
+      expect.objectContaining({ scheduledFor: '2026-11-18' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Tomorrow' }));
+    expect(updateTask).toHaveBeenLastCalledWith(
+      'task-1',
+      expect.objectContaining({ scheduledFor: '2026-11-19' }),
+    );
   });
 });
 
