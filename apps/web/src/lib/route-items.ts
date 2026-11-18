@@ -357,10 +357,21 @@ async function fallbackToTasks(text: string, source: CaptureSource): Promise<Rou
   return results;
 }
 
+// A leading list bullet, number, or checkbox: "- ", "* ", "• ", "1. ", "2) ",
+// "[ ] ", "- [x] ". The marker needs trailing whitespace, so "-5 degrees" and
+// "1.5 hours" keep their text.
+const LIST_MARKER_RE = /^\s*(?:(?:[-*+\u2022]|\d{1,3}[.)])\s+)?(?:\[[ xX]?\]\s+)?/;
+
+/**
+ * Offline, each line of the dump becomes one task. The capture prompt expects
+ * "mixed lists", and with the AI unreachable a pasted bullet list was filed as
+ * tasks titled "- Call Sam", so the list marker is dropped first. A line that
+ * is only a marker is skipped.
+ */
 export function fallbackCaptureLines(text: string): string[] {
   return text
     .split(/\r?\n/)
-    .map((line) => boundedDraftText(line, MAX_ROUTED_TITLE_LENGTH))
+    .map((line) => boundedDraftText(line.replace(LIST_MARKER_RE, ''), MAX_ROUTED_TITLE_LENGTH))
     .filter((line): line is string => Boolean(line))
     .slice(0, MAX_ROUTED_ITEMS);
 }
