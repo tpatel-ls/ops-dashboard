@@ -362,11 +362,14 @@ export function downloadJson(data: unknown, filename: string): void {
   releaseDownloadUrl(url);
 }
 
+// `<`, `&`, and `~` are escaped too: a title such as "Fix the <details> tag"
+// was read as raw HTML and dropped by renderers, "&amp;" was decoded to "&",
+// and "~~old~~" rendered struck through.
 function markdownInline(value: string): string {
   return value
     .replace(/\s+/g, ' ')
     .trim()
-    .replace(/([\\`*_[\]{}()#+.!|>])/g, '\\$1');
+    .replace(/([\\`*_[\]{}()#+.!|<>~&])/g, '\\$1');
 }
 
 function markdownTag(value: string): string {

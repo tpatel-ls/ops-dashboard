@@ -120,6 +120,12 @@ describe('tasksToMarkdown', () => {
     );
   });
 
+  it('escapes raw HTML and strikethrough in exported user text', () => {
+    const markdown = tasksToMarkdown([task('Fix the <details> tag ~~soon~~ &amp;')], 'Tasks');
+
+    expect(markdown).toContain('- [ ] Fix the \\<details\\> tag \\~\\~soon\\~\\~ \\&amp;');
+  });
+
   it('omits deleted and archived tasks from readable exports', () => {
     const deleted = task('Deleted task');
     deleted.deletedAt = '2026-08-01T12:00:00.000Z';
