@@ -112,12 +112,24 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // 3:30pm"), which left titles like "Call at" or "Ship v1 by". Drop the
       // word that sits directly before the date it introduced.
       removed = true;
-      const before = working.slice(0, first.index).replace(DANGLING_PREPOSITION_RE, ' ');
+      // chrono's weekday pattern swallows a closing bracket ("friday)"), so
+      // measure the match without brackets at either edge.
+      const leading = /^[([]*/.exec(first.text)?.[0].length ?? 0;
+      const trailing = /[)\]]*$/.exec(first.text)?.[0].length ?? 0;
+      let before = working.slice(0, first.index + leading);
+      let after = working.slice(first.index + first.text.length - trailing);
+      // A date in its own parentheses ("Submit report (due friday)") is an
+      // annotation, so the whole parenthetical goes with it. Removing only
+      // the date left "Submit report (due".
+      const open = before.lastIndexOf('(');
+      if (open > before.lastIndexOf(')') && /^\s*\)/.test(after)) {
+        before = before.slice(0, open);
+        after = after.replace(/^\s*\)/, '');
+      }
+      before = before.replace(DANGLING_PREPOSITION_RE, ' ');
       // Rejoin with a space so marks glued to the date ("tomorrow!!") stand
       // alone and are read as priority below.
-      working = `${before} ${working.slice(first.index + first.text.length)}`
-        .replace(/\s+/g, ' ')
-        .trim();
+      working = `${before} ${after}`.replace(/\s+/g, ' ').trim();
     }
   }
 
