@@ -68,7 +68,7 @@ describe('tasksToMarkdown', () => {
       'Tasks',
     );
 
-    expect(markdown).toContain('## Tuesday, July 28');
+    expect(markdown).toContain('## Tuesday, July 28, 2026');
     expect(markdown).toContain('- [ ] Imported with a time');
     expect(markdown).not.toContain('## Unscheduled');
   });
@@ -76,7 +76,18 @@ describe('tasksToMarkdown', () => {
   it('formats valid scheduled dates', () => {
     const markdown = tasksToMarkdown([task('Tuesday task', '2026-07-28')], 'Tasks');
 
-    expect(markdown).toContain('## Tuesday, July 28');
+    expect(markdown).toContain('## Tuesday, July 28, 2026');
+  });
+
+  it('tells the same date in different years apart', () => {
+    const markdown = tasksToMarkdown(
+      [task('Last year', '2025-07-28'), task('This year', '2026-07-28')],
+      'Tasks',
+    );
+
+    expect(markdown).toContain('## Monday, July 28, 2025');
+    expect(markdown).toContain('## Tuesday, July 28, 2026');
+    expect(markdown.indexOf('2025')).toBeLessThan(markdown.indexOf('2026'));
   });
 
   it('exports tasks with malformed synced tag collections', () => {
