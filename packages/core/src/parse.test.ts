@@ -174,6 +174,22 @@ describe('parseQuickAdd', () => {
     expect(book.scheduledFor).toBe('2026-05-01');
   });
 
+  it('removes a parenthetical that only held the date', () => {
+    expect(parseQuickAdd('Submit report (due friday)', anchor).title).toBe('Submit report');
+    expect(parseQuickAdd('Renew passport (expires March 2027) !', anchor)).toMatchObject({
+      title: 'Renew passport',
+      scheduledFor: '2027-03-01',
+      priority: 1,
+    });
+    expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
+  });
+
+  it('keeps parentheses that hold more than the date', () => {
+    expect(parseQuickAdd('Call mom (about the trip) tomorrow', anchor).title).toBe(
+      'Call mom (about the trip)',
+    );
+  });
+
   it('handles combined directives', () => {
     const r = parseQuickAdd('Finish report tomorrow 3pm #work !!', anchor);
     expect(r.tags).toEqual(['work']);
