@@ -153,6 +153,16 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Review budget next month', anchor).scheduledFor).toBe('2026-05-26');
   });
 
+  it('leaves a date word inside quotation marks in the title', () => {
+    const draft = parseQuickAdd('"Today" newsletter draft', anchor);
+    expect(draft.title).toBe('"Today" newsletter draft');
+    expect(draft).not.toHaveProperty('scheduledFor');
+
+    const book = parseQuickAdd('Read \u201cTomorrow and Tomorrow\u201d friday', anchor);
+    expect(book.title).toBe('Read \u201cTomorrow and Tomorrow\u201d');
+    expect(book.scheduledFor).toBe('2026-05-01');
+  });
+
   it('handles combined directives', () => {
     const r = parseQuickAdd('Finish report tomorrow 3pm #work !!', anchor);
     expect(r.tags).toEqual(['work']);
