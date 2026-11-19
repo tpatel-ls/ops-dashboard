@@ -46,6 +46,21 @@ function tidyAfterRemoval(title: string): string {
     .trim();
 }
 
+/**
+ * Index ranges of quoted spans: straight double quotes and curly quotes.
+ *
+ * Words in quotes are a name, not a date: '"Today" newsletter draft' and
+ * 'Read "Tomorrow and Tomorrow and Tomorrow"' were scheduled and lost the
+ * quoted word, leaving titles like '" " newsletter draft'.
+ */
+function quotedRanges(text: string): Array<[open: number, close: number]> {
+  const ranges: Array<[number, number]> = [];
+  for (const match of text.matchAll(/"[^"]*"|\u201c[^\u201d]*\u201d/g)) {
+    ranges.push([match.index, match.index + match[0].length - 1]);
+  }
+  return ranges;
+}
+
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {
   if (typeof input !== 'string') throw new Error('Quick add text must be a string.');
   let working = input.trim();
@@ -67,7 +82,14 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   let removed = tags.length > 0;
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
-  const results = chrono.parse(working, now, { forwardDate: true }).filter(isSchedulingMatch);
+  const quoted = quotedRanges(working);
+  const results = chrono
+    .parse(working, now, { forwardDate: true })
+    .filter(
+      (result) =>
+        isSchedulingMatch(result) &&
+        !quoted.some(([open, close]) => result.index > open && result.index < close),
+    );
   let scheduledFor: string | undefined;
   let startAt: string | undefined;
   let endAt: string | undefined;
