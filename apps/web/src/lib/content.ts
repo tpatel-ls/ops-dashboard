@@ -51,11 +51,15 @@ export function compareContentOrder(
  * any other non-day string produced an Invalid Date and the chip rendered the
  * literal text "Invalid Date".
  */
-export function contentPublishLabel(value: string | undefined): string | undefined {
+export function contentPublishLabel(value: string | undefined, today: string): string | undefined {
   if (!value || localDay(value) !== value) return undefined;
+  // Published pieces stay on the board for years, so a date outside the
+  // current year carries its year rather than reading as this year's.
+  const sameYear = localDay(today) === today && today.slice(0, 4) === value.slice(0, 4);
   return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
+    ...(sameYear ? {} : { year: 'numeric' }),
   });
 }
 

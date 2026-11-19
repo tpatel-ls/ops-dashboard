@@ -2,6 +2,7 @@ import { localDay } from '@ops-dashboard/core';
 import type { Task } from '@ops-dashboard/core';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { calendarInstant } from './calendar-agenda';
+import { shortDayLabel } from './calendar-label';
 
 export function taskPlanningTimestamp(
   task: Pick<Task, 'startAt' | 'dueAt' | 'scheduledFor'>,
@@ -34,9 +35,9 @@ export function taskSearchStatus(status: Task['status']): { label: string; close
 
 export function taskDateLabel(date: string, today: string, done: boolean): string {
   if (localDay(date) !== date) return date;
-  const parsed = parseISO(date);
-  const calendarLabel = format(parsed, 'MMM d');
+  const calendarLabel = shortDayLabel(date, today);
   if (localDay(today) !== today) return calendarLabel;
+  const parsed = parseISO(date);
 
   const offset = differenceInCalendarDays(parsed, parseISO(today));
   if (offset === 0) return 'Today';

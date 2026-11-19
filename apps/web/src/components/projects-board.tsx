@@ -17,7 +17,7 @@ import {
   Timer,
   X,
 } from 'lucide-react';
-import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
+import { formatDistanceToNow, isValid, parseISO } from 'date-fns';
 import { getDb, matchesOrgContext, PERSONAL_COLOR } from '@ops-dashboard/core';
 import type {
   Domain,
@@ -39,6 +39,7 @@ import { destinationOrgId, resolveWorkDestination, type WorkDestination } from '
 import { useAppStore } from '@/lib/app-store';
 import { useLiveSettings } from '@/lib/use-settings';
 import { useToday } from '@/lib/use-today';
+import { shortDayLabel } from '@/lib/calendar-label';
 import { ProjectDetail } from '@/components/project-detail';
 import { cn } from '@ops-dashboard/ui';
 import {
@@ -302,7 +303,10 @@ function ProjectCard({
   const lastWorked = parsedLastWorked && isValid(parsedLastWorked) ? parsedLastWorked : null;
   const isSlipping = projectIsSlipping(project.lastWorkedAt, slippingDays);
   const parsedDueDate = project.dueDate ? parseISO(project.dueDate) : null;
-  const dueLabel = parsedDueDate && isValid(parsedDueDate) ? format(parsedDueDate, 'MMM d') : null;
+  const dueLabel =
+    project.dueDate && parsedDueDate && isValid(parsedDueDate)
+      ? shortDayLabel(project.dueDate, today)
+      : null;
   const isOverdue = Boolean(dueLabel && project.dueDate && project.dueDate < today);
 
   return (

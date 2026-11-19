@@ -100,31 +100,43 @@ describe('updateContent', () => {
 });
 
 describe('contentPublishLabel', () => {
+  const today = '2026-11-19';
   const short = (date: Date) =>
     date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
+  it('adds the year to a publish day in another year', () => {
+    expect(contentPublishLabel('2025-09-19', today)).toBe(
+      new Date(2025, 8, 19).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    );
+    expect(contentPublishLabel('2025-09-19', today)).toContain('2025');
+  });
+
   it('labels a real calendar day in the local month and day', () => {
-    expect(contentPublishLabel('2026-09-19')).toBe(short(new Date(2026, 8, 19)));
+    expect(contentPublishLabel('2026-09-19', today)).toBe(short(new Date(2026, 8, 19)));
   });
 
   it('does not shift the day backwards in timezones west of UTC', () => {
     // `new Date('2026-01-01')` is midnight UTC, which is Dec 31 locally in the
     // Americas. The label must stay on the stored calendar day.
-    expect(contentPublishLabel('2026-01-01')).toBe(short(new Date(2026, 0, 1)));
+    expect(contentPublishLabel('2026-01-01', today)).toBe(short(new Date(2026, 0, 1)));
   });
 
   it('has no label for a value the write path would have rejected', () => {
-    expect(contentPublishLabel(undefined)).toBeUndefined();
-    expect(contentPublishLabel('')).toBeUndefined();
+    expect(contentPublishLabel(undefined, today)).toBeUndefined();
+    expect(contentPublishLabel('', today)).toBeUndefined();
     // A full timestamp: concatenating 'T00:00:00' onto this rendered "Invalid Date".
-    expect(contentPublishLabel('2026-09-19T10:00:00.000Z')).toBeUndefined();
-    expect(contentPublishLabel('2026-02-30')).toBeUndefined();
-    expect(contentPublishLabel('not-a-day')).toBeUndefined();
+    expect(contentPublishLabel('2026-09-19T10:00:00.000Z', today)).toBeUndefined();
+    expect(contentPublishLabel('2026-02-30', today)).toBeUndefined();
+    expect(contentPublishLabel('not-a-day', today)).toBeUndefined();
   });
 
   it('never returns the literal Invalid Date string', () => {
     for (const value of ['2026-09-19T10:00:00.000Z', '2026-02-30', 'not-a-day']) {
-      expect(contentPublishLabel(value)).not.toBe('Invalid Date');
+      expect(contentPublishLabel(value, today)).not.toBe('Invalid Date');
     }
   });
 });

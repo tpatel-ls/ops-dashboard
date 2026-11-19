@@ -22,9 +22,12 @@ export function compareWhiteboardUpdates(
   return nameOrder !== 0 ? nameOrder : compareText(a.id, b.id);
 }
 
-export function whiteboardUpdatedLabel(value: unknown): string {
+export function whiteboardUpdatedLabel(value: unknown, now: Date = new Date()): string {
   const timestamp = updatedTimestamp(value);
-  return timestamp === undefined
-    ? 'Updated time unavailable'
-    : `Updated ${format(new Date(timestamp), 'MMM d, HH:mm')}`;
+  if (timestamp === undefined) return 'Updated time unavailable';
+  const updated = new Date(timestamp);
+  // Boards are kept for years; an update from another year names that year.
+  const pattern =
+    updated.getFullYear() === now.getFullYear() ? 'MMM d, HH:mm' : 'MMM d, yyyy, HH:mm';
+  return `Updated ${format(updated, pattern)}`;
 }
