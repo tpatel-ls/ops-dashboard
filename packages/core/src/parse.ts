@@ -14,7 +14,7 @@ export interface ParsedQuickAdd {
 
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
-const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on)\s*$/i;
+const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on|by|for|@)\s*$/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 
 /**
@@ -108,9 +108,9 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         dueAt = start.toISOString();
       }
       // chrono consumes the preposition for some phrasings ("at 3pm", "on
-      // friday") but not others ("at noon", "on Dec 5"), which left titles
-      // like "Call at". Drop an "at" or "on" that sits directly before the
-      // date it introduced.
+      // friday") but not others ("at noon", "on Dec 5", "by 12/15", "@
+      // 3:30pm"), which left titles like "Call at" or "Ship v1 by". Drop the
+      // word that sits directly before the date it introduced.
       removed = true;
       const before = working.slice(0, first.index).replace(DANGLING_PREPOSITION_RE, ' ');
       // Rejoin with a space so marks glued to the date ("tomorrow!!") stand

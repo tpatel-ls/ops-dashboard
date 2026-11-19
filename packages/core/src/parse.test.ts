@@ -123,6 +123,17 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Meet at noon tomorrow', anchor).title).toBe('Meet');
   });
 
+  it('drops a "by", "for", or "@" left directly before the date', () => {
+    expect(parseQuickAdd('Ship v1 by 12/15', anchor).title).toBe('Ship v1');
+    expect(parseQuickAdd('Order pizzas for noon', anchor).title).toBe('Order pizzas');
+    expect(parseQuickAdd('Pick up kids @ 3:30pm', anchor).title).toBe('Pick up kids');
+  });
+
+  it('keeps a "by" or "for" that belongs to the title', () => {
+    expect(parseQuickAdd('Stop by the bank tomorrow', anchor).title).toBe('Stop by the bank');
+    expect(parseQuickAdd('Shop for gifts tomorrow', anchor).title).toBe('Shop for gifts');
+  });
+
   it('keeps an "at" or "on" that belongs to the title or ends a word', () => {
     expect(parseQuickAdd('Look at report tomorrow', anchor).title).toBe('Look at report');
     expect(parseQuickAdd('Leave on time tomorrow', anchor).title).toBe('Leave on time');
