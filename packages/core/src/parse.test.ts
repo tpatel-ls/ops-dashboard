@@ -159,6 +159,13 @@ describe('parseQuickAdd', () => {
     expect(launch.scheduledFor).toBe('2026-04-27');
   });
 
+  it('reads 24/7 as part of the title, not as July 24', () => {
+    const r = parseQuickAdd('Check 24/7 support tomorrow', anchor);
+    expect(r.title).toBe('Check 24/7 support');
+    expect(r.scheduledFor).toBe('2026-04-27');
+    expect(parseQuickAdd('Plan 15/12', anchor).scheduledFor).toBe('2026-12-15');
+  });
+
   it('still schedules a month with a day or a relative month', () => {
     expect(parseQuickAdd('Dinner on Dec 5', anchor).scheduledFor).toBe('2026-12-05');
     expect(parseQuickAdd('Review budget next month', anchor).scheduledFor).toBe('2026-05-26');

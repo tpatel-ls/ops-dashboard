@@ -27,6 +27,9 @@ const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
  * count.
  */
 function isSchedulingMatch(result: chrono.ParsedResult): boolean {
+  // "24/7" means around the clock. chrono falls back to day-first and read
+  // "Check 24/7 support" as July 24 next year, saving "Check support".
+  if (result.text === '24/7') return false;
   const { start } = result;
   if (start.isCertain('day') || start.isCertain('weekday') || start.isCertain('hour')) return true;
   return !BARE_WORD_RE.test(result.text.trim());
