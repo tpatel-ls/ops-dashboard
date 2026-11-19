@@ -34,6 +34,7 @@ const { NotificationsFeed } = await import('./notifications-feed');
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   notifications = [];
   markNotificationRead.mockReset();
 });
@@ -50,6 +51,21 @@ describe('NotificationsFeed', () => {
     screen.getByRole('button', { name: 'Mark as read: Call Dana' }).click();
     expect(markNotificationRead).toHaveBeenCalledWith('n2');
     expect(screen.getByRole('button', { name: 'Mark as read: Pay rent' })).toBeTruthy();
+  });
+
+  it('keeps a notification age current on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-19T09:00:10.000Z'));
+    notifications = [
+      { id: 'n1', kind: 'reminder', title: 'Pay rent', createdAt: '2026-11-19T09:00:00.000Z' },
+    ];
+    render(createElement(NotificationsFeed));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(screen.getByText('less than a minute ago')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(10 * 60_000));
+
+    expect(screen.getByText('10 minutes ago')).toBeTruthy();
   });
 
   it('labels the section by a level-2 heading', async () => {
