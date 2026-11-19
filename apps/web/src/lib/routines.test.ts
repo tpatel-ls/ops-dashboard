@@ -37,6 +37,7 @@ import {
   createRoutine,
   isRoutineDoneOn,
   fixedRoutineDuration,
+  fixedRoutineProgressLabel,
   routineElapsedDays,
   toggleRoutineCheck,
   updateRoutine,
@@ -115,6 +116,29 @@ describe('routineElapsedDays', () => {
   it('returns null instead of normalizing an impossible stored date', () => {
     expect(routineElapsedDays('2026-02-30', '2026-08-10')).toBeNull();
     expect(routineElapsedDays('2026-08-01', 'not-a-day')).toBeNull();
+  });
+});
+
+describe('fixedRoutineProgressLabel', () => {
+  const routine = { kind: 'fixed' as const, durationDays: 30, startDate: '2026-08-01' };
+
+  it('counts the current day of a running routine', () => {
+    expect(fixedRoutineProgressLabel(routine, '2026-08-01')).toBe('day 1 / 30');
+    expect(fixedRoutineProgressLabel(routine, '2026-08-30')).toBe('day 30 / 30');
+  });
+
+  it('reports a routine past its last day as finished', () => {
+    expect(fixedRoutineProgressLabel(routine, '2026-08-31')).toBe('finished · 30 days');
+    expect(fixedRoutineProgressLabel(routine, '2026-11-19')).toBe('finished · 30 days');
+  });
+
+  it('has no badge for an ongoing routine or an unreadable start day', () => {
+    expect(
+      fixedRoutineProgressLabel({ ...routine, kind: 'ongoing' }, '2026-08-05'),
+    ).toBeUndefined();
+    expect(
+      fixedRoutineProgressLabel({ ...routine, startDate: '2026-02-30' }, '2026-08-05'),
+    ).toBeUndefined();
   });
 });
 

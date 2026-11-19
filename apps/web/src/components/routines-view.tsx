@@ -9,9 +9,8 @@ import {
   archiveRoutine,
   computeStreak,
   deleteRoutine,
-  fixedRoutineDuration,
+  fixedRoutineProgressLabel,
   isRoutineDoneOn,
-  routineElapsedDays,
   toggleRoutineCheck,
 } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
@@ -44,14 +43,9 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
   const routineChecks = checks.filter((c) => c.routineId === routine.id);
   const streak = computeStreak(routineChecks, today);
 
-  // Fixed-kind progress
-  const durationDays = fixedRoutineDuration(routine);
-  // `startDate` is validated on local writes but sync casts rows in unchecked,
-  // so an unreadable day must not render as "day NaN".
-  const elapsedDays =
-    durationDays === undefined ? null : routineElapsedDays(routine.startDate, today);
-  const clampedDay =
-    elapsedDays === null ? null : Math.min(Math.max(0, elapsedDays) + 1, durationDays!);
+  // Fixed-kind progress. `startDate` is validated on local writes but sync
+  // casts rows in unchecked, so an unreadable day falls back to "ongoing".
+  const progressLabel = fixedRoutineProgressLabel(routine, today);
 
   const [confirming, setConfirming] = useState(false);
 
@@ -107,9 +101,9 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
           </span>
 
           {/* Kind badge */}
-          {clampedDay !== null ? (
+          {progressLabel !== undefined ? (
             <span className="bg-primary-soft text-primary rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
-              day {clampedDay} / {durationDays}
+              {progressLabel}
             </span>
           ) : (
             <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">

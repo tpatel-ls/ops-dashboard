@@ -124,6 +124,25 @@ export function routineElapsedDays(startDate: string, today: string): number | n
   return differenceInCalendarDays(new Date(`${today}T00:00:00`), new Date(`${startDate}T00:00:00`));
 }
 
+/**
+ * Progress badge for a fixed routine, or undefined when it has no readable
+ * length or start day (the view then shows "ongoing").
+ *
+ * The day count was clamped to the length, so a 30-day routine that ended two
+ * months ago still read "day 30 / 30" every day, as if it were on its last day.
+ */
+export function fixedRoutineProgressLabel(
+  routine: Pick<Routine, 'kind' | 'durationDays' | 'startDate'>,
+  today: string,
+): string | undefined {
+  const durationDays = fixedRoutineDuration(routine);
+  if (durationDays === undefined) return undefined;
+  const elapsedDays = routineElapsedDays(routine.startDate, today);
+  if (elapsedDays === null) return undefined;
+  if (elapsedDays >= durationDays) return `finished · ${durationDays} days`;
+  return `day ${Math.max(0, elapsedDays) + 1} / ${durationDays}`;
+}
+
 export function addDaysISO(iso: string, days: number): string {
   if (localDay(iso) !== iso || !Number.isInteger(days)) {
     throw new Error('Routine date must be a valid calendar day.');
