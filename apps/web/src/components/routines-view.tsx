@@ -10,6 +10,7 @@ import {
   computeStreak,
   deleteRoutine,
   fixedRoutineProgressLabel,
+  isRoutineActiveOn,
   isRoutineDoneOn,
   toggleRoutineCheck,
 } from '@/lib/routines';
@@ -40,6 +41,9 @@ interface RoutineCardProps {
 
 function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
   const doneToday = isRoutineDoneOn(checks, routine.id, today);
+  // toggleRoutineCheck refuses a day outside the routine's start and end, so a
+  // finished fixed routine must not offer a check that can only fail.
+  const activeToday = isRoutineActiveOn(routine, today);
   const routineChecks = checks.filter((c) => c.routineId === routine.id);
   const streak = computeStreak(routineChecks, today);
 
@@ -77,9 +81,15 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
       <button
         type="button"
         onClick={handleToggle}
-        aria-label={`${doneToday ? 'Mark as not done' : 'Mark as done today'}: ${routine.name}`}
+        disabled={!activeToday}
+        aria-label={
+          activeToday
+            ? `${doneToday ? 'Mark as not done' : 'Mark as done today'}: ${routine.name}`
+            : `Not active today: ${routine.name}`
+        }
         className={cn(
           'mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border transition-all',
+          !activeToday && 'cursor-not-allowed opacity-40',
           doneToday
             ? 'border-primary bg-primary text-primary-foreground'
             : 'border-border-strong hover:border-primary hover:bg-primary/10 text-transparent',
