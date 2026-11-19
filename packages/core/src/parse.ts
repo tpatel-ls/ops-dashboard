@@ -15,6 +15,22 @@ export interface ParsedQuickAdd {
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on)\s*$/i;
+const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
+
+/**
+ * Whether a chrono match is a date the user meant to schedule.
+ *
+ * A month name on its own ("Lunch with April", "Plan the May launch") has no
+ * day and no weekday, and chrono reads it as the first of that month. That
+ * scheduled the task on a date the user never typed and cut the name out of
+ * the title. Relative phrases like "next month" and times like "noon" still
+ * count.
+ */
+function isSchedulingMatch(result: chrono.ParsedResult): boolean {
+  const { start } = result;
+  if (start.isCertain('day') || start.isCertain('weekday') || start.isCertain('hour')) return true;
+  return !BARE_WORD_RE.test(result.text.trim());
+}
 
 /**
  * Close up the punctuation a removed date or tag leaves behind: "Call mom
@@ -51,7 +67,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   let removed = tags.length > 0;
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
-  const results = chrono.parse(working, now, { forwardDate: true });
+  const results = chrono.parse(working, now, { forwardDate: true }).filter(isSchedulingMatch);
   let scheduledFor: string | undefined;
   let startAt: string | undefined;
   let endAt: string | undefined;

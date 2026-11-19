@@ -138,6 +138,21 @@ describe('parseQuickAdd', () => {
     expect(r).not.toHaveProperty('dueAt');
   });
 
+  it('does not schedule a bare month name', () => {
+    const lunch = parseQuickAdd('Lunch with April', anchor);
+    expect(lunch.title).toBe('Lunch with April');
+    expect(lunch).not.toHaveProperty('scheduledFor');
+
+    const launch = parseQuickAdd('Plan the May launch tomorrow', anchor);
+    expect(launch.title).toBe('Plan the May launch');
+    expect(launch.scheduledFor).toBe('2026-04-27');
+  });
+
+  it('still schedules a month with a day or a relative month', () => {
+    expect(parseQuickAdd('Dinner on Dec 5', anchor).scheduledFor).toBe('2026-12-05');
+    expect(parseQuickAdd('Review budget next month', anchor).scheduledFor).toBe('2026-05-26');
+  });
+
   it('handles combined directives', () => {
     const r = parseQuickAdd('Finish report tomorrow 3pm #work !!', anchor);
     expect(r.tags).toEqual(['work']);
