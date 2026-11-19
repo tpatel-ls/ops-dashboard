@@ -11,6 +11,7 @@ import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
 import { useToday } from '@/lib/use-today';
+import { weekRangeLabel } from '@/lib/calendar-label';
 import {
   CALENDAR_END_HOUR,
   CALENDAR_START_HOUR,
@@ -97,7 +98,7 @@ export function CalendarWeek() {
           className="text-foreground ml-1 flex items-center gap-2 text-xs font-semibold md:ml-2"
         >
           <CalendarDays className="text-muted-foreground size-4" aria-hidden />
-          {format(weekStart, 'MMM d')} to {format(weekEnd, 'MMM d')}
+          {weekRangeLabel(weekStart, weekEnd)}
         </span>
         {lanes.showLegend ? (
           <div className="min-w-0 md:ml-auto">

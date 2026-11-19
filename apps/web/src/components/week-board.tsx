@@ -25,6 +25,7 @@ import { OrgLaneLegend, useOrgLanes } from '@/components/org-legend';
 import { cn } from '@ops-dashboard/ui';
 import { useLiveSettings } from '@/lib/use-settings';
 import { useToday } from '@/lib/use-today';
+import { weekRangeLabel } from '@/lib/calendar-label';
 
 const PRIORITY_COLOR: Record<Priority, string> = {
   0: 'transparent',
@@ -111,9 +112,7 @@ export function WeekBoard() {
           className="text-muted-foreground flex min-w-0 items-center gap-2 text-xs font-medium"
         >
           <CalendarDays className="size-4 shrink-0" aria-hidden />
-          <span className="truncate">
-            {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
-          </span>
+          <span className="truncate">{weekRangeLabel(weekStart, weekEnd)}</span>
         </span>
         {lanes.showLegend ? (
           <div className="ml-auto">
