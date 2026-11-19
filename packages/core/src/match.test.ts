@@ -27,6 +27,14 @@ describe('matchByName', () => {
     expect(matchByName(PROJECTS, '  Mini Monet ')).toBe(PROJECTS[2]);
   });
 
+  it('treats a run of whitespace inside a name as one space', () => {
+    const routines = [{ id: 'walk', name: 'Morning  walk' }];
+
+    expect(matchByName(routines, 'Morning walk')?.id).toBe('walk');
+    expect(matchByName(PROJECTS, 'Power\tDialer')).toBe(PROJECTS[1]);
+    expect(matchByName(PROJECTS, 'PowerDialer')).toBeUndefined();
+  });
+
   it('matches canonically equivalent Unicode names', () => {
     const projects = [{ id: 'project-1', name: 'Caf\u00e9 Launch' }];
 
