@@ -49,7 +49,9 @@ describe('RoutinesView', () => {
   it('checks a routine off for the new day after midnight on a page left open', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
-    routines = [{ id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' }];
+    routines = [
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+    ];
     checks = [{ id: 'c1', routineId: 'r1', date: '2026-11-05', done: true }];
 
     render(createElement(RoutinesView));
@@ -62,10 +64,34 @@ describe('RoutinesView', () => {
     expect(toggleRoutineCheck).toHaveBeenCalledWith('r1', '2026-11-06', true);
   });
 
+  it('does not offer a check-in for a fixed routine past its end day', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 19, 9));
+    routines = [
+      {
+        id: 'r1',
+        name: 'Couch to 5k',
+        timeOfDay: 'morning',
+        kind: 'fixed',
+        durationDays: 30,
+        startDate: '2026-09-01',
+        endDate: '2026-09-30',
+      },
+    ];
+
+    render(createElement(RoutinesView));
+    const button = (await screen.findByRole('button', {
+      name: 'Not active today: Couch to 5k',
+    })) as HTMLButtonElement;
+
+    expect(button.disabled).toBe(true);
+    expect(screen.getByText('finished · 30 days')).toBeTruthy();
+  });
+
   it('names the routine each row control acts on', async () => {
     routines = [
-      { id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
-      { id: 'r2', name: 'Read', timeOfDay: 'morning', kind: 'ongoing' },
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+      { id: 'r2', startDate: '2026-01-01', name: 'Read', timeOfDay: 'morning', kind: 'ongoing' },
     ];
 
     render(createElement(RoutinesView));
@@ -81,8 +107,8 @@ describe('RoutinesView', () => {
 
   it('titles each time-of-day group with a level-2 heading', async () => {
     routines = [
-      { id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
-      { id: 'r2', name: 'Read', timeOfDay: 'anytime', kind: 'ongoing' },
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+      { id: 'r2', startDate: '2026-01-01', name: 'Read', timeOfDay: 'anytime', kind: 'ongoing' },
     ];
 
     render(createElement(RoutinesView));
@@ -95,8 +121,14 @@ describe('RoutinesView', () => {
 
   it('heads the archived group beside the time-of-day groups', async () => {
     routines = [
-      { id: 'r1', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
-      { id: 'r2', name: 'Old habit', kind: 'ongoing', archivedAt: '2026-11-01T00:00:00.000Z' },
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+      {
+        id: 'r2',
+        startDate: '2026-01-01',
+        name: 'Old habit',
+        kind: 'ongoing',
+        archivedAt: '2026-11-01T00:00:00.000Z',
+      },
     ];
 
     render(createElement(RoutinesView));
@@ -114,7 +146,13 @@ describe('RoutinesView', () => {
 
   it('reports whether the archived routines are shown', async () => {
     routines = [
-      { id: 'r1', name: 'Old habit', kind: 'ongoing', archivedAt: '2026-11-01T00:00:00.000Z' },
+      {
+        id: 'r1',
+        startDate: '2026-01-01',
+        name: 'Old habit',
+        kind: 'ongoing',
+        archivedAt: '2026-11-01T00:00:00.000Z',
+      },
     ];
     render(createElement(RoutinesView));
 

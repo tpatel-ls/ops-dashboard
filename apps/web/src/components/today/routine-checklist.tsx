@@ -5,7 +5,7 @@ import { Check, Flame } from 'lucide-react';
 import { getDb, localDay } from '@ops-dashboard/core';
 import { useToday } from '@/lib/use-today';
 import type { TimeOfDay } from '@ops-dashboard/core';
-import { computeStreak, toggleRoutineCheck } from '@/lib/routines';
+import { computeStreak, isRoutineActiveOn, toggleRoutineCheck } from '@/lib/routines';
 import { hapticSuccess, hapticTap } from '@/lib/haptics';
 import { knownValue } from '@/lib/known-value';
 import { cn } from '@ops-dashboard/ui';
@@ -28,7 +28,12 @@ export function RoutineChecklist() {
       db.routineChecks.toArray(),
     ]);
 
-    const activeRoutines = routines.filter((r) => !r.deletedAt && !r.archivedAt);
+    // A fixed routine past its end day (or one that has not started) cannot be
+    // checked in: toggleRoutineCheck refuses the day. Listing it left a
+    // checkbox that silently failed and a done count that never reached 100%.
+    const activeRoutines = routines.filter(
+      (r) => !r.deletedAt && !r.archivedAt && isRoutineActiveOn(r, today),
+    );
     const activeChecks = checks.filter((c) => !c.deletedAt);
 
     // Group checks by routineId for streak computation

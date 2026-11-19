@@ -38,6 +38,7 @@ import {
   isRoutineDoneOn,
   fixedRoutineDuration,
   fixedRoutineProgressLabel,
+  isRoutineActiveOn,
   routineElapsedDays,
   toggleRoutineCheck,
   updateRoutine,
@@ -139,6 +140,29 @@ describe('fixedRoutineProgressLabel', () => {
     expect(
       fixedRoutineProgressLabel({ ...routine, startDate: '2026-02-30' }, '2026-08-05'),
     ).toBeUndefined();
+  });
+});
+
+describe('isRoutineActiveOn', () => {
+  it('is active from the start day through the end day', () => {
+    const routine = { startDate: '2026-09-01', endDate: '2026-09-30' };
+    expect(isRoutineActiveOn(routine, '2026-08-31')).toBe(false);
+    expect(isRoutineActiveOn(routine, '2026-09-01')).toBe(true);
+    expect(isRoutineActiveOn(routine, '2026-09-30')).toBe(true);
+    expect(isRoutineActiveOn(routine, '2026-10-01')).toBe(false);
+  });
+
+  it('has no end day for an ongoing routine', () => {
+    expect(isRoutineActiveOn({ startDate: '2026-09-01' }, '2030-01-01')).toBe(true);
+  });
+
+  it('resolves a synced timestamp bound and rejects an unreadable one', () => {
+    const start = new Date(2026, 8, 1, 9).toISOString();
+    expect(isRoutineActiveOn({ startDate: start }, '2026-09-01')).toBe(true);
+    expect(isRoutineActiveOn({ startDate: 'not-a-day' }, '2026-09-01')).toBe(false);
+    expect(isRoutineActiveOn({ startDate: '2026-09-01', endDate: 'nope' }, '2026-09-02')).toBe(
+      false,
+    );
   });
 });
 

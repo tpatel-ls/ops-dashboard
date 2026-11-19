@@ -50,9 +50,14 @@ afterEach(() => {
 describe('RoutineChecklist', () => {
   it('lists a routine with an unknown time of day under Anytime', async () => {
     routines = [
-      { id: 'r1', name: 'Stretch', timeOfDay: 'morning' },
-      { id: 'r2', name: 'Night walk', timeOfDay: 'late-night' as Routine['timeOfDay'] },
-      { id: 'r3', name: 'Read', timeOfDay: undefined },
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning' },
+      {
+        id: 'r2',
+        startDate: '2026-01-01',
+        name: 'Night walk',
+        timeOfDay: 'late-night' as Routine['timeOfDay'],
+      },
+      { id: 'r3', startDate: '2026-01-01', name: 'Read', timeOfDay: undefined },
     ];
 
     render(createElement(RoutineChecklist));
@@ -67,7 +72,7 @@ describe('RoutineChecklist', () => {
   it('starts a fresh day at local midnight on a page left open', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 10, 5, 23, 59, 30));
-    routines = [{ id: 'r1', name: 'Stretch', timeOfDay: 'morning' }];
+    routines = [{ id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning' }];
     checks = [{ id: 'c1', routineId: 'r1', date: '2026-11-05', done: true }];
 
     render(createElement(RoutineChecklist));
@@ -82,8 +87,8 @@ describe('RoutineChecklist', () => {
 
   it('names the routine each check button toggles', async () => {
     routines = [
-      { id: 'r1', name: 'Stretch', timeOfDay: 'morning' },
-      { id: 'r2', name: 'Read', timeOfDay: 'morning' },
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning' },
+      { id: 'r2', startDate: '2026-01-01', name: 'Read', timeOfDay: 'morning' },
     ];
     checks = [{ id: 'c1', routineId: 'r1', date: todayIso(), done: true }];
 
@@ -91,6 +96,28 @@ describe('RoutineChecklist', () => {
 
     expect(await screen.findByRole('button', { name: 'Uncheck: Stretch' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Check: Read' })).toBeTruthy();
+  });
+
+  it('leaves out a fixed routine past its end day', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 19, 9));
+    routines = [
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning' },
+      {
+        id: 'r2',
+        name: 'Couch to 5k',
+        timeOfDay: 'morning',
+        kind: 'fixed',
+        durationDays: 30,
+        startDate: '2026-09-01',
+        endDate: '2026-09-30',
+      },
+    ];
+
+    render(createElement(RoutineChecklist));
+
+    expect(await screen.findByText('0/1 done')).toBeTruthy();
+    expect(screen.queryByText('Couch to 5k')).toBeNull();
   });
 
   it('titles the checklist with a level-2 heading', async () => {
@@ -101,8 +128,8 @@ describe('RoutineChecklist', () => {
 
   it('heads each time-of-day group under the Routines heading', async () => {
     routines = [
-      { id: 'r1', name: 'Stretch', timeOfDay: 'morning' },
-      { id: 'r2', name: 'Read', timeOfDay: undefined },
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning' },
+      { id: 'r2', startDate: '2026-01-01', name: 'Read', timeOfDay: undefined },
     ];
 
     render(createElement(RoutineChecklist));
