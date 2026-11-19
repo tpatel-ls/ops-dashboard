@@ -386,10 +386,14 @@ export function tasksToMarkdown(tasks: Task[], heading: string): string {
     grouped[k] = grouped[k] ?? [];
     grouped[k].push(t);
   }
+  // The export covers every task, so it routinely spans more than one year.
+  // Without the year, two different days read as the same heading.
   for (const day of Object.keys(grouped).sort()) {
     const list = grouped[day]!.sort(compareTasks);
     const label =
-      day === 'unscheduled' ? 'Unscheduled' : format(parseISO(`${day}T00:00:00`), 'EEEE, MMMM d');
+      day === 'unscheduled'
+        ? 'Unscheduled'
+        : format(parseISO(`${day}T00:00:00`), 'EEEE, MMMM d, yyyy');
     lines.push(`## ${label}`, '');
     for (const t of list) {
       const box = t.status === 'done' ? '[x]' : '[ ]';
