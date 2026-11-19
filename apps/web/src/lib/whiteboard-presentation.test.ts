@@ -39,6 +39,16 @@ describe('whiteboard presentation', () => {
     expect(whiteboardUpdatedLabel('2026-08-01T12:00:00.000Z')).toMatch(/^Updated /);
   });
 
+  it('names the year of an update from another year', () => {
+    const now = new Date(2026, 10, 19, 12);
+    expect(whiteboardUpdatedLabel(new Date(2026, 2, 3, 14, 5).toISOString(), now)).toBe(
+      'Updated Mar 3, 14:05',
+    );
+    expect(whiteboardUpdatedLabel(new Date(2025, 2, 3, 14, 5).toISOString(), now)).toBe(
+      'Updated Mar 3, 2025, 14:05',
+    );
+  });
+
   it('keeps equal-time ordering available when a synced name is malformed', () => {
     const updatedAt = '2026-08-02T12:00:00.000Z';
     const malformed = { id: 'malformed', name: null as never, updatedAt };

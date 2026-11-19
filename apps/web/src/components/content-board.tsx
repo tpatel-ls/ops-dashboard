@@ -26,6 +26,7 @@ import { cn } from '@ops-dashboard/ui';
 import { knownValue } from '@/lib/known-value';
 import { linkOptions } from '@/lib/link-options';
 import { saveErrorMessage } from '@/lib/save-error';
+import { useToday } from '@/lib/use-today';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -372,7 +373,8 @@ interface CardProps {
 }
 
 export function ContentCard({ item, domain, isOpen, onToggle, domains }: CardProps) {
-  const publishLabel = contentPublishLabel(item.publishDate);
+  const today = useToday();
+  const publishLabel = contentPublishLabel(item.publishDate, today);
 
   return (
     <div className="flex flex-col">

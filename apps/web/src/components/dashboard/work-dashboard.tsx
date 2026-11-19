@@ -9,6 +9,7 @@ import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { buildWorkDashboard } from '@/lib/work-dashboard';
 import { taskEarliestDay } from '@/lib/task-dates';
+import { shortDayLabel } from '@/lib/calendar-label';
 import { useOrgStore } from '@/lib/org-store';
 import { setTaskStatus } from '@/lib/tasks';
 import { useToday } from '@/lib/use-today';
@@ -234,8 +235,8 @@ function AgendaTaskRow({
   const dateLabel =
     date === today
       ? 'Today'
-      : parsedDate && isValid(parsedDate)
-        ? format(parsedDate, 'MMM d')
+      : date && parsedDate && isValid(parsedDate)
+        ? shortDayLabel(date, today)
         : date;
   const overdue = Boolean(date && date < today);
 

@@ -457,7 +457,7 @@ function WorkLoggerPanel({
                 <SlidersHorizontal className="size-3.5 shrink-0" aria-hidden />
                 <span className="min-w-0 flex-1 truncate">
                   {selectedProject?.name ?? selectedDestinationName} ·{' '}
-                  {taskScheduleLabel(schedule, scheduledDate)}
+                  {taskScheduleLabel(schedule, scheduledDate, localDate())}
                   {priority >= 2 ? ` · ${priority === 3 ? 'Critical' : 'Important'}` : ''}
                 </span>
                 <span className="text-primary shrink-0 text-[11px] font-semibold">Change</span>

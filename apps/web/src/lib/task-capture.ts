@@ -8,7 +8,11 @@ export type TaskSchedule = 'inbox' | 'today' | 'tomorrow' | 'date';
 export const LAST_TASK_DESTINATION_KEY = 'ops:last-task-destination';
 export const LAST_TASK_PROJECT_KEY = 'ops:last-task-project';
 
-export function taskScheduleLabel(schedule: TaskSchedule, scheduledDate: string): string {
+export function taskScheduleLabel(
+  schedule: TaskSchedule,
+  scheduledDate: string,
+  today: string,
+): string {
   if (schedule === 'inbox') return 'Inbox';
   if (schedule === 'today') return 'Today';
   if (schedule === 'tomorrow') return 'Tomorrow';
@@ -20,11 +24,14 @@ export function taskScheduleLabel(schedule: TaskSchedule, scheduledDate: string)
   const date = new Date(0);
   date.setUTCHours(0, 0, 0, 0);
   date.setUTCFullYear(year!, month! - 1, day!);
-  return new Intl.DateTimeFormat('en-US', {
+  const monthDay = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     timeZone: 'UTC',
   }).format(date);
+  // A date picked in another year names it, so "Jan 4" is not read as this year.
+  const sameYear = localDay(today) === today && today.slice(0, 4) === scheduledDate.slice(0, 4);
+  return sameYear ? monthDay : `${monthDay}, ${year}`;
 }
 
 export function resolveRecentProject(

@@ -72,13 +72,18 @@ describe('taskCaptureOverrides', () => {
 
 describe('taskScheduleLabel', () => {
   it('returns a stable human label for every schedule choice', () => {
-    expect(taskScheduleLabel('inbox', '2026-07-20')).toBe('Inbox');
-    expect(taskScheduleLabel('today', '2026-07-20')).toBe('Today');
-    expect(taskScheduleLabel('tomorrow', '2026-07-20')).toBe('Tomorrow');
-    expect(taskScheduleLabel('date', '2026-07-20')).toBe('Jul 20');
-    expect(taskScheduleLabel('date', '0000-02-29')).toBe('Feb 29');
-    expect(taskScheduleLabel('date', '')).toBe('Pick date');
-    expect(taskScheduleLabel('date', '2026-02-30')).toBe('Pick date');
-    expect(taskScheduleLabel('date', 'not-a-date')).toBe('Pick date');
+    const today = '2026-07-16';
+    expect(taskScheduleLabel('inbox', '2026-07-20', today)).toBe('Inbox');
+    expect(taskScheduleLabel('today', '2026-07-20', today)).toBe('Today');
+    expect(taskScheduleLabel('tomorrow', '2026-07-20', today)).toBe('Tomorrow');
+    expect(taskScheduleLabel('date', '2026-07-20', today)).toBe('Jul 20');
+    expect(taskScheduleLabel('date', '0000-02-29', today)).toBe('Feb 29, 0');
+    expect(taskScheduleLabel('date', '', today)).toBe('Pick date');
+    expect(taskScheduleLabel('date', '2026-02-30', today)).toBe('Pick date');
+    expect(taskScheduleLabel('date', 'not-a-date', today)).toBe('Pick date');
+  });
+
+  it('names the year of a picked date in another year', () => {
+    expect(taskScheduleLabel('date', '2027-01-04', '2026-11-19')).toBe('Jan 4, 2027');
   });
 });
