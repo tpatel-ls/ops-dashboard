@@ -10,6 +10,7 @@ import {
   notificationAge,
 } from '@/lib/feed';
 import { cn } from '@ops-dashboard/ui';
+import { useNow } from '@/lib/use-now';
 
 const KIND_LABEL: Record<string, string> = {
   capture: 'capture',
@@ -20,6 +21,7 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 export function NotificationsFeed() {
+  const now = useNow();
   const feed = useLiveQuery(async () => {
     const all = await getDb().notifications.toArray();
     const unread = all.filter((n) => !n.deletedAt && !n.readAt).sort(compareNotificationRecency);
@@ -82,7 +84,7 @@ export function NotificationsFeed() {
                     </p>
                   )}
                   <p className="text-subtle-foreground mt-0.5 font-mono text-[10px]">
-                    {notificationAge(n.createdAt)}
+                    {notificationAge(n.createdAt, now)}
                   </p>
                 </div>
                 <button

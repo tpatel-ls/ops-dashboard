@@ -15,9 +15,11 @@ import {
   type StaleDomain,
 } from '@/lib/briefing';
 import { useToday } from '@/lib/use-today';
+import { useNow } from '@/lib/use-now';
 
 export function BriefingIntelligence() {
   const today = useToday();
+  const now = useNow();
   const briefing = useLiveQuery(async () => {
     const db = getDb();
     const [domains, projects, tasks, captures] = await Promise.all([
@@ -105,7 +107,7 @@ export function BriefingIntelligence() {
           moreLabel="stale domains"
         >
           {briefing.staleDomains.map((domain) => (
-            <StaleDomainRow key={domain.domainId} domain={domain} />
+            <StaleDomainRow key={domain.domainId} domain={domain} now={now} />
           ))}
         </BriefingPanel>
         <BriefingPanel
@@ -118,7 +120,7 @@ export function BriefingIntelligence() {
           moreLabel="routing issues"
         >
           {briefing.routingIssues.map((issue) => (
-            <CaptureIssueRow key={issue.captureId} issue={issue} />
+            <CaptureIssueRow key={issue.captureId} issue={issue} now={now} />
           ))}
         </BriefingPanel>
       </div>
@@ -207,8 +209,8 @@ function BriefingPanel({
   );
 }
 
-function StaleDomainRow({ domain }: { domain: StaleDomain }) {
-  const lastTouched = relativeTimeLabel(domain.lastTouchedAt);
+function StaleDomainRow({ domain, now }: { domain: StaleDomain; now: Date }) {
+  const lastTouched = relativeTimeLabel(domain.lastTouchedAt, now);
 
   return (
     <li className="bg-bg-sunken/50 flex items-center gap-3 rounded-md border px-3 py-2">
@@ -230,14 +232,14 @@ function StaleDomainRow({ domain }: { domain: StaleDomain }) {
   );
 }
 
-function CaptureIssueRow({ issue }: { issue: CaptureRoutingIssue }) {
+function CaptureIssueRow({ issue, now }: { issue: CaptureRoutingIssue; now: Date }) {
   const label =
     issue.reason === 'unprocessed'
       ? 'unprocessed'
       : issue.reason === 'missing-context'
         ? 'needs domain'
         : 'missing record';
-  const created = relativeTimeLabel(issue.createdAt);
+  const created = relativeTimeLabel(issue.createdAt, now);
 
   return (
     <li className="bg-bg-sunken/50 flex items-center gap-3 rounded-md border px-3 py-2">
