@@ -17,7 +17,7 @@ import { createFoodLog, deleteFoodLog } from './food-logs';
 import { createJournalEntry, deleteJournalEntry } from './journal';
 import { createNote, deleteNote } from './notes';
 import { createQuote, deleteQuote } from './quotes';
-import { toggleRoutineCheck } from './routines';
+import { isRoutineActiveOn, toggleRoutineCheck } from './routines';
 import { addTask, addTaskToProject, softDeleteTask } from './tasks';
 import { fetchWithTimeout } from './fetch-timeout';
 import { journalEntrySource } from './journal-source';
@@ -78,7 +78,12 @@ export async function processBrainDump(
         (p) => !p.deletedAt && !p.archivedAt && p.status !== 'archived' && p.status !== 'done',
       )
       .toArray(),
-    db.routines.filter((r) => !r.deletedAt && !r.archivedAt).toArray(),
+    // Only routines that accept a check-in today: toggleRoutineCheck refuses a
+    // finished fixed routine, which left a matching habit capture unrouted
+    // instead of falling back to a task.
+    db.routines
+      .filter((r) => !r.deletedAt && !r.archivedAt && isRoutineActiveOn(r, todayIso()))
+      .toArray(),
   ]);
 
   const ctx: RouteContext = { projects, routines, source };

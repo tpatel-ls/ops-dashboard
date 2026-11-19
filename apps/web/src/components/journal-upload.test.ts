@@ -8,18 +8,26 @@ const fetchWithTimeout = vi.fn();
 vi.mock('@/lib/fetch-timeout', () => ({ fetchWithTimeout }));
 const createJournalEntry = vi.fn();
 vi.mock('@/lib/journal', () => ({ createJournalEntry }));
-vi.mock('@/lib/routines', () => ({ toggleRoutineCheck: vi.fn() }));
+const toggleRoutineCheck = vi.fn();
+vi.mock('@/lib/routines', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/routines')>()),
+  toggleRoutineCheck,
+}));
+let routines: object[] = [];
 vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@ops-dashboard/core')>()),
-  getDb: () => ({ routines: { toArray: async () => [] } }),
+  getDb: () => ({ routines: { toArray: async () => routines } }),
 }));
 
 const { JournalUpload } = await import('./journal-upload');
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   fetchWithTimeout.mockReset();
   createJournalEntry.mockReset();
+  toggleRoutineCheck.mockReset();
+  routines = [];
 });
 
 describe('JournalUpload mood picker', () => {
@@ -83,6 +91,52 @@ describe('JournalUpload extracted details', () => {
     expect(screen.queryByRole('list', { name: 'Tags' })).toBeNull();
     expect(screen.getByText('None found')).toBeTruthy();
     expect(screen.queryByText('Habits detected')).toBeNull();
+  });
+});
+
+describe('JournalUpload habit check-ins', () => {
+  it('skips a finished fixed routine instead of failing a saved entry', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 19, 9));
+    routines = [
+      { id: 'walk', name: 'Morning walk', startDate: '2026-01-01' },
+      {
+        id: 'c25k',
+        name: 'Couch to 5k',
+        kind: 'fixed',
+        durationDays: 30,
+        startDate: '2026-09-01',
+        endDate: '2026-09-30',
+      },
+    ];
+    createJournalEntry.mockResolvedValue({});
+    const onSaved = vi.fn();
+    fetchWithTimeout.mockResolvedValue({
+      status: 200,
+      json: async () => ({
+        ok: true,
+        result: {
+          summary: 'A day',
+          body: 'Walked, then ran.',
+          mood: 'good',
+          tags: [],
+          habitsDone: ['Morning walk', 'Couch to 5k'],
+        },
+      }),
+    });
+    render(createElement(JournalUpload, { onSaved }));
+    fireEvent.click(screen.getByRole('button', { name: /Paste text/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Journal text to analyze' }), {
+      target: { value: 'Walked, then ran.' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Analyse with AI/ }));
+    await screen.findByRole('group', { name: 'Entry mood' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save entry' }));
+
+    await vi.waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(toggleRoutineCheck).toHaveBeenCalledTimes(1);
+    expect(toggleRoutineCheck).toHaveBeenCalledWith('walk', '2026-11-19', true, 'journal');
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });
 

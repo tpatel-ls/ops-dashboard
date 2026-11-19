@@ -15,7 +15,7 @@ import {
 import { getDb, matchByName, todayIso } from '@ops-dashboard/core';
 import { createJournalEntry } from '@/lib/journal';
 import { saveErrorMessage } from '@/lib/save-error';
-import { toggleRoutineCheck } from '@/lib/routines';
+import { isRoutineActiveOn, toggleRoutineCheck } from '@/lib/routines';
 import { cn } from '@ops-dashboard/ui';
 import { fetchWithTimeout } from '@/lib/fetch-timeout';
 import {
@@ -124,8 +124,14 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
 
     try {
       const db = getDb();
+      const today = todayIso();
       const allRoutines = await db.routines.toArray();
-      const activeRoutines = allRoutines.filter((r) => !r.deletedAt && !r.archivedAt);
+      // A finished fixed routine refuses check-ins. Matching one threw after
+      // the entry was saved, so the user saw a save error and a retry saved
+      // the entry twice.
+      const activeRoutines = allRoutines.filter(
+        (r) => !r.deletedAt && !r.archivedAt && isRoutineActiveOn(r, today),
+      );
       const routineNames = activeRoutines.map((r) => r.name);
 
       const resp = await fetchWithTimeout('/api/journal/extract', {
@@ -172,8 +178,14 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
     setSaving(true);
     try {
       const db = getDb();
+      const today = todayIso();
       const allRoutines = await db.routines.toArray();
-      const activeRoutines = allRoutines.filter((r) => !r.deletedAt && !r.archivedAt);
+      // A finished fixed routine refuses check-ins. Matching one threw after
+      // the entry was saved, so the user saw a save error and a retry saved
+      // the entry twice.
+      const activeRoutines = allRoutines.filter(
+        (r) => !r.deletedAt && !r.archivedAt && isRoutineActiveOn(r, today),
+      );
 
       await createJournalEntry({
         body: result.body,
@@ -183,7 +195,6 @@ export function JournalUpload({ onSaved }: { onSaved?: () => void }) {
       });
 
       // mark each detected habit
-      const today = todayIso();
       for (const name of result.habitsDone) {
         const routine = matchByName(activeRoutines, name);
         if (routine) {

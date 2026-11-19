@@ -4,14 +4,21 @@ const mocks = vi.hoisted(() => ({
   createCapture: vi.fn(),
   addTask: vi.fn(),
   fetchWithTimeout: vi.fn(),
+  toggleRoutineCheck: vi.fn(),
+  routines: [] as object[],
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
   const actual = await vi.importActual<typeof import('@ops-dashboard/core')>('@ops-dashboard/core');
   const emptyQuery = { filter: () => ({ toArray: async () => [] }) };
+  const routineQuery = {
+    filter: (keep: (routine: object) => boolean) => ({
+      toArray: async () => mocks.routines.filter(keep),
+    }),
+  };
   return {
     ...actual,
-    getDb: () => ({ projects: emptyQuery, routines: emptyQuery }),
+    getDb: () => ({ projects: emptyQuery, routines: routineQuery }),
   };
 });
 
@@ -26,6 +33,10 @@ vi.mock('./tasks', () => ({
   softDeleteTask: vi.fn(),
 }));
 vi.mock('./fetch-timeout', () => ({ fetchWithTimeout: mocks.fetchWithTimeout }));
+vi.mock('./routines', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./routines')>()),
+  toggleRoutineCheck: mocks.toggleRoutineCheck,
+}));
 
 import { MAX_BRAIN_DUMP_TEXT_LENGTH } from './brain-dump-result';
 import { processBrainDump } from './route-items';
@@ -83,5 +94,47 @@ describe('processBrainDump failure recovery', () => {
     const results = await processBrainDump(lines.join('\n'), 'notepad');
 
     expect(results.map((result) => result.title)).toEqual(lines);
+  });
+});
+
+describe('processBrainDump habit routing', () => {
+  it('routes a habit for a finished fixed routine to a task instead of failing', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 19, 9));
+    mocks.routines = [
+      {
+        id: 'c25k',
+        name: 'Couch to 5k',
+        kind: 'fixed',
+        durationDays: 30,
+        startDate: '2026-09-01',
+        endDate: '2026-09-30',
+      },
+    ];
+    mocks.fetchWithTimeout.mockReset();
+    mocks.fetchWithTimeout.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          ok: true,
+          items: [{ kind: 'habit', title: 'Couch to 5k', routineName: 'Couch to 5k' }],
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+    mocks.createCapture.mockReset();
+    mocks.createCapture.mockResolvedValue({ id: 'capture' });
+    mocks.addTask.mockReset();
+    mocks.addTask.mockImplementation(async (title: string) => ({ id: 'task', title }));
+
+    try {
+      const results = await processBrainDump('Did couch to 5k', 'text');
+
+      expect(mocks.toggleRoutineCheck).not.toHaveBeenCalled();
+      expect(mocks.addTask).toHaveBeenCalledOnce();
+      expect(results).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+      mocks.routines = [];
+    }
   });
 });
