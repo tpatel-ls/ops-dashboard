@@ -23,13 +23,52 @@ vi.mock('@/lib/organizations', async (importOriginal) => ({
   createOrganization,
 }));
 
+const addTask = vi.fn();
+vi.mock('@/lib/tasks', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/tasks')>()),
+  addTask,
+}));
+
 const { useAppStore } = await import('@/lib/app-store');
 const { WorkLoggerDialog } = await import('./work-logger-dialog');
 
 afterEach(() => {
   cleanup();
   createOrganization.mockReset();
+  addTask.mockReset();
   useAppStore.setState({ workLoggerOpen: false });
+});
+
+describe('WorkLoggerDialog task priority', () => {
+  async function addTitle(title: string) {
+    fireEvent.change(screen.getByLabelText('Task'), { target: { value: title } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
+    });
+  }
+
+  it('keeps priority marks typed in the title when no priority is picked', async () => {
+    addTask.mockResolvedValue({ id: 't1', title: 'Fix bug' });
+    useAppStore.getState().openWorkLogger('task');
+    render(createElement(WorkLoggerDialog));
+
+    await addTitle('Fix bug !!');
+
+    expect(addTask).toHaveBeenCalledTimes(1);
+    expect(addTask.mock.calls[0]![1]).not.toHaveProperty('priority');
+  });
+
+  it('sends a priority the user picked', async () => {
+    addTask.mockResolvedValue({ id: 't1', title: 'Fix bug' });
+    useAppStore.getState().openWorkLogger('task');
+    render(createElement(WorkLoggerDialog));
+    fireEvent.click(screen.getByRole('button', { name: /Change/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Critical' }));
+
+    await addTitle('Fix bug');
+
+    expect(addTask.mock.calls[0]![1]).toMatchObject({ priority: 3 });
+  });
 });
 
 describe('WorkLoggerDialog new organization', () => {

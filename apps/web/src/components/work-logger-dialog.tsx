@@ -299,7 +299,10 @@ function WorkLoggerPanel({
       const orgId = destinationOrgId(destination);
       if (mode === 'task') {
         await addTask(taskTitle.trim(), {
-          priority,
+          // "Normal" is the picker's default, so sending it replaced the
+          // priority marks typed in the title: "Fix bug !!" saved as normal
+          // with its marks removed. Only a picked priority overrides them.
+          ...(priority > 0 ? { priority } : {}),
           ...(scheduledFor() ? { scheduledFor: scheduledFor() } : {}),
           ...(selectedProject
             ? {
