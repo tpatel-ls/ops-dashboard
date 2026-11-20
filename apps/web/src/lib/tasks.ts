@@ -458,7 +458,7 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
 
   if (status === 'done' && existing.recurrence) {
     const projected = projectNextTask(existing);
-    if (projected) {
+    if (projected && !(await nextOccurrenceExists(existing, projected))) {
       const last = await db.tasks.orderBy('order').last();
       const newTaskId = newId();
       const reminders = projectRecurringReminders(existing, projected, newTaskId);
@@ -474,6 +474,31 @@ export async function setTaskStatus(id: string, status: Task['status']): Promise
       await enqueueOp({ table: 'tasks', recordId: newTask.id, op: 'put', payload: newTask });
     }
   }
+}
+
+/**
+ * Whether completing `task` already created `projected`. The done checkbox in
+ * the task list, board, and project view toggles back to todo, and the task
+ * keeps its recurrence, so ticking it off, unticking it, and ticking it again
+ * created the next occurrence twice. Match on what projection copies: the
+ * day, title, project, and rule (not its count, which projection lowers).
+ */
+async function nextOccurrenceExists(task: Task, projected: Task): Promise<boolean> {
+  if (!projected.scheduledFor) return false;
+  const sameDay = await getDb()
+    .tasks.where('scheduledFor')
+    .equals(projected.scheduledFor)
+    .toArray();
+  return sameDay.some(
+    (other) =>
+      other.id !== task.id &&
+      !other.deletedAt &&
+      other.title === projected.title &&
+      other.projectId === projected.projectId &&
+      other.recurrence?.freq === task.recurrence?.freq &&
+      other.recurrence?.interval === task.recurrence?.interval &&
+      JSON.stringify(other.recurrence?.byDay) === JSON.stringify(task.recurrence?.byDay),
+  );
 }
 
 function recurrenceAnchor(task: Task): number | undefined {
