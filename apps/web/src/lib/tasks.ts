@@ -403,6 +403,10 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
     ...quickAddToTask(parsed, { id, deviceId: getDeviceId(), order }),
     ...mutableOverrides,
   };
+  // Adding straight into the board's Done column creates a finished task.
+  // setTaskStatus stamps completedAt, but this path did not, so the briefing,
+  // daily review, and activity heatmap never counted it as done.
+  if (task.status === 'done' && !task.completedAt) task.completedAt = task.createdAt;
   await db.tasks.put(task);
   await enqueueOp({ table: 'tasks', recordId: task.id, op: 'put', payload: task });
   return task;
