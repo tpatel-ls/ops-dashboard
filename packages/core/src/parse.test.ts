@@ -166,6 +166,29 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Plan 15/12', anchor).scheduledFor).toBe('2026-12-15');
   });
 
+  it('does not schedule a length of time as a date', () => {
+    for (const input of ['Read 5 minutes', 'Walk 2 hours', 'Fast 3 days', 'Read for an hour']) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r).not.toHaveProperty('scheduledFor');
+      expect(r).not.toHaveProperty('startAt');
+    }
+
+    const run = parseQuickAdd('Run for 30 minutes tomorrow', anchor);
+    expect(run.title).toBe('Run for 30 minutes');
+    expect(run.scheduledFor).toBe('2026-04-27');
+    expect(run).not.toHaveProperty('startAt');
+  });
+
+  it('still schedules a duration that says when', () => {
+    expect(parseQuickAdd('Call in 2 days', anchor)).toMatchObject({
+      title: 'Call',
+      scheduledFor: '2026-04-28',
+    });
+    expect(parseQuickAdd('Ping within 2 days', anchor).scheduledFor).toBe('2026-04-28');
+    expect(parseQuickAdd('Ship 2 weeks from now', anchor).scheduledFor).toBe('2026-05-10');
+  });
+
   it('still schedules a month with a day or a relative month', () => {
     expect(parseQuickAdd('Dinner on Dec 5', anchor).scheduledFor).toBe('2026-12-05');
     expect(parseQuickAdd('Review budget next month', anchor).scheduledFor).toBe('2026-05-26');

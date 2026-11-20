@@ -16,6 +16,11 @@ const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on|by|for|@)\s*$/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
+// A length of time with no direction ("5 minutes", "for an hour", "1 hour 30
+// min"). "in 20 minutes", "within 2 days", and "2 days later" say when; these
+// only say how long.
+const DURATION_ONLY_RE =
+  /^(?:for\s+)?(?:(?:\d+(?:\.\d+)?|an?|half(?:\s+an?)?|one|two|three|four|five|six|seven|eight|nine|ten|a\s+few|few|several)\s*(?:seconds?|secs?|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|wks?|w|months?|mos?|years?|yrs?|y)\b\s*)+$/i;
 
 /**
  * Whether a chrono match is a date the user meant to schedule.
@@ -30,6 +35,11 @@ function isSchedulingMatch(result: chrono.ParsedResult): boolean {
   // "24/7" means around the clock. chrono falls back to day-first and read
   // "Check 24/7 support" as July 24 next year, saving "Check support".
   if (result.text === '24/7') return false;
+  // chrono reads a bare duration as that long from now, so "Read 5 minutes"
+  // was due at 09:05 and "Fast 3 days" was scheduled three days out. In "Run
+  // for 30 minutes tomorrow" the duration also won over the real date, which
+  // stayed in the title.
+  if (DURATION_ONLY_RE.test(result.text.trim())) return false;
   const { start } = result;
   if (start.isCertain('day') || start.isCertain('weekday') || start.isCertain('hour')) return true;
   return !BARE_WORD_RE.test(result.text.trim());
