@@ -20,6 +20,7 @@ import {
 import { getDb } from '@ops-dashboard/core';
 import type { FoodLog, MealType } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
+import { longDayLabel } from '@/lib/calendar-label';
 import { knownValue } from '@/lib/known-value';
 import {
   deleteFoodLog,
@@ -127,7 +128,7 @@ export function FoodView() {
             <ChevronRight className="size-3" />
           </button>
           <span className="ml-2 text-sm font-semibold tracking-tight">
-            {format(parseISO(day), 'EEEE, MMM d')}
+            {longDayLabel(day, today)}
             {isToday ? (
               <span className="text-primary ml-2 font-mono text-[10px] tracking-[0.14em] uppercase">
                 today

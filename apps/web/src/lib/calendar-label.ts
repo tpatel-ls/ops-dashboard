@@ -11,9 +11,22 @@ import { format, parseISO } from 'date-fns';
  * the label keeps the year so it is never ambiguous.
  */
 export function shortDayLabel(day: string, today: string): string {
-  const parsed = parseISO(day);
-  const sameYear = localDay(today) === today && today.slice(0, 4) === day.slice(0, 4);
-  return format(parsed, sameYear ? 'MMM d' : 'MMM d, yyyy');
+  return format(parseISO(day), sameYear(day, today) ? 'MMM d' : 'MMM d, yyyy');
+}
+
+/**
+ * Day heading with the weekday: "Thursday, Nov 20", or "Thursday, Nov 20,
+ * 2025" when the day is not in the same year as `today`.
+ *
+ * Views that page one day at a time (the Food log) can step back into earlier
+ * years, where a heading without the year read as this year's date.
+ */
+export function longDayLabel(day: string, today: string): string {
+  return format(parseISO(day), sameYear(day, today) ? 'EEEE, MMM d' : 'EEEE, MMM d, yyyy');
+}
+
+function sameYear(day: string, today: string): boolean {
+  return localDay(today) === today && today.slice(0, 4) === day.slice(0, 4);
 }
 
 /**
