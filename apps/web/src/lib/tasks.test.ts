@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   put: vi.fn(),
   bulkPutReminders: vi.fn(),
   enqueueOp: vi.fn(),
+  sameDay: vi.fn(async (): Promise<Task[]> => []),
 }));
 
 vi.mock('@ops-dashboard/core', async () => {
@@ -18,6 +19,7 @@ vi.mock('@ops-dashboard/core', async () => {
         get: mocks.get,
         put: mocks.put,
         orderBy: () => ({ last: mocks.last }),
+        where: () => ({ equals: () => ({ toArray: mocks.sameDay }) }),
       },
       reminders: { bulkPut: mocks.bulkPutReminders },
     }),
@@ -723,6 +725,63 @@ describe('setTaskStatus', () => {
         id: 'task-test',
         reminders: [expect.objectContaining({ taskId: 'task-test' })],
       }),
+    );
+  });
+});
+
+describe('setTaskStatus on a recurring task', () => {
+  const recurring = {
+    id: 'task-1',
+    title: 'Daily planning',
+    status: 'todo',
+    priority: 0,
+    scheduledFor: '2026-08-01',
+    tags: [],
+    reminders: [],
+    checklist: [],
+    order: 1,
+    recurrence: { freq: 'daily', interval: 1 },
+    createdAt: '2026-08-01T12:00:00.000Z',
+    updatedAt: '2026-08-01T12:00:00.000Z',
+    version: 1,
+    deviceId: 'device-original',
+  } satisfies Task;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.get.mockResolvedValue(recurring);
+    mocks.last.mockResolvedValue({ order: 1 });
+    mocks.sameDay.mockResolvedValue([]);
+  });
+
+  it('creates the next occurrence once when the task is completed again', async () => {
+    // Ticked off, unticked, and ticked again: the occurrence from the first
+    // completion is already there.
+    mocks.sameDay.mockResolvedValue([
+      { ...recurring, id: 'task-next', scheduledFor: '2026-08-02', version: 1 },
+    ]);
+    await setTaskStatus('task-1', 'done');
+
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'task-1', status: 'done' }),
+    );
+  });
+
+  it('still creates the next occurrence beside an unrelated task that day', async () => {
+    mocks.sameDay.mockResolvedValue([
+      { ...recurring, id: 'other', title: 'Weekly review', scheduledFor: '2026-08-02' },
+      {
+        ...recurring,
+        id: 'gone',
+        scheduledFor: '2026-08-02',
+        deletedAt: '2026-08-01T13:00:00.000Z',
+      },
+    ]);
+    await setTaskStatus('task-1', 'done');
+
+    expect(mocks.put).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'task-test', scheduledFor: '2026-08-02' }),
     );
   });
 });
