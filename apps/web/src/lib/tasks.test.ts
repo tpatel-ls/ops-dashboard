@@ -238,6 +238,34 @@ describe('addTask', () => {
     await expect(addTask('  Trim me  ')).resolves.toMatchObject({ title: 'Trim me' });
   });
 
+  it('keeps a time typed in the title on the day the caller picked', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 20, 9, 0));
+    try {
+      const task = await addTask('Call Bob at 3pm', { scheduledFor: '2026-11-21' });
+      expect(task).toMatchObject({
+        title: 'Call Bob',
+        scheduledFor: '2026-11-21',
+        startAt: new Date(2026, 10, 21, 15, 0).toISOString(),
+        dueAt: new Date(2026, 10, 21, 15, 0).toISOString(),
+      });
+
+      const block = await addTask('Workshop 2pm-4pm', { scheduledFor: '2026-11-24' });
+      expect(block).toMatchObject({
+        startAt: new Date(2026, 10, 24, 14, 0).toISOString(),
+        endAt: new Date(2026, 10, 24, 16, 0).toISOString(),
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('leaves an explicit start time from the caller alone', async () => {
+    const startAt = '2026-11-25T18:00:00.000Z';
+    const task = await addTask('Call Bob at 3pm', { scheduledFor: '2026-11-25', startAt });
+    expect(task.startAt).toBe(startAt);
+  });
+
   it('rejects a non-finite task order', async () => {
     await expect(addTask('Invalid order', { order: Number.POSITIVE_INFINITY })).rejects.toThrow(
       'Task order must be finite',

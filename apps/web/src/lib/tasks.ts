@@ -12,6 +12,7 @@ import {
 } from '@ops-dashboard/core';
 import type {
   ChecklistItem,
+  ParsedQuickAdd,
   Project,
   RecurrenceRule,
   Reminder,
@@ -340,6 +341,26 @@ function assertTaskRecurrenceRange(
   }
 }
 
+/**
+ * A caller that picks the day (the work logger's Today / Tomorrow / date
+ * choice) overrides `scheduledFor`, but a time typed in the title ("Call Bob
+ * at 3pm") was still parsed onto the day chrono chose. The task then sat on
+ * the picked day on the week board and on another day in the calendar and
+ * Today rail, and its parsed due time could already be overdue. Keep the
+ * typed time on the picked day, as rescheduling does.
+ */
+function moveParsedTimeToDay(parsed: ParsedQuickAdd, overrides: Partial<Task>): void {
+  const day = overrides.scheduledFor;
+  if (!day || !parsed.startAt || day === parsed.scheduledFor) return;
+  if (overrides.startAt !== undefined || overrides.endAt !== undefined) return;
+  const moved = timeBlockOnDay(parsed, day);
+  if (!moved.startAt) return;
+  if (parsed.dueAt === parsed.startAt && overrides.dueAt === undefined)
+    parsed.dueAt = moved.startAt;
+  parsed.startAt = moved.startAt;
+  if (moved.endAt) parsed.endAt = moved.endAt;
+}
+
 /** Add a task straight into a project, inheriting its domain and org lane. */
 export function addTaskToProject(
   input: string,
@@ -371,6 +392,7 @@ export async function addTask(input: string, overrides: Partial<Task> = {}): Pro
   }
   const id = newId();
   assertTaskFields(mutableOverrides, id);
+  moveParsedTimeToDay(parsed, mutableOverrides);
   const candidate = { ...parsed, ...mutableOverrides };
   assertTaskTimeRange(candidate);
   assertTaskRecurrenceRange(candidate);
