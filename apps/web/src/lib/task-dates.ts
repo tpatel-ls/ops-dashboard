@@ -169,18 +169,28 @@ export function dailyMissionTasks(tasks: Task[]): Task[] {
  * day left a timed task on its old day in one set of views and the new day in
  * the other. Returns an empty patch when there is no readable block or `day`
  * is not a calendar day, so the caller's validation still decides.
+ *
+ * Quick add sets `dueAt` to the same instant as a typed time ("Call Bob at
+ * 3pm"). A due time equal to the start moves with it; left behind, the card
+ * was labelled by its old day and turned overdue there. A separate deadline
+ * stays where it is.
  */
 export function timeBlockOnDay(
-  task: Pick<Task, 'startAt' | 'endAt'>,
+  task: Pick<Task, 'startAt' | 'endAt' | 'dueAt'>,
   day: string | undefined,
-): Partial<Pick<Task, 'startAt' | 'endAt'>> {
+): Partial<Pick<Task, 'startAt' | 'endAt' | 'dueAt'>> {
   if (!day || localDay(day) !== day || typeof task.startAt !== 'string') return {};
   const start = new Date(task.startAt);
   if (!Number.isFinite(start.getTime())) return {};
   const [year, month, date] = day.split('-').map(Number);
   const moved = new Date(start);
   moved.setFullYear(year!, month! - 1, date!);
-  const patch: Partial<Pick<Task, 'startAt' | 'endAt'>> = { startAt: moved.toISOString() };
+  const patch: Partial<Pick<Task, 'startAt' | 'endAt' | 'dueAt'>> = {
+    startAt: moved.toISOString(),
+  };
+  if (typeof task.dueAt === 'string' && Date.parse(task.dueAt) === start.getTime()) {
+    patch.dueAt = patch.startAt;
+  }
   const end = typeof task.endAt === 'string' ? Date.parse(task.endAt) : NaN;
   if (Number.isFinite(end) && end > start.getTime()) {
     patch.endAt = new Date(moved.getTime() + (end - start.getTime())).toISOString();

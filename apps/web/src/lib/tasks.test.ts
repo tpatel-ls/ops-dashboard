@@ -825,6 +825,14 @@ describe('rescheduleTask', () => {
     });
   });
 
+  it('carries a quick add due time that matches the start', async () => {
+    const at = new Date(2026, 8, 20, 15).toISOString();
+    mocks.get.mockResolvedValue({ ...(await mocks.get()), startAt: at, dueAt: at });
+    await rescheduleTask('task-1', '2026-09-26');
+    const moved = new Date(2026, 8, 26, 15).toISOString();
+    expect(mocks.put.mock.calls[0]?.[0]).toMatchObject({ startAt: moved, dueAt: moved });
+  });
+
   it('clears the day for an absent or empty value rather than storing one', async () => {
     // The unscheduled state is a missing scheduledFor. Passing '' straight
     // through would leave a blank string that no day view matches.
