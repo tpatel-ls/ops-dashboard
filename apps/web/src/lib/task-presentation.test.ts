@@ -138,4 +138,22 @@ describe('taskStartTimePatch', () => {
   it('clears the start for an empty time value', () => {
     expect(taskStartTimePatch(task, '2026-09-19', '')).toEqual({ startAt: undefined });
   });
+
+  it('moves or clears a due time that matches the start, as quick add sets it', () => {
+    const typed = { startAt: at(15), dueAt: at(15) };
+    expect(taskStartTimePatch(typed, '2026-09-19', '17:00')).toEqual({
+      startAt: at(17),
+      dueAt: at(17),
+    });
+    expect(taskStartTimePatch(typed, '2026-09-19', '')).toEqual({
+      startAt: undefined,
+      dueAt: undefined,
+    });
+  });
+
+  it('leaves a separate deadline alone', () => {
+    const deadline = { startAt: at(9), dueAt: at(17) };
+    expect(taskStartTimePatch(deadline, '2026-09-19', '11:00')).toEqual({ startAt: at(11) });
+    expect(taskStartTimePatch(deadline, '2026-09-19', '')).toEqual({ startAt: undefined });
+  });
 });
