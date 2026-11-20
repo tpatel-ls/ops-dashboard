@@ -190,6 +190,26 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Party Saturday', anchor).scheduledFor).toBe('2026-05-02');
   });
 
+  it('leaves a past date phrase in the title instead of scheduling it', () => {
+    for (const input of [
+      'Recap yesterday meeting',
+      'Review last week notes',
+      'Follow up on last friday call',
+      'Log 2 days ago workout',
+    ]) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r).not.toHaveProperty('scheduledFor');
+    }
+  });
+
+  it('schedules the future date when a past phrase comes first', () => {
+    expect(parseQuickAdd('Pay last month invoice by friday', anchor)).toMatchObject({
+      title: 'Pay last month invoice',
+      scheduledFor: '2026-05-01',
+    });
+  });
+
   it('reads 24/7 as part of the title, not as July 24', () => {
     const r = parseQuickAdd('Check 24/7 support tomorrow', anchor);
     expect(r.title).toBe('Check 24/7 support');

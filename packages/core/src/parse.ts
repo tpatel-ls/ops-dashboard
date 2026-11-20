@@ -18,6 +18,7 @@ const DANGLING_PREPOSITION_RE =
   /(?:^|\s)(?:at|on|by|for|@|before|until|till|due|no later than)\s*$/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
+const PAST_REFERENCE_RE = /\b(?:yesterday|last|ago|previous|past)\b/i;
 // A length of time with no direction ("5 minutes", "for an hour", "1 hour 30
 // min"). "in 20 minutes", "within 2 days", and "2 days later" say when; these
 // only say how long.
@@ -46,6 +47,11 @@ function isSchedulingMatch(result: chrono.ParsedResult): boolean {
   // Sunday as "Buy cream", and "Get wed invites printed" lost "wed". The
   // full names and "this sat" / "next sun" still schedule.
   if (WORD_WEEKDAY_RE.test(result.text.trim())) return false;
+  // A past phrase names what the task is about, not when to do it: "Recap
+  // yesterday meeting" was scheduled for yesterday and was overdue the moment
+  // it was saved, and forwardDate turned "Follow up on last friday call" into
+  // next Friday. Both also lost the words from the title.
+  if (PAST_REFERENCE_RE.test(result.text)) return false;
   const { start } = result;
   if (start.isCertain('day') || start.isCertain('weekday') || start.isCertain('hour')) return true;
   return !BARE_WORD_RE.test(result.text.trim());
