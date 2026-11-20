@@ -65,21 +65,33 @@ export function taskClockTime(value: string | undefined): string {
  * the current end would fail the time-range check, so the end moves with it and
  * keeps the block's previous length. Without this, rescheduling a 09:00-10:00
  * block to 14:00 meant editing the end first.
+ *
+ * Quick add also sets `dueAt` to the typed time, and the drawer has no due
+ * field, so a due time equal to the old start follows the start (or is cleared
+ * with it). Left behind, "Call Bob at 3pm" moved to 17:00 still went overdue
+ * at 15:00, with nothing in the drawer to explain why.
  */
 export function taskStartTimePatch(
-  task: Pick<Task, 'startAt' | 'endAt'>,
+  task: Pick<Task, 'startAt' | 'endAt' | 'dueAt'>,
   day: string,
   clock: string,
-): Pick<Task, 'startAt'> | Pick<Task, 'startAt' | 'endAt'> {
-  if (!clock) return { startAt: undefined };
+): Partial<Pick<Task, 'startAt' | 'endAt' | 'dueAt'>> {
+  const previousStart = calendarInstant(task.startAt);
+  const dueFollowsStart =
+    previousStart !== undefined &&
+    typeof task.dueAt === 'string' &&
+    Date.parse(task.dueAt) === previousStart.getTime();
+  if (!clock)
+    return dueFollowsStart ? { startAt: undefined, dueAt: undefined } : { startAt: undefined };
   const start = new Date(`${day}T${clock}:00`);
   const startAt = start.toISOString();
+  const patch: Partial<Pick<Task, 'startAt' | 'endAt' | 'dueAt'>> = { startAt };
+  if (dueFollowsStart) patch.dueAt = startAt;
   const end = calendarInstant(task.endAt);
-  const previousStart = calendarInstant(task.startAt);
-  if (!end || end.getTime() > start.getTime() || !previousStart) return { startAt };
+  if (!end || end.getTime() > start.getTime() || !previousStart) return patch;
   const length = end.getTime() - previousStart.getTime();
-  if (length <= 0) return { startAt };
-  return { startAt, endAt: new Date(start.getTime() + length).toISOString() };
+  if (length <= 0) return patch;
+  return { ...patch, endAt: new Date(start.getTime() + length).toISOString() };
 }
 
 /** Reminder trigger label, or a stated fallback when the instant is unreadable. */
