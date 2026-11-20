@@ -266,6 +266,17 @@ describe('addTask', () => {
     expect(task.startAt).toBe(startAt);
   });
 
+  it('stamps completedAt on a task created as done', async () => {
+    const done = await addTask('Shipped release', { status: 'done' });
+    expect(done.completedAt).toBe(done.createdAt);
+
+    const completedAt = '2026-11-19T15:00:00.000Z';
+    await expect(addTask('Logged', { status: 'done', completedAt })).resolves.toMatchObject({
+      completedAt,
+    });
+    await expect(addTask('Open', { status: 'todo' })).resolves.not.toHaveProperty('completedAt');
+  });
+
   it('rejects a non-finite task order', async () => {
     await expect(addTask('Invalid order', { order: Number.POSITIVE_INFINITY })).rejects.toThrow(
       'Task order must be finite',
