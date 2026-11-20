@@ -55,6 +55,18 @@ describe('FoodView day', () => {
 
     expect(screen.getByText('Wednesday, Nov 4')).toBeTruthy();
   });
+
+  it('names the year once the user pages back into last year', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 1, 9, 0));
+    render(createElement(FoodView));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(screen.getByText('Thursday, Jan 1')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
+
+    expect(screen.getByText('Wednesday, Dec 31, 2025')).toBeTruthy();
+  });
 });
 
 describe('FoodView quick log', () => {
