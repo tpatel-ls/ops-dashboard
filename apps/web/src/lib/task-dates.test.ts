@@ -371,6 +371,22 @@ describe('timeBlockOnDay', () => {
     });
   });
 
+  it('moves a due time that matches the start, as quick add sets it', () => {
+    expect(timeBlockOnDay({ startAt: at(20, 15), dueAt: at(20, 15) }, '2026-09-26')).toEqual({
+      startAt: at(26, 15),
+      dueAt: at(26, 15),
+    });
+  });
+
+  it('leaves a separate deadline where it is', () => {
+    expect(timeBlockOnDay({ startAt: at(20, 9), dueAt: at(28, 17) }, '2026-09-26')).toEqual({
+      startAt: at(26, 9),
+    });
+    expect(timeBlockOnDay({ startAt: at(20, 9), dueAt: '2026-09-20' }, '2026-09-26')).toEqual({
+      startAt: at(26, 9),
+    });
+  });
+
   it('leaves the task alone without a block or a calendar day to move it to', () => {
     expect(timeBlockOnDay({}, '2026-09-26')).toEqual({});
     expect(timeBlockOnDay({ startAt: 'bad' }, '2026-09-26')).toEqual({});
