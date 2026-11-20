@@ -14,7 +14,8 @@ export interface ParsedQuickAdd {
 
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
-const DANGLING_PREPOSITION_RE = /(?:^|\s)(?:at|on|by|for|@)\s*$/i;
+const DANGLING_PREPOSITION_RE =
+  /(?:^|\s)(?:at|on|by|for|@|before|until|till|due|no later than)\s*$/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 // A length of time with no direction ("5 minutes", "for an hour", "1 hour 30
 // min"). "in 20 minutes", "within 2 days", and "2 days later" say when; these
@@ -122,8 +123,10 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       }
       // chrono consumes the preposition for some phrasings ("at 3pm", "on
       // friday") but not others ("at noon", "on Dec 5", "by 12/15", "@
-      // 3:30pm"), which left titles like "Call at" or "Ship v1 by". Drop the
-      // word that sits directly before the date it introduced.
+      // 3:30pm"), which left titles like "Call at" or "Ship v1 by". It never
+      // consumes a deadline word, so "Finish slides before friday" saved as
+      // "Finish slides before". Drop the word that sits directly before the
+      // date it introduced.
       removed = true;
       // chrono's weekday pattern swallows a closing bracket ("friday)"), so
       // measure the match without brackets at either edge.

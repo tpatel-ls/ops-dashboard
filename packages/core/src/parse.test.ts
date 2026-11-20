@@ -129,6 +129,19 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Pick up kids @ 3:30pm', anchor).title).toBe('Pick up kids');
   });
 
+  it('drops a deadline word left directly before the date', () => {
+    expect(parseQuickAdd('Finish slides before friday', anchor).title).toBe('Finish slides');
+    expect(parseQuickAdd('Hold until monday', anchor).title).toBe('Hold');
+    expect(parseQuickAdd('Submit report due friday', anchor).title).toBe('Submit report');
+    expect(parseQuickAdd('Ship due tomorrow at 5pm', anchor).title).toBe('Ship');
+    expect(parseQuickAdd('Send invoice no later than friday', anchor).title).toBe('Send invoice');
+  });
+
+  it('keeps a deadline word that belongs to the title', () => {
+    expect(parseQuickAdd('Pay dues friday', anchor).title).toBe('Pay dues');
+    expect(parseQuickAdd('Read Before Sunrise tomorrow', anchor).title).toBe('Read Before Sunrise');
+  });
+
   it('keeps a "by" or "for" that belongs to the title', () => {
     expect(parseQuickAdd('Stop by the bank tomorrow', anchor).title).toBe('Stop by the bank');
     expect(parseQuickAdd('Shop for gifts tomorrow', anchor).title).toBe('Shop for gifts');
