@@ -37,6 +37,18 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `tomorrow 3pm-4pm` schedule a time block with an end time
 - `Cmd/Ctrl Enter` save from supported capture forms
 
+The first date phrase is scheduled and removed from the title, along with a
+word that only introduced it (`at`, `on`, `by`, `for`, `@`, `before`, `until`,
+`due`). These stay in the title and do not schedule anything:
+
+- a length of time with no direction: `Read 30 minutes`, `Fast 3 days`
+  (`in 2 days`, `within 2 days`, and `2 weeks from now` still schedule)
+- a past phrase: `Recap yesterday meeting`, `Review last week notes`
+- a bare month name (`Lunch with April`) and `24/7`
+- `sun`, `sat`, and `wed` on their own (`Buy sun cream`); use the full weekday
+  name or `this sat` / `next sun`
+- anything inside quotation marks: `Read "Tomorrow and Tomorrow"`
+
 ## Whiteboard
 
 These come from tldraw, not from the app's own hotkey table, so the in-app `?`
