@@ -172,6 +172,24 @@ describe('parseQuickAdd', () => {
     expect(launch.scheduledFor).toBe('2026-04-27');
   });
 
+  it('reads "sun", "sat", and "wed" on their own as words, not weekdays', () => {
+    for (const input of ['Buy sun cream', 'Sat exam prep', 'Get wed invites printed']) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r).not.toHaveProperty('scheduledFor');
+    }
+  });
+
+  it('still schedules other weekday abbreviations and qualified short names', () => {
+    expect(parseQuickAdd('Pay mon', anchor)).toMatchObject({
+      title: 'Pay',
+      scheduledFor: '2026-04-27',
+    });
+    expect(parseQuickAdd('Ship this fri', anchor).scheduledFor).toBe('2026-05-01');
+    expect(parseQuickAdd('Brunch next sun', anchor).title).toBe('Brunch');
+    expect(parseQuickAdd('Party Saturday', anchor).scheduledFor).toBe('2026-05-02');
+  });
+
   it('reads 24/7 as part of the title, not as July 24', () => {
     const r = parseQuickAdd('Check 24/7 support tomorrow', anchor);
     expect(r.title).toBe('Check 24/7 support');

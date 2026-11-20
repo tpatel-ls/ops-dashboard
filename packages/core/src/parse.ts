@@ -17,6 +17,7 @@ const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE =
   /(?:^|\s)(?:at|on|by|for|@|before|until|till|due|no later than)\s*$/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
+const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
 // A length of time with no direction ("5 minutes", "for an hour", "1 hour 30
 // min"). "in 20 minutes", "within 2 days", and "2 days later" say when; these
 // only say how long.
@@ -41,6 +42,10 @@ function isSchedulingMatch(result: chrono.ParsedResult): boolean {
   // for 30 minutes tomorrow" the duration also won over the real date, which
   // stayed in the title.
   if (DURATION_ONLY_RE.test(result.text.trim())) return false;
+  // "sun", "sat", and "wed" are also words: "Buy sun cream" was scheduled for
+  // Sunday as "Buy cream", and "Get wed invites printed" lost "wed". The
+  // full names and "this sat" / "next sun" still schedule.
+  if (WORD_WEEKDAY_RE.test(result.text.trim())) return false;
   const { start } = result;
   if (start.isCertain('day') || start.isCertain('weekday') || start.isCertain('hour')) return true;
   return !BARE_WORD_RE.test(result.text.trim());
