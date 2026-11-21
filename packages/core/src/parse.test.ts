@@ -285,6 +285,14 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('schedules "this month" and "this year" today rather than in the past', () => {
+    expect(parseQuickAdd('Send invoice this month', anchor)).toMatchObject({
+      title: 'Send invoice',
+      scheduledFor: '2026-04-26',
+    });
+    expect(parseQuickAdd('File taxes this year', anchor).scheduledFor).toBe('2026-04-26');
+  });
+
   it('drops "from", "over the", and "on the" left before a date', () => {
     expect(parseQuickAdd('Pay rent on the 1st of december', anchor)).toMatchObject({
       title: 'Pay rent',

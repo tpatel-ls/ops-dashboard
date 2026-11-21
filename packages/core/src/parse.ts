@@ -131,6 +131,12 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       const end = first.end?.date();
       const hasTime = first.start.isCertain('hour');
       scheduledFor = toISODate(start);
+      // chrono reads "this month" and "this year" as the first day of the
+      // period, which forwardDate leaves alone, so "Send invoice this month"
+      // was scheduled on the 1st and overdue the moment it was saved. The
+      // earliest day of the period still ahead is today.
+      const today = toISODate(now);
+      if (!hasTime && scheduledFor < today) scheduledFor = today;
       if (hasTime) {
         startAt = start.toISOString();
         if (end) endAt = end.toISOString();
