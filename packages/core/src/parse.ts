@@ -142,10 +142,11 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // "Finish slides before". Drop the word that sits directly before the
       // date it introduced.
       removed = true;
-      // chrono's weekday pattern swallows a closing bracket ("friday)"), so
-      // measure the match without brackets at either edge.
+      // chrono's weekday pattern swallows a closing bracket ("friday)") or a
+      // comma ("on Friday, then Bob" lost its comma), so measure the match
+      // without brackets at either edge or a trailing comma.
       const leading = /^[([]*/.exec(first.text)?.[0].length ?? 0;
-      const trailing = /[)\]]*$/.exec(first.text)?.[0].length ?? 0;
+      const trailing = /[)\],]*$/.exec(first.text)?.[0].length ?? 0;
       let before = working.slice(0, first.index + leading);
       let after = working.slice(first.index + first.text.length - trailing);
       // A date in its own parentheses ("Submit report (due friday)") or

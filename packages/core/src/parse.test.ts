@@ -282,6 +282,15 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('keeps the comma after a weekday', () => {
+    expect(parseQuickAdd('Call mom on Friday, then Bob', anchor)).toMatchObject({
+      title: 'Call mom, then Bob',
+      scheduledFor: '2026-05-01',
+    });
+    expect(parseQuickAdd('Call mom tomorrow, then Bob', anchor).title).toBe('Call mom, then Bob');
+    expect(parseQuickAdd('Call mom, Friday', anchor).title).toBe('Call mom');
+  });
+
   it('removes square brackets that only held the date', () => {
     expect(parseQuickAdd('[tomorrow] call mom', anchor)).toMatchObject({
       title: 'call mom',
