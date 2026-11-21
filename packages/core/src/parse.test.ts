@@ -293,6 +293,30 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('reads a time range that starts or ends at noon or midnight', () => {
+    const at = (clock: string) => new Date(clock).toISOString();
+    expect(parseQuickAdd('Call noon-1pm', anchor)).toMatchObject({
+      title: 'Call',
+      startAt: at('2026-04-26T12:00:00'),
+      endAt: at('2026-04-26T13:00:00'),
+    });
+    expect(parseQuickAdd('Deep work 9am to noon tomorrow', anchor)).toMatchObject({
+      title: 'Deep work',
+      startAt: at('2026-04-27T09:00:00'),
+      endAt: at('2026-04-27T12:00:00'),
+    });
+    expect(parseQuickAdd('Lunch noon - 12:30pm', anchor)).toMatchObject({
+      startAt: at('2026-04-26T12:00:00'),
+      endAt: at('2026-04-26T12:30:00'),
+    });
+    expect(parseQuickAdd('Deploy 10pm-midnight', anchor)).toMatchObject({
+      title: 'Deploy',
+      startAt: at('2026-04-26T22:00:00'),
+      endAt: at('2026-04-27T00:00:00'),
+    });
+    expect(parseQuickAdd('Set up the noon meeting', anchor).title).toBe('Set up the meeting');
+  });
+
   it('reads a time after "@" as part of the day before it', () => {
     const r = parseQuickAdd('Call mom tomorrow @ 5pm', anchor);
     expect(r.title).toBe('Call mom');
