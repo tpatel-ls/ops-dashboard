@@ -21,7 +21,9 @@ const TAG_RE = /(?:^|\s)#((?=[\p{N}\p{M}_-]*\p{L})[\p{L}\p{N}_-][\p{L}\p{N}\p{M}
 // the task at no priority, the opposite of what the extra marks asked for.
 const PRIORITY_RE = /(?:^|\s)(!+)(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE =
-  /(?:^|\s)(?:at|on|by|for|from|over|during|@|before|until|till|due|no later than)(?:\s+the)?\s*$/i;
+  /(?:^|\s)(?:at|on|by|for|from|over|during|between|@|before|until|till|due|no later than)(?:\s+the)?\s*$/i;
+const BETWEEN_TIMES_RE =
+  /\b(between\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)(\s+and\s+)(?=\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|\d{1,2}:\d{2}\b)/gi;
 const POSSESSIVE_RE = /^['\u2019]s\b/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
@@ -212,7 +214,13 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   // "9am to noon" at noon, and ended "noon - 12:30pm" when it began. Parse a
   // copy with clock times of the same length so match indices still line up
   // with the title text.
-  const clockText = working.replace(/\bnoon\b/gi, '12pm').replace(/\bmidnight\b/gi, '12:00 am');
+  const clockText = working
+    .replace(/\bnoon\b/gi, '12pm')
+    .replace(/\bmidnight\b/gi, '12:00 am')
+    // chrono has no "between 2 and 3pm": it took only "3pm", so the task
+    // started at the end of the window and kept "between 2 and" in its
+    // title. Write the "and" as a range dash, padded to the same length.
+    .replace(BETWEEN_TIMES_RE, (_, from: string, and: string) => from + ' - '.padEnd(and.length));
   const results = chrono.parse(clockText, now, { forwardDate: true }).filter(
     (result) =>
       isSchedulingMatch(result) &&

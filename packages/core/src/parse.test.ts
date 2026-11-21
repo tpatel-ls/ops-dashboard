@@ -293,6 +293,23 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('reads "between" two times as a time range', () => {
+    const at = (clock: string) => new Date(clock).toISOString();
+    expect(parseQuickAdd('Call the bank between 2 and 3pm', anchor)).toMatchObject({
+      title: 'Call the bank',
+      startAt: at('2026-04-26T14:00:00'),
+      endAt: at('2026-04-26T15:00:00'),
+    });
+    expect(parseQuickAdd('Delivery between 10am and noon tomorrow', anchor)).toMatchObject({
+      title: 'Delivery',
+      startAt: at('2026-04-27T10:00:00'),
+      endAt: at('2026-04-27T12:00:00'),
+    });
+    expect(parseQuickAdd('Pick between 2 and 3 options', anchor).title).toBe(
+      'Pick between 2 and 3 options',
+    );
+  });
+
   it('reads a length after a start time as the end of the block', () => {
     const at = (clock: string) => new Date(clock).toISOString();
     expect(parseQuickAdd('Meet Sam 2pm for an hour', anchor)).toMatchObject({
