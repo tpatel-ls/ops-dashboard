@@ -282,6 +282,17 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('removes square brackets that only held the date', () => {
+    expect(parseQuickAdd('[tomorrow] call mom', anchor)).toMatchObject({
+      title: 'call mom',
+      scheduledFor: '2026-04-27',
+    });
+    expect(parseQuickAdd('Submit report [due friday]', anchor).title).toBe('Submit report');
+    expect(parseQuickAdd('Call mom [about the trip] tomorrow', anchor).title).toBe(
+      'Call mom [about the trip]',
+    );
+  });
+
   it('keeps parentheses that hold more than the date', () => {
     expect(parseQuickAdd('Call mom (about the trip) tomorrow', anchor).title).toBe(
       'Call mom (about the trip)',
