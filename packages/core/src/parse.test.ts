@@ -293,6 +293,23 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('ends a range at the next time an hour without am or pm comes round', () => {
+    const at = (clock: string) => new Date(clock).toISOString();
+    expect(parseQuickAdd('Shift 8am-5', anchor)).toMatchObject({
+      title: 'Shift',
+      startAt: at('2026-04-27T08:00:00'),
+      endAt: at('2026-04-27T17:00:00'),
+    });
+    expect(parseQuickAdd('Call 11am-1', anchor).endAt).toBe(at('2026-04-26T13:00:00'));
+    expect(parseQuickAdd('Call 3pm-5', anchor).endAt).toBe(at('2026-04-26T17:00:00'));
+    expect(parseQuickAdd('Party 11pm-1', anchor).endAt).toBe(at('2026-04-27T01:00:00'));
+    expect(parseQuickAdd('Shift 08:00-22:00 tomorrow', anchor).endAt).toBe(
+      at('2026-04-27T22:00:00'),
+    );
+    expect(parseQuickAdd('Call tomorrow @ 3pm-4pm', anchor).endAt).toBe(at('2026-04-27T16:00:00'));
+    expect(parseQuickAdd('Call tomorrow @ 11am-1', anchor).endAt).toBe(at('2026-04-27T13:00:00'));
+  });
+
   it('reads a time range that starts or ends at noon or midnight', () => {
     const at = (clock: string) => new Date(clock).toISOString();
     expect(parseQuickAdd('Call noon-1pm', anchor)).toMatchObject({
