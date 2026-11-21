@@ -110,16 +110,39 @@ interface DateMatch {
  * @ 5pm" was scheduled for the day with no time and kept "@ 5pm" in its
  * title. A day followed by "@" and a time is joined into one match.
  */
+/**
+ * The end of a time range, or undefined when it does not follow the start.
+ *
+ * An end hour typed without am or pm is the next time that hour comes round
+ * after the start. chrono read it as the morning hour, so "Call 8am-5" ran to
+ * 05:00 the next day as a 21-hour block and "Call 11am-1" ended at 01:00.
+ */
+function rangeEnd(
+  start: Date,
+  end: chrono.ParsedComponents,
+  date: Date = end.date(),
+): Date | undefined {
+  const hour = end.get('hour');
+  if (!end.isCertain('meridiem') && hour !== null && hour <= 12) {
+    date = new Date(start);
+    date.setHours(hour, end.get('minute') ?? 0, 0, 0);
+    while (date <= start) date.setHours(date.getHours() + 12);
+  }
+  return date > start ? date : undefined;
+}
+
 function dateMatch(
   first: chrono.ParsedResult,
   next: chrono.ParsedResult | undefined,
   text: string,
 ): DateMatch {
+  const firstStart = first.start.date();
+  const firstEnd = first.end ? rangeEnd(firstStart, first.end) : undefined;
   const match: DateMatch = {
     index: first.index,
     text: first.text,
-    start: first.start.date(),
-    ...(first.end ? { end: first.end.date() } : {}),
+    start: firstStart,
+    ...(firstEnd ? { end: firstEnd } : {}),
     hasTime: first.start.isCertain('hour'),
   };
   if (
@@ -138,12 +161,12 @@ function dateMatch(
     return date;
   };
   const start = at(next.start);
-  const end = next.end ? at(next.end) : undefined;
+  const end = next.end ? rangeEnd(start, next.end, at(next.end)) : undefined;
   return {
     index: first.index,
     text: text.slice(first.index, next.index + next.text.length),
     start,
-    ...(end && end > start ? { end } : {}),
+    ...(end ? { end } : {}),
     hasTime: true,
   };
 }
