@@ -383,6 +383,18 @@ describe('parseQuickAdd', () => {
     expect(r.tags).toEqual(['work']);
   });
 
+  it('leaves a number after # in the title instead of tagging it', () => {
+    for (const input of ['Fix issue #123', 'Buy #2 pencils', 'Close #42']) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r.tags).toEqual([]);
+    }
+    expect(parseQuickAdd('Plan #Q4 #2026goals', anchor)).toMatchObject({
+      title: 'Plan',
+      tags: ['q4', '2026goals'],
+    });
+  });
+
   it('ignores an incomplete hashtag token', () => {
     const r = parseQuickAdd('Plan this #');
 

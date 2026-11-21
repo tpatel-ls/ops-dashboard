@@ -12,7 +12,10 @@ export interface ParsedQuickAdd {
   priority: Priority;
 }
 
-const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
+// A tag needs a letter. "#123" and "#2" are numbers: "Fix issue #123" lost
+// the issue number from its title to a tag named "123", and "Buy #2 pencils"
+// saved as "Buy pencils".
+const TAG_RE = /(?:^|\s)#((?=[\p{N}\p{M}_-]*\p{L})[\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 // Any standalone run of marks sets priority, capped at urgent below. With
 // {1,3} a "!!!!" was not a marker at all: it stayed in the title and left
 // the task at no priority, the opposite of what the extra marks asked for.
