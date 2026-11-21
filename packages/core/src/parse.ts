@@ -16,6 +16,7 @@ const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE =
   /(?:^|\s)(?:at|on|by|for|@|before|until|till|due|no later than)\s*$/i;
+const POSSESSIVE_RE = /^['\u2019]s\b/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
 const PAST_REFERENCE_RE = /\b(?:yesterday|last|ago|previous|past)\b/i;
@@ -108,13 +109,15 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
   const quoted = quotedRanges(working);
-  const results = chrono
-    .parse(working, now, { forwardDate: true })
-    .filter(
-      (result) =>
-        isSchedulingMatch(result) &&
-        !quoted.some(([open, close]) => result.index > open && result.index < close),
-    );
+  const results = chrono.parse(working, now, { forwardDate: true }).filter(
+    (result) =>
+      isSchedulingMatch(result) &&
+      !quoted.some(([open, close]) => result.index > open && result.index < close) &&
+      // A possessive date names the thing, not when to do it: "Prep for
+      // tomorrow's demo" saved as "Prep 's demo" and "Review Monday's
+      // notes" as "Review 's notes".
+      !POSSESSIVE_RE.test(working.slice(result.index + result.text.length)),
+  );
   let scheduledFor: string | undefined;
   let startAt: string | undefined;
   let endAt: string | undefined;

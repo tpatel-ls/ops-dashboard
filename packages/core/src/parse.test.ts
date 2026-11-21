@@ -203,6 +203,23 @@ describe('parseQuickAdd', () => {
     }
   });
 
+  it('leaves a possessive date in the title instead of scheduling it', () => {
+    for (const input of [
+      "Prep for tomorrow's demo",
+      "Review Monday's notes",
+      'Read today\u2019s paper',
+      "Clean up after tonight's party",
+    ]) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r).not.toHaveProperty('scheduledFor');
+    }
+    expect(parseQuickAdd("Plan tomorrow's agenda tomorrow", anchor)).toMatchObject({
+      title: "Plan tomorrow's agenda",
+      scheduledFor: '2026-04-27',
+    });
+  });
+
   it('schedules the future date when a past phrase comes first', () => {
     expect(parseQuickAdd('Pay last month invoice by friday', anchor)).toMatchObject({
       title: 'Pay last month invoice',
