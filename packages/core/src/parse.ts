@@ -170,7 +170,13 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
   const quoted = quotedRanges(working);
-  const results = chrono.parse(working, now, { forwardDate: true }).filter(
+  // chrono mishandles "noon" and "midnight" next to another time: it read the
+  // "-1" in "noon-1pm" as a UTC offset (07:00, title "Call pm"), started
+  // "9am to noon" at noon, and ended "noon - 12:30pm" when it began. Parse a
+  // copy with clock times of the same length so match indices still line up
+  // with the title text.
+  const clockText = working.replace(/\bnoon\b/gi, '12pm').replace(/\bmidnight\b/gi, '12:00 am');
+  const results = chrono.parse(clockText, now, { forwardDate: true }).filter(
     (result) =>
       isSchedulingMatch(result) &&
       !quoted.some(([open, close]) => result.index > open && result.index < close) &&
