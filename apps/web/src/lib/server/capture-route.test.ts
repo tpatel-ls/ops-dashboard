@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   createAdminClient: vi.fn(),
+  getSingleUserId: vi.fn(),
   requestAllowed: vi.fn().mockResolvedValue(true),
 }));
 
@@ -28,12 +29,17 @@ vi.mock('@/lib/server/input', () => ({
 vi.mock('@/lib/server/triage-result', () => ({ normalizeTriageResult: () => null }));
 vi.mock('@/lib/journal-source', () => ({ journalEntrySource: (source: string) => source }));
 vi.mock('@/lib/sync/mapping', () => ({
-  SYNC_TABLES: { tasks: 'tasks', journalEntries: 'journal_entries' },
-  toRow: vi.fn(),
+  SYNC_TABLES: {
+    tasks: 'tasks',
+    journalEntries: 'journal_entries',
+    captures: 'captures',
+    notifications: 'notifications',
+  },
+  toRow: (record: object) => record,
 }));
 vi.mock('@/utils/supabase/admin', () => ({
   createAdminClient: mocks.createAdminClient,
-  getSingleUserId: vi.fn(),
+  getSingleUserId: mocks.getSingleUserId,
 }));
 vi.mock('@/utils/supabase/server', () => ({ createClient: vi.fn().mockResolvedValue(null) }));
 
@@ -95,5 +101,30 @@ describe('capture API persistence', () => {
 
     expect(body.record.title).toBe('Call the customer');
     expect(body.record.notes).toBeUndefined();
+  });
+
+  it('keeps the stored capture notification within the feed title limit', async () => {
+    vi.stubEnv('OPS_API_SECRET', 'watch-secret');
+    const writes: Array<{ table: string; row: { title?: string } }> = [];
+    mocks.createAdminClient.mockReturnValue({
+      from: (table: string) => ({
+        upsert: (row: { title?: string }) => {
+          writes.push({ table, row });
+          return Promise.resolve({ error: null });
+        },
+      }),
+    });
+    mocks.getSingleUserId.mockResolvedValue('user-1');
+    const raw = `Call the customer about ${'the renewal '.repeat(100)}`.trim();
+    const request = new Request('https://dashboard.example/api/capture', {
+      method: 'POST',
+      headers: { authorization: 'Bearer watch-secret', 'content-type': 'application/json' },
+      body: JSON.stringify({ raw }),
+    });
+
+    expect((await POST(request)).status).toBe(200);
+    const title = writes.find((write) => write.table === 'notifications')?.row.title ?? '';
+    expect(title.startsWith('Captured: Call the customer about')).toBe(true);
+    expect(Array.from(title).length).toBeLessThanOrEqual(200);
   });
 });
