@@ -101,12 +101,18 @@ export function createBook(input: {
     isbn: input.isbn,
   });
 
+  // Match the card's status control, which stamps the day a book moves to
+  // reading or finished. A book added straight into either group had no date,
+  // so its synced and exported record said it was never started or finished.
+  const now = new Date().toISOString();
   return putRecord(
     'books',
     newRecord<Book>({
       title: fields.title!,
       ...(fields.author ? { author: fields.author } : {}),
       status: fields.status!,
+      ...(fields.status === 'reading' ? { startedAt: now } : {}),
+      ...(fields.status === 'finished' ? { finishedAt: now } : {}),
       ...(fields.coverUrl ? { coverUrl: fields.coverUrl } : {}),
       ...(fields.isbn ? { isbn: fields.isbn } : {}),
       tags: [],
