@@ -38,8 +38,10 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `Cmd/Ctrl Enter` save from supported capture forms
 
 The first date phrase is scheduled and removed from the title, along with a
-word that only introduced it (`at`, `on`, `by`, `for`, `@`, `before`, `until`,
-`due`). These stay in the title and do not schedule anything:
+word that only introduced it (`at`, `on`, `by`, `for`, `from`, `over`,
+`during`, `@`, `before`, `until`, `due`, also with a `the` after it as in
+`on the 1st of December`).
+These stay in the title and do not schedule anything:
 
 - a length of time with no direction: `Read 30 minutes`, `Fast 3 days`
   (`in 2 days`, `within 2 days`, and `2 weeks from now` still schedule)

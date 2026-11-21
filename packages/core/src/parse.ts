@@ -15,7 +15,7 @@ export interface ParsedQuickAdd {
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
 const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE =
-  /(?:^|\s)(?:at|on|by|for|@|before|until|till|due|no later than)\s*$/i;
+  /(?:^|\s)(?:at|on|by|for|from|over|during|@|before|until|till|due|no later than)(?:\s+the)?\s*$/i;
 const POSSESSIVE_RE = /^['\u2019]s\b/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
