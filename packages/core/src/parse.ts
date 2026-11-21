@@ -88,6 +88,60 @@ function quotedRanges(text: string): Array<[open: number, close: number]> {
   return ranges;
 }
 
+interface DateMatch {
+  index: number;
+  text: string;
+  start: Date;
+  end?: Date;
+  hasTime: boolean;
+}
+
+/**
+ * The date phrase to schedule, starting from chrono's first match.
+ *
+ * chrono reads "tomorrow at 5pm" as one date but "tomorrow @ 5pm" as two: a
+ * day, then a time on today. Only the first was used, so "Call mom tomorrow
+ * @ 5pm" was scheduled for the day with no time and kept "@ 5pm" in its
+ * title. A day followed by "@" and a time is joined into one match.
+ */
+function dateMatch(
+  first: chrono.ParsedResult,
+  next: chrono.ParsedResult | undefined,
+  text: string,
+): DateMatch {
+  const match: DateMatch = {
+    index: first.index,
+    text: first.text,
+    start: first.start.date(),
+    ...(first.end ? { end: first.end.date() } : {}),
+    hasTime: first.start.isCertain('hour'),
+  };
+  if (
+    !next ||
+    match.hasTime ||
+    !next.start.isCertain('hour') ||
+    next.start.isCertain('day') ||
+    next.start.isCertain('weekday') ||
+    !/^\s*@\s*$/.test(text.slice(first.index + first.text.length, next.index))
+  ) {
+    return match;
+  }
+  const at = (time: chrono.ParsedComponents) => {
+    const date = new Date(match.start);
+    date.setHours(time.get('hour') ?? 0, time.get('minute') ?? 0, 0, 0);
+    return date;
+  };
+  const start = at(next.start);
+  const end = next.end ? at(next.end) : undefined;
+  return {
+    index: first.index,
+    text: text.slice(first.index, next.index + next.text.length),
+    start,
+    ...(end && end > start ? { end } : {}),
+    hasTime: true,
+  };
+}
+
 export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuickAdd {
   if (typeof input !== 'string') throw new Error('Quick add text must be a string.');
   let working = input.trim();
@@ -125,11 +179,9 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   let dueAt: string | undefined;
 
   if (results.length > 0) {
-    const first = results[0];
-    if (first) {
-      const start = first.start.date();
-      const end = first.end?.date();
-      const hasTime = first.start.isCertain('hour');
+    if (results[0]) {
+      const first = dateMatch(results[0], results[1], working);
+      const { start, end, hasTime } = first;
       scheduledFor = toISODate(start);
       // chrono reads "this month" and "this year" as the first day of the
       // period, which forwardDate leaves alone, so "Send invoice this month"

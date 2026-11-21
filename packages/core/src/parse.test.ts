@@ -285,6 +285,19 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('reads a time after "@" as part of the day before it', () => {
+    const r = parseQuickAdd('Call mom tomorrow @ 5pm', anchor);
+    expect(r.title).toBe('Call mom');
+    expect(r.scheduledFor).toBe('2026-04-27');
+    expect(r.startAt).toBe(new Date('2026-04-27T17:00:00').toISOString());
+    expect(parseQuickAdd('Demo friday @10:30am', anchor).startAt).toBe(
+      new Date('2026-05-01T10:30:00').toISOString(),
+    );
+    expect(parseQuickAdd('Call @ 3:30pm', anchor).startAt).toBe(
+      new Date('2026-04-26T15:30:00').toISOString(),
+    );
+  });
+
   it('schedules "this month" and "this year" today rather than in the past', () => {
     expect(parseQuickAdd('Send invoice this month', anchor)).toMatchObject({
       title: 'Send invoice',
