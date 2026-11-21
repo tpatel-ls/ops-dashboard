@@ -29,7 +29,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 
 ## Capture syntax
 
-- `#tag` add a tag
+- `#tag` add a tag (a tag needs a letter, so `#123` stays in the title)
 - `!` set priority 1 (Low)
 - `!!` set priority 2 (Med)
 - `!!!` (or more) set priority 3 (Urgent)
