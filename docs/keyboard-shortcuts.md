@@ -32,7 +32,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `#tag` add a tag
 - `!` set priority 1 (Low)
 - `!!` set priority 2 (Med)
-- `!!!` set priority 3 (Urgent)
+- `!!!` (or more) set priority 3 (Urgent)
 - `tomorrow 3pm` add a natural-language schedule
 - `tomorrow 3pm-4pm` schedule a time block with an end time
 - `Cmd/Ctrl Enter` save from supported capture forms

@@ -13,7 +13,10 @@ export interface ParsedQuickAdd {
 }
 
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-][\p{L}\p{N}\p{M}_-]*)/gu;
-const PRIORITY_RE = /(?:^|\s)(!{1,3})(?=\s|$)/g;
+// Any standalone run of marks sets priority, capped at urgent below. With
+// {1,3} a "!!!!" was not a marker at all: it stayed in the title and left
+// the task at no priority, the opposite of what the extra marks asked for.
+const PRIORITY_RE = /(?:^|\s)(!+)(?=\s|$)/g;
 const DANGLING_PREPOSITION_RE =
   /(?:^|\s)(?:at|on|by|for|from|over|during|@|before|until|till|due|no later than)(?:\s+the)?\s*$/i;
 const POSSESSIVE_RE = /^['\u2019]s\b/i;

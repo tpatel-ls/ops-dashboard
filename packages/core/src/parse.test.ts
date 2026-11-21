@@ -8,6 +8,14 @@ describe('parseQuickAdd', () => {
 
   it('caps repeated priority markers at urgent', () => {
     expect(parseQuickAdd('Escalate !!!', anchor).priority).toBe(3);
+    expect(parseQuickAdd('Escalate !!!!', anchor)).toMatchObject({
+      title: 'Escalate',
+      priority: 3,
+    });
+    expect(parseQuickAdd('Call mom tomorrow!!!!!', anchor)).toMatchObject({
+      title: 'Call mom',
+      priority: 3,
+    });
   });
   it('accepts hyphens and underscores in tags', () => {
     expect(parseQuickAdd('Review #follow-up #next_step', anchor).tags).toEqual([
