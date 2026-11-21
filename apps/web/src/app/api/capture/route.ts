@@ -17,6 +17,7 @@ import { triageRequest } from '@/lib/server/triage-request';
 import { normalizeTriageResult, type TriageResult } from '@/lib/server/triage-result';
 import { MAX_ROUTED_TITLE_LENGTH } from '@/lib/brain-dump-result';
 import { journalEntrySource } from '@/lib/journal-source';
+import { excerpt } from '@/lib/excerpt';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient, getSingleUserId } from '@/utils/supabase/admin';
 import { SYNC_TABLES, toRow } from '@/lib/sync/mapping';
@@ -25,6 +26,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const runtime = 'nodejs';
 
 const MAX_RAW = 4000;
+/** The feed refuses a notification title over 200 characters; `excerpt` adds an ellipsis. */
+const MAX_NOTIFICATION_TITLE_EXCERPT = 200 - 'Captured: '.length - 1;
 
 function bearerMatches(req: Request): boolean {
   return bearerSecretMatches(req.headers.get('authorization'), process.env.OPS_API_SECRET);
@@ -203,7 +206,10 @@ export async function POST(req: Request): Promise<Response> {
     'title' in routedRecord ? routedRecord.title : routedRecord.body.split('\n', 1)[0]?.trim();
   const notification: AppNotification = {
     ...meta(deviceId),
-    title: `Captured: ${result?.title ?? routedTitle ?? routedRecord.id}`,
+    // Routed titles run to 500 characters. The in-app capture shortens the
+    // same notification to the feed's 200, but this route stored the whole
+    // title, a record the app itself would refuse to create.
+    title: `Captured: ${excerpt(result?.title ?? routedTitle ?? routedRecord.id, MAX_NOTIFICATION_TITLE_EXCERPT)}`,
     kind: 'capture',
     refType: routeType,
     refId: routedRecord.id,
