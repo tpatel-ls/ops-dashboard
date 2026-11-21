@@ -157,6 +157,20 @@ describe('createBook', () => {
     expect(() => createBook({ title: '   ' })).toThrow('Book title is required');
     expect(mocks.putRecord).not.toHaveBeenCalled();
   });
+
+  it('dates a book added as reading or finished, as the status control does', async () => {
+    await createBook({ title: 'Deep Work', status: 'reading' });
+    await createBook({ title: 'Atomic Habits', status: 'finished' });
+    await createBook({ title: 'Range' });
+
+    const [reading, finished, wanted] = mocks.putRecord.mock.calls.map(([, book]) => book);
+    expect(reading).toMatchObject({ startedAt: expect.any(String) });
+    expect(reading).not.toHaveProperty('finishedAt');
+    expect(finished).toMatchObject({ finishedAt: expect.any(String) });
+    expect(finished).not.toHaveProperty('startedAt');
+    expect(wanted).not.toHaveProperty('startedAt');
+    expect(wanted).not.toHaveProperty('finishedAt');
+  });
 });
 
 describe('createQuote', () => {
