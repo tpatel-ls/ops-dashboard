@@ -44,6 +44,7 @@ word that only introduced it (`at`, `on`, `by`, `for`, `@`, `before`, `until`,
 - a length of time with no direction: `Read 30 minutes`, `Fast 3 days`
   (`in 2 days`, `within 2 days`, and `2 weeks from now` still schedule)
 - a past phrase: `Recap yesterday meeting`, `Review last week notes`
+- a possessive date: `Prep for tomorrow's demo`, `Review Monday's notes`
 - a bare month name (`Lunch with April`) and `24/7`
 - `sun`, `sat`, and `wed` on their own (`Buy sun cream`); use the full weekday
   name or `this sat` / `next sun`
