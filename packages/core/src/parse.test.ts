@@ -285,6 +285,19 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('drops "from", "over the", and "on the" left before a date', () => {
+    expect(parseQuickAdd('Pay rent on the 1st of december', anchor)).toMatchObject({
+      title: 'Pay rent',
+      scheduledFor: '2026-12-01',
+    });
+    expect(parseQuickAdd('Trip from friday to sunday', anchor)).toMatchObject({
+      title: 'Trip',
+      scheduledFor: '2026-05-01',
+    });
+    expect(parseQuickAdd('Email the team from tomorrow', anchor).title).toBe('Email the team');
+    expect(parseQuickAdd('Clean garage over the weekend', anchor).title).toBe('Clean garage');
+  });
+
   it('keeps the comma after a weekday', () => {
     expect(parseQuickAdd('Call mom on Friday, then Bob', anchor)).toMatchObject({
       title: 'Call mom, then Bob',
