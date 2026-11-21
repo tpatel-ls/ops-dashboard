@@ -35,6 +35,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `!!!` (or more) set priority 3 (Urgent)
 - `tomorrow 3pm` add a natural-language schedule
 - `tomorrow 3pm-4pm` schedule a time block with an end time
+- `tomorrow 3pm for 45 minutes` schedule a time block of that length
 - `Cmd/Ctrl Enter` save from supported capture forms
 
 The first date phrase is scheduled and removed from the title, along with a
@@ -43,7 +44,8 @@ word that only introduced it (`at`, `on`, `by`, `for`, `from`, `over`,
 `on the 1st of December`).
 These stay in the title and do not schedule anything:
 
-- a length of time with no direction: `Read 30 minutes`, `Fast 3 days`
+- a length of time with no direction and no start time before it:
+  `Read 30 minutes`, `Fast 3 days`
   (`in 2 days`, `within 2 days`, and `2 weeks from now` still schedule)
 - a past phrase: `Recap yesterday meeting`, `Review last week notes`
 - a possessive date: `Prep for tomorrow's demo`, `Review Monday's notes`

@@ -293,6 +293,36 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Call (tomorrow) mom', anchor).title).toBe('Call mom');
   });
 
+  it('reads a length after a start time as the end of the block', () => {
+    const at = (clock: string) => new Date(clock).toISOString();
+    expect(parseQuickAdd('Meet Sam 2pm for an hour', anchor)).toMatchObject({
+      title: 'Meet Sam',
+      startAt: at('2026-04-26T14:00:00'),
+      endAt: at('2026-04-26T15:00:00'),
+    });
+    expect(parseQuickAdd('Review tomorrow at 9am for 30 minutes #work', anchor)).toMatchObject({
+      title: 'Review',
+      endAt: at('2026-04-27T09:30:00'),
+      tags: ['work'],
+    });
+    expect(parseQuickAdd('Call 4pm for half an hour', anchor).endAt).toBe(
+      at('2026-04-26T16:30:00'),
+    );
+    expect(parseQuickAdd('Focus 1pm for 1 hour 30 min', anchor).endAt).toBe(
+      at('2026-04-26T14:30:00'),
+    );
+    // A length with no start time still stays in the title.
+    expect(parseQuickAdd('Read tomorrow for an hour', anchor)).toMatchObject({
+      title: 'Read for an hour',
+    });
+    expect(parseQuickAdd('Read tomorrow for an hour', anchor)).not.toHaveProperty('endAt');
+    // An explicit range keeps its own end.
+    expect(parseQuickAdd('Meet 2pm-3pm for 10 minutes', anchor)).toMatchObject({
+      title: 'Meet for 10 minutes',
+      endAt: at('2026-04-26T15:00:00'),
+    });
+  });
+
   it('ends a range at the next time an hour without am or pm comes round', () => {
     const at = (clock: string) => new Date(clock).toISOString();
     expect(parseQuickAdd('Shift 8am-5', anchor)).toMatchObject({

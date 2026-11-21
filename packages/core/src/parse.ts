@@ -110,6 +110,20 @@ interface DateMatch {
  * @ 5pm" was scheduled for the day with no time and kept "@ 5pm" in its
  * title. A day followed by "@" and a time is joined into one match.
  */
+// "for 30 minutes", "for an hour", "for half an hour", "for 1 hour 30 min"
+// directly after a start time.
+const LENGTH_AFTER_TIME_RE =
+  /^\s*,?\s*for\s+(an?|half\s+an?|\d+(?:\.\d+)?)\s*(hours?|hrs?|h|minutes?|mins?|m)\b(?:\s*(?:and\s+)?(\d+)\s*(?:minutes?|mins?|m)\b)?/i;
+const MAX_LENGTH_MINUTES = 24 * 60;
+
+/** Minutes in a LENGTH_AFTER_TIME_RE match, or 0 when it is not a usable length. */
+function lengthMinutes(match: RegExpExecArray): number {
+  const [, amount = '', unit = '', extra] = match;
+  const count = /^an?$/i.test(amount) ? 1 : /^half/i.test(amount) ? 0.5 : Number(amount);
+  const minutes = Math.round(count * (/^h/i.test(unit) ? 60 : 1) + Number(extra ?? 0));
+  return minutes > 0 && minutes <= MAX_LENGTH_MINUTES ? minutes : 0;
+}
+
 /**
  * The end of a time range, or undefined when it does not follow the start.
  *
@@ -243,6 +257,14 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       const trailing = /[)\],]*$/.exec(first.text)?.[0].length ?? 0;
       let before = working.slice(0, first.index + leading);
       let after = working.slice(first.index + first.text.length - trailing);
+      // A length after the start time is how long the block runs: "Meet 2pm
+      // for an hour" kept "for an hour" in its title and had no end time.
+      const length = hasTime && !end ? LENGTH_AFTER_TIME_RE.exec(after) : null;
+      const minutes = length ? lengthMinutes(length) : 0;
+      if (length && minutes > 0) {
+        endAt = new Date(start.getTime() + minutes * 60_000).toISOString();
+        after = after.slice(length[0].length);
+      }
       // A date in its own parentheses ("Submit report (due friday)") or
       // brackets ("[tomorrow] call mom") is an annotation, so the whole
       // group goes with it. Removing only the date left "Submit report (due"
