@@ -148,13 +148,19 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       const trailing = /[)\]]*$/.exec(first.text)?.[0].length ?? 0;
       let before = working.slice(0, first.index + leading);
       let after = working.slice(first.index + first.text.length - trailing);
-      // A date in its own parentheses ("Submit report (due friday)") is an
-      // annotation, so the whole parenthetical goes with it. Removing only
-      // the date left "Submit report (due".
-      const open = before.lastIndexOf('(');
-      if (open > before.lastIndexOf(')') && /^\s*\)/.test(after)) {
-        before = before.slice(0, open);
-        after = after.replace(/^\s*\)/, '');
+      // A date in its own parentheses ("Submit report (due friday)") or
+      // brackets ("[tomorrow] call mom") is an annotation, so the whole
+      // group goes with it. Removing only the date left "Submit report (due"
+      // and "[ ] call mom".
+      for (const [opener, closer] of [
+        ['(', ')'],
+        ['[', ']'],
+      ] as const) {
+        const open = before.lastIndexOf(opener);
+        if (open > before.lastIndexOf(closer) && after.trimStart().startsWith(closer)) {
+          before = before.slice(0, open);
+          after = after.trimStart().slice(1);
+        }
       }
       before = before.replace(DANGLING_PREPOSITION_RE, ' ');
       // Rejoin with a space so marks glued to the date ("tomorrow!!") stand
