@@ -60,13 +60,14 @@ function isSchedulingMatch(result: chrono.ParsedResult): boolean {
 
 /**
  * Close up the punctuation a removed date or tag leaves behind: "Call mom
- * tomorrow." became "Call mom ." and "Buy milk - tomorrow" became "Buy milk -".
+ * tomorrow." became "Call mom .", "Ask Sam tomorrow?" became "Ask Sam ?", and
+ * "Buy milk - tomorrow" became "Buy milk -".
  * Only runs when something was removed, so a title typed as "Agenda:" keeps
  * its colon.
  */
 function tidyAfterRemoval(title: string): string {
   return title
-    .replace(/\s+([,.;:])/g, '$1')
+    .replace(/\s+([,.;:?])/g, '$1')
     .replace(/^(?:[,.;:]|[-\u2013\u2014](?=\s))\s*/, '')
     .replace(/(?:[,;:]|\s[-\u2013\u2014])$/, '')
     .trim();

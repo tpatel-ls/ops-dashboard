@@ -85,6 +85,9 @@ describe('parseQuickAdd', () => {
 
   it('closes up punctuation left where a date or tag was removed', () => {
     expect(parseQuickAdd('Call mom tomorrow.', anchor).title).toBe('Call mom.');
+    expect(parseQuickAdd('Ask Sam about the lease tomorrow?', anchor).title).toBe(
+      'Ask Sam about the lease?',
+    );
     expect(parseQuickAdd('Call mom tomorrow, then gym', anchor).title).toBe('Call mom, then gym');
     expect(parseQuickAdd('Buy milk - tomorrow', anchor).title).toBe('Buy milk');
     expect(parseQuickAdd('Email Kim re: budget, friday 3pm', anchor).title).toBe(
