@@ -546,6 +546,25 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Clean garage over the weekend', anchor).title).toBe('Clean garage');
   });
 
+  it('drops a word that only says the time is rough', () => {
+    for (const input of [
+      'Ship around 5pm',
+      'Ship at around 5pm',
+      'Ship ~5pm',
+      'Ship approx. 5pm',
+      'Ship 5pm-ish',
+      'Ship 5pm ish',
+    ]) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe('Ship');
+      expect(new Date(r.startAt ?? '').getHours()).toBe(17);
+    }
+    expect(parseQuickAdd('Show Sam around tomorrow', anchor)).toMatchObject({
+      title: 'Show Sam around',
+      scheduledFor: '2026-04-27',
+    });
+  });
+
   it('keeps the comma after a weekday', () => {
     expect(parseQuickAdd('Call mom on Friday, then Bob', anchor)).toMatchObject({
       title: 'Call mom, then Bob',
