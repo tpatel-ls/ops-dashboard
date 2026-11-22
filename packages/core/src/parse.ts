@@ -27,6 +27,10 @@ const BETWEEN_TIMES_RE =
 const POSSESSIVE_RE = /^['\u2019]s\b/i;
 const BARE_WORD_RE = /^[\p{L}]+\.?$/u;
 const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
+// "1/2", "3/4", or "2/3" followed by a unit or "of" is an amount, not a date.
+const SLASH_DATE_RE = /^\d{1,2}\/\d{1,2}$/;
+const AMOUNT_UNIT_RE =
+  /^\s+(?:of|cups?|c|tsp|tbsp|teaspoons?|tablespoons?|oz|ounces?|lbs?|pounds?|g|grams?|kg|kilos?|ml|l|liters?|litres?|gal|gallons?|pints?|quarts?|in|inch(?:es)?|ft|foot|feet|yards?|yds?|mi|miles?|km|kilometers?|kilometres?|tablets?|pills?|doses?|slices?|pieces?|scoops?|sticks?|cans?|hours?|hrs?|days?|weeks?)\b/i;
 const PAST_REFERENCE_RE = /\b(?:yesterday|last|ago|previous|past)\b/i;
 // A length of time with no direction ("5 minutes", "for an hour", "1 hour 30
 // min"). "in 20 minutes", "within 2 days", and "2 days later" say when; these
@@ -228,7 +232,14 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // A possessive date names the thing, not when to do it: "Prep for
       // tomorrow's demo" saved as "Prep 's demo" and "Review Monday's
       // notes" as "Review 's notes".
-      !POSSESSIVE_RE.test(working.slice(result.index + result.text.length)),
+      !POSSESSIVE_RE.test(working.slice(result.index + result.text.length)) &&
+      // chrono reads a fraction as a month and day: "Add 1/2 cup sugar" was
+      // scheduled for January 2 as "Add cup sugar", and "Fill 2/3 of tank"
+      // for February 3 as "Fill of tank".
+      !(
+        SLASH_DATE_RE.test(result.text) &&
+        AMOUNT_UNIT_RE.test(working.slice(result.index + result.text.length))
+      ),
   );
   let scheduledFor: string | undefined;
   let startAt: string | undefined;
