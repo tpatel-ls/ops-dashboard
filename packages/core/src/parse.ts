@@ -64,7 +64,8 @@ function isSchedulingMatch(result: FoundDate): boolean {
   // yesterday meeting" was scheduled for yesterday and was overdue the moment
   // it was saved, and forwardDate turned "Follow up on last friday call" into
   // next Friday. Both also lost the words from the title.
-  if (PAST_REFERENCE_RE.test(result.text)) return false;
+  // Read from chrono's copy, where "quarter past 9am" is already "9:15am".
+  if (PAST_REFERENCE_RE.test(result.parsedText)) return false;
   const { start } = result;
   if (start.isCertain('day') || start.isCertain('weekday') || start.isCertain('hour')) return true;
   return !BARE_WORD_RE.test(result.text.trim());
@@ -101,11 +102,40 @@ function quotedRanges(text: string): Array<[open: number, close: number]> {
 }
 
 const WEEKDAY_ABBREVIATION_RE = /\b(tue|wed)s\b\.?/gi;
+const CLOCK_PHRASE_RE =
+  /\b(?:(quarter)\s+(past|after|to|before|till?)|(half)\s+(past|after))\s+(\d{1,2})\s*(am|pm)?\b/gi;
+
+/**
+ * "quarter to 5pm" as a clock time ("4:45pm"), or the phrase unchanged when
+ * the hour is not on a clock. Keeps the am/pm the user typed, if any. With
+ * no quarterWay it is "half past".
+ */
+function clockPhrase(
+  phrase: string,
+  quarterWay: string | undefined,
+  hourText: string,
+  meridiem: string | undefined,
+): string {
+  const hour = Number(hourText);
+  if (hour < 1 || hour > 12) return phrase;
+  const offset =
+    quarterWay === undefined ? 30 : /^(?:to|before|till?)$/i.test(quarterWay) ? -15 : 15;
+  const pm = meridiem?.toLowerCase() === 'pm';
+  const base = ((hour % 12) + (pm ? 12 : 0)) * 60;
+  const minutes = (base + offset + 24 * 60) % (24 * 60);
+  const minute = String(minutes % 60).padStart(2, '0');
+  const hour24 = Math.floor(minutes / 60);
+  const hour12 = hour24 % 12 || 12;
+  if (meridiem === undefined) return `${hour12}:${minute}`;
+  return `${hour12}:${minute}${hour24 >= 12 ? 'pm' : 'am'}`;
+}
 
 /** A chrono match measured against the title text rather than chrono's copy. */
 interface FoundDate {
   index: number;
   text: string;
+  /** The match in chrono's copy, with shortened words as chrono read them. */
+  parsedText: string;
   start: chrono.ParsedComponents;
   end?: chrono.ParsedComponents;
 }
@@ -126,6 +156,7 @@ function widenMatch(
   return {
     index: start,
     text: text.slice(start, end),
+    parsedText: result.text,
     start: result.start,
     ...(result.end ? { end: result.end } : {}),
   };
@@ -291,7 +322,27 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
     .replace(WEEKDAY_ABBREVIATION_RE, (word: string, day: string, offset: number) => {
       shortened.push([offset, offset + word.length]);
       return day.padEnd(word.length);
-    });
+    })
+    // chrono reads only the hour in "quarter to 5pm" and "half past 3pm",
+    // so the call was set for 17:00 and kept "quarter to" in its title.
+    .replace(
+      CLOCK_PHRASE_RE,
+      (
+        phrase: string,
+        _quarter: string | undefined,
+        quarterWay: string | undefined,
+        _half: string | undefined,
+        _halfWay: string | undefined,
+        hour: string,
+        meridiem: string | undefined,
+        offset: number,
+      ) => {
+        const clock = clockPhrase(phrase, quarterWay, hour, meridiem);
+        if (clock === phrase) return phrase;
+        shortened.push([offset, offset + phrase.length]);
+        return clock.padEnd(phrase.length);
+      },
+    );
   const results = chrono
     .parse(clockText, now, { forwardDate: true })
     .map((result) => widenMatch(result, shortened, working))
