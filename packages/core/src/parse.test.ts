@@ -423,6 +423,23 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Set up the noon meeting', anchor).title).toBe('Set up the meeting');
   });
 
+  it('reads an hour and a half as one length', () => {
+    const at = (input: string) => {
+      const r = parseQuickAdd(input, anchor);
+      return [
+        r.title,
+        r.startAt && new Date(r.startAt).toString().slice(16, 21),
+        r.endAt && new Date(r.endAt).toString().slice(16, 21),
+      ];
+    };
+    expect(at('Call in an hour and a half')).toEqual(['Call', '11:30', undefined]);
+    expect(at('Call in 2 hours and a half')).toEqual(['Call', '12:30', undefined]);
+    expect(at('Call in 2 and a half hours')).toEqual(['Call', '12:30', undefined]);
+    expect(at('Meet 2pm for an hour and a half')).toEqual(['Meet', '14:00', '15:30']);
+    expect(at('Meet 2pm for 2 hours and a half')).toEqual(['Meet', '14:00', '16:30']);
+    expect(at('Meet 2pm for 2 and a half hours')).toEqual(['Meet', '14:00', '16:30']);
+  });
+
   it('reads "wk", "wks", and "yrs" like the full units', () => {
     for (const [input, title, day] of [
       ['Pay bill in 2 wks', 'Pay bill', '2026-05-10'],
