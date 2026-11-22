@@ -35,6 +35,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `!!!` (or more) set priority 3 (Urgent)
 - `tomorrow 3pm` add a natural-language schedule
 - `quarter to 5pm`, `quarter past 9am`, or `half past 3pm` a clock time
+- `on the 15th` the next 15th of a month (`the 3rd floor` stays in the title)
 - `tomorrow 3pm-4pm` or `between 2 and 3pm` schedule a time block with an end
   time
 - `tomorrow 3pm for 45 minutes` schedule a time block of that length
