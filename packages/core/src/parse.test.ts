@@ -625,6 +625,24 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('reads "in two days time" as the offset alone', () => {
+    for (const input of [
+      'Call in two days time',
+      "Call in 2 days' time",
+      'Call in 2 days\u2019 time',
+    ]) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({
+        title: 'Call',
+        scheduledFor: '2026-04-28',
+      });
+    }
+    // "time permitting" is its own phrase.
+    expect(parseQuickAdd('Call in 2 days time permitting', anchor).title).toBe(
+      'Call time permitting',
+    );
+    expect(parseQuickAdd('Fix tomorrow time zone bug', anchor).title).toBe('Fix time zone bug');
+  });
+
   it('drops "this coming" and "upcoming" before a weekday', () => {
     for (const input of [
       'Call this coming friday',

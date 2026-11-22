@@ -25,6 +25,8 @@ const DANGLING_PREPOSITION_RE =
 // A word that only says a time is rough: "around 5pm", "~3pm", "3pm-ish".
 // Only removed next to a time, so "Show Sam around tomorrow" keeps "around".
 const APPROXIMATE_BEFORE_RE = /(?:^|\s)(?:around|approx\.?|approximately|circa|~)\s*$/i;
+const IN_OFFSET_RE = /^(?:in|within)\s/i;
+const TIME_AFTER_OFFSET_RE = /^(?:['\u2019]s?)?\s+time\b(?!\s+permitting)/i;
 const COMING_BEFORE_RE = /(?:^|\s)(?:this\s+)?(?:up)?coming\s*$/i;
 const WEEKDAY_START_RE = /^[([]*(?:mon|tue|wed|thu|fri|sat|sun|week)/i;
 const APPROXIMATE_AFTER_RE = /^\s*-?ish\b/i;
@@ -527,6 +529,9 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         before = before.replace(APPROXIMATE_BEFORE_RE, ' ');
         after = after.replace(APPROXIMATE_AFTER_RE, '');
       }
+      // "in two days time" and "in 2 days' time" are the same offset as "in
+      // two days", but chrono stops before "time" and saved "Call time".
+      if (IN_OFFSET_RE.test(first.text)) after = after.replace(TIME_AFTER_OFFSET_RE, '');
       // chrono reads the weekday in "this coming friday" but not the words
       // before it, which saved "Call this coming".
       if (WEEKDAY_START_RE.test(first.text)) before = before.replace(COMING_BEFORE_RE, ' ');
