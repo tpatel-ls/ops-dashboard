@@ -419,6 +419,22 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Set up the noon meeting', anchor).title).toBe('Set up the meeting');
   });
 
+  it('reads "quarter to", "quarter past", and "half past" as clock times', () => {
+    const at = (input: string) => {
+      const r = parseQuickAdd(input, anchor);
+      return [r.title, r.startAt && new Date(r.startAt).toString().slice(16, 21)];
+    };
+    expect(at('Call quarter to 5pm')).toEqual(['Call', '16:45']);
+    expect(at('Call at quarter past 9am tomorrow')).toEqual(['Call', '09:15']);
+    expect(at('Meet half past 3pm')).toEqual(['Meet', '15:30']);
+    expect(at('Lunch quarter to 1pm')).toEqual(['Lunch', '12:45']);
+    expect(at('Break quarter to 12pm')).toEqual(['Break', '11:45']);
+    // A count of quarters is not a time.
+    expect(parseQuickAdd('Review quarter to date numbers', anchor).title).toBe(
+      'Review quarter to date numbers',
+    );
+  });
+
   it('reads a time after "@" as part of the day before it', () => {
     const r = parseQuickAdd('Call mom tomorrow @ 5pm', anchor);
     expect(r.title).toBe('Call mom');
