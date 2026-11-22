@@ -417,6 +417,41 @@ describe('parseQuickAdd', () => {
     );
   });
 
+  it('moves a time typed before a later day onto that day', () => {
+    const at = (input: string) => {
+      const r = parseQuickAdd(input, anchor);
+      return {
+        title: r.title,
+        scheduledFor: r.scheduledFor,
+        start: r.startAt && new Date(r.startAt).toString().slice(0, 21),
+        end: r.endAt && new Date(r.endAt).toString().slice(0, 21),
+      };
+    };
+    expect(at('Dinner at 7pm with Sam tomorrow')).toEqual({
+      title: 'Dinner with Sam',
+      scheduledFor: '2026-04-27',
+      start: 'Mon Apr 27 2026 19:00',
+      end: undefined,
+    });
+    expect(at('Call 3pm about invoice on friday')).toEqual({
+      title: 'Call about invoice',
+      scheduledFor: '2026-05-01',
+      start: 'Fri May 01 2026 15:00',
+      end: undefined,
+    });
+    expect(at('Gym 6-7pm with Sam tomorrow')).toEqual({
+      title: 'Gym with Sam',
+      scheduledFor: '2026-04-27',
+      start: 'Mon Apr 27 2026 18:00',
+      end: 'Mon Apr 27 2026 19:00',
+    });
+    // A day first, then a time, is still one phrase.
+    expect(at('Call friday at 3pm')).toMatchObject({
+      title: 'Call',
+      start: 'Fri May 01 2026 15:00',
+    });
+  });
+
   it('schedules "this month" and "this year" today rather than in the past', () => {
     expect(parseQuickAdd('Send invoice this month', anchor)).toMatchObject({
       title: 'Send invoice',

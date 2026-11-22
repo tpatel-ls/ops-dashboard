@@ -106,6 +106,8 @@ interface DateMatch {
   start: Date;
   end?: Date;
   hasTime: boolean;
+  /** A later day phrase the time was moved onto, removed from the title too. */
+  day?: { index: number; text: string };
 }
 
 /**
@@ -165,6 +167,30 @@ function dateMatch(
     ...(firstEnd ? { end: firstEnd } : {}),
     hasTime: first.start.isCertain('hour'),
   };
+  // A time typed before the day it belongs to: chrono reads "Dinner at 7pm
+  // with Sam tomorrow" as 19:00 today plus a separate "tomorrow", so the task
+  // was scheduled for today and kept "tomorrow" in its title. Move the time
+  // onto that day.
+  if (
+    next &&
+    match.hasTime &&
+    !first.start.isCertain('day') &&
+    !first.start.isCertain('weekday') &&
+    !next.start.isCertain('hour') &&
+    (next.start.isCertain('day') || next.start.isCertain('weekday'))
+  ) {
+    const start = next.start.date();
+    start.setHours(firstStart.getHours(), firstStart.getMinutes(), 0, 0);
+    const end = firstEnd
+      ? new Date(start.getTime() + firstEnd.getTime() - firstStart.getTime())
+      : undefined;
+    return {
+      ...match,
+      start,
+      ...(end ? { end } : {}),
+      day: { index: next.index, text: next.text },
+    };
+  }
   if (
     !next ||
     match.hasTime ||
@@ -269,6 +295,10 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // "Finish slides before". Drop the word that sits directly before the
       // date it introduced.
       removed = true;
+      if (first.day) {
+        const dayBefore = working.slice(0, first.day.index).replace(DANGLING_PREPOSITION_RE, ' ');
+        working = `${dayBefore} ${working.slice(first.day.index + first.day.text.length)}`;
+      }
       // chrono's weekday pattern swallows a closing bracket ("friday)") or a
       // comma ("on Friday, then Bob" lost its comma), so measure the match
       // without brackets at either edge or a trailing comma.
