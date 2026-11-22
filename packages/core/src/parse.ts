@@ -383,8 +383,15 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       shortened.push([offset, offset + phrase.length]);
       return 'in 2 days'.padEnd(phrase.length);
     })
+    // chrono reads "w" and "yr" but not "wk", "wks", or "yrs": "Pay bill in
+    // 2 wks" saved unscheduled, and "Pay bill 2 wks from now" matched only
+    // "now", so it was due this minute.
+    .replace(/(?<=(?:\d|\ban?)\s*)(?:wks?|yrs)\b/gi, (unit: string, offset: number) => {
+      shortened.push([offset, offset + unit.length]);
+      return (/^w/i.test(unit) ? 'w' : 'yr').padEnd(unit.length);
+    })
     .replace(
-      /(?<=\b(?:days?|weeks?|months?|years?)\s+)from today\b/gi,
+      /(?<=\b(?:days?|weeks?|w|months?|years?|yr)\s+)from today\b/gi,
       (phrase: string, offset: number) => {
         shortened.push([offset, offset + phrase.length]);
         return 'from now'.padEnd(phrase.length);
