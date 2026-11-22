@@ -423,6 +423,22 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Set up the noon meeting', anchor).title).toBe('Set up the meeting');
   });
 
+  it('reads "wk", "wks", and "yrs" like the full units', () => {
+    for (const [input, title, day] of [
+      ['Pay bill in 2 wks', 'Pay bill', '2026-05-10'],
+      ['Pay bill in 1 wk', 'Pay bill', '2026-05-03'],
+      ['Pay bill in a wk', 'Pay bill', '2026-05-03'],
+      ['Pay bill 2 wks from now', 'Pay bill', '2026-05-10'],
+      ['Pay bill 2 wks from today', 'Pay bill', '2026-05-10'],
+      ['Renew in 2 yrs', 'Renew', '2028-04-26'],
+    ] as const) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r).toMatchObject({ title, scheduledFor: day });
+      expect(r.startAt).toBeUndefined();
+    }
+    expect(parseQuickAdd('Ship wks', anchor).title).toBe('Ship wks');
+  });
+
   it('reads "day after tomorrow" and "from today" offsets', () => {
     expect(parseQuickAdd('Lunch day after tomorrow', anchor)).toMatchObject({
       title: 'Lunch',
