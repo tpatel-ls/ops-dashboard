@@ -625,6 +625,23 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('drops "this coming" and "upcoming" before a weekday', () => {
+    for (const input of [
+      'Call this coming friday',
+      'Call coming friday',
+      'Call upcoming friday',
+      'Call on this coming Friday',
+    ]) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({
+        title: 'Call',
+        scheduledFor: '2026-05-01',
+      });
+    }
+    expect(parseQuickAdd('Plan upcoming launch tomorrow', anchor).title).toBe(
+      'Plan upcoming launch',
+    );
+  });
+
   it('keeps the comma after a weekday', () => {
     expect(parseQuickAdd('Call mom on Friday, then Bob', anchor)).toMatchObject({
       title: 'Call mom, then Bob',

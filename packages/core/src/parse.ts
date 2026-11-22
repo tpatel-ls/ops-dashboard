@@ -25,6 +25,8 @@ const DANGLING_PREPOSITION_RE =
 // A word that only says a time is rough: "around 5pm", "~3pm", "3pm-ish".
 // Only removed next to a time, so "Show Sam around tomorrow" keeps "around".
 const APPROXIMATE_BEFORE_RE = /(?:^|\s)(?:around|approx\.?|approximately|circa|~)\s*$/i;
+const COMING_BEFORE_RE = /(?:^|\s)(?:this\s+)?(?:up)?coming\s*$/i;
+const WEEKDAY_START_RE = /^[([]*(?:mon|tue|wed|thu|fri|sat|sun|week)/i;
 const APPROXIMATE_AFTER_RE = /^\s*-?ish\b/i;
 const BETWEEN_TIMES_RE =
   /\b(between\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)(\s+and\s+)(?=\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|\d{1,2}:\d{2}\b)/gi;
@@ -525,6 +527,9 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         before = before.replace(APPROXIMATE_BEFORE_RE, ' ');
         after = after.replace(APPROXIMATE_AFTER_RE, '');
       }
+      // chrono reads the weekday in "this coming friday" but not the words
+      // before it, which saved "Call this coming".
+      if (WEEKDAY_START_RE.test(first.text)) before = before.replace(COMING_BEFORE_RE, ' ');
       before = before.replace(DANGLING_PREPOSITION_RE, ' ');
       // Rejoin with a space so marks glued to the date ("tomorrow!!") stand
       // alone and are read as priority below.
