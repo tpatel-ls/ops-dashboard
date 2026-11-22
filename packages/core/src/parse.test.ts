@@ -216,12 +216,16 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Party Saturday', anchor).scheduledFor).toBe('2026-05-02');
   });
 
-  it('leaves a past date phrase in the title instead of scheduling it', () => {
+  it('leaves a past or backward-counted date phrase in the title', () => {
     for (const input of [
       'Recap yesterday meeting',
       'Review last week notes',
       'Follow up on last friday call',
       'Log 2 days ago workout',
+      'Call 2 hours before',
+      'Call 30 minutes earlier',
+      'Prep 2 days before friday',
+      'Send 2 days before the launch',
     ]) {
       const r = parseQuickAdd(input, anchor);
       expect(r.title).toBe(input);

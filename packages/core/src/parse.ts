@@ -31,7 +31,7 @@ const WORD_WEEKDAY_RE = /^(?:sun|sat|wed)$/i;
 const SLASH_DATE_RE = /^\d{1,2}\/\d{1,2}$/;
 const AMOUNT_UNIT_RE =
   /^\s+(?:of|cups?|c|tsp|tbsp|teaspoons?|tablespoons?|oz|ounces?|lbs?|pounds?|g|grams?|kg|kilos?|ml|l|liters?|litres?|gal|gallons?|pints?|quarts?|in|inch(?:es)?|ft|foot|feet|yards?|yds?|mi|miles?|km|kilometers?|kilometres?|tablets?|pills?|doses?|slices?|pieces?|scoops?|sticks?|cans?|hours?|hrs?|days?|weeks?)\b/i;
-const PAST_REFERENCE_RE = /\b(?:yesterday|last|ago|previous|past)\b/i;
+const PAST_REFERENCE_RE = /\b(?:yesterday|last|ago|previous|past|before|earlier)\b/i;
 // A length of time with no direction ("5 minutes", "for an hour", "1 hour 30
 // min"). "in 20 minutes", "within 2 days", and "2 days later" say when; these
 // only say how long.
@@ -63,7 +63,9 @@ function isSchedulingMatch(result: FoundDate): boolean {
   // A past phrase names what the task is about, not when to do it: "Recap
   // yesterday meeting" was scheduled for yesterday and was overdue the moment
   // it was saved, and forwardDate turned "Follow up on last friday call" into
-  // next Friday. Both also lost the words from the title.
+  // next Friday. Both also lost the words from the title. chrono counts
+  // "before" and "earlier" back from now as well: "Call 2 hours before" was
+  // set for two hours ago and "Prep 2 days before friday" for today.
   // Read from chrono's copy, where "quarter past 9am" is already "9:15am".
   if (PAST_REFERENCE_RE.test(result.parsedText)) return false;
   const { start } = result;
