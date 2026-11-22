@@ -369,8 +369,23 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       shortened.push([offset, offset + phrase.length]);
       return `${date.getMonth() + 1}/${date.getDate()}`.padEnd(phrase.length);
     });
+  // chrono knows "the day after tomorrow" but read "Lunch day after
+  // tomorrow" as tomorrow, saved as "Lunch day after". It also stops at "from
+  // today": "Meet 3 days from today" was scheduled today as "Meet 3 days".
+  const relativeText = clockText
+    .replace(/(?<!\bthe\s)\bday after tomorrow\b/gi, (phrase: string, offset: number) => {
+      shortened.push([offset, offset + phrase.length]);
+      return 'in 2 days'.padEnd(phrase.length);
+    })
+    .replace(
+      /(?<=\b(?:days?|weeks?|months?|years?)\s+)from today\b/gi,
+      (phrase: string, offset: number) => {
+        shortened.push([offset, offset + phrase.length]);
+        return 'from now'.padEnd(phrase.length);
+      },
+    );
   const results = chrono
-    .parse(clockText, now, { forwardDate: true })
+    .parse(relativeText, now, { forwardDate: true })
     .map((result) => widenMatch(result, shortened, working))
     .filter(
       (result) =>

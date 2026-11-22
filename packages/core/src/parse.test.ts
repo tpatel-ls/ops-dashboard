@@ -419,6 +419,25 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Set up the noon meeting', anchor).title).toBe('Set up the meeting');
   });
 
+  it('reads "day after tomorrow" and "from today" offsets', () => {
+    expect(parseQuickAdd('Lunch day after tomorrow', anchor)).toMatchObject({
+      title: 'Lunch',
+      scheduledFor: '2026-04-28',
+    });
+    expect(parseQuickAdd('Lunch the day after tomorrow', anchor)).toMatchObject({
+      title: 'Lunch',
+      scheduledFor: '2026-04-28',
+    });
+    expect(parseQuickAdd('Meet 3 days from today', anchor)).toMatchObject({
+      title: 'Meet',
+      scheduledFor: '2026-04-29',
+    });
+    expect(parseQuickAdd('Meet two weeks from today', anchor)).toMatchObject({
+      title: 'Meet',
+      scheduledFor: '2026-05-10',
+    });
+  });
+
   it('schedules the next "the 15th" when no month is given', () => {
     expect(parseQuickAdd('Pay bills on the 15th', anchor)).toMatchObject({
       title: 'Pay bills',
