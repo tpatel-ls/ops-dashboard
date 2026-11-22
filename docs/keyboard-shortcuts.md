@@ -54,7 +54,8 @@ These stay in the title and do not schedule anything:
 - a length of time with no direction and no start time before it:
   `Read 30 minutes`, `Fast 3 days`
   (`in 2 days`, `within 2 days`, and `2 weeks from now` still schedule)
-- a past phrase: `Recap yesterday meeting`, `Review last week notes`
+- a past phrase: `Recap yesterday meeting`, `Review last week notes`, or a
+  length counted back with `before` or `earlier`: `Call 2 hours before`
 - a possessive date: `Prep for tomorrow's demo`, `Review Monday's notes`
 - a bare month name (`Lunch with April`) and `24/7`
 - a fraction before a unit or `of`: `Add 1/2 cup sugar`, `Fill 2/3 of tank`
