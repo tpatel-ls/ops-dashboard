@@ -440,6 +440,33 @@ describe('parseQuickAdd', () => {
     expect(at('Meet 2pm for 2 and a half hours')).toEqual(['Meet', '14:00', '16:30']);
   });
 
+  it('schedules the end of a month or year on its last day', () => {
+    for (const [input, title, day] of [
+      ['Pay rent end of month', 'Pay rent', '2026-04-30'],
+      ['Pay rent by end of the month', 'Pay rent', '2026-04-30'],
+      ['Pay rent by the end of this month', 'Pay rent', '2026-04-30'],
+      ['Pay by end of next month', 'Pay', '2026-05-31'],
+      ['File taxes end of year', 'File taxes', '2026-12-31'],
+      ['File taxes end of next year', 'File taxes', '2027-12-31'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    expect(parseQuickAdd('Pay end of month', new Date('2026-12-15T10:00:00')).scheduledFor).toBe(
+      '2026-12-31',
+    );
+    expect(
+      parseQuickAdd('Pay end of next month', new Date('2026-12-15T10:00:00')).scheduledFor,
+    ).toBe('2027-01-31');
+  });
+
+  it('leaves the end of a week in the title', () => {
+    for (const input of ['Ship end of next week', 'Ship by the end of this week']) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r.scheduledFor).toBeUndefined();
+    }
+  });
+
   it('reads "wk", "wks", and "yrs" like the full units', () => {
     for (const [input, title, day] of [
       ['Pay bill in 2 wks', 'Pay bill', '2026-05-10'],

@@ -36,6 +36,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `tomorrow 3pm` add a natural-language schedule
 - `quarter to 5pm`, `quarter past 9am`, or `half past 3pm` a clock time
 - `on the 15th` the next 15th of a month (`the 3rd floor` stays in the title)
+- `end of month`, `end of next month`, or `end of year` the last day of it
 - `tomorrow 3pm-4pm` or `between 2 and 3pm` schedule a time block with an end
   time
 - `tomorrow 3pm for 45 minutes` (or `for an hour and a half`) schedule a time
@@ -63,6 +64,8 @@ These stay in the title and do not schedule anything:
 - a fraction before a unit or `of`: `Add 1/2 cup sugar`, `Fill 2/3 of tank`
 - `sun`, `sat`, and `wed` on their own (`Buy sun cream`); use the full weekday
   name, `weds`, or `this sat` / `next sun`
+- the end of a week (`Ship end of next week`), since which day ends a week
+  depends on the week start setting
 - anything inside quotation marks: `Read "Tomorrow and Tomorrow"`
 
 ## Whiteboard
