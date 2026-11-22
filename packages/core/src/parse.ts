@@ -47,7 +47,7 @@ const DURATION_ONLY_RE =
  * the title. Relative phrases like "next month" and times like "noon" still
  * count.
  */
-function isSchedulingMatch(result: chrono.ParsedResult): boolean {
+function isSchedulingMatch(result: FoundDate): boolean {
   // "24/7" means around the clock. chrono falls back to day-first and read
   // "Check 24/7 support" as July 24 next year, saving "Check support".
   if (result.text === '24/7') return false;
@@ -98,6 +98,37 @@ function quotedRanges(text: string): Array<[open: number, close: number]> {
     ranges.push([match.index, match.index + match[0].length - 1]);
   }
   return ranges;
+}
+
+const WEEKDAY_ABBREVIATION_RE = /\b(tue|wed)s\b\.?/gi;
+
+/** A chrono match measured against the title text rather than chrono's copy. */
+interface FoundDate {
+  index: number;
+  text: string;
+  start: chrono.ParsedComponents;
+  end?: chrono.ParsedComponents;
+}
+
+function widenMatch(
+  result: chrono.ParsedResult,
+  shortened: ReadonlyArray<[start: number, end: number]>,
+  text: string,
+): FoundDate {
+  let start = result.index;
+  let end = result.index + result.text.length;
+  for (const [from, to] of shortened) {
+    if (from < end && to > start) {
+      start = Math.min(start, from);
+      end = Math.max(end, to);
+    }
+  }
+  return {
+    index: start,
+    text: text.slice(start, end),
+    start: result.start,
+    ...(result.end ? { end: result.end } : {}),
+  };
 }
 
 interface DateMatch {
@@ -153,11 +184,7 @@ function rangeEnd(
   return date > start ? date : undefined;
 }
 
-function dateMatch(
-  first: chrono.ParsedResult,
-  next: chrono.ParsedResult | undefined,
-  text: string,
-): DateMatch {
+function dateMatch(first: FoundDate, next: FoundDate | undefined, text: string): DateMatch {
   const firstStart = first.start.date();
   const firstEnd = first.end ? rangeEnd(firstStart, first.end) : undefined;
   const match: DateMatch = {
@@ -244,6 +271,9 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   const dateOnlyTitle = working.replace(PRIORITY_RE, ' ').replace(/\s+/g, ' ').trim();
 
   const quoted = quotedRanges(working);
+  // Words written shorter in the copy chrono parses, padded with spaces to
+  // the same length. A match that covers one is widened to the whole word.
+  const shortened: Array<[start: number, end: number]> = [];
   // chrono mishandles "noon" and "midnight" next to another time: it read the
   // "-1" in "noon-1pm" as a UTC offset (07:00, title "Call pm"), started
   // "9am to noon" at noon, and ended "noon - 12:30pm" when it began. Parse a
@@ -255,23 +285,32 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
     // chrono has no "between 2 and 3pm": it took only "3pm", so the task
     // started at the end of the window and kept "between 2 and" in its
     // title. Write the "and" as a range dash, padded to the same length.
-    .replace(BETWEEN_TIMES_RE, (_, from: string, and: string) => from + ' - '.padEnd(and.length));
-  const results = chrono.parse(clockText, now, { forwardDate: true }).filter(
-    (result) =>
-      isSchedulingMatch(result) &&
-      !quoted.some(([open, close]) => result.index > open && result.index < close) &&
-      // A possessive date names the thing, not when to do it: "Prep for
-      // tomorrow's demo" saved as "Prep 's demo" and "Review Monday's
-      // notes" as "Review 's notes".
-      !POSSESSIVE_RE.test(working.slice(result.index + result.text.length)) &&
-      // chrono reads a fraction as a month and day: "Add 1/2 cup sugar" was
-      // scheduled for January 2 as "Add cup sugar", and "Fill 2/3 of tank"
-      // for February 3 as "Fill of tank".
-      !(
-        SLASH_DATE_RE.test(result.text) &&
-        AMOUNT_UNIT_RE.test(working.slice(result.index + result.text.length))
-      ),
-  );
+    .replace(BETWEEN_TIMES_RE, (_, from: string, and: string) => from + ' - '.padEnd(and.length))
+    // chrono knows "tue" and "thurs" but not "tues" or "weds", so "Lunch
+    // tues" was not scheduled at all.
+    .replace(WEEKDAY_ABBREVIATION_RE, (word: string, day: string, offset: number) => {
+      shortened.push([offset, offset + word.length]);
+      return day.padEnd(word.length);
+    });
+  const results = chrono
+    .parse(clockText, now, { forwardDate: true })
+    .map((result) => widenMatch(result, shortened, working))
+    .filter(
+      (result) =>
+        isSchedulingMatch(result) &&
+        !quoted.some(([open, close]) => result.index > open && result.index < close) &&
+        // A possessive date names the thing, not when to do it: "Prep for
+        // tomorrow's demo" saved as "Prep 's demo" and "Review Monday's
+        // notes" as "Review 's notes".
+        !POSSESSIVE_RE.test(working.slice(result.index + result.text.length)) &&
+        // chrono reads a fraction as a month and day: "Add 1/2 cup sugar" was
+        // scheduled for January 2 as "Add cup sugar", and "Fill 2/3 of tank"
+        // for February 3 as "Fill of tank".
+        !(
+          SLASH_DATE_RE.test(result.text) &&
+          AMOUNT_UNIT_RE.test(working.slice(result.index + result.text.length))
+        ),
+    );
   let scheduledFor: string | undefined;
   let startAt: string | undefined;
   let endAt: string | undefined;

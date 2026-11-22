@@ -191,6 +191,21 @@ describe('parseQuickAdd', () => {
     }
   });
 
+  it('schedules "tues" and "weds" like other weekday abbreviations', () => {
+    expect(parseQuickAdd('Lunch tues', anchor)).toMatchObject({
+      title: 'Lunch',
+      scheduledFor: '2026-04-28',
+    });
+    expect(parseQuickAdd('Call Sam weds at 3pm', anchor)).toMatchObject({
+      title: 'Call Sam',
+      scheduledFor: '2026-04-29',
+    });
+    expect(parseQuickAdd('Review Tues. notes', anchor)).toMatchObject({
+      title: 'Review notes',
+      scheduledFor: '2026-04-28',
+    });
+  });
+
   it('still schedules other weekday abbreviations and qualified short names', () => {
     expect(parseQuickAdd('Pay mon', anchor)).toMatchObject({
       title: 'Pay',

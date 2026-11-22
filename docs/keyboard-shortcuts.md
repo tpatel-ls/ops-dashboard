@@ -57,7 +57,7 @@ These stay in the title and do not schedule anything:
 - a bare month name (`Lunch with April`) and `24/7`
 - a fraction before a unit or `of`: `Add 1/2 cup sugar`, `Fill 2/3 of tank`
 - `sun`, `sat`, and `wed` on their own (`Buy sun cream`); use the full weekday
-  name or `this sat` / `next sun`
+  name, `weds`, or `this sat` / `next sun`
 - anything inside quotation marks: `Read "Tomorrow and Tomorrow"`
 
 ## Whiteboard
