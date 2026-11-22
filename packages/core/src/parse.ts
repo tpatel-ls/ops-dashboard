@@ -206,13 +206,17 @@ interface DateMatch {
 // "for 30 minutes", "for an hour", "for half an hour", "for 1 hour 30 min"
 // directly after a start time.
 const LENGTH_AFTER_TIME_RE =
-  /^\s*,?\s*for\s+(an?|half\s+an?|\d+(?:\.\d+)?)\s*(hours?|hrs?|h|minutes?|mins?|m)\b(?:\s*(?:and\s+)?(\d+)\s*(?:minutes?|mins?|m)\b)?/i;
+  /^\s*,?\s*for\s+(an?|half\s+an?|\d+(?:\.\d+)?(?:\s+and\s+a\s+half)?)\s*(hours?|hrs?|h|minutes?|mins?|m)\b(?:\s*(?:and\s+)?(\d+)\s*(?:minutes?|mins?|m)\b|\s+(and\s+a\s+half)\b)?/i;
 const MAX_LENGTH_MINUTES = 24 * 60;
+// "an hour and a half", "2 hours and a half", "2 and a half hours".
+const HOURS_AND_A_HALF_RE =
+  /\b(?:(an?|one|\d+)\s+(hours?|hrs?)\s+and\s+a\s+half|(\d+)\s+and\s+a\s+half\s+(?:hours?|hrs?))\b/gi;
 
 /** Minutes in a LENGTH_AFTER_TIME_RE match, or 0 when it is not a usable length. */
 function lengthMinutes(match: RegExpExecArray): number {
-  const [, amount = '', unit = '', extra] = match;
-  const count = /^an?$/i.test(amount) ? 1 : /^half/i.test(amount) ? 0.5 : Number(amount);
+  const [, amount = '', unit = '', extra, andAHalf] = match;
+  const whole = /^an?$/i.test(amount) ? 1 : /^half/i.test(amount) ? 0.5 : parseFloat(amount);
+  const count = whole + (andAHalf || /and\s+a\s+half$/i.test(amount) ? 0.5 : 0);
   const minutes = Math.round(count * (/^h/i.test(unit) ? 60 : 1) + Number(extra ?? 0));
   return minutes > 0 && minutes <= MAX_LENGTH_MINUTES ? minutes : 0;
 }
@@ -383,6 +387,24 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       shortened.push([offset, offset + phrase.length]);
       return 'in 2 days'.padEnd(phrase.length);
     })
+    // chrono stops at "an hour" in "Call in an hour and a half", so the call
+    // was set an hour out and saved as "Call and a half". Write the length
+    // as a decimal chrono reads.
+    .replace(
+      HOURS_AND_A_HALF_RE,
+      (
+        phrase: string,
+        unitFirst: string | undefined,
+        _unit: string | undefined,
+        andAHalfFirst: string | undefined,
+        offset: number,
+      ) => {
+        const amount = unitFirst ?? andAHalfFirst ?? '';
+        const hours = (/^(?:an?|one)$/i.test(amount) ? 1 : Number(amount)) + 0.5;
+        shortened.push([offset, offset + phrase.length]);
+        return `${hours} hours`.padEnd(phrase.length);
+      },
+    )
     // chrono reads "w" and "yr" but not "wk", "wks", or "yrs": "Pay bill in
     // 2 wks" saved unscheduled, and "Pay bill 2 wks from now" matched only
     // "now", so it was due this minute.

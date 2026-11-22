@@ -38,7 +38,8 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `on the 15th` the next 15th of a month (`the 3rd floor` stays in the title)
 - `tomorrow 3pm-4pm` or `between 2 and 3pm` schedule a time block with an end
   time
-- `tomorrow 3pm for 45 minutes` schedule a time block of that length
+- `tomorrow 3pm for 45 minutes` (or `for an hour and a half`) schedule a time
+  block of that length
 - `Dinner at 7pm with Sam tomorrow` a time before a later day is scheduled on
   that day
 - `Cmd/Ctrl Enter` save from supported capture forms
