@@ -208,6 +208,10 @@ interface DateMatch {
 const LENGTH_AFTER_TIME_RE =
   /^\s*,?\s*for\s+(an?|half\s+an?|\d+(?:\.\d+)?(?:\s+and\s+a\s+half)?)\s*(hours?|hrs?|h|minutes?|mins?|m)\b(?:\s*(?:and\s+)?(\d+)\s*(?:minutes?|mins?|m)\b|\s+(and\s+a\s+half)\b)?/i;
 const MAX_LENGTH_MINUTES = 24 * 60;
+// "end of month", "the end of this month", "end of next year".
+const END_OF_PERIOD_RE = /\b(?:the\s+)?end\s+of\s+(?:the\s+|(this|next)\s+)?(month|year)\b/gi;
+// "end of" left in front of a period chrono did read, like "next week".
+const END_OF_BEFORE_RE = /\bend\s+of\s+(?:the\s+)?$/i;
 // "an hour and a half", "2 hours and a half", "2 and a half hours".
 const HOURS_AND_A_HALF_RE =
   /\b(?:(an?|one|\d+)\s+(hours?|hrs?)\s+and\s+a\s+half|(\d+)\s+and\s+a\s+half\s+(?:hours?|hrs?))\b/gi;
@@ -383,6 +387,20 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   // tomorrow" as tomorrow, saved as "Lunch day after". It also stops at "from
   // today": "Meet 3 days from today" was scheduled today as "Meet 3 days".
   const relativeText = clockText
+    // chrono has no "end of": "Pay rent by end of the month" was scheduled a
+    // month out as "Pay rent by end of", and "end of month" not at all. The
+    // last day of a month or year is a date; write it as one.
+    .replace(
+      END_OF_PERIOD_RE,
+      (phrase: string, which: string | undefined, period: string, offset: number) => {
+        const next = /^next/i.test(which ?? '') ? 1 : 0;
+        const end = /^month/i.test(period)
+          ? new Date(now.getFullYear(), now.getMonth() + next + 1, 0)
+          : new Date(now.getFullYear() + next, 11, 31);
+        shortened.push([offset, offset + phrase.length]);
+        return `${end.getMonth() + 1}/${end.getDate()}/${end.getFullYear()}`.padEnd(phrase.length);
+      },
+    )
     .replace(/(?<!\bthe\s)\bday after tomorrow\b/gi, (phrase: string, offset: number) => {
       shortened.push([offset, offset + phrase.length]);
       return 'in 2 days'.padEnd(phrase.length);
@@ -425,6 +443,10 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
     .filter(
       (result) =>
         isSchedulingMatch(result) &&
+        // Which day ends a week depends on the week start setting, which the
+        // parser does not know. "Ship end of next week" was scheduled at the
+        // start of next week as "Ship end of", so leave it to the user.
+        !END_OF_BEFORE_RE.test(working.slice(0, result.index)) &&
         !quoted.some(([open, close]) => result.index > open && result.index < close) &&
         // A possessive date names the thing, not when to do it: "Prep for
         // tomorrow's demo" saved as "Prep 's demo" and "Review Monday's
