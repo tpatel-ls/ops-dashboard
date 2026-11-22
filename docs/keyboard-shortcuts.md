@@ -45,6 +45,8 @@ The first date phrase is scheduled and removed from the title, along with a
 word that only introduced it (`at`, `on`, `by`, `for`, `from`, `over`,
 `during`, `@`, `before`, `until`, `due`, also with a `the` after it as in
 `on the 1st of December`).
+When the date is the only text left, it stays as the title (`tomorrow #work`
+saves as `tomorrow`, tagged `work`).
 These stay in the title and do not schedule anything:
 
 - a length of time with no direction and no start time before it:

@@ -522,6 +522,19 @@ describe('parseQuickAdd', () => {
     expect(r.priority).toBe(2);
   });
 
+  it('keeps only the date as the title when nothing else is left', () => {
+    expect(parseQuickAdd('tomorrow #work !!', anchor)).toMatchObject({
+      title: 'tomorrow',
+      scheduledFor: '2026-04-27',
+      tags: ['work'],
+      priority: 2,
+    });
+    expect(parseQuickAdd('friday 3pm', anchor)).toMatchObject({
+      title: 'friday 3pm',
+      scheduledFor: '2026-05-01',
+    });
+  });
+
   it('collapses the gap left by a hashtag removed from mid-title', () => {
     const r = parseQuickAdd('Call bob #work please', anchor);
 

@@ -238,6 +238,11 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   let removed = tags.length > 0;
   working = working.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
+  // When the date is all the text there is, it becomes the title. Keep it
+  // without the tags and priority marks already read from the input:
+  // "tomorrow #work !!" saved as "tomorrow #work !!", showing the tag twice.
+  const dateOnlyTitle = working.replace(PRIORITY_RE, ' ').replace(/\s+/g, ' ').trim();
+
   const quoted = quotedRanges(working);
   // chrono mishandles "noon" and "midnight" next to another time: it read the
   // "-1" in "noon-1pm" as a UTC offset (07:00, title "Call pm"), started
@@ -346,7 +351,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
   if (removed) working = tidyAfterRemoval(working);
 
   return {
-    title: working || input.trim(),
+    title: working || dateOnlyTitle || input.trim(),
     ...(scheduledFor !== undefined ? { scheduledFor } : {}),
     ...(startAt !== undefined ? { startAt } : {}),
     ...(endAt !== undefined ? { endAt } : {}),
