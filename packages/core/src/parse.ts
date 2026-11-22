@@ -105,6 +105,23 @@ const WEEKDAY_ABBREVIATION_RE = /\b(tue|wed)s\b\.?/gi;
 const CLOCK_PHRASE_RE =
   /\b(?:(quarter)\s+(past|after|to|before|till?)|(half)\s+(past|after))\s+(\d{1,2})\s*(am|pm)?\b/gi;
 
+// "the 15th" with nothing after it but punctuation or a time, so "the 3rd
+// floor" and "the 2nd draft" stay in the title.
+const ORDINAL_DAY_RE =
+  /\bthe\s+(\d{1,2})(?:st|nd|rd|th)\b(?=\s*$|\s*[,.;:!?)\]]|\s+(?:at|@|from|between)\b|\s+\d)/gi;
+
+/** The next date on or after today that falls on this day of the month. */
+function nextDayOfMonth(day: number, now: Date): Date | undefined {
+  if (day < 1 || day > 31) return undefined;
+  for (let ahead = 0; ahead < 12; ahead += 1) {
+    const date = new Date(now.getFullYear(), now.getMonth() + ahead, day);
+    // A month without the day (the 31st in April) rolls over; skip it.
+    if (date.getDate() !== day) continue;
+    if (ahead > 0 || day >= now.getDate()) return date;
+  }
+  return undefined;
+}
+
 /**
  * "quarter to 5pm" as a clock time ("4:45pm"), or the phrase unchanged when
  * the hour is not on a clock. Keeps the am/pm the user typed, if any. With
@@ -342,7 +359,16 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         shortened.push([offset, offset + phrase.length]);
         return clock.padEnd(phrase.length);
       },
-    );
+    )
+    // chrono has no day of the month on its own, so "Pay bills on the 15th"
+    // saved unscheduled and "Call on the 3rd at 5pm" was set for 17:00 today
+    // with "on the 3rd" left in its title. Write the next such day as a date.
+    .replace(ORDINAL_DAY_RE, (phrase: string, day: string, offset: number) => {
+      const date = nextDayOfMonth(Number(day), now);
+      if (!date) return phrase;
+      shortened.push([offset, offset + phrase.length]);
+      return `${date.getMonth() + 1}/${date.getDate()}`.padEnd(phrase.length);
+    });
   const results = chrono
     .parse(clockText, now, { forwardDate: true })
     .map((result) => widenMatch(result, shortened, working))

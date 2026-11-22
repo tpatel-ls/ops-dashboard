@@ -419,6 +419,25 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Set up the noon meeting', anchor).title).toBe('Set up the meeting');
   });
 
+  it('schedules the next "the 15th" when no month is given', () => {
+    expect(parseQuickAdd('Pay bills on the 15th', anchor)).toMatchObject({
+      title: 'Pay bills',
+      scheduledFor: '2026-05-15',
+    });
+    expect(parseQuickAdd('Pay rent by the 30th', anchor).scheduledFor).toBe('2026-04-30');
+    expect(parseQuickAdd('Review on the 26th', anchor).scheduledFor).toBe('2026-04-26');
+    // April has no 31st, so the next one is in May.
+    expect(parseQuickAdd('Close books on the 31st', anchor).scheduledFor).toBe('2026-05-31');
+    const timed = parseQuickAdd('Call on the 3rd at 5pm', anchor);
+    expect(timed).toMatchObject({ title: 'Call', scheduledFor: '2026-05-03' });
+    expect(new Date(timed.startAt ?? '').getHours()).toBe(17);
+    expect(parseQuickAdd('Pay on the 15th of June', anchor).scheduledFor).toBe('2026-06-15');
+    for (const input of ['Meet on the 3rd floor', 'Finish the 2nd draft', 'Call on the 32nd']) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title: input });
+      expect(parseQuickAdd(input, anchor).scheduledFor).toBeUndefined();
+    }
+  });
+
   it('reads "quarter to", "quarter past", and "half past" as clock times', () => {
     const at = (input: string) => {
       const r = parseQuickAdd(input, anchor);
