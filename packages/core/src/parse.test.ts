@@ -238,6 +238,29 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('reads a fraction before a unit as an amount, not a date', () => {
+    for (const input of [
+      'Add 1/2 cup sugar',
+      'Cook 1/4 lb beef',
+      'Take 1/2 tablet',
+      'Run 3/4 mile',
+      'Fill 2/3 of tank',
+    ]) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe(input);
+      expect(r.scheduledFor).toBeUndefined();
+    }
+    expect(parseQuickAdd('Add 1/2 cup sugar tomorrow', anchor)).toMatchObject({
+      title: 'Add 1/2 cup sugar',
+      scheduledFor: '2026-04-27',
+    });
+    expect(parseQuickAdd('Call mom on 5/12', anchor)).toMatchObject({
+      title: 'Call mom',
+      scheduledFor: '2026-05-12',
+    });
+    expect(parseQuickAdd('Vote 11/3', anchor).scheduledFor).toBe('2026-11-03');
+  });
+
   it('reads 24/7 as part of the title, not as July 24', () => {
     const r = parseQuickAdd('Check 24/7 support tomorrow', anchor);
     expect(r.title).toBe('Check 24/7 support');
