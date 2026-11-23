@@ -459,6 +459,27 @@ describe('parseQuickAdd', () => {
     ).toBe('2027-01-31');
   });
 
+  it('schedules "first of the month" on the next 1st', () => {
+    for (const [input, title, day] of [
+      ['Pay rent first of the month', 'Pay rent', '2026-05-01'],
+      ['Pay rent on the 1st of the month', 'Pay rent', '2026-05-01'],
+      ['Pay rent by the first of next month', 'Pay rent', '2026-05-01'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    const firstOfDecember = new Date('2026-12-01T10:00:00');
+    expect(parseQuickAdd('Pay rent first of the month', firstOfDecember).scheduledFor).toBe(
+      '2026-12-01',
+    );
+    expect(parseQuickAdd('Pay rent first of next month', firstOfDecember).scheduledFor).toBe(
+      '2027-01-01',
+    );
+    // A time already past on the 1st stays on that day, not a year out.
+    expect(parseQuickAdd('Invoice 1st of the month at 9am', firstOfDecember).scheduledFor).toBe(
+      '2026-12-01',
+    );
+  });
+
   it('leaves the end of a week in the title', () => {
     for (const input of ['Ship end of next week', 'Ship by the end of this week']) {
       const r = parseQuickAdd(input, anchor);

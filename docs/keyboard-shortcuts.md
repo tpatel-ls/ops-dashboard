@@ -36,6 +36,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `tomorrow 3pm` add a natural-language schedule
 - `quarter to 5pm`, `quarter past 9am`, or `half past 3pm` a clock time
 - `on the 15th` the next 15th of a month (`the 3rd floor` stays in the title)
+- `first of the month` or `first of next month` the next 1st, or next month's
 - `end of month`, `end of next month`, or `end of year` the last day of it
 - `friday after next` the week after the next Friday
 - `tuesday week` a week from the next Tuesday
