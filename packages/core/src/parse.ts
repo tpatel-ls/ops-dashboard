@@ -30,6 +30,8 @@ const TIME_AFTER_OFFSET_RE = /^(?:['\u2019]s?)?\s+time\b(?!\s+permitting)/i;
 const COMING_BEFORE_RE = /(?:^|\s)(?:this\s+)?(?:up)?coming\s*$/i;
 const WEEKDAY_START_RE = /^[([]*(?:mon|tue|wed|thu|fri|sat|sun|week)/i;
 const APPROXIMATE_AFTER_RE = /^\s*-?ish\b/i;
+// "3pm sharp" and "9am on the dot" only say the time is exact.
+const EXACT_AFTER_RE = /^\s+(?:sharp|on\s+the\s+dot)\b/i;
 const BETWEEN_TIMES_RE =
   /\b(between\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)(\s+and\s+)(?=\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|\d{1,2}:\d{2}\b)/gi;
 const POSSESSIVE_RE = /^['\u2019]s\b/i;
@@ -649,6 +651,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       if (hasTime) {
         before = before.replace(APPROXIMATE_BEFORE_RE, ' ');
         after = after.replace(APPROXIMATE_AFTER_RE, '');
+        after = after.replace(EXACT_AFTER_RE, '');
       }
       // "in two days time" and "in 2 days' time" are the same offset as "in
       // two days", but chrono stops before "time" and saved "Call time".

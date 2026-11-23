@@ -54,7 +54,9 @@ The first date phrase is scheduled and removed from the title, along with a
 word that only introduced it (`at`, `on`, `by`, `for`, `from`, `over`,
 `during`, `@`, `before`, `until`, `due`, also with a `the` after it as in
 `on the 1st of December`, or on its own as in `the 2nd of May`). Next to a
-time, a word that only says the time is rough goes too: `around 5pm`, `~5pm`, `approx. 5pm`, `5pm-ish`.
+time, a word that only says the time is rough goes too: `around 5pm`, `~5pm`,
+`approx. 5pm`, `5pm-ish`. So does a word that says it is exact: `3pm sharp`,
+`9am on the dot`.
 When the date is the only text left, it stays as the title (`tomorrow #work`
 saves as `tomorrow`, tagged `work`).
 These stay in the title and do not schedule anything:
