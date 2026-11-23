@@ -273,6 +273,8 @@ const LENGTH_AFTER_TIME_RE =
 const MAX_LENGTH_MINUTES = 24 * 60;
 // "end of month", "the end of this month", "end of next year".
 const END_OF_PERIOD_RE = /\b(?:the\s+)?end\s+of\s+(?:the\s+|(this|next)\s+)?(month|year)\b/gi;
+// "first of the month", "the 1st of next month".
+const FIRST_OF_MONTH_RE = /\b(?:the\s+)?(?:first|1st)\s+of\s+(?:the|(next))\s+month\b/gi;
 // "end of" left in front of a period chrono did read, like "next week".
 const END_OF_BEFORE_RE = /\bend\s+of\s+(?:the\s+)?$/i;
 // "an hour and a half", "2 hours and a half", "2 and a half hours".
@@ -472,6 +474,18 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       date.setDate(date.getDate() + 7);
       shortened.push([offset, offset + phrase.length]);
       return monthDay(date).padEnd(phrase.length);
+    })
+    // chrono read "the month" in "Pay rent first of the month" as a month
+    // from today, saving "Pay rent first of" for the 26th of next month. It is
+    // the next 1st, or the 1st of next month.
+    .replace(FIRST_OF_MONTH_RE, (phrase: string, next: string | undefined, offset: number) => {
+      const date = next
+        ? new Date(now.getFullYear(), now.getMonth() + 1, 1)
+        : nextDayOfMonth(1, now);
+      if (!date) return phrase;
+      shortened.push([offset, offset + phrase.length]);
+      // With the year, so a time already past on the 1st stays on that day.
+      return `${monthDay(date)}/${date.getFullYear()}`.padEnd(phrase.length);
     })
     .replace(/(?<!\bthe\s)\bday after tomorrow\b/gi, (phrase: string, offset: number) => {
       shortened.push([offset, offset + phrase.length]);
