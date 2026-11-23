@@ -721,6 +721,19 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('drops a word that only says the time is exact', () => {
+    for (const input of [
+      'Standup 3pm sharp',
+      'Standup at 3pm on the dot',
+      'Standup 3pm sharp tomorrow',
+    ]) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe('Standup');
+      expect(new Date(r.startAt ?? '').getHours()).toBe(15);
+    }
+    expect(parseQuickAdd('Buy sharp knives tomorrow', anchor).title).toBe('Buy sharp knives');
+  });
+
   it('reads "in two days time" as the offset alone', () => {
     for (const input of [
       'Call in two days time',
