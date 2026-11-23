@@ -504,6 +504,20 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Ship wks', anchor).title).toBe('Ship wks');
   });
 
+  it('reads "a fortnight" as two weeks', () => {
+    for (const [input, title, day] of [
+      ['Dentist in a fortnight', 'Dentist', '2026-05-10'],
+      ['Call a fortnight from today', 'Call', '2026-05-10'],
+      ['Call a fortnight from friday', 'Call', '2026-05-15'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    // Like "for 2 weeks", a length with no direction schedules nothing.
+    const length = parseQuickAdd('Holiday for a fortnight', anchor);
+    expect(length.title).toBe('Holiday for a fortnight');
+    expect(length.scheduledFor).toBeUndefined();
+  });
+
   it('reads "day after tomorrow" and "from today" offsets', () => {
     expect(parseQuickAdd('Lunch day after tomorrow', anchor)).toMatchObject({
       title: 'Lunch',

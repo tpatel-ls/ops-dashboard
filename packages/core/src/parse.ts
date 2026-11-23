@@ -63,7 +63,13 @@ function isSchedulingMatch(result: FoundDate): boolean {
   // was due at 09:05 and "Fast 3 days" was scheduled three days out. In "Run
   // for 30 minutes tomorrow" the duration also won over the real date, which
   // stayed in the title.
-  if (DURATION_ONLY_RE.test(result.text.trim())) return false;
+  // Check chrono's copy too, where "for a fortnight" reads "for 2 weeks".
+  if (
+    DURATION_ONLY_RE.test(result.text.trim()) ||
+    DURATION_ONLY_RE.test(result.parsedText.trim())
+  ) {
+    return false;
+  }
   // "sun", "sat", and "wed" are also words: "Buy sun cream" was scheduled for
   // Sunday as "Buy cream", and "Get wed invites printed" lost "wed". The
   // full names and "this sat" / "next sun" still schedule.
@@ -509,6 +515,11 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         return `${hours} hours`.padEnd(phrase.length);
       },
     )
+    // chrono has no "fortnight": "Dentist in a fortnight" saved unscheduled.
+    .replace(/\ba fortnight\b/gi, (phrase: string, offset: number) => {
+      shortened.push([offset, offset + phrase.length]);
+      return '2 weeks'.padEnd(phrase.length);
+    })
     // chrono reads "w" and "yr" but not "wk", "wks", or "yrs": "Pay bill in
     // 2 wks" saved unscheduled, and "Pay bill 2 wks from now" matched only
     // "now", so it was due this minute.
