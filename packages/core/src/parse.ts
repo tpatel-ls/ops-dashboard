@@ -142,6 +142,24 @@ const WEEKDAY_AFTER_NEXT_RE = new RegExp(
   `\\b(?:the\\s+)?(${WEEKDAY_NAME})\\s+after\\s+next\\b`,
   'gi',
 );
+// "2 weeks from friday", "a week from tomorrow", "3 days from monday". Runs
+// after "wks" is shortened to "w".
+const OFFSET_FROM_DAY_RE = new RegExp(
+  `\\b(\\d+|an?|one|two|three|four|five|six|seven|eight|nine|ten)\\s+(days?|d|weeks?|w)\\s+from\\s+(tomorrow|${WEEKDAY_NAME})\\b`,
+  'gi',
+);
+const NUMBER_WORDS = [
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+];
 
 /**
  * The next date that falls on a weekday, from chrono's reading of the bare
@@ -202,10 +220,17 @@ function widenMatch(
 ): FoundDate {
   let start = result.index;
   let end = result.index + result.text.length;
-  for (const [from, to] of shortened) {
-    if (from < end && to > start) {
-      start = Math.min(start, from);
-      end = Math.max(end, to);
+  // Repeat until nothing changes: a rewrite can end on a word shortened
+  // earlier ("2 wks from tues" ends on "tue"), which only overlaps once the
+  // match has been widened to the rewrite.
+  for (let widened = true; widened;) {
+    widened = false;
+    for (const [from, to] of shortened) {
+      if (from < end && to > start && (from < start || to > end)) {
+        start = Math.min(start, from);
+        end = Math.max(end, to);
+        widened = true;
+      }
     }
   }
   return {
@@ -471,6 +496,23 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       shortened.push([offset, offset + unit.length]);
       return (/^w/i.test(unit) ? 'w' : 'yr').padEnd(unit.length);
     })
+    // chrono reads only the day in "2 weeks from friday", so "Party 2 weeks
+    // from friday" was set for this Friday as "Party 2 weeks". Count the
+    // offset from that day instead.
+    .replace(
+      OFFSET_FROM_DAY_RE,
+      (phrase: string, amount: string, unit: string, from: string, offset: number) => {
+        const count = /^an?$/i.test(amount)
+          ? 1
+          : Number(amount) || NUMBER_WORDS.indexOf(amount.toLowerCase()) + 1;
+        const date = /^tomorrow$/i.test(from)
+          ? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+          : upcomingWeekday(from, now);
+        date.setDate(date.getDate() + count * (/^d/i.test(unit) ? 1 : 7));
+        shortened.push([offset, offset + phrase.length]);
+        return monthDay(date).padEnd(phrase.length);
+      },
+    )
     .replace(
       /(?<=\b(?:days?|weeks?|w|months?|years?|yr)\s+)from today\b/gi,
       (phrase: string, offset: number) => {
