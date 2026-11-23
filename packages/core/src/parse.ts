@@ -573,7 +573,10 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         // A possessive date names the thing, not when to do it: "Prep for
         // tomorrow's demo" saved as "Prep 's demo" and "Review Monday's
         // notes" as "Review 's notes".
-        !POSSESSIVE_RE.test(working.slice(result.index + result.text.length)) &&
+        // "in a week's time" is an offset, not a possessive.
+        (!POSSESSIVE_RE.test(working.slice(result.index + result.text.length)) ||
+          (IN_OFFSET_RE.test(result.text) &&
+            TIME_AFTER_OFFSET_RE.test(working.slice(result.index + result.text.length)))) &&
         // chrono reads a fraction as a month and day: "Add 1/2 cup sugar" was
         // scheduled for January 2 as "Add cup sugar", and "Fill 2/3 of tank"
         // for February 3 as "Fill of tank".
