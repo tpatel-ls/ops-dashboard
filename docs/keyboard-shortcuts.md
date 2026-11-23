@@ -65,6 +65,7 @@ These stay in the title and do not schedule anything:
 - a past phrase: `Recap yesterday meeting`, `Review last week notes`, or a
   length counted back with `before` or `earlier`: `Call 2 hours before`
 - a possessive date: `Prep for tomorrow's demo`, `Review Monday's notes`
+  (`in a week's time` still schedules)
 - a bare month name (`Lunch with April`) and `24/7`
 - a fraction before a unit or `of`: `Add 1/2 cup sugar`, `Fill 2/3 of tank`
 - `sun`, `sat`, and `wed` on their own (`Buy sun cream`); use the full weekday

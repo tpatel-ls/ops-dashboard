@@ -729,6 +729,18 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Fix tomorrow time zone bug', anchor).title).toBe('Fix time zone bug');
   });
 
+  it('reads "in a week\'s time" as the offset alone', () => {
+    for (const [input, title, day] of [
+      ["Call in a week's time", 'Call', '2026-05-03'],
+      ['Call in a week\u2019s time', 'Call', '2026-05-03'],
+      ["Renew in a year's time", 'Renew', '2027-04-26'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    // Any other possessive still names the thing, not when to do it.
+    expect(parseQuickAdd("Review in a week's notes", anchor).scheduledFor).toBeUndefined();
+  });
+
   it('drops "this coming" and "upcoming" before a weekday', () => {
     for (const input of [
       'Call this coming friday',
