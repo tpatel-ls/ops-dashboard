@@ -659,6 +659,8 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
       // chrono reads the weekday in "this coming friday" but not the words
       // before it, which saved "Call this coming".
       if (WEEKDAY_START_RE.test(first.text)) before = before.replace(COMING_BEFORE_RE, ' ');
+      // "Ping Ana right now" was due this minute but saved as "Ping Ana right".
+      if (/^now$/i.test(first.text.trim())) before = before.replace(/(?:^|\s)right\s*$/i, ' ');
       // chrono starts "the 2nd of May" at the number, which saved "Call Sam
       // the 2nd of May" as "Call Sam the".
       if (/^\d{1,2}(?:st|nd|rd|th)\b/i.test(first.text)) {

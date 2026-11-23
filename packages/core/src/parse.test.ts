@@ -721,6 +721,14 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('drops "right" before a quick add "now"', () => {
+    for (const input of ['Ping Ana right now', 'Ping Ana right now!!']) {
+      const r = parseQuickAdd(input, anchor);
+      expect(r.title).toBe('Ping Ana');
+      expect(r.startAt).toBe(anchor.toISOString());
+    }
+  });
+
   it('drops a word that only says the time is exact', () => {
     for (const input of [
       'Standup 3pm sharp',
