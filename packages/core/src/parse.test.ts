@@ -588,6 +588,16 @@ describe('parseQuickAdd', () => {
     expect(new Date(timed.startAt ?? '').getHours()).toBe(9);
   });
 
+  it('drops the "the" before an ordinal date', () => {
+    for (const [input, title, day] of [
+      ['Call Sam the 2nd of May', 'Call Sam', '2026-05-02'],
+      ['Party the 21st of June', 'Party', '2026-06-21'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    expect(parseQuickAdd('Call Sam the 2nd of May at 3pm', anchor).title).toBe('Call Sam');
+  });
+
   it('schedules the next "the 15th" when no month is given', () => {
     expect(parseQuickAdd('Pay bills on the 15th', anchor)).toMatchObject({
       title: 'Pay bills',
