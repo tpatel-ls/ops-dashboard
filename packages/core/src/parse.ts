@@ -142,6 +142,12 @@ const WEEKDAY_AFTER_NEXT_RE = new RegExp(
   `\\b(?:the\\s+)?(${WEEKDAY_NAME})\\s+after\\s+next\\b`,
   'gi',
 );
+// "Tuesday week" (a week from Tuesday), with nothing after it but
+// punctuation or a time, so "Plan Monday week review" keeps its words.
+const WEEKDAY_WEEK_RE = new RegExp(
+  `\\b(${WEEKDAY_NAME})\\s+week\\b(?=\\s*$|\\s*[,.;:!?)\\]]|\\s+(?:at|@)\\b|\\s+\\d)`,
+  'gi',
+);
 // "2 weeks from friday", "a week from tomorrow", "3 days from monday". Runs
 // after "wks" is shortened to "w".
 const OFFSET_FROM_DAY_RE = new RegExp(
@@ -495,6 +501,14 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
     .replace(/(?<=(?:\d|\ban?)\s*)(?:wks?|yrs)\b/gi, (unit: string, offset: number) => {
       shortened.push([offset, offset + unit.length]);
       return (/^w/i.test(unit) ? 'w' : 'yr').padEnd(unit.length);
+    })
+    // "Tuesday week" is a week from Tuesday. chrono read only the weekday, so
+    // "Review Tuesday week" was set for this Tuesday as "Review week".
+    .replace(WEEKDAY_WEEK_RE, (phrase: string, day: string, offset: number) => {
+      const date = upcomingWeekday(day, now);
+      date.setDate(date.getDate() + 7);
+      shortened.push([offset, offset + phrase.length]);
+      return monthDay(date).padEnd(phrase.length);
     })
     // chrono reads only the day in "2 weeks from friday", so "Party 2 weeks
     // from friday" was set for this Friday as "Party 2 weeks". Count the

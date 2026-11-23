@@ -522,6 +522,21 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('schedules "Tuesday week" a week from that Tuesday', () => {
+    // The anchor is Sunday 2026-04-26.
+    for (const [input, title, day] of [
+      ['Review Tuesday week', 'Review', '2026-05-05'],
+      ['Lunch weds week', 'Lunch', '2026-05-06'],
+      // On the day itself, it is a week from today.
+      ['Call sunday week', 'Call', '2026-05-03'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    const timed = parseQuickAdd('Call friday week at 3pm', anchor);
+    expect(timed).toMatchObject({ title: 'Call', scheduledFor: '2026-05-08' });
+    expect(new Date(timed.startAt ?? '').getHours()).toBe(15);
+  });
+
   it('counts "2 weeks from friday" from that day', () => {
     // The anchor is Sunday 2026-04-26, so the next Friday is 2026-05-01.
     for (const [input, title, day] of [
