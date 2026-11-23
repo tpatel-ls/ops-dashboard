@@ -132,6 +132,34 @@ function nextDayOfMonth(day: number, now: Date): Date | undefined {
   return undefined;
 }
 
+// A weekday name, full or short. "tues" and "weds" are already shortened to
+// "tue" and "wed" (padded) in the copy these patterns run on.
+const WEEKDAY_NAME =
+  '(?:sun(?:day)?|mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:r(?:s(?:day)?)?)?|fri(?:day)?|sat(?:urday)?)';
+const WEEKDAY_INDEX: Record<string, number> = { su: 0, mo: 1, tu: 2, we: 3, th: 4, fr: 5, sa: 6 };
+// "friday after next", "the monday after next".
+const WEEKDAY_AFTER_NEXT_RE = new RegExp(
+  `\\b(?:the\\s+)?(${WEEKDAY_NAME})\\s+after\\s+next\\b`,
+  'gi',
+);
+
+/**
+ * The next date that falls on a weekday, from chrono's reading of the bare
+ * name: today when it is that weekday, or the following one when
+ * `strictlyAfter` is set.
+ */
+function upcomingWeekday(name: string, now: Date, strictlyAfter = false): Date {
+  const target = WEEKDAY_INDEX[name.slice(0, 2).toLowerCase()] ?? 0;
+  let ahead = (target - now.getDay() + 7) % 7;
+  if (ahead === 0 && strictlyAfter) ahead = 7;
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + ahead);
+}
+
+/** A date written as "M/D", which chrono reads with forwardDate. */
+function monthDay(date: Date): string {
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
 /**
  * "quarter to 5pm" as a clock time ("4:45pm"), or the phrase unchanged when
  * the hour is not on a clock. Keeps the am/pm the user typed, if any. With
@@ -405,6 +433,15 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedQuic
         return `${end.getMonth() + 1}/${end.getDate()}/${end.getFullYear()}`.padEnd(phrase.length);
       },
     )
+    // chrono reads only the weekday in "friday after next", so "Demo friday
+    // after next" was set for this Friday as "Demo after next". It is the
+    // week after the next such day.
+    .replace(WEEKDAY_AFTER_NEXT_RE, (phrase: string, day: string, offset: number) => {
+      const date = upcomingWeekday(day, now, true);
+      date.setDate(date.getDate() + 7);
+      shortened.push([offset, offset + phrase.length]);
+      return monthDay(date).padEnd(phrase.length);
+    })
     .replace(/(?<!\bthe\s)\bday after tomorrow\b/gi, (phrase: string, offset: number) => {
       shortened.push([offset, offset + phrase.length]);
       return 'in 2 days'.padEnd(phrase.length);

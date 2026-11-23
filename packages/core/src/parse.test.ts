@@ -502,6 +502,26 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('schedules "<weekday> after next" a week after the next one', () => {
+    // The anchor is Sunday 2026-04-26, so the next Friday is 2026-05-01.
+    for (const [input, title, day] of [
+      ['Demo friday after next', 'Demo', '2026-05-08'],
+      ['Demo the friday after next', 'Demo', '2026-05-08'],
+      ['Lunch tues after next', 'Lunch', '2026-05-05'],
+      ['Review sunday after next', 'Review', '2026-05-10'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    const timed = parseQuickAdd('Pickup Monday after next at 3pm', anchor);
+    expect(timed).toMatchObject({ title: 'Pickup', scheduledFor: '2026-05-04' });
+    expect(new Date(timed.startAt ?? '').getHours()).toBe(15);
+    // On a Friday, the next Friday is a week out, so "after next" is two.
+    expect(parseQuickAdd('Demo friday after next', new Date('2026-05-01T10:00:00'))).toMatchObject({
+      title: 'Demo',
+      scheduledFor: '2026-05-15',
+    });
+  });
+
   it('schedules the next "the 15th" when no month is given', () => {
     expect(parseQuickAdd('Pay bills on the 15th', anchor)).toMatchObject({
       title: 'Pay bills',
