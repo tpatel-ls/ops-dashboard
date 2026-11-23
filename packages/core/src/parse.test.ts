@@ -522,6 +522,22 @@ describe('parseQuickAdd', () => {
     });
   });
 
+  it('counts "2 weeks from friday" from that day', () => {
+    // The anchor is Sunday 2026-04-26, so the next Friday is 2026-05-01.
+    for (const [input, title, day] of [
+      ['Party 2 weeks from friday', 'Party', '2026-05-15'],
+      ['Pay a week from friday', 'Pay', '2026-05-08'],
+      ['Call 3 days from monday', 'Call', '2026-04-30'],
+      ['Ship two weeks from tomorrow', 'Ship', '2026-05-11'],
+      ['Pay 2 wks from tues', 'Pay', '2026-05-12'],
+    ] as const) {
+      expect(parseQuickAdd(input, anchor)).toMatchObject({ title, scheduledFor: day });
+    }
+    const timed = parseQuickAdd('Pay a week from friday at 9am', anchor);
+    expect(timed).toMatchObject({ title: 'Pay', scheduledFor: '2026-05-08' });
+    expect(new Date(timed.startAt ?? '').getHours()).toBe(9);
+  });
+
   it('schedules the next "the 15th" when no month is given', () => {
     expect(parseQuickAdd('Pay bills on the 15th', anchor)).toMatchObject({
       title: 'Pay bills',

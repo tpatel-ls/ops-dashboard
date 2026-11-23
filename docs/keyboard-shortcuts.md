@@ -38,6 +38,7 @@ Press `?` outside a text field to open the in-app shortcut reference.
 - `on the 15th` the next 15th of a month (`the 3rd floor` stays in the title)
 - `end of month`, `end of next month`, or `end of year` the last day of it
 - `friday after next` the week after the next Friday
+- `2 weeks from friday` or `3 days from tomorrow` counted from that day
 - `tomorrow 3pm-4pm` or `between 2 and 3pm` schedule a time block with an end
   time
 - `tomorrow 3pm for 45 minutes` (or `for an hour and a half`) schedule a time
