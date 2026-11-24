@@ -9,7 +9,7 @@ const useLiveQuery = vi.hoisted(() => vi.fn());
 vi.mock('dexie-react-hooks', () => ({ useLiveQuery }));
 vi.mock('@/lib/tasks', () => ({ setTaskStatus: vi.fn() }));
 
-const { AgendaSection, WorkDashboard } = await import('./work-dashboard');
+const { AgendaSection, WorkDashboard, workCountsLabel } = await import('./work-dashboard');
 
 afterEach(() => {
   cleanup();
@@ -90,5 +90,16 @@ describe('WorkDashboard', () => {
     act(() => vi.advanceTimersByTime(31_000));
 
     expect(useLiveQuery.mock.lastCall?.[1]).toContain('2026-11-06');
+  });
+});
+
+describe('workCountsLabel', () => {
+  it('names what the header counts mean, with the right plural', () => {
+    expect(workCountsLabel({ openTasks: 1, overdue: 0, upcoming: 2 })).toBe(
+      '1 open task, 0 overdue, 2 upcoming',
+    );
+    expect(workCountsLabel({ openTasks: 3, overdue: 1, upcoming: 0 })).toBe(
+      '3 open tasks, 1 overdue, 0 upcoming',
+    );
   });
 });
