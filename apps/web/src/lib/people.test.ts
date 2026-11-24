@@ -305,6 +305,12 @@ describe('personInitials', () => {
     expect(personInitials('𝒜da 𠀋ee')).toBe('𝒜𠀋');
   });
 
+  it('keeps a flag, a joined emoji, or an accented letter whole', () => {
+    expect(personInitials('\u{1F1FA}\u{1F1F8} Team')).toBe('\u{1F1FA}\u{1F1F8}T');
+    expect(personInitials('\u{1F469}\u200D\u{1F4BB} Dev')).toBe('\u{1F469}\u200D\u{1F4BB}D');
+    expect(personInitials('e\u0301mile zola')).toBe('E\u0301Z');
+  });
+
   it('returns an empty string for malformed synced names', () => {
     expect(personInitials(undefined)).toBe('');
     expect(personInitials(42)).toBe('');
