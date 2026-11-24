@@ -102,6 +102,16 @@ describe('ContentCard', () => {
 });
 
 describe('ContentBoard', () => {
+  it('announces that the board is loading instead of showing a silent dot', async () => {
+    render(createElement(ContentBoard));
+
+    const status = screen.getByRole('status');
+    expect(status.textContent).toBe('Loading content');
+    expect(status.getAttribute('aria-busy')).toBe('true');
+    expect(await screen.findByText('A clean slate.')).toBeTruthy();
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('titles every status column and phone group with a level-2 heading', async () => {
     liveContent = [{ id: 'c-1', title: 'Pilot episode', type: 'video', status: 'idea' }];
     render(createElement(ContentBoard));

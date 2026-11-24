@@ -674,8 +674,13 @@ export function ContentBoard() {
       <QuickAdd onAdd={handleAdd} />
 
       {isLoading ? (
-        <div className="surface flex h-48 items-center justify-center">
-          <span className="live-dot bg-primary inline-block size-2 rounded-full" />
+        <div
+          className="surface flex h-48 items-center justify-center"
+          role="status"
+          aria-busy="true"
+        >
+          <span className="sr-only">Loading content</span>
+          <span className="live-dot bg-primary inline-block size-2 rounded-full" aria-hidden />
         </div>
       ) : isEmpty ? (
         <EmptyState />
