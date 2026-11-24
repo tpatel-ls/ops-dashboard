@@ -22,6 +22,7 @@ import {
   calendarKindOf,
   compareCalendarTasks,
 } from '@/lib/calendar-agenda';
+import { countLabel } from '@/lib/count-label';
 
 const HOUR_HEIGHT = 48;
 
@@ -203,7 +204,7 @@ function MobileDayAgenda({
 
   return (
     <section
-      aria-label={`${format(day, 'EEEE, MMMM d')}, ${blocks.length} scheduled items`}
+      aria-label={`${format(day, 'EEEE, MMMM d')}, ${countLabel(blocks.length, 'scheduled item')}`}
       aria-current={isToday ? 'date' : undefined}
       className="min-w-0 py-2"
     >

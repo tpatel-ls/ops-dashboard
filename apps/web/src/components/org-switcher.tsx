@@ -8,6 +8,7 @@ import type { OrgContext, Organization } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { compareOrganizations, taskLane } from '@/lib/org-lanes';
 import { resolveOrgContext, useOrgStore } from '@/lib/org-store';
+import { countLabel } from '@/lib/count-label';
 
 const emptySubscribe = () => () => {};
 
@@ -225,7 +226,7 @@ export function OrgSwitcher() {
                 >
                   {lane.count}
                 </span>
-                <span className="sr-only">{`, ${lane.count} open tasks`}</span>
+                <span className="sr-only">{`, ${countLabel(lane.count, 'open task')}`}</span>
                 {active ? (
                   <span className="text-primary ml-auto inline-flex items-center gap-1 text-[10px] font-medium">
                     Current

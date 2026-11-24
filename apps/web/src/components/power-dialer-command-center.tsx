@@ -31,6 +31,7 @@ import { cn } from '@ops-dashboard/ui';
 import { ViewShell } from '@/components/view-shell';
 import { syncLsgLaunchPlan } from '@/lib/lsg-work-setup';
 import { safeTaskTags } from '@/lib/task-query';
+import { countLabel } from '@/lib/count-label';
 
 const STATUS_TONE: Record<TaskStatus, string> = {
   backlog: 'bg-bg-sunken text-subtle-foreground border-border',
@@ -370,7 +371,7 @@ export function PowerDialerCommandCenter() {
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <span className="text-subtle-foreground font-mono text-[11px]">
-                        {progress.matched.length} tasks
+                        {countLabel(progress.matched.length, 'task')}
                       </span>
                     </div>
                     <h3 className="text-sm font-semibold tracking-tight">{capability.title}</h3>
