@@ -6,6 +6,7 @@ import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 import { compareText } from './compare-text';
 import { normalizeStringList } from './string-list';
 import { newestFirstBy, recencyTimestamp } from './recency';
+import { graphemeClusters } from './graphemes';
 
 const MAX_PERSON_FACTS = 100;
 const MAX_PERSON_INTERACTIONS = 500;
@@ -231,8 +232,9 @@ export function matchesPersonSearch(person: Person, query: string): boolean {
 /**
  * Up to two initials from a person's name for the avatar fallback. Splits on
  * any run of whitespace, so a doubled space does not yield an empty word, and
- * takes whole code points, so a name starting with an astral character does
- * not render a lone surrogate. Synced names are not validated, so a non-string
+ * takes whole grapheme clusters, so a name starting with an astral character
+ * does not render a lone surrogate, and one starting with a flag, a joined
+ * emoji, or a letter with a combining accent keeps that whole character. Synced names are not validated, so a non-string
  * name yields an empty string rather than throwing during render.
  */
 export function personInitials(name: unknown): string {
@@ -241,7 +243,7 @@ export function personInitials(name: unknown): string {
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((word) => Array.from(word)[0]?.toUpperCase() ?? '')
+    .map((word) => graphemeClusters(word)[0]?.toUpperCase() ?? '')
     .join('');
 }
 

@@ -1,3 +1,5 @@
+import { graphemeClusters } from './graphemes';
+
 const ELLIPSIS = '…';
 
 /**
@@ -28,17 +30,12 @@ export function excerpt(body: string, limit: number): string {
 
 /** The longest run of whole grapheme clusters with at most `limit` code points. */
 function wholeGraphemePrefix(body: string, limit: number): string {
-  if (typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') {
-    return Array.from(body).slice(0, limit).join('');
-  }
   let kept = '';
   let count = 0;
-  for (const { segment } of new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(
-    body,
-  )) {
-    const length = Array.from(segment).length;
+  for (const cluster of graphemeClusters(body)) {
+    const length = Array.from(cluster).length;
     if (count + length > limit) break;
-    kept += segment;
+    kept += cluster;
     count += length;
   }
   return kept;
