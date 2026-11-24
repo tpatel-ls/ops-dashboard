@@ -8,6 +8,25 @@ export interface Hotkey {
   combo: string;
   handler: HotkeyHandler;
   when?: () => boolean;
+  /**
+   * Let an unmodified or chord combo fire while a modal dialog is open. Off by
+   * default, because those combos act on the page behind the dialog.
+   */
+  overModal?: boolean;
+}
+
+/**
+ * True while a modal dialog is on screen.
+ *
+ * The single-key and chord shortcuts act on the page: `q` focuses the quick
+ * task field, `/` the task search, `g then s` navigates. With a modal open and
+ * focus on one of its buttons, they still fired, so `q` moved focus to a field
+ * behind the dialog that its focus trap is meant to wall off, and `f` stacked
+ * focus mode over it. Every modal here marks itself with `aria-modal="true"`,
+ * and the docked task drawer drops it because it is not modal.
+ */
+export function modalDialogOpen(): boolean {
+  return typeof document !== 'undefined' && document.querySelector('[aria-modal="true"]') !== null;
 }
 
 /**
@@ -81,10 +100,13 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
       const list = ref.current;
       const inField = isTypingTarget(e);
       const unmodified = !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+      let modalOpen: boolean | undefined;
       for (const hk of list) {
         if (hk.when && !hk.when()) continue;
         const combo = hk.combo.toLowerCase();
         const isChord = combo.includes(' then ');
+        const allowsMeta = combo.includes('mod') || combo.includes('cmd') || combo.includes('ctrl');
+        if (!allowsMeta && !hk.overModal && (modalOpen ??= modalDialogOpen())) continue;
         if (isChord) {
           if (inField) continue;
           if (e.repeat) {
@@ -105,7 +127,6 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
           }
           continue;
         }
-        const allowsMeta = combo.includes('mod') || combo.includes('cmd') || combo.includes('ctrl');
         if (inField && !allowsMeta) continue;
         if (matchesHotkey(combo, e)) {
           e.preventDefault();

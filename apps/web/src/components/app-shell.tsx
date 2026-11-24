@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
-import { useHotkeys } from '@/lib/hotkeys';
+import { modalDialogOpen, useHotkeys } from '@/lib/hotkeys';
 import { useAppStore } from '@/lib/app-store';
 import { ensureOrgSetup } from '@/lib/org-setup';
 import { CommandPalette } from './command-palette';
@@ -60,7 +60,13 @@ export function AppShell() {
 
   useHotkeys([
     { combo: 'mod+k', handler: togglePalette },
-    { combo: '?', handler: toggleHelp },
+    {
+      combo: '?',
+      handler: toggleHelp,
+      // Over its own dialog, `?` still closes the help it opened.
+      overModal: true,
+      when: () => useAppStore.getState().helpOpen || !modalDialogOpen(),
+    },
     { combo: 'g then a', handler: () => openWorkLogger('task') },
     { combo: 'q', handler: focusCapture },
     { combo: 'g then h', handler: () => router.push('/dashboard') },
@@ -73,7 +79,7 @@ export function AppShell() {
     { combo: 'g then n', handler: () => router.push('/notepad') },
     { combo: 'g then s', handler: () => router.push('/settings') },
     { combo: 'f', handler: openFocus },
-    { combo: 'escape', handler: closeAll },
+    { combo: 'escape', handler: closeAll, overModal: true },
   ]);
 
   return (
