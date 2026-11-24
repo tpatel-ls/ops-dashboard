@@ -130,6 +130,11 @@ export function useHotkeys(hotkeys: Hotkey[]): void {
         if (inField && !allowsMeta) continue;
         if (matchesHotkey(combo, e)) {
           e.preventDefault();
+          // A held key repeats keydown. For the toggles (`mod+k`, `?`) every
+          // repeat flipped the overlay again, so holding the key a moment too
+          // long flickered it open and shut. Claim the repeat so the browser
+          // does not act on it either, but run the handler once per press.
+          if (e.repeat) return;
           hk.handler(e);
           clearChord();
           return;

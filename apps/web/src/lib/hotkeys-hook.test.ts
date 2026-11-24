@@ -72,6 +72,23 @@ describe('useHotkeys', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it('runs a toggle once per press while its key auto-repeats', () => {
+    const handler = vi.fn();
+    renderHook(() => useHotkeys([{ combo: 'mod+k', handler }]));
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+    const repeat = new KeyboardEvent('keydown', {
+      key: 'k',
+      metaKey: true,
+      repeat: true,
+      cancelable: true,
+    });
+    window.dispatchEvent(repeat);
+
+    expect(handler).toHaveBeenCalledOnce();
+    expect(repeat.defaultPrevented).toBe(true);
+  });
+
   it('keeps page shortcuts from acting behind an open modal dialog', () => {
     const quick = vi.fn();
     const chord = vi.fn();
