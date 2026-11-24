@@ -275,7 +275,8 @@ export function PeopleView() {
 
         {/* Loading skeleton */}
         {data === undefined ? (
-          <div className="grid gap-1.5 lg:grid-cols-2">
+          <div className="grid gap-1.5 lg:grid-cols-2" role="status" aria-busy="true">
+            <span className="sr-only">Loading people</span>
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}

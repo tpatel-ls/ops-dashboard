@@ -61,13 +61,10 @@ export function WhiteboardList() {
       ) : null}
 
       {boards === undefined ? (
-        <div
-          className="grid gap-2 sm:grid-cols-2"
-          aria-busy="true"
-          aria-label="Loading whiteboards"
-        >
-          <div className="surface-flat h-36 animate-pulse" />
-          <div className="surface-flat h-36 animate-pulse" />
+        <div className="grid gap-2 sm:grid-cols-2" role="status" aria-busy="true">
+          <span className="sr-only">Loading whiteboards</span>
+          <div className="surface-flat h-36 animate-pulse" aria-hidden />
+          <div className="surface-flat h-36 animate-pulse" aria-hidden />
         </div>
       ) : boards.length === 0 ? (
         <div className="surface text-muted-foreground flex h-40 flex-col items-center justify-center gap-2 text-sm">

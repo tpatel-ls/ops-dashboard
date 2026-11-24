@@ -318,8 +318,9 @@ export function workCountsLabel(counts: {
 
 function AgendaSkeleton() {
   return (
-    <div className="surface h-72 animate-pulse p-4" aria-label="Loading Today">
-      <div className="bg-bg-sunken h-4 w-24 rounded" />
+    <div className="surface h-72 animate-pulse p-4" role="status" aria-busy="true">
+      <span className="sr-only">Loading Today</span>
+      <div className="bg-bg-sunken h-4 w-24 rounded" aria-hidden />
       <div className="mt-5 space-y-3">
         {Array.from({ length: 4 }).map((_, index) => (
           <div key={index} className="bg-bg-sunken h-12 rounded" aria-hidden />

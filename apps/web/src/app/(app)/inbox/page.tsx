@@ -248,11 +248,14 @@ export default function InboxPage() {
 
 function SkeletonRows() {
   return (
-    <ul className="flex flex-col gap-2" aria-label="Loading">
-      {[1, 2, 3].map((i) => (
-        <li key={i} className="surface-flat bg-bg-sunken h-16 animate-pulse" />
-      ))}
-    </ul>
+    <div role="status" aria-busy="true">
+      <span className="sr-only">Loading captures</span>
+      <ul className="flex flex-col gap-2" aria-hidden>
+        {[1, 2, 3].map((i) => (
+          <li key={i} className="surface-flat bg-bg-sunken h-16 animate-pulse" />
+        ))}
+      </ul>
+    </div>
   );
 }
 
