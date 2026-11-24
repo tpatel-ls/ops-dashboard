@@ -2,6 +2,11 @@
 
 Press `?` outside a text field to open the in-app shortcut reference.
 
+Single-key shortcuts and `g then` chords do not fire while a text field has
+focus or while a dialog is open, because they act on the page behind it.
+`Cmd/Ctrl K` and `Esc` still work there, and `?` closes the reference it
+opened.
+
 ## Global
 
 - `?` open the shortcut reference
