@@ -54,19 +54,22 @@ export function WorkDashboard() {
       subtitle={format(new Date(), 'EEEE, MMMM d')}
       meta={
         data ? (
-          <div
-            className="bg-bg-sunken text-muted-foreground inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs tabular-nums"
-            aria-label={`${data.model.counts.openTasks} open tasks, ${data.model.counts.overdue} overdue, ${data.model.counts.upcoming} upcoming`}
-          >
-            <span>{data.model.counts.openTasks} open</span>
+          <div className="bg-bg-sunken text-muted-foreground inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs tabular-nums">
+            {/* aria-label on a plain div is ignored by most screen readers, so
+                this read as "3 open 2 upcoming" with nothing saying what was
+                counted. Name the counts in text instead. */}
+            <span className="sr-only">{workCountsLabel(data.model.counts)}</span>
+            <span aria-hidden>{data.model.counts.openTasks} open</span>
             {data.model.counts.overdue > 0 ? (
               <>
                 <span aria-hidden>·</span>
-                <span className="text-destructive">{data.model.counts.overdue} overdue</span>
+                <span aria-hidden className="text-destructive">
+                  {data.model.counts.overdue} overdue
+                </span>
               </>
             ) : null}
             <span aria-hidden>·</span>
-            <span>{data.model.counts.upcoming} upcoming</span>
+            <span aria-hidden>{data.model.counts.upcoming} upcoming</span>
           </div>
         ) : null
       }
@@ -301,6 +304,16 @@ function AgendaTaskRow({
       ) : null}
     </li>
   );
+}
+
+/** What the open, overdue, and upcoming counts in the header pill mean. */
+export function workCountsLabel(counts: {
+  openTasks: number;
+  overdue: number;
+  upcoming: number;
+}): string {
+  const open = `${counts.openTasks} open ${counts.openTasks === 1 ? 'task' : 'tasks'}`;
+  return `${open}, ${counts.overdue} overdue, ${counts.upcoming} upcoming`;
 }
 
 function AgendaSkeleton() {
