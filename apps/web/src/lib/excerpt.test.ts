@@ -39,4 +39,23 @@ describe('excerpt', () => {
   it('drops the whitespace the cut landed on before the ellipsis', () => {
     expect(excerpt('word     tail', 6)).toBe('word…');
   });
+
+  it('never cuts inside a joined emoji, a flag, or an accented letter', () => {
+    const family = '\u{1F468}‍\u{1F469}‍\u{1F467}'; // 5 code points
+    const flag = '\u{1F1FA}\u{1F1F8}'; // 2 code points
+    const accented = 'é'; // 2 code points
+
+    expect(excerpt(`ab${family} tail`, 4)).toBe('ab…');
+    expect(excerpt(`abc${flag} tail`, 4)).toBe('abc…');
+    expect(excerpt(`abc${accented} tail`, 4)).toBe('abc…');
+    expect(excerpt(`${family}${family}`, 7)).toBe(`${family}…`);
+  });
+
+  it('stays within the code point limit that callers size against', () => {
+    const family = '\u{1F468}‍\u{1F469}‍\u{1F467}';
+    const result = excerpt(family.repeat(60), 200);
+
+    expect(Array.from(result.slice(0, -1)).length).toBeLessThanOrEqual(200);
+    expect(result).toBe(`${family.repeat(40)}…`);
+  });
 });
