@@ -3,6 +3,7 @@
 import { getDb, isoDay, localDay, todayIso } from '@ops-dashboard/core';
 import type { Routine, RoutineCheck, RoutineKind, TimeOfDay } from '@ops-dashboard/core';
 import { differenceInCalendarDays } from 'date-fns';
+import { countLabel } from './count-label';
 import { newRecord, patchRecord, putRecord, softDeleteRecord } from './records';
 
 // Routines validated types, formats, enums, and ranges but measured no string
@@ -139,7 +140,7 @@ export function fixedRoutineProgressLabel(
   if (durationDays === undefined) return undefined;
   const elapsedDays = routineElapsedDays(routine.startDate, today);
   if (elapsedDays === null) return undefined;
-  if (elapsedDays >= durationDays) return `finished · ${durationDays} days`;
+  if (elapsedDays >= durationDays) return `finished · ${countLabel(durationDays, 'day')}`;
   return `day ${Math.max(0, elapsedDays) + 1} / ${durationDays}`;
 }
 
