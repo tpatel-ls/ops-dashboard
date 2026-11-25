@@ -133,6 +133,12 @@ describe('fixedRoutineProgressLabel', () => {
     expect(fixedRoutineProgressLabel(routine, '2026-11-19')).toBe('finished · 30 days');
   });
 
+  it('uses the singular for a finished one-day routine', () => {
+    expect(fixedRoutineProgressLabel({ ...routine, durationDays: 1 }, '2026-08-02')).toBe(
+      'finished · 1 day',
+    );
+  });
+
   it('has no badge for an ongoing routine or an unreadable start day', () => {
     expect(
       fixedRoutineProgressLabel({ ...routine, kind: 'ongoing' }, '2026-08-05'),
