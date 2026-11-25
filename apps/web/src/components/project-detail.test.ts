@@ -26,10 +26,14 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   getDb: () => ({
     organizations: { toArray: async () => liveOrganizations },
     projects: { get: async (id: string) => liveProjects.find((p) => p.id === id) },
-    tasks: { toArray: async () => [] },
+    tasks: {
+      toArray: async () => [],
+      where: () => ({ equals: () => ({ toArray: async () => liveTasks }) }),
+    },
     workLogs: { toArray: async () => [] },
   }),
 }));
+let liveTasks: Array<{ id: string; deletedAt?: string }> = [];
 const logWork = vi.fn();
 const addTaskToProject = vi.fn();
 vi.mock('@/lib/tasks', async (importOriginal) => ({
@@ -43,6 +47,8 @@ vi.mock('@/lib/worklogs', async (importOriginal) => ({
 
 const { ChecklistsSection, LinkedTasksSection, LogWorkSection, MetaSection, MilestonesSection } =
   await import('./project-detail');
+const projectsLib = await import('@/lib/projects');
+const tasksLib = await import('@/lib/tasks');
 
 afterEach(() => {
   cleanup();
@@ -72,6 +78,51 @@ describe('MetaSection organization picker', () => {
       'Old Co (archived)',
     ]);
     expect(select.value).toBe('old');
+  });
+
+  it('moves a project and its tasks back to Personal', async () => {
+    const updateProject = vi.spyOn(projectsLib, 'updateProject').mockResolvedValue(null as never);
+    const updateTask = vi.spyOn(tasksLib, 'updateTask').mockResolvedValue(undefined);
+    liveOrganizations = [{ id: 'acme', name: 'Acme', order: 0 }];
+    liveTasks = [{ id: 't-1' }, { id: 't-2', deletedAt: '2026-10-01T00:00:00.000Z' }];
+    const project = { id: 'p-1', name: 'Launch', status: 'active', orgId: 'acme' } as Project;
+    try {
+      render(createElement(MetaSection, { project, domains: [] }));
+      const select = screen.getByRole('combobox', { name: 'Project organization' });
+      await screen.findByRole('option', { name: 'Acme' });
+      fireEvent.change(select, { target: { value: '' } });
+
+      // Both validators reject a null link, so the clear must be undefined.
+      await vi.waitFor(() => expect(updateTask).toHaveBeenCalledTimes(1));
+      expect(updateProject).toHaveBeenCalledWith('p-1', { orgId: undefined });
+      expect(updateTask).toHaveBeenCalledWith('t-1', { orgId: undefined });
+    } finally {
+      updateProject.mockRestore();
+      updateTask.mockRestore();
+      liveTasks = [];
+    }
+  });
+
+  it('reports an organization change that fails instead of dropping it', async () => {
+    const updateProject = vi
+      .spyOn(projectsLib, 'updateProject')
+      .mockRejectedValue(
+        new Error('Project organization link must contain at most 128 characters.'),
+      );
+    liveOrganizations = [{ id: 'acme', name: 'Acme', order: 0 }];
+    const project = { id: 'p-1', name: 'Launch', status: 'active' } as Project;
+    try {
+      render(createElement(MetaSection, { project, domains: [] }));
+      const select = screen.getByRole('combobox', { name: 'Project organization' });
+      await screen.findByRole('option', { name: 'Acme' });
+      fireEvent.change(select, { target: { value: 'acme' } });
+
+      expect((await screen.findByRole('alert')).textContent).toBe(
+        'Could not change the organization. Project organization link must contain at most 128 characters.',
+      );
+    } finally {
+      updateProject.mockRestore();
+    }
   });
 });
 
