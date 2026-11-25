@@ -255,6 +255,31 @@ describe('TaskEditDrawer unsaved drafts', () => {
 });
 
 describe('TaskEditDrawer links', () => {
+  it('clears the project and its org lane with values updateTask accepts', async () => {
+    vi.mocked(updateTask).mockClear();
+    vi.mocked(updateTask).mockResolvedValue(undefined as never);
+    liveProjects = [{ id: 'project-1', name: 'Launch', orgId: 'org-1' }];
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'todo',
+      projectId: 'project-1',
+      orgId: 'org-1',
+    } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    const picker = await screen.findByLabelText('Project');
+    await screen.findByRole('option', { name: 'Launch' });
+    fireEvent.change(picker, { target: { value: '' } });
+
+    // updateTask rejects a null reference ("Task references must be valid.").
+    expect(updateTask).toHaveBeenCalledWith('task-1', {
+      projectId: undefined,
+      orgId: undefined,
+    });
+  });
+
   it('keeps showing a project the task still belongs to after it was archived', async () => {
     liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', projectId: 'old' } as Task;
     liveProjects = [

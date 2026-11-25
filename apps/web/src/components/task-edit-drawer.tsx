@@ -458,13 +458,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
               onChange={(e) => {
                 const pid = e.target.value;
                 const proj = pid ? projects?.find((p) => p.id === pid) : undefined;
-                // The task's org lane follows its project. Clears travel as
-                // SQL null so they propagate to other devices (the sync
-                // mapper drops absent keys).
-                void save({
-                  projectId: (pid || null) as unknown as string | undefined,
-                  orgId: (proj?.orgId ?? null) as unknown as string | undefined,
-                });
+                // The task's org lane follows its project. A cleared link is
+                // an explicit undefined, which `toRow` sends as SQL null so it
+                // clears on other devices too. A null here was rejected by
+                // `updateTask`, so "No project" never saved.
+                void save({ projectId: pid || undefined, orgId: proj?.orgId });
               }}
               className="input w-full"
             >
