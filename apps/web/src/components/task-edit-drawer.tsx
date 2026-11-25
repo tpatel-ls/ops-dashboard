@@ -217,6 +217,14 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
     return save({ scheduledFor: day, ...timeBlockOnDay(task, day) });
   }
 
+  // A time on an unscheduled task is placed on today, as quick add would
+  // place it. Record that day too: with only the time saved, the calendar
+  // showed the block today while the date field, the task lists, and the
+  // Today view still treated the task as unscheduled.
+  function withClockDay(patch: Partial<Task>, day: string): Partial<Task> {
+    return task.scheduledFor ? patch : { ...patch, scheduledFor: day };
+  }
+
   const currentRecurrence = task.recurrence?.freq ?? 'none';
   const tags = safeTaskTags(task.tags);
   const reminders = safeTaskReminders(task.reminders);
@@ -382,9 +390,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <input
                   type="time"
                   value={taskClockTime(task.startAt)}
-                  onChange={(e) =>
-                    save(taskStartTimePatch(task, task.scheduledFor ?? todayIso(), e.target.value))
-                  }
+                  onChange={(e) => {
+                    const day = task.scheduledFor ?? todayIso();
+                    const patch = taskStartTimePatch(task, day, e.target.value);
+                    void save(e.target.value ? withClockDay(patch, day) : patch);
+                  }}
                   className="input"
                 />
               </Field>
@@ -394,10 +404,12 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                   value={taskClockTime(task.endAt)}
                   onChange={(e) => {
                     const day = task.scheduledFor ?? todayIso();
-                    const iso = e.target.value
-                      ? new Date(`${day}T${e.target.value}:00`).toISOString()
-                      : undefined;
-                    save({ endAt: iso });
+                    if (!e.target.value) {
+                      void save({ endAt: undefined });
+                      return;
+                    }
+                    const endAt = new Date(`${day}T${e.target.value}:00`).toISOString();
+                    void save(withClockDay({ endAt }, day));
                   }}
                   className="input"
                 />
