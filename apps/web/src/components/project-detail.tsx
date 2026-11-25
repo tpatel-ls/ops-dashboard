@@ -604,6 +604,9 @@ export function LogWorkSection({ project }: { project: Project }) {
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Only the range check is about the minutes field; a failed save is not.
+  const [minutesInvalid, setMinutesInvalid] = useState(false);
+  const errorId = `project-${project.id}-log-error`;
 
   const totalHours = useLiveQuery(async () => {
     const all = await getDb().workLogs.toArray();
@@ -619,8 +622,10 @@ export function LogWorkSection({ project }: { project: Project }) {
     // logWork rejects anything outside this range, which used to fail silently.
     if (!validWorkMinutes(mins)) {
       setError('Enter whole minutes between 1 and 1440.');
+      setMinutesInvalid(true);
       return;
     }
+    setMinutesInvalid(false);
     setSaving(true);
     setError(null);
     try {
@@ -677,7 +682,12 @@ export function LogWorkSection({ project }: { project: Project }) {
             max={1440}
             placeholder="Minutes"
             value={minutes}
-            onChange={(e) => setMinutes(e.target.value)}
+            onChange={(e) => {
+              setMinutes(e.target.value);
+              setMinutesInvalid(false);
+            }}
+            aria-invalid={minutesInvalid || undefined}
+            aria-errormessage={minutesInvalid ? errorId : undefined}
             className="input w-28"
           />
           <label htmlFor={`project-${project.id}-note`} className="sr-only">
@@ -704,7 +714,7 @@ export function LogWorkSection({ project }: { project: Project }) {
           </button>
         </div>
         {error ? (
-          <p role="alert" className="text-destructive text-xs">
+          <p id={errorId} role="alert" className="text-destructive text-xs">
             {error}
           </p>
         ) : null}

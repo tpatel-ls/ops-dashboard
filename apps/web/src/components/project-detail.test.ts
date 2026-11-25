@@ -108,6 +108,30 @@ describe('LogWorkSection', () => {
     expect(logWork).not.toHaveBeenCalled();
   });
 
+  it('marks the minutes field invalid until it is edited', () => {
+    render(createElement(LogWorkSection, { project }));
+    const minutes = screen.getByLabelText('Minutes worked');
+    fireEvent.change(minutes, { target: { value: '1500' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+
+    expect(minutes.getAttribute('aria-invalid')).toBe('true');
+    expect(minutes.getAttribute('aria-errormessage')).toBe(screen.getByRole('alert').id);
+
+    fireEvent.change(minutes, { target: { value: '30' } });
+    expect(minutes.getAttribute('aria-invalid')).toBeNull();
+  });
+
+  it('does not mark the minutes field invalid when the save fails', async () => {
+    logWork.mockRejectedValue(new DOMException('Quota exceeded', 'QuotaExceededError'));
+    render(createElement(LogWorkSection, { project }));
+    const minutes = screen.getByLabelText('Minutes worked');
+    fireEvent.change(minutes, { target: { value: '45' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+
+    await screen.findByRole('alert');
+    expect(minutes.getAttribute('aria-invalid')).toBeNull();
+  });
+
   it('reports a rejected save and keeps the entry', async () => {
     logWork.mockRejectedValue(new DOMException('Quota exceeded', 'QuotaExceededError'));
     render(createElement(LogWorkSection, { project }));
