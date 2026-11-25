@@ -8,6 +8,7 @@ import type { Person } from '@ops-dashboard/core';
 vi.mock('dexie-react-hooks', () => ({ useLiveQuery: () => undefined }));
 
 const { PersonDetail } = await import('./person-detail');
+const peopleLib = await import('@/lib/people');
 
 afterEach(cleanup);
 
@@ -75,6 +76,35 @@ describe('PersonDetail fields', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not save the relationship. It is still in the field. Person relationship must contain at most 200 characters.',
     );
+  });
+});
+
+describe('PersonDetail unsaved fields', () => {
+  it('saves a name and relationship typed just before Escape closes the panel', () => {
+    const updatePerson = vi.spyOn(peopleLib, 'updatePerson').mockResolvedValue(undefined as never);
+    let open = true;
+    const { rerender } = render(
+      createElement(PersonDetail, {
+        person,
+        domains: [],
+        onClose: () => {
+          open = false;
+        },
+        onDeleted: () => {},
+      }),
+    );
+    fireEvent.change(screen.getByLabelText('Person name'), { target: { value: 'Ada Lovelace' } });
+    fireEvent.change(screen.getByLabelText('Relationship'), { target: { value: 'mentor' } });
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(open).toBe(false);
+    rerender(createElement('div'));
+
+    expect(updatePerson).toHaveBeenCalledTimes(1);
+    expect(updatePerson).toHaveBeenCalledWith('person-1', {
+      name: 'Ada Lovelace',
+      relationship: 'mentor',
+    });
+    updatePerson.mockRestore();
   });
 });
 
