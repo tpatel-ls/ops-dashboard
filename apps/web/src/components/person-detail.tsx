@@ -315,6 +315,29 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
   const [name, setName] = useState(person.name);
   const [relationship, setRelationship] = useState(person.relationship ?? '');
   const [error, setError] = useState<string | null>(null);
+  // Both fields save on blur, but Escape closes the panel without blurring
+  // the focused field, so an edit in progress was dropped. Track the latest
+  // text and what was last saved, and save any difference on unmount.
+  const latestFields = useRef({ name: person.name, relationship: person.relationship ?? '' });
+  const savedFields = useRef({ name: person.name, relationship: person.relationship ?? '' });
+  useEffect(() => {
+    latestFields.current = { name, relationship };
+  }, [name, relationship]);
+  const personId = person.id;
+  useEffect(
+    () => () => {
+      const latest = latestFields.current;
+      const saved = savedFields.current;
+      const patch: Partial<Person> = {};
+      const n = latest.name.trim();
+      if (n && n !== saved.name.trim()) patch.name = n;
+      const r = latest.relationship.trim();
+      if (r !== saved.relationship.trim()) patch.relationship = r || undefined;
+      // The panel is gone, so there is nowhere to show a rejection.
+      if (Object.keys(patch).length > 0) void updatePerson(personId, patch).catch(() => undefined);
+    },
+    [personId],
+  );
 
   // These fields save on blur, so a rejected value (a relationship over 200
   // characters, say) would otherwise stay on screen looking saved.
@@ -336,12 +359,14 @@ function MetaSection({ person, domains }: { person: Person; domains: Domain[] })
       return;
     }
     if (n === person.name) return;
+    savedFields.current = { ...savedFields.current, name: n };
     await save({ name: n }, 'Could not save the name. It is still in the field.');
   }
 
   async function saveRelationship() {
     const r = relationship.trim();
     if (r === (person.relationship ?? '')) return;
+    savedFields.current = { ...savedFields.current, relationship: r };
     await save(
       { relationship: r || undefined },
       'Could not save the relationship. It is still in the field.',
