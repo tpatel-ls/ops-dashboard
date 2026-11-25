@@ -2,10 +2,10 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, ChevronDown, ChevronRight, Star } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
 import { useState } from 'react';
 import { getDb } from '@ops-dashboard/core';
 import { useToday } from '@/lib/use-today';
+import { weekdayChipLabel } from '@/lib/calendar-label';
 import type { Priority } from '@ops-dashboard/core';
 import { setTaskStatus, updateTask } from '@/lib/tasks';
 import { useAppStore } from '@/lib/app-store';
@@ -183,7 +183,7 @@ export function OpenTasks() {
                                 isOverdue ? 'text-destructive' : 'text-subtle-foreground',
                               )}
                             >
-                              {format(parseISO(`${commitmentDay}T00:00:00`), 'EEE d MMM')}
+                              {weekdayChipLabel(commitmentDay, today)}
                             </span>
                           )}
                           {/* project / domain chip */}
