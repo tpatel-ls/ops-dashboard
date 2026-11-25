@@ -57,4 +57,25 @@ describe('OpenTasks', () => {
     const heading = screen.getByRole('heading', { level: 2, name: /Open Tasks/ });
     expect(heading.querySelector('button[aria-expanded="true"]')).toBeTruthy();
   });
+
+  it('names the year on a chip for a task overdue since an earlier year', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-25T12:00:00'), toFake: ['Date'] });
+    try {
+      tasks = [
+        {
+          id: 't1',
+          title: 'Renew lease',
+          status: 'todo',
+          priority: 0,
+          tags: [],
+          scheduledFor: '2025-03-03',
+        },
+      ];
+      render(createElement(OpenTasks));
+
+      expect(await screen.findByText('Mon 3 Mar 2025')).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

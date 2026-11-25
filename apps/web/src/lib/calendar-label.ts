@@ -25,6 +25,17 @@ export function longDayLabel(day: string, today: string): string {
   return format(parseISO(day), sameYear(day, today) ? 'EEEE, MMM d' : 'EEEE, MMM d, yyyy');
 }
 
+/**
+ * Compact chip label with the weekday: "Tue 3 Mar", or "Tue 3 Mar 2025" when
+ * the day is not in the same year as `today`.
+ *
+ * The Today open-tasks list keeps tasks overdue since an earlier year, and a
+ * chip without the year read as this year's date.
+ */
+export function weekdayChipLabel(day: string, today: string): string {
+  return format(parseISO(day), sameYear(day, today) ? 'EEE d MMM' : 'EEE d MMM yyyy');
+}
+
 function sameYear(day: string, today: string): boolean {
   return localDay(today) === today && today.slice(0, 4) === day.slice(0, 4);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { longDayLabel, shortDayLabel, weekRangeLabel } from './calendar-label';
+import { longDayLabel, shortDayLabel, weekRangeLabel, weekdayChipLabel } from './calendar-label';
 
 describe('shortDayLabel', () => {
   it('omits the year for a day in the current year', () => {
@@ -27,6 +27,16 @@ describe('longDayLabel', () => {
 
   it('keeps the year when today is not a calendar day', () => {
     expect(longDayLabel('2026-11-20', '')).toBe('Friday, Nov 20, 2026');
+  });
+});
+
+describe('weekdayChipLabel', () => {
+  it('omits the year for a day in the current year', () => {
+    expect(weekdayChipLabel('2026-03-03', '2026-11-25')).toBe('Tue 3 Mar');
+  });
+
+  it('includes the year for a day in another year', () => {
+    expect(weekdayChipLabel('2025-03-03', '2026-11-25')).toBe('Mon 3 Mar 2025');
   });
 });
 
