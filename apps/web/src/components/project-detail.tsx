@@ -747,15 +747,22 @@ export function MetaSection({ project, domains }: { project: Project; domains: D
   }
 
   async function setOrg(orgId: string) {
-    // Clears travel as SQL null: the sync mapper drops absent keys, so an
-    // undefined would leave the previous lane on other devices.
-    const value = (orgId || null) as unknown as Project['orgId'];
-    await updateProject(project.id, { orgId: value });
-    // orgId is denormalized onto tasks; cascade so lists/calendar move too.
-    const tasks = await getDb().tasks.where('projectId').equals(project.id).toArray();
-    for (const t of tasks) {
-      if (t.deletedAt) continue;
-      await updateTask(t.id, { orgId: value as Task['orgId'] });
+    // "Personal" clears the lane with an explicit undefined, which `toRow`
+    // sends as SQL null so other devices clear it too. A null here was
+    // rejected by both validators, and the rejection went unhandled, so a
+    // project could never be moved back to Personal.
+    const value = orgId || undefined;
+    setError(null);
+    try {
+      await updateProject(project.id, { orgId: value });
+      // orgId is denormalized onto tasks; cascade so lists/calendar move too.
+      const tasks = await getDb().tasks.where('projectId').equals(project.id).toArray();
+      for (const t of tasks) {
+        if (t.deletedAt) continue;
+        await updateTask(t.id, { orgId: value });
+      }
+    } catch (err) {
+      setError(saveErrorMessage('Could not change the organization.', err));
     }
   }
 
