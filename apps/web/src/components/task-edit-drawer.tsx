@@ -146,6 +146,20 @@ export function TaskEditDrawer() {
   );
 }
 
+/**
+ * Title and notes edits not yet saved by a blur. A blank title is skipped, as
+ * on blur, because `updateTask` rejects it.
+ */
+function pendingDraftPatch(
+  latest: { title: string; notes: string },
+  saved: { title: string; notes: string },
+): Partial<Pick<Task, 'title' | 'notes'>> | null {
+  const patch: Partial<Pick<Task, 'title' | 'notes'>> = {};
+  if (latest.title !== saved.title && latest.title.trim()) patch.title = latest.title;
+  if (latest.notes !== saved.notes) patch.notes = latest.notes;
+  return Object.keys(patch).length > 0 ? patch : null;
+}
+
 function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const allProjects = useLiveQuery(async () => getDb().projects.toArray());
   const allDomains = useLiveQuery(async () => getDb().domains.toArray());
@@ -159,6 +173,23 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
   const [draftTitle, setDraftTitle] = useState(task.title);
   const [draftNotes, setDraftNotes] = useState(task.notes ?? '');
+  // Title and notes save on blur, but Escape closes the drawer without
+  // blurring the field, so the typing in progress was dropped. Keep the latest
+  // drafts and what was last saved, and save any difference on unmount.
+  const latestDrafts = useRef({ title: task.title, notes: task.notes ?? '' });
+  const savedDrafts = useRef({ title: task.title, notes: task.notes ?? '' });
+  useEffect(() => {
+    latestDrafts.current = { title: draftTitle, notes: draftNotes };
+  }, [draftTitle, draftNotes]);
+  const taskId = task.id;
+  useEffect(
+    () => () => {
+      const pending = pendingDraftPatch(latestDrafts.current, savedDrafts.current);
+      // The drawer is gone, so there is nowhere to show a rejection.
+      if (pending) void updateTask(taskId, pending).catch(() => undefined);
+    },
+    [taskId],
+  );
   const [tagDraft, setTagDraft] = useState('');
   const [reminderDraft, setReminderDraft] = useState('');
   const [checklistDraft, setChecklistDraft] = useState('');
@@ -214,7 +245,10 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                     setDraftTitle(task.title);
                     return;
                   }
-                  if (draftTitle !== task.title) void save({ title: draftTitle });
+                  if (draftTitle !== task.title) {
+                    savedDrafts.current = { ...savedDrafts.current, title: draftTitle };
+                    void save({ title: draftTitle });
+                  }
                 }}
                 aria-label="Task title"
                 className="w-full bg-transparent text-xl font-semibold tracking-tight outline-none"
@@ -238,7 +272,11 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
             <textarea
               value={draftNotes}
               onChange={(e) => setDraftNotes(e.target.value)}
-              onBlur={() => draftNotes !== (task.notes ?? '') && save({ notes: draftNotes })}
+              onBlur={() => {
+                if (draftNotes === (task.notes ?? '')) return;
+                savedDrafts.current = { ...savedDrafts.current, notes: draftNotes };
+                void save({ notes: draftNotes });
+              }}
               className="text-muted-foreground mt-2 w-full resize-none bg-transparent text-sm outline-none"
               rows={3}
               aria-label="Task notes"

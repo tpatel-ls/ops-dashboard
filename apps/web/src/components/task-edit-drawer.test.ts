@@ -212,6 +212,48 @@ describe('TaskEditDrawer reminders', () => {
   });
 });
 
+describe('TaskEditDrawer unsaved drafts', () => {
+  it('saves notes and title typed just before Escape closes the drawer', async () => {
+    vi.mocked(updateTask).mockClear();
+    vi.mocked(updateTask).mockResolvedValue(undefined as never);
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', notes: '' } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    const notes = await screen.findByLabelText('Task notes');
+    fireEvent.change(screen.getByLabelText('Task title'), { target: { value: 'Ship it today' } });
+    fireEvent.change(notes, { target: { value: 'Check the changelog' } });
+    act(() => {
+      fireEvent.keyDown(document, { key: 'Escape' });
+    });
+
+    expect(screen.queryByLabelText('Task notes')).toBeNull();
+    expect(updateTask).toHaveBeenCalledTimes(1);
+    expect(updateTask).toHaveBeenCalledWith('task-1', {
+      title: 'Ship it today',
+      notes: 'Check the changelog',
+    });
+  });
+
+  it('does not save a draft again on close after its blur saved it', async () => {
+    vi.mocked(updateTask).mockClear();
+    vi.mocked(updateTask).mockResolvedValue(undefined as never);
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', notes: '' } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    const notes = await screen.findByLabelText('Task notes');
+    fireEvent.change(notes, { target: { value: 'Check the changelog' } });
+    fireEvent.blur(notes);
+    act(() => {
+      fireEvent.keyDown(document, { key: 'Escape' });
+    });
+
+    expect(updateTask).toHaveBeenCalledTimes(1);
+    expect(updateTask).toHaveBeenCalledWith('task-1', { notes: 'Check the changelog' });
+  });
+});
+
 describe('TaskEditDrawer links', () => {
   it('keeps showing a project the task still belongs to after it was archived', async () => {
     liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', projectId: 'old' } as Task;
