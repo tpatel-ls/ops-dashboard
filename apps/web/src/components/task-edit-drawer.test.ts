@@ -254,6 +254,57 @@ describe('TaskEditDrawer unsaved drafts', () => {
   });
 });
 
+describe('TaskEditDrawer times', () => {
+  it('schedules an unscheduled task on the day its new start time is placed', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-25T08:00:00'), toFake: ['Date'] });
+    try {
+      vi.mocked(updateTask).mockClear();
+      vi.mocked(updateTask).mockResolvedValue(undefined as never);
+      liveTask = { id: 'task-1', title: 'Ship it', status: 'todo' } as unknown as Task;
+      useAppStore.setState({ editTaskId: 'task-1' });
+      render(createElement(TaskEditDrawer));
+
+      await screen.findByLabelText('Task notes');
+      const [start, end] = Array.from(
+        document.querySelectorAll<HTMLInputElement>('input[type="time"]'),
+      );
+      fireEvent.change(start!, { target: { value: '14:00' } });
+      expect(updateTask).toHaveBeenLastCalledWith('task-1', {
+        startAt: new Date('2026-11-25T14:00:00').toISOString(),
+        scheduledFor: '2026-11-25',
+      });
+
+      fireEvent.change(end!, { target: { value: '15:00' } });
+      expect(updateTask).toHaveBeenLastCalledWith('task-1', {
+        endAt: new Date('2026-11-25T15:00:00').toISOString(),
+        scheduledFor: '2026-11-25',
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps the scheduled day of a task that already has one', async () => {
+    vi.mocked(updateTask).mockClear();
+    vi.mocked(updateTask).mockResolvedValue(undefined as never);
+    liveTask = {
+      id: 'task-1',
+      title: 'Ship it',
+      status: 'todo',
+      scheduledFor: '2026-12-02',
+    } as unknown as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    await screen.findByLabelText('Task notes');
+    const [start] = Array.from(document.querySelectorAll<HTMLInputElement>('input[type="time"]'));
+    fireEvent.change(start!, { target: { value: '09:30' } });
+    expect(updateTask).toHaveBeenLastCalledWith('task-1', {
+      startAt: new Date('2026-12-02T09:30:00').toISOString(),
+    });
+  });
+});
+
 describe('TaskEditDrawer links', () => {
   it('clears the project and its org lane with values updateTask accepts', async () => {
     vi.mocked(updateTask).mockClear();
