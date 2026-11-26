@@ -176,4 +176,11 @@ describe('FoodLogRow', () => {
 
     expect(deleteFoodLog).not.toHaveBeenCalled();
   });
+
+  it('names its meal type select after the entry it moves', () => {
+    render(createElement('ul', null, createElement(FoodLogRow, { log: foodLog })));
+
+    const select = screen.getByRole('combobox', { name: 'Meal type: Two eggs' });
+    expect((select as HTMLSelectElement).value).toBe('breakfast');
+  });
 });
