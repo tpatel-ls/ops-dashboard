@@ -402,8 +402,20 @@ function MealGroup({ meal, logs }: { meal: MealType; logs: FoodLog[] }) {
   );
 }
 
-function FoodLogRow({ log }: { log: FoodLog }) {
+export function FoodLogRow({ log }: { log: FoodLog }) {
   const items = safeFoodItems(log.items);
+  // Ask for a second activation like every other delete. A stray click
+  // removed the entry, and logging it again costs another AI estimate.
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  function handleDelete() {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
+    setConfirmingDelete(false);
+    void deleteFoodLog(log.id);
+  }
 
   return (
     <li className="surface-flat group flex items-start gap-3 rounded-[14px] px-4 py-3">
@@ -448,10 +460,20 @@ function FoodLogRow({ log }: { log: FoodLog }) {
         </select>
         <button
           type="button"
-          title="Delete"
-          aria-label={`Delete ${log.description}`}
-          onClick={() => void deleteFoodLog(log.id)}
-          className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive flex size-7 items-center justify-center rounded-md"
+          title={confirmingDelete ? 'Click again to confirm' : 'Delete'}
+          aria-label={
+            confirmingDelete
+              ? `Delete ${log.description}. Activate again to confirm`
+              : `Delete ${log.description}`
+          }
+          onClick={handleDelete}
+          onBlur={() => setConfirmingDelete(false)}
+          className={cn(
+            'flex size-7 items-center justify-center rounded-md transition-colors',
+            confirmingDelete
+              ? 'bg-destructive text-destructive-foreground'
+              : 'text-subtle-foreground hover:bg-destructive/10 hover:text-destructive',
+          )}
         >
           <Trash2 className="size-4" aria-hidden />
         </button>
