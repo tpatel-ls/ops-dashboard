@@ -48,15 +48,18 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
 
 export function OrgForm({
   initial,
+  defaultColor,
   onSave,
   onCancel,
 }: {
   initial?: Organization;
+  /** Preselected color for a new organization. */
+  defaultColor?: string;
   onSave: (name: string, color: string) => Promise<void>;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [color, setColor] = useState(initial?.color ?? PRESET_COLORS[0]!);
+  const [color, setColor] = useState(initial?.color ?? defaultColor ?? PRESET_COLORS[0]!);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -193,11 +196,12 @@ export function OrganizationsManager() {
       ) : null}
       {creating ? (
         <OrgForm
+          // Preselect the next color in the rotation. The form used to start on
+          // the first preset, so every new organization was the same blue as
+          // the first one and their lanes could not be told apart.
+          defaultColor={nextOrgColor(data?.active.length ?? 0)}
           onSave={async (name, color) => {
-            await createOrganization({
-              name,
-              color: color || nextOrgColor(data?.active.length ?? 0),
-            });
+            await createOrganization({ name, color });
             setCreating(false);
           }}
           onCancel={() => setCreating(false)}
