@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Book, Quote } from '@ops-dashboard/core';
@@ -68,11 +68,30 @@ describe('BookCard', () => {
     liveBooks = [book];
     render(createElement(BookCard, { book, quotes: [] }));
 
-    fireEvent.change(screen.getByLabelText('Reading status'), { target: { value: 'reading' } });
+    fireEvent.change(screen.getByLabelText('Reading status: Dune'), {
+      target: { value: 'reading' },
+    });
 
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not save this change. Book finish date must not precede its start date.',
     );
+  });
+
+  it('names its status and rating controls after the book', () => {
+    const book = {
+      id: 'b-1',
+      title: 'Dune',
+      status: 'reading',
+      rating: 4,
+      tags: [],
+    } as unknown as Book;
+    render(createElement(BookCard, { book, quotes: [] }));
+
+    expect(screen.getByRole('combobox', { name: 'Reading status: Dune' })).toBeTruthy();
+    const rating = screen.getByRole('group', { name: 'Rating: Dune' });
+    expect(
+      within(rating).getByRole('button', { name: '4 stars' }).getAttribute('aria-pressed'),
+    ).toBe('true');
   });
 
   it('reports whether the highlights list is expanded', () => {
