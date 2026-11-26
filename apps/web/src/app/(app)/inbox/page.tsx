@@ -80,6 +80,20 @@ function relativeTime(iso: string): string {
 /* ------------------------------------------------------------------ */
 
 function CaptureRow({ cap }: { cap: Capture }) {
+  // Every other delete in the app asks for a second activation. A pending
+  // capture's raw text is the only copy of what was captured, and one stray
+  // click removed it with no undo.
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  function handleDelete() {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
+    setConfirmingDelete(false);
+    void deleteCapture(cap.id);
+  }
+
   const routeLabel = cap.routedTo
     ? `to ${KIND_LABEL[cap.routedTo.type] ?? cap.routedTo.type}`
     : null;
@@ -155,10 +169,20 @@ function CaptureRow({ cap }: { cap: Capture }) {
         ) : null}
         <button
           type="button"
-          title="Delete"
-          aria-label={`Delete capture: ${captureLabel}`}
-          onClick={() => deleteCapture(cap.id)}
-          className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive flex size-10 items-center justify-center rounded-md sm:size-8"
+          title={confirmingDelete ? 'Click again to confirm' : 'Delete'}
+          aria-label={
+            confirmingDelete
+              ? `Delete capture: ${captureLabel}. Activate again to confirm`
+              : `Delete capture: ${captureLabel}`
+          }
+          onClick={handleDelete}
+          onBlur={() => setConfirmingDelete(false)}
+          className={cn(
+            'flex size-10 items-center justify-center rounded-md transition-colors sm:size-8',
+            confirmingDelete
+              ? 'bg-destructive text-destructive-foreground'
+              : 'text-subtle-foreground hover:bg-destructive/10 hover:text-destructive',
+          )}
         >
           <Trash2 className="size-4" aria-hidden />
         </button>
