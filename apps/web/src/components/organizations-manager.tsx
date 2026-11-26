@@ -116,8 +116,20 @@ export function OrgForm({
   );
 }
 
-function OrgRow({ org, projectCount }: { org: Organization; projectCount: number }) {
+export function OrgRow({ org, projectCount }: { org: Organization; projectCount: number }) {
   const [editing, setEditing] = useState(false);
+  // Archiving takes the lane out of every switcher and nothing in the app
+  // restores it, so ask for a second activation like a delete does.
+  const [confirmingArchive, setConfirmingArchive] = useState(false);
+
+  function handleArchive() {
+    if (!confirmingArchive) {
+      setConfirmingArchive(true);
+      return;
+    }
+    setConfirmingArchive(false);
+    void archiveOrganization(org.id);
+  }
 
   if (editing) {
     return (
@@ -153,9 +165,20 @@ function OrgRow({ org, projectCount }: { org: Organization; projectCount: number
       </button>
       <button
         type="button"
-        onClick={() => void archiveOrganization(org.id)}
-        aria-label={`Archive ${org.name}`}
-        className="text-subtle-foreground hover:bg-destructive/10 hover:text-destructive inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
+        onClick={handleArchive}
+        onBlur={() => setConfirmingArchive(false)}
+        aria-label={
+          confirmingArchive
+            ? `Archive ${org.name}. Activate again to confirm`
+            : `Archive ${org.name}`
+        }
+        title={confirmingArchive ? 'Click again to confirm' : 'Archive'}
+        className={cn(
+          'inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+          confirmingArchive
+            ? 'bg-destructive text-destructive-foreground sm:opacity-100'
+            : 'text-subtle-foreground hover:bg-destructive/10 hover:text-destructive sm:opacity-0',
+        )}
       >
         <Archive className="size-3.5" aria-hidden />
       </button>
