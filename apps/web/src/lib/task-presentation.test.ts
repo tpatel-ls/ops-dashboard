@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   taskClockTime,
   taskDateLabel,
+  taskFocusedLabel,
   taskPlanningTimestamp,
   taskReminderLabel,
   taskResultSummary,
@@ -155,5 +156,19 @@ describe('taskStartTimePatch', () => {
     const deadline = { startAt: at(9), dueAt: at(17) };
     expect(taskStartTimePatch(deadline, '2026-09-19', '11:00')).toEqual({ startAt: at(11) });
     expect(taskStartTimePatch(deadline, '2026-09-19', '')).toEqual({ startAt: undefined });
+  });
+});
+
+describe('taskFocusedLabel', () => {
+  it('states recorded focus time in hours and minutes', () => {
+    expect(taskFocusedLabel(25)).toBe('Focused for 25m');
+    expect(taskFocusedLabel(60)).toBe('Focused for 1h');
+    expect(taskFocusedLabel(95)).toBe('Focused for 1h 35m');
+  });
+
+  it('shows nothing when no usable focus time is recorded', () => {
+    for (const value of [undefined, 0, -5, 1.5, Number.NaN, '30']) {
+      expect(taskFocusedLabel(value)).toBeNull();
+    }
   });
 });

@@ -388,6 +388,14 @@ describe('TaskEditDrawer save errors', () => {
     expect((await screen.findByRole('alert')).textContent).toBe('Could not save that change.');
   });
 
+  it('shows the focus time recorded on the task', async () => {
+    liveTask = { id: 'task-1', title: 'Ship it', status: 'todo', actualMinutes: 95 } as Task;
+    useAppStore.setState({ editTaskId: 'task-1' });
+    render(createElement(TaskEditDrawer));
+
+    expect(await screen.findByText('Focused for 1h 35m')).toBeTruthy();
+  });
+
   it('names the estimate field when it rejects a fractional estimate', async () => {
     const tasks = await import('@/lib/tasks');
     const actual = await vi.importActual<typeof import('@/lib/tasks')>('@/lib/tasks');

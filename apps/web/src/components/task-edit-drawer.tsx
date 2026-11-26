@@ -33,7 +33,12 @@ import {
 import { cancelReminder, scheduleReminder } from '@/lib/notifications';
 import { routedTag } from '@/lib/brain-dump-result';
 import { timeBlockOnDay } from '@/lib/task-dates';
-import { taskClockTime, taskReminderLabel, taskStartTimePatch } from '@/lib/task-presentation';
+import {
+  taskClockTime,
+  taskFocusedLabel,
+  taskReminderLabel,
+  taskStartTimePatch,
+} from '@/lib/task-presentation';
 import { safeTaskTags } from '@/lib/task-query';
 import { linkOptions } from '@/lib/link-options';
 import { saveErrorMessage } from '@/lib/save-error';
@@ -226,6 +231,7 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
   }
 
   const currentRecurrence = task.recurrence?.freq ?? 'none';
+  const focusedLabel = taskFocusedLabel(task.actualMinutes);
   const tags = safeTaskTags(task.tags);
   const reminders = safeTaskReminders(task.reminders);
   const checklist = safeChecklistItems(task.checklist);
@@ -415,6 +421,9 @@ function DrawerBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 />
               </Field>
             </div>
+            {focusedLabel ? (
+              <p className="text-subtle-foreground mt-2 text-[11px]">{focusedLabel}</p>
+            ) : null}
           </Section>
 
           {/* Recurrence */}

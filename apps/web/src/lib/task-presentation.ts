@@ -99,3 +99,15 @@ export function taskReminderLabel(value: string | undefined): string {
   const instant = calendarInstant(value);
   return instant ? format(instant, 'EEE d MMM HH:mm') : 'Time unavailable';
 }
+
+/**
+ * Focus time recorded on a task, as shown in the drawer, or null when there is
+ * none. Focus mode adds each session to `actualMinutes`, which nothing showed.
+ */
+export function taskFocusedLabel(minutes: unknown): string | null {
+  if (typeof minutes !== 'number' || !Number.isSafeInteger(minutes) || minutes <= 0) return null;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  const time = hours === 0 ? `${rest}m` : rest === 0 ? `${hours}h` : `${hours}h ${rest}m`;
+  return `Focused for ${time}`;
+}
