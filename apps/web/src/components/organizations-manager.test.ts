@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createOrganization } from '@/lib/organizations';
+import { createOrganization, nextOrgColor } from '@/lib/organizations';
 
 const { OrgForm } = await import('./organizations-manager');
 
@@ -25,5 +25,24 @@ describe('OrgForm', () => {
     );
     expect(onSave).toHaveBeenCalledOnce();
     expect((screen.getByLabelText('Organization name') as HTMLInputElement).value).toBe(name);
+  });
+
+  it('preselects the color it is given for a new organization', async () => {
+    const onSave = vi.fn(async () => {});
+    render(createElement(OrgForm, { defaultColor: nextOrgColor(1), onSave, onCancel: () => {} }));
+    expect(
+      screen
+        .getByRole('button', { name: 'Select organization color 2' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true');
+    expect(
+      screen
+        .getByRole('button', { name: 'Select organization color 1' })
+        .getAttribute('aria-pressed'),
+    ).toBe('false');
+
+    fireEvent.change(screen.getByLabelText('Organization name'), { target: { value: 'Beta' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    await vi.waitFor(() => expect(onSave).toHaveBeenCalledWith('Beta', nextOrgColor(1)));
   });
 });
