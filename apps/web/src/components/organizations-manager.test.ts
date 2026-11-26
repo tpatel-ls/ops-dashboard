@@ -3,11 +3,21 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createOrganization, nextOrgColor } from '@/lib/organizations';
+import type { Organization } from '@ops-dashboard/core';
 
-const { OrgForm } = await import('./organizations-manager');
+const archiveOrganization = vi.fn(async () => {});
+vi.mock('@/lib/organizations', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/organizations')>()),
+  archiveOrganization,
+}));
 
-afterEach(cleanup);
+const { createOrganization, nextOrgColor } = await import('@/lib/organizations');
+const { OrgForm, OrgRow } = await import('./organizations-manager');
+
+afterEach(() => {
+  cleanup();
+  archiveOrganization.mockClear();
+});
 
 describe('OrgForm', () => {
   it('reports a rejected save and keeps the details', async () => {
@@ -44,5 +54,25 @@ describe('OrgForm', () => {
     fireEvent.change(screen.getByLabelText('Organization name'), { target: { value: 'Beta' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     await vi.waitFor(() => expect(onSave).toHaveBeenCalledWith('Beta', nextOrgColor(1)));
+  });
+});
+
+describe('OrgRow', () => {
+  it('archives an organization only on a second activation', () => {
+    const org = { id: 'org-1', name: 'Acme', color: '#f00', order: 1 } as Organization;
+    render(createElement(OrgRow, { org, projectCount: 2 }));
+
+    const button = screen.getByRole('button', { name: 'Archive Acme' });
+    fireEvent.click(button);
+    expect(archiveOrganization).not.toHaveBeenCalled();
+
+    fireEvent.blur(button);
+    fireEvent.click(button);
+    expect(archiveOrganization).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Archive Acme. Activate again to confirm' }),
+    );
+    expect(archiveOrganization).toHaveBeenCalledWith('org-1');
   });
 });

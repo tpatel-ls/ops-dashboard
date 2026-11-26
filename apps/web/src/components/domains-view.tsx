@@ -141,6 +141,19 @@ function DomainCard({ domain }: { domain: Domain }) {
     return countDomainWork(domain.id, projects, tasks);
   }, [domain.id]);
 
+  // The archived list has no restore action, so archiving is one way from
+  // here. Ask for a second activation like a delete does.
+  const [confirmingArchive, setConfirmingArchive] = useState(false);
+
+  function handleArchive() {
+    if (!confirmingArchive) {
+      setConfirmingArchive(true);
+      return;
+    }
+    setConfirmingArchive(false);
+    void archiveDomain(domain.id);
+  }
+
   if (editing) {
     return (
       <DomainForm
@@ -201,9 +214,20 @@ function DomainCard({ domain }: { domain: Domain }) {
           </button>
           <button
             type="button"
-            onClick={() => archiveDomain(domain.id)}
-            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-9 items-center justify-center rounded-md"
-            aria-label={`Archive ${domain.name}`}
+            onClick={handleArchive}
+            onBlur={() => setConfirmingArchive(false)}
+            className={cn(
+              'inline-flex size-9 items-center justify-center rounded-md',
+              confirmingArchive
+                ? 'bg-destructive text-destructive-foreground'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+            )}
+            aria-label={
+              confirmingArchive
+                ? `Archive ${domain.name}. Activate again to confirm`
+                : `Archive ${domain.name}`
+            }
+            title={confirmingArchive ? 'Click again to confirm' : 'Archive'}
           >
             <Archive className="size-3.5" />
           </button>
