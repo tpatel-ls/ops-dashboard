@@ -449,7 +449,7 @@ export function FoodLogRow({ log }: { log: FoodLog }) {
         <select
           value={log.mealType}
           onChange={(e) => void updateFoodLog(log.id, { mealType: e.target.value as MealType })}
-          aria-label="Meal type"
+          aria-label={`Meal type: ${log.description}`}
           className="border-border bg-card text-muted-foreground rounded-md border px-1.5 py-0.5 text-[11px] outline-none"
         >
           {MEAL_ORDER.map((m) => (
