@@ -129,12 +129,20 @@ export function BookForm({ onSaved, onCancel }: BookFormProps) {
 
 /* ─── StarRating ────────────────────────────────────────────────── */
 
-function StarRating({ value, onChange }: { value?: number; onChange: (v: number) => void }) {
+function StarRating({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value?: number;
+  onChange: (v: number) => void;
+}) {
   const [hovered, setHovered] = useState<number | null>(null);
   const rated = bookRatingStars(value);
 
   return (
-    <div role="group" aria-label="Rating" className="flex items-center gap-0.5">
+    <div role="group" aria-label={label} className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => i + 1).map((star) => {
         // Hover is a preview only. `aria-pressed` must report the stored
         // rating, which is the state a pointer never reveals.
@@ -312,10 +320,10 @@ export function BookCard({ book, quotes }: BookCardProps) {
 
         {/* Rating + status change */}
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <StarRating value={book.rating} onChange={handleRating} />
+          <StarRating label={`Rating: ${book.title}`} value={book.rating} onChange={handleRating} />
           <select
             className="border-border bg-input text-foreground h-9 rounded-md border px-2 font-mono text-[10px] tracking-[0.12em] uppercase focus:outline-none"
-            aria-label="Reading status"
+            aria-label={`Reading status: ${book.title}`}
             value={book.status}
             onChange={(e) => handleStatus(e.target.value as BookStatus)}
           >
