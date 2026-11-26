@@ -3,11 +3,17 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { FoodLog } from '@ops-dashboard/core';
 
 const processBrainDump = vi.fn<(raw: string, source: string) => Promise<unknown[]>>();
+const deleteFoodLog = vi.fn(async () => {});
 
 vi.mock('dexie-react-hooks', () => ({ useLiveQuery: () => undefined }));
 vi.mock('@/lib/route-items', () => ({ processBrainDump }));
+vi.mock('@/lib/food-logs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/food-logs')>()),
+  deleteFoodLog,
+}));
 vi.mock('@/lib/use-voice-input', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/use-voice-input')>()),
   useVoiceInput: () => ({
@@ -19,12 +25,26 @@ vi.mock('@/lib/use-voice-input', async (importOriginal) => ({
   }),
 }));
 
-const { FoodView } = await import('./food-view');
+const { FoodLogRow, FoodView } = await import('./food-view');
+
+const foodLog = {
+  id: 'log-1',
+  date: '2026-11-26',
+  mealType: 'breakfast',
+  description: 'Two eggs',
+  items: [],
+  totalCalories: 140,
+  createdAt: '2026-11-26T08:00:00.000Z',
+  updatedAt: '2026-11-26T08:00:00.000Z',
+  version: 1,
+  deviceId: 'device-1',
+} as FoodLog;
 
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
   processBrainDump.mockReset();
+  deleteFoodLog.mockClear();
 });
 
 describe('FoodView day', () => {
@@ -130,5 +150,30 @@ describe('FoodView quick log', () => {
     });
 
     expect(screen.getByRole('status').textContent).toContain('AI offline');
+  });
+});
+
+describe('FoodLogRow', () => {
+  it('deletes the entry only on a second activation', () => {
+    render(createElement('ul', null, createElement(FoodLogRow, { log: foodLog })));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Two eggs' }));
+    expect(deleteFoodLog).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Delete Two eggs. Activate again to confirm' }),
+    );
+    expect(deleteFoodLog).toHaveBeenCalledWith('log-1');
+  });
+
+  it('cancels the pending delete when focus leaves the button', () => {
+    render(createElement('ul', null, createElement(FoodLogRow, { log: foodLog })));
+    const button = screen.getByRole('button', { name: 'Delete Two eggs' });
+
+    fireEvent.click(button);
+    fireEvent.blur(button);
+    fireEvent.click(button);
+
+    expect(deleteFoodLog).not.toHaveBeenCalled();
   });
 });
