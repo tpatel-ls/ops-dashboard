@@ -170,3 +170,18 @@ describe('PersonDetail rows', () => {
     updatePerson.mockRestore();
   });
 });
+
+describe('PersonDetail Escape', () => {
+  it('closes only the add form when Escape is pressed inside it', () => {
+    const onClose = vi.fn();
+    render(createElement(PersonDetail, { person, domains: [], onClose, onDeleted: () => {} }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.keyDown(screen.getByLabelText('Fact label'), { key: 'Escape' });
+
+    expect(screen.queryByLabelText('Fact label')).toBeNull();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});

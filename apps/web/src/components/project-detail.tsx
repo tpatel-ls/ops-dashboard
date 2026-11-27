@@ -143,7 +143,12 @@ export function MilestonesSection({ project }: { project: Project }) {
             onKeyDown={(e) => {
               if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') addMilestone();
-              if (e.key === 'Escape') setAdding(false);
+              if (e.key === 'Escape') {
+                // Close just this form: the panel closes on any Escape
+                // that reaches window.
+                e.stopPropagation();
+                setAdding(false);
+              }
             }}
           />
           <input
@@ -153,6 +158,11 @@ export function MilestonesSection({ project }: { project: Project }) {
             aria-label="Milestone due date"
             value={newDue}
             onChange={(e) => setNewDue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'Escape') return;
+              e.stopPropagation();
+              setAdding(false);
+            }}
           />
           {error ? (
             <p role="alert" className="text-destructive text-xs">
@@ -297,7 +307,12 @@ export function ChecklistsSection({ project }: { project: Project }) {
             onKeyDown={(e) => {
               if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') addList();
-              if (e.key === 'Escape') setAddingList(false);
+              if (e.key === 'Escape') {
+                // Close just this form: the panel closes on any Escape
+                // that reaches window.
+                e.stopPropagation();
+                setAddingList(false);
+              }
             }}
           />
           <button
@@ -439,7 +454,12 @@ function ChecklistGroup({
                 onKeyDown={(e) => {
                   if (isComposingKeyEvent(e)) return;
                   if (e.key === 'Enter' && itemText.trim()) void addItem();
-                  if (e.key === 'Escape') setAddingItem(false);
+                  if (e.key === 'Escape') {
+                    // Close just this form: the panel closes on any Escape
+                    // that reaches window.
+                    e.stopPropagation();
+                    setAddingItem(false);
+                  }
                 }}
               />
               <button
