@@ -184,4 +184,22 @@ describe('PersonDetail Escape', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('closes only the interaction form on Escape and keeps the typed note', () => {
+    const onClose = vi.fn();
+    render(createElement(PersonDetail, { person, domains: [], onClose, onDeleted: () => {} }));
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+    fireEvent.change(screen.getByLabelText('Interaction notes'), {
+      target: { value: 'Talked about the move' },
+    });
+    fireEvent.keyDown(screen.getByLabelText('Interaction notes'), { key: 'Escape' });
+
+    expect(screen.queryByLabelText('Interaction notes')).toBeNull();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+    expect((screen.getByLabelText('Interaction notes') as HTMLTextAreaElement).value).toBe(
+      'Talked about the move',
+    );
+  });
 });
