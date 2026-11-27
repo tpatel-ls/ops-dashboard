@@ -110,7 +110,8 @@ export function MilestonesSection({ project }: { project: Project }) {
             onClick={() => setAdding(true)}
             className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-[11px]"
           >
-            <Plus className="size-3" /> Add
+            {/* Named for what it adds: the form it opens has its own "Add". */}
+            <Plus className="size-3" aria-hidden /> Add milestone
           </button>
         </div>
       </div>

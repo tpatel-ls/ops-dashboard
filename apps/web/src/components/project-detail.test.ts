@@ -269,7 +269,7 @@ describe('MilestonesSection', () => {
       milestones: [],
     } as unknown as Project;
     render(createElement(MilestonesSection, { project }));
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add milestone' }));
     // Milestone titles are limited to 500 characters, so updateProject rejects this one.
     const title = 'x'.repeat(501);
     fireEvent.change(screen.getByLabelText('Milestone title'), { target: { value: title } });
@@ -386,10 +386,10 @@ describe('add forms inside the project panel', () => {
       render(createElement(MilestonesSection, { project }));
       render(createElement(ChecklistsSection, { project }));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Add milestone' }));
       fireEvent.keyDown(screen.getByLabelText('Milestone title'), { key: 'Escape' });
       expect(screen.queryByLabelText('Milestone title')).toBeNull();
-      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Add milestone' }));
       fireEvent.keyDown(screen.getByLabelText('Milestone due date'), { key: 'Escape' });
       expect(screen.queryByLabelText('Milestone due date')).toBeNull();
 
@@ -406,5 +406,16 @@ describe('add forms inside the project panel', () => {
     } finally {
       window.removeEventListener('keydown', reachedWindow);
     }
+  });
+});
+
+describe('MilestonesSection controls', () => {
+  it('names the button that opens the form apart from the form submit', () => {
+    const project = { id: 'p-1', name: 'Launch', status: 'active', milestones: [] };
+    render(createElement(MilestonesSection, { project: project as unknown as Project }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add milestone' }));
+
+    expect(screen.getAllByRole('button', { name: 'Add' })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Add milestone' })).toHaveLength(1);
   });
 });
