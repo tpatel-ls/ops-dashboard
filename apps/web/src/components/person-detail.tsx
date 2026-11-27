@@ -21,6 +21,7 @@ import {
 import { isComposingKeyEvent } from '@/lib/hotkeys';
 import { excerpt } from '@/lib/excerpt';
 import { saveErrorMessage } from '@/lib/save-error';
+import { cn } from '@ops-dashboard/ui';
 
 // ─── Facts section ────────────────────────────────────────────────────────────
 
@@ -137,6 +138,19 @@ function FactsSection({ person }: { person: Person }) {
 }
 
 function FactRow({ fact, onRemove }: { fact: PersonFact; onRemove: () => void }) {
+  // Removing takes a second activation, as deleting a journal entry or a
+  // note does: nothing restores a removed fact.
+  const [confirming, setConfirming] = useState(false);
+
+  function handleRemove() {
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    setConfirming(false);
+    onRemove();
+  }
+
   return (
     <li className="group surface-flat flex items-center gap-2 px-3 py-2">
       <div className="min-w-0 flex-1">
@@ -149,9 +163,16 @@ function FactRow({ fact, onRemove }: { fact: PersonFact; onRemove: () => void })
       </div>
       <button
         type="button"
-        onClick={onRemove}
-        className="text-muted-foreground hover:text-destructive inline-flex size-6 items-center justify-center rounded opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
-        aria-label={`Remove fact: ${fact.label}`}
+        onClick={handleRemove}
+        onBlur={() => setConfirming(false)}
+        className={cn(
+          'inline-flex size-6 items-center justify-center rounded transition-opacity',
+          confirming
+            ? 'bg-destructive text-destructive-foreground opacity-100'
+            : 'text-muted-foreground hover:text-destructive opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+        )}
+        aria-label={`${confirming ? 'Confirm remove' : 'Remove'} fact: ${fact.label}`}
+        title={confirming ? 'Click again to confirm' : 'Remove'}
       >
         <X className="size-3.5" />
       </button>
@@ -285,6 +306,18 @@ function InteractionRow({
   onRemove: () => void;
 }) {
   const relative = relativeTimeLabel(interaction.date);
+  // An interaction note is the user's own writing and nothing restores it,
+  // so removing one takes a second activation.
+  const [confirming, setConfirming] = useState(false);
+
+  function handleRemove() {
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    setConfirming(false);
+    onRemove();
+  }
 
   return (
     <li className="group surface-flat flex gap-2.5 px-3 py-2.5">
@@ -299,9 +332,16 @@ function InteractionRow({
       </div>
       <button
         type="button"
-        onClick={onRemove}
-        className="text-muted-foreground hover:text-destructive inline-flex size-6 shrink-0 items-center justify-center rounded opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
-        aria-label={`Remove interaction: ${excerpt(interaction.note, 60)}`}
+        onClick={handleRemove}
+        onBlur={() => setConfirming(false)}
+        className={cn(
+          'inline-flex size-6 shrink-0 items-center justify-center rounded transition-opacity',
+          confirming
+            ? 'bg-destructive text-destructive-foreground opacity-100'
+            : 'text-muted-foreground hover:text-destructive opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
+        )}
+        aria-label={`${confirming ? 'Confirm remove' : 'Remove'} interaction: ${excerpt(interaction.note, 60)}`}
+        title={confirming ? 'Click again to confirm' : 'Remove'}
       >
         <X className="size-3.5" />
       </button>

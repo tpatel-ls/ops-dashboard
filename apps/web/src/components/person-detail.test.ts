@@ -138,4 +138,35 @@ describe('PersonDetail rows', () => {
     const long = screen.getByRole('button', { name: /^Remove interaction: Long call x+…$/ });
     expect(Array.from(long.getAttribute('aria-label')!).length).toBeLessThan(85);
   });
+
+  it('removes a fact or an interaction only on a second activation', () => {
+    const updatePerson = vi.spyOn(peopleLib, 'updatePerson').mockResolvedValue(undefined as never);
+    const withRows = {
+      ...person,
+      facts: [{ id: 'f1', label: 'Birthday', value: 'March 15' }],
+      interactions: [{ id: 'i1', date: '2026-11-01T12:00:00.000Z', note: 'Coffee' }],
+    } as unknown as Person;
+    render(
+      createElement(PersonDetail, {
+        person: withRows,
+        domains: [],
+        onClose: () => {},
+        onDeleted: () => {},
+      }),
+    );
+
+    const fact = screen.getByRole('button', { name: 'Remove fact: Birthday' });
+    fireEvent.click(fact);
+    fireEvent.blur(fact);
+    fireEvent.click(fact);
+    const interaction = screen.getByRole('button', { name: 'Remove interaction: Coffee' });
+    fireEvent.click(interaction);
+    expect(updatePerson).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm remove fact: Birthday' }));
+    expect(updatePerson).toHaveBeenLastCalledWith('person-1', { facts: [] });
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm remove interaction: Coffee' }));
+    expect(updatePerson).toHaveBeenLastCalledWith('person-1', { interactions: [] });
+    updatePerson.mockRestore();
+  });
 });
