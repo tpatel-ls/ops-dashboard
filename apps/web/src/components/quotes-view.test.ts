@@ -97,4 +97,19 @@ describe('QuoteCard thoughts', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm remove thought: Second' }));
     expect(updateQuote).toHaveBeenCalledWith('q-1', { thoughts: [quote.thoughts[0]] });
   });
+
+  it('names the favourite and delete buttons with a short excerpt of a long quote', () => {
+    const quote = {
+      id: 'q-1',
+      text: `Long quote ${'x'.repeat(7000)}`,
+      tags: [],
+      thoughts: [],
+    } as unknown as Quote;
+    render(createElement(QuoteCard, { quote }));
+
+    for (const name of [/^Favourite quote: Long quote x+…$/, /^Delete quote: Long quote x+…$/]) {
+      const button = screen.getByRole('button', { name });
+      expect(Array.from(button.getAttribute('aria-label')!).length).toBeLessThan(80);
+    }
+  });
 });
