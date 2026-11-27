@@ -248,7 +248,18 @@ function InteractionsSection({ person }: { person: Person }) {
       </div>
 
       {adding ? (
-        <div className="surface-flat flex flex-col gap-2 p-3">
+        // Escape closes just this form, as it does the fact form. It used to
+        // reach the panel's window listener and close the whole panel, which
+        // threw away the note being typed; closing the form keeps the draft
+        // for the next Log.
+        <div
+          className="surface-flat flex flex-col gap-2 p-3"
+          onKeyDown={(e) => {
+            if (isComposingKeyEvent(e) || e.key !== 'Escape') return;
+            e.stopPropagation();
+            setAdding(false);
+          }}
+        >
           <textarea
             className="input resize-none"
             placeholder="What happened or was discussed?"
