@@ -1,8 +1,8 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
-import { getDb, localDay } from '@ops-dashboard/core';
-import type { Project, Task, Whiteboard } from '@ops-dashboard/core';
+import { bumpVersion, getDb, localDay } from '@ops-dashboard/core';
+import type { Project, SyncMeta, Task, Whiteboard } from '@ops-dashboard/core';
 import { compareTasks, safeTaskTags } from './task-query';
 import { enqueueOp } from './sync-queue';
 import { storedDocument } from './whiteboards';
@@ -311,6 +311,35 @@ export async function exportAll(): Promise<OpsExport> {
   });
 }
 
+function safeVersion(value: unknown): number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : 0;
+}
+
+/**
+ * Stamp each restored record as a new local write, above both its backup
+ * version and the copy this device holds.
+ *
+ * A backup's records carry the versions they had when it was taken. Written
+ * back as they were, an older version replaced the newer local copy, and the
+ * server's sync guard then kept its own newer row and silently ignored the
+ * push. This device showed the restored record while every other device kept
+ * the newer one, and later edits here, counted up from the old version, were
+ * dropped by the server the same way.
+ */
+async function restoredRecords<T extends SyncMeta>(
+  table: { bulkGet(ids: string[]): Promise<Array<T | undefined>> },
+  records: T[],
+): Promise<T[]> {
+  if (records.length === 0) return [];
+  const existing = await table.bulkGet(records.map((record) => record.id));
+  return records.map((record, index) =>
+    bumpVersion({
+      ...record,
+      version: Math.max(safeVersion(record.version), safeVersion(existing[index]?.version)),
+    }),
+  );
+}
+
 export async function importAll(value: unknown): Promise<void> {
   const validated = validateOpsExport(value);
   // Exports taken before blank boards were stored as `{}` carry a null
@@ -324,15 +353,18 @@ export async function importAll(value: unknown): Promise<void> {
   };
   const db = getDb();
   await db.transaction('rw', db.tasks, db.projects, db.whiteboards, db.syncOps, async () => {
-    if (payload.projects) await db.projects.bulkPut(payload.projects);
-    if (payload.tasks) await db.tasks.bulkPut(payload.tasks);
-    if (payload.whiteboards) await db.whiteboards.bulkPut(payload.whiteboards);
+    const projects = await restoredRecords(db.projects, payload.projects);
+    const tasks = await restoredRecords(db.tasks, payload.tasks);
+    const whiteboards = await restoredRecords(db.whiteboards, payload.whiteboards);
+    await db.projects.bulkPut(projects);
+    await db.tasks.bulkPut(tasks);
+    await db.whiteboards.bulkPut(whiteboards);
     await Promise.all(
       (
         [
-          ['projects', payload.projects],
-          ['tasks', payload.tasks],
-          ['whiteboards', payload.whiteboards],
+          ['projects', projects],
+          ['tasks', tasks],
+          ['whiteboards', whiteboards],
         ] as const
       ).flatMap(([table, records]) =>
         records.map((record) =>
