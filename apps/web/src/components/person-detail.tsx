@@ -84,7 +84,12 @@ function FactsSection({ person }: { person: Person }) {
             autoFocus
             onKeyDown={(e) => {
               if (isComposingKeyEvent(e)) return;
-              if (e.key === 'Escape') setAdding(false);
+              if (e.key === 'Escape') {
+                // Close just this form: the panel closes on any Escape
+                // that reaches window.
+                e.stopPropagation();
+                setAdding(false);
+              }
             }}
           />
           <input
@@ -96,7 +101,12 @@ function FactsSection({ person }: { person: Person }) {
             onKeyDown={(e) => {
               if (isComposingKeyEvent(e)) return;
               if (e.key === 'Enter') addFact();
-              if (e.key === 'Escape') setAdding(false);
+              if (e.key === 'Escape') {
+                // Close just this form: the panel closes on any Escape
+                // that reaches window.
+                e.stopPropagation();
+                setAdding(false);
+              }
             }}
           />
           {error ? (

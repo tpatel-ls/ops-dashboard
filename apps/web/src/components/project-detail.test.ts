@@ -369,3 +369,42 @@ describe('project detail section outline', () => {
     ).toEqual(['Milestones', 'Checklists', 'Tasks', 'Log work']);
   });
 });
+
+describe('add forms inside the project panel', () => {
+  it('keep an Escape that closes the form from also closing the panel', () => {
+    // The panel closes on any Escape that reaches window.
+    const reachedWindow = vi.fn();
+    window.addEventListener('keydown', reachedWindow);
+    try {
+      const project = {
+        id: 'p-1',
+        name: 'Launch',
+        status: 'active',
+        milestones: [],
+        checklists: [{ id: 'cl-1', name: 'Prep', items: [] }],
+      } as unknown as Project;
+      render(createElement(MilestonesSection, { project }));
+      render(createElement(ChecklistsSection, { project }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      fireEvent.keyDown(screen.getByLabelText('Milestone title'), { key: 'Escape' });
+      expect(screen.queryByLabelText('Milestone title')).toBeNull();
+      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      fireEvent.keyDown(screen.getByLabelText('Milestone due date'), { key: 'Escape' });
+      expect(screen.queryByLabelText('Milestone due date')).toBeNull();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add checklist' }));
+      fireEvent.keyDown(screen.getByLabelText('Checklist name'), { key: 'Escape' });
+      expect(screen.queryByLabelText('Checklist name')).toBeNull();
+
+      fireEvent.click(screen.getByRole('button', { name: /Prep/ }));
+      fireEvent.click(screen.getByRole('button', { name: 'Add item' }));
+      fireEvent.keyDown(screen.getByLabelText('New item for Prep'), { key: 'Escape' });
+      expect(screen.queryByLabelText('New item for Prep')).toBeNull();
+
+      expect(reachedWindow).not.toHaveBeenCalled();
+    } finally {
+      window.removeEventListener('keydown', reachedWindow);
+    }
+  });
+});
