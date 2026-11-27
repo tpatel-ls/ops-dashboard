@@ -16,6 +16,7 @@ import {
 } from '@/lib/quotes';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
+import { excerpt } from '@/lib/excerpt';
 import { saveErrorMessage } from '@/lib/save-error';
 
 /* ─── Constants ────────────────────────────────────────────────── */
@@ -224,7 +225,7 @@ export function AddThoughtInput({ quote, onDone }: AddThoughtInputProps) {
 
 /* ─── QuoteCard ────────────────────────────────────────────────── */
 
-function QuoteCard({ quote }: { quote: Quote }) {
+export function QuoteCard({ quote }: { quote: Quote }) {
   const [thoughtsExpanded, setThoughtsExpanded] = useState(false);
   const [addingThought, setAddingThought] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -317,7 +318,9 @@ function QuoteCard({ quote }: { quote: Quote }) {
                     onClick={() => handleDeleteThought(thought.id)}
                     className="text-subtle-foreground hover:text-destructive mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded opacity-100 transition-colors sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100"
                     title="Remove thought"
-                    aria-label={`Remove thought: ${thought.text}`}
+                    // A thought can run to 2000 characters, and a screen reader
+                    // reads the whole name before the role.
+                    aria-label={`Remove thought: ${excerpt(thought.text, 60)}`}
                   >
                     <Trash2 className="size-3" />
                   </button>

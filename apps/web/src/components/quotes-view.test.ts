@@ -5,7 +5,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Quote } from '@ops-dashboard/core';
 
-const { AddThoughtInput, QuoteForm } = await import('./quotes-view');
+const { AddThoughtInput, QuoteCard, QuoteForm } = await import('./quotes-view');
 
 afterEach(cleanup);
 
@@ -41,5 +41,25 @@ describe('AddThoughtInput', () => {
     );
     expect(onDone).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Quote thought') as HTMLInputElement).value).toBe(thought);
+  });
+});
+
+describe('QuoteCard thoughts', () => {
+  it('names each remove button with a short excerpt of its thought', () => {
+    const quote = {
+      id: 'q-1',
+      text: 'Keep going.',
+      tags: [],
+      thoughts: [
+        { id: 't1', text: 'Short note', at: '2026-11-01T12:00:00.000Z' },
+        { id: 't2', text: `Long note ${'x'.repeat(1990)}`, at: '2026-11-02T12:00:00.000Z' },
+      ],
+    } as unknown as Quote;
+    render(createElement(QuoteCard, { quote }));
+    fireEvent.click(screen.getByRole('button', { name: /Thoughts \(2\)/ }));
+
+    expect(screen.getByRole('button', { name: 'Remove thought: Short note' })).toBeTruthy();
+    const long = screen.getByRole('button', { name: /^Remove thought: Long note x+…$/ });
+    expect(Array.from(long.getAttribute('aria-label')!).length).toBeLessThan(80);
   });
 });
