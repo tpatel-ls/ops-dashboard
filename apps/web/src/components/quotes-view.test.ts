@@ -5,9 +5,18 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Quote } from '@ops-dashboard/core';
 
+const updateQuote = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/quotes', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/quotes')>()),
+  updateQuote,
+}));
+
 const { AddThoughtInput, QuoteCard, QuoteForm } = await import('./quotes-view');
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  updateQuote.mockReset();
+});
 
 describe('QuoteForm', () => {
   it('reports a rejected save and keeps the draft', async () => {
@@ -61,5 +70,31 @@ describe('QuoteCard thoughts', () => {
     expect(screen.getByRole('button', { name: 'Remove thought: Short note' })).toBeTruthy();
     const long = screen.getByRole('button', { name: /^Remove thought: Long note x+…$/ });
     expect(Array.from(long.getAttribute('aria-label')!).length).toBeLessThan(80);
+  });
+
+  it('removes a thought only on a second activation', () => {
+    const quote = {
+      id: 'q-1',
+      text: 'Keep going.',
+      tags: [],
+      thoughts: [
+        { id: 't1', text: 'First', at: '2026-11-01T12:00:00.000Z' },
+        { id: 't2', text: 'Second', at: '2026-11-02T12:00:00.000Z' },
+      ],
+    } as unknown as Quote;
+    render(createElement(QuoteCard, { quote }));
+    fireEvent.click(screen.getByRole('button', { name: /Thoughts \(2\)/ }));
+
+    const first = screen.getByRole('button', { name: 'Remove thought: First' });
+    fireEvent.click(first);
+    fireEvent.blur(first);
+    fireEvent.click(first);
+    // Arming another thought does not remove the one armed before it.
+    fireEvent.click(screen.getByRole('button', { name: 'Remove thought: Second' }));
+    expect(updateQuote).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Remove thought: First' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm remove thought: Second' }));
+    expect(updateQuote).toHaveBeenCalledWith('q-1', { thoughts: [quote.thoughts[0]] });
   });
 });
