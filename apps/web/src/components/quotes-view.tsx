@@ -244,7 +244,16 @@ export function QuoteCard({ quote }: { quote: Quote }) {
     await deleteQuote(quote.id);
   }
 
+  // Removing a thought takes a second activation, as deleting the quote
+  // does: a thought is the user's own writing and nothing restores it.
+  const [confirmingThoughtId, setConfirmingThoughtId] = useState<string | null>(null);
+
   async function handleDeleteThought(thoughtId: string) {
+    if (confirmingThoughtId !== thoughtId) {
+      setConfirmingThoughtId(thoughtId);
+      return;
+    }
+    setConfirmingThoughtId(null);
     const remaining = thoughts.filter((t) => t.id !== thoughtId);
     await updateQuote(quote.id, { thoughts: remaining });
   }
@@ -316,11 +325,21 @@ export function QuoteCard({ quote }: { quote: Quote }) {
                   <button
                     type="button"
                     onClick={() => handleDeleteThought(thought.id)}
-                    className="text-subtle-foreground hover:text-destructive mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded opacity-100 transition-colors sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100"
-                    title="Remove thought"
+                    onBlur={() => setConfirmingThoughtId(null)}
+                    className={cn(
+                      'mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded transition-colors',
+                      confirmingThoughtId === thought.id
+                        ? 'bg-destructive text-destructive-foreground opacity-100'
+                        : 'text-subtle-foreground hover:text-destructive opacity-100 sm:opacity-0 sm:group-focus-within/thought:opacity-100 sm:group-hover/thought:opacity-100',
+                    )}
+                    title={
+                      confirmingThoughtId === thought.id
+                        ? 'Click again to confirm'
+                        : 'Remove thought'
+                    }
                     // A thought can run to 2000 characters, and a screen reader
                     // reads the whole name before the role.
-                    aria-label={`Remove thought: ${excerpt(thought.text, 60)}`}
+                    aria-label={`${confirmingThoughtId === thought.id ? 'Confirm remove' : 'Remove'} thought: ${excerpt(thought.text, 60)}`}
                   >
                     <Trash2 className="size-3" />
                   </button>
