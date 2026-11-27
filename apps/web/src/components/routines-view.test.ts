@@ -30,9 +30,11 @@ vi.mock('@ops-dashboard/core', async (importOriginal) => ({
   }),
 }));
 const toggleRoutineCheck = vi.fn();
+const archiveRoutine = vi.fn();
 vi.mock('@/lib/routines', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/routines')>()),
   toggleRoutineCheck,
+  archiveRoutine,
 }));
 
 const { RoutinesView } = await import('./routines-view');
@@ -41,6 +43,7 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   toggleRoutineCheck.mockReset();
+  archiveRoutine.mockReset();
   routines = [];
   checks = [];
 });
@@ -161,5 +164,23 @@ describe('RoutinesView', () => {
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(screen.getByText('Old habit')).toBeTruthy();
+  });
+
+  it('archives a routine only on a second activation', async () => {
+    routines = [
+      { id: 'r1', startDate: '2026-01-01', name: 'Stretch', timeOfDay: 'morning', kind: 'ongoing' },
+    ];
+    render(createElement(RoutinesView));
+
+    const button = await screen.findByRole('button', { name: 'Archive routine: Stretch' });
+    fireEvent.click(button);
+    expect(archiveRoutine).not.toHaveBeenCalled();
+
+    fireEvent.blur(button);
+    fireEvent.click(button);
+    expect(archiveRoutine).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm archive: Stretch' }));
+    expect(archiveRoutine).toHaveBeenCalledWith('r1');
   });
 });
