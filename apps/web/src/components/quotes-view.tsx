@@ -259,6 +259,10 @@ export function QuoteCard({ quote }: { quote: Quote }) {
   }
 
   const hasThoughts = thoughts.length > 0;
+  // A quote can run to 8000 characters. The row controls name the quote
+  // they act on, so use a short excerpt instead of making a screen reader
+  // read the whole quote before each button.
+  const quoteName = excerpt(quote.text, 60);
 
   return (
     <li className="surface-flat group hover:border-border-strong relative flex flex-col gap-2.5 px-4 py-3 transition-all hover:shadow-[0_4px_18px_-12px_rgba(0,0,0,0.35)]">
@@ -380,7 +384,7 @@ export function QuoteCard({ quote }: { quote: Quote }) {
             onClick={handleFavorite}
             title={quote.favorite ? 'Unfavorite' : 'Favorite'}
             aria-pressed={quote.favorite}
-            aria-label={`Favourite quote: ${quote.text}`}
+            aria-label={`Favourite quote: ${quoteName}`}
             className={cn(
               'inline-flex size-7 items-center justify-center rounded-md transition-colors',
               quote.favorite ? 'text-warning' : 'text-muted-foreground hover:text-warning',
@@ -395,8 +399,8 @@ export function QuoteCard({ quote }: { quote: Quote }) {
             title={confirming ? 'Click again to confirm' : 'Delete quote'}
             aria-label={
               confirming
-                ? `Delete quote: ${quote.text}. Activate again to confirm`
-                : `Delete quote: ${quote.text}`
+                ? `Delete quote: ${quoteName}. Activate again to confirm`
+                : `Delete quote: ${quoteName}`
             }
             className={cn(
               'inline-flex size-7 items-center justify-center rounded-md transition-colors',
