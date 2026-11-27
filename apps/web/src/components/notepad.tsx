@@ -24,6 +24,7 @@ import type { CaptureKind } from '@ops-dashboard/core';
 import { cn } from '@ops-dashboard/ui';
 import { processBrainDump } from '@/lib/route-items';
 import type { RoutedResult } from '@/lib/route-items';
+import { saveErrorMessage } from '@/lib/save-error';
 import { useLocalDraft } from '@/lib/use-local-draft';
 import { useVoiceInput } from '@/lib/use-voice-input';
 import { ViewShell } from '@/components/view-shell';
@@ -81,6 +82,7 @@ export function Notepad() {
   const [value, setValue] = useState(() => withSharedText(draft, sharedValue));
   const [feed, setFeed] = useState<FeedEntry[]>([]);
   const [nothingSaved, setNothingSaved] = useState(false);
+  const [undoError, setUndoError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const taRef = useRef<HTMLTextAreaElement>(null);
 
@@ -148,8 +150,17 @@ export function Notepad() {
   }
 
   function undoEntry(id: string, result: RoutedResult) {
+    setUndoError(null);
     startTransition(async () => {
-      await result.undo();
+      // An undo can be refused, for example a habit check on a routine that
+      // was archived after it was routed. A rejection inside the transition
+      // reached the error boundary and replaced the whole page.
+      try {
+        await result.undo();
+      } catch (err) {
+        setUndoError(saveErrorMessage(`Could not undo ${result.title}.`, err));
+        return;
+      }
       setFeed((prev) =>
         prev.map((e) => (e.type === 'item' && e.id === id ? { ...e, undone: true } : e)),
       );
@@ -285,6 +296,11 @@ export function Notepad() {
                 Full trail in Inbox
               </Link>
             </div>
+            {undoError ? (
+              <p role="alert" className="text-destructive text-xs">
+                {undoError}
+              </p>
+            ) : null}
             <ul className="flex flex-col gap-2">
               {feed.map((entry) =>
                 entry.type === 'notice' ? (
