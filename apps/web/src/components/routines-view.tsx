@@ -52,12 +52,21 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
   const progressLabel = fixedRoutineProgressLabel(routine, today);
 
   const [confirming, setConfirming] = useState(false);
+  // The archived list has no restore action, and an archived routine can no
+  // longer be checked in, so archiving is one way from here. Ask for a
+  // second activation like a delete does.
+  const [confirmingArchive, setConfirmingArchive] = useState(false);
 
   async function handleToggle() {
     await toggleRoutineCheck(routine.id, today, !doneToday);
   }
 
   async function handleArchive() {
+    if (!confirmingArchive) {
+      setConfirmingArchive(true);
+      return;
+    }
+    setConfirmingArchive(false);
     await archiveRoutine(routine.id);
   }
 
@@ -153,9 +162,15 @@ function RoutineCard({ routine, checks, domain, today }: RoutineCardProps) {
         <button
           type="button"
           onClick={handleArchive}
-          className="text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md transition-colors"
-          aria-label={`Archive routine: ${routine.name}`}
-          title="Archive"
+          onBlur={() => setConfirmingArchive(false)}
+          className={cn(
+            'inline-flex size-7 items-center justify-center rounded-md transition-colors',
+            confirmingArchive
+              ? 'bg-destructive text-destructive-foreground'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+          aria-label={`${confirmingArchive ? 'Confirm archive' : 'Archive routine'}: ${routine.name}`}
+          title={confirmingArchive ? 'Click again to confirm' : 'Archive'}
         >
           <Archive className="size-3.5" />
         </button>
