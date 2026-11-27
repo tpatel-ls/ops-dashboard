@@ -154,4 +154,40 @@ describe('Notepad capture', () => {
     expect(field.value).toBe('email sam');
     expect(screen.getByRole('alert').textContent).toMatch(/Nothing could be saved/);
   });
+
+  it('reports an undo that fails and keeps the item undoable', async () => {
+    render(createElement(Notepad));
+    const undo = vi
+      .fn<() => Promise<void>>()
+      .mockRejectedValueOnce(new Error('Routine is not active on this date.'))
+      .mockResolvedValueOnce();
+    vi.mocked(processBrainDump).mockResolvedValueOnce([
+      {
+        captureId: 'c1',
+        kind: 'habit',
+        title: 'Ran 5k',
+        recordType: 'routineCheck',
+        recordId: 'r1',
+        undo,
+      },
+    ]);
+    type('ran 5k');
+    await act(async () => {
+      fireEvent.keyDown(screen.getByLabelText('Work intake'), { key: 'Enter', ctrlKey: true });
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Undo Ran 5k' }));
+    });
+    expect(screen.getByRole('alert').textContent).toBe(
+      'Could not undo Ran 5k. Routine is not active on this date.',
+    );
+    expect(screen.queryByText('undone')).toBeNull();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Undo Ran 5k' }));
+    });
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByText('undone')).toBeTruthy();
+  });
 });
