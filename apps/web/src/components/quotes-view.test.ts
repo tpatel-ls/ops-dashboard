@@ -35,6 +35,22 @@ describe('QuoteForm', () => {
   });
 });
 
+describe('QuoteCard source type', () => {
+  it('labels a known source type and leaves out one this build does not know', () => {
+    const quote = { id: 'q-1', text: 'Keep going.', tags: [], thoughts: [] } as unknown as Quote;
+    render(createElement(QuoteCard, { quote: { ...quote, sourceType: 'book' } }));
+    expect(screen.getByText('Book')).toBeTruthy();
+    cleanup();
+
+    const { container } = render(
+      createElement(QuoteCard, {
+        quote: { ...quote, sourceType: 'video' as Quote['sourceType'] },
+      }),
+    );
+    expect(container.querySelector('.rounded-full.uppercase')).toBeNull();
+  });
+});
+
 describe('AddThoughtInput', () => {
   it('reports a rejected thought and keeps the text', async () => {
     const onDone = vi.fn();
