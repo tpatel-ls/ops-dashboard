@@ -1,12 +1,26 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Person } from '@ops-dashboard/core';
 
-const { CreatePersonForm } = await import('./people-view');
+let people: Person[] = [];
 
-afterEach(cleanup);
+// The first query lists the people; the second, keyed on the selection, finds
+// the open person, and none is open here.
+vi.mock('dexie-react-hooks', () => ({
+  useLiveQuery: (_query: unknown, deps?: unknown[]) =>
+    deps ? null : { peopleWithDomains: people.map((person) => ({ person })), domains: [] },
+}));
+
+const { CreatePersonForm, PeopleView } = await import('./people-view');
+
+afterEach(() => {
+  cleanup();
+  people = [];
+  vi.useRealTimers();
+});
 
 describe('CreatePersonForm', () => {
   it('reports a rejected save and keeps the details', async () => {
@@ -22,5 +36,26 @@ describe('CreatePersonForm', () => {
     );
     expect(onCreated).not.toHaveBeenCalled();
     expect((screen.getByLabelText('Person name') as HTMLInputElement).value).toBe('Ada');
+  });
+});
+
+describe('PeopleView', () => {
+  it('moves a last interaction from today to yesterday at midnight on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 28, 23, 59, 30));
+    people = [
+      {
+        id: 'person-1',
+        name: 'Ada',
+        facts: [],
+        interactions: [{ id: 'i1', date: '2026-11-28', note: 'Coffee' }],
+      } as unknown as Person,
+    ];
+    render(createElement(PeopleView));
+    expect(screen.getByText('today')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(60_000));
+
+    expect(screen.getByText('yesterday')).toBeTruthy();
   });
 });

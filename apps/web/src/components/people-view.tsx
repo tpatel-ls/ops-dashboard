@@ -14,6 +14,7 @@ import {
   safePersonFacts,
 } from '@/lib/people';
 import { relativeTimeLabel } from '@/lib/relative-time';
+import { useNow } from '@/lib/use-now';
 import { PersonDetail } from '@/components/person-detail';
 import { cn } from '@ops-dashboard/ui';
 import { isComposingKeyEvent } from '@/lib/hotkeys';
@@ -113,10 +114,11 @@ export function CreatePersonForm({ onCreated, onCancel }: CreatePersonFormProps)
 interface PersonCardProps {
   person: Person;
   domain?: Domain;
+  now: Date;
   onClick: () => void;
 }
 
-function PersonCard({ person, domain, onClick }: PersonCardProps) {
+function PersonCard({ person, domain, now, onClick }: PersonCardProps) {
   const factCount = safePersonFacts(person.facts).length;
   const lastInteraction = latestInteraction(person.interactions);
 
@@ -182,7 +184,7 @@ function PersonCard({ person, domain, onClick }: PersonCardProps) {
         {lastInteraction ? (
           <span className="inline-flex items-center gap-1">
             <Calendar className="size-3" aria-hidden />
-            {relativeTimeLabel(lastInteraction.date) ?? 'Date unavailable'}
+            {relativeTimeLabel(lastInteraction.date, now) ?? 'Date unavailable'}
           </span>
         ) : (
           <span className="text-subtle-foreground text-[11px]">No interactions yet</span>
@@ -198,6 +200,9 @@ export function PeopleView() {
   const [creating, setCreating] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [query, setQuery] = useState('');
+  // Measured during render alone, a card whose last interaction was today
+  // still read "today" after midnight on a page left open.
+  const now = useNow();
 
   const data = useLiveQuery(async () => {
     const db = getDb();
@@ -321,6 +326,7 @@ export function PeopleView() {
                 key={person.id}
                 person={person}
                 domain={domain}
+                now={now}
                 onClick={() => setSelectedPerson(person)}
               />
             ))}
