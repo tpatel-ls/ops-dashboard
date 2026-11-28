@@ -92,9 +92,18 @@ function CaptureRow({ cap, now }: { cap: Capture; now: Date }) {
     void deleteCapture(cap.id);
   }
 
+  // Synced rows are not validated, so the route type and status can be values
+  // this build does not know. Read through `Object.hasOwn`: a plain lookup
+  // found `Object.prototype` members, so a route type of "constructor" printed
+  // "to function Object() { [native code] }", and an unknown status left an
+  // empty, unstyled chip.
+  const routeType = cap.routedTo?.type;
   const routeLabel = cap.routedTo
-    ? `to ${KIND_LABEL[cap.routedTo.type] ?? cap.routedTo.type}`
+    ? `to ${typeof routeType === 'string' && Object.hasOwn(KIND_LABEL, routeType) ? KIND_LABEL[routeType] : String(routeType ?? 'record')}`
     : null;
+  const knownStatus = typeof cap.status === 'string' && Object.hasOwn(STATUS_LABEL, cap.status);
+  const statusLabel = knownStatus ? STATUS_LABEL[cap.status] : String(cap.status ?? 'Unknown');
+  const statusClass = knownStatus ? STATUS_CLASS[cap.status] : STATUS_CLASS.triaged;
 
   // The row's own heading, so each action names the capture it acts on rather
   // than repeating a bare verb for every row in the list. A capture's raw text
@@ -126,13 +135,8 @@ function CaptureRow({ cap, now }: { cap: Capture; now: Date }) {
         ) : null}
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           {/* Status chip */}
-          <span
-            className={cn(
-              'rounded-md px-2 py-0.5 text-[10px] font-semibold',
-              STATUS_CLASS[cap.status],
-            )}
-          >
-            {STATUS_LABEL[cap.status]}
+          <span className={cn('rounded-md px-2 py-0.5 text-[10px] font-semibold', statusClass)}>
+            {statusLabel}
           </span>
 
           {/* Route chip */}

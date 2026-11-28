@@ -50,6 +50,21 @@ describe('InboxPage', () => {
     expect(screen.getByText('Call the bank')).toBeTruthy();
   });
 
+  it('labels a synced capture whose route type or status this build does not know', () => {
+    captures = [
+      capture({
+        status: 'archived' as Capture['status'],
+        routedTo: { type: 'constructor', id: 'r1' } as unknown as Capture['routedTo'],
+      }),
+    ];
+
+    render(createElement(InboxPage));
+    fireEvent.click(screen.getByRole('button', { name: 'All' }));
+
+    expect(screen.getByText('to constructor')).toBeTruthy();
+    expect(screen.getByText('archived')).toBeTruthy();
+  });
+
   it('deletes a capture only on a second activation', () => {
     captures = [capture({})];
     render(createElement(InboxPage));
