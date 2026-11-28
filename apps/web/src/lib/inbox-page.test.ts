@@ -88,4 +88,18 @@ describe('InboxPage', () => {
 
     expect(screen.getByText('10 minutes ago')).toBeTruthy();
   });
+
+  it('names the actions of a long capture with an excerpt', () => {
+    captures = [capture({ raw: `Call the bank ${'about the mortgage '.repeat(400)}` })];
+    render(createElement(InboxPage));
+
+    const dismiss = screen.getByRole('button', { name: /^Dismiss capture: Call the bank/ });
+    const remove = screen.getByRole('button', { name: /^Delete capture: Call the bank/ });
+
+    for (const button of [dismiss, remove]) {
+      const name = button.getAttribute('aria-label') ?? '';
+      expect(name.endsWith('…')).toBe(true);
+      expect(Array.from(name).length).toBeLessThan(100);
+    }
+  });
 });

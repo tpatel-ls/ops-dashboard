@@ -22,6 +22,7 @@ import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { relativeTimeLabel } from '@/lib/relative-time';
 import { useNow } from '@/lib/use-now';
+import { excerpt } from '@/lib/excerpt';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */
@@ -96,8 +97,10 @@ function CaptureRow({ cap, now }: { cap: Capture; now: Date }) {
     : null;
 
   // The row's own heading, so each action names the capture it acts on rather
-  // than repeating a bare verb for every row in the list.
-  const captureLabel = cap.aiSummary ?? cap.raw;
+  // than repeating a bare verb for every row in the list. A capture's raw text
+  // can run to 8000 characters, so the name uses an excerpt: a screen reader
+  // otherwise read the whole capture before each button's role.
+  const captureLabel = excerpt(cap.aiSummary ?? cap.raw, 60);
 
   // Synced and imported captures reach Dexie through `fromRow`, which does not
   // validate, so `aiKind` can be a kind this build does not know (one added by
