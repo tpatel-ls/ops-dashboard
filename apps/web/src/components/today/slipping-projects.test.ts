@@ -75,6 +75,23 @@ describe('SlippingProjects', () => {
     expect(screen.queryByText('Ongoing area')).toBeNull();
   });
 
+  it('badges a synced project with a missing or unknown kind as a project', async () => {
+    const quiet = { status: 'active' as const, lastWorkedAt: new Date(2020, 0, 1).toISOString() };
+    projects = [
+      { id: 'p1', name: 'No kind', ...quiet },
+      { id: 'p2', name: 'Future kind', kind: 'client' as Project['kind'], ...quiet },
+      { id: 'p3', name: 'Retainer', kind: 'retainer', ...quiet },
+    ];
+
+    render(createElement(SlippingProjects));
+    await screen.findByText('No kind');
+
+    const badges = screen
+      .getAllByRole('listitem')
+      .map((row) => row.querySelector('.font-mono.rounded')?.textContent);
+    expect(badges).toEqual(['project', 'project', 'retainer']);
+  });
+
   it('titles the list with a level-2 heading', async () => {
     projects = [
       {

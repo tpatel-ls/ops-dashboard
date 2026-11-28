@@ -63,8 +63,11 @@ export function SlippingProjects() {
                   {lastWorked ? `last worked ${lastWorked}` : 'never worked on'}
                 </div>
               </div>
+              {/* The kind the row was filed under above. The raw value left the
+                  badge empty for a synced row with no kind, and showed an
+                  unknown one the board itself files as a project. */}
               <span className="bg-warning/15 text-warning shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px]">
-                {p.kind}
+                {projectBoardKind(p.kind)}
               </span>
               <button
                 type="button"
