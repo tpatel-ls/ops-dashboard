@@ -14,7 +14,12 @@ import type {
   ProjectStatus,
   Task,
 } from '@ops-dashboard/core';
-import { safeProjectChecklists, safeProjectMilestones, updateProject } from '@/lib/projects';
+import {
+  projectBoardKind,
+  safeProjectChecklists,
+  safeProjectMilestones,
+  updateProject,
+} from '@/lib/projects';
 import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import { logWork, workLoggedHours } from '@/lib/worklogs';
@@ -947,7 +952,9 @@ export function ProjectDetail({ project, onClose, domains }: ProjectDetailProps)
               </h2>
               <div className="mt-0.5 flex items-center gap-2">
                 <span className="text-subtle-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-                  {KIND_LABELS[project.kind]}
+                  {/* A synced row with a missing or unknown kind left this blank,
+                      though the board files it as a project. */}
+                  {KIND_LABELS[projectBoardKind(project.kind)]}
                 </span>
                 <span
                   className={cn(

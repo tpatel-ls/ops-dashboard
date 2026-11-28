@@ -45,8 +45,14 @@ vi.mock('@/lib/worklogs', async (importOriginal) => ({
   logWork,
 }));
 
-const { ChecklistsSection, LinkedTasksSection, LogWorkSection, MetaSection, MilestonesSection } =
-  await import('./project-detail');
+const {
+  ChecklistsSection,
+  LinkedTasksSection,
+  LogWorkSection,
+  MetaSection,
+  MilestonesSection,
+  ProjectDetail,
+} = await import('./project-detail');
 const projectsLib = await import('@/lib/projects');
 const tasksLib = await import('@/lib/tasks');
 
@@ -417,5 +423,25 @@ describe('MilestonesSection controls', () => {
 
     expect(screen.getAllByRole('button', { name: 'Add' })).toHaveLength(1);
     expect(screen.getAllByRole('button', { name: 'Add milestone' })).toHaveLength(1);
+  });
+});
+
+describe('ProjectDetail header', () => {
+  it.each([
+    ['missing', undefined],
+    ['unknown', 'client'],
+  ])('names a synced project whose kind is %s as the project the board files it as', (_, kind) => {
+    const project = {
+      id: 'p-1',
+      name: 'Launch',
+      status: 'active',
+      kind,
+      milestones: [],
+      checklists: [],
+    } as unknown as Project;
+    render(createElement(ProjectDetail, { project, onClose: () => {}, domains: [] }));
+
+    const title = screen.getByRole('heading', { level: 2, name: 'Launch' });
+    expect(title.nextElementSibling?.firstElementChild?.textContent).toBe('Project');
   });
 });
