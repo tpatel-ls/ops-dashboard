@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Person } from '@ops-dashboard/core';
@@ -10,7 +10,10 @@ vi.mock('dexie-react-hooks', () => ({ useLiveQuery: () => undefined }));
 const { PersonDetail } = await import('./person-detail');
 const peopleLib = await import('@/lib/people');
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 const person = { id: 'person-1', name: 'Ada', facts: [], interactions: [] } as unknown as Person;
 
@@ -201,5 +204,29 @@ describe('PersonDetail Escape', () => {
     expect((screen.getByLabelText('Interaction notes') as HTMLTextAreaElement).value).toBe(
       'Talked about the move',
     );
+  });
+});
+
+describe('PersonDetail interaction dates', () => {
+  it('moves an interaction from today to yesterday at midnight on a panel left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 28, 23, 59, 30));
+    const withInteraction = {
+      ...person,
+      interactions: [{ id: 'i1', date: '2026-11-28', note: 'Coffee at the market' }],
+    } as unknown as Person;
+    render(
+      createElement(PersonDetail, {
+        person: withInteraction,
+        domains: [],
+        onClose: () => {},
+        onDeleted: () => {},
+      }),
+    );
+    expect(screen.getByText('today')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(60_000));
+
+    expect(screen.getByText('yesterday')).toBeTruthy();
   });
 });
