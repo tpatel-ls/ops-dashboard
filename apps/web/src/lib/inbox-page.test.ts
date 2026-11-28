@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Capture } from '@ops-dashboard/core';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -36,6 +36,7 @@ function capture(patch: Partial<Capture>): Capture {
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   captures = [];
   deleteCapture.mockClear();
 });
@@ -74,5 +75,17 @@ describe('InboxPage', () => {
     fireEvent.click(button);
 
     expect(deleteCapture).not.toHaveBeenCalled();
+  });
+
+  it('keeps a capture age current on a page left open', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-29T09:00:10.000Z'));
+    captures = [capture({})];
+    render(createElement(InboxPage));
+    expect(screen.getByText('less than a minute ago')).toBeTruthy();
+
+    await act(async () => vi.advanceTimersByTimeAsync(10 * 60_000));
+
+    expect(screen.getByText('10 minutes ago')).toBeTruthy();
   });
 });
