@@ -6,6 +6,7 @@ import { Calendar, Lightbulb, MessageSquare, Plus, Trash2, X } from 'lucide-reac
 import { getDb } from '@ops-dashboard/core';
 import type { Domain, Interaction, Person, PersonFact } from '@ops-dashboard/core';
 import { relativeTimeLabel } from '@/lib/relative-time';
+import { useNow } from '@/lib/use-now';
 import { wrapTabFocus } from '@/lib/focus-trap';
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock';
 import {
@@ -198,6 +199,9 @@ function InteractionsSection({ person }: { person: Person }) {
   const [date, setDate] = useState('');
   const [error, setError] = useState<string | null>(null);
   const interactions = safePersonInteractions(person.interactions);
+  // Measured during render alone, an interaction logged for today still read
+  // "today" after midnight on a panel left open.
+  const now = useNow();
 
   const sorted = [...interactions].sort(compareInteractionRecency);
 
@@ -310,6 +314,7 @@ function InteractionsSection({ person }: { person: Person }) {
             <InteractionRow
               key={interaction.id}
               interaction={interaction}
+              now={now}
               onRemove={() => removeInteraction(interaction.id)}
             />
           ))}
@@ -321,12 +326,14 @@ function InteractionsSection({ person }: { person: Person }) {
 
 function InteractionRow({
   interaction,
+  now,
   onRemove,
 }: {
   interaction: Interaction;
+  now: Date;
   onRemove: () => void;
 }) {
-  const relative = relativeTimeLabel(interaction.date);
+  const relative = relativeTimeLabel(interaction.date, now);
   // An interaction note is the user's own writing and nothing restores it,
   // so removing one takes a second activation.
   const [confirming, setConfirming] = useState(false);
