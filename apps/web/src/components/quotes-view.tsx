@@ -280,11 +280,15 @@ export function QuoteCard({ quote }: { quote: Quote }) {
             {quote.source && <span className="italic">{quote.source}</span>}
           </span>
         )}
-        {quote.sourceType && (
-          <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase">
-            {SOURCE_TYPE_LABELS[quote.sourceType]}
-          </span>
-        )}
+        {/* Synced rows are not validated, so the stored type can be one this
+            build does not know. Its label lookup came back empty and left a
+            blank pill on the card. */}
+        {typeof quote.sourceType === 'string' &&
+          Object.hasOwn(SOURCE_TYPE_LABELS, quote.sourceType) && (
+            <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase">
+              {SOURCE_TYPE_LABELS[quote.sourceType]}
+            </span>
+          )}
         {tags.map((tag) => (
           <span
             key={tag}
