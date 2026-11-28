@@ -21,6 +21,7 @@ import { ViewShell } from '@/components/view-shell';
 import { cn } from '@ops-dashboard/ui';
 import { useAppStore } from '@/lib/app-store';
 import { relativeTimeLabel } from '@/lib/relative-time';
+import { useNow } from '@/lib/use-now';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */
@@ -71,15 +72,11 @@ const CAPTURE_FILTERS: Array<{ id: CaptureFilter; label: string }> = [
   { id: 'dismissed', label: 'Dismissed' },
 ];
 
-function relativeTime(iso: string): string {
-  return relativeTimeLabel(iso) ?? '';
-}
-
 /* ------------------------------------------------------------------ */
 /* Row                                                                  */
 /* ------------------------------------------------------------------ */
 
-function CaptureRow({ cap }: { cap: Capture }) {
+function CaptureRow({ cap, now }: { cap: Capture; now: Date }) {
   // Every other delete in the app asks for a second activation. A pending
   // capture's raw text is the only copy of what was captured, and one stray
   // click removed it with no undo.
@@ -149,7 +146,7 @@ function CaptureRow({ cap }: { cap: Capture }) {
 
           {/* Time */}
           <span className="text-subtle-foreground ml-auto font-mono text-[10px]">
-            {relativeTime(cap.createdAt)}
+            {relativeTimeLabel(cap.createdAt, now) ?? ''}
           </span>
         </div>
       </div>
@@ -198,6 +195,10 @@ function CaptureRow({ cap }: { cap: Capture }) {
 export default function InboxPage() {
   const openWorkLogger = useAppStore((state) => state.openWorkLogger);
   const [filter, setFilter] = useState<CaptureFilter>('pending');
+  // Measured during render alone, a capture's age only moved when the list
+  // re-rendered for another reason, so one taken while the inbox was open kept
+  // reading "less than a minute ago".
+  const now = useNow();
   const captures = useLiveQuery(async () => {
     const db = getDb();
     const all = await db.captures.toArray();
@@ -256,7 +257,7 @@ export default function InboxPage() {
           {visibleCaptures?.length ? (
             <ul className="flex flex-col gap-2">
               {visibleCaptures.map((cap) => (
-                <CaptureRow key={cap.id} cap={cap} />
+                <CaptureRow key={cap.id} cap={cap} now={now} />
               ))}
             </ul>
           ) : (
